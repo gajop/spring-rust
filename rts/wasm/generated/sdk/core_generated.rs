@@ -154,11 +154,6 @@ pub mod units_query {
     pub mod raw {
         #[link(wasm_import_module = "spring:units-query")]
         extern "C" {
-            #[link_name = "get-all-units"]
-            pub fn core_get_all_units(p0: i32, p1: i32) -> i32;
-        }
-        #[link(wasm_import_module = "spring:units-query")]
-        extern "C" {
             #[link_name = "get-closest-enemy-unit"]
             pub fn core_get_closest_enemy_unit(p0: f32, p1: i32, p2: i32) -> i64;
         }
@@ -184,11 +179,6 @@ pub mod units_query {
         }
         #[link(wasm_import_module = "spring:units-query")]
         extern "C" {
-            #[link_name = "get-team-units"]
-            pub fn core_get_team_units(p0: i32, p1: i32) -> i32;
-        }
-        #[link(wasm_import_module = "spring:units-query")]
-        extern "C" {
             #[link_name = "get-team-units-counts"]
             pub fn core_get_team_units_counts(p0: i32, p1: i32) -> i32;
         }
@@ -209,28 +199,8 @@ pub mod units_query {
         }
         #[link(wasm_import_module = "spring:units-query")]
         extern "C" {
-            #[link_name = "get-units-in-box"]
-            pub fn core_get_units_in_box(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, p7: i32) -> i32;
-        }
-        #[link(wasm_import_module = "spring:units-query")]
-        extern "C" {
-            #[link_name = "get-units-in-cylinder"]
-            pub fn core_get_units_in_cylinder(p0: f32, p1: f32, p2: f32, p3: i32, p4: i32) -> i32;
-        }
-        #[link(wasm_import_module = "spring:units-query")]
-        extern "C" {
             #[link_name = "get-units-in-planes"]
             pub fn core_get_units_in_planes(p0: i32, p1: i32, p2: i32) -> i32;
-        }
-        #[link(wasm_import_module = "spring:units-query")]
-        extern "C" {
-            #[link_name = "get-units-in-rectangle"]
-            pub fn core_get_units_in_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
-        }
-        #[link(wasm_import_module = "spring:units-query")]
-        extern "C" {
-            #[link_name = "get-units-in-sphere"]
-            pub fn core_get_units_in_sphere(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-query")]
         extern "C" {
@@ -4867,13 +4837,13 @@ pub mod unit_defs {
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         extern "C" {
-            #[link_name = "get-unit-def-health"]
-            pub fn core_get_unit_def_health(p0: i32) -> i64;
+            #[link_name = "get-unit-def-custom-param"]
+            pub fn core_get_unit_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         extern "C" {
-            #[link_name = "get-unit-def-human-name"]
-            pub fn core_get_unit_def_human_name(p0: i32, p1: i32) -> i32;
+            #[link_name = "get-unit-def-health"]
+            pub fn core_get_unit_def_health(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         extern "C" {
@@ -4882,8 +4852,8 @@ pub mod unit_defs {
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         extern "C" {
-            #[link_name = "get-unit-def-name"]
-            pub fn core_get_unit_def_name(p0: i32, p1: i32) -> i32;
+            #[link_name = "get-unit-def-param-string"]
+            pub fn core_get_unit_def_param_string(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         extern "C" {
@@ -5047,6 +5017,11 @@ pub mod feature_defs {
         }
         #[link(wasm_import_module = "spring:feature-defs")]
         extern "C" {
+            #[link_name = "get-feature-def-custom-param"]
+            pub fn core_get_feature_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:feature-defs")]
+        extern "C" {
             #[link_name = "get-feature-def-energy"]
             pub fn core_get_feature_def_energy(p0: i32) -> i64;
         }
@@ -5163,6 +5138,11 @@ pub mod weapon_defs {
         extern "C" {
             #[link_name = "get-weapon-def-count"]
             pub fn core_get_weapon_def_count(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:weapon-defs")]
+        extern "C" {
+            #[link_name = "get-weapon-def-custom-param"]
+            pub fn core_get_weapon_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:weapon-defs")]
         extern "C" {
@@ -5415,8 +5395,18 @@ pub mod game {
         }
         #[link(wasm_import_module = "spring:game")]
         extern "C" {
+            #[link_name = "get-map-option"]
+            pub fn core_get_map_option(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:game")]
+        extern "C" {
             #[link_name = "get-map-start-positions"]
             pub fn core_get_map_start_positions(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:game")]
+        extern "C" {
+            #[link_name = "get-mod-option"]
+            pub fn core_get_mod_option(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         extern "C" {
@@ -6768,6 +6758,35 @@ pub mod math_extra {
 
 }
 
+pub mod encoding {
+    use crate::{ApiError, ErrorCode, Result};
+
+    #[cfg(target_arch = "wasm32")]
+    pub mod raw {
+        #[link(wasm_import_module = "spring:encoding")]
+        extern "C" {
+            #[link_name = "decode-base64"]
+            pub fn core_decode_base64(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:encoding")]
+        extern "C" {
+            #[link_name = "decode-base64-url"]
+            pub fn core_decode_base64_url(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:encoding")]
+        extern "C" {
+            #[link_name = "encode-base64"]
+            pub fn core_encode_base64(p0: i32, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:encoding")]
+        extern "C" {
+            #[link_name = "encode-base64-url"]
+            pub fn core_encode_base64_url(p0: i32, p1: i32) -> i32;
+        }
+    }
+
+}
+
 pub mod metal_map {
     use crate::{ApiError, ErrorCode, Result};
 
@@ -7509,6 +7528,11 @@ pub mod input {
         extern "C" {
             #[link_name = "get-invert-queue-key"]
             pub fn core_get_invert_queue_key(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:input")]
+        extern "C" {
+            #[link_name = "get-key-from-scan-symbol"]
+            pub fn core_get_key_from_scan_symbol(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         extern "C" {
@@ -8999,6 +9023,20 @@ pub mod messages {
 
 }
 
+pub mod config {
+    use crate::{ApiError, ErrorCode, Result};
+
+    #[cfg(target_arch = "wasm32")]
+    pub mod raw {
+        #[link(wasm_import_module = "spring:config")]
+        extern "C" {
+            #[link_name = "get-config-string"]
+            pub fn core_get_config_string(p0: i32, p1: i32) -> i32;
+        }
+    }
+
+}
+
 pub mod tracing {
     use crate::{ApiError, ErrorCode, Result};
 
@@ -9027,6 +9065,11 @@ pub mod tracing {
         }
         #[link(wasm_import_module = "spring:tracing")]
         extern "C" {
+            #[link_name = "trace-ray-between-positions"]
+            pub fn core_trace_ray_between_positions(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:tracing")]
+        extern "C" {
             #[link_name = "trace-ray-features"]
             pub fn core_trace_ray_features(p0: i32, p1: i32) -> i32;
         }
@@ -9039,6 +9082,11 @@ pub mod tracing {
         extern "C" {
             #[link_name = "trace-ray-ground-in-direction"]
             pub fn core_trace_ray_ground_in_direction(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:tracing")]
+        extern "C" {
+            #[link_name = "trace-ray-in-direction"]
+            pub fn core_trace_ray_in_direction(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:tracing")]
         extern "C" {
@@ -9524,6 +9572,11 @@ pub mod unsynced_ctrl {
         extern "C" {
             #[link_name = "force-tesselation-update"]
             pub fn core_force_tesselation_update(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unsynced-ctrl")]
+        extern "C" {
+            #[link_name = "get-water-texture"]
+            pub fn core_get_water_texture(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         extern "C" {
@@ -11660,8 +11713,18 @@ pub mod gfx {
         }
         #[link(wasm_import_module = "spring:gfx")]
         extern "C" {
+            #[link_name = "font-wrap-text"]
+            pub fn core_font_wrap_text(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        extern "C" {
             #[link_name = "frustum"]
             pub fn core_frustum(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        extern "C" {
+            #[link_name = "get-atmosphere"]
+            pub fn core_get_atmosphere(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         extern "C" {
@@ -11687,6 +11750,11 @@ pub mod gfx {
         extern "C" {
             #[link_name = "get-idvbo"]
             pub fn core_get_idvbo(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        extern "C" {
+            #[link_name = "get-map-rendering"]
+            pub fn core_get_map_rendering(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         extern "C" {
@@ -11730,6 +11798,11 @@ pub mod gfx {
         }
         #[link(wasm_import_module = "spring:gfx")]
         extern "C" {
+            #[link_name = "get-sun"]
+            pub fn core_get_sun(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        extern "C" {
             #[link_name = "get-vao"]
             pub fn core_get_vao(p0: i32, p1: i32) -> i32;
         }
@@ -11752,6 +11825,11 @@ pub mod gfx {
         extern "C" {
             #[link_name = "get-view-sizes"]
             pub fn core_get_view_sizes(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        extern "C" {
+            #[link_name = "get-water-rendering"]
+            pub fn core_get_water_rendering(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         extern "C" {
@@ -16947,6 +17025,11 @@ pub mod profiling {
         }
         #[link(wasm_import_module = "spring:profiling")]
         extern "C" {
+            #[link_name = "get-profiler-time-record"]
+            pub fn core_get_profiler_time_record(p0: i32, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:profiling")]
+        extern "C" {
             #[link_name = "get-synced-gc-info"]
             pub fn core_get_synced_gc_info(p0: i32) -> i64;
         }
@@ -17514,6 +17597,11 @@ pub mod rml_ui {
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         extern "C" {
+            #[link_name = "element-get-attribute"]
+            pub fn core_element_get_attribute(p0: i64, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        extern "C" {
             #[link_name = "element-get-child"]
             pub fn core_element_get_child(p0: i64, p1: i32, p2: i32) -> i32;
         }
@@ -17521,6 +17609,16 @@ pub mod rml_ui {
         extern "C" {
             #[link_name = "element-get-class-name"]
             pub fn core_element_get_class_name(p0: i64, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        extern "C" {
+            #[link_name = "element-get-elements-by-class-name"]
+            pub fn core_element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        extern "C" {
+            #[link_name = "element-get-elements-by-tag-name"]
+            pub fn core_element_get_elements_by_tag_name(p0: i64, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         extern "C" {
@@ -17584,6 +17682,11 @@ pub mod rml_ui {
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         extern "C" {
+            #[link_name = "element-query-selector-all"]
+            pub fn core_element_query_selector_all(p0: i64, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        extern "C" {
             #[link_name = "element-remove-child"]
             pub fn core_element_remove_child(p0: i64, p1: i64, p2: i32) -> i32;
         }
@@ -17621,6 +17724,11 @@ pub mod rml_ui {
         extern "C" {
             #[link_name = "event-get-current-element"]
             pub fn core_event_get_current_element(p0: i64, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        extern "C" {
+            #[link_name = "event-get-parameter-string"]
+            pub fn core_event_get_parameter_string(p0: i64, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         extern "C" {
@@ -19865,13 +19973,138 @@ pub mod vfs {
         }
         #[link(wasm_import_module = "spring:vfs")]
         extern "C" {
+            #[link_name = "calculate-hash"]
+            pub fn core_calculate_hash(p0: i32, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "get-archive-checksum"]
+            pub fn core_get_archive_checksum(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "get-archive-containing-file"]
+            pub fn core_get_archive_containing_file(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "get-archive-path"]
+            pub fn core_get_archive_path(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "get-file-absolute-path"]
+            pub fn core_get_file_absolute_path(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
             #[link_name = "get-map-square-texture-info"]
             pub fn core_get_map_square_texture_info(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         extern "C" {
+            #[link_name = "get-name-from-rapid-tag"]
+            pub fn core_get_name_from_rapid_tag(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "load-file"]
+            pub fn core_load_file(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "pack-f32"]
+            pub fn core_pack_f32(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "pack-s16"]
+            pub fn core_pack_s16(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "pack-s32"]
+            pub fn core_pack_s32(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "pack-s8"]
+            pub fn core_pack_s8(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "pack-u16"]
+            pub fn core_pack_u16(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "pack-u32"]
+            pub fn core_pack_u32(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "pack-u8"]
+            pub fn core_pack_u8(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "read-file"]
+            pub fn core_read_file(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "read-file-as-string"]
+            pub fn core_read_file_as_string(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
             #[link_name = "scan-all-dirs"]
             pub fn core_scan_all_dirs(p0: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "unpack-f32"]
+            pub fn core_unpack_f32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "unpack-s16"]
+            pub fn core_unpack_s16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "unpack-s32"]
+            pub fn core_unpack_s32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "unpack-s8"]
+            pub fn core_unpack_s8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "unpack-u16"]
+            pub fn core_unpack_u16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "unpack-u32"]
+            pub fn core_unpack_u32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "unpack-u8"]
+            pub fn core_unpack_u8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "zlib-compress"]
+            pub fn core_zlib_compress(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        extern "C" {
+            #[link_name = "zlib-decompress"]
+            pub fn core_zlib_decompress(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -20032,6 +20265,11 @@ pub mod unsynced_read {
         extern "C" {
             #[link_name = "is-unit-selected"]
             pub fn core_is_unit_selected(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unsynced-read")]
+        extern "C" {
+            #[link_name = "solve-nurbs-curve"]
+            pub fn core_solve_nurbs_curve(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
     }
 

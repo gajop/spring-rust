@@ -280,7 +280,8 @@ pub fn get_unit_commands(unit_id: i32, max_commands: u32) -> Result<Vec<UnitComm
     {
         let first = get_unit_commands_into(unit_id, max_commands, &mut [])?;
         let required = match first {
-            CommandBufferFill::Complete(bytes) | CommandBufferFill::Insufficient { required: bytes } => bytes,
+            CommandBufferFill::Complete(bytes)
+            | CommandBufferFill::Insufficient { required: bytes } => bytes,
         };
         let mut wire = vec![0u8; required];
         for _ in 0..3 {

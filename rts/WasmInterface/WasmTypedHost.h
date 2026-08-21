@@ -103,8 +103,10 @@ public:
 	static void Unload(std::string_view moduleName);
 	static void UnloadAll();
 	static bool AnyActive();
-	static bool DispatchCallin(std::string_view name, const void* query, void* result,
-		std::string& error);
+	// `synced` comes from the NativeInterface event seam; it is forwarded to the
+	// Core dispatch below, which needs the side rather than guessing it.
+	static bool DispatchCallin(std::string_view name, const void* query, bool synced,
+		void* result, std::string& error);
 
 	~WasmTypedHost();
 

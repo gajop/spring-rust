@@ -122,7 +122,9 @@ pub fn run(scale: f64) -> spring::Result<()> {
             name,
             scaled_terrain_count(nominal_invocations, scale),
             scale,
-            || spring::set_height_map_func(1, 0).map(|_| ()),
+            || {
+                spring::set_height_map_func(spring::SyncCallback::new(1, 0)).map(|_| ())
+            },
         )?;
         let Some((invocations, sorted)) = measured else {
             continue;

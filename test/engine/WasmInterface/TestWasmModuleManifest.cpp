@@ -201,6 +201,65 @@ TEST_CASE("Production Core ABI rejects ambient WASI even when legacy WASI is ena
 	CHECK(result.error.find("unknown or unavailable Core Wasm import") != std::string::npos);
 }
 
+TEST_CASE("Production Core ABI enforces import environment masks")
+{
+	auto module = CoreHeader();
+	AddCoreFunctionType(module, {}, {0x7e}); // -> i64
+	AddCoreFunctionImport(module, "spring:profiling", "get-timer");
+	AddCoreMemory(module, true);
+	AddCoreMemoryExport(module);
+
+	WasmRuntimeConfig config;
+	const auto synced = recoil::wasm::core::ValidateModule(module,
+		WasmEnvironment::RulesSynced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+	CHECK_FALSE(synced.valid);
+	CHECK(synced.error.find("unknown or unavailable Core Wasm import") != std::string::npos);
+
+	const auto unsynced = recoil::wasm::core::ValidateModule(module,
+		WasmEnvironment::RulesUnsynced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+	CHECK(unsynced.valid);
+}
+
+TEST_CASE("Production Core ABI admits only reviewed synchronous callback imports in synced environments")
+{
+	WasmRuntimeConfig config;
+
+	for (const auto& [importModule, name, params] : std::vector<std::tuple<std::string_view,
+			std::string_view, std::vector<std::uint8_t>>>{
+		{"spring:terrain-control", "set-height-map-func", {0x7f, 0x7f}},
+		{"spring:terrain-control", "set-original-height-map-func", {0x7f, 0x7f}},
+		{"spring:terrain-control", "set-smooth-mesh-func", {0x7f, 0x7f}},
+		{"spring:system-control", "call-as-team", {0x7f, 0x7f, 0x7f}},
+	}) {
+		auto module = CoreHeader();
+		AddCoreFunctionType(module, params, {0x7e}); // -> i64
+		AddCoreFunctionImport(module, importModule, name);
+		AddCoreMemory(module, true);
+		AddCoreMemoryExport(module);
+
+		const auto synced = recoil::wasm::core::ValidateModule(module,
+			WasmEnvironment::RulesSynced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+		CHECK(synced.valid);
+
+		const auto unsynced = recoil::wasm::core::ValidateModule(module,
+			WasmEnvironment::RulesUnsynced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+		CHECK_FALSE(unsynced.valid);
+		CHECK(unsynced.error.find("unknown or unavailable Core Wasm import") != std::string::npos);
+	}
+}
+
+TEST_CASE("Production Core ABI rejects start functions")
+{
+	auto module = MinimalCoreModule(true);
+	AddCoreSection(module, 8, {0});
+
+	WasmRuntimeConfig config;
+	const auto result = recoil::wasm::core::ValidateModule(module,
+		WasmEnvironment::RulesSynced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+	CHECK_FALSE(result.valid);
+	CHECK(result.error.find("does not allow a start function") != std::string::npos);
+}
+
 TEST_CASE("Production Core ABI requires fixed synced memory but permits unsynced growth")
 {
 	const auto growable = MinimalCoreModule(false);

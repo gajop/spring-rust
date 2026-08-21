@@ -121,9 +121,19 @@ pub(crate) fn eligible(
     outputs: &[FieldModel],
     records: &BTreeMap<String, RecordModel>,
 ) -> bool {
+    // A reviewed handwritten transport already owns this import.
+    if crate::render_core_wasm_registry::handwritten_reviewed(&plan.module, &plan.function) {
+        return false;
+    }
     if matches!(plan.source_status.as_str(), "manual" | "unsupported")
-        || !matches!(plan.input_strategy, InputStrategy::Direct | InputStrategy::FixedInputBuffer)
-        || matches!(plan.result_strategy, ResultStrategy::VariableOutputBuffer | ResultStrategy::Unsupported)
+        || !matches!(
+            plan.input_strategy,
+            InputStrategy::Direct | InputStrategy::FixedInputBuffer
+        )
+        || matches!(
+            plan.result_strategy,
+            ResultStrategy::VariableOutputBuffer | ResultStrategy::Unsupported
+        )
     {
         return false;
     }
@@ -134,7 +144,10 @@ pub(crate) fn eligible(
     }
     if matches!(plan.result_strategy, ResultStrategy::Packed32)
         && (outputs.len() != 1
-            || !matches!(outputs[0].ty, SemanticType::Scalar { .. } | SemanticType::Enum { .. }))
+            || !matches!(
+                outputs[0].ty,
+                SemanticType::Scalar { .. } | SemanticType::Enum { .. }
+            ))
     {
         return false;
     }
@@ -154,22 +167,30 @@ fn field_supported(field: &FieldModel, records: &BTreeMap<String, RecordModel>) 
         SemanticType::Option { inner } => {
             presence_field(field).is_some() && type_supported(inner, records)
         }
-        SemanticType::Record { name } => records
-            .get(name)
-            .is_some_and(|record| record.fields.iter().all(|field| field_supported(field, records))),
+        SemanticType::Record { name } => records.get(name).is_some_and(|record| {
+            record
+                .fields
+                .iter()
+                .all(|field| field_supported(field, records))
+        }),
         other => type_supported(other, records),
     }
 }
 
 fn type_supported(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bool {
     match ty {
-        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => true,
+        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => {
+            true
+        }
         SemanticType::FixedArray { element, length } => {
             *length <= 64 && type_supported(element, records)
         }
-        SemanticType::Record { name } => records
-            .get(name)
-            .is_some_and(|record| record.fields.iter().all(|field| field_supported(field, records))),
+        SemanticType::Record { name } => records.get(name).is_some_and(|record| {
+            record
+                .fields
+                .iter()
+                .all(|field| field_supported(field, records))
+        }),
         SemanticType::Option { .. } => false,
         _ => false,
     }
@@ -178,9 +199,12 @@ fn type_supported(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) ->
 fn field_has_option(field: &FieldModel, records: &BTreeMap<String, RecordModel>) -> bool {
     match &field.ty {
         SemanticType::Option { .. } => true,
-        SemanticType::Record { name } => records
-            .get(name)
-            .is_some_and(|record| record.fields.iter().any(|field| field_has_option(field, records))),
+        SemanticType::Record { name } => records.get(name).is_some_and(|record| {
+            record
+                .fields
+                .iter()
+                .any(|field| field_has_option(field, records))
+        }),
         _ => false,
     }
 }
@@ -202,13 +226,19 @@ fn fixed_layout(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> O
             let (payload_bytes, payload_alignment) = fixed_layout(inner, records)?;
             let alignment = payload_alignment.max(4);
             let payload_offset = align_up(4, payload_alignment);
-            Some((align_up(payload_offset.checked_add(payload_bytes)?, alignment), alignment))
+            Some((
+                align_up(payload_offset.checked_add(payload_bytes)?, alignment),
+                alignment,
+            ))
         }
         _ => None,
     }
 }
 
-fn layout_fields(fields: &[FieldModel], records: &BTreeMap<String, RecordModel>) -> Option<(u32, u32)> {
+fn layout_fields(
+    fields: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<(u32, u32)> {
     let mut bytes = 0u32;
     let mut alignment = 1u32;
     for field in fields {
@@ -219,13 +249,20 @@ fn layout_fields(fields: &[FieldModel], records: &BTreeMap<String, RecordModel>)
     Some((align_up(bytes, alignment), alignment))
 }
 
-fn aggregate_input_layout(fields: &[FieldModel], records: &BTreeMap<String, RecordModel>) -> Option<(u32, u32)> {
+fn aggregate_input_layout(
+    fields: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<(u32, u32)> {
     let fixed = fields
         .iter()
         .filter(|field| !direct_type(&field.ty))
         .cloned()
         .collect::<Vec<_>>();
-    if fixed.is_empty() { None } else { layout_fields(&fixed, records) }
+    if fixed.is_empty() {
+        None
+    } else {
+        layout_fields(&fixed, records)
+    }
 }
 
 fn align_up(value: u32, alignment: u32) -> u32 {
@@ -243,8 +280,15 @@ fn render_callback(
     let api_guard = native_guard(module_name);
     let slot_count = plan.direct_params.len().max(plan.direct_results.len());
     let fixed_input = matches!(plan.input_strategy, InputStrategy::FixedInputBuffer);
-    let fixed_output = matches!(plan.result_strategy, ResultStrategy::FixedOutputBuffer { .. });
-    let direct_input_count = function.inputs.iter().filter(|field| direct_type(&field.ty)).count();
+    let fixed_output = matches!(
+        plan.result_strategy,
+        ResultStrategy::FixedOutputBuffer { .. }
+    );
+    let direct_input_count = function
+        .inputs
+        .iter()
+        .filter(|field| direct_type(&field.ty))
+        .count();
     let mut body = format!(
         "wasm_trap_t* {callback}(void* environment, wasmtime_caller_t* caller,\n    wasmtime_val_raw_t* slots, std::size_t slotCount)\n{{\n    auto* state = static_cast<HostState*>(environment);\n    if (state == nullptr || state->native == nullptr || {api_guard} ||\n        state->native->{api_member}->{function_name} == nullptr)\n        return Trap(\"{function_name} generated Core binding is unavailable\");\n    if ({slot_count} != 0 && (slots == nullptr || slotCount != {slot_count}))\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n    if ({slot_count} == 0 && slotCount != 0)\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n\n    std::string budgetError;\n    ImportGuard guard(state, {work}u, budgetError);\n    if (!guard.Ok())\n        return Trap(budgetError);\n",
         callback = callback,
@@ -258,7 +302,8 @@ fn render_callback(
         body.push_str("\n    std::string memoryError;\n    if (!EnsureMemory(state, caller, memoryError))\n        return Trap(memoryError);\n");
     }
     if fixed_input {
-        let (bytes, _) = aggregate_input_layout(&function.inputs, records).expect("eligible option input layout");
+        let (bytes, _) = aggregate_input_layout(&function.inputs, records)
+            .expect("eligible option input layout");
         body.push_str(&format!(
             "    const std::uint32_t input = static_cast<std::uint32_t>(slots[{index}].i32);\n    std::span<const std::uint8_t> inputWire;\n    if (!state->memory.View(input, {bytes}u, inputWire)) {{\n{error}    }}\n    WireReader reader(inputWire);\n",
             index = direct_input_count,
@@ -286,11 +331,18 @@ fn render_callback(
             ));
             direct_slot += 1;
         } else {
-            body.push_str(&render_read_field(field, &format!("query.{}", field.name), "query", records, 1));
+            body.push_str(&render_read_field(
+                field,
+                &format!("query.{}", field.name),
+                "query",
+                records,
+                1,
+            ));
         }
     }
     if fixed_input {
-        let (_, alignment) = aggregate_input_layout(&function.inputs, records).expect("eligible option input layout");
+        let (_, alignment) = aggregate_input_layout(&function.inputs, records)
+            .expect("eligible option input layout");
         body.push_str(&format!(
             "    if (!reader.Finish({alignment}u)) {{\n{error}    }}\n",
             alignment = alignment,
@@ -304,7 +356,9 @@ fn render_callback(
         function_name = function.name,
     ));
     match plan.result_strategy {
-        ResultStrategy::Status => body.push_str("    slots[0].i32 = errorCode;\n    return nullptr;\n"),
+        ResultStrategy::Status => {
+            body.push_str("    slots[0].i32 = errorCode;\n    return nullptr;\n")
+        }
         ResultStrategy::Packed32 => {
             let field = &function.outputs[0];
             body.push_str(&format!(
@@ -313,10 +367,20 @@ fn render_callback(
             ));
         }
         ResultStrategy::FixedOutputBuffer { bytes, alignment } => {
-            body.push_str("    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }\n");
-            body.push_str(&format!("    std::array<std::uint8_t, {bytes}> wire{{}};\n    WireWriter writer(wire);\n"));
+            body.push_str(
+                "    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }\n",
+            );
+            body.push_str(&format!(
+                "    std::array<std::uint8_t, {bytes}> wire{{}};\n    WireWriter writer(wire);\n"
+            ));
             for field in &function.outputs {
-                body.push_str(&render_write_field(field, &format!("result.{}", field.name), "result", records, 1));
+                body.push_str(&render_write_field(
+                    field,
+                    &format!("result.{}", field.name),
+                    "result",
+                    records,
+                    1,
+                ));
             }
             body.push_str(&format!(
                 "    if (!writer.Finish({alignment}u)) return Trap(\"generated option output layout mismatch\");\n    if (!state->memory.Write(output, wire.data(), wire.size())) return Trap(\"generated option output range changed unexpectedly\");\n    slots[0].i32 = 0;\n    return nullptr;\n"
@@ -351,7 +415,15 @@ fn render_read_field(
             let mut output = records[name]
                 .fields
                 .iter()
-                .map(|nested| render_read_field(nested, &format!("{destination}.{}", nested.name), destination, records, indent))
+                .map(|nested| {
+                    render_read_field(
+                        nested,
+                        &format!("{destination}.{}", nested.name),
+                        destination,
+                        records,
+                        indent,
+                    )
+                })
                 .collect::<String>();
             let (_, alignment) = fixed_layout(&field.ty, records)
                 .expect("eligible option record must have a fixed layout");
@@ -420,8 +492,15 @@ fn render_write_field(
             let mut output = format!("{pad}if (!writer.Bool({owner}.{presence})) return Trap(\"generated option output overflow\");\n");
             output.push_str(&format!("{pad}if ({owner}.{presence}) {{\n"));
             output.push_str(&render_write_type(inner, value, records, indent + 1));
-            output.push_str(&format!("{pad}}} else {{\n{pad}    {native_ty} coreDefault{{}};\n"));
-            output.push_str(&render_write_type(inner, "coreDefault", records, indent + 1));
+            output.push_str(&format!(
+                "{pad}}} else {{\n{pad}    {native_ty} coreDefault{{}};\n"
+            ));
+            output.push_str(&render_write_type(
+                inner,
+                "coreDefault",
+                records,
+                indent + 1,
+            ));
             output.push_str(&format!("{pad}}}\n"));
             output
         }
@@ -429,7 +508,15 @@ fn render_write_field(
             let mut output = records[name]
                 .fields
                 .iter()
-                .map(|nested| render_write_field(nested, &format!("{value}.{}", nested.name), value, records, indent))
+                .map(|nested| {
+                    render_write_field(
+                        nested,
+                        &format!("{value}.{}", nested.name),
+                        value,
+                        records,
+                        indent,
+                    )
+                })
                 .collect::<String>();
             let (_, alignment) = fixed_layout(&field.ty, records)
                 .expect("eligible option record must have a fixed layout");
@@ -487,7 +574,9 @@ fn scalar_read(method: &str, raw: &str, destination: &str, pad: &str) -> String 
 }
 
 fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
-    let cast = |value: String| format!("static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})");
+    let cast = |value: String| {
+        format!("static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})")
+    };
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
             "bool" => format!("slots[{slot}].i32 != 0"),
@@ -504,9 +593,15 @@ fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
 
 fn packed32_expr(ty: &SemanticType, value: &str) -> String {
     match ty {
-        SemanticType::Scalar { name } if name == "f32" => format!("std::bit_cast<std::uint32_t>({value})"),
-        SemanticType::Scalar { name } if name == "bool" => format!("static_cast<std::uint32_t>({value} ? 1u : 0u)"),
-        SemanticType::Scalar { .. } | SemanticType::Enum { .. } => format!("static_cast<std::uint32_t>({value})"),
+        SemanticType::Scalar { name } if name == "f32" => {
+            format!("std::bit_cast<std::uint32_t>({value})")
+        }
+        SemanticType::Scalar { name } if name == "bool" => {
+            format!("static_cast<std::uint32_t>({value} ? 1u : 0u)")
+        }
+        SemanticType::Scalar { .. } | SemanticType::Enum { .. } => {
+            format!("static_cast<std::uint32_t>({value})")
+        }
         _ => unreachable!(),
     }
 }
@@ -521,7 +616,11 @@ fn error_return(plan: &FunctionPlan, status: &str, indent: usize) -> String {
 }
 
 fn presence_field(field: &FieldModel) -> Option<String> {
-    field.metadata.iter().find_map(|metadata| metadata.strip_prefix("presence-field:").map(ToString::to_string))
+    field.metadata.iter().find_map(|metadata| {
+        metadata
+            .strip_prefix("presence-field:")
+            .map(ToString::to_string)
+    })
 }
 
 fn render_registration(plan: &FunctionPlan, callback: &str) -> String {
@@ -533,8 +632,22 @@ fn render_registration(plan: &FunctionPlan, callback: &str) -> String {
 }
 
 fn kind_array(name: &str, kinds: &[CoreType]) -> String {
-    if kinds.is_empty() { return format!("        const wasm_valkind_t* {name} = nullptr;\n"); }
-    format!("        const wasm_valkind_t {name}[] = {{{}}};\n", kinds.iter().map(|kind| match kind { CoreType::I32=>"WASM_I32", CoreType::I64=>"WASM_I64", CoreType::F32=>"WASM_F32", CoreType::F64=>"WASM_F64" }).collect::<Vec<_>>().join(", "))
+    if kinds.is_empty() {
+        return format!("        const wasm_valkind_t* {name} = nullptr;\n");
+    }
+    format!(
+        "        const wasm_valkind_t {name}[] = {{{}}};\n",
+        kinds
+            .iter()
+            .map(|kind| match kind {
+                CoreType::I32 => "WASM_I32",
+                CoreType::I64 => "WASM_I64",
+                CoreType::F32 => "WASM_F32",
+                CoreType::F64 => "WASM_F64",
+            })
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
 }
 
 fn native_member(module: &str) -> String {
@@ -547,10 +660,20 @@ fn native_guard(module: &str) -> String {
         .unwrap_or_else(|| panic!("no NativeInterface member mapped for module {module}"))
 }
 fn callback_name(module: &str, function: &str) -> String {
-    format!("CoreOption_{}_{}", module.to_snake_case(), function.to_snake_case())
+    format!(
+        "CoreOption_{}_{}",
+        module.to_snake_case(),
+        function.to_snake_case()
+    )
 }
 fn record_index(model: &ApiModel) -> BTreeMap<String, RecordModel> {
     let mut records = BTreeMap::new();
-    for module in &model.modules { for record in &module.records { records.entry(record.name.clone()).or_insert_with(|| record.clone()); } }
+    for module in &model.modules {
+        for record in &module.records {
+            records
+                .entry(record.name.clone())
+                .or_insert_with(|| record.clone());
+        }
+    }
     records
 }

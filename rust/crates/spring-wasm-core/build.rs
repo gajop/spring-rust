@@ -1,18 +1,58 @@
 use std::{env, fs, path::PathBuf};
 
+fn append_generated(contents: &mut String, path: &PathBuf, description: &str) {
+    println!("cargo:rerun-if-changed={}", path.display());
+    if path.is_file() {
+        contents.push_str(&fs::read_to_string(path).expect("read generated Core SDK fragment"));
+    } else {
+        contents.push_str(&format!(
+            "// {description} has not been generated yet; run spring-api-codegen.\n"
+        ));
+    }
+    contents.push('\n');
+}
+
 fn main() {
     let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
-    let generated = manifest.join("../../../rts/wasm/generated/sdk/core_generated.rs");
+    let generated_dir = manifest.join("../../../rts/wasm/generated/sdk");
     let output = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("core_generated.rs");
 
-    println!("cargo:rerun-if-changed={}", generated.display());
-    if generated.is_file() {
-        fs::copy(&generated, &output).expect("copy generated Core Rust SDK");
-    } else {
-        fs::write(
-            &output,
-            "// Core SDK has not been generated yet; run spring-api-codegen.\n",
-        )
-        .expect("write empty generated Core Rust SDK fallback");
-    }
+    let mut contents = String::new();
+    append_generated(
+        &mut contents,
+        &generated_dir.join("core_generated.rs"),
+        "Core callout SDK",
+    );
+    append_generated(
+        &mut contents,
+        &generated_dir.join("core_borrowed.rs"),
+        "borrowed Core callout SDK",
+    );
+    append_generated(
+        &mut contents,
+        &generated_dir.join("core_variable.rs"),
+        "adapted variable-input Core callout SDK",
+    );
+    append_generated(
+        &mut contents,
+        &generated_dir.join("core_dynamic_input.rs"),
+        "nested dynamic-input Core callout SDK",
+    );
+    append_generated(
+        &mut contents,
+        &generated_dir.join("core_dynamic_output.rs"),
+        "dynamic-output Core callout SDK",
+    );
+    append_generated(
+        &mut contents,
+        &generated_dir.join("core_callins.rs"),
+        "Core numeric callin SDK",
+    );
+    append_generated(
+        &mut contents,
+        &generated_dir.join("core_callins_scratch.rs"),
+        "Core shared-scratch callin SDK",
+    );
+
+    fs::write(&output, contents).expect("write combined generated Core Rust SDK");
 }

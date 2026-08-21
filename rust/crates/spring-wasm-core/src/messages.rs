@@ -7,7 +7,13 @@ mod raw {
     #[link(wasm_import_module = "spring:messages")]
     extern "C" {
         pub fn echo(message: i32, message_len: i32, rest: i32, rest_len: i32) -> i64;
-        pub fn log(section: i32, section_len: i32, level: i32, message: i32, message_len: i32) -> i64;
+        pub fn log(
+            section: i32,
+            section_len: i32,
+            level: i32,
+            message: i32,
+            message_len: i32,
+        ) -> i64;
         #[link_name = "send-message"]
         pub fn send_message(message: i32, message_len: i32) -> i64;
         #[link_name = "send-message-to-player"]
@@ -103,7 +109,11 @@ macro_rules! id_string {
 one_string!(send_message, send_message);
 id_string!(send_message_to_player, send_message_to_player, player_id);
 id_string!(send_message_to_team, send_message_to_team, team_id);
-id_string!(send_message_to_ally_team, send_message_to_ally_team, ally_team_id);
+id_string!(
+    send_message_to_ally_team,
+    send_message_to_ally_team,
+    ally_team_id
+);
 one_string!(send_message_to_spectators, send_message_to_spectators);
 one_string!(send_public_chat, send_public_chat);
 one_string!(send_ally_chat, send_ally_chat);
@@ -138,7 +148,13 @@ pub fn log(section: &str, level: i32, message: &str) -> Result<bool> {
         let (section_pointer, section_length) = string_parts(section)?;
         let (message_pointer, message_length) = string_parts(message)?;
         return unpack_bool(unsafe {
-            raw::log(section_pointer, section_length, level, message_pointer, message_length)
+            raw::log(
+                section_pointer,
+                section_length,
+                level,
+                message_pointer,
+                message_length,
+            )
         });
     }
     #[cfg(not(target_arch = "wasm32"))]

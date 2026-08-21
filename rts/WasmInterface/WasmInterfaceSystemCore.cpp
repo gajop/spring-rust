@@ -4,12 +4,12 @@
 
 #include <algorithm>
 #include <array>
-#include <optional>
+#include <string>
 #include <string_view>
 
-#include "NativeInterface/WasmUiVisibility.h"
 #include "NativeInterface/api/Callins.h"
 #include "WasmCoreHost.h"
+#include "WasmCoreUiCallinFilter.h"
 #include "wasm/generated/WasmCallinRegistry.h"
 
 namespace {
@@ -21,21 +21,30 @@ WasmInterfaceSystem*& ActiveCoreSystem()
 }
 
 constexpr std::size_t CORE_CALLIN_COUNT =
-	static_cast<std::size_t>(WasmCoreCallin::DrawWorld) + 1;
+	(sizeof(recoil::wasm::generated::kCallins) /
+		sizeof(recoil::wasm::generated::kCallins[0])) + 1u;
 
 enum class CoreAggregation : std::uint8_t {
 	Ignore,
 	OrTrue,
 	AndFalse,
 	First,
+	FirstNonEmpty,
 	Unsupported,
 };
 
 enum class CoreResultKind : std::uint8_t {
 	None,
 	Bool,
+	Int,
 	Damage,
 	AllowUnitCreation,
+	String,
+	// Generated fixed-result callins can write their concrete native result
+	// directly. For first-result aggregation the dispatcher does not need to
+	// understand that struct: only the first contributing module receives the
+	// caller's result pointer, while later modules still run with a null sink.
+	OpaqueFirst,
 	Unsupported,
 };
 
@@ -45,6 +54,7 @@ CoreAggregation ResolveAggregation(std::string_view value)
 	if (value == "or-true") return CoreAggregation::OrTrue;
 	if (value == "and-false") return CoreAggregation::AndFalse;
 	if (value == "first") return CoreAggregation::First;
+	if (value == "first-non-empty") return CoreAggregation::FirstNonEmpty;
 	return CoreAggregation::Unsupported;
 }
 
@@ -53,8 +63,13 @@ CoreResultKind ResolveResultKind(std::string_view value, CoreAggregation aggrega
 	if (aggregation == CoreAggregation::Ignore)
 		return CoreResultKind::None;
 	if (value == "BoolCallinResult") return CoreResultKind::Bool;
+	if (value == "IntCallinResult") return CoreResultKind::Int;
 	if (value == "DamageCallinResult") return CoreResultKind::Damage;
 	if (value == "AllowUnitCreationResult") return CoreResultKind::AllowUnitCreation;
+	if (aggregation == CoreAggregation::FirstNonEmpty && value == "StringCallinResult")
+		return CoreResultKind::String;
+	if (aggregation == CoreAggregation::First)
+		return CoreResultKind::OpaqueFirst;
 	return CoreResultKind::Unsupported;
 }
 
@@ -88,26 +103,13 @@ const CoreCallinPolicy* FindCoreCallinPolicy(WasmCoreCallin callin)
 	return &index[slot];
 }
 
-bool ResolveCoreDispatchSide(WasmCoreCallin callin, bool& synced)
+std::string& CoreStringResultStorage()
 {
-	switch (callin) {
-		case WasmCoreCallin::GameFrame:
-		case WasmCoreCallin::GameFramePost:
-		case WasmCoreCallin::UnitCreated:
-		case WasmCoreCallin::UnitPreDamaged:
-		case WasmCoreCallin::AllowUnitCreation:
-			synced = true;
-			return true;
-		case WasmCoreCallin::Update:
-		case WasmCoreCallin::AddConsoleLine:
-		case WasmCoreCallin::CommandNotify:
-		case WasmCoreCallin::DrawWorld:
-			synced = false;
-			return true;
-		case WasmCoreCallin::Invalid:
-			return false;
-	}
-	return false;
+	// Native callin results expose const char*. Keep the final aggregate in
+	// host-owned storage after returning from the guest; never expose a guest
+	// linear-memory pointer through the native result record.
+	thread_local std::string storage;
+	return storage;
 }
 
 bool DispatchCoreModule(const WasmInterfaceSystem::CoreCallinInvocation& invocation,
@@ -139,7 +141,8 @@ WasmInterfaceSystem::CoreDispatchRegistration::~CoreDispatchRegistration()
 }
 
 bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
-	const void* query, void* nativeResult, bool& handled, std::string& error)
+	const void* query, bool synced, void* nativeResult, bool& handled,
+	std::string& error)
 {
 	handled = false;
 	WasmInterfaceSystem* system = ActiveCoreSystem();
@@ -147,9 +150,32 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 		return true;
 
 	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
-	bool synced = false;
-	if (!ResolveCoreDispatchSide(callin, synced))
+	if (callin == WasmCoreCallin::Invalid)
 		return true;
+
+	// Budgets are frame-scoped rather than call-scoped. Reset every synced
+	// instance immediately before the simulation GameFrame boundary and every
+	// unsynced/UI instance immediately before the Update boundary. This makes
+	// all later callins/callouts in the same frame share one deterministic
+	// allowance and never lets a guest reset its own window through re-entry.
+	const bool resetBudgetWindow =
+		(synced && callin == WasmCoreCallin::GameFrame) ||
+		(!synced && callin == WasmCoreCallin::Update);
+	if (resetBudgetWindow) {
+		for (CoreModuleRecord& module : system->coreModules) {
+			if (WasmEnvironmentMatrix::Policy(module.descriptor.environment).synced != synced)
+				continue;
+			if (module.host == nullptr)
+				module.host = WasmCoreHost::ModuleHandle(module.descriptor.name);
+			std::string resetError;
+			if (!WasmCoreHost::ResetBudget(module.host, resetError)) {
+				error = "Core Wasm budget reset failed in module " +
+					module.descriptor.name + ": " + resetError;
+				WasmCoreHost::FaultModule(module.descriptor.name, error);
+				return false;
+			}
+		}
+	}
 
 	std::uint32_t coreEnvironmentMask = 0;
 	for (const CoreModuleRecord& module : system->coreModules) {
@@ -176,29 +202,21 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 			invocations[invocationCount++] = {environment, query, true};
 	}
 
-	std::optional<UnitCreatedQuery> uiUnitCreated;
+	recoil::wasm::core::UiCallinFilter uiFilter;
 	if (hasCoreEnvironment(WasmEnvironment::UI)) {
 		bool includeUi = true;
 		const void* uiQuery = query;
-		if (callin == WasmCoreCallin::UnitCreated) {
-			const auto* typed = static_cast<const UnitCreatedQuery*>(query);
-			if (typed == nullptr) {
-				error = "Core UnitCreated dispatch received a null query";
-				return false;
-			}
-			WasmUiVisibility::ScopedContext uiContext(true);
-			includeUi = WasmUiVisibility::IsTeamVisible(typed->unitTeam);
-			if (includeUi) {
-				uiUnitCreated = *typed;
-				if (uiUnitCreated->builderID >= 0 &&
-					WasmUiVisibility::FindUnit(uiUnitCreated->builderID,
-						WasmUiVisibility::UnitAccess::Visible) == nullptr)
-					uiUnitCreated->builderID = -1;
-				uiQuery = &*uiUnitCreated;
-			}
+		if (!uiFilter.Prepare(name, query, includeUi, uiQuery, error))
+			return false;
+		if (includeUi) {
+			// EventHandler discards UI return values for these synced-control
+			// events. The UI callback still runs, but cannot change simulation
+			// aggregation. Keep this identical to the Component path.
+			const bool contributesResult = name != "Explosion" &&
+				name != "UnitUnitCollision" && name != "UnitFeatureCollision";
+			invocations[invocationCount++] = {
+				WasmEnvironment::UI, uiQuery, contributesResult};
 		}
-		if (includeUi)
-			invocations[invocationCount++] = {WasmEnvironment::UI, uiQuery, true};
 	}
 
 	if (invocationCount == 0)
@@ -279,10 +297,24 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 	}
 
 	bool haveResult = false;
-	BoolCallinResult boolAggregate = {
+	BoolCallinResult boolDefault = {
 		.error = nullptr,
 		.value = aggregation == CoreAggregation::AndFalse,
 	};
+	if (nativeResult != nullptr && resultKind == CoreResultKind::Bool)
+		boolDefault = *static_cast<const BoolCallinResult*>(nativeResult);
+	BoolCallinResult boolAggregate = boolDefault;
+	if (aggregation == CoreAggregation::AndFalse && nativeResult == nullptr)
+		boolAggregate.value = true;
+
+	IntCallinResult intDefault = {
+		.error = nullptr,
+		.value = 0,
+	};
+	if (nativeResult != nullptr && resultKind == CoreResultKind::Int)
+		intDefault = *static_cast<const IntCallinResult*>(nativeResult);
+	IntCallinResult intAggregate = intDefault;
+
 	DamageCallinResult damageDefault = {
 		.error = nullptr,
 		.newDamage = 0.0f,
@@ -291,6 +323,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 	if (nativeResult != nullptr && resultKind == CoreResultKind::Damage)
 		damageDefault = *static_cast<const DamageCallinResult*>(nativeResult);
 	DamageCallinResult damageAggregate = damageDefault;
+
 	AllowUnitCreationResult creationDefault = {
 		.error = nullptr,
 		.allow = true,
@@ -299,6 +332,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 	if (nativeResult != nullptr && resultKind == CoreResultKind::AllowUnitCreation)
 		creationDefault = *static_cast<const AllowUnitCreationResult*>(nativeResult);
 	AllowUnitCreationResult creationAggregate = creationDefault;
+
+	std::string stringAggregate;
 
 	for (const CoreCallinInvocation& invocation : invocations) {
 		const std::uint32_t environmentBit =
@@ -324,10 +359,11 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 
 			if (resultKind == CoreResultKind::Bool &&
 				(aggregation == CoreAggregation::OrTrue || aggregation == CoreAggregation::AndFalse)) {
-				BoolCallinResult moduleResult = {
-					.error = nullptr,
-					.value = aggregation == CoreAggregation::AndFalse,
-				};
+				BoolCallinResult moduleResult = boolDefault;
+				if (aggregation == CoreAggregation::OrTrue && nativeResult == nullptr)
+					moduleResult.value = false;
+				if (aggregation == CoreAggregation::AndFalse && nativeResult == nullptr)
+					moduleResult.value = true;
 				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
 						callin, diagnosticName, &moduleResult, error))
 					return false;
@@ -341,9 +377,33 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 				continue;
 			}
 
+			if (resultKind == CoreResultKind::Bool && aggregation == CoreAggregation::First) {
+				BoolCallinResult moduleResult = boolDefault;
+				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
+						callin, diagnosticName, &moduleResult, error))
+					return false;
+				if (invocation.contributesResult && !haveResult) {
+					boolAggregate = moduleResult;
+					haveResult = true;
+				}
+				continue;
+			}
+
+			if (resultKind == CoreResultKind::Int && aggregation == CoreAggregation::First) {
+				IntCallinResult moduleResult = intDefault;
+				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
+						callin, diagnosticName, &moduleResult, error))
+					return false;
+				if (invocation.contributesResult && !haveResult) {
+					intAggregate = moduleResult;
+					haveResult = true;
+				}
+				continue;
+			}
+
 			if (resultKind == CoreResultKind::Damage && aggregation == CoreAggregation::First) {
 				if (invocation.query == nullptr) {
-					error = "Core UnitPreDamaged dispatch received a null query";
+					error = "Core damage callin dispatch received a null query";
 					return false;
 				}
 				DamageCallinResult moduleResult = damageDefault;
@@ -370,6 +430,36 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 				continue;
 			}
 
+			if (resultKind == CoreResultKind::String &&
+				aggregation == CoreAggregation::FirstNonEmpty) {
+				StringCallinResult moduleResult = {
+					.error = nullptr,
+					.value = nullptr,
+				};
+				const bool mayContribute = invocation.contributesResult && !haveResult;
+				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
+						callin, diagnosticName, mayContribute ? &moduleResult : nullptr, error))
+					return false;
+				if (mayContribute && moduleResult.value != nullptr && moduleResult.value[0] != '\0') {
+					stringAggregate.assign(moduleResult.value);
+					haveResult = true;
+				}
+				continue;
+			}
+
+			if (resultKind == CoreResultKind::OpaqueFirst && aggregation == CoreAggregation::First) {
+				void* moduleResult = nullptr;
+				const bool takeResult = invocation.contributesResult && !haveResult;
+				if (takeResult)
+					moduleResult = nativeResult;
+				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
+						callin, diagnosticName, moduleResult, error))
+					return false;
+				if (takeResult)
+					haveResult = true;
+				continue;
+			}
+
 			error = "Core Wasm callin policy combination is unsupported: " +
 				std::string(diagnosticName);
 			return false;
@@ -385,6 +475,17 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 		if (valueResult != nullptr) {
 			*valueResult = WasmValue::Record({
 				{"value", WasmValue::Bool(boolAggregate.value)},
+			});
+		}
+		return true;
+	}
+
+	if (resultKind == CoreResultKind::Int) {
+		if (nativeResult != nullptr)
+			*static_cast<IntCallinResult*>(nativeResult) = intAggregate;
+		if (valueResult != nullptr) {
+			*valueResult = WasmValue::Record({
+				{"value", WasmValue::I64(intAggregate.value)},
 			});
 		}
 		return true;
@@ -414,5 +515,22 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 		return true;
 	}
 
+	if (resultKind == CoreResultKind::String) {
+		std::string& storage = CoreStringResultStorage();
+		storage = std::move(stringAggregate);
+		if (nativeResult != nullptr) {
+			auto* typedResult = static_cast<StringCallinResult*>(nativeResult);
+			typedResult->error = nullptr;
+			typedResult->value = storage.c_str();
+		}
+		// Do not construct a WasmValue solely for the production Core path.
+		// NativeInterface consumers use nativeResult; the generic value path can
+		// remain Unit until it has an independent need for string conversion.
+		return true;
+	}
+
+	// OpaqueFirst has already written the first contributing native result in
+	// place. WasmValue conversion is intentionally unavailable for that generic
+	// path; production Core dispatch uses nativeResult directly.
 	return true;
 }

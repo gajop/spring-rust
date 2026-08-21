@@ -26,14 +26,16 @@ class ImportGuard {
 public:
 	ImportGuard(HostState* state, std::uint64_t work)
 		: uiContext(state != nullptr && state->environment == WasmEnvironment::UI)
+		, errorStorage(&ownedError)
 	{
-		Initialize(state, work, ownedError);
+		Initialize(state, work);
 	}
 
 	ImportGuard(HostState* state, std::uint64_t work, std::string& error)
 		: uiContext(state != nullptr && state->environment == WasmEnvironment::UI)
+		, errorStorage(&error)
 	{
-		Initialize(state, work, error);
+		Initialize(state, work);
 	}
 
 	~ImportGuard()
@@ -47,14 +49,39 @@ public:
 	ImportGuard(ImportGuard&&) = delete;
 	ImportGuard& operator=(ImportGuard&&) = delete;
 
-	bool Ok() const { return entered; }
-	std::string_view Error() const { return ownedError; }
+	bool Ok() const { return entered && !failed; }
+	std::string_view Error() const
+	{
+		return errorStorage == nullptr ? std::string_view{} : std::string_view(*errorStorage);
+	}
+
+	// Variable-size Core inputs can make host work scale with guest-controlled
+	// lengths after the import has already been entered. Charge that work before
+	// any host allocation/adaptation/native iteration. This is intentionally a
+	// separate cheap counter operation so zero-copy paths do not pay for bytes
+	// they merely validate and borrow unless the native API can consume them.
+	bool Charge(std::uint64_t work)
+	{
+		if (!entered || failed)
+			return false;
+		if (budget == nullptr || budget->ChargeHost(work))
+			return true;
+		failed = true;
+		SetError("Wasm callout host-work budget exhausted");
+		return false;
+	}
 
 private:
-	void Initialize(HostState* state, std::uint64_t work, std::string& error)
+	void SetError(std::string_view message)
+	{
+		if (errorStorage != nullptr)
+			errorStorage->assign(message.data(), message.size());
+	}
+
+	void Initialize(HostState* state, std::uint64_t work)
 	{
 		if (state == nullptr) {
-			error = "core Wasm generated host state is null";
+			SetError("core Wasm generated host state is null");
 			return;
 		}
 
@@ -66,14 +93,14 @@ private:
 		const bool allowReentry = budget->CallbackDepth() != 0 &&
 			budget->CallbackReentryAllowed();
 		if (!budget->EnterImport(allowReentry)) {
-			error = "Wasm import re-entry denied";
+			SetError("Wasm import re-entry denied");
 			return;
 		}
 		entered = true;
 		if (!budget->ChargeHost(work)) {
 			budget->LeaveImport();
 			entered = false;
-			error = "Wasm callout host-work budget exhausted";
+			SetError("Wasm callout host-work budget exhausted");
 		}
 	}
 
@@ -83,7 +110,9 @@ private:
 	WasmUiVisibility::ConditionalScopedContext uiContext;
 	WasmExecutionBudget* budget = nullptr;
 	bool entered = false;
+	bool failed = false;
 	std::string ownedError;
+	std::string* errorStorage = nullptr;
 };
 
 inline bool EnsureMemory(HostState* state, wasmtime_caller_t* caller, std::string& error)
@@ -131,12 +160,13 @@ private:
 inline bool ResolveCallback(HostState& state, wasmtime_caller_t* caller,
 	std::string& error)
 {
-	if (state.callbackDispatchBound)
-		return true;
 	if (caller == nullptr) {
 		error = "Core Wasm callback has no active caller";
 		return false;
 	}
+	state.context = wasmtime_caller_context(caller);
+	if (state.callbackDispatchBound)
+		return true;
 	constexpr char exportName[] = "spring:callback/dispatch";
 	wasmtime_extern_t item{};
 	if (!wasmtime_caller_export_get(caller, exportName, sizeof(exportName) - 1, &item)) {
@@ -149,8 +179,7 @@ inline bool ResolveCallback(HostState& state, wasmtime_caller_t* caller,
 		return false;
 	}
 	const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-	if (!FunctionHasSignature(wasmtime_caller_context(caller), item.of.func,
-			params, 2, nullptr, 0)) {
+	if (!FunctionHasSignature(state.context, item.of.func, params, 2, nullptr, 0)) {
 		wasmtime_extern_delete(&item);
 		error = "Core Wasm callback dispatch export must be (i32,i32)->()";
 		return false;
@@ -176,8 +205,7 @@ inline bool DispatchCallback(HostState& state, wasmtime_caller_t* caller,
 	slots[1].i32 = static_cast<std::int32_t>(userData);
 	wasm_trap_t* trap = nullptr;
 	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(
-			wasmtime_caller_context(caller), &state.callbackDispatch,
-			slots.data(), slots.size(), &trap);
+			state.context, &state.callbackDispatch, slots.data(), slots.size(), &trap);
 		callError != nullptr) {
 		error = "Core Wasm callback dispatch failed: " + ErrorMessage(callError);
 		if (trap != nullptr)
@@ -186,6 +214,39 @@ inline bool DispatchCallback(HostState& state, wasmtime_caller_t* caller,
 	}
 	if (trap != nullptr) {
 		error = "Core Wasm callback dispatch trapped: " + TrapMessage(trap);
+		return false;
+	}
+	return true;
+}
+
+inline bool DispatchRetainedCallback(HostState& state, std::uint32_t callbackID,
+	std::uint32_t userData, std::string& error)
+{
+	if (!state.callbackDispatchBound || state.context == nullptr) {
+		error = "Core Wasm retained callback dispatch is not bound";
+		return false;
+	}
+	WasmUiVisibility::ConditionalScopedContext uiContext(
+		state.environment == WasmEnvironment::UI);
+	CallbackGuard guard(state.budget);
+	if (!guard.Ok()) {
+		error = "Core Wasm callback nesting limit rejected callback";
+		return false;
+	}
+	std::array<wasmtime_val_raw_t, 2> slots{};
+	slots[0].i32 = static_cast<std::int32_t>(callbackID);
+	slots[1].i32 = static_cast<std::int32_t>(userData);
+	wasm_trap_t* trap = nullptr;
+	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(
+			state.context, &state.callbackDispatch, slots.data(), slots.size(), &trap);
+		callError != nullptr) {
+		error = "Core Wasm retained callback dispatch failed: " + ErrorMessage(callError);
+		if (trap != nullptr)
+			error += ": " + TrapMessage(trap);
+		return false;
+	}
+	if (trap != nullptr) {
+		error = "Core Wasm retained callback dispatch trapped: " + TrapMessage(trap);
 		return false;
 	}
 	return true;

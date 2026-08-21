@@ -2,28 +2,52 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "NativeInterface/WasmUiVisibility.h"
 #include "WasmEnvironment.h"
 #include "WasmRuntime.h"
+#include "wasm/generated/WasmCallinRegistry.h"
 
 struct NativeInterface;
 
-enum class WasmCoreCallin : std::uint8_t {
+namespace recoil::wasm::core::detail {
+
+consteval std::uint16_t CoreCallinOrdinal(std::string_view name)
+{
+	for (std::size_t index = 0;
+		index < sizeof(recoil::wasm::generated::kCallins) /
+			sizeof(recoil::wasm::generated::kCallins[0]);
+		++index) {
+		if (name == recoil::wasm::generated::kCallins[index].name)
+			return static_cast<std::uint16_t>(index + 1u);
+	}
+	return 0;
+}
+
+} // namespace recoil::wasm::core::detail
+
+// Every generated Callins.def descriptor has a stable per-build numeric Core
+// ID: generated-registry index + 1. Only the hand-specialized hot callins need
+// named enum constants here; every other valid ID is represented by casting the
+// generated ordinal returned by ResolveCallin(). This avoids a hand-maintained
+// 126-entry enum while keeping the hot specialized comparisons compile-time.
+enum class WasmCoreCallin : std::uint16_t {
 	Invalid = 0,
-	GameFrame,
-	GameFramePost,
-	Update,
-	UnitCreated,
-	UnitPreDamaged,
-	AllowUnitCreation,
-	AddConsoleLine,
-	CommandNotify,
-	DrawWorld,
+	GameFrame = recoil::wasm::core::detail::CoreCallinOrdinal("GameFrame"),
+	GameFramePost = recoil::wasm::core::detail::CoreCallinOrdinal("GameFramePost"),
+	Update = recoil::wasm::core::detail::CoreCallinOrdinal("Update"),
+	UnitCreated = recoil::wasm::core::detail::CoreCallinOrdinal("UnitCreated"),
+	UnitPreDamaged = recoil::wasm::core::detail::CoreCallinOrdinal("UnitPreDamaged"),
+	AllowUnitCreation = recoil::wasm::core::detail::CoreCallinOrdinal("AllowUnitCreation"),
+	AddConsoleLine = recoil::wasm::core::detail::CoreCallinOrdinal("AddConsoleLine"),
+	CommandNotify = recoil::wasm::core::detail::CoreCallinOrdinal("CommandNotify"),
+	DrawWorld = recoil::wasm::core::detail::CoreCallinOrdinal("DrawWorld"),
 };
 
 // Native C++ host for the Spring Core-Wasm ABI. Each guest owns a separate
@@ -65,6 +89,18 @@ public:
 		return ModuleHasCallin(moduleName, ResolveCallin(name));
 	}
 
+	// Budget-window boundaries already hold the cached module handle. Reset
+	// through that pointer so a frame boundary never repeats the module-name
+	// lookup on the steady-state path.
+	static bool ResetBudget(WasmCoreHost* host, std::string& error)
+	{
+		if (host == nullptr) {
+			error = "Core Wasm module handle is null";
+			return false;
+		}
+		return host->ResetBudgetImpl(error);
+	}
+
 	// Pointer + numeric-callin overload is the steady-state hot path. String
 	// overloads remain only for legacy/diagnostic callers.
 	static bool DispatchModule(WasmCoreHost* host, WasmCoreCallin callin,
@@ -74,6 +110,10 @@ public:
 			error = "Core Wasm module handle is null";
 			return false;
 		}
+		// Keep UI read visibility active for the whole guest invocation, matching
+		// the Component/WasmValue boundary. All nested Core imports and re-entrant
+		// callbacks then inherit the same thread-local visibility perspective.
+		WasmUiVisibility::ScopedContext uiContext(host->environment == WasmEnvironment::UI);
 		return host->Invoke(callin, query, result, error);
 	}
 	static bool DispatchModule(std::string_view moduleName, WasmCoreCallin callin,

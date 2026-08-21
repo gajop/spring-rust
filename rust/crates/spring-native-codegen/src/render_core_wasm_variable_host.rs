@@ -142,13 +142,19 @@ pub(crate) fn eligible(
     outputs: &[FieldModel],
     records: &BTreeMap<String, RecordModel>,
 ) -> bool {
+    // A reviewed handwritten transport already owns this import.
+    if crate::render_core_wasm_registry::handwritten_reviewed(&plan.module, &plan.function) {
+        return false;
+    }
     if matches!(plan.source_status.as_str(), "manual" | "unsupported")
         || !matches!(plan.input_strategy, InputStrategy::VariableInputBuffer)
     {
         return false;
     }
     if descriptor_layout(inputs, records).is_none()
-        || !inputs.iter().all(|field| input_field_supported(field, records))
+        || !inputs
+            .iter()
+            .all(|field| input_field_supported(field, records))
     {
         return false;
     }
@@ -161,9 +167,9 @@ pub(crate) fn eligible(
                     SemanticType::Scalar { .. } | SemanticType::Enum { .. }
                 )
         }
-        ResultStrategy::FixedOutputBuffer { .. } => {
-            outputs.iter().all(|field| fixed_wire_type(&field.ty, records))
-        }
+        ResultStrategy::FixedOutputBuffer { .. } => outputs
+            .iter()
+            .all(|field| fixed_wire_type(&field.ty, records)),
         ResultStrategy::VariableOutputBuffer | ResultStrategy::Unsupported => false,
     }
 }
@@ -189,14 +195,12 @@ fn input_field_supported(field: &FieldModel, records: &BTreeMap<String, RecordMo
     }
 }
 
-fn list_element_supported(
-    ty: &SemanticType,
-    records: &BTreeMap<String, RecordModel>,
-) -> bool {
+fn list_element_supported(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bool {
     match ty {
         SemanticType::String => true,
-        SemanticType::Scalar { name }
-            if !matches!(name.as_str(), "bool" | "isize" | "usize") => true,
+        SemanticType::Scalar { name } if !matches!(name.as_str(), "bool" | "isize" | "usize") => {
+            true
+        }
         SemanticType::Enum { .. } => true,
         SemanticType::Record { .. } => fixed_wire_type(ty, records),
         _ => false,
@@ -205,13 +209,18 @@ fn list_element_supported(
 
 fn fixed_wire_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bool {
     match ty {
-        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => true,
+        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => {
+            true
+        }
         SemanticType::FixedArray { element, length } => {
             *length <= 64 && fixed_wire_type(element, records)
         }
-        SemanticType::Record { name } => records
-            .get(name)
-            .is_some_and(|record| record.fields.iter().all(|field| fixed_wire_type(&field.ty, records))),
+        SemanticType::Record { name } => records.get(name).is_some_and(|record| {
+            record
+                .fields
+                .iter()
+                .all(|field| fixed_wire_type(&field.ty, records))
+        }),
         _ => false,
     }
 }
@@ -240,7 +249,10 @@ fn descriptor_field_layout(
     ty: &SemanticType,
     records: &BTreeMap<String, RecordModel>,
 ) -> Option<(u32, u32)> {
-    if matches!(ty, SemanticType::String | SemanticType::Bytes | SemanticType::List { .. }) {
+    if matches!(
+        ty,
+        SemanticType::String | SemanticType::Bytes | SemanticType::List { .. }
+    ) {
         Some((8, 4))
     } else {
         fixed_wire_layout(ty, records)
@@ -263,7 +275,10 @@ fn descriptor_layout(
     any.then(|| (align_up(bytes, alignment), alignment))
 }
 
-fn layout_fields(fields: &[FieldModel], records: &BTreeMap<String, RecordModel>) -> Option<(u32, u32)> {
+fn layout_fields(
+    fields: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<(u32, u32)> {
     let mut bytes = 0u32;
     let mut alignment = 1u32;
     for field in fields {
@@ -288,7 +303,11 @@ fn render_callback(
     let api_member = native_member(module_name);
     let api_guard = native_guard(module_name);
     let slot_count = plan.direct_params.len().max(plan.direct_results.len());
-    let direct_input_count = function.inputs.iter().filter(|field| direct_type(&field.ty)).count();
+    let direct_input_count = function
+        .inputs
+        .iter()
+        .filter(|field| direct_type(&field.ty))
+        .count();
     let descriptor_index = direct_input_count;
     let (descriptor_bytes, descriptor_alignment) =
         descriptor_layout(&function.inputs, records).expect("eligible variable input descriptor");
@@ -325,7 +344,10 @@ fn render_callback(
                 expr = query_expr(&field.ty, direct_slot, &format!("query.{}", field.name)),
             ));
             direct_slot += 1;
-        } else if matches!(field.ty, SemanticType::String | SemanticType::Bytes | SemanticType::List { .. }) {
+        } else if matches!(
+            field.ty,
+            SemanticType::String | SemanticType::Bytes | SemanticType::List { .. }
+        ) {
             body.push_str(&render_variable_field(field, records, plan));
         } else {
             body.push_str(&render_wire_read(
@@ -350,7 +372,9 @@ fn render_callback(
         function_name = function.name,
     ));
     match plan.result_strategy {
-        ResultStrategy::Status => body.push_str("    slots[0].i32 = errorCode;\n    return nullptr;\n"),
+        ResultStrategy::Status => {
+            body.push_str("    slots[0].i32 = errorCode;\n    return nullptr;\n")
+        }
         ResultStrategy::Packed32 => {
             let field = &function.outputs[0];
             body.push_str(&format!(
@@ -359,8 +383,12 @@ fn render_callback(
             ));
         }
         ResultStrategy::FixedOutputBuffer { bytes, alignment } => {
-            body.push_str("    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }\n");
-            body.push_str(&format!("    std::array<std::uint8_t, {bytes}> wire{{}};\n    WireWriter writer(wire);\n"));
+            body.push_str(
+                "    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }\n",
+            );
+            body.push_str(&format!(
+                "    std::array<std::uint8_t, {bytes}> wire{{}};\n    WireWriter writer(wire);\n"
+            ));
             for field in &function.outputs {
                 body.push_str(&render_wire_write(
                     &field.ty,
@@ -441,7 +469,9 @@ fn render_variable_field(
 }
 
 fn native_cast(destination: &str, value: &str) -> String {
-    format!("static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})")
+    format!(
+        "static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})"
+    )
 }
 
 fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
@@ -450,7 +480,9 @@ fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
             "bool" => format!("slots[{slot}].i32 != 0"),
             "f32" => format!("slots[{slot}].f32"),
             "f64" => format!("slots[{slot}].f64"),
-            "i64" | "u64" | "isize" | "usize" => native_cast(destination, &format!("slots[{slot}].i64")),
+            "i64" | "u64" | "isize" | "usize" => {
+                native_cast(destination, &format!("slots[{slot}].i64"))
+            }
             _ => native_cast(destination, &format!("slots[{slot}].i32")),
         },
         SemanticType::Enum { .. } => native_cast(destination, &format!("slots[{slot}].i32")),
@@ -461,9 +493,15 @@ fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
 
 fn packed32_expr(ty: &SemanticType, value: &str) -> String {
     match ty {
-        SemanticType::Scalar { name } if name == "f32" => format!("std::bit_cast<std::uint32_t>({value})"),
-        SemanticType::Scalar { name } if name == "bool" => format!("static_cast<std::uint32_t>({value} ? 1u : 0u)"),
-        SemanticType::Scalar { .. } | SemanticType::Enum { .. } => format!("static_cast<std::uint32_t>({value})"),
+        SemanticType::Scalar { name } if name == "f32" => {
+            format!("std::bit_cast<std::uint32_t>({value})")
+        }
+        SemanticType::Scalar { name } if name == "bool" => {
+            format!("static_cast<std::uint32_t>({value} ? 1u : 0u)")
+        }
+        SemanticType::Scalar { .. } | SemanticType::Enum { .. } => {
+            format!("static_cast<std::uint32_t>({value})")
+        }
         _ => unreachable!(),
     }
 }
@@ -560,7 +598,11 @@ fn native_cpp_type(ty: &SemanticType) -> String {
 }
 
 fn count_field(field: &FieldModel) -> Option<String> {
-    field.metadata.iter().find_map(|metadata| metadata.strip_prefix("count-field:").map(ToString::to_string))
+    field.metadata.iter().find_map(|metadata| {
+        metadata
+            .strip_prefix("count-field:")
+            .map(ToString::to_string)
+    })
 }
 
 fn error_return(plan: &FunctionPlan, status: &str, indent: usize) -> String {
@@ -580,8 +622,22 @@ fn render_registration(plan: &FunctionPlan, callback: &str) -> String {
 }
 
 fn kind_array(name: &str, kinds: &[CoreType]) -> String {
-    if kinds.is_empty() { return format!("        const wasm_valkind_t* {name} = nullptr;\n"); }
-    format!("        const wasm_valkind_t {name}[] = {{{}}};\n", kinds.iter().map(|kind| match kind { CoreType::I32=>"WASM_I32", CoreType::I64=>"WASM_I64", CoreType::F32=>"WASM_F32", CoreType::F64=>"WASM_F64" }).collect::<Vec<_>>().join(", "))
+    if kinds.is_empty() {
+        return format!("        const wasm_valkind_t* {name} = nullptr;\n");
+    }
+    format!(
+        "        const wasm_valkind_t {name}[] = {{{}}};\n",
+        kinds
+            .iter()
+            .map(|kind| match kind {
+                CoreType::I32 => "WASM_I32",
+                CoreType::I64 => "WASM_I64",
+                CoreType::F32 => "WASM_F32",
+                CoreType::F64 => "WASM_F64",
+            })
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
 }
 
 fn native_member(module: &str) -> String {
@@ -593,8 +649,27 @@ fn native_guard(module: &str) -> String {
     spring_native_codegen::render_host::core_native_guard(module)
         .unwrap_or_else(|| panic!("no NativeInterface member mapped for module {module}"))
 }
-fn callback_name(module: &str, function: &str) -> String { format!("CoreVariable_{}_{}", module.to_snake_case(), function.to_snake_case()) }
-fn sanitize(value: &str) -> String { value.chars().map(|c| if c.is_ascii_alphanumeric(){c}else{'_'}).collect() }
+fn callback_name(module: &str, function: &str) -> String {
+    format!(
+        "CoreVariable_{}_{}",
+        module.to_snake_case(),
+        function.to_snake_case()
+    )
+}
+fn sanitize(value: &str) -> String {
+    value
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
+        .collect()
+}
 fn record_index(model: &ApiModel) -> BTreeMap<String, RecordModel> {
-    let mut records=BTreeMap::new(); for module in &model.modules { for record in &module.records { records.entry(record.name.clone()).or_insert_with(||record.clone()); } } records
+    let mut records = BTreeMap::new();
+    for module in &model.modules {
+        for record in &module.records {
+            records
+                .entry(record.name.clone())
+                .or_insert_with(|| record.clone());
+        }
+    }
+    records
 }

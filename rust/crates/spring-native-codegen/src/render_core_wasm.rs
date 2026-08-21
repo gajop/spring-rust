@@ -97,7 +97,11 @@ pub fn plan(model: &ApiModel) -> CoreAbiPlan {
                 .map(|function| plan_function(&module.name, function, &records))
         })
         .collect::<Vec<_>>();
-    functions.sort_by(|a, b| a.module.cmp(&b.module).then_with(|| a.function.cmp(&b.function)));
+    functions.sort_by(|a, b| {
+        a.module
+            .cmp(&b.module)
+            .then_with(|| a.function.cmp(&b.function))
+    });
 
     let mut automatic_count = 0;
     let mut manual_count = 0;
@@ -175,15 +179,16 @@ fn plan_function(
     let mut notes = function.notes.clone();
     let mut direct_params = Vec::new();
     let input_strategy = classify_inputs(&function.inputs, records, &mut direct_params, &mut notes);
-    let (result_strategy, mut direct_results) = classify_outputs(&function.outputs, records, &mut notes);
+    let (result_strategy, mut direct_results) =
+        classify_outputs(&function.outputs, records, &mut notes);
     let string_list = function
         .inputs
         .iter()
         .chain(function.outputs.iter())
-        .any(|field| contains_string_list(&field.ty));
+        .any(|field| contains_string_list(&field.ty, records));
     if string_list {
         notes.push(
-            "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+            "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
                 .to_owned(),
         );
     }
@@ -219,11 +224,7 @@ fn plan_function(
         environment_mask: environment_mask(&function.environments),
         mutating: function.mutating,
         visibility_sensitive: function.visibility_sensitive,
-        source_status: if string_list {
-            "manual".to_owned()
-        } else {
-            status_name(function.status).to_owned()
-        },
+        source_status: status_name(function.status).to_owned(),
         input_strategy,
         result_strategy,
         signature: core_signature(&direct_params, &direct_results),
@@ -233,21 +234,96 @@ fn plan_function(
     }
 }
 
-fn contains_string_list(ty: &SemanticType) -> bool {
-    match ty {
-        SemanticType::List { element } => {
-            matches!(element.as_ref(), SemanticType::String) || contains_string_list(element)
+fn contains_string_list(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bool {
+    fn inner(
+        ty: &SemanticType,
+        records: &BTreeMap<String, RecordModel>,
+        visiting: &mut BTreeSet<String>,
+    ) -> bool {
+        match ty {
+            SemanticType::List { element } => {
+                matches!(element.as_ref(), SemanticType::String)
+                    || inner(element, records, visiting)
+            }
+            SemanticType::FixedArray { element, .. } | SemanticType::Option { inner: element } => {
+                inner(element, records, visiting)
+            }
+            SemanticType::Result { ok, error } => {
+                ok.as_deref()
+                    .is_some_and(|value| inner(value, records, visiting))
+                    || error
+                        .as_deref()
+                        .is_some_and(|value| inner(value, records, visiting))
+            }
+            SemanticType::Pointer { pointee, .. } => inner(pointee, records, visiting),
+            SemanticType::Record { name } => {
+                if !visiting.insert(name.clone()) {
+                    return false;
+                }
+                let result = records.get(name).is_some_and(|record| {
+                    record
+                        .fields
+                        .iter()
+                        .any(|field| inner(&field.ty, records, visiting))
+                });
+                visiting.remove(name);
+                result
+            }
+            _ => false,
         }
-        SemanticType::FixedArray { element, .. } | SemanticType::Option { inner: element } => {
-            contains_string_list(element)
-        }
-        SemanticType::Result { ok, error } => {
-            ok.as_deref().is_some_and(contains_string_list)
-                || error.as_deref().is_some_and(contains_string_list)
-        }
-        SemanticType::Pointer { pointee, .. } => contains_string_list(pointee),
-        _ => false,
     }
+
+    inner(ty, records, &mut BTreeSet::new())
+}
+
+fn variable_size(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bool {
+    fn inner(
+        ty: &SemanticType,
+        records: &BTreeMap<String, RecordModel>,
+        visiting: &mut BTreeSet<String>,
+    ) -> bool {
+        match ty {
+            SemanticType::String | SemanticType::Bytes | SemanticType::List { .. } => true,
+            SemanticType::FixedArray { element, .. } | SemanticType::Option { inner: element } => {
+                inner(element, records, visiting)
+            }
+            SemanticType::Result { ok, error } => {
+                ok.as_deref()
+                    .is_some_and(|value| inner(value, records, visiting))
+                    || error
+                        .as_deref()
+                        .is_some_and(|value| inner(value, records, visiting))
+            }
+            SemanticType::Pointer { pointee, .. } => inner(pointee, records, visiting),
+            SemanticType::Record { name } => {
+                if !visiting.insert(name.clone()) {
+                    return false;
+                }
+                let result = records.get(name).is_some_and(|record| {
+                    record
+                        .fields
+                        .iter()
+                        .any(|field| inner(&field.ty, records, visiting))
+                });
+                visiting.remove(name);
+                result
+            }
+            SemanticType::Scalar { .. }
+            | SemanticType::Enum { .. }
+            | SemanticType::Handle { .. }
+            | SemanticType::Callback { .. }
+            | SemanticType::Unknown { .. } => false,
+        }
+    }
+
+    inner(ty, records, &mut BTreeSet::new())
+}
+
+fn record_pointer(field: &FieldModel) -> bool {
+    field
+        .metadata
+        .iter()
+        .any(|metadata| metadata.starts_with("spring.wasm.record:"))
 }
 
 fn classify_inputs(
@@ -259,11 +335,17 @@ fn classify_inputs(
     let mut has_fixed = false;
     let mut has_variable = false;
     for field in fields {
-        if let Some(core) = direct_type(&field.ty) {
+        // spring.wasm.record describes a native pointee. Even when the record
+        // itself is fixed-width, Core must materialize call-scoped native
+        // storage and pass its address; treating it as an inline fixed record
+        // would silently change the C ABI.
+        if record_pointer(field) {
+            has_variable = true;
+        } else if let Some(core) = direct_type(&field.ty) {
             direct.push(core);
         } else if fixed_layout(&field.ty, records).is_some() {
             has_fixed = true;
-        } else if field.ty.is_variable_size() {
+        } else if variable_size(&field.ty, records) {
             has_variable = true;
         } else {
             notes.push(format!("unsupported Core input field {}", field.name));
@@ -308,7 +390,7 @@ fn classify_outputs(
                 vec![CoreType::I32],
             );
         }
-        if ty.is_variable_size() {
+        if variable_size(ty, records) {
             return (ResultStrategy::VariableOutputBuffer, vec![CoreType::I32]);
         }
     } else if let Some((bytes, alignment)) = layout_fields(fields, records) {
@@ -316,7 +398,7 @@ fn classify_outputs(
             ResultStrategy::FixedOutputBuffer { bytes, alignment },
             vec![CoreType::I32],
         );
-    } else if fields.iter().any(|field| field.ty.is_variable_size()) {
+    } else if fields.iter().any(|field| variable_size(&field.ty, records)) {
         return (ResultStrategy::VariableOutputBuffer, vec![CoreType::I32]);
     }
 
@@ -327,9 +409,7 @@ fn classify_outputs(
 fn direct_type(ty: &SemanticType) -> Option<CoreType> {
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
-            "i8" | "u8" | "char" | "i16" | "u16" | "i32" | "u32" | "bool" => {
-                Some(CoreType::I32)
-            }
+            "i8" | "u8" | "char" | "i16" | "u16" | "i32" | "u32" | "bool" => Some(CoreType::I32),
             "i64" | "u64" | "isize" | "usize" => Some(CoreType::I64),
             "f32" => Some(CoreType::F32),
             "f64" => Some(CoreType::F64),
@@ -342,10 +422,7 @@ fn direct_type(ty: &SemanticType) -> Option<CoreType> {
     }
 }
 
-fn fixed_layout(
-    ty: &SemanticType,
-    records: &BTreeMap<String, RecordModel>,
-) -> Option<(u32, u32)> {
+fn fixed_layout(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> Option<(u32, u32)> {
     if let Some(core) = direct_type(ty) {
         return Some((core.bytes(), core.bytes().min(8)));
     }
@@ -359,7 +436,10 @@ fn fixed_layout(
             let (payload_bytes, payload_alignment) = fixed_layout(inner, records)?;
             let alignment = payload_alignment.max(4);
             let payload_offset = align_up(4, payload_alignment);
-            Some((align_up(payload_offset.checked_add(payload_bytes)?, alignment), alignment))
+            Some((
+                align_up(payload_offset.checked_add(payload_bytes)?, alignment),
+                alignment,
+            ))
         }
         _ => None,
     }
@@ -388,7 +468,9 @@ fn record_index(model: &ApiModel) -> BTreeMap<String, RecordModel> {
     let mut records = BTreeMap::new();
     for module in &model.modules {
         for record in &module.records {
-            records.entry(record.name.clone()).or_insert_with(|| record.clone());
+            records
+                .entry(record.name.clone())
+                .or_insert_with(|| record.clone());
         }
     }
     records
@@ -446,5 +528,35 @@ mod tests {
             core_signature(&[CoreType::I32, CoreType::F32], &[CoreType::I64]),
             "i32,f32->i64"
         );
+    }
+
+    #[test]
+    fn nested_record_variable_size_is_detected() {
+        let mut records = BTreeMap::new();
+        records.insert(
+            "Dynamic".to_owned(),
+            RecordModel {
+                name: "Dynamic".to_owned(),
+                fields: vec![FieldModel {
+                    name: "text".to_owned(),
+                    ty: SemanticType::String,
+                    status: LoweringStatus::Automatic,
+                    metadata: Vec::new(),
+                }],
+                status: LoweringStatus::Automatic,
+            },
+        );
+        assert!(variable_size(
+            &SemanticType::Record {
+                name: "Dynamic".to_owned(),
+            },
+            &records,
+        ));
+        assert!(contains_string_list(
+            &SemanticType::List {
+                element: Box::new(SemanticType::String),
+            },
+            &records,
+        ));
     }
 }

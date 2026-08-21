@@ -1,0 +1,1948 @@
+{
+  "total": 126,
+  "executable_total": 126,
+  "verified_total": 0,
+  "by_class": {
+    "generated-direct": 26,
+    "generated-direct-ignored-result": 57,
+    "generated-first-non-empty-string": 2,
+    "generated-fixed-flattened": 5,
+    "generated-fixed-flattened-ignored-result": 4,
+    "generated-packed-result": 3,
+    "generated-shared-scratch": 10,
+    "generated-shared-scratch-ignored-result": 11,
+    "specialized": 8
+  },
+  "executable": [
+    {
+      "name": "ActiveCommandChanged",
+      "query": "ActiveCommandChangedQuery",
+      "result": "ActiveCommandChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AddConsoleLine",
+      "query": "AddConsoleLineQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "specialized",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowBuilderHoldFire",
+      "query": "AllowBuilderHoldFireQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowCommand",
+      "query": "UnitCommandQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowDirectUnitControl",
+      "query": "AllowDirectUnitControlQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowFeatureBuildStep",
+      "query": "AllowFeatureBuildStepQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowFeatureCreation",
+      "query": "AllowFeatureCreationQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-fixed-flattened",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowResourceLevel",
+      "query": "AllowResourceLevelQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowResourceTransfer",
+      "query": "AllowResourceTransferQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowStartPosition",
+      "query": "AllowStartPositionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-fixed-flattened",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowUnitBuildStep",
+      "query": "AllowUnitBuildStepQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowUnitCloak",
+      "query": "AllowUnitCloakQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowUnitCreation",
+      "query": "AllowUnitCreationQuery",
+      "result": "AllowUnitCreationResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "specialized",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowUnitDecloak",
+      "query": "AllowUnitDecloakQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowUnitKamikaze",
+      "query": "AllowUnitKamikazeQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowUnitTransfer",
+      "query": "AllowUnitTransferQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowUnitTransport",
+      "query": "AllowUnitTransportQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowUnitTransportPosition",
+      "query": "AllowUnitTransportPositionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-fixed-flattened",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowWeaponInterceptTarget",
+      "query": "AllowWeaponInterceptTargetQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowWeaponTarget",
+      "query": "AllowWeaponTargetQuery",
+      "result": "AllowWeaponTargetResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-packed-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowWeaponTargetCheck",
+      "query": "AllowWeaponTargetCheckQuery",
+      "result": "IntCallinResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "ArchiveCallin",
+      "query": "SimpleCallinQuery",
+      "result": "ArchiveCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "CollectGarbage",
+      "query": "CollectGarbageQuery",
+      "result": "CollectGarbageResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "CommandFallback",
+      "query": "CommandFallbackQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "CommandNotify",
+      "query": "CommandNotifyQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "specialized",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DefaultCommand",
+      "query": "DefaultCommandQuery",
+      "result": "DefaultCommandResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-packed-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DownloadFailed",
+      "query": "DownloadFailedQuery",
+      "result": "DownloadFailedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DownloadFinished",
+      "query": "DownloadFinishedQuery",
+      "result": "DownloadFinishedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DownloadProgress",
+      "query": "DownloadProgressQuery",
+      "result": "DownloadProgressResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DownloadQueued",
+      "query": "DownloadQueuedQuery",
+      "result": "DownloadQueuedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DownloadStarted",
+      "query": "DownloadStartedQuery",
+      "result": "DownloadStartedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawAlphaObjectsLua",
+      "query": "DrawAlphaObjectsLuaQuery",
+      "result": "DrawAlphaObjectsLuaResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawBuildSquare",
+      "query": "DrawBuildSquareQuery",
+      "result": "DrawBuildSquareResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawFeature",
+      "query": "DrawFeatureQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawMaterial",
+      "query": "DrawMaterialQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawObjectsLua",
+      "query": "DrawObjectsLuaQuery",
+      "result": "DrawObjectsLuaResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawProjectile",
+      "query": "DrawProjectileQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawScreen",
+      "query": "DrawScreenQuery",
+      "result": "DrawScreenResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawShield",
+      "query": "DrawShieldQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawUnit",
+      "query": "DrawUnitQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawWorldPreParticles",
+      "query": "DrawWorldPreParticlesQuery",
+      "result": "DrawWorldPreParticlesResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "Explosion",
+      "query": "ExplosionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-fixed-flattened",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "FeatureCreated",
+      "query": "FeatureCreatedQuery",
+      "result": "FeatureCreatedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "FeatureDamaged",
+      "query": "FeatureDamagedQuery",
+      "result": "FeatureDamagedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "FeatureDestroyed",
+      "query": "FeatureDestroyedQuery",
+      "result": "FeatureDestroyedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "FeatureMoved",
+      "query": "FeatureMovedQuery",
+      "result": "FeatureMovedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-fixed-flattened-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "FeaturePreDamaged",
+      "query": "FeatureDamagedQuery",
+      "result": "DamageCallinResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-packed-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "Float3Callin",
+      "query": "Float3CallinQuery",
+      "result": "Float3CallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-fixed-flattened-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GameFrame",
+      "query": "GameFrameQuery",
+      "result": "GameFrameResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "specialized",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GameFramePost",
+      "query": "GameFramePostQuery",
+      "result": "GameFramePostResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "specialized",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GameID",
+      "query": "GameIDQuery",
+      "result": "GameIDResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GameOver",
+      "query": "GameOverEventQuery",
+      "result": "GameOverEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GamePaused",
+      "query": "GamePausedQuery",
+      "result": "GamePausedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GamePreload",
+      "query": "GamePreloadQuery",
+      "result": "GamePreloadResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GameProgress",
+      "query": "GameProgressQuery",
+      "result": "GameProgressResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GameSetup",
+      "query": "GameSetupQuery",
+      "result": "GameSetupResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GameStart",
+      "query": "GameStartQuery",
+      "result": "GameStartResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GroupChanged",
+      "query": "GroupChangedQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "HandleLuaCall",
+      "query": "HandleLuaCallQuery",
+      "result": "HandleLuaCallResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "HandleLuaMsg",
+      "query": "HandleLuaMsgQuery",
+      "result": "HandleLuaMsgResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "InitializeNativeModule",
+      "query": "InitializeNativeModuleQuery",
+      "result": "InitializeNativeModuleResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "KeyMapChanged",
+      "query": "SimpleCallinQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "KeyPress",
+      "query": "KeyPressQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "KeyRelease",
+      "query": "KeyReleaseQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "LastMessagePosition",
+      "query": "LastMessagePositionQuery",
+      "result": "LastMessagePositionResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-fixed-flattened-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "Load",
+      "query": "SimpleCallinQuery",
+      "result": "ArchiveCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MapDrawCmd",
+      "query": "MapDrawCmdQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MiniMapDraw",
+      "query": "MiniMapDrawQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MiniMapGeometryChanged",
+      "query": "MiniMapGeometryChangedQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MiniMapRotationChanged",
+      "query": "MiniMapRotationChangedQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MiniMapStateChanged",
+      "query": "MiniMapStateChangedQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MouseMove",
+      "query": "MouseMoveQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MousePress",
+      "query": "MousePressQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MouseRelease",
+      "query": "MouseReleaseQuery",
+      "result": "MouseReleaseResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MouseWheel",
+      "query": "MouseWheelQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "MoveCtrlNotify",
+      "query": "MoveCtrlNotifyQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "PlayerAdded",
+      "query": "PlayerAddedQuery",
+      "result": "PlayerAddedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "PlayerChanged",
+      "query": "PlayerChangedQuery",
+      "result": "PlayerChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "PlayerRemoved",
+      "query": "PlayerRemovedQuery",
+      "result": "PlayerRemovedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "Pong",
+      "query": "PongQuery",
+      "result": "PongResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "ProjectileEvent",
+      "query": "ProjectileEventQuery",
+      "result": "ProjectileEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "RectChanged",
+      "query": "RectChangedQuery",
+      "result": "RectChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "RecvFromSynced",
+      "query": "RecvFromSyncedQuery",
+      "result": "RecvFromSyncedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "RenderUnitDestroyed",
+      "query": "RenderUnitDestroyedQuery",
+      "result": "RenderUnitDestroyedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "ResourceExcess",
+      "query": "ResourceExcessQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "Save",
+      "query": "SimpleCallinQuery",
+      "result": "ArchiveCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "ScreenPosition",
+      "query": "ScreenPositionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "ScreenTooltip",
+      "query": "ScreenPositionQuery",
+      "result": "StringCallinResult",
+      "aggregation": "first-non-empty",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-first-non-empty-string",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "ShieldPreDamaged",
+      "query": "ShieldPreDamagedQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-fixed-flattened",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "Shutdown",
+      "query": "ShutdownQuery",
+      "result": "ShutdownResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "SimpleCallin",
+      "query": "SimpleCallinQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "StockpileChanged",
+      "query": "StockpileChangedQuery",
+      "result": "StockpileChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "SunChanged",
+      "query": "SunChangedQuery",
+      "result": "SunChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "TeamChanged",
+      "query": "TeamChangedQuery",
+      "result": "TeamChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "TeamDied",
+      "query": "TeamDiedQuery",
+      "result": "TeamDiedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "TerraformComplete",
+      "query": "TerraformCompleteQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "TextEditing",
+      "query": "TextEditingQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "TextInput",
+      "query": "TextInputQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitCloakEvent",
+      "query": "UnitCloakEventQuery",
+      "result": "UnitCloakEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitCmdDone",
+      "query": "UnitCmdDoneQuery",
+      "result": "UnitCmdDoneResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitCommand",
+      "query": "UnitCommandQuery",
+      "result": "UnitCommandResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitConstructionDecayed",
+      "query": "UnitConstructionDecayedQuery",
+      "result": "UnitConstructionDecayedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitCreated",
+      "query": "UnitCreatedQuery",
+      "result": "UnitCreatedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "specialized",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitDamaged",
+      "query": "UnitDamagedQuery",
+      "result": "UnitDamagedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitDestroyed",
+      "query": "UnitDestroyedQuery",
+      "result": "UnitDestroyedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitExperience",
+      "query": "UnitExperienceQuery",
+      "result": "UnitExperienceResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitFeatureCollision",
+      "query": "UnitFeatureCollisionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitFinished",
+      "query": "UnitFinishedQuery",
+      "result": "UnitFinishedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitFromFactory",
+      "query": "UnitFromFactoryQuery",
+      "result": "UnitFromFactoryResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitGiven",
+      "query": "UnitGivenQuery",
+      "result": "UnitGivenResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitHarvestStorageFull",
+      "query": "UnitHarvestStorageFullQuery",
+      "result": "UnitHarvestStorageFullResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitIdle",
+      "query": "UnitIdleQuery",
+      "result": "UnitIdleResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitLoaded",
+      "query": "UnitLoadedQuery",
+      "result": "UnitLoadedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitLosEvent",
+      "query": "UnitLosEventQuery",
+      "result": "UnitLosEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitMoveEvent",
+      "query": "UnitMoveEventQuery",
+      "result": "UnitMoveEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitMovementClassEvent",
+      "query": "UnitMovementClassEventQuery",
+      "result": "UnitMovementClassEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitPreDamaged",
+      "query": "UnitDamagedQuery",
+      "result": "DamageCallinResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "class": "specialized",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitReverseBuilt",
+      "query": "UnitReverseBuiltQuery",
+      "result": "UnitReverseBuiltResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitSeismicPing",
+      "query": "UnitSeismicPingQuery",
+      "result": "UnitSeismicPingResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-fixed-flattened-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitStunned",
+      "query": "UnitStunnedQuery",
+      "result": "UnitStunnedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitTaken",
+      "query": "UnitTakenQuery",
+      "result": "UnitTakenResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitUnitCollision",
+      "query": "UnitUnitCollisionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "UnitUnloaded",
+      "query": "UnitUnloadedQuery",
+      "result": "UnitUnloadedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "Update",
+      "query": "UpdateQuery",
+      "result": "UpdateResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "specialized",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "ViewResize",
+      "query": "ViewResizeQuery",
+      "result": "ViewResizeResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "WorldTooltip",
+      "query": "WorldTooltipQuery",
+      "result": "StringCallinResult",
+      "aggregation": "first-non-empty",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "class": "generated-first-non-empty-string",
+      "verified": false,
+      "reason": null
+    }
+  ],
+  "pending": []
+}

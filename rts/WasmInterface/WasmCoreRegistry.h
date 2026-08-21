@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "WasmEnvironment.h"
+#include "WasmCoreRegistryPolicy.h"
 
 #if __has_include("../wasm/generated/WasmCoreGeneratedRegistry.h")
 #include "../wasm/generated/WasmCoreGeneratedRegistry.h"
@@ -31,9 +32,12 @@ inline constexpr std::string_view UnitsInfoModule = "spring:units-info";
 inline constexpr std::string_view UnitsQueryModule = "spring:units-query";
 inline constexpr std::string_view UnitDefsModule = "spring:unit-defs";
 inline constexpr std::string_view UnitsCommandsModule = "spring:units-commands";
+inline constexpr std::string_view CobScriptModule = "spring:cob-script";
 inline constexpr std::string_view UnitsPiecesModule = "spring:units-pieces";
 inline constexpr std::string_view UnitControlModule = "spring:unit-control";
 inline constexpr std::string_view TerrainControlModule = "spring:terrain-control";
+inline constexpr std::string_view SystemControlModule = "spring:system-control";
+inline constexpr std::string_view MathExtraModule = "spring:math-extra";
 inline constexpr std::string_view GfxModule = "spring:gfx";
 inline constexpr std::string_view ProfilingModule = "spring:profiling";
 inline constexpr std::string_view MessagesModule = "spring:messages";
@@ -103,6 +107,7 @@ inline constexpr ImportDescriptor kImports[] = {
 	// these imports need no host vector or copy.
 	{UnitsCommandsModule, "give-order", "i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 	{UnitsCommandsModule, "give-order-to-unit-map", "i32,i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
+	{CobScriptModule, "call-cob-script", "i32,i32,i32,i32,i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 
 	// Reviewed flat list<string> result. The descriptor table and packed bytes
 	// are guest-owned; Core never materializes vector<string> or one allocation
@@ -114,8 +119,23 @@ inline constexpr ImportDescriptor kImports[] = {
 	{TerrainControlModule, "set-height-map", "f32,f32,f32,f32->i64", SyncedEnvironmentMask},
 	{TerrainControlModule, "level-height-map", "f32,f32,f32,f32,f32->i64", SyncedEnvironmentMask},
 	{TerrainControlModule, "set-height-map-func", "i32,i32->i64", SyncedEnvironmentMask},
+	{TerrainControlModule, "set-original-height-map-func", "i32,i32->i64", SyncedEnvironmentMask},
+	{TerrainControlModule, "set-smooth-mesh-func", "i32,i32->i64", SyncedEnvironmentMask},
+	{SystemControlModule, "call-as-team", "i32,i32,i32->i64", SyncedEnvironmentMask},
+	{MathExtraModule, "normalize", "f32,f32,f32,i32->i32", AllEnvironmentMask},
+
 	{GfxModule, "vertex", "f32,f32,f32,f32,i32->i32", UnsyncedEnvironmentMask},
 	{GfxModule, "begin-end", "i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "active-fbo", "i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "active-shader", "i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "create-list", "i32,i32->i64", UnsyncedEnvironmentMask},
+	{GfxModule, "draw-func-at-unit", "i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "push-pop-matrix", "i32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "render-to-texture", "i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "run-query", "i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "unsafe-state", "i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "create-texture", "i32,i32,i32,i32,i32,i32->i64", UnsyncedEnvironmentMask},
+	{GfxModule, "create-texture-atlas", "i32,i32,i32,i32,i32->i64", UnsyncedEnvironmentMask},
 
 	// Profiling reads are intentionally unsynced-only. GetTimerMicros was
 	// historically marked all-environment despite using spring_now(); allowing a
@@ -130,8 +150,9 @@ inline constexpr ImportDescriptor kImports[] = {
 	{ProfilingModule, "get-synced-gc-info", "i32->i64", UnsyncedEnvironmentMask},
 
 	// Message strings are copied into call-scoped NUL-terminated storage before
-	// entering NativeInterface; short values stay on the stack. SendToUnsynced
-	// retains its synced-only semantic policy.
+	// entering NativeInterface. The legacy table retains its source masks here;
+	// WasmCoreRegistryPolicy normalizes ordinary messages to unsynced/UI and
+	// withholds SendCommands before validation returns the descriptor.
 	{MessagesModule, "echo", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{MessagesModule, "log", "i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{MessagesModule, "send-message", "i32,i32->i64", AllEnvironmentMask},
@@ -180,8 +201,15 @@ inline constexpr ImportDescriptor kImports[] = {
 inline ImportLookup LookupImport(std::string_view module, std::string_view name)
 {
 	for (const ImportDescriptor& import : kImports) {
-		if (import.module == module && import.name == name)
-			return {import.signature, import.environmentMask, true};
+		if (import.module != module || import.name != name)
+			continue;
+		if (!registry_policy::HandwrittenImportAllowed(module, name))
+			return {};
+		return {
+			import.signature,
+			registry_policy::HandwrittenEnvironmentMask(module, name, import.environmentMask),
+			true,
+		};
 	}
 #if defined(RECOIL_WASM_CORE_GENERATED_REGISTRY)
 	if (const auto* import = generated_registry::Find(module, name); import != nullptr)

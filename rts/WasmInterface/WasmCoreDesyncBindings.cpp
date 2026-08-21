@@ -5,10 +5,10 @@
 // diverge between clients, which is why the same timers are unsynced-only in
 // `spring:profiling`.
 //
-// The group exists because debugging and benchmarking synced code needs a
-// clock, and a guest that wants to trade determinism for that is entitled to.
-// The module name is the warning label: nothing here can be imported by
-// accident, and an import list is easy to audit for it.
+// The import namespace remains visible so module validation/configuration does
+// not depend on a process-local environment variable. Actual clock reads in a
+// synced environment are disabled by default and require the same explicit
+// diagnostic opt-in as the Component path: SPRING_ENABLE_SYNCED_TIMERS=1.
 //
 // This is a sync hazard only. It grants no sandbox escape, no OS authority and
 // no hidden game state, so it is not a safety, security or visibility
@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <string>
 
+#include "System/SyncedTiming.h"
 #include "WasmCoreGeneratedSupport.h"
 
 namespace recoil::wasm::core {
@@ -30,6 +31,14 @@ namespace {
 using generated::ImportGuard;
 using generated::Trap;
 
+bool TimerAllowed(const HostState* state)
+{
+	const bool synced = state != nullptr &&
+		WasmEnvironmentMatrix::Policy(state->environment).synced;
+	return spring::synced_timing::IsAllowed(
+		synced, true, spring::synced_timing::IsEnabled());
+}
+
 wasm_trap_t* GetTimer(void* environment, wasmtime_caller_t*,
 	wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -39,6 +48,8 @@ wasm_trap_t* GetTimer(void* environment, wasmtime_caller_t*,
 		return Trap("desync get-timer Core binding is unavailable");
 	if (slots == nullptr || slotCount != 1)
 		return Trap("desync get-timer Core ABI signature mismatch");
+	if (!TimerAllowed(state))
+		return Trap("synced Wasm timers are disabled; set SPRING_ENABLE_SYNCED_TIMERS=1 for diagnostic benchmarking");
 	ImportGuard guard(state, 1);
 	if (!guard.Ok())
 		return Trap(guard.Error());
@@ -60,6 +71,8 @@ wasm_trap_t* GetTimerMicros(void* environment, wasmtime_caller_t*,
 		return Trap("desync get-timer-micros Core binding is unavailable");
 	if (slots == nullptr || slotCount != 1)
 		return Trap("desync get-timer-micros Core ABI signature mismatch");
+	if (!TimerAllowed(state))
+		return Trap("synced Wasm timers are disabled; set SPRING_ENABLE_SYNCED_TIMERS=1 for diagnostic benchmarking");
 	ImportGuard guard(state, 1);
 	if (!guard.Ok())
 		return Trap(guard.Error());

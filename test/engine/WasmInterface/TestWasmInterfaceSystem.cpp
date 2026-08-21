@@ -11,31 +11,35 @@
 #include "ComponentAggregationFalseFixture.h"
 #include "ComponentAggregationTrueFixture.h"
 #include "System/SyncedTiming.h"
+#include "WasmInterface/WasmCoreHost.h"
+
+#include "CoreLoadFixture.h"
 #include "WasmInterface/WasmInterfaceSystem.h"
 #include "generated/WasmCallinRegistry.h"
 
 namespace {
 	std::vector<std::uint8_t> MinimalCoreModule()
 	{
-		return {
-			0x00, 'a', 's', 'm', 0x01, 0x00, 0x00, 0x00,
-		};
+		return wasm_core_load_fixture::MinimalCoreModule();
 	}
 }
 
 TEST_CASE("Wasm interface system keeps multiple instances deterministic")
 {
-	WasmInterfaceSystem system;
+	wasm_core_load_fixture::StubAdapter adapter;
+	WasmInterfaceSystem system(&adapter);
 	REQUIRE(system.Runtime().IsAvailable());
 	std::string error;
 
-	REQUIRE(system.LoadModule({
+	const bool loadedLater = system.LoadModule({
 		.name = "later",
 		.source = "later.wasm",
 		.environment = WasmEnvironment::RulesSynced,
 		.order = 4,
 		.bytes = MinimalCoreModule(),
-	}, error));
+	}, error);
+	INFO(error);
+	REQUIRE(loadedLater);
 	REQUIRE(system.LoadModule({
 		.name = "earlier",
 		.source = "earlier.wasm",
@@ -107,6 +111,17 @@ TEST_CASE("synced timing requires an explicit opt-in value")
 	CHECK(spring::synced_timing::IsEnabledSetting("YES"));
 	CHECK(spring::synced_timing::IsEnabledSetting("on"));
 	CHECK(spring::synced_timing::IsEnabledSetting("ON"));
+}
+
+TEST_CASE("Core callin resolver preserves every generated ordinal")
+{
+	std::size_t index = 0;
+	for (const auto& descriptor : recoil::wasm::generated::kCallins) {
+		const auto callin = WasmCoreHost::ResolveCallin(descriptor.name);
+		CHECK(static_cast<std::uint16_t>(callin) == index + 1u);
+		++index;
+	}
+	CHECK(WasmCoreHost::ResolveCallin("not-a-spring-callin") == WasmCoreCallin::Invalid);
 }
 
 TEST_CASE("Wasm Allow callins are synced-only and deny by default")
@@ -250,7 +265,8 @@ TEST_CASE("Wasm callin aggregation combines compiled components")
 
 TEST_CASE("Wasm manifest loading is atomic across multiple declarations")
 {
-	WasmInterfaceSystem system;
+	wasm_core_load_fixture::StubAdapter adapter;
+	WasmInterfaceSystem system(&adapter);
 	REQUIRE(system.Runtime().IsAvailable());
 	std::string error;
 
@@ -267,7 +283,9 @@ TEST_CASE("Wasm manifest loading is atomic across multiple declarations")
 	const std::string manifest =
 		"module(alpha, alpha.wasm, rules-synced, 1)\n"
 		"module(beta, beta.wasm, rules-synced, 0)\n";
-	REQUIRE(system.LoadManifest(manifest, provider, error));
+	const bool loadedManifest = system.LoadManifest(manifest, provider, error);
+	INFO(error);
+	REQUIRE(loadedManifest);
 	CHECK(system.ModuleCount() == 2);
 
 	const std::string brokenManifest =
@@ -283,7 +301,8 @@ TEST_CASE("Wasm manifest loading is atomic across multiple declarations")
 
 TEST_CASE("Wasm manifest loading merges archives deterministically and atomically")
 {
-	WasmInterfaceSystem system;
+	wasm_core_load_fixture::StubAdapter adapter;
+	WasmInterfaceSystem system(&adapter);
 	REQUIRE(system.Runtime().IsAvailable());
 	std::string error;
 	std::vector<std::string> requests;

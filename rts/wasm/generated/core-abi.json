@@ -55,7 +55,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -67,7 +67,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -106,15 +106,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "camera",
@@ -152,16 +153,19 @@
       "mutating": false,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
-      "direct_params": [],
+      "direct_params": [
+        "f32",
+        "f32",
+        "f32",
+        "i32"
+      ],
       "direct_results": [
         "i64"
       ],
-      "signature": "->i64",
-      "notes": [
-        "unsupported Core input field state"
-      ]
+      "signature": "f32,f32,f32,i32->i64",
+      "notes": []
     },
     {
       "module": "camera",
@@ -246,20 +250,21 @@
       "mutating": true,
       "visibility_sensitive": false,
       "source_status": "manual",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
+        "i32",
         "i32",
         "i32"
       ],
       "direct_results": [
         "i32"
       ],
-      "signature": "i32,i32->i32",
+      "signature": "i32,i32,i32,i32->i32",
       "notes": [
         "reviewed mutating variable-size-result exception",
-        "reviewed mutating variable-size result",
-        "unsupported Core input field func"
+        "reviewed mutating variable-size result"
       ]
     },
     {
@@ -385,7 +390,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -397,7 +402,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -1186,7 +1191,7 @@
       "mutating": true,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": {
         "fixed-output-buffer": {
           "bytes": 8,
@@ -1194,15 +1199,17 @@
         }
       },
       "direct_params": [
+        "f32",
+        "f32",
+        "f32",
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i32"
       ],
-      "signature": "i32->i32",
-      "notes": [
-        "unsupported Core input field ceg"
-      ]
+      "signature": "f32,f32,f32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "effects_control",
@@ -1408,16 +1415,19 @@
       "mutating": true,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
-      "direct_params": [],
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
       "direct_results": [
         "i64"
       ],
-      "signature": "->i64",
-      "notes": [
-        "unsupported Core input field featureDef"
-      ]
+      "signature": "i32,i32,i32,i32->i64",
+      "notes": []
     },
     {
       "module": "feature_control",
@@ -1932,18 +1942,19 @@
       "mutating": true,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
+        "i32",
+        "f32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32->i64",
-      "notes": [
-        "unsupported Core input field unitDef"
-      ]
+      "signature": "i32,i32,f32,i32->i64",
+      "notes": []
     },
     {
       "module": "feature_control",
@@ -2084,15 +2095,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "feature_defs",
@@ -2144,7 +2156,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -2156,7 +2168,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -2596,15 +2608,16 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "features",
@@ -2821,15 +2834,16 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "features",
@@ -3272,15 +3286,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "game",
@@ -3292,15 +3307,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "game",
@@ -3384,15 +3400,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "game",
@@ -3484,7 +3501,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -3496,7 +3513,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -3549,7 +3566,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -3561,7 +3578,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -3574,15 +3591,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "game",
@@ -3594,15 +3612,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "game",
@@ -6405,7 +6424,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -6417,7 +6436,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -9644,7 +9663,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "fixed-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -9656,7 +9675,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -10093,16 +10112,17 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "icons",
@@ -10153,7 +10173,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -10165,7 +10185,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -11316,7 +11336,7 @@
       "mutating": false,
       "visibility_sensitive": false,
       "source_status": "manual",
-      "input_strategy": "fixed-input-buffer",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": {
         "fixed-output-buffer": {
           "bytes": 16,
@@ -11949,15 +11969,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "move_ctrl",
@@ -12531,7 +12552,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -12543,7 +12564,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -12993,18 +13014,17 @@
       "mutating": true,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32->i64",
-      "notes": [
-        "unsupported Core input field projectileParams"
-      ]
+      "signature": "i32,i32->i64",
+      "notes": []
     },
     {
       "module": "projectiles",
@@ -13037,15 +13057,16 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "projectiles",
@@ -13077,16 +13098,17 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "projectiles",
@@ -15784,7 +15806,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -15796,7 +15818,7 @@
       ],
       "signature": "i64,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -17228,7 +17250,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -17240,7 +17262,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -17530,16 +17552,17 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17549,7 +17572,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": true,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -17561,7 +17584,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -17574,15 +17597,16 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17592,7 +17616,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": true,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -17604,7 +17628,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -17617,16 +17641,17 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17636,7 +17661,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": true,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -17648,7 +17673,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -17661,16 +17686,17 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17680,7 +17706,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": true,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -17692,7 +17718,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -17705,16 +17731,17 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17724,7 +17751,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": true,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -17736,7 +17763,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -17748,18 +17775,18 @@
       "mutating": true,
       "visibility_sensitive": true,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32->i64",
-      "notes": [
-        "unsupported Core input field value"
-      ]
+      "signature": "i32,i32,i32->i64",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17770,16 +17797,17 @@
       "mutating": true,
       "visibility_sensitive": true,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
-      "direct_params": [],
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
       "direct_results": [
         "i64"
       ],
-      "signature": "->i64",
-      "notes": [
-        "unsupported Core input field value"
-      ]
+      "signature": "i32,i32->i64",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17790,18 +17818,18 @@
       "mutating": true,
       "visibility_sensitive": true,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32->i64",
-      "notes": [
-        "unsupported Core input field value"
-      ]
+      "signature": "i32,i32,i32->i64",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17812,18 +17840,18 @@
       "mutating": true,
       "visibility_sensitive": true,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32->i64",
-      "notes": [
-        "unsupported Core input field value"
-      ]
+      "signature": "i32,i32,i32->i64",
+      "notes": []
     },
     {
       "module": "rules_params",
@@ -17834,18 +17862,18 @@
       "mutating": true,
       "visibility_sensitive": true,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32->i64",
-      "notes": [
-        "unsupported Core input field value"
-      ]
+      "signature": "i32,i32,i32->i64",
+      "notes": []
     },
     {
       "module": "selection",
@@ -17959,15 +17987,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "selection",
@@ -18061,15 +18090,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "selection",
@@ -18183,7 +18213,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -18195,7 +18225,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -18351,16 +18381,16 @@
       "mutating": false,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
-      "direct_params": [],
+      "direct_params": [
+        "i32"
+      ],
       "direct_results": [
         "i64"
       ],
-      "signature": "->i64",
-      "notes": [
-        "unsupported Core input field params"
-      ]
+      "signature": "i32->i64",
+      "notes": []
     },
     {
       "module": "sound",
@@ -19253,15 +19283,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "teams",
@@ -19273,14 +19304,17 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
       "notes": [
-        "result requires manual Core ABI lowering"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -19340,16 +19374,17 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "teams",
@@ -19445,16 +19480,17 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "teams",
@@ -20850,16 +20886,18 @@
       "mutating": true,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
-      "direct_params": [],
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32"
+      ],
       "direct_results": [
         "i64"
       ],
-      "signature": "->i64",
-      "notes": [
-        "unsupported Core input field unitDef"
-      ]
+      "signature": "i32,i32,i32->i64",
+      "notes": []
     },
     {
       "module": "unit_control",
@@ -20891,19 +20929,20 @@
       "mutating": true,
       "visibility_sensitive": false,
       "source_status": "manual",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32,i32->i64",
+      "signature": "i32,i32,i32->i64",
       "notes": [
         "nested command description requires owned pointer adapter",
-        "unsupported Core input field cmdDesc"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -21086,19 +21125,20 @@
       "mutating": true,
       "visibility_sensitive": false,
       "source_status": "manual",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32,i32->i64",
+      "signature": "i32,i32,i32->i64",
       "notes": [
         "nested command description requires owned pointer adapter",
-        "unsupported Core input field cmdDesc"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -22588,15 +22628,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "unit_defs",
@@ -22700,7 +22741,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -22712,7 +22753,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -23559,18 +23600,18 @@
       "mutating": false,
       "visibility_sensitive": false,
       "source_status": "manual",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i32"
       ],
-      "signature": "i32->i32",
+      "signature": "i32,i32->i32",
       "notes": [
-        "nested command record requires owned pointer adapter",
-        "unsupported Core input field command"
+        "nested command record requires owned pointer adapter"
       ]
     },
     {
@@ -23673,17 +23714,18 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "units_commands",
@@ -23746,7 +23788,9 @@
         "i32"
       ],
       "signature": "i32,i32->i32",
-      "notes": []
+      "notes": [
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
+      ]
     },
     {
       "module": "units_commands",
@@ -23800,16 +23844,17 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "units_commands",
@@ -24563,15 +24608,16 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "units_info",
@@ -25230,15 +25276,18 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
       "notes": [
-        "result requires manual Core ABI lowering"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -25249,7 +25298,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -25261,7 +25310,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -25394,7 +25443,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -25406,7 +25455,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -25487,15 +25536,18 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
       "notes": [
-        "result requires manual Core ABI lowering"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -25506,7 +25558,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -25518,7 +25570,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -25651,7 +25703,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -25663,7 +25715,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -26230,16 +26282,17 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32,i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
     },
     {
       "module": "units_weapons",
@@ -26976,18 +27029,18 @@
       "mutating": false,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "unsupported",
+      "input_strategy": "variable-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
+        "i32",
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i64"
       ],
-      "signature": "i32->i64",
-      "notes": [
-        "unsupported Core input field cmdReference"
-      ]
+      "signature": "i32,i32,i32->i64",
+      "notes": []
     },
     {
       "module": "unsynced_ctrl",
@@ -28139,14 +28192,17 @@
       "visibility_sensitive": true,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
       "notes": [
-        "result requires manual Core ABI lowering"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -28168,7 +28224,9 @@
         "i32"
       ],
       "signature": "i32,i32->i32",
-      "notes": []
+      "notes": [
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
+      ]
     },
     {
       "module": "unsynced_read",
@@ -28920,7 +28978,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -28932,7 +28990,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -28985,7 +29043,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -28997,7 +29055,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -29050,7 +29108,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -29062,7 +29120,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -29073,7 +29131,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -29085,7 +29143,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -29140,15 +29198,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "variable-input-buffer",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "vfs",
@@ -29178,7 +29237,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -29190,7 +29249,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -29201,7 +29260,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -29213,7 +29272,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -29274,7 +29333,7 @@
       "environment_mask": 26,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -29286,7 +29345,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -29632,7 +29691,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -29645,7 +29704,7 @@
       ],
       "signature": "i32,i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -29885,15 +29944,16 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "unsupported",
+      "result_strategy": "variable-output-buffer",
       "direct_params": [
+        "i32",
         "i32"
       ],
-      "direct_results": [],
-      "signature": "i32->",
-      "notes": [
-        "result requires manual Core ABI lowering"
-      ]
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
     },
     {
       "module": "weapon_defs",
@@ -29945,7 +30005,7 @@
       "environment_mask": 31,
       "mutating": false,
       "visibility_sensitive": false,
-      "source_status": "manual",
+      "source_status": "annotated",
       "input_strategy": "direct",
       "result_strategy": "variable-output-buffer",
       "direct_params": [
@@ -29957,7 +30017,7 @@
       ],
       "signature": "i32,i32->i32",
       "notes": [
-        "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
       ]
     },
     {
@@ -30083,7 +30143,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1097,
-  "manual_count": 189,
-  "unsupported_count": 68
+  "automatic_count": 1144,
+  "manual_count": 193,
+  "unsupported_count": 17
 }

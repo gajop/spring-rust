@@ -13,6 +13,7 @@
 
 #include "NativeInterface/api/Callins.h"
 #include "System/BenchmarkCallins.h"
+#include "WasmResources.h"
 
 namespace recoil::wasm::core {
 
@@ -79,6 +80,15 @@ bool ResolveOptional(RawExport& target, wasmtime_context_t* context,
 
 } // namespace
 
+bool& VariableCallinScratchInUse()
+{
+	// Callins execute synchronously on an engine thread. A thread-local guard is
+	// intentionally broader than one module instance so hand-written and
+	// generated serializers cannot overwrite each other's scratch during reentry.
+	static thread_local bool inUse = false;
+	return inUse;
+}
+
 bool VariableCallinBindings::Bind(wasmtime_context_t* context,
 	const wasmtime_instance_t& instance, Memory& memory, std::string& error)
 {
@@ -141,13 +151,14 @@ bool VariableCallinBindings::CallBool(wasmtime_context_t* context,
 }
 
 bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
-	Memory& memory, const AddConsoleLineQuery& query, BoolCallinResult& result,
-	std::string& error) const
+	WasmExecutionBudget& budget, Memory& memory, const AddConsoleLineQuery& query,
+	BoolCallinResult& result, std::string& error) const
 {
 	if (!addConsoleLine.Present()) {
 		error = "Core AddConsoleLine export is unavailable";
 		return false;
 	}
+	bool& scratchInUse = VariableCallinScratchInUse();
 	if (scratchInUse) {
 		error = "nested Core variable callin would overwrite guest scratch";
 		return false;
@@ -165,6 +176,10 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 	if (!AddSize(required, message.size()) || !AddSize(required, section.size()) ||
 		required > scratchCapacity || required > std::numeric_limits<std::uint32_t>::max()) {
 		error = "Core AddConsoleLine payload exceeds guest scratch capacity";
+		return false;
+	}
+	if (!budget.ChargeHost(static_cast<std::uint64_t>(required))) {
+		error = "Core AddConsoleLine scratch host-work budget exhausted";
 		return false;
 	}
 
@@ -191,13 +206,14 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 }
 
 bool VariableCallinBindings::CommandNotify(wasmtime_context_t* context,
-	Memory& memory, const CommandNotifyQuery& query, BoolCallinResult& result,
-	std::string& error) const
+	WasmExecutionBudget& budget, Memory& memory, const CommandNotifyQuery& query,
+	BoolCallinResult& result, std::string& error) const
 {
 	if (!commandNotify.Present()) {
 		error = "Core CommandNotify export is unavailable";
 		return false;
 	}
+	bool& scratchInUse = VariableCallinScratchInUse();
 	if (scratchInUse) {
 		error = "nested Core variable callin would overwrite guest scratch";
 		return false;
@@ -218,6 +234,10 @@ bool VariableCallinBindings::CommandNotify(wasmtime_context_t* context,
 		static_cast<std::size_t>(command.numParams) * sizeof(float);
 	if (required > scratchCapacity) {
 		error = "Core CommandNotify payload exceeds guest scratch capacity";
+		return false;
+	}
+	if (!budget.ChargeHost(static_cast<std::uint64_t>(required))) {
+		error = "Core CommandNotify scratch host-work budget exhausted";
 		return false;
 	}
 

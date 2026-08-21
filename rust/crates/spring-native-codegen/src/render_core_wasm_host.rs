@@ -47,12 +47,7 @@ pub fn render_cpp(model: &ApiModel) -> String {
                 continue;
             }
             generated_count += 1;
-            callbacks.push_str(&render_callback(
-                &module.name,
-                function,
-                plan,
-                &records,
-            ));
+            callbacks.push_str(&render_callback(&module.name, function, plan, &records));
             callbacks.push('\n');
             registrations.push_str(&render_registration(
                 plan,
@@ -126,6 +121,10 @@ fn eligible(
     outputs: &[FieldModel],
     records: &BTreeMap<String, RecordModel>,
 ) -> bool {
+    // A reviewed handwritten transport already owns this import.
+    if crate::render_core_wasm_registry::handwritten_reviewed(&plan.module, &plan.function) {
+        return false;
+    }
     if plan.source_status != "automatic"
         || !matches!(
             plan.input_strategy,
@@ -134,9 +133,10 @@ fn eligible(
     {
         return false;
     }
-    if inputs.iter().any(|field| {
-        !direct_query_type(&field.ty) && !wire_type(&field.ty, records)
-    }) {
+    if inputs
+        .iter()
+        .any(|field| !direct_query_type(&field.ty) && !wire_type(&field.ty, records))
+    {
         return false;
     }
     if matches!(plan.input_strategy, InputStrategy::FixedInputBuffer)
@@ -146,9 +146,7 @@ fn eligible(
     }
     match plan.result_strategy {
         ResultStrategy::Status => true,
-        ResultStrategy::Packed32 => {
-            outputs.len() == 1 && packed32_type(&outputs[0].ty)
-        }
+        ResultStrategy::Packed32 => outputs.len() == 1 && packed32_type(&outputs[0].ty),
         ResultStrategy::FixedOutputBuffer { .. } => {
             outputs.iter().all(|field| wire_type(&field.ty, records))
         }
@@ -169,21 +167,23 @@ fn packed32_type(ty: &SemanticType) -> bool {
 
 fn wire_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bool {
     match ty {
-        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => true,
+        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => {
+            true
+        }
         SemanticType::FixedArray { element, length } => {
             *length <= 64 && wire_type(element, records)
         }
-        SemanticType::Record { name } => records
-            .get(name)
-            .is_some_and(|record| record.fields.iter().all(|field| wire_type(&field.ty, records))),
+        SemanticType::Record { name } => records.get(name).is_some_and(|record| {
+            record
+                .fields
+                .iter()
+                .all(|field| wire_type(&field.ty, records))
+        }),
         _ => false,
     }
 }
 
-fn wire_layout(
-    ty: &SemanticType,
-    records: &BTreeMap<String, RecordModel>,
-) -> Option<(u32, u32)> {
+fn wire_layout(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> Option<(u32, u32)> {
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
             "i64" | "u64" | "isize" | "usize" | "f64" => Some((8, 8)),
@@ -250,7 +250,10 @@ fn render_callback(
     let slot_count = plan.direct_params.len().max(plan.direct_results.len());
     let work = 1 + plan.direct_params.len() as u64;
     let fixed_input = matches!(plan.input_strategy, InputStrategy::FixedInputBuffer);
-    let fixed_output = matches!(plan.result_strategy, ResultStrategy::FixedOutputBuffer { .. });
+    let fixed_output = matches!(
+        plan.result_strategy,
+        ResultStrategy::FixedOutputBuffer { .. }
+    );
     let direct_input_count = function
         .inputs
         .iter()
@@ -396,7 +399,9 @@ fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
             "bool" => format!("slots[{slot}].i32 != 0"),
             "f32" => format!("slots[{slot}].f32"),
             "f64" => format!("slots[{slot}].f64"),
-            "i64" | "u64" | "isize" | "usize" => native_cast(destination, &format!("slots[{slot}].i64")),
+            "i64" | "u64" | "isize" | "usize" => {
+                native_cast(destination, &format!("slots[{slot}].i64"))
+            }
             _ => native_cast(destination, &format!("slots[{slot}].i32")),
         },
         SemanticType::Enum { .. } => native_cast(destination, &format!("slots[{slot}].i32")),
@@ -621,7 +626,9 @@ fn record_index(model: &ApiModel) -> BTreeMap<String, RecordModel> {
     let mut records = BTreeMap::new();
     for module in &model.modules {
         for record in &module.records {
-            records.entry(record.name.clone()).or_insert_with(|| record.clone());
+            records
+                .entry(record.name.clone())
+                .or_insert_with(|| record.clone());
         }
     }
     records

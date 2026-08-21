@@ -488,7 +488,7 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 		bool coreHandled = false;
 		std::string coreError;
 		if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
-				name, query, nativeResult, coreHandled, coreError)) {
+				name, query, synced, nativeResult, coreHandled, coreError)) {
 			if (!coreError.empty()) {
 				LOG_L(L_ERROR, "Core Wasm callin %s failed: %s",
 					std::string(name).c_str(), coreError.c_str());
@@ -508,7 +508,7 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 	// leaving those on the C API path.
 	if (WasmTypedHost::Enabled() && WasmTypedHost::AnyActive()) {
 		std::string typedError;
-		if (WasmTypedHost::DispatchCallin(name, query, nativeResult, typedError)) {
+		if (WasmTypedHost::DispatchCallin(name, query, synced, nativeResult, typedError)) {
 			if (!typedError.empty())
 				LOG_L(L_WARNING, "%s", typedError.c_str());
 			// Direct transports write value results into nativeResult. Mark a
@@ -619,8 +619,18 @@ bool NativeInterfaceEventClient::DispatchWasmStringCallin(std::string_view name,
 	const void* query, bool synced, std::string& result)
 {
 	WasmValue wasmResult;
-	if (!DispatchWasmCallin(name, query, synced, &wasmResult))
+	StringCallinResult directResult = {.error = nullptr, .value = nullptr};
+	if (!DispatchWasmCallin(name, query, synced, &wasmResult, &directResult))
 		return false;
+	if (wasmResult.IsUnit()) {
+		if (directResult.error != nullptr) {
+			LOG_L(L_WARNING, "Wasm callin %s returned a direct string error: %s",
+				std::string(name).c_str(), directResult.error->message);
+			return false;
+		}
+		result = directResult.value == nullptr ? std::string{} : std::string(directResult.value);
+		return true;
+	}
 	const auto* record = std::get_if<WasmValueRecord>(&wasmResult.storage);
 	if (record == nullptr) {
 		LOG_L(L_WARNING, "Wasm callin %s returned a non-record string result",
@@ -643,8 +653,18 @@ bool NativeInterfaceEventClient::DispatchWasmIntegerCallin(std::string_view name
 	const void* query, bool synced, int& result)
 {
 	WasmValue wasmResult;
-	if (!DispatchWasmCallin(name, query, synced, &wasmResult))
+	IntCallinResult directResult = {.error = nullptr, .value = 0};
+	if (!DispatchWasmCallin(name, query, synced, &wasmResult, &directResult))
 		return false;
+	if (wasmResult.IsUnit()) {
+		if (directResult.error != nullptr) {
+			LOG_L(L_WARNING, "Wasm callin %s returned a direct integer error: %s",
+				std::string(name).c_str(), directResult.error->message);
+			return false;
+		}
+		result = directResult.value;
+		return true;
+	}
 	const auto* record = std::get_if<WasmValueRecord>(&wasmResult.storage);
 	if (record == nullptr) {
 		LOG_L(L_WARNING, "Wasm callin %s returned a non-record integer result",

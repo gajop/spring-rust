@@ -2230,20 +2230,17 @@ bool Read_HandleLuaCallQuery(const WasmValue& input, HandleLuaCallQuery& output,
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
 	const auto* value_message = FindRecordField(*record, "message", error);
 	if (value_message == nullptr) return false;
-	auto& stored_string_output_message = storage.Make<std::string>();
-	if (!ReadString(*value_message, stored_string_output_message, error)) { return false; }
-	output.message = stored_string_output_message.c_str();
-	const auto* value_messageLength = FindRecordField(*record, "message-length", error);
-	if (value_messageLength == nullptr) return false;
-	if (!ReadScalar(*value_messageLength, output.messageLength, error)) { return false; }
+	auto& native_message = storage.Make<std::vector<std::uint8_t>>();
+	if (!ReadByteList(*value_message, native_message, error)) { return false; }
+	output.message = reinterpret_cast<decltype(output.message)>(native_message.data());
+	if (!AssignCount(native_message.size(), output.messageLength, error)) { return false; }
 	return true;
 }
 
 WasmValue Write_HandleLuaCallQuery(const HandleLuaCallQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
-	fields.emplace("message-length", WriteScalar(value.messageLength));
+	fields.emplace("message", WriteNativeList(value.message, value.messageLength, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3446,20 +3443,17 @@ bool Read_RecvFromSyncedQuery(const WasmValue& input, RecvFromSyncedQuery& outpu
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
 	const auto* value_message = FindRecordField(*record, "message", error);
 	if (value_message == nullptr) return false;
-	auto& stored_string_output_message = storage.Make<std::string>();
-	if (!ReadString(*value_message, stored_string_output_message, error)) { return false; }
-	output.message = stored_string_output_message.c_str();
-	const auto* value_messageLength = FindRecordField(*record, "message-length", error);
-	if (value_messageLength == nullptr) return false;
-	if (!ReadScalar(*value_messageLength, output.messageLength, error)) { return false; }
+	auto& native_message = storage.Make<std::vector<std::uint8_t>>();
+	if (!ReadByteList(*value_message, native_message, error)) { return false; }
+	output.message = reinterpret_cast<decltype(output.message)>(native_message.data());
+	if (!AssignCount(native_message.size(), output.messageLength, error)) { return false; }
 	return true;
 }
 
 WasmValue Write_RecvFromSyncedQuery(const RecvFromSyncedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
-	fields.emplace("message-length", WriteScalar(value.messageLength));
+	fields.emplace("message", WriteNativeList(value.message, value.messageLength, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 

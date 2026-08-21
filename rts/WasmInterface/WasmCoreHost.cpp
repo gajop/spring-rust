@@ -3,7 +3,7 @@
 #include "WasmCoreHost.h"
 
 #include <algorithm>
-#include <cstdlib>
+#include <array>
 #include <memory>
 #include <utility>
 
@@ -15,22 +15,87 @@
 #include "WasmCoreVariableCallins.h"
 #include "WasmResources.h"
 
-namespace {
+#if __has_include("../wasm/generated/WasmCoreGeneratedCallinBindings.h")
+#include "../wasm/generated/WasmCoreGeneratedCallinBindings.h"
+#define RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS 1
+#endif
 
-bool TruthyEnvironment(const char* name)
-{
-	const char* value = std::getenv(name);
-	if (value == nullptr)
-		return false;
-	const std::string_view setting(value);
-	return setting == "1" || setting == "true" || setting == "TRUE" ||
-		setting == "yes" || setting == "YES" || setting == "on" || setting == "ON";
-}
+#if __has_include("../wasm/generated/WasmCoreGeneratedScratchCallinBindings.h")
+#include "../wasm/generated/WasmCoreGeneratedScratchCallinBindings.h"
+#define RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS 1
+#endif
+
+namespace {
 
 std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 {
 	static std::vector<std::unique_ptr<WasmCoreHost>> hosts;
 	return hosts;
+}
+
+constexpr std::size_t CALLIN_COUNT =
+	sizeof(recoil::wasm::generated::kCallins) /
+		sizeof(recoil::wasm::generated::kCallins[0]);
+
+constexpr std::uint64_t HashCallin(std::string_view name)
+{
+	std::uint64_t hash = 14695981039346656037ull;
+	for (const unsigned char character : name) {
+		hash ^= character;
+		hash *= 1099511628211ull;
+	}
+	return hash;
+}
+
+constexpr std::size_t CallinHashCapacity()
+{
+	std::size_t capacity = 1;
+	while (capacity < CALLIN_COUNT * 2u)
+		capacity <<= 1u;
+	return capacity;
+}
+
+constexpr std::size_t CALLIN_HASH_CAPACITY = CallinHashCapacity();
+static_assert((CALLIN_HASH_CAPACITY & (CALLIN_HASH_CAPACITY - 1u)) == 0u);
+static_assert(CALLIN_COUNT < (1u << 16));
+
+struct CallinHashSlot {
+	std::uint64_t hash = 0;
+	std::uint16_t ordinal = 0;
+};
+
+constexpr auto BuildCallinHashIndex()
+{
+	std::array<CallinHashSlot, CALLIN_HASH_CAPACITY> index{};
+	for (std::size_t callinIndex = 0; callinIndex < CALLIN_COUNT; ++callinIndex) {
+		const std::uint64_t hash = HashCallin(recoil::wasm::generated::kCallins[callinIndex].name);
+		std::size_t slot = static_cast<std::size_t>(hash) & (CALLIN_HASH_CAPACITY - 1u);
+		while (index[slot].ordinal != 0)
+			slot = (slot + 1u) & (CALLIN_HASH_CAPACITY - 1u);
+		index[slot] = {
+			.hash = hash,
+			.ordinal = static_cast<std::uint16_t>(callinIndex + 1u),
+		};
+	}
+	return index;
+}
+
+inline constexpr auto CALLIN_HASH_INDEX = BuildCallinHashIndex();
+
+std::uint16_t ResolveCallinOrdinal(std::string_view name)
+{
+	const std::uint64_t hash = HashCallin(name);
+	std::size_t slot = static_cast<std::size_t>(hash) & (CALLIN_HASH_CAPACITY - 1u);
+	for (std::size_t probe = 0; probe < CALLIN_HASH_CAPACITY; ++probe) {
+		const CallinHashSlot& candidate = CALLIN_HASH_INDEX[slot];
+		if (candidate.ordinal == 0)
+			return 0;
+		if (candidate.hash == hash &&
+			name == recoil::wasm::generated::kCallins[candidate.ordinal - 1u].name)
+			return candidate.ordinal;
+		slot = (slot + 1u) & (CALLIN_HASH_CAPACITY - 1u);
+	}
+	return 0;
 }
 
 } // namespace
@@ -43,7 +108,8 @@ struct WasmCoreHost::Backend {
 			runtime.Config().resultBytesLimit)
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 		, bindings(nativeInterface, &budget,
-			WasmEnvironmentMatrix::Policy(environment).synced, environment)
+			WasmEnvironmentMatrix::Policy(environment).synced, environment,
+			runtime.Config().maxValueNodes)
 #endif
 	{
 		(void)nativeInterface;
@@ -67,6 +133,13 @@ struct WasmCoreHost::Backend {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	recoil::wasm::core::InstanceBindings bindings;
 	recoil::wasm::core::VariableCallinBindings variableCallins;
+#if defined(RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS)
+	recoil::wasm::core::generated::GeneratedCallinBindings generatedCallins;
+	std::string generatedStringResultStorage;
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS)
+	recoil::wasm::core::generated::GeneratedScratchCallinBindings generatedScratchCallins;
+#endif
 	wasmtime_store_t* store = nullptr;
 	wasmtime_linker_t* linker = nullptr;
 	wasmtime_module_t* module = nullptr;
@@ -97,22 +170,15 @@ WasmCoreHost* WasmCoreHost::Find(std::string_view moduleName)
 
 bool WasmCoreHost::Enabled()
 {
-	static const bool enabled = TruthyEnvironment("SPRING_WASM_CORE_HOST");
-	return enabled;
+	// Core is the production transport. This is a routing decision, not a
+	// runtime-availability probe: unsupported builds must enter Load() and fail
+	// explicitly rather than silently falling back to the legacy scalar Core ABI.
+	return true;
 }
 
 WasmCoreCallin WasmCoreHost::ResolveCallin(std::string_view name)
 {
-	if (name == "GameFrame") return WasmCoreCallin::GameFrame;
-	if (name == "GameFramePost") return WasmCoreCallin::GameFramePost;
-	if (name == "Update") return WasmCoreCallin::Update;
-	if (name == "UnitCreated") return WasmCoreCallin::UnitCreated;
-	if (name == "UnitPreDamaged") return WasmCoreCallin::UnitPreDamaged;
-	if (name == "AllowUnitCreation") return WasmCoreCallin::AllowUnitCreation;
-	if (name == "AddConsoleLine") return WasmCoreCallin::AddConsoleLine;
-	if (name == "CommandNotify") return WasmCoreCallin::CommandNotify;
-	if (name == "DrawWorld") return WasmCoreCallin::DrawWorld;
-	return WasmCoreCallin::Invalid;
+	return static_cast<WasmCoreCallin>(ResolveCallinOrdinal(name));
 }
 
 bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
@@ -212,6 +278,19 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		error = "Core Wasm variable callin binding failed: " + error;
 		return false;
 	}
+#if defined(RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS)
+	if (!backend->generatedCallins.Bind(context, backend->instance, error)) {
+		error = "generated Core Wasm callin binding failed: " + error;
+		return false;
+	}
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS)
+	if (!backend->generatedScratchCallins.Bind(context, backend->instance,
+			backend->bindings.Host().memory, error)) {
+		error = "generated scratch Core Wasm callin binding failed: " + error;
+		return false;
+	}
+#endif
 #else
 	error = "Wasmtime is unavailable for the Core Wasm host";
 	return false;
@@ -372,8 +451,17 @@ bool WasmCoreHost::HasCallin(WasmCoreCallin callin) const
 		case WasmCoreCallin::AddConsoleLine: return backend->variableCallins.HasAddConsoleLine();
 		case WasmCoreCallin::CommandNotify: return backend->variableCallins.HasCommandNotify();
 		case WasmCoreCallin::DrawWorld: return backend->bindings.HasDrawWorld();
-		case WasmCoreCallin::Invalid: break;
+		case WasmCoreCallin::Invalid: return false;
+		default: break;
 	}
+#if defined(RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS)
+	if (backend->generatedCallins.Has(static_cast<std::uint16_t>(callin)))
+		return true;
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS)
+	if (backend->generatedScratchCallins.Has(static_cast<std::uint16_t>(callin)))
+		return true;
+#endif
 #endif
 	return false;
 }
@@ -456,9 +544,6 @@ bool WasmCoreHost::InvokeUnitPreDamaged(const void* query, void* result,
 		error = "Core Wasm UnitPreDamaged query is null";
 		return false;
 	}
-	// Preserve the incoming engine result defaults. NativeInterfaceEventClient
-	// may already have a modified newDamage/impulseMult from an earlier event
-	// client before Core Wasm is reached.
 	float newDamage = typedResult == nullptr ? typed->damage : typedResult->newDamage;
 	float impulseMult = typedResult == nullptr ? 1.0f : typedResult->impulseMult;
 	if (!backend->bindings.UnitPreDamaged(wasmtime_store_context(backend->store),
@@ -523,8 +608,8 @@ bool WasmCoreHost::InvokeAddConsoleLine(const void* query, void* result,
 	if (typedResult == nullptr)
 		typedResult = &fallback;
 	return backend->variableCallins.AddConsoleLine(
-		wasmtime_store_context(backend->store), backend->bindings.Host().memory,
-		*typed, *typedResult, error);
+		wasmtime_store_context(backend->store), backend->budget,
+		backend->bindings.Host().memory, *typed, *typedResult, error);
 #else
 	(void)query;
 	(void)result;
@@ -547,8 +632,8 @@ bool WasmCoreHost::InvokeCommandNotify(const void* query, void* result,
 	if (typedResult == nullptr)
 		typedResult = &fallback;
 	return backend->variableCallins.CommandNotify(
-		wasmtime_store_context(backend->store), backend->bindings.Host().memory,
-		*typed, *typedResult, error);
+		wasmtime_store_context(backend->store), backend->budget,
+		backend->bindings.Host().memory, *typed, *typedResult, error);
 #else
 	(void)query;
 	(void)result;
@@ -583,7 +668,7 @@ bool WasmCoreHost::Invoke(WasmCoreCallin callin, const void* query, void* result
 		return false;
 	}
 	if (!HasCallin(callin))
-		return true; // optional export
+		return true;
 	if (!backend->budget.ChargeHost(1)) {
 		error = "Core Wasm callin host-work budget exhausted";
 		Fault(error);
@@ -602,6 +687,27 @@ bool WasmCoreHost::Invoke(WasmCoreCallin callin, const void* query, void* result
 		case WasmCoreCallin::CommandNotify: success = InvokeCommandNotify(query, result, error); break;
 		case WasmCoreCallin::DrawWorld: success = InvokeDrawWorld(error); break;
 		case WasmCoreCallin::Invalid: break;
+		default: {
+			const std::uint16_t ordinal = static_cast<std::uint16_t>(callin);
+#if defined(RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS)
+			if (backend->generatedCallins.Has(ordinal)) {
+				success = backend->generatedCallins.Invoke(ordinal,
+					wasmtime_store_context(backend->store), backend->budget,
+					backend->bindings.Host().memory, backend->generatedStringResultStorage,
+					query, result, error);
+				break;
+			}
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS)
+			if (backend->generatedScratchCallins.Has(ordinal)) {
+				success = backend->generatedScratchCallins.Invoke(ordinal,
+					wasmtime_store_context(backend->store), backend->budget,
+					backend->bindings.Host().memory, query, result, error);
+				break;
+			}
+#endif
+			break;
+		}
 	}
 
 	if (!success)

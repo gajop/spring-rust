@@ -116,7 +116,14 @@ endmacro()
 	foreach(wasm_core_generated_source
 			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedBindings.cpp"
 			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedOptionBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedVariableOutputBindings.cpp")
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedVariableOutputBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedDynamicOutputBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedDynamicInputBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedVariableBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedBorrowedBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedVariableIoBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedCallinBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedScratchCallinBindings.cpp")
 		if(EXISTS ${wasm_core_generated_source})
 			list(APPEND wasm_core_generated_sources ${wasm_core_generated_source})
 		endif()

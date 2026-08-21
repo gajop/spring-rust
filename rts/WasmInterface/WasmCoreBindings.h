@@ -21,6 +21,7 @@ struct HostState {
 	WasmEnvironment environment = WasmEnvironment::RulesSynced;
 	std::uint32_t maxValueNodes = 1u << 20;
 	bool fixedMemory = false;
+	wasmtime_context_t* context = nullptr;
 	wasmtime_func_t callbackDispatch{};
 	bool callbackDispatchBound = false;
 };
@@ -49,6 +50,46 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
 }
 #endif
 
+#if __has_include("../wasm/generated/WasmCoreGeneratedDynamicOutputBindings.h")
+#define RECOIL_WASM_CORE_GENERATED_DYNAMIC_OUTPUT_BINDINGS 1
+namespace generated {
+bool RegisterGeneratedDynamicOutputImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+}
+#endif
+
+#if __has_include("../wasm/generated/WasmCoreGeneratedDynamicInputBindings.h")
+#define RECOIL_WASM_CORE_GENERATED_DYNAMIC_INPUT_BINDINGS 1
+namespace generated {
+bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+}
+#endif
+
+#if __has_include("../wasm/generated/WasmCoreGeneratedVariableBindings.h")
+#define RECOIL_WASM_CORE_GENERATED_VARIABLE_BINDINGS 1
+namespace generated {
+bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+}
+#endif
+
+#if __has_include("../wasm/generated/WasmCoreGeneratedBorrowedBindings.h")
+#define RECOIL_WASM_CORE_GENERATED_BORROWED_BINDINGS 1
+namespace generated {
+bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+}
+#endif
+
+#if __has_include("../wasm/generated/WasmCoreGeneratedVariableIoBindings.h")
+#define RECOIL_WASM_CORE_GENERATED_VARIABLE_IO_BINDINGS 1
+namespace generated {
+bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+}
+#endif
+
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
 bool RegisterUnitsInfoVariableImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
@@ -60,15 +101,27 @@ bool RegisterUnitDefsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterUnitsCommandsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterCobScriptImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterUnitsPiecesImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterUnitControlImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterTerrainControlImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterSystemControlImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+bool RegisterMathExtraImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterTerrainReadImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterGfxImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+bool RegisterGfxResourceImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+bool RegisterVfsImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+bool RegisterRmlUiImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterProfilingImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
@@ -121,6 +174,26 @@ public:
 		if (!generated::RegisterGeneratedVariableOutputImports(linker, &host, error))
 			return false;
 #endif
+#if defined(RECOIL_WASM_CORE_GENERATED_DYNAMIC_OUTPUT_BINDINGS)
+		if (!generated::RegisterGeneratedDynamicOutputImports(linker, &host, error))
+			return false;
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_DYNAMIC_INPUT_BINDINGS)
+		if (!generated::RegisterGeneratedDynamicInputImports(linker, &host, error))
+			return false;
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_BINDINGS)
+		if (!generated::RegisterGeneratedVariableImports(linker, &host, error))
+			return false;
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_BORROWED_BINDINGS)
+		if (!generated::RegisterGeneratedBorrowedImports(linker, &host, error))
+			return false;
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_IO_BINDINGS)
+		if (!generated::RegisterGeneratedVariableIoImports(linker, &host, error))
+			return false;
+#endif
 		if (host.environment != WasmEnvironment::UI &&
 			!RegisterFastImports(linker, &host, error))
 			return false;
@@ -134,15 +207,27 @@ public:
 			return false;
 		if (!RegisterUnitsCommandsImports(linker, &host, error))
 			return false;
+		if (!RegisterCobScriptImports(linker, &host, error))
+			return false;
 		if (!RegisterUnitsPiecesImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitControlImports(linker, &host, error))
 			return false;
 		if (!RegisterTerrainControlImports(linker, &host, error))
 			return false;
+		if (!RegisterSystemControlImports(linker, &host, error))
+			return false;
+		if (!RegisterMathExtraImports(linker, &host, error))
+			return false;
 		if (!RegisterTerrainReadImports(linker, &host, error))
 			return false;
 		if (!RegisterGfxImports(linker, &host, error))
+			return false;
+		if (!RegisterGfxResourceImports(linker, &host, error))
+			return false;
+		if (!RegisterVfsImports(linker, &host, error))
+			return false;
+		if (!RegisterRmlUiImports(linker, &host, error))
 			return false;
 		if (!RegisterProfilingImports(linker, &host, error))
 			return false;

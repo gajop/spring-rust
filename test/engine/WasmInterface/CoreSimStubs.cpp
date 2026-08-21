@@ -17,3 +17,7 @@ bool RegisterUnitsPiecesImports(wasmtime_linker_t* /*linker*/, HostState* /*stat
 }
 
 } // namespace recoil::wasm::core
+
+// Keep focused Core callback execution coverage in this already-linked tiny
+// test translation unit instead of growing the large aggregate test sources.
+#include "TestWasmCoreCallbacks.h"

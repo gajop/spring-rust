@@ -67,6 +67,20 @@ extern "C" {
  *
  * Version information is passed via InitializeNativeModuleQuery and
  * modules export their version via the NativeModuleApiVersion symbol.
+ *
+ * Query pointer lifetime contract:
+ *
+ * - A NativeInterface call is synchronous unless that individual API explicitly
+ *   documents otherwise.
+ * - Pointers reachable from an ordinary Query (strings, byte arrays and scalar
+ *   arrays) are borrowed for the duration of that call only. The implementation
+ *   must not retain, free or use them after the function returns.
+ * - APIs carrying callbacks, opaque native pointers/handles, or an explicitly
+ *   documented retained/asynchronous resource are outside this generic rule and
+ *   require their reviewed/manual adapter semantics.
+ *
+ * This contract allows zero-copy FFI transports such as Core Wasm to lend
+ * validated guest-memory ranges directly to synchronous NativeInterface calls.
  */
 struct NativeInterface {
 	const MemoryApi* memory;

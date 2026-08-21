@@ -24,11 +24,10 @@ template<typename T>
 bool AssignCoreCount(std::uint32_t value, T& output)
 {
     using Native = std::remove_cv_t<std::remove_reference_t<T>>;
-    if constexpr (std::numeric_limits<Native>::is_signed) {
-        if (static_cast<std::uint64_t>(value) >
-            static_cast<std::uint64_t>(std::numeric_limits<Native>::max()))
-            return false;
-    }
+    static_assert(std::is_integral_v<Native>);
+    if (static_cast<std::uint64_t>(value) >
+        static_cast<std::uint64_t>(std::numeric_limits<Native>::max()))
+        return false;
     output = static_cast<Native>(value);
     return true;
 }
@@ -58,99 +57,6 @@ bool DefineGeneratedVariableIo(wasmtime_linker_t* linker, const char* moduleName
         return true;
     error = ErrorMessage(defineError);
     return false;
-}
-
-wasm_trap_t* CoreVariableIo_units_query_get_team_units_by_defs(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->unitsQuery == nullptr ||
-        state->native->unitsQuery->GetTeamUnitsByDefs == nullptr)
-        return Trap("GetTeamUnitsByDefs generated Core binding is unavailable");
-    if (slots == nullptr || slotCount != 3)
-        return Trap("GetTeamUnitsByDefs generated Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 4u, budgetError);
-    if (!guard.Ok())
-        return Trap(budgetError);
-
-    std::string memoryError;
-    if (!EnsureMemory(state, caller, memoryError))
-        return Trap(memoryError);
-    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
-    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
-    std::span<const std::uint8_t> inputWire;
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputWire) ||
-        !state->memory.MutableView(outputDescriptor, 12u, outputWire)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
-        return nullptr;
-    }
-    WireReader reader(inputWire);
-    WireReader unitsControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
-    std::uint32_t unitsPointer = 0;
-    std::uint32_t unitsCapacity = 0;
-    std::uint32_t unitsIgnoredLength = 0;
-    if (!unitsControl.U32(unitsPointer) || !unitsControl.U32(unitsCapacity) ||
-        !unitsControl.U32(unitsIgnoredLength) || !unitsControl.Finish(4)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
-        return nullptr;
-    }
-    const std::uint64_t unitsCapacityBytes = static_cast<std::uint64_t>(unitsCapacity) * 4u;
-    if (unitsCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(unitsPointer, static_cast<std::size_t>(unitsCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-
-    GetTeamUnitsByDefsQuery query{};
-    query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
-    std::uint32_t unitDefIDsInputPointer = 0;
-    std::uint32_t unitDefIDsInputCount = 0;
-    if (!reader.U32(unitDefIDsInputPointer) || !reader.U32(unitDefIDsInputCount)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
-        return nullptr;
-    }
-    const std::uint64_t unitDefIDsInputBytes64 = static_cast<std::uint64_t>(unitDefIDsInputCount) * 4u;
-    if (unitDefIDsInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    std::span<const std::uint8_t> unitDefIDsInputWire;
-    if (!state->memory.View(unitDefIDsInputPointer, static_cast<std::size_t>(unitDefIDsInputBytes64), unitDefIDsInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    WireReader unitDefIDsInputReader(unitDefIDsInputWire);
-    std::vector<std::int32_t> unitDefIDsInputStorage;
-    unitDefIDsInputStorage.reserve(unitDefIDsInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < unitDefIDsInputCount; ++coreIndex) {
-        std::int32_t item{};
-        { std::int32_t coreRaw = 0; if (!unitDefIDsInputReader.I32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
-        unitDefIDsInputStorage.push_back(item);
-    }
-    if (!unitDefIDsInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.unitDefIDs = unitDefIDsInputStorage.data();
-    if (!AssignCoreCount(unitDefIDsInputCount, query.defCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!reader.Finish(4u)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
-        return nullptr;
-    }
-    GetTeamUnitsByDefsResult result{};
-    state->native->unitsQuery->GetTeamUnitsByDefs(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
-    bool outputTooSmall = false;
-    if (static_cast<std::uint64_t>(result.count) > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
-    const std::uint32_t unitsRequired = static_cast<std::uint32_t>(result.count);
-    if (unitsRequired != 0 && result.units == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
-    if (!WriteCoreU32(outputWire, 8u, unitsRequired))
-        return Trap("generated Core output descriptor changed unexpectedly");
-    outputTooSmall = outputTooSmall || unitsCapacity < unitsRequired;
-    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
-    if (unitsRequired != 0) {
-        const std::size_t unitsBytes = static_cast<std::size_t>(unitsRequired) * 4u;
-        std::span<std::uint8_t> unitsWire;
-        if (!state->memory.MutableView(unitsPointer, unitsBytes, unitsWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter unitsWriter(unitsWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < unitsRequired; ++coreIndex) {
-        if (!unitsWriter.I32(result.units[coreIndex])) return Trap("generated Core wire overflow");
-        }
-        if (!unitsWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
-    }
-    slots[0].i32 = 0;
-    return nullptr;
 }
 
 wasm_trap_t* CoreVariableIo_unit_defs_get_unit_def_custom_param(void* environment, wasmtime_caller_t* caller,
@@ -213,9 +119,6 @@ wasm_trap_t* CoreVariableIo_unit_defs_get_unit_def_custom_param(void* environmen
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.value == nullptr) {
-        const std::uint32_t valueRequired = 0;
-    }
     const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
     if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
@@ -288,9 +191,6 @@ wasm_trap_t* CoreVariableIo_unit_defs_get_unit_def_param_string(void* environmen
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.value == nullptr) {
-        const std::uint32_t valueRequired = 0;
-    }
     const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
     if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
@@ -363,9 +263,6 @@ wasm_trap_t* CoreVariableIo_feature_defs_get_feature_def_custom_param(void* envi
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.value == nullptr) {
-        const std::uint32_t valueRequired = 0;
-    }
     const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
     if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
@@ -438,9 +335,6 @@ wasm_trap_t* CoreVariableIo_weapon_defs_get_weapon_def_custom_param(void* enviro
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.value == nullptr) {
-        const std::uint32_t valueRequired = 0;
-    }
     const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
     if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
@@ -512,9 +406,6 @@ wasm_trap_t* CoreVariableIo_game_get_map_option(void* environment, wasmtime_call
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.value == nullptr) {
-        const std::uint32_t valueRequired = 0;
-    }
     const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
     if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
@@ -590,9 +481,6 @@ wasm_trap_t* CoreVariableIo_game_get_mod_option(void* environment, wasmtime_call
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.value == nullptr) {
-        const std::uint32_t valueRequired = 0;
-    }
     const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
     if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
@@ -842,9 +730,6 @@ wasm_trap_t* CoreVariableIo_encoding_encode_base64(void* environment, wasmtime_c
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.encoded == nullptr) {
-        const std::uint32_t encodedRequired = 0;
-    }
     const std::size_t encodedRequiredSize = result.encoded == nullptr ? 0u : std::char_traits<char>::length(result.encoded);
     if (encodedRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t encodedRequired = static_cast<std::uint32_t>(encodedRequiredSize);
@@ -927,9 +812,6 @@ wasm_trap_t* CoreVariableIo_encoding_encode_base64_url(void* environment, wasmti
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.encoded == nullptr) {
-        const std::uint32_t encodedRequired = 0;
-    }
     const std::size_t encodedRequiredSize = result.encoded == nullptr ? 0u : std::char_traits<char>::length(result.encoded);
     if (encodedRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t encodedRequired = static_cast<std::uint32_t>(encodedRequiredSize);
@@ -1001,9 +883,6 @@ wasm_trap_t* CoreVariableIo_input_get_key_from_scan_symbol(void* environment, wa
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.keyName == nullptr) {
-        const std::uint32_t keyNameRequired = 0;
-    }
     const std::size_t keyNameRequiredSize = result.keyName == nullptr ? 0u : std::char_traits<char>::length(result.keyName);
     if (keyNameRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t keyNameRequired = static_cast<std::uint32_t>(keyNameRequiredSize);
@@ -1012,6 +891,98 @@ wasm_trap_t* CoreVariableIo_input_get_key_from_scan_symbol(void* environment, wa
     outputTooSmall = outputTooSmall || keyNameCapacity < keyNameRequired;
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (keyNameRequired != 0 && !state->memory.Write(keyNamePointer, result.keyName, keyNameRequired)) return Trap("generated Core variable output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreVariableIo_config_get_config_string(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->config == nullptr ||
+        state->native->config->GetConfigString == nullptr)
+        return Trap("GetConfigString generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("GetConfigString generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 20u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 16u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader valueControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t valuePointer = 0;
+    std::uint32_t valueCapacity = 0;
+    std::uint32_t valueIgnoredLength = 0;
+    if (!valueControl.U32(valuePointer) || !valueControl.U32(valueCapacity) ||
+        !valueControl.U32(valueIgnoredLength) || !valueControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (!state->memory.Contains(valuePointer, valueCapacity)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetConfigStringQuery query{};
+    std::uint32_t keyInputPointer = 0;
+    std::uint32_t keyInputCount = 0;
+    if (!reader.U32(keyInputPointer) || !reader.U32(keyInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> keyInputBytes;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    query.key = keyInputStorage.c_str();
+    bool defaultValueInputPresent = false;
+    std::uint32_t defaultValueInputPointer = 0;
+    std::uint32_t defaultValueInputCount = 0;
+    if (!reader.Bool(defaultValueInputPresent) || !reader.U32(defaultValueInputPointer) || !reader.U32(defaultValueInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    query.hasDefault = defaultValueInputPresent;
+    std::string defaultValueInputStorage;
+    if (!defaultValueInputPresent) {
+        query.defaultValue = nullptr;
+    } else {
+        std::span<const std::uint8_t> defaultValueInputBytes;
+        if (!state->memory.View(defaultValueInputPointer, defaultValueInputCount, defaultValueInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+        defaultValueInputStorage.assign(reinterpret_cast<const char*>(defaultValueInputBytes.data()), defaultValueInputBytes.size());
+        query.defaultValue = defaultValueInputStorage.c_str();
+    }
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    GetConfigStringResult result{};
+    state->native->config->GetConfigString(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
+    if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
+    if (!WriteCoreU32(outputWire, 8u, valueRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || valueCapacity < valueRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (valueRequired != 0 && !state->memory.Write(valuePointer, result.value, valueRequired)) return Trap("generated Core variable output range changed unexpectedly");
+    std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 4u);
+    WireWriter writer(fixedWire);
+    if (!writer.Bool(result.exists)) return Trap("generated Core wire overflow");
+    if (!writer.Finish(4u)) return Trap("generated Core fixed output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -1105,6 +1076,102 @@ wasm_trap_t* CoreVariableIo_tracing_trace_ray_between_positions(void* environmen
     return nullptr;
 }
 
+wasm_trap_t* CoreVariableIo_tracing_trace_ray_in_direction(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->tracing == nullptr ||
+        state->native->tracing->TraceRayInDirection == nullptr)
+        return Trap("TraceRayInDirection generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("TraceRayInDirection generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 40u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 12u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader hitsControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t hitsPointer = 0;
+    std::uint32_t hitsCapacity = 0;
+    std::uint32_t hitsIgnoredLength = 0;
+    if (!hitsControl.U32(hitsPointer) || !hitsControl.U32(hitsCapacity) ||
+        !hitsControl.U32(hitsIgnoredLength) || !hitsControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    const std::uint64_t hitsCapacityBytes = static_cast<std::uint64_t>(hitsCapacity) * 12u;
+    if (hitsCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(hitsPointer, static_cast<std::size_t>(hitsCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    TraceRayInDirectionQuery query{};
+    if (!reader.F32(query.pos.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.pos.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.pos.z)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.dir.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.dir.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.dir.z)) return Trap("generated Core wire underflow");
+    {
+        bool corePresent = false;
+        if (!reader.Bool(corePresent)) return Trap("generated Core option presence underflow");
+        query.options.hasMaxLength = corePresent;
+    }
+    if (!reader.F32(query.options.maxLength)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core option record alignment underflow");
+    std::uint32_t typeInputPointer = 0;
+    std::uint32_t typeInputCount = 0;
+    if (!reader.U32(typeInputPointer) || !reader.U32(typeInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> typeInputBytes;
+    if (!state->memory.View(typeInputPointer, typeInputCount, typeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string typeInputStorage(reinterpret_cast<const char*>(typeInputBytes.data()), typeInputBytes.size());
+    query.type = typeInputStorage.c_str();
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    TraceRayInDirectionResult result{};
+    state->native->tracing->TraceRayInDirection(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    if (static_cast<std::uint64_t>(result.count) > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t hitsRequired = static_cast<std::uint32_t>(result.count);
+    if (hitsRequired != 0 && result.hits == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteCoreU32(outputWire, 8u, hitsRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || hitsCapacity < hitsRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (hitsRequired != 0) {
+        const std::size_t hitsBytes = static_cast<std::size_t>(hitsRequired) * 12u;
+        std::span<std::uint8_t> hitsWire;
+        if (!state->memory.MutableView(hitsPointer, hitsBytes, hitsWire)) return Trap("generated Core variable output range changed unexpectedly");
+        WireWriter hitsWriter(hitsWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < hitsRequired; ++coreIndex) {
+        if (!hitsWriter.F32(result.hits[coreIndex].hitLength)) return Trap("generated Core wire overflow");
+        if (!hitsWriter.I32(result.hits[coreIndex].objectID)) return Trap("generated Core wire overflow");
+        if (!hitsWriter.I32(result.hits[coreIndex].objectType)) return Trap("generated Core wire overflow");
+        }
+        if (!hitsWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariableIo_unsynced_ctrl_get_water_texture(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -1164,9 +1231,6 @@ wasm_trap_t* CoreVariableIo_unsynced_ctrl_get_water_texture(void* environment, w
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.texName == nullptr) {
-        const std::uint32_t texNameRequired = 0;
-    }
     const std::size_t texNameRequiredSize = result.texName == nullptr ? 0u : std::char_traits<char>::length(result.texName);
     if (texNameRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t texNameRequired = static_cast<std::uint32_t>(texNameRequiredSize);
@@ -1242,9 +1306,6 @@ wasm_trap_t* CoreVariableIo_gfx_font_wrap_text(void* environment, wasmtime_calle
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.text == nullptr) {
-        const std::uint32_t textRequired = 0;
-    }
     const std::size_t textRequiredSize = result.text == nullptr ? 0u : std::char_traits<char>::length(result.text);
     if (textRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t textRequired = static_cast<std::uint32_t>(textRequiredSize);
@@ -1256,6 +1317,386 @@ wasm_trap_t* CoreVariableIo_gfx_font_wrap_text(void* environment, wasmtime_calle
     std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 4u);
     WireWriter writer(fixedWire);
     if (!writer.I32(result.lines)) return Trap("generated Core wire overflow");
+    if (!writer.Finish(4u)) return Trap("generated Core fixed output layout mismatch");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreVariableIo_gfx_get_atmosphere(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->GetAtmosphere == nullptr)
+        return Trap("GetAtmosphere generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("GetAtmosphere generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 40u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader stringValueControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t stringValuePointer = 0;
+    std::uint32_t stringValueCapacity = 0;
+    std::uint32_t stringValueIgnoredLength = 0;
+    if (!stringValueControl.U32(stringValuePointer) || !stringValueControl.U32(stringValueCapacity) ||
+        !stringValueControl.U32(stringValueIgnoredLength) || !stringValueControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (!state->memory.Contains(stringValuePointer, stringValueCapacity)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GfxValueQuery query{};
+    std::uint32_t keyInputPointer = 0;
+    std::uint32_t keyInputCount = 0;
+    if (!reader.U32(keyInputPointer) || !reader.U32(keyInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> keyInputBytes;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    query.key = keyInputStorage.c_str();
+    std::uint32_t modeInputPointer = 0;
+    std::uint32_t modeInputCount = 0;
+    if (!reader.U32(modeInputPointer) || !reader.U32(modeInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> modeInputBytes;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    query.mode = modeInputStorage.c_str();
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    GfxValueResult result{};
+    state->native->gfx->GetAtmosphere(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    const std::size_t stringValueRequiredSize = result.stringValue == nullptr ? 0u : std::char_traits<char>::length(result.stringValue);
+    if (stringValueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t stringValueRequired = static_cast<std::uint32_t>(stringValueRequiredSize);
+    if (!WriteCoreU32(outputWire, 8u, stringValueRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || stringValueCapacity < stringValueRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (stringValueRequired != 0 && !state->memory.Write(stringValuePointer, result.stringValue, stringValueRequired)) return Trap("generated Core variable output range changed unexpectedly");
+    std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 28u);
+    WireWriter writer(fixedWire);
+    for (std::size_t coreWriteIndex1 = 0; coreWriteIndex1 < 4u; ++coreWriteIndex1) {
+        if (!writer.F32(result.values[coreWriteIndex1])) return Trap("generated Core wire overflow");
+    }
+    if (!writer.U32(result.count)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.hasBool)) return Trap("generated Core option overflow");
+    if (result.hasBool) {
+        if (!writer.Bool(result.boolValue)) return Trap("generated Core wire overflow");
+    } else {
+        std::remove_cv_t<std::remove_reference_t<decltype(result.boolValue)>> coreAbsent{};
+        if (!writer.Bool(coreAbsent)) return Trap("generated Core wire overflow");
+    }
+    if (!writer.Finish(4u)) return Trap("generated Core fixed output layout mismatch");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreVariableIo_gfx_get_map_rendering(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->GetMapRendering == nullptr)
+        return Trap("GetMapRendering generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("GetMapRendering generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 40u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader stringValueControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t stringValuePointer = 0;
+    std::uint32_t stringValueCapacity = 0;
+    std::uint32_t stringValueIgnoredLength = 0;
+    if (!stringValueControl.U32(stringValuePointer) || !stringValueControl.U32(stringValueCapacity) ||
+        !stringValueControl.U32(stringValueIgnoredLength) || !stringValueControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (!state->memory.Contains(stringValuePointer, stringValueCapacity)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GfxValueQuery query{};
+    std::uint32_t keyInputPointer = 0;
+    std::uint32_t keyInputCount = 0;
+    if (!reader.U32(keyInputPointer) || !reader.U32(keyInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> keyInputBytes;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    query.key = keyInputStorage.c_str();
+    std::uint32_t modeInputPointer = 0;
+    std::uint32_t modeInputCount = 0;
+    if (!reader.U32(modeInputPointer) || !reader.U32(modeInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> modeInputBytes;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    query.mode = modeInputStorage.c_str();
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    GfxValueResult result{};
+    state->native->gfx->GetMapRendering(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    const std::size_t stringValueRequiredSize = result.stringValue == nullptr ? 0u : std::char_traits<char>::length(result.stringValue);
+    if (stringValueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t stringValueRequired = static_cast<std::uint32_t>(stringValueRequiredSize);
+    if (!WriteCoreU32(outputWire, 8u, stringValueRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || stringValueCapacity < stringValueRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (stringValueRequired != 0 && !state->memory.Write(stringValuePointer, result.stringValue, stringValueRequired)) return Trap("generated Core variable output range changed unexpectedly");
+    std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 28u);
+    WireWriter writer(fixedWire);
+    for (std::size_t coreWriteIndex1 = 0; coreWriteIndex1 < 4u; ++coreWriteIndex1) {
+        if (!writer.F32(result.values[coreWriteIndex1])) return Trap("generated Core wire overflow");
+    }
+    if (!writer.U32(result.count)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.hasBool)) return Trap("generated Core option overflow");
+    if (result.hasBool) {
+        if (!writer.Bool(result.boolValue)) return Trap("generated Core wire overflow");
+    } else {
+        std::remove_cv_t<std::remove_reference_t<decltype(result.boolValue)>> coreAbsent{};
+        if (!writer.Bool(coreAbsent)) return Trap("generated Core wire overflow");
+    }
+    if (!writer.Finish(4u)) return Trap("generated Core fixed output layout mismatch");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreVariableIo_gfx_get_sun(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->GetSun == nullptr)
+        return Trap("GetSun generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("GetSun generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 40u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader stringValueControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t stringValuePointer = 0;
+    std::uint32_t stringValueCapacity = 0;
+    std::uint32_t stringValueIgnoredLength = 0;
+    if (!stringValueControl.U32(stringValuePointer) || !stringValueControl.U32(stringValueCapacity) ||
+        !stringValueControl.U32(stringValueIgnoredLength) || !stringValueControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (!state->memory.Contains(stringValuePointer, stringValueCapacity)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GfxValueQuery query{};
+    std::uint32_t keyInputPointer = 0;
+    std::uint32_t keyInputCount = 0;
+    if (!reader.U32(keyInputPointer) || !reader.U32(keyInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> keyInputBytes;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    query.key = keyInputStorage.c_str();
+    std::uint32_t modeInputPointer = 0;
+    std::uint32_t modeInputCount = 0;
+    if (!reader.U32(modeInputPointer) || !reader.U32(modeInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> modeInputBytes;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    query.mode = modeInputStorage.c_str();
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    GfxValueResult result{};
+    state->native->gfx->GetSun(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    const std::size_t stringValueRequiredSize = result.stringValue == nullptr ? 0u : std::char_traits<char>::length(result.stringValue);
+    if (stringValueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t stringValueRequired = static_cast<std::uint32_t>(stringValueRequiredSize);
+    if (!WriteCoreU32(outputWire, 8u, stringValueRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || stringValueCapacity < stringValueRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (stringValueRequired != 0 && !state->memory.Write(stringValuePointer, result.stringValue, stringValueRequired)) return Trap("generated Core variable output range changed unexpectedly");
+    std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 28u);
+    WireWriter writer(fixedWire);
+    for (std::size_t coreWriteIndex1 = 0; coreWriteIndex1 < 4u; ++coreWriteIndex1) {
+        if (!writer.F32(result.values[coreWriteIndex1])) return Trap("generated Core wire overflow");
+    }
+    if (!writer.U32(result.count)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.hasBool)) return Trap("generated Core option overflow");
+    if (result.hasBool) {
+        if (!writer.Bool(result.boolValue)) return Trap("generated Core wire overflow");
+    } else {
+        std::remove_cv_t<std::remove_reference_t<decltype(result.boolValue)>> coreAbsent{};
+        if (!writer.Bool(coreAbsent)) return Trap("generated Core wire overflow");
+    }
+    if (!writer.Finish(4u)) return Trap("generated Core fixed output layout mismatch");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreVariableIo_gfx_get_water_rendering(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->GetWaterRendering == nullptr)
+        return Trap("GetWaterRendering generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("GetWaterRendering generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 40u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader stringValueControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t stringValuePointer = 0;
+    std::uint32_t stringValueCapacity = 0;
+    std::uint32_t stringValueIgnoredLength = 0;
+    if (!stringValueControl.U32(stringValuePointer) || !stringValueControl.U32(stringValueCapacity) ||
+        !stringValueControl.U32(stringValueIgnoredLength) || !stringValueControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (!state->memory.Contains(stringValuePointer, stringValueCapacity)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GfxValueQuery query{};
+    std::uint32_t keyInputPointer = 0;
+    std::uint32_t keyInputCount = 0;
+    if (!reader.U32(keyInputPointer) || !reader.U32(keyInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> keyInputBytes;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    query.key = keyInputStorage.c_str();
+    std::uint32_t modeInputPointer = 0;
+    std::uint32_t modeInputCount = 0;
+    if (!reader.U32(modeInputPointer) || !reader.U32(modeInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> modeInputBytes;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    query.mode = modeInputStorage.c_str();
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    GfxValueResult result{};
+    state->native->gfx->GetWaterRendering(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    const std::size_t stringValueRequiredSize = result.stringValue == nullptr ? 0u : std::char_traits<char>::length(result.stringValue);
+    if (stringValueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t stringValueRequired = static_cast<std::uint32_t>(stringValueRequiredSize);
+    if (!WriteCoreU32(outputWire, 8u, stringValueRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || stringValueCapacity < stringValueRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (stringValueRequired != 0 && !state->memory.Write(stringValuePointer, result.stringValue, stringValueRequired)) return Trap("generated Core variable output range changed unexpectedly");
+    std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 28u);
+    WireWriter writer(fixedWire);
+    for (std::size_t coreWriteIndex1 = 0; coreWriteIndex1 < 4u; ++coreWriteIndex1) {
+        if (!writer.F32(result.values[coreWriteIndex1])) return Trap("generated Core wire overflow");
+    }
+    if (!writer.U32(result.count)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.hasBool)) return Trap("generated Core option overflow");
+    if (result.hasBool) {
+        if (!writer.Bool(result.boolValue)) return Trap("generated Core wire overflow");
+    } else {
+        std::remove_cv_t<std::remove_reference_t<decltype(result.boolValue)>> coreAbsent{};
+        if (!writer.Bool(coreAbsent)) return Trap("generated Core wire overflow");
+    }
     if (!writer.Finish(4u)) return Trap("generated Core fixed output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
@@ -1331,13 +1772,18 @@ wasm_trap_t* CoreVariableIo_profiling_get_profiler_time_record(void* environment
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (frameDataRequired != 0) {
         const std::size_t frameDataBytes = static_cast<std::size_t>(frameDataRequired) * 4u;
-        std::span<std::uint8_t> frameDataWire;
-        if (!state->memory.MutableView(frameDataPointer, frameDataBytes, frameDataWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter frameDataWriter(frameDataWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < frameDataRequired; ++coreIndex) {
-        if (!frameDataWriter.F32(result.frameData[coreIndex])) return Trap("generated Core wire overflow");
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(float) == 4u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(frameDataPointer, result.frameData, frameDataBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> frameDataWire;
+            if (!state->memory.MutableView(frameDataPointer, frameDataBytes, frameDataWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter frameDataWriter(frameDataWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < frameDataRequired; ++coreIndex) {
+            if (!frameDataWriter.F32(result.frameData[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!frameDataWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
         }
-        if (!frameDataWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
     }
     std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 20u);
     WireWriter writer(fixedWire);
@@ -1411,9 +1857,6 @@ wasm_trap_t* CoreVariableIo_rml_ui_element_get_attribute(void* environment, wasm
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.value == nullptr) {
-        const std::uint32_t valueRequired = 0;
-    }
     const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
     if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
@@ -1500,13 +1943,18 @@ wasm_trap_t* CoreVariableIo_rml_ui_element_get_elements_by_class_name(void* envi
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (elementHandlesRequired != 0) {
         const std::size_t elementHandlesBytes = static_cast<std::size_t>(elementHandlesRequired) * 8u;
-        std::span<std::uint8_t> elementHandlesWire;
-        if (!state->memory.MutableView(elementHandlesPointer, elementHandlesBytes, elementHandlesWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter elementHandlesWriter(elementHandlesWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < elementHandlesRequired; ++coreIndex) {
-        if (!elementHandlesWriter.U64(result.elementHandles[coreIndex])) return Trap("generated Core wire overflow");
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(std::uint64_t) == 8u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(elementHandlesPointer, result.elementHandles, elementHandlesBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> elementHandlesWire;
+            if (!state->memory.MutableView(elementHandlesPointer, elementHandlesBytes, elementHandlesWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter elementHandlesWriter(elementHandlesWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < elementHandlesRequired; ++coreIndex) {
+            if (!elementHandlesWriter.U64(result.elementHandles[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!elementHandlesWriter.Finish(8u)) return Trap("generated Core list output layout mismatch");
         }
-        if (!elementHandlesWriter.Finish(8u)) return Trap("generated Core list output layout mismatch");
     }
     slots[0].i32 = 0;
     return nullptr;
@@ -1582,13 +2030,18 @@ wasm_trap_t* CoreVariableIo_rml_ui_element_get_elements_by_tag_name(void* enviro
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (elementHandlesRequired != 0) {
         const std::size_t elementHandlesBytes = static_cast<std::size_t>(elementHandlesRequired) * 8u;
-        std::span<std::uint8_t> elementHandlesWire;
-        if (!state->memory.MutableView(elementHandlesPointer, elementHandlesBytes, elementHandlesWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter elementHandlesWriter(elementHandlesWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < elementHandlesRequired; ++coreIndex) {
-        if (!elementHandlesWriter.U64(result.elementHandles[coreIndex])) return Trap("generated Core wire overflow");
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(std::uint64_t) == 8u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(elementHandlesPointer, result.elementHandles, elementHandlesBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> elementHandlesWire;
+            if (!state->memory.MutableView(elementHandlesPointer, elementHandlesBytes, elementHandlesWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter elementHandlesWriter(elementHandlesWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < elementHandlesRequired; ++coreIndex) {
+            if (!elementHandlesWriter.U64(result.elementHandles[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!elementHandlesWriter.Finish(8u)) return Trap("generated Core list output layout mismatch");
         }
-        if (!elementHandlesWriter.Finish(8u)) return Trap("generated Core list output layout mismatch");
     }
     slots[0].i32 = 0;
     return nullptr;
@@ -1664,13 +2117,18 @@ wasm_trap_t* CoreVariableIo_rml_ui_element_query_selector_all(void* environment,
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (elementHandlesRequired != 0) {
         const std::size_t elementHandlesBytes = static_cast<std::size_t>(elementHandlesRequired) * 8u;
-        std::span<std::uint8_t> elementHandlesWire;
-        if (!state->memory.MutableView(elementHandlesPointer, elementHandlesBytes, elementHandlesWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter elementHandlesWriter(elementHandlesWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < elementHandlesRequired; ++coreIndex) {
-        if (!elementHandlesWriter.U64(result.elementHandles[coreIndex])) return Trap("generated Core wire overflow");
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(std::uint64_t) == 8u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(elementHandlesPointer, result.elementHandles, elementHandlesBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> elementHandlesWire;
+            if (!state->memory.MutableView(elementHandlesPointer, elementHandlesBytes, elementHandlesWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter elementHandlesWriter(elementHandlesWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < elementHandlesRequired; ++coreIndex) {
+            if (!elementHandlesWriter.U64(result.elementHandles[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!elementHandlesWriter.Finish(8u)) return Trap("generated Core list output layout mismatch");
         }
-        if (!elementHandlesWriter.Finish(8u)) return Trap("generated Core list output layout mismatch");
     }
     slots[0].i32 = 0;
     return nullptr;
@@ -1736,9 +2194,6 @@ wasm_trap_t* CoreVariableIo_rml_ui_event_get_parameter_string(void* environment,
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.value == nullptr) {
-        const std::uint32_t valueRequired = 0;
-    }
     const std::size_t valueRequiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
     if (valueRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t valueRequired = static_cast<std::uint32_t>(valueRequiredSize);
@@ -1826,9 +2281,6 @@ wasm_trap_t* CoreVariableIo_vfs_calculate_hash(void* environment, wasmtime_calle
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.hash == nullptr) {
-        const std::uint32_t hashRequired = 0;
-    }
     const std::size_t hashRequiredSize = result.hash == nullptr ? 0u : std::char_traits<char>::length(result.hash);
     if (hashRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t hashRequired = static_cast<std::uint32_t>(hashRequiredSize);
@@ -1910,18 +2362,12 @@ wasm_trap_t* CoreVariableIo_vfs_get_archive_checksum(void* environment, wasmtime
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.singleChecksum == nullptr) {
-        const std::uint32_t singleChecksumRequired = 0;
-    }
     const std::size_t singleChecksumRequiredSize = result.singleChecksum == nullptr ? 0u : std::char_traits<char>::length(result.singleChecksum);
     if (singleChecksumRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t singleChecksumRequired = static_cast<std::uint32_t>(singleChecksumRequiredSize);
     if (!WriteCoreU32(outputWire, 8u, singleChecksumRequired))
         return Trap("generated Core output descriptor changed unexpectedly");
     outputTooSmall = outputTooSmall || singleChecksumCapacity < singleChecksumRequired;
-    if (result.completeChecksum == nullptr) {
-        const std::uint32_t completeChecksumRequired = 0;
-    }
     const std::size_t completeChecksumRequiredSize = result.completeChecksum == nullptr ? 0u : std::char_traits<char>::length(result.completeChecksum);
     if (completeChecksumRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t completeChecksumRequired = static_cast<std::uint32_t>(completeChecksumRequiredSize);
@@ -2004,9 +2450,6 @@ wasm_trap_t* CoreVariableIo_vfs_get_archive_containing_file(void* environment, w
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.archiveName == nullptr) {
-        const std::uint32_t archiveNameRequired = 0;
-    }
     const std::size_t archiveNameRequiredSize = result.archiveName == nullptr ? 0u : std::char_traits<char>::length(result.archiveName);
     if (archiveNameRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t archiveNameRequired = static_cast<std::uint32_t>(archiveNameRequiredSize);
@@ -2078,9 +2521,6 @@ wasm_trap_t* CoreVariableIo_vfs_get_archive_path(void* environment, wasmtime_cal
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.path == nullptr) {
-        const std::uint32_t pathRequired = 0;
-    }
     const std::size_t pathRequiredSize = result.path == nullptr ? 0u : std::char_traits<char>::length(result.path);
     if (pathRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t pathRequired = static_cast<std::uint32_t>(pathRequiredSize);
@@ -2162,9 +2602,6 @@ wasm_trap_t* CoreVariableIo_vfs_get_file_absolute_path(void* environment, wasmti
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.path == nullptr) {
-        const std::uint32_t pathRequired = 0;
-    }
     const std::size_t pathRequiredSize = result.path == nullptr ? 0u : std::char_traits<char>::length(result.path);
     if (pathRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t pathRequired = static_cast<std::uint32_t>(pathRequiredSize);
@@ -2236,9 +2673,6 @@ wasm_trap_t* CoreVariableIo_vfs_get_name_from_rapid_tag(void* environment, wasmt
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.archiveName == nullptr) {
-        const std::uint32_t archiveNameRequired = 0;
-    }
     const std::size_t archiveNameRequiredSize = result.archiveName == nullptr ? 0u : std::char_traits<char>::length(result.archiveName);
     if (archiveNameRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t archiveNameRequired = static_cast<std::uint32_t>(archiveNameRequiredSize);
@@ -2389,20 +2823,17 @@ wasm_trap_t* CoreVariableIo_vfs_pack_f32(void* environment, wasmtime_caller_t* c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-    if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    std::span<const std::uint8_t> valuesInputWire;
-    if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    WireReader valuesInputReader(valuesInputWire);
-    std::vector<float> valuesInputStorage;
-    valuesInputStorage.reserve(valuesInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputCount; ++coreIndex) {
-        float item{};
-        if (!valuesInputReader.F32(item)) return Trap("generated Core wire underflow");
-        valuesInputStorage.push_back(item);
+    if (valuesInputCount == 0) {
+        query.values = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
+        const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
+        if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max() || (valuesInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+        std::span<const std::uint8_t> valuesInputBytes;
+        if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+        static_assert(sizeof(float) == 4u, "generated Core borrowed/native element width mismatch");
+        query.values = reinterpret_cast<std::remove_reference_t<decltype(query.values)>>(valuesInputBytes.data());
     }
-    if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.values = valuesInputStorage.data();
     if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2573,20 +3004,17 @@ wasm_trap_t* CoreVariableIo_vfs_pack_s32(void* environment, wasmtime_caller_t* c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-    if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    std::span<const std::uint8_t> valuesInputWire;
-    if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    WireReader valuesInputReader(valuesInputWire);
-    std::vector<std::int32_t> valuesInputStorage;
-    valuesInputStorage.reserve(valuesInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputCount; ++coreIndex) {
-        std::int32_t item{};
-        { std::int32_t coreRaw = 0; if (!valuesInputReader.I32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
-        valuesInputStorage.push_back(item);
+    if (valuesInputCount == 0) {
+        query.values = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
+        const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
+        if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max() || (valuesInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+        std::span<const std::uint8_t> valuesInputBytes;
+        if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+        static_assert(sizeof(std::int32_t) == 4u, "generated Core borrowed/native element width mismatch");
+        query.values = reinterpret_cast<std::remove_reference_t<decltype(query.values)>>(valuesInputBytes.data());
     }
-    if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.values = valuesInputStorage.data();
     if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2849,20 +3277,17 @@ wasm_trap_t* CoreVariableIo_vfs_pack_u32(void* environment, wasmtime_caller_t* c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-    if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    std::span<const std::uint8_t> valuesInputWire;
-    if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    WireReader valuesInputReader(valuesInputWire);
-    std::vector<std::uint32_t> valuesInputStorage;
-    valuesInputStorage.reserve(valuesInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputCount; ++coreIndex) {
-        std::uint32_t item{};
-        { std::uint32_t coreRaw = 0; if (!valuesInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
-        valuesInputStorage.push_back(item);
+    if (valuesInputCount == 0) {
+        query.values = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
+        const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
+        if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max() || (valuesInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+        std::span<const std::uint8_t> valuesInputBytes;
+        if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+        static_assert(sizeof(std::uint32_t) == 4u, "generated Core borrowed/native element width mismatch");
+        query.values = reinterpret_cast<std::remove_reference_t<decltype(query.values)>>(valuesInputBytes.data());
     }
-    if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.values = valuesInputStorage.data();
     if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -3126,9 +3551,6 @@ wasm_trap_t* CoreVariableIo_vfs_read_file_as_string(void* environment, wasmtime_
     const std::int32_t errorCode = NativeErrorCode(result.error);
     if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
     bool outputTooSmall = false;
-    if (result.content == nullptr) {
-        const std::uint32_t contentRequired = 0;
-    }
     const std::size_t contentRequiredSize = result.content == nullptr ? 0u : std::char_traits<char>::length(result.content);
     if (contentRequiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     const std::uint32_t contentRequired = static_cast<std::uint32_t>(contentRequiredSize);
@@ -3223,13 +3645,18 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_f32(void* environment, wasmtime_caller_t*
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (valuesRequired != 0) {
         const std::size_t valuesBytes = static_cast<std::size_t>(valuesRequired) * 4u;
-        std::span<std::uint8_t> valuesWire;
-        if (!state->memory.MutableView(valuesPointer, valuesBytes, valuesWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter valuesWriter(valuesWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < valuesRequired; ++coreIndex) {
-        if (!valuesWriter.F32(result.values[coreIndex])) return Trap("generated Core wire overflow");
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(float) == 4u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(valuesPointer, result.values, valuesBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> valuesWire;
+            if (!state->memory.MutableView(valuesPointer, valuesBytes, valuesWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter valuesWriter(valuesWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < valuesRequired; ++coreIndex) {
+            if (!valuesWriter.F32(result.values[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!valuesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
         }
-        if (!valuesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
     }
     slots[0].i32 = 0;
     return nullptr;
@@ -3411,13 +3838,18 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_s32(void* environment, wasmtime_caller_t*
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (valuesRequired != 0) {
         const std::size_t valuesBytes = static_cast<std::size_t>(valuesRequired) * 4u;
-        std::span<std::uint8_t> valuesWire;
-        if (!state->memory.MutableView(valuesPointer, valuesBytes, valuesWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter valuesWriter(valuesWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < valuesRequired; ++coreIndex) {
-        if (!valuesWriter.I32(result.values[coreIndex])) return Trap("generated Core wire overflow");
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(std::int32_t) == 4u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(valuesPointer, result.values, valuesBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> valuesWire;
+            if (!state->memory.MutableView(valuesPointer, valuesBytes, valuesWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter valuesWriter(valuesWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < valuesRequired; ++coreIndex) {
+            if (!valuesWriter.I32(result.values[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!valuesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
         }
-        if (!valuesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
     }
     slots[0].i32 = 0;
     return nullptr;
@@ -3693,13 +4125,18 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_u32(void* environment, wasmtime_caller_t*
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (valuesRequired != 0) {
         const std::size_t valuesBytes = static_cast<std::size_t>(valuesRequired) * 4u;
-        std::span<std::uint8_t> valuesWire;
-        if (!state->memory.MutableView(valuesPointer, valuesBytes, valuesWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter valuesWriter(valuesWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < valuesRequired; ++coreIndex) {
-        if (!valuesWriter.U32(result.values[coreIndex])) return Trap("generated Core wire overflow");
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(std::uint32_t) == 4u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(valuesPointer, result.values, valuesBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> valuesWire;
+            if (!state->memory.MutableView(valuesPointer, valuesBytes, valuesWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter valuesWriter(valuesWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < valuesRequired; ++coreIndex) {
+            if (!valuesWriter.U32(result.values[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!valuesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
         }
-        if (!valuesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
     }
     slots[0].i32 = 0;
     return nullptr;
@@ -4055,20 +4492,17 @@ wasm_trap_t* CoreVariableIo_unsynced_read_solve_nurbs_curve(void* environment, w
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t knotsInputBytes64 = static_cast<std::uint64_t>(knotsInputCount) * 4u;
-    if (knotsInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    std::span<const std::uint8_t> knotsInputWire;
-    if (!state->memory.View(knotsInputPointer, static_cast<std::size_t>(knotsInputBytes64), knotsInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    WireReader knotsInputReader(knotsInputWire);
-    std::vector<float> knotsInputStorage;
-    knotsInputStorage.reserve(knotsInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < knotsInputCount; ++coreIndex) {
-        float item{};
-        if (!knotsInputReader.F32(item)) return Trap("generated Core wire underflow");
-        knotsInputStorage.push_back(item);
+    if (knotsInputCount == 0) {
+        query.knots = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
+        const std::uint64_t knotsInputBytes64 = static_cast<std::uint64_t>(knotsInputCount) * 4u;
+        if (knotsInputBytes64 > std::numeric_limits<std::size_t>::max() || (knotsInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+        std::span<const std::uint8_t> knotsInputBytes;
+        if (!state->memory.View(knotsInputPointer, static_cast<std::size_t>(knotsInputBytes64), knotsInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+        static_assert(sizeof(float) == 4u, "generated Core borrowed/native element width mismatch");
+        query.knots = reinterpret_cast<std::remove_reference_t<decltype(query.knots)>>(knotsInputBytes.data());
     }
-    if (!knotsInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.knots = knotsInputStorage.data();
     if (!AssignCoreCount(knotsInputCount, query.knotCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.segments = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.segments)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
@@ -4116,13 +4550,6 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
     if (linker == nullptr || state == nullptr || state->native == nullptr) {
         error = "cannot register generated variable-I/O Core imports without linker/host/native API";
         return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedVariableIo(linker, "spring:units-query", "get-team-units-by-defs",
-                MakeFuncType(params, 3, results, 1), CoreVariableIo_units_query_get_team_units_by_defs, state, error))
-            return false;
     }
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
@@ -4204,8 +4631,22 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:config", "get-config-string",
+                MakeFuncType(params, 2, results, 1), CoreVariableIo_config_get_config_string, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedVariableIo(linker, "spring:tracing", "trace-ray-between-positions",
                 MakeFuncType(params, 2, results, 1), CoreVariableIo_tracing_trace_ray_between_positions, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:tracing", "trace-ray-in-direction",
+                MakeFuncType(params, 2, results, 1), CoreVariableIo_tracing_trace_ray_in_direction, state, error))
             return false;
     }
     {
@@ -4220,6 +4661,34 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedVariableIo(linker, "spring:gfx", "font-wrap-text",
                 MakeFuncType(params, 6, results, 1), CoreVariableIo_gfx_font_wrap_text, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:gfx", "get-atmosphere",
+                MakeFuncType(params, 2, results, 1), CoreVariableIo_gfx_get_atmosphere, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:gfx", "get-map-rendering",
+                MakeFuncType(params, 2, results, 1), CoreVariableIo_gfx_get_map_rendering, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:gfx", "get-sun",
+                MakeFuncType(params, 2, results, 1), CoreVariableIo_gfx_get_sun, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:gfx", "get-water-rendering",
+                MakeFuncType(params, 2, results, 1), CoreVariableIo_gfx_get_water_rendering, state, error))
             return false;
     }
     {
@@ -4450,6 +4919,6 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
     return true;
 }
 
-static_assert(47 >= 0, "generated variable-I/O Core callback count");
+static_assert(52 >= 0, "generated variable-I/O Core callback count");
 
 } // namespace recoil::wasm::core::generated

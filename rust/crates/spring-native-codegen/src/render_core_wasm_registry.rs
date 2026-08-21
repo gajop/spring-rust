@@ -1,17 +1,33 @@
 //! Generate the validator registry for Core imports that have executable host
 //! callbacks. This is intentionally narrower than the diagnostic ABI plan.
 //!
-//! Performance policy: generic variable-input renderers are useful scaffolding,
-//! but they currently allocate/copy host vectors. Do not advertise them as the
-//! production Core path until their borrowed/scratch lowering is reviewed.
+//! Performance policy: variable input enters this registry only when a renderer
+//! has a reviewed synchronous lifetime path. Borrowable inputs stay zero-copy;
+//! representation-mismatched inputs are adapted explicitly.
+//!
+//! Production capability, process-safety, sync, and visibility authorization
+//! live in the adjacent policy module so transport coverage cannot silently
+//! grant guest authority, expose an unsafe adapter, or widen information access.
 
 use serde::Serialize;
 use std::collections::BTreeMap;
 
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
 use crate::render_core_wasm::{self, FunctionPlan, InputStrategy, ResultStrategy};
+use crate::render_core_wasm_borrowed_host;
+use crate::render_core_wasm_dynamic_input_host;
+use crate::render_core_wasm_dynamic_output_host;
 use crate::render_core_wasm_option_host;
+use crate::render_core_wasm_variable_host;
+use crate::render_core_wasm_variable_io_host;
 use crate::render_core_wasm_variable_output_host;
+
+#[path = "render_core_wasm_registry_policy.rs"]
+mod policy;
+use policy::{
+    production_function_environment_mask, production_import_allowed, production_process_safe,
+    production_visibility_environment_mask,
+};
 
 pub fn render(model: &ApiModel) -> String {
     let records = record_index(model);
@@ -26,7 +42,28 @@ pub fn render(model: &ApiModel) -> String {
             let Some(plan) = plans.get(&(module.name.clone(), function.name.clone())) else {
                 continue;
             };
-            if executable_class(plan, &function.inputs, &function.outputs, &records).is_none() {
+            let sync_mask = production_function_environment_mask(
+                &module.name,
+                &function.name,
+                plan.environment_mask,
+            );
+            let visibility_mask = production_visibility_environment_mask(
+                &module.name,
+                &function.name,
+                plan.environment_mask,
+            );
+            let environment_mask = sync_mask & visibility_mask;
+            // Only generated transports enter this registry. Handwritten
+            // transports publish their exact signatures through WasmCoreRegistry.h,
+            // which resolves first, so a generated entry for the same name would
+            // advertise a signature no guest can actually import.
+            if handwritten_reviewed(&module.name, &function.name)
+                || generated_executable_class(plan, &function.inputs, &function.outputs, &records)
+                    .is_none()
+                || !production_import_allowed(&module.name, &function.name)
+                || !production_process_safe(&module.name, &function.name)
+                || environment_mask == 0
+            {
                 continue;
             }
             output.push_str(&format!(
@@ -34,7 +71,7 @@ pub fn render(model: &ApiModel) -> String {
                 escape(&plan.import_module),
                 escape(&plan.import_name),
                 escape(&plan.signature),
-                plan.environment_mask,
+                environment_mask,
             ));
         }
     }
@@ -52,12 +89,38 @@ struct CoverageEntry {
     import_module: String,
     import_name: String,
     class: Option<String>,
+    /// Executable means a generated or reviewed handwritten host transport
+    /// exists. Production authority, process safety, sync, and information
+    /// visibility are reported separately.
+    verified: bool,
+    production_import_allowed: bool,
+    production_process_safe: bool,
+    production_sync_environment_mask: u32,
+    production_visibility_environment_mask: u32,
+    production_environment_mask: u32,
     reason: Option<String>,
+    /// Only on pending entries: the semantic shape that no generated renderer
+    /// accepts yet. "0 pending or an explicit documented reason for each
+    /// remaining entry" is the definition of done, so the report has to name
+    /// the shape rather than leave a category label to be re-derived by hand.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pending_shape: Option<PendingShape>,
+}
+
+#[derive(Serialize)]
+struct PendingShape {
+    input_strategy: String,
+    result_strategy: String,
+    inputs: Vec<String>,
+    outputs: Vec<String>,
 }
 
 #[derive(Serialize)]
 struct CoverageReport {
+    total: usize,
     executable_total: usize,
+    verified_total: usize,
+    production_import_total: usize,
     by_class: BTreeMap<String, usize>,
     executable: Vec<CoverageEntry>,
     pending: Vec<CoverageEntry>,
@@ -75,7 +138,47 @@ pub fn render_coverage_json(model: &ApiModel) -> anyhow::Result<String> {
             let Some(plan) = plans.get(&(module.name.clone(), function.name.clone())) else {
                 continue;
             };
-            if let Some(class) = executable_class(plan, &function.inputs, &function.outputs, &records) {
+            let production_allowed = production_import_allowed(&module.name, &function.name);
+            let process_safe = production_process_safe(&module.name, &function.name);
+            let sync_mask = production_function_environment_mask(
+                &module.name,
+                &function.name,
+                plan.environment_mask,
+            );
+            let visibility_mask = production_visibility_environment_mask(
+                &module.name,
+                &function.name,
+                plan.environment_mask,
+            );
+            let production_mask = sync_mask & visibility_mask;
+            let reason = if !production_allowed {
+                Some(
+                    "withheld from production Core import registry by capability policy".to_owned(),
+                )
+            } else if !process_safe {
+                Some(
+                    "withheld from production Core import registry by process-safety policy"
+                        .to_owned(),
+                )
+            } else if sync_mask == 0 {
+                Some("withheld from every production Core environment by sync policy".to_owned())
+            } else if visibility_mask == 0 {
+                Some(
+                    "withheld from every production Core environment by visibility policy"
+                        .to_owned(),
+                )
+            } else if production_mask == 0 {
+                Some(
+                    "withheld because sync and visibility environment policies do not overlap"
+                        .to_owned(),
+                )
+            } else {
+                None
+            };
+
+            if let Some(class) =
+                coverage_executable_class(plan, &function.inputs, &function.outputs, &records)
+            {
                 *by_class.entry(class.to_owned()).or_default() += 1;
                 executable.push(CoverageEntry {
                     module: module.name.clone(),
@@ -83,7 +186,14 @@ pub fn render_coverage_json(model: &ApiModel) -> anyhow::Result<String> {
                     import_module: plan.import_module.clone(),
                     import_name: plan.import_name.clone(),
                     class: Some(class.to_owned()),
-                    reason: None,
+                    verified: false,
+                    production_import_allowed: production_allowed,
+                    production_process_safe: process_safe,
+                    production_sync_environment_mask: sync_mask,
+                    production_visibility_environment_mask: visibility_mask,
+                    production_environment_mask: production_mask,
+                    reason,
+                    pending_shape: None,
                 });
             } else {
                 pending.push(CoverageEntry {
@@ -92,14 +202,45 @@ pub fn render_coverage_json(model: &ApiModel) -> anyhow::Result<String> {
                     import_module: plan.import_module.clone(),
                     import_name: plan.import_name.clone(),
                     class: None,
+                    verified: false,
+                    production_import_allowed: production_allowed,
+                    production_process_safe: process_safe,
+                    production_sync_environment_mask: sync_mask,
+                    production_visibility_environment_mask: visibility_mask,
+                    production_environment_mask: production_mask,
                     reason: Some(pending_reason(plan)),
+                    pending_shape: Some(PendingShape {
+                        input_strategy: format!("{:?}", plan.input_strategy),
+                        result_strategy: format!("{:?}", plan.result_strategy),
+                        inputs: function
+                            .inputs
+                            .iter()
+                            .map(|field| describe_field(field, &records))
+                            .collect(),
+                        outputs: function
+                            .outputs
+                            .iter()
+                            .map(|field| describe_field(field, &records))
+                            .collect(),
+                    }),
                 });
             }
         }
     }
 
+    let production_import_total = executable
+        .iter()
+        .filter(|entry| {
+            entry.production_import_allowed
+                && entry.production_process_safe
+                && entry.production_environment_mask != 0
+        })
+        .count();
     let report = CoverageReport {
+        total: executable.len() + pending.len(),
         executable_total: executable.len(),
+        verified_total: 0,
+        production_import_total,
         by_class,
         executable,
         pending,
@@ -107,7 +248,148 @@ pub fn render_coverage_json(model: &ApiModel) -> anyhow::Result<String> {
     Ok(serde_json::to_string_pretty(&report)? + "\n")
 }
 
-fn executable_class<'a>(
+/// Strict full-generation implementation check. Capability/security policy is
+/// deliberately irrelevant here: a production-denied API may still have a
+/// complete transport, and coverage should record that separately.
+pub fn coverage_errors(model: &ApiModel) -> Vec<String> {
+    let records = record_index(model);
+    let plans = plan_index(model);
+    let mut errors = Vec::new();
+
+    for module in &model.modules {
+        for function in &module.functions {
+            let Some(plan) = plans.get(&(module.name.clone(), function.name.clone())) else {
+                errors.push(format!(
+                    "{}::{} has no Core ABI plan",
+                    module.name, function.name
+                ));
+                continue;
+            };
+            if coverage_executable_class(plan, &function.inputs, &function.outputs, &records)
+                .is_none()
+            {
+                errors.push(format!(
+                    "{}::{}: {}",
+                    module.name,
+                    function.name,
+                    pending_reason(plan)
+                ));
+            }
+        }
+    }
+    errors
+}
+
+fn coverage_executable_class<'a>(
+    plan: &FunctionPlan,
+    inputs: &[FieldModel],
+    outputs: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<&'a str> {
+    handwritten_executable_class(&plan.module, &plan.function)
+        .or_else(|| generated_executable_class(plan, inputs, outputs, records))
+}
+
+/// A reviewed handwritten transport owns its import outright. No generated
+/// renderer may emit a second binding for the same import name: the linker
+/// would see a duplicate definition, and the generic lowering does not carry
+/// the reviewed semantics (in-place mutation, retained callbacks, budgets).
+pub(crate) fn handwritten_reviewed(module: &str, function: &str) -> bool {
+    handwritten_executable_class(module, function).is_some()
+}
+
+/// Imports whose reviewed handwritten binding declares a different Core
+/// signature than the generic lowering would.
+///
+/// `WasmCoreRegistry.h` resolves handwritten imports before generated ones, so
+/// for these names the handwritten signature is the only one a guest can
+/// import: a module built against the generated shape is rejected by the
+/// validator with a signature mismatch. Generating a second binding therefore
+/// produces unreachable code and, worse, makes the coverage report claim a
+/// generated transport that production can never use.
+///
+/// Keep this in step with `kImports`; `verify_codegen.py` fails when the two
+/// registries disagree about a signature that is not listed here.
+fn handwritten_signature_owner(module: &str, function: &str) -> bool {
+    matches!(
+        (module, function),
+        ("messages", "Echo")
+            | ("messages", "Log")
+            | ("messages", "SendAllyChat")
+            | ("messages", "SendLuaGaiaMsg")
+            | ("messages", "SendLuaMenuMsg")
+            | ("messages", "SendLuaRulesMsg")
+            | ("messages", "SendLuaUIMsg")
+            | ("messages", "SendMessage")
+            | ("messages", "SendMessageToAllyTeam")
+            | ("messages", "SendMessageToPlayer")
+            | ("messages", "SendMessageToSpectators")
+            | ("messages", "SendMessageToTeam")
+            | ("messages", "SendPrivateChat")
+            | ("messages", "SendPublicChat")
+            | ("messages", "SendSkirmishAIMessage")
+            | ("messages", "SendSpectatorChat")
+            | ("messages", "SendToUnsynced")
+            | ("terrain", "GetGroundExtremes")
+            | ("terrain", "GetHeightMapSize")
+            | ("terrain", "GetWaterPlaneLevel")
+            | ("terrain", "IsPosInMap")
+            | ("unit_control", "GiveOrderToUnit")
+            | ("unit_defs", "GetUnitDefHumanName")
+            | ("unit_defs", "GetUnitDefName")
+            | ("units_commands", "GetUnitCommands")
+            | ("units_commands", "GiveOrder")
+            | ("units_commands", "GiveOrderToUnitMap")
+            | ("units_query", "GetAllUnits")
+            | ("units_query", "GetTeamUnits")
+            | ("units_query", "GetTeamUnitsByDefs")
+            | ("units_query", "GetUnitArrayCentroid")
+            | ("units_query", "GetUnitMapCentroid")
+            | ("units_query", "GetUnitsInBox")
+            | ("units_query", "GetUnitsInCylinder")
+            | ("units_query", "GetUnitsInRectangle")
+            | ("units_query", "GetUnitsInSphere")
+    )
+}
+
+/// Reviewed bindings implemented directly under rts/WasmInterface. Keep this
+/// list narrow; generic transports must be discovered from renderer eligibility.
+fn handwritten_executable_class(module: &str, function: &str) -> Option<&'static str> {
+    if handwritten_signature_owner(module, function) {
+        return Some("handwritten-reviewed");
+    }
+    let implemented = matches!(
+        (module, function),
+        ("rml_ui", "DataModelBindEvent")
+            | ("rml_ui", "DataModelUnbindEvent")
+            | ("rml_ui", "ContextAddEventListener")
+            | ("rml_ui", "ElementAddEventListener")
+            | ("rml_ui", "EventListenerOnAttach")
+            | ("rml_ui", "EventListenerOnDetach")
+            | ("rml_ui", "EventListenerProcessEvent")
+            | ("math_extra", "Normalize")
+            | ("vfs", "UseArchive")
+            | ("cob_script", "CallCOBScript")
+            | ("gfx", "ActiveFBO")
+            | ("gfx", "ActiveShader")
+            | ("gfx", "BeginEnd")
+            | ("gfx", "CreateList")
+            | ("gfx", "CreateTexture")
+            | ("gfx", "CreateTextureAtlas")
+            | ("gfx", "DrawFuncAtUnit")
+            | ("gfx", "PushPopMatrix")
+            | ("gfx", "RenderToTexture")
+            | ("gfx", "RunQuery")
+            | ("gfx", "UnsafeState")
+            | ("system_control", "CallAsTeam")
+            | ("terrain_control", "SetHeightMapFunc")
+            | ("terrain_control", "SetOriginalHeightMapFunc")
+            | ("terrain_control", "SetSmoothMeshFunc")
+    );
+    implemented.then_some("handwritten-reviewed")
+}
+
+fn generated_executable_class<'a>(
     plan: &FunctionPlan,
     inputs: &[FieldModel],
     outputs: &[FieldModel],
@@ -122,17 +404,113 @@ fn executable_class<'a>(
     if render_core_wasm_variable_output_host::eligible(plan, inputs, outputs, records) {
         return Some("variable-output-caller-owned");
     }
-
-    // Deliberately exclude InputStrategy::VariableInputBuffer here. The current
-    // generic renderers allocate/copy host storage. Specialized bindings can
-    // still expose reviewed zero-/low-allocation forms through the handwritten
-    // registry, but generated coverage must not call the generic form "fast".
+    if render_core_wasm_dynamic_output_host::eligible(plan, inputs, outputs, records) {
+        return Some("dynamic-output-caller-owned");
+    }
+    if render_core_wasm_variable_io_host::eligible(plan, inputs, outputs, records) {
+        return Some("variable-io-borrowed-input-caller-owned-output");
+    }
+    if render_core_wasm_borrowed_host::eligible(plan, inputs, outputs, records) {
+        const VARIABLE: &str = "variable-input-borrowed";
+        const MIXED: &str = "variable-input-borrowed-mixed-fixed";
+        return Some(
+            if inputs.iter().any(|field| {
+                !direct_type(&field.ty)
+                    && !matches!(
+                        field.ty,
+                        SemanticType::String | SemanticType::Bytes | SemanticType::List { .. }
+                    )
+            }) {
+                MIXED
+            } else {
+                VARIABLE
+            },
+        );
+    }
+    if render_core_wasm_variable_host::eligible(plan, inputs, outputs, records) {
+        return Some("variable-input-adapted");
+    }
+    if render_core_wasm_dynamic_input_host::eligible(plan, inputs, outputs, records) {
+        return Some("variable-input-nested-adapted");
+    }
     None
+}
+
+/// Compact, stable rendering of one field's semantic type. Records expand one
+/// level so a pending entry names the field that actually blocks it instead of
+/// an opaque record name.
+fn describe_field(field: &FieldModel, records: &BTreeMap<String, RecordModel>) -> String {
+    format!(
+        "{}: {}",
+        field.name,
+        describe_type(&field.ty, records, true)
+    )
+}
+
+fn describe_type(
+    ty: &SemanticType,
+    records: &BTreeMap<String, RecordModel>,
+    expand_record: bool,
+) -> String {
+    match ty {
+        SemanticType::Scalar { name } => name.clone(),
+        SemanticType::Enum { name } => format!("enum {name}"),
+        SemanticType::Handle { family } => format!("handle {family}"),
+        SemanticType::String => "string".to_owned(),
+        SemanticType::Bytes => "bytes".to_owned(),
+        SemanticType::List { element } => {
+            format!("list<{}>", describe_type(element, records, false))
+        }
+        SemanticType::FixedArray { element, length } => {
+            format!(
+                "array<{}, {length}>",
+                describe_type(element, records, false)
+            )
+        }
+        SemanticType::Option { inner } => {
+            format!("option<{}>", describe_type(inner, records, false))
+        }
+        SemanticType::Result { ok, error } => format!(
+            "result<{}, {}>",
+            ok.as_ref()
+                .map(|ty| describe_type(ty, records, false))
+                .unwrap_or_else(|| "()".to_owned()),
+            error
+                .as_ref()
+                .map(|ty| describe_type(ty, records, false))
+                .unwrap_or_else(|| "()".to_owned())
+        ),
+        SemanticType::Callback { name } => format!("callback {name}"),
+        SemanticType::Pointer { pointee, mutable } => format!(
+            "{}pointer<{}>",
+            if *mutable { "mut " } else { "" },
+            describe_type(pointee, records, false)
+        ),
+        SemanticType::Unknown { spelling } => format!("unknown {spelling}"),
+        SemanticType::Record { name } => match records.get(name).filter(|_| expand_record) {
+            Some(record) => {
+                let fields = record
+                    .fields
+                    .iter()
+                    .map(|field| {
+                        format!(
+                            "{}: {}",
+                            field.name,
+                            describe_type(&field.ty, records, false)
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                format!("record {name} {{ {fields} }}")
+            }
+            None => format!("record {name}"),
+        },
+    }
 }
 
 fn pending_reason(plan: &FunctionPlan) -> String {
     if matches!(plan.input_strategy, InputStrategy::VariableInputBuffer) {
-        return "variable input awaits allocation-free/reviewed lowering".to_owned();
+        return "variable input requires complex adaptation or reviewed retained/callback semantics".to_owned();
     }
     if plan.source_status == "manual" {
         return "semantic/manual lowering required".to_owned();
@@ -191,13 +569,18 @@ fn direct_type(ty: &SemanticType) -> bool {
 
 fn wire_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bool {
     match ty {
-        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => true,
+        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => {
+            true
+        }
         SemanticType::FixedArray { element, length } => {
             *length <= 64 && wire_type(element, records)
         }
-        SemanticType::Record { name } => records
-            .get(name)
-            .is_some_and(|record| record.fields.iter().all(|field| wire_type(&field.ty, records))),
+        SemanticType::Record { name } => records.get(name).is_some_and(|record| {
+            record
+                .fields
+                .iter()
+                .all(|field| wire_type(&field.ty, records))
+        }),
         _ => false,
     }
 }
@@ -214,7 +597,9 @@ fn record_index(model: &ApiModel) -> BTreeMap<String, RecordModel> {
     let mut records = BTreeMap::new();
     for module in &model.modules {
         for record in &module.records {
-            records.entry(record.name.clone()).or_insert_with(|| record.clone());
+            records
+                .entry(record.name.clone())
+                .or_insert_with(|| record.clone());
         }
     }
     records

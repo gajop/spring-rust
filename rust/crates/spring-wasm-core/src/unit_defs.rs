@@ -70,10 +70,7 @@ pub fn get_unit_def_name_into(unit_def_id: i32, output: &mut [u8]) -> Result<Byt
 }
 
 #[inline]
-pub fn get_unit_def_human_name_into(
-    unit_def_id: i32,
-    output: &mut [u8],
-) -> Result<ByteBufferFill> {
+pub fn get_unit_def_human_name_into(unit_def_id: i32, output: &mut [u8]) -> Result<ByteBufferFill> {
     #[cfg(target_arch = "wasm32")]
     {
         let (pointer, capacity) = output_parts(output);

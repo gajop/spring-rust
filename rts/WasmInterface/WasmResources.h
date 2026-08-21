@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -86,6 +87,8 @@ public:
 	std::uint32_t CallbackDepth() const { return callbackDepth; }
 
 private:
+	static constexpr std::uint32_t MaxCallbackDepth = 32;
+
 	std::uint64_t instructionFuel;
 	std::uint64_t hostWork = 0;
 	std::uint64_t hostWorkLimit;
@@ -93,6 +96,5 @@ private:
 	std::uint32_t hostCallDepth = 0;
 	std::uint32_t callbackDepth = 0;
 	std::uint32_t nonReentrantCallbackDepth = 0;
-	std::vector<bool> callbackReentry;
-	static constexpr std::uint32_t MaxCallbackDepth = 32;
+	std::array<bool, MaxCallbackDepth> callbackReentry{};
 };

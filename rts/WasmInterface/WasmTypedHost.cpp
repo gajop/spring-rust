@@ -155,14 +155,14 @@ bool WasmTypedHost::AnyActive()
 	return WasmCoreHost::AnyActive() || !Hosts().empty();
 }
 
-bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query, void* result,
-	std::string& error)
+bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query, bool synced,
+	void* result, std::string& error)
 {
 	if (WasmCoreHost::AnyActive()) {
 		bool coreHandled = false;
 		std::string coreError;
 		if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
-				name, query, result, coreHandled, coreError)) {
+				name, query, synced, result, coreHandled, coreError)) {
 			error = coreError.empty() ? "ordered Core Wasm callin dispatch failed" : coreError;
 			// A failing Core callin is still handled: do not fall through and
 			// invoke a second transport for the same engine event.

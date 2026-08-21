@@ -50,12 +50,7 @@ pub fn get_unit_rules_param_f32(unit_id: i32, name: &str) -> Result<f32> {
 }
 
 #[inline]
-pub fn set_unit_rules_param_f32(
-    unit_id: i32,
-    name: &str,
-    value: f32,
-    los: i32,
-) -> Result<bool> {
+pub fn set_unit_rules_param_f32(unit_id: i32, name: &str, value: f32, los: i32) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
         let (pointer, length) = string_parts(name)?;

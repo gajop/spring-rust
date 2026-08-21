@@ -1,0 +1,432 @@
+{
+  "version": 1,
+  "transports": [
+    {
+      "module": "cob_script",
+      "function": "CallCOBScript",
+      "import_name": "call-cob-script",
+      "class": "reviewed-mutating-variable-result-single-call",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "ActiveFBO",
+      "import_name": "active-fbo",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "ActiveShader",
+      "import_name": "active-shader",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "BeginEnd",
+      "import_name": "begin-end",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "CreateList",
+      "import_name": "create-list",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "CreateTexture",
+      "import_name": "create-texture",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "CreateTextureAtlas",
+      "import_name": "create-texture-atlas",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "DrawFuncAtUnit",
+      "import_name": "draw-func-at-unit",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "PushPopMatrix",
+      "import_name": "push-pop-matrix",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "RenderToTexture",
+      "import_name": "render-to-texture",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "RunQuery",
+      "import_name": "run-query",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "gfx",
+      "function": "UnsafeState",
+      "import_name": "unsafe-state",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "math_extra",
+      "function": "Normalize",
+      "import_name": "normalize",
+      "class": "reviewed-owned-mutated-record",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "Echo",
+      "import_name": "echo",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "Log",
+      "import_name": "log",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendAllyChat",
+      "import_name": "send-ally-chat",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendLuaGaiaMsg",
+      "import_name": "send-lua-gaia-msg",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendLuaMenuMsg",
+      "import_name": "send-lua-menu-msg",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendLuaRulesMsg",
+      "import_name": "send-lua-rules-msg",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendLuaUIMsg",
+      "import_name": "send-lua-ui-msg",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendMessage",
+      "import_name": "send-message",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendMessageToAllyTeam",
+      "import_name": "send-message-to-ally-team",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendMessageToPlayer",
+      "import_name": "send-message-to-player",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendMessageToSpectators",
+      "import_name": "send-message-to-spectators",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendMessageToTeam",
+      "import_name": "send-message-to-team",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendPrivateChat",
+      "import_name": "send-private-chat",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendPublicChat",
+      "import_name": "send-public-chat",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendSkirmishAIMessage",
+      "import_name": "send-skirmish-ai-message",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendSpectatorChat",
+      "import_name": "send-spectator-chat",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "messages",
+      "function": "SendToUnsynced",
+      "import_name": "send-to-unsynced",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "rml_ui",
+      "function": "ContextAddEventListener",
+      "import_name": "context-add-event-listener",
+      "class": "reviewed-retained-callback-resource",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "rml_ui",
+      "function": "DataModelBindEvent",
+      "import_name": "data-model-bind-event",
+      "class": "reviewed-retained-callback-resource",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "rml_ui",
+      "function": "DataModelUnbindEvent",
+      "import_name": "data-model-unbind-event",
+      "class": "reviewed-retained-callback-resource",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "rml_ui",
+      "function": "ElementAddEventListener",
+      "import_name": "element-add-event-listener",
+      "class": "reviewed-retained-callback-resource",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "rml_ui",
+      "function": "EventListenerOnAttach",
+      "import_name": "event-listener-on-attach",
+      "class": "reviewed-retained-listener-dispatch",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "rml_ui",
+      "function": "EventListenerOnDetach",
+      "import_name": "event-listener-on-detach",
+      "class": "reviewed-retained-listener-dispatch",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "rml_ui",
+      "function": "EventListenerProcessEvent",
+      "import_name": "event-listener-process-event",
+      "class": "reviewed-retained-listener-dispatch",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "system_control",
+      "function": "CallAsTeam",
+      "import_name": "call-as-team",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "terrain",
+      "function": "GetGroundExtremes",
+      "import_name": "get-ground-extremes",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "terrain",
+      "function": "GetHeightMapSize",
+      "import_name": "get-height-map-size",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "terrain",
+      "function": "GetWaterPlaneLevel",
+      "import_name": "get-water-plane-level",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "terrain",
+      "function": "IsPosInMap",
+      "import_name": "is-pos-in-map",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "terrain_control",
+      "function": "SetHeightMapFunc",
+      "import_name": "set-height-map-func",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "terrain_control",
+      "function": "SetOriginalHeightMapFunc",
+      "import_name": "set-original-height-map-func",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "terrain_control",
+      "function": "SetSmoothMeshFunc",
+      "import_name": "set-smooth-mesh-func",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "unit_control",
+      "function": "GiveOrderToUnit",
+      "import_name": "give-order-to-unit",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "unit_defs",
+      "function": "GetUnitDefHumanName",
+      "import_name": "get-unit-def-human-name",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "unit_defs",
+      "function": "GetUnitDefName",
+      "import_name": "get-unit-def-name",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_commands",
+      "function": "GetUnitCommands",
+      "import_name": "get-unit-commands",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_commands",
+      "function": "GiveOrder",
+      "import_name": "give-order",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_commands",
+      "function": "GiveOrderToUnitMap",
+      "import_name": "give-order-to-unit-map",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetAllUnits",
+      "import_name": "get-all-units",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetTeamUnits",
+      "import_name": "get-team-units",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetTeamUnitsByDefs",
+      "import_name": "get-team-units-by-defs",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetUnitArrayCentroid",
+      "import_name": "get-unit-array-centroid",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetUnitMapCentroid",
+      "import_name": "get-unit-map-centroid",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetUnitsInBox",
+      "import_name": "get-units-in-box",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetUnitsInCylinder",
+      "import_name": "get-units-in-cylinder",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetUnitsInRectangle",
+      "import_name": "get-units-in-rectangle",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "units_query",
+      "function": "GetUnitsInSphere",
+      "import_name": "get-units-in-sphere",
+      "class": "reviewed-handwritten-signature-owner",
+      "source": "reviewed-handwritten"
+    },
+    {
+      "module": "vfs",
+      "function": "UseArchive",
+      "import_name": "use-archive",
+      "class": "reviewed-synchronous-callback",
+      "source": "reviewed-handwritten"
+    }
+  ]
+}

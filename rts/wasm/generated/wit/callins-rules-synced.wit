@@ -345,8 +345,7 @@ interface callins-rules-synced {
   }
 
   record handle-lua-call-query {
-    message: string,
-    message-length: u32,
+    message: list<u8>,
   }
 
   record handle-lua-msg-query {

@@ -28,6 +28,8 @@ enum class UnitAccess : std::uint8_t {
 	Ally,
 };
 
+bool Active();
+
 // The context is deliberately thread-local. Wasm imports execute on the
 // engine thread, and nested imports must restore the caller's perspective
 // rather than inheriting a stale UI read context.
@@ -46,11 +48,13 @@ private:
 // Unlike ScopedContext(false), this leaves an existing perspective untouched
 // when disabled. Core host imports use it so non-UI modules neither pay for a
 // thread-local context swap nor accidentally widen a nested UI perspective.
+// If an outer Core callin already installed the UI perspective, nested imports
+// reuse it instead of saving/rebuilding the same thread-local state each time.
 class ConditionalScopedContext {
 public:
 	explicit ConditionalScopedContext(bool enabled)
 	{
-		if (enabled)
+		if (enabled && !Active())
 			context.emplace(true);
 	}
 
@@ -61,7 +65,6 @@ private:
 	std::optional<ScopedContext> context;
 };
 
-bool Active();
 bool FullRead();
 int ReadPlayer();
 int ReadTeam();

@@ -386,7 +386,10 @@ WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
 			case 5: valid = ValidateMemorySection(section, config, environment == WasmEnvironment::RulesSynced || environment == WasmEnvironment::GaiaSynced, hasMemory, result.error); break;
 			case 6: section.offset = section.bytes.size(); break;
 			case 7: valid = ValidateExportSection(section, config, exports, exportsMemory, result.error); break;
-			case 8: section.offset = section.bytes.size(); break;
+			case 8:
+				result.error = "Spring Core ABI does not allow a start function";
+				valid = false;
+				break;
 			case 9: section.offset = section.bytes.size(); break;
 			case 10: valid = ValidateCodeSection(section, config, result.error); break;
 			case 11: section.offset = section.bytes.size(); break;

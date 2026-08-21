@@ -15,24 +15,44 @@ use std::{
 mod model {
     pub use spring_native_codegen::model::*;
 }
+#[path = "../callin_semantics.rs"]
+mod callin_semantics;
 #[path = "../render_core_wasm.rs"]
 mod render_core_wasm;
+#[path = "../render_core_wasm_borrowed_host.rs"]
+mod render_core_wasm_borrowed_host;
+#[path = "../render_core_wasm_callin_coverage.rs"]
+mod render_core_wasm_callin_coverage;
+#[path = "../render_core_wasm_callin_exec.rs"]
+mod render_core_wasm_callin_exec;
+#[path = "../render_core_wasm_callin_scratch.rs"]
+mod render_core_wasm_callin_scratch;
 #[path = "../render_core_wasm_callins.rs"]
 mod render_core_wasm_callins;
+#[path = "../render_core_wasm_dynamic_input_guest.rs"]
+mod render_core_wasm_dynamic_input_guest;
+#[path = "../render_core_wasm_dynamic_input_host.rs"]
+mod render_core_wasm_dynamic_input_host;
+#[path = "../render_core_wasm_dynamic_output_guest.rs"]
+mod render_core_wasm_dynamic_output_guest;
+#[path = "../render_core_wasm_dynamic_output_host.rs"]
+mod render_core_wasm_dynamic_output_host;
 #[path = "../render_core_wasm_guest.rs"]
 mod render_core_wasm_guest;
 #[path = "../render_core_wasm_host.rs"]
 mod render_core_wasm_host;
 #[path = "../render_core_wasm_option_host.rs"]
 mod render_core_wasm_option_host;
+#[path = "../render_core_wasm_registry.rs"]
+mod render_core_wasm_registry;
+#[path = "../render_core_wasm_variable_guest.rs"]
+mod render_core_wasm_variable_guest;
 #[path = "../render_core_wasm_variable_host.rs"]
 mod render_core_wasm_variable_host;
 #[path = "../render_core_wasm_variable_io_host.rs"]
 mod render_core_wasm_variable_io_host;
 #[path = "../render_core_wasm_variable_output_host.rs"]
 mod render_core_wasm_variable_output_host;
-#[path = "../render_core_wasm_registry.rs"]
-mod render_core_wasm_registry;
 
 fn main() {
     if let Err(error) = run() {
@@ -88,6 +108,7 @@ fn run() -> Result<()> {
         modules,
         callins: callin_model,
     };
+    callin_semantics::normalize(&mut model)?;
     callins::validate_model(&model.callins, &model)?;
 
     let annotations_path = api_dir.join("WasmAnnotations.def");
@@ -102,6 +123,22 @@ fn run() -> Result<()> {
                 "native Wasm adapter coverage is incomplete:\n{}",
                 adapter_errors.join("\n")
             ));
+        }
+        if arguments.only.is_none() {
+            let core_callin_errors = render_core_wasm_callin_coverage::coverage_errors(&model)?;
+            if !core_callin_errors.is_empty() {
+                return Err(anyhow!(
+                    "Core Wasm callin coverage is incomplete:\n{}",
+                    core_callin_errors.join("\n")
+                ));
+            }
+            let core_callout_errors = render_core_wasm_registry::coverage_errors(&model);
+            if !core_callout_errors.is_empty() {
+                return Err(anyhow!(
+                    "Core Wasm callout coverage is incomplete:\n{}",
+                    core_callout_errors.join("\n")
+                ));
+            }
         }
     }
 
@@ -144,10 +181,6 @@ fn run() -> Result<()> {
         &(serde_json::to_string_pretty(&model.callins)? + "\n"),
     )?;
 
-    // Runtime-neutral Core ABI plans plus executable callback coverage. The
-    // validator registry is derived only from callbacks that meet the current
-    // fast-path policy, never from the broader planning inventory or known
-    // allocation-heavy variable-input scaffolding.
     write(
         &arguments.output.join("core-abi.json"),
         &render_core_wasm::render_json(&model)?,
@@ -155,6 +188,32 @@ fn run() -> Result<()> {
     write(
         &arguments.output.join("core-callin-plan.json"),
         &render_core_wasm_callins::render_json(&model)?,
+    )?;
+    write(
+        &arguments
+            .output
+            .join("core-callin-executable-coverage.json"),
+        &render_core_wasm_callin_coverage::render_json(&model)?,
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedCallinBindings.h"),
+        &render_core_wasm_callin_exec::render_header(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedCallinBindings.cpp"),
+        &render_core_wasm_callin_exec::render_cpp(&model),
+    )?;
+    write(
+        &arguments
+            .output
+            .join("WasmCoreGeneratedScratchCallinBindings.h"),
+        &render_core_wasm_callin_scratch::render_header(&model),
+    )?;
+    write(
+        &arguments
+            .output
+            .join("WasmCoreGeneratedScratchCallinBindings.cpp"),
+        &render_core_wasm_callin_scratch::render_cpp(&model),
     )?;
     write(
         &arguments.output.join("WasmCoreAbiInventory.h"),
@@ -184,30 +243,77 @@ fn run() -> Result<()> {
         &arguments.output.join("WasmCoreGeneratedOptionBindings.cpp"),
         &render_core_wasm_option_host::render_cpp(&model),
     )?;
-    // Keep emitting variable-input/combined-I/O source as implementation
-    // scaffolding even though the production build currently excludes it.
+    write(
+        &arguments.output.join("WasmCoreGeneratedBorrowedBindings.h"),
+        &render_core_wasm_borrowed_host::render_header(),
+    )?;
+    write(
+        &arguments
+            .output
+            .join("WasmCoreGeneratedBorrowedBindings.cpp"),
+        &render_core_wasm_borrowed_host::render_cpp(&model),
+    )?;
+
+    // Variable-input production lowering is layered: nested dynamic records are
+    // the fallback, ordinary adaptation handles pointer tables/fixed records,
+    // and borrowed bindings registered later shadow both whenever zero-copy is
+    // safe. Outputs remain caller-owned.
+    write(
+        &arguments
+            .output
+            .join("WasmCoreGeneratedDynamicInputBindings.h"),
+        &render_core_wasm_dynamic_input_host::render_header(),
+    )?;
+    write(
+        &arguments
+            .output
+            .join("WasmCoreGeneratedDynamicInputBindings.cpp"),
+        &render_core_wasm_dynamic_input_host::render_cpp(&model),
+    )?;
     write(
         &arguments.output.join("WasmCoreGeneratedVariableBindings.h"),
         &render_core_wasm_variable_host::render_header(),
     )?;
     write(
-        &arguments.output.join("WasmCoreGeneratedVariableBindings.cpp"),
+        &arguments
+            .output
+            .join("WasmCoreGeneratedVariableBindings.cpp"),
         &render_core_wasm_variable_host::render_cpp(&model),
     )?;
     write(
-        &arguments.output.join("WasmCoreGeneratedVariableOutputBindings.h"),
+        &arguments
+            .output
+            .join("WasmCoreGeneratedVariableOutputBindings.h"),
         &render_core_wasm_variable_output_host::render_header(),
     )?;
     write(
-        &arguments.output.join("WasmCoreGeneratedVariableOutputBindings.cpp"),
+        &arguments
+            .output
+            .join("WasmCoreGeneratedVariableOutputBindings.cpp"),
         &render_core_wasm_variable_output_host::render_cpp(&model),
     )?;
     write(
-        &arguments.output.join("WasmCoreGeneratedVariableIoBindings.h"),
+        &arguments
+            .output
+            .join("WasmCoreGeneratedDynamicOutputBindings.h"),
+        &render_core_wasm_dynamic_output_host::render_header(),
+    )?;
+    write(
+        &arguments
+            .output
+            .join("WasmCoreGeneratedDynamicOutputBindings.cpp"),
+        &render_core_wasm_dynamic_output_host::render_cpp(&model),
+    )?;
+    write(
+        &arguments
+            .output
+            .join("WasmCoreGeneratedVariableIoBindings.h"),
         &render_core_wasm_variable_io_host::render_header(),
     )?;
     write(
-        &arguments.output.join("WasmCoreGeneratedVariableIoBindings.cpp"),
+        &arguments
+            .output
+            .join("WasmCoreGeneratedVariableIoBindings.cpp"),
         &render_core_wasm_variable_io_host::render_cpp(&model),
     )?;
 
@@ -251,6 +357,30 @@ fn run() -> Result<()> {
         &render_core_wasm_guest::render(&model),
     )?;
     write(
+        &sdk_dir.join("core_borrowed.rs"),
+        &render_core_wasm_borrowed_host::render_rust(&model),
+    )?;
+    write(
+        &sdk_dir.join("core_variable.rs"),
+        &render_core_wasm_variable_guest::render(&model),
+    )?;
+    write(
+        &sdk_dir.join("core_dynamic_input.rs"),
+        &render_core_wasm_dynamic_input_guest::render(&model),
+    )?;
+    write(
+        &sdk_dir.join("core_dynamic_output.rs"),
+        &render_core_wasm_dynamic_output_guest::render(&model),
+    )?;
+    write(
+        &sdk_dir.join("core_callins.rs"),
+        &render_core_wasm_callin_exec::render_rust(&model),
+    )?;
+    write(
+        &sdk_dir.join("core_callins_scratch.rs"),
+        &render_core_wasm_callin_scratch::render_rust(&model),
+    )?;
+    write(
         &sdk_dir.join("callins.rs"),
         &render_callins::render_rust(&model),
     )?;
@@ -261,9 +391,7 @@ fn run() -> Result<()> {
     report.push('\n');
     report.push_str(&format!(
         "\n# core-wasm planning\nautomatic={} manual={} unsupported={}\n",
-        core_summary.automatic_count,
-        core_summary.manual_count,
-        core_summary.unsupported_count,
+        core_summary.automatic_count, core_summary.manual_count, core_summary.unsupported_count,
     ));
     if let Err(error) = validation {
         report.push_str("\n# report-mode validation findings\n");
@@ -337,7 +465,8 @@ impl Arguments {
                 }
                 "--output" => {
                     index += 1;
-                    output = PathBuf::from(values.get(index).context("--output needs a path")?);
+                    output =
+                        PathBuf::from(values.get(index).context("--output needs a path")?.clone());
                 }
                 "--only" => {
                     index += 1;

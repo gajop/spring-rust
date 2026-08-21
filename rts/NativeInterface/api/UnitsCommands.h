@@ -112,14 +112,14 @@ struct FindUnitCmdDescResult { const Error* error; int32_t cmdIndex; bool found;
 struct GetCommandParamsQuery { RECOIL_WASM_RECORD("CommandFFI") const CommandFFI* command; };
 struct GetCommandParamsResult { const Error* error; float* params; uint32_t count; };
 
-struct GiveOrderQuery { int32_t cmdID; float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };
+struct GiveOrderQuery { int32_t cmdID; const float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };
 struct GiveOrderResult { const Error* error; bool success; };
 
 struct GiveOrderToUnitMapQuery {
 	const int32_t* unitIDs;
 	uint32_t count;
 	int32_t cmdID;
-	float* params;
+	const float* params;
 	uint32_t paramCount;
 	uint32_t options;
 	int32_t timeout;

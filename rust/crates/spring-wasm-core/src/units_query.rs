@@ -149,7 +149,8 @@ pub fn get_team_unit_def_count(team_id: i32, unit_def_id: i32) -> Result<u32> {
     #[cfg(target_arch = "wasm32")]
     {
         // SAFETY: generated scalar signature; no guest memory is touched.
-        let packed = unsafe { units_query_raw::get_team_unit_def_count(team_id, unit_def_id) } as u64;
+        let packed =
+            unsafe { units_query_raw::get_team_unit_def_count(team_id, unit_def_id) } as u64;
         let status = (packed >> 32) as u32 as i32;
         return if status == 0 {
             Ok(packed as u32)
@@ -299,7 +300,9 @@ pub fn get_unit_nearest_ally(unit_id: i32, range: f32) -> Result<i32> {
     #[cfg(target_arch = "wasm32")]
     {
         // SAFETY: generated scalar signature.
-        return super::unpack_i32(unsafe { units_query_raw::get_unit_nearest_ally(unit_id, range) });
+        return super::unpack_i32(unsafe {
+            units_query_raw::get_unit_nearest_ally(unit_id, range)
+        });
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -319,8 +322,16 @@ pub fn get_unit_nearest_enemy(
     #[cfg(target_arch = "wasm32")]
     {
         let flags = (if use_los { NEAREST_USE_LOS } else { 0 })
-            | (if sphere_distance { NEAREST_SPHERE_DISTANCE } else { 0 })
-            | (if check_sight_distance { NEAREST_CHECK_SIGHT_DISTANCE } else { 0 });
+            | (if sphere_distance {
+                NEAREST_SPHERE_DISTANCE
+            } else {
+                0
+            })
+            | (if check_sight_distance {
+                NEAREST_CHECK_SIGHT_DISTANCE
+            } else {
+                0
+            });
         // SAFETY: generated scalar signature.
         return super::unpack_i32(unsafe {
             units_query_raw::get_unit_nearest_enemy(unit_id, range, flags as i32)
@@ -328,7 +339,13 @@ pub fn get_unit_nearest_enemy(
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let _ = (unit_id, range, use_los, sphere_distance, check_sight_distance);
+        let _ = (
+            unit_id,
+            range,
+            use_los,
+            sphere_distance,
+            check_sight_distance,
+        );
         Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
     }
 }

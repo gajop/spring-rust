@@ -39191,15 +39191,13 @@ impl FromValue for GroupChangedQuery {
 #[allow(dead_code, non_camel_case_types)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct HandleLuaCallQuery {
-    pub message: String,
-    pub message_length: u32,
+    pub message: Vec<u8>,
 }
 
 impl IntoValue for HandleLuaCallQuery {
     fn into_value(self) -> Value {
         let mut fields = std::collections::BTreeMap::new();
         fields.insert("message".to_string(), self.message.into_value());
-        fields.insert("messageLength".to_string(), self.message_length.into_value());
         Value::Record(fields)
     }
 }
@@ -39210,7 +39208,6 @@ impl FromValue for HandleLuaCallQuery {
         let Value::Record(mut fields) = value else { return Err(ApiError::with_detail(102, crate::ErrorCategory::Internal, "expected record")); };
         Ok(Self {
             message: FromValue::from_value(fields.remove("message").ok_or_else(|| generated_missing_field("message"))?)?,
-            message_length: FromValue::from_value(fields.remove("messageLength").ok_or_else(|| generated_missing_field("messageLength"))?)?,
         })
     }
 }
@@ -45374,15 +45371,13 @@ impl FromValue for RectangleQuery {
 #[allow(dead_code, non_camel_case_types)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct RecvFromSyncedQuery {
-    pub message: String,
-    pub message_length: u32,
+    pub message: Vec<u8>,
 }
 
 impl IntoValue for RecvFromSyncedQuery {
     fn into_value(self) -> Value {
         let mut fields = std::collections::BTreeMap::new();
         fields.insert("message".to_string(), self.message.into_value());
-        fields.insert("messageLength".to_string(), self.message_length.into_value());
         Value::Record(fields)
     }
 }
@@ -45393,7 +45388,6 @@ impl FromValue for RecvFromSyncedQuery {
         let Value::Record(mut fields) = value else { return Err(ApiError::with_detail(102, crate::ErrorCategory::Internal, "expected record")); };
         Ok(Self {
             message: FromValue::from_value(fields.remove("message").ok_or_else(|| generated_missing_field("message"))?)?,
-            message_length: FromValue::from_value(fields.remove("messageLength").ok_or_else(|| generated_missing_field("messageLength"))?)?,
         })
     }
 }

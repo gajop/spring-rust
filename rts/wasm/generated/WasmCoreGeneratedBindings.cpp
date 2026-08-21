@@ -6588,55 +6588,6 @@ wasm_trap_t* Core_terrain_get_ground_blocked(void* environment, wasmtime_caller_
     return nullptr;
 }
 
-wasm_trap_t* Core_terrain_get_ground_extremes(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->terrain == nullptr ||
-        state->native->terrain->GetGroundExtremes == nullptr)
-        return Trap("GetGroundExtremes generated Core binding is unavailable");
-    if (2 != 0 && (slots == nullptr || slotCount != 2))
-        return Trap("GetGroundExtremes generated Core ABI signature mismatch");
-    if (2 == 0 && slotCount != 0)
-        return Trap("GetGroundExtremes generated Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 3u, budgetError);
-    if (!guard.Ok())
-        return Trap(budgetError);
-
-    std::string memoryError;
-    if (!EnsureMemory(state, caller, memoryError))
-        return Trap(memoryError);
-    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
-    if (!state->memory.Contains(output, 16u)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
-        return nullptr;
-    }
-
-    GetGroundExtremesQuery query{};
-    query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
-    GetGroundExtremesResult result{};
-    state->native->terrain->GetGroundExtremes(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    if (errorCode != 0) {
-        slots[0].i32 = errorCode;
-        return nullptr;
-    }
-    std::array<std::uint8_t, 16> wire{};
-    WireWriter writer(wire);
-    if (!writer.F32(result.initMinHeight)) return Trap("generated Core wire overflow");
-    if (!writer.F32(result.initMaxHeight)) return Trap("generated Core wire overflow");
-    if (!writer.F32(result.currMinHeight)) return Trap("generated Core wire overflow");
-    if (!writer.F32(result.currMaxHeight)) return Trap("generated Core wire overflow");
-    if (!writer.Finish(4u))
-        return Trap("generated Core wire layout mismatch for GetGroundExtremes");
-    if (!state->memory.Write(output, wire.data(), wire.size()))
-        return Trap("generated Core output range changed unexpectedly");
-    slots[0].i32 = 0;
-    return nullptr;
-}
-
 wasm_trap_t* Core_terrain_get_ground_height(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -6743,53 +6694,6 @@ wasm_trap_t* Core_terrain_get_ground_orig_height(void* environment, wasmtime_cal
     return nullptr;
 }
 
-wasm_trap_t* Core_terrain_get_height_map_size(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->terrain == nullptr ||
-        state->native->terrain->GetHeightMapSize == nullptr)
-        return Trap("GetHeightMapSize generated Core binding is unavailable");
-    if (2 != 0 && (slots == nullptr || slotCount != 2))
-        return Trap("GetHeightMapSize generated Core ABI signature mismatch");
-    if (2 == 0 && slotCount != 0)
-        return Trap("GetHeightMapSize generated Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 3u, budgetError);
-    if (!guard.Ok())
-        return Trap(budgetError);
-
-    std::string memoryError;
-    if (!EnsureMemory(state, caller, memoryError))
-        return Trap(memoryError);
-    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
-    if (!state->memory.Contains(output, 8u)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
-        return nullptr;
-    }
-
-    GetHeightMapSizeQuery query{};
-    query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
-    GetHeightMapSizeResult result{};
-    state->native->terrain->GetHeightMapSize(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    if (errorCode != 0) {
-        slots[0].i32 = errorCode;
-        return nullptr;
-    }
-    std::array<std::uint8_t, 8> wire{};
-    WireWriter writer(wire);
-    if (!writer.I32(result.pointsX)) return Trap("generated Core wire overflow");
-    if (!writer.I32(result.pointsZ)) return Trap("generated Core wire overflow");
-    if (!writer.Finish(4u))
-        return Trap("generated Core wire layout mismatch for GetHeightMapSize");
-    if (!state->memory.Write(output, wire.data(), wire.size()))
-        return Trap("generated Core output range changed unexpectedly");
-    slots[0].i32 = 0;
-    return nullptr;
-}
-
 wasm_trap_t* Core_terrain_get_smooth_mesh_height(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -6841,80 +6745,6 @@ wasm_trap_t* Core_terrain_get_water_level(void* environment, wasmtime_caller_t* 
     state->native->terrain->GetWaterLevel(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(std::bit_cast<std::uint32_t>(result.level), errorCode));
-    return nullptr;
-}
-
-wasm_trap_t* Core_terrain_get_water_plane_level(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->terrain == nullptr ||
-        state->native->terrain->GetWaterPlaneLevel == nullptr)
-        return Trap("GetWaterPlaneLevel generated Core binding is unavailable");
-    if (1 != 0 && (slots == nullptr || slotCount != 1))
-        return Trap("GetWaterPlaneLevel generated Core ABI signature mismatch");
-    if (1 == 0 && slotCount != 0)
-        return Trap("GetWaterPlaneLevel generated Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 2u, budgetError);
-    if (!guard.Ok())
-        return Trap(budgetError);
-
-    GetWaterPlaneLevelQuery query{};
-    query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
-    GetWaterPlaneLevelResult result{};
-    state->native->terrain->GetWaterPlaneLevel(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    slots[0].i64 = static_cast<std::int64_t>(PackU32(std::bit_cast<std::uint32_t>(result.level), errorCode));
-    return nullptr;
-}
-
-wasm_trap_t* Core_terrain_is_pos_in_map(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->terrain == nullptr ||
-        state->native->terrain->IsPosInMap == nullptr)
-        return Trap("IsPosInMap generated Core binding is unavailable");
-    if (3 != 0 && (slots == nullptr || slotCount != 3))
-        return Trap("IsPosInMap generated Core ABI signature mismatch");
-    if (3 == 0 && slotCount != 0)
-        return Trap("IsPosInMap generated Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 4u, budgetError);
-    if (!guard.Ok())
-        return Trap(budgetError);
-
-    std::string memoryError;
-    if (!EnsureMemory(state, caller, memoryError))
-        return Trap(memoryError);
-    const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
-    if (!state->memory.Contains(output, 8u)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
-        return nullptr;
-    }
-
-    IsPosInMapQuery query{};
-    query.x = slots[0].f32;
-    query.z = slots[1].f32;
-    IsPosInMapResult result{};
-    state->native->terrain->IsPosInMap(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    if (errorCode != 0) {
-        slots[0].i32 = errorCode;
-        return nullptr;
-    }
-    std::array<std::uint8_t, 8> wire{};
-    WireWriter writer(wire);
-    if (!writer.Bool(result.inMap)) return Trap("generated Core wire overflow");
-    if (!writer.Bool(result.inPlayArea)) return Trap("generated Core wire overflow");
-    if (!writer.Finish(4u))
-        return Trap("generated Core wire layout mismatch for IsPosInMap");
-    if (!state->memory.Write(output, wire.data(), wire.size()))
-        return Trap("generated Core output range changed unexpectedly");
-    slots[0].i32 = 0;
     return nullptr;
 }
 
@@ -29966,13 +29796,6 @@ bool RegisterGeneratedImports(wasmtime_linker_t* linker, HostState* state, std::
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGenerated(linker, "spring:terrain", "get-ground-extremes",
-                MakeFuncType(params, 2, results, 1), Core_terrain_get_ground_extremes, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_F32, WASM_F32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:terrain", "get-ground-height",
@@ -29994,13 +29817,6 @@ bool RegisterGeneratedImports(wasmtime_linker_t* linker, HostState* state, std::
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGenerated(linker, "spring:terrain", "get-height-map-size",
-                MakeFuncType(params, 2, results, 1), Core_terrain_get_height_map_size, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_F32, WASM_F32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:terrain", "get-smooth-mesh-height",
@@ -30012,20 +29828,6 @@ bool RegisterGeneratedImports(wasmtime_linker_t* linker, HostState* state, std::
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:terrain", "get-water-level",
                 MakeFuncType(params, 2, results, 1), Core_terrain_get_water_level, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGenerated(linker, "spring:terrain", "get-water-plane-level",
-                MakeFuncType(params, 1, results, 1), Core_terrain_get_water_plane_level, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_F32, WASM_F32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGenerated(linker, "spring:terrain", "is-pos-in-map",
-                MakeFuncType(params, 3, results, 1), Core_terrain_is_pos_in_map, state, error))
             return false;
     }
     {
@@ -34456,6 +34258,6 @@ bool RegisterGeneratedImports(wasmtime_linker_t* linker, HostState* state, std::
     return true;
 }
 
-static_assert(817 >= 0, "generated Core Wasm callback count");
+static_assert(813 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

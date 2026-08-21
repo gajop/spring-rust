@@ -63,7 +63,12 @@ pub fn get_timer_micros() -> Result<u64> {
 
 /// Difference between two timers. Desyncs synced guests.
 #[inline]
-pub fn diff_timers(end_timer: u64, start_timer: u64, return_ms: bool, from_micro_secs: bool) -> Result<f32> {
+pub fn diff_timers(
+    end_timer: u64,
+    start_timer: u64,
+    return_ms: bool,
+    from_micro_secs: bool,
+) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
         let packed = unsafe {

@@ -10,10 +10,16 @@
 struct AddConsoleLineQuery;
 struct BoolCallinResult;
 struct CommandNotifyQuery;
+class WasmExecutionBudget;
 
 namespace recoil::wasm::core {
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
+
+// All variable engine->guest callin paths use the same per-thread guard. This
+// includes hand-specialized and generated scratch serializers. A nested event
+// must never overwrite a scratch region while an outer guest still borrows it.
+bool& VariableCallinScratchInUse();
 
 // Variable-size engine -> guest callins use one guest-owned scratch region.
 // The region is negotiated once at bind time through
@@ -29,11 +35,11 @@ public:
 	bool HasCommandNotify() const { return commandNotify.Present(); }
 	bool AnyPresent() const { return HasAddConsoleLine() || HasCommandNotify(); }
 
-	bool AddConsoleLine(wasmtime_context_t* context, Memory& memory,
-		const AddConsoleLineQuery& query, BoolCallinResult& result,
+	bool AddConsoleLine(wasmtime_context_t* context, WasmExecutionBudget& budget,
+		Memory& memory, const AddConsoleLineQuery& query, BoolCallinResult& result,
 		std::string& error) const;
-	bool CommandNotify(wasmtime_context_t* context, Memory& memory,
-		const CommandNotifyQuery& query, BoolCallinResult& result,
+	bool CommandNotify(wasmtime_context_t* context, WasmExecutionBudget& budget,
+		Memory& memory, const CommandNotifyQuery& query, BoolCallinResult& result,
 		std::string& error) const;
 
 	std::uint32_t ScratchOffset() const { return scratchOffset; }
@@ -48,10 +54,6 @@ private:
 	RawExport commandNotify;
 	std::uint32_t scratchOffset = 0;
 	std::uint32_t scratchCapacity = 0;
-	// A variable callin may re-enter host code. A second variable event while
-	// the outer guest is still consuming this shared region would corrupt its
-	// payload, so reject that uncommon nested path deterministically.
-	mutable bool scratchInUse = false;
 };
 
 #endif

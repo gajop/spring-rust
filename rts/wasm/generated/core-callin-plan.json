@@ -15,8 +15,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -34,6 +37,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -51,7 +56,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowCommand",
@@ -65,6 +72,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -82,7 +91,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowFeatureBuildStep",
@@ -97,7 +108,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 5
+      "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowFeatureCreation",
@@ -113,8 +126,10 @@
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 4,
       "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening"
       ]
     },
     {
@@ -129,6 +144,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -145,6 +162,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -163,8 +182,10 @@
       "fixed_query_bytes": 36,
       "fixed_result_bytes": 4,
       "numeric_flat_query_values": 9,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening"
       ]
     },
     {
@@ -180,7 +201,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 5
+      "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowUnitCloak",
@@ -195,7 +218,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowUnitCreation",
@@ -211,8 +236,11 @@
       "fixed_query_bytes": 32,
       "fixed_result_bytes": 8,
       "numeric_flat_query_values": 8,
+      "scratch_query_eligible": false,
+      "packed_result_values": 2,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening",
+        "fixed result can use one packed i64 Core return"
       ]
     },
     {
@@ -228,7 +256,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 5
+      "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowUnitKamikaze",
@@ -243,7 +273,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowUnitTransfer",
@@ -258,7 +290,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 5
+      "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowUnitTransport",
@@ -273,7 +307,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 6
+      "numeric_flat_query_values": 6,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowUnitTransportPosition",
@@ -289,8 +325,10 @@
       "fixed_query_bytes": 40,
       "fixed_result_bytes": 4,
       "numeric_flat_query_values": 10,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening"
       ]
     },
     {
@@ -306,7 +344,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "AllowWeaponTarget",
@@ -321,7 +361,12 @@
       "result_strategy": "fixed-wire",
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 8,
-      "numeric_flat_query_values": 6
+      "numeric_flat_query_values": 6,
+      "scratch_query_eligible": false,
+      "packed_result_values": 2,
+      "notes": [
+        "fixed result can use one packed i64 Core return"
+      ]
     },
     {
       "name": "AllowWeaponTargetCheck",
@@ -336,7 +381,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "ArchiveCallin",
@@ -353,7 +400,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "CollectGarbage",
@@ -371,7 +423,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "CommandFallback",
@@ -387,6 +444,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -406,6 +465,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -426,7 +487,12 @@
       "result_strategy": "fixed-wire",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 8,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 2,
+      "notes": [
+        "fixed result can use one packed i64 Core return"
+      ]
     },
     {
       "name": "DownloadFailed",
@@ -444,7 +510,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "DownloadFinished",
@@ -462,7 +533,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "DownloadProgress",
@@ -480,7 +556,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "DownloadQueued",
@@ -497,8 +578,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -517,7 +601,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "DrawAlphaObjectsLua",
@@ -535,7 +624,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "DrawBuildSquare",
@@ -552,8 +646,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -571,7 +668,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "DrawMaterial",
@@ -588,7 +687,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "DrawObjectsLua",
@@ -606,7 +707,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "DrawProjectile",
@@ -623,7 +729,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "DrawScreen",
@@ -641,7 +749,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "DrawShield",
@@ -658,7 +771,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "DrawUnit",
@@ -675,7 +790,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "DrawWorldPreParticles",
@@ -693,7 +810,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "Explosion",
@@ -712,8 +834,10 @@
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 4,
       "numeric_flat_query_values": 6,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening"
       ]
     },
     {
@@ -732,7 +856,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "FeatureDamaged",
@@ -750,7 +879,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 36,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 9
+      "numeric_flat_query_values": 9,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "FeatureDestroyed",
@@ -768,7 +902,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "FeatureMoved",
@@ -787,8 +926,11 @@
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 0,
       "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -806,7 +948,12 @@
       "result_strategy": "fixed-wire",
       "fixed_query_bytes": 36,
       "fixed_result_bytes": 8,
-      "numeric_flat_query_values": 9
+      "numeric_flat_query_values": 9,
+      "scratch_query_eligible": false,
+      "packed_result_values": 2,
+      "notes": [
+        "fixed result can use one packed i64 Core return"
+      ]
     },
     {
       "name": "Float3Callin",
@@ -825,8 +972,11 @@
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
       "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -845,7 +995,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "GameFramePost",
@@ -863,7 +1018,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "GameID",
@@ -880,8 +1040,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -899,8 +1062,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -919,7 +1085,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "GamePreload",
@@ -937,7 +1108,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 0,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 0
+      "numeric_flat_query_values": 0,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "GameProgress",
@@ -953,7 +1129,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "GameSetup",
@@ -966,10 +1147,13 @@
         "ui"
       ],
       "query_strategy": "variable-scratch",
-      "result_strategy": "fixed-wire",
-      "fixed_result_bytes": 8,
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -988,7 +1172,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 0,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 0
+      "numeric_flat_query_values": 0,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "GroupChanged",
@@ -1006,7 +1195,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "HandleLuaCall",
@@ -1022,8 +1213,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -1040,8 +1234,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -1056,11 +1253,14 @@
         "gaia-unsynced"
       ],
       "query_strategy": "direct",
-      "result_strategy": "manual",
+      "result_strategy": "empty",
       "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
       "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
       "notes": [
-        "variable/manual result needs reviewed guest-to-host return lowering"
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -1079,7 +1279,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "KeyPress",
@@ -1096,6 +1298,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -1115,6 +1319,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -1136,8 +1342,11 @@
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
       "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -1156,7 +1365,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "MapDrawCmd",
@@ -1173,6 +1387,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -1193,7 +1409,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "MiniMapGeometryChanged",
@@ -1211,7 +1432,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 32,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 8
+      "numeric_flat_query_values": 8,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "MiniMapRotationChanged",
@@ -1229,7 +1455,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "MiniMapStateChanged",
@@ -1247,7 +1478,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "MouseMove",
@@ -1265,7 +1501,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 5
+      "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "MousePress",
@@ -1283,7 +1521,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "MouseRelease",
@@ -1301,7 +1541,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "MouseWheel",
@@ -1319,7 +1564,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "MoveCtrlNotify",
@@ -1336,7 +1583,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "PlayerAdded",
@@ -1354,7 +1603,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "PlayerChanged",
@@ -1372,7 +1626,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "PlayerRemoved",
@@ -1390,7 +1649,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "Pong",
@@ -1406,7 +1670,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "ProjectileEvent",
@@ -1424,7 +1693,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "RectChanged",
@@ -1442,7 +1716,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "RecvFromSynced",
@@ -1456,8 +1735,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -1476,7 +1758,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "ResourceExcess",
@@ -1492,6 +1779,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -1511,7 +1800,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "ScreenPosition",
@@ -1529,7 +1823,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "ScreenTooltip",
@@ -1547,6 +1843,7 @@
       "result_strategy": "manual",
       "fixed_query_bytes": 8,
       "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
       "notes": [
         "variable/manual result needs reviewed guest-to-host return lowering"
       ]
@@ -1567,8 +1864,10 @@
       "fixed_query_bytes": 52,
       "fixed_result_bytes": 4,
       "numeric_flat_query_values": 13,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening"
       ]
     },
     {
@@ -1587,7 +1886,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 0,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 0
+      "numeric_flat_query_values": 0,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "SimpleCallin",
@@ -1605,7 +1909,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "StockpileChanged",
@@ -1623,7 +1932,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 6
+      "numeric_flat_query_values": 6,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "SunChanged",
@@ -1641,7 +1955,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "TeamChanged",
@@ -1659,7 +1978,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "TeamDied",
@@ -1677,7 +2001,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "TerraformComplete",
@@ -1694,7 +2023,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 6
+      "numeric_flat_query_values": 6,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "TextEditing",
@@ -1711,6 +2042,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -1730,6 +2063,8 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
       "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
       "notes": [
         "variable payload should use one cached guest callin scratch region"
       ]
@@ -1750,7 +2085,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitCmdDone",
@@ -1767,8 +2107,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -1786,8 +2129,11 @@
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
       "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
       "notes": [
-        "variable payload should use one cached guest callin scratch region"
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -1806,7 +2152,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 6
+      "numeric_flat_query_values": 6,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitCreated",
@@ -1824,7 +2175,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitDamaged",
@@ -1842,7 +2198,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 40,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 10
+      "numeric_flat_query_values": 10,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitDestroyed",
@@ -1860,7 +2221,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 28,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 7
+      "numeric_flat_query_values": 7,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitExperience",
@@ -1878,7 +2244,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 5
+      "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitFeatureCollision",
@@ -1896,7 +2267,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "UnitFinished",
@@ -1914,7 +2287,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitFromFactory",
@@ -1932,7 +2310,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 24,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 6
+      "numeric_flat_query_values": 6,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitGiven",
@@ -1950,7 +2333,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitHarvestStorageFull",
@@ -1968,7 +2356,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitIdle",
@@ -1986,7 +2379,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitLoaded",
@@ -2004,7 +2402,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 5
+      "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitLosEvent",
@@ -2022,7 +2425,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitMoveEvent",
@@ -2040,7 +2448,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitMovementClassEvent",
@@ -2058,7 +2471,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitPreDamaged",
@@ -2075,7 +2493,12 @@
       "result_strategy": "fixed-wire",
       "fixed_query_bytes": 40,
       "fixed_result_bytes": 8,
-      "numeric_flat_query_values": 10
+      "numeric_flat_query_values": 10,
+      "scratch_query_eligible": false,
+      "packed_result_values": 2,
+      "notes": [
+        "fixed result can use one packed i64 Core return"
+      ]
     },
     {
       "name": "UnitReverseBuilt",
@@ -2093,7 +2516,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 12,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 3
+      "numeric_flat_query_values": 3,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitSeismicPing",
@@ -2112,8 +2540,11 @@
       "fixed_query_bytes": 28,
       "fixed_result_bytes": 0,
       "numeric_flat_query_values": 7,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+        "fixed numeric record can use allocation-free scalar flattening",
+        "ignored aggregation elides the guest result ABI"
       ]
     },
     {
@@ -2132,7 +2563,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitTaken",
@@ -2150,7 +2586,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 4
+      "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "UnitUnitCollision",
@@ -2168,7 +2609,9 @@
       "result_strategy": "direct",
       "fixed_query_bytes": 8,
       "fixed_result_bytes": 4,
-      "numeric_flat_query_values": 2
+      "numeric_flat_query_values": 2,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
     },
     {
       "name": "UnitUnloaded",
@@ -2186,7 +2629,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 20,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 5
+      "numeric_flat_query_values": 5,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "Update",
@@ -2202,7 +2650,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 4,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 1
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "ViewResize",
@@ -2220,7 +2673,12 @@
       "result_strategy": "empty",
       "fixed_query_bytes": 64,
       "fixed_result_bytes": 0,
-      "numeric_flat_query_values": 16
+      "numeric_flat_query_values": 16,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
     },
     {
       "name": "WorldTooltip",
@@ -2236,8 +2694,9 @@
       "result_strategy": "manual",
       "fixed_query_bytes": 24,
       "numeric_flat_query_values": 6,
+      "scratch_query_eligible": false,
       "notes": [
-        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature",
+        "fixed numeric record can use allocation-free scalar flattening",
         "variable/manual result needs reviewed guest-to-host return lowering"
       ]
     }
@@ -2250,8 +2709,8 @@
   },
   "by_result_strategy": {
     "direct": 43,
-    "empty": 74,
-    "fixed-wire": 6,
-    "manual": 3
+    "empty": 76,
+    "fixed-wire": 5,
+    "manual": 2
   }
 }

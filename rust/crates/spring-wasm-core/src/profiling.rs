@@ -29,7 +29,12 @@ mod raw {
         #[link_name = "get-timer-micros"]
         pub fn get_timer_micros() -> i64;
         #[link_name = "diff-timers"]
-        pub fn diff_timers(end_timer: i64, start_timer: i64, return_ms: i32, from_micros: i32) -> i64;
+        pub fn diff_timers(
+            end_timer: i64,
+            start_timer: i64,
+            return_ms: i32,
+            from_micros: i32,
+        ) -> i64;
         #[link_name = "get-frame-timer"]
         pub fn get_frame_timer(last_frame_time: i32) -> i64;
         #[link_name = "get-draw-seconds"]

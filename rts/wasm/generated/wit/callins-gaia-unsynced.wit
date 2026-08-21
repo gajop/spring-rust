@@ -226,8 +226,7 @@ interface callins-gaia-unsynced {
   }
 
   record handle-lua-call-query {
-    message: string,
-    message-length: u32,
+    message: list<u8>,
   }
 
   record handle-lua-msg-query {
@@ -398,8 +397,7 @@ interface callins-gaia-unsynced {
   }
 
   record recv-from-synced-query {
-    message: string,
-    message-length: u32,
+    message: list<u8>,
   }
 
   record render-unit-destroyed-query {

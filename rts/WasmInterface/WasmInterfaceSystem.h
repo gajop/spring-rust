@@ -15,7 +15,7 @@
 #include "WasmRuntime.h"
 
 class WasmCoreHost;
-enum class WasmCoreCallin : std::uint8_t;
+enum class WasmCoreCallin : std::uint16_t;
 
 class WasmInterfaceSystem {
 public:
@@ -76,8 +76,12 @@ public:
 		WasmValue* valueResult, void* nativeResult, bool& handled,
 		std::string& error);
 
+	// The NativeInterface event seam already knows whether this dispatch is on
+	// the synced or unsynced side. Pass that fact through instead of inferring it
+	// from a small hardcoded callin-name set; many generated callins are valid on
+	// both sides.
 	static bool DispatchActiveCoreCallin(std::string_view name, const void* query,
-		void* nativeResult, bool& handled, std::string& error);
+		bool synced, void* nativeResult, bool& handled, std::string& error);
 
 	bool DispatchSyncedMessage(std::string_view message, std::string& error);
 

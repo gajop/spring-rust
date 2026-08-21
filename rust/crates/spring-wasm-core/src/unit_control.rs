@@ -39,14 +39,7 @@ pub fn give_order_to_unit(
             (pointer as u32 as i32, params.len() as u32 as i32)
         };
         let packed = unsafe {
-            raw::give_order_to_unit(
-                unit_id,
-                cmd_id,
-                pointer,
-                count,
-                options as i32,
-                timeout,
-            )
+            raw::give_order_to_unit(unit_id, cmd_id, pointer, count, options as i32, timeout)
         } as u64;
         let status = (packed >> 32) as u32 as i32;
         if status != 0 {

@@ -5,18 +5,18 @@
 // message, RulesParams and Terrain-read wrappers that once lived here are now
 // in profiling/messages/rules_params/terrain, which validate their inputs; the
 // duplicates here made every one of those names ambiguous through `lib.rs`.
+// `set_height_map_func` left for the same reason: the reviewed synchronous
+// callback wrapper in `terrain_control` is the single definition.
 
 use super::{ApiError, ErrorCode, Result};
 
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:profiling")]
-    extern "C" {
-    }
+    extern "C" {}
 
     #[link(wasm_import_module = "spring:messages")]
-    extern "C" {
-    }
+    extern "C" {}
 
     #[link(wasm_import_module = "spring:benchmark")]
     extern "C" {
@@ -27,12 +27,10 @@ mod raw {
     }
 
     #[link(wasm_import_module = "spring:rules-params")]
-    extern "C" {
-    }
+    extern "C" {}
 
     #[link(wasm_import_module = "spring:terrain")]
-    extern "C" {
-    }
+    extern "C" {}
 
     #[link(wasm_import_module = "spring:terrain-control")]
     extern "C" {
@@ -40,8 +38,6 @@ mod raw {
         pub fn set_height_map(x: f32, z: f32, height: f32, terraform: f32) -> i64;
         #[link_name = "level-height-map"]
         pub fn level_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> i64;
-        #[link_name = "set-height-map-func"]
-        pub fn set_height_map_func(callback_id: i32, user_data: i32) -> i64;
     }
 
     #[link(wasm_import_module = "spring:gfx")]
@@ -115,9 +111,6 @@ fn status_result(status: i32) -> Result<()> {
     }
 }
 
-
-
-
 // Benchmark-only wrappers. They intentionally expose a no-allocation borrowed
 // input path so the suite can measure the Core variable-input transport floor.
 #[inline]
@@ -148,9 +141,6 @@ pub fn benchmark_consume_f32_list(value: &[f32]) -> Result<u32> {
     }
 }
 
-
-
-
 #[inline]
 pub fn set_height_map(x: f32, z: f32, height: f32, terraform: f32) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
@@ -173,21 +163,6 @@ pub fn level_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Resu
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x1, z1, x2, z2, height);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-    }
-}
-
-#[inline]
-pub fn set_height_map_func(callback_id: u32, user_data: u32) -> Result<bool> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        return unpack_bool_local(unsafe {
-            raw::set_height_map_func(callback_id as i32, user_data as i32)
-        });
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = (callback_id, user_data);
         Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
     }
 }

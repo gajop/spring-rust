@@ -8,32 +8,48 @@
 //! memory offsets. The host validates every offset/length before dereferencing.
 
 mod benchmark;
+mod callback;
+mod cob_script;
 mod config;
 /// Nondeterministic imports usable from synced code. Namespaced on purpose:
 /// importing anything here makes a synced guest desync. See `desync.rs`.
 pub mod desync;
+mod gfx;
+mod math_extra;
 mod messages;
 mod profiling;
+mod rml_ui;
 mod rules_params;
+mod system_control;
 mod terrain;
-mod unit_defs;
+mod terrain_control;
 mod unit_control;
+mod unit_defs;
 mod units_commands;
 mod units_pieces;
 mod units_query;
 mod units_query_borrowed;
+mod vfs;
 pub use benchmark::*;
+pub use callback::*;
+pub use cob_script::*;
 pub use config::*;
+pub use gfx::*;
+pub use math_extra::*;
 pub use messages::*;
 pub use profiling::*;
+pub use rml_ui::*;
 pub use rules_params::*;
+pub use system_control::*;
 pub use terrain::*;
-pub use unit_defs::*;
+pub use terrain_control::*;
 pub use unit_control::*;
+pub use unit_defs::*;
 pub use units_commands::*;
 pub use units_pieces::*;
 pub use units_query::*;
 pub use units_query_borrowed::*;
+pub use vfs::*;
 
 /// Generated production-fast Core imports and direct wrappers. This stays
 /// namespaced so specialized hand-written hot APIs remain the normal surface.
@@ -252,9 +268,8 @@ pub fn get_unit_position(unit_id: i32, mid_pos: bool, aim_pos: bool) -> Result<[
         }
         let pointer = output.as_mut_ptr() as usize;
         debug_assert!(pointer <= u32::MAX as usize);
-        let status = unsafe {
-            raw::get_unit_position(unit_id, flags as i32, pointer as u32 as i32)
-        };
+        let status =
+            unsafe { raw::get_unit_position(unit_id, flags as i32, pointer as u32 as i32) };
         if status == 0 {
             Ok(output)
         } else {
@@ -460,7 +475,10 @@ mod tests {
 
     #[test]
     fn allow_unit_creation_flags_are_stable() {
-        assert_eq!(__pack_allow_unit_creation(AllowUnitCreationResult::ALLOW), 1);
+        assert_eq!(
+            __pack_allow_unit_creation(AllowUnitCreationResult::ALLOW),
+            1
+        );
         assert_eq!(
             __pack_allow_unit_creation(AllowUnitCreationResult {
                 allow: true,
