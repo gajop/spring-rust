@@ -1983,12 +1983,7 @@ CORE_CONTEXT_BITS = {
 # them explicit until the corresponding record/option adapters are generated;
 # they must not be reported as a passing Core observation.
 CORE_OWNED_UNSUPPORTED_TESTS = frozenset(
-    {
-        "feature_direction",
-        "get_unit_nearest_enemy",
-        "get_unit_separation",
-        "unit_last_attacked_piece_fixed_shape",
-    }
+    {}
 )
 
 

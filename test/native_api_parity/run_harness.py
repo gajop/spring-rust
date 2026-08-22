@@ -1008,6 +1008,16 @@ def compare_wasm_details(
             continue
         expected_fields = expected_row.get("fields", {})
         actual_fields = actual_row.get("fields", {})
+        compare_fields = API_TEST_BY_ID.get(test_id, {}).get("compare", {}).get("fields", [])
+        if compare_fields:
+            expected_fields = {
+                field: expected_fields.get(field, {"__missing__": True})
+                for field in compare_fields
+            }
+            actual_fields = {
+                field: actual_fields.get(field, {"__missing__": True})
+                for field in compare_fields
+            }
         order_insensitive_fields = set(
             API_TEST_BY_ID.get(test_id, {}).get("order_insensitive_fields", [])
         )

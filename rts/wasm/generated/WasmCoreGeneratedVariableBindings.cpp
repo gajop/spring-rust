@@ -1525,70 +1525,6 @@ wasm_trap_t* CoreVariable_sound_preload_sound_item(void* environment, wasmtime_c
     return nullptr;
 }
 
-wasm_trap_t* CoreVariable_messages_send_commands(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->messages == nullptr ||
-        state->native->messages->SendCommands == nullptr)
-        return Trap("SendCommands generated Core binding is unavailable");
-    if (slots == nullptr || slotCount != 1)
-        return Trap("SendCommands generated Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 2u, budgetError);
-    if (!guard.Ok())
-        return Trap(budgetError);
-
-    std::string memoryError;
-    if (!EnsureMemory(state, caller, memoryError))
-        return Trap(memoryError);
-    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[0].i32);
-    std::span<const std::uint8_t> descriptorWire;
-    if (!state->memory.View(descriptor, 16u, descriptorWire)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
-        return nullptr;
-    }
-    WireReader reader(descriptorWire);
-
-    SendCommandsQuery query{};
-    std::uint32_t commandPointer = 0;
-    std::uint32_t commandCount = 0;
-    if (!reader.U32(commandPointer) || !reader.U32(commandCount)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    std::span<const std::uint8_t> commandBytes;
-    if (!state->memory.View(commandPointer, commandCount, commandBytes)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
-        return nullptr;
-    }
-    std::string commandStorage(reinterpret_cast<const char*>(commandBytes.data()), commandBytes.size());
-    query.command = commandStorage.c_str();
-    std::uint32_t restPointer = 0;
-    std::uint32_t restCount = 0;
-    if (!reader.U32(restPointer) || !reader.U32(restCount)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    std::span<const std::uint8_t> restBytes;
-    if (!state->memory.View(restPointer, restCount, restBytes)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
-        return nullptr;
-    }
-    std::string restStorage(reinterpret_cast<const char*>(restBytes.data()), restBytes.size());
-    query.rest = restStorage.c_str();
-    if (!reader.Finish(4u)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    SendCommandsResult result{};
-    state->native->messages->SendCommands(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
-    return nullptr;
-}
-
 wasm_trap_t* CoreVariable_config_set_config_float(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -12726,13 +12662,6 @@ bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedVariable(linker, "spring:messages", "send-commands",
-                MakeFuncType(params, 1, results, 1), CoreVariable_messages_send_commands, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_F32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedVariable(linker, "spring:config", "set-config-float",
@@ -13989,6 +13918,6 @@ bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(205 >= 0, "generated variable Core callback count");
+static_assert(204 >= 0, "generated variable Core callback count");
 
 } // namespace recoil::wasm::core::generated

@@ -101,7 +101,6 @@
         "get_active_command",
         "get_default_command",
         "get_action_hot_keys",
-        "get_gather_mode",
         "get_console_buffer_count",
         "echo_console_buffer_count",
         "send_message_console_buffer_count",
@@ -115,14 +114,17 @@
         "vfs_get_games_count",
         "vfs_download_archive_invalid_category",
         "vfs_download_archive_missing_name",
-        "vfs_abort_download_missing",
-        "vfs_scan_all_dirs",
         "get_selected_units_counts",
         "get_group_units_counts",
         "get_group_units_sorted_fixed",
         "get_key_bindings_count",
         "get_active_cmd_descs_fixed_count",
         "get_active_cmd_desc_fixed_fields"
+      ],
+      "core_policy": [
+        "get_gather_mode",
+        "vfs_abort_download_missing",
+        "vfs_scan_all_dirs"
       ],
       "mutating_getter_or_unsupported": [
         "give_order_selected",

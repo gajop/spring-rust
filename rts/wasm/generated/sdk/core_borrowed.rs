@@ -959,47 +959,6 @@ pub mod borrowed {
 
     }
 
-    pub mod messages {
-        use crate::{ApiError, ErrorCode, Result};
-
-        #[cfg(target_arch = "wasm32")]
-        mod raw {
-            #[link(wasm_import_module = "spring:messages")]
-            extern "C" {
-                #[link_name = "send-commands"]
-                pub fn send_commands(arg0: i32) -> i64;
-            }
-        }
-
-        #[inline]
-        pub fn send_commands(command: &core::ffi::CStr, rest: &core::ffi::CStr) -> Result<bool> {
-            #[cfg(target_arch = "wasm32")]
-            {
-            let mut descriptor = [0u8; 16];
-            let mut cursor = 0usize;
-            let core_ptr = command.as_ptr() as usize;
-            let core_len = command.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
-            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = rest.as_ptr() as usize;
-            let core_len = rest.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
-            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::send_commands((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
-            if status != 0 { return Err(ApiError::new(status)); }
-            Ok((packed as u32) != 0)
-            }
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                let _ = (command, rest);
-                Err(unreachable!())
-            }
-        }
-
-    }
-
     pub mod config {
         use crate::{ApiError, ErrorCode, Result};
 
@@ -6308,5 +6267,5 @@ pub mod borrowed {
     }
 
 #[doc(hidden)]
-    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 208;
+    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 207;
 }

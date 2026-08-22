@@ -1760,82 +1760,6 @@ wasm_trap_t* CoreBorrowed_sound_preload_sound_item(void* environment, wasmtime_c
     return nullptr;
 }
 
-wasm_trap_t* CoreBorrowed_messages_send_commands(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->messages == nullptr ||
-        state->native->messages->SendCommands == nullptr)
-        return Trap("SendCommands borrowed Core binding is unavailable");
-    if (slots == nullptr || slotCount != 1u)
-        return Trap("SendCommands borrowed Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 2u, budgetError);
-    if (!guard.Ok()) return Trap(budgetError);
-
-    std::string memoryError;
-    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
-    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[0].i32);
-    std::span<const std::uint8_t> descriptorWire;
-    if (!state->memory.View(descriptor, 16u, descriptorWire)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
-        return nullptr;
-    }
-    WireReader reader(descriptorWire);
-
-    SendCommandsQuery query{};
-    std::uint32_t commandPointer = 0;
-    std::uint32_t commandCount = 0;
-    if (!reader.U32(commandPointer) || !reader.U32(commandCount)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    if (commandCount == std::numeric_limits<std::uint32_t>::max()) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    std::span<const std::uint8_t> commandBytes;
-    if (!state->memory.View(commandPointer, static_cast<std::size_t>(commandCount) + 1u, commandBytes)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
-        return nullptr;
-    }
-    if (commandBytes[commandCount] != 0) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    query.command = reinterpret_cast<const char*>(commandBytes.data());
-    std::uint32_t restPointer = 0;
-    std::uint32_t restCount = 0;
-    if (!reader.U32(restPointer) || !reader.U32(restCount)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    if (restCount == std::numeric_limits<std::uint32_t>::max()) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    std::span<const std::uint8_t> restBytes;
-    if (!state->memory.View(restPointer, static_cast<std::size_t>(restCount) + 1u, restBytes)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
-        return nullptr;
-    }
-    if (restBytes[restCount] != 0) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    query.rest = reinterpret_cast<const char*>(restBytes.data());
-    if (!reader.Finish(4u)) {
-        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
-        return nullptr;
-    }
-    SendCommandsResult result{};
-    state->native->messages->SendCommands(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
-    return nullptr;
-}
-
 wasm_trap_t* CoreBorrowed_config_get_config_float(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -13818,13 +13742,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:messages", "send-commands",
-                MakeFuncType(params, 1, results, 1), CoreBorrowed_messages_send_commands, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedBorrowed(linker, "spring:config", "get-config-float",
@@ -15088,6 +15005,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(208u >= 0u, "generated borrowed Core callback count");
+static_assert(207u >= 0u, "generated borrowed Core callback count");
 
 } // namespace recoil::wasm::core::generated

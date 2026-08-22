@@ -2297,6 +2297,81 @@ use crate::Result;
             crate::get_team_units(team_id)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_units_by_defs {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-team-units-by-defs"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-team-units-by-defs."]
+        #[inline]
+        pub unsafe fn get_team_units_by_defs(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64 {
+            unsafe { __core_owned_get_team_units_by_defs::call(p0, p1, p2, p3, p4) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_units_counts {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-team-units-counts"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-team-units-counts."]
+        #[inline]
+        pub unsafe fn get_team_units_counts(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_team_units_counts::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_units_sorted {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-team-units-sorted"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-team-units-sorted."]
+        #[inline]
+        pub unsafe fn get_team_units_sorted(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_team_units_sorted::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_array_centroid {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-unit-array-centroid"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-unit-array-centroid."]
+        #[inline]
+        pub unsafe fn get_unit_array_centroid(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_array_centroid::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_map_centroid {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-unit-map-centroid"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-unit-map-centroid."]
+        #[inline]
+        pub unsafe fn get_unit_map_centroid(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_map_centroid::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_unit_nearest_ally(unit_id: i32, range: f32) -> Result<i32> {
             let value = crate::generated::units_query::get_unit_nearest_ally(unit_id, range)?;
@@ -2305,14 +2380,87 @@ use crate::Result;
 
         #[inline]
         pub fn get_unit_nearest_enemy(unit_id: i32, range: f32, options: GetUnitNearestEnemyOptions) -> Result<i32> {
-            let value = crate::generated::units_query::get_unit_nearest_enemy(unit_id, range, crate::generated::units_query::GetUnitNearestEnemyOptions { use_los: options.use_los, sphere_dist_test: options.sphere_dist_test, check_sight_dist: options.check_sight_dist })?;
-            Ok(value)
+            crate::get_unit_nearest_enemy(unit_id, range, options.use_los, options.sphere_dist_test, options.check_sight_dist)
         }
 
         #[inline]
         pub fn get_unit_separation(unit_id1: i32, unit_id2: i32, options: GetUnitSeparationOptions) -> Result<f32> {
-            let value = crate::generated::units_query::get_unit_separation(unit_id1, unit_id2, crate::generated::units_query::GetUnitSeparationOptions { positional: options.positional, check_map: options.check_map })?;
-            Ok(value)
+            crate::get_unit_separation(unit_id1, unit_id2, options.positional, options.check_map)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_units_in_box {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-units-in-box"]
+                pub fn call(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, p7: i32, p8: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-units-in-box."]
+        #[inline]
+        pub unsafe fn get_units_in_box(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, p7: i32, p8: i32) -> i64 {
+            unsafe { __core_owned_get_units_in_box::call(p0, p1, p2, p3, p4, p5, p6, p7, p8) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_units_in_cylinder {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-units-in-cylinder"]
+                pub fn call(p0: f32, p1: f32, p2: f32, p3: i32, p4: i32, p5: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-units-in-cylinder."]
+        #[inline]
+        pub unsafe fn get_units_in_cylinder(p0: f32, p1: f32, p2: f32, p3: i32, p4: i32, p5: i32) -> i64 {
+            unsafe { __core_owned_get_units_in_cylinder::call(p0, p1, p2, p3, p4, p5) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_units_in_planes {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-units-in-planes"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-units-in-planes."]
+        #[inline]
+        pub unsafe fn get_units_in_planes(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_units_in_planes::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_units_in_rectangle {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-units-in-rectangle"]
+                pub fn call(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32, p6: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-units-in-rectangle."]
+        #[inline]
+        pub unsafe fn get_units_in_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32, p6: i32) -> i64 {
+            unsafe { __core_owned_get_units_in_rectangle::call(p0, p1, p2, p3, p4, p5, p6) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_units_in_sphere {
+            #[link(wasm_import_module = "spring:units-query")]
+            extern "C" {
+                #[link_name = "get-units-in-sphere"]
+                pub fn call(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32, p6: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-units-in-sphere."]
+        #[inline]
+        pub unsafe fn get_units_in_sphere(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32, p6: i32) -> i64 {
+            unsafe { __core_owned_get_units_in_sphere::call(p0, p1, p2, p3, p4, p5, p6) }
         }
 
         #[inline]
@@ -3469,6 +3617,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_build_params {
+            #[link(wasm_import_module = "spring:units-info")]
+            extern "C" {
+                #[link_name = "get-unit-build-params"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-build-params."]
+        #[inline]
+        pub unsafe fn get_unit_build_params(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_build_params::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_unit_buildee_radius(unit_id: i32) -> Result<f32> {
             let value = crate::generated::units_info::get_unit_buildee_radius(unit_id)?;
@@ -3636,6 +3799,65 @@ use crate::Result;
         }
 
         #[inline]
+        pub fn get_unit_last_attacked_piece(unit_id: i32) -> Result<LastHitPiece> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut output = Vec::<u8>::new();
+                loop {
+                    match crate::generated::dynamic_output::units_info::get_unit_last_attacked_piece(unit_id, &mut output) {
+                        Ok(required) => {
+                            output.truncate(required);
+                            let mut cursor = 0usize;
+                            let name_length = crate::generated::__core_wire::u32(&output, &mut cursor)
+                                .ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize;
+                            let name_end = cursor.checked_add(name_length)
+                                .ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?;
+                            let name = String::from_utf8(output.get(cursor..name_end)
+                                .ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+                                .to_vec())
+                                .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32))?;
+                            cursor = name_end;
+                            let piece_num = crate::generated::__core_wire::i32(&output, &mut cursor)
+                                .ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?;
+                            let frame = crate::generated::__core_wire::i32(&output, &mut cursor)
+                                .ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?;
+                            let was_hit = crate::generated::__core_wire::boolean(&output, &mut cursor)
+                                .ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?;
+                            if !crate::generated::__core_wire::finish(&output, &mut cursor, 8) {
+                                return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                            }
+                            return Ok(LastHitPiece { name, piece_num, frame, was_hit });
+                        }
+                        Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                            output.resize(error.required, 0);
+                        }
+                        Err(error) => return Err(error.error),
+                    }
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = unit_id;
+                Err(unreachable!())
+            }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_last_attacker {
+            #[link(wasm_import_module = "spring:units-info")]
+            extern "C" {
+                #[link_name = "get-unit-last-attacker"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-last-attacker."]
+        #[inline]
+        pub unsafe fn get_unit_last_attacker(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_last_attacker::call(p0, p1) }
+        }
+
+        #[inline]
         pub fn get_unit_los_state(unit_id: i32, ally_team_id: i32, raw: bool) -> Result<UnitLosState> {
             let value = crate::generated::units_info::get_unit_los_state(unit_id, ally_team_id, raw)?;
             Ok(UnitLosState { raw_mask: value.raw_mask, los: value.los, radar: value.radar, typed: value.typed })
@@ -3757,10 +3979,55 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_sensor_radius {
+            #[link(wasm_import_module = "spring:units-info")]
+            extern "C" {
+                #[link_name = "get-unit-sensor-radius"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-sensor-radius."]
+        #[inline]
+        pub unsafe fn get_unit_sensor_radius(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_sensor_radius::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_shield_state {
+            #[link(wasm_import_module = "spring:units-info")]
+            extern "C" {
+                #[link_name = "get-unit-shield-state"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-shield-state."]
+        #[inline]
+        pub unsafe fn get_unit_shield_state(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_shield_state::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_unit_states(unit_id: i32, options: UnitStatesOptions) -> Result<UnitStates> {
             let value = crate::generated::units_info::get_unit_states(unit_id, crate::generated::units_info::UnitStatesOptions { ret_table: options.ret_table, bin_state: options.bin_state, amt_state: options.amt_state })?;
             Ok(UnitStates { fire_state: value.fire_state, move_state: value.move_state, auto_repair_level: value.auto_repair_level, repeat: value.repeat, cloak: value.cloak, active: value.active, trajectory: value.trajectory, auto_land: value.auto_land, loopback_attack: value.loopback_attack })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_stockpile {
+            #[link(wasm_import_module = "spring:units-info")]
+            extern "C" {
+                #[link_name = "get-unit-stockpile"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-stockpile."]
+        #[inline]
+        pub unsafe fn get_unit_stockpile(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_stockpile::call(p0, p1) }
         }
 
         #[inline]
@@ -4351,10 +4618,40 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_weapon_damages {
+            #[link(wasm_import_module = "spring:units-weapons")]
+            extern "C" {
+                #[link_name = "get-unit-weapon-damages"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-weapons.get-unit-weapon-damages."]
+        #[inline]
+        pub unsafe fn get_unit_weapon_damages(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_weapon_damages::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_unit_weapon_have_free_line_of_fire(unit_id: i32, weapon_num: i32, target_id: i32, source_pos: Float3, target_pos: Float3, options: GetUnitWeaponHaveFreeLineOfFireOptions) -> Result<bool> {
             let value = crate::generated::units_weapons::get_unit_weapon_have_free_line_of_fire(unit_id, weapon_num, target_id, crate::generated::units_weapons::Float3 { x: source_pos.x, y: source_pos.y, z: source_pos.z }, crate::generated::units_weapons::Float3 { x: target_pos.x, y: target_pos.y, z: target_pos.z }, crate::generated::units_weapons::GetUnitWeaponHaveFreeLineOfFireOptions { is_ground_target: options.is_ground_target })?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_weapon_state {
+            #[link(wasm_import_module = "spring:units-weapons")]
+            extern "C" {
+                #[link_name = "get-unit-weapon-state"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-weapons.get-unit-weapon-state."]
+        #[inline]
+        pub unsafe fn get_unit_weapon_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_get_unit_weapon_state::call(p0, p1, p2, p3) }
         }
 
         #[inline]
@@ -4959,6 +5256,36 @@ use crate::Result;
             })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_command_params {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "get-command-params"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.get-command-params."]
+        #[inline]
+        pub unsafe fn get_command_params(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_command_params::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_command_queue {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "get-command-queue"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.get-command-queue."]
+        #[inline]
+        pub unsafe fn get_command_queue(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_command_queue::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_factory_bugger_off(unit_id: i32) -> Result<GetFactoryBuggerOffValue> {
             let value = crate::generated::units_commands::get_factory_bugger_off(unit_id)?;
@@ -4976,6 +5303,51 @@ use crate::Result;
         pub fn get_factory_command_count(unit_id: i32) -> Result<u32> {
             let value = crate::generated::units_commands::get_factory_command_count(unit_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_factory_commands {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "get-factory-commands"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.get-factory-commands."]
+        #[inline]
+        pub unsafe fn get_factory_commands(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_factory_commands::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_factory_counts {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "get-factory-counts"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.get-factory-counts."]
+        #[inline]
+        pub unsafe fn get_factory_counts(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_get_factory_counts::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_full_build_queue {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "get-full-build-queue"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.get-full-build-queue."]
+        #[inline]
+        pub unsafe fn get_full_build_queue(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_full_build_queue::call(p0, p1) }
         }
 
         #[inline]
@@ -5007,10 +5379,100 @@ use crate::Result;
             }
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_cmd_descs {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "get-unit-cmd-descs"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.get-unit-cmd-descs."]
+        #[inline]
+        pub unsafe fn get_unit_cmd_descs(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_cmd_descs::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_unit_command_count(unit_id: i32) -> Result<u32> {
             let value = crate::generated::units_commands::get_unit_command_count(unit_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_commands {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "get-unit-commands"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.get-unit-commands."]
+        #[inline]
+        pub unsafe fn get_unit_commands(p0: i32, p1: i32, p2: i32, p3: i32) -> i64 {
+            unsafe { __core_owned_get_unit_commands::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_current_command {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "get-unit-current-command"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.get-unit-current-command."]
+        #[inline]
+        pub unsafe fn get_unit_current_command(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_current_command::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_give_order {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "give-order"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.give-order."]
+        #[inline]
+        pub unsafe fn give_order(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64 {
+            unsafe { __core_owned_give_order::call(p0, p1, p2, p3, p4) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_give_order_array_to_unit_map {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "give-order-array-to-unit-map"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.give-order-array-to-unit-map."]
+        #[inline]
+        pub unsafe fn give_order_array_to_unit_map(p0: i32) -> i64 {
+            unsafe { __core_owned_give_order_array_to_unit_map::call(p0) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_give_order_to_unit_map {
+            #[link(wasm_import_module = "spring:units-commands")]
+            extern "C" {
+                #[link_name = "give-order-to-unit-map"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-commands.give-order-to-unit-map."]
+        #[inline]
+        pub unsafe fn give_order_to_unit_map(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i64 {
+            unsafe { __core_owned_give_order_to_unit_map::call(p0, p1, p2, p3, p4, p5, p6) }
         }
 
     }
@@ -5600,6 +6062,51 @@ use crate::Result;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_piece_info {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-feature-piece-info"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-feature-piece-info."]
+        #[inline]
+        pub unsafe fn get_feature_piece_info(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_feature_piece_info::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_piece_list {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-feature-piece-list"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-feature-piece-list."]
+        #[inline]
+        pub unsafe fn get_feature_piece_list(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_feature_piece_list::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_piece_map {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-feature-piece-map"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-feature-piece-map."]
+        #[inline]
+        pub unsafe fn get_feature_piece_map(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_feature_piece_map::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_feature_piece_matrix(feature_id: i32, piece_num: i32) -> Result<PieceMatrix> {
             let value = crate::generated::units_pieces::get_feature_piece_matrix(feature_id, piece_num)?;
@@ -5624,6 +6131,36 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_model_piece_list {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-model-piece-list"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-model-piece-list."]
+        #[inline]
+        pub unsafe fn get_model_piece_list(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_model_piece_list::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_model_piece_map {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-model-piece-map"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-model-piece-map."]
+        #[inline]
+        pub unsafe fn get_model_piece_map(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_model_piece_map::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_model_root_piece(model_name: &str) -> Result<i32> {
             let mut model_name_bytes = model_name.as_bytes().to_vec();
@@ -5637,6 +6174,51 @@ use crate::Result;
         pub fn get_unit_piece_direction(unit_id: i32, piece_num: i32) -> Result<Float3> {
             let value = crate::generated::units_pieces::get_unit_piece_direction(unit_id, piece_num)?;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_piece_info {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-unit-piece-info"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-unit-piece-info."]
+        #[inline]
+        pub unsafe fn get_unit_piece_info(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_piece_info::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_piece_list {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-unit-piece-list"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-unit-piece-list."]
+        #[inline]
+        pub unsafe fn get_unit_piece_list(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_piece_list::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_piece_map {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-unit-piece-map"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-unit-piece-map."]
+        #[inline]
+        pub unsafe fn get_unit_piece_map(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_piece_map::call(p0, p1) }
         }
 
         #[inline]
@@ -5661,6 +6243,21 @@ use crate::Result;
         pub fn get_unit_root_piece(unit_id: i32) -> Result<i32> {
             let value = crate::generated::units_pieces::get_unit_root_piece(unit_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_script_names {
+            #[link(wasm_import_module = "spring:units-pieces")]
+            extern "C" {
+                #[link_name = "get-unit-script-names"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:units-pieces.get-unit-script-names."]
+        #[inline]
+        pub unsafe fn get_unit_script_names(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_script_names::call(p0, p1) }
         }
 
         #[inline]
@@ -6370,6 +6967,36 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_ai_info {
+            #[link(wasm_import_module = "spring:teams")]
+            extern "C" {
+                #[link_name = "get-ai-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:teams.get-ai-info."]
+        #[inline]
+        pub unsafe fn get_ai_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_ai_info::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_ally_team_info {
+            #[link(wasm_import_module = "spring:teams")]
+            extern "C" {
+                #[link_name = "get-ally-team-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:teams.get-ally-team-info."]
+        #[inline]
+        pub unsafe fn get_ally_team_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_ally_team_info::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_ally_team_list(unused: u8) -> Result<Vec<i32>> {
             #[cfg(target_arch = "wasm32")]
@@ -6406,6 +7033,21 @@ use crate::Result;
                 unit_id: value.0,
                 has_unit: value.1
             })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_player_info {
+            #[link(wasm_import_module = "spring:teams")]
+            extern "C" {
+                #[link_name = "get-player-info"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:teams.get-player-info."]
+        #[inline]
+        pub unsafe fn get_player_info(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_player_info::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -6501,6 +7143,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_info {
+            #[link(wasm_import_module = "spring:teams")]
+            extern "C" {
+                #[link_name = "get-team-info"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:teams.get-team-info."]
+        #[inline]
+        pub unsafe fn get_team_info(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_team_info::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_team_list(ally_team_id: i32) -> Result<Vec<i32>> {
             #[cfg(target_arch = "wasm32")]
@@ -6563,6 +7220,51 @@ use crate::Result;
         pub fn get_team_max_units(team_id: i32) -> Result<i32> {
             let value = crate::generated::teams::get_team_max_units(team_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_resource_stats {
+            #[link(wasm_import_module = "spring:teams")]
+            extern "C" {
+                #[link_name = "get-team-resource-stats"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:teams.get-team-resource-stats."]
+        #[inline]
+        pub unsafe fn get_team_resource_stats(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_team_resource_stats::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_resources {
+            #[link(wasm_import_module = "spring:teams")]
+            extern "C" {
+                #[link_name = "get-team-resources"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:teams.get-team-resources."]
+        #[inline]
+        pub unsafe fn get_team_resources(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_team_resources::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_stats_history {
+            #[link(wasm_import_module = "spring:teams")]
+            extern "C" {
+                #[link_name = "get-team-stats-history"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:teams.get-team-stats-history."]
+        #[inline]
+        pub unsafe fn get_team_stats_history(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_get_team_stats_history::call(p0, p1, p2, p3) }
         }
 
         #[inline]
@@ -7510,6 +8212,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_last_attacked_piece {
+            #[link(wasm_import_module = "spring:features")]
+            extern "C" {
+                #[link_name = "get-feature-last-attacked-piece"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:features.get-feature-last-attacked-piece."]
+        #[inline]
+        pub unsafe fn get_feature_last_attacked_piece(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_feature_last_attacked_piece::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_feature_lua_draw(feature_id: i32) -> Result<bool> {
             let value = crate::generated::features::get_feature_lua_draw(feature_id)?;
@@ -7562,6 +8279,21 @@ use crate::Result;
         pub fn get_feature_resources(feature_id: i32) -> Result<FeatureResources> {
             let value = crate::generated::features::get_feature_resources(feature_id)?;
             Ok(FeatureResources { metal: value.metal, def_metal: value.def_metal, energy: value.energy, def_energy: value.def_energy, reclaim_left: value.reclaim_left, reclaim_time: value.reclaim_time })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_resurrect {
+            #[link(wasm_import_module = "spring:features")]
+            extern "C" {
+                #[link_name = "get-feature-resurrect"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:features.get-feature-resurrect."]
+        #[inline]
+        pub unsafe fn get_feature_resurrect(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_feature_resurrect::call(p0, p1) }
         }
 
         #[inline]
@@ -7662,6 +8394,21 @@ use crate::Result;
                 let _ = (min_x as f32, min_z as f32, max_x as f32, max_z as f32);
                 Err(unreachable!())
             }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_features_in_sphere {
+            #[link(wasm_import_module = "spring:features")]
+            extern "C" {
+                #[link_name = "get-features-in-sphere"]
+                pub fn call(p0: f32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:features.get-features-in-sphere."]
+        #[inline]
+        pub unsafe fn get_features_in_sphere(p0: f32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_features_in_sphere::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -8326,10 +9073,40 @@ use crate::Result;
             }
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_piece_projectile_params {
+            #[link(wasm_import_module = "spring:projectiles")]
+            extern "C" {
+                #[link_name = "get-piece-projectile-params"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:projectiles.get-piece-projectile-params."]
+        #[inline]
+        pub unsafe fn get_piece_projectile_params(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_piece_projectile_params::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_projectile_ally_team_id(projectile_id: i32) -> Result<i32> {
             let value = crate::generated::projectiles::get_projectile_ally_team_id(projectile_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_projectile_damages {
+            #[link(wasm_import_module = "spring:projectiles")]
+            extern "C" {
+                #[link_name = "get-projectile-damages"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:projectiles.get-projectile-damages."]
+        #[inline]
+        pub unsafe fn get_projectile_damages(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_projectile_damages::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -8399,6 +9176,36 @@ use crate::Result;
         pub fn get_projectile_velocity(projectile_id: i32) -> Result<Float3> {
             let value = crate::generated::projectiles::get_projectile_velocity(projectile_id)?;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_projectiles_in_rectangle {
+            #[link(wasm_import_module = "spring:projectiles")]
+            extern "C" {
+                #[link_name = "get-projectiles-in-rectangle"]
+                pub fn call(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:projectiles.get-projectiles-in-rectangle."]
+        #[inline]
+        pub unsafe fn get_projectiles_in_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32 {
+            unsafe { __core_owned_get_projectiles_in_rectangle::call(p0, p1, p2, p3, p4, p5) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_projectiles_in_sphere {
+            #[link(wasm_import_module = "spring:projectiles")]
+            extern "C" {
+                #[link_name = "get-projectiles-in-sphere"]
+                pub fn call(p0: f32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:projectiles.get-projectiles-in-sphere."]
+        #[inline]
+        pub unsafe fn get_projectiles_in_sphere(p0: f32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_projectiles_in_sphere::call(p0, p1, p2) }
         }
 
     }
@@ -9543,6 +10350,21 @@ use crate::Result;
             pub classify: UnitDefClassify,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_def_by_id {
+            #[link(wasm_import_module = "spring:unit-defs")]
+            extern "C" {
+                #[link_name = "get-unit-def-by-id"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-by-id."]
+        #[inline]
+        pub unsafe fn get_unit_def_by_id(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_def_by_id::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_unit_def_classify(unit_def_id: i32) -> Result<UnitDefClassify> {
             let value = crate::generated::unit_defs::get_unit_def_classify(unit_def_id)?;
@@ -9561,10 +10383,55 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_def_custom_param {
+            #[link(wasm_import_module = "spring:unit-defs")]
+            extern "C" {
+                #[link_name = "get-unit-def-custom-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-custom-param."]
+        #[inline]
+        pub unsafe fn get_unit_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_def_custom_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_def_custom_param_keys {
+            #[link(wasm_import_module = "spring:unit-defs")]
+            extern "C" {
+                #[link_name = "get-unit-def-custom-param-keys"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-custom-param-keys."]
+        #[inline]
+        pub unsafe fn get_unit_def_custom_param_keys(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_def_custom_param_keys::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_unit_def_health(unit_def_id: i32) -> Result<f32> {
             let value = crate::generated::unit_defs::get_unit_def_health(unit_def_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_def_human_name {
+            #[link(wasm_import_module = "spring:unit-defs")]
+            extern "C" {
+                #[link_name = "get-unit-def-human-name"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-human-name."]
+        #[inline]
+        pub unsafe fn get_unit_def_human_name(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_get_unit_def_human_name::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -9605,6 +10472,21 @@ use crate::Result;
             }
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_def_name {
+            #[link(wasm_import_module = "spring:unit-defs")]
+            extern "C" {
+                #[link_name = "get-unit-def-name"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-name."]
+        #[inline]
+        pub unsafe fn get_unit_def_name(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_get_unit_def_name::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_unit_def_param_bool(unit_def_id: i32, key: &str) -> Result<bool> {
             let mut key_bytes = key.as_bytes().to_vec();
@@ -9630,6 +10512,36 @@ use crate::Result;
             key_bytes.push(0);
             let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
             crate::generated::borrowed::unit_defs::get_unit_def_param_int(unit_def_id, &key_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_def_param_keys {
+            #[link(wasm_import_module = "spring:unit-defs")]
+            extern "C" {
+                #[link_name = "get-unit-def-param-keys"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-param-keys."]
+        #[inline]
+        pub unsafe fn get_unit_def_param_keys(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_def_param_keys::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_def_param_string {
+            #[link(wasm_import_module = "spring:unit-defs")]
+            extern "C" {
+                #[link_name = "get-unit-def-param-string"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-param-string."]
+        #[inline]
+        pub unsafe fn get_unit_def_param_string(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_def_param_string::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -10116,10 +11028,55 @@ use crate::Result;
             pub exists: bool,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_def_by_id {
+            #[link(wasm_import_module = "spring:feature-defs")]
+            extern "C" {
+                #[link_name = "get-feature-def-by-id"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:feature-defs.get-feature-def-by-id."]
+        #[inline]
+        pub unsafe fn get_feature_def_by_id(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_feature_def_by_id::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_feature_def_count(unused: u8) -> Result<u32> {
             let value = crate::generated::feature_defs::get_feature_def_count(unused)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_def_custom_param {
+            #[link(wasm_import_module = "spring:feature-defs")]
+            extern "C" {
+                #[link_name = "get-feature-def-custom-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:feature-defs.get-feature-def-custom-param."]
+        #[inline]
+        pub unsafe fn get_feature_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_feature_def_custom_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_def_custom_param_keys {
+            #[link(wasm_import_module = "spring:feature-defs")]
+            extern "C" {
+                #[link_name = "get-feature-def-custom-param-keys"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:feature-defs.get-feature-def-custom-param-keys."]
+        #[inline]
+        pub unsafe fn get_feature_def_custom_param_keys(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_feature_def_custom_param_keys::call(p0, p1) }
         }
 
         #[inline]
@@ -10665,10 +11622,55 @@ use crate::Result;
             pub exists: bool,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_weapon_def_by_id {
+            #[link(wasm_import_module = "spring:weapon-defs")]
+            extern "C" {
+                #[link_name = "get-weapon-def-by-id"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:weapon-defs.get-weapon-def-by-id."]
+        #[inline]
+        pub unsafe fn get_weapon_def_by_id(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_weapon_def_by_id::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_weapon_def_count(unused: u8) -> Result<u32> {
             let value = crate::generated::weapon_defs::get_weapon_def_count(unused)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_weapon_def_custom_param {
+            #[link(wasm_import_module = "spring:weapon-defs")]
+            extern "C" {
+                #[link_name = "get-weapon-def-custom-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:weapon-defs.get-weapon-def-custom-param."]
+        #[inline]
+        pub unsafe fn get_weapon_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_weapon_def_custom_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_weapon_def_custom_param_keys {
+            #[link(wasm_import_module = "spring:weapon-defs")]
+            extern "C" {
+                #[link_name = "get-weapon-def-custom-param-keys"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:weapon-defs.get-weapon-def-custom-param-keys."]
+        #[inline]
+        pub unsafe fn get_weapon_def_custom_param_keys(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_weapon_def_custom_param_keys::call(p0, p1) }
         }
 
         #[inline]
@@ -11589,6 +12591,36 @@ use crate::Result;
             })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_game_map_info {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-game-map-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-game-map-info."]
+        #[inline]
+        pub unsafe fn get_game_map_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_game_map_info::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_game_mod_info {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-game-mod-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-game-mod-info."]
+        #[inline]
+        pub unsafe fn get_game_mod_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_game_mod_info::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_game_rules_info(unused: u8) -> Result<GameRulesInfo> {
             let value = crate::generated::game::get_game_rules_info(unused)?;
@@ -11607,6 +12639,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_game_setup_info {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-game-setup-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-game-setup-info."]
+        #[inline]
+        pub unsafe fn get_game_setup_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_game_setup_info::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_global_los(ally_team_id: i32) -> Result<i32> {
             let value = crate::generated::game::get_global_los(ally_team_id)?;
@@ -11623,6 +12670,111 @@ use crate::Result;
         pub fn get_heading_from_vector(x: f32, z: f32) -> Result<i32> {
             let value = crate::generated::game::get_heading_from_vector(x, z)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_map_option {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-map-option"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-map-option."]
+        #[inline]
+        pub unsafe fn get_map_option(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_map_option::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_map_options {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-map-options"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-map-options."]
+        #[inline]
+        pub unsafe fn get_map_options(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_map_options::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_map_start_positions {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-map-start-positions"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-map-start-positions."]
+        #[inline]
+        pub unsafe fn get_map_start_positions(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_map_start_positions::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_mod_option {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-mod-option"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-mod-option."]
+        #[inline]
+        pub unsafe fn get_mod_option(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_mod_option::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_mod_options {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-mod-options"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-mod-options."]
+        #[inline]
+        pub unsafe fn get_mod_options(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_mod_options::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_side_data {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-side-data"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-side-data."]
+        #[inline]
+        pub unsafe fn get_side_data(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_side_data::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_side_data_by_index {
+            #[link(wasm_import_module = "spring:game")]
+            extern "C" {
+                #[link_name = "get-side-data-by-index"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:game.get-side-data-by-index."]
+        #[inline]
+        pub unsafe fn get_side_data_by_index(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_side_data_by_index::call(p0, p1) }
         }
 
         #[inline]
@@ -12269,6 +13421,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_ground_info {
+            #[link(wasm_import_module = "spring:terrain")]
+            extern "C" {
+                #[link_name = "get-ground-info"]
+                pub fn call(p0: f32, p1: f32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:terrain.get-ground-info."]
+        #[inline]
+        pub unsafe fn get_ground_info(p0: f32, p1: f32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_ground_info::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_ground_normal(x: f32, z: f32, smoothed: bool) -> Result<GetGroundNormalValue> {
             let value = crate::generated::terrain::get_ground_normal(x, z, smoothed)?;
@@ -12313,6 +13480,21 @@ use crate::Result;
         pub fn get_smooth_mesh_height(x: f32, z: f32) -> Result<f32> {
             let value = crate::generated::terrain::get_smooth_mesh_height(x, z)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_terrain_type_data {
+            #[link(wasm_import_module = "spring:terrain")]
+            extern "C" {
+                #[link_name = "get-terrain-type-data"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:terrain.get-terrain-type-data."]
+        #[inline]
+        pub unsafe fn get_terrain_type_data(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_terrain_type_data::call(p0, p1) }
         }
 
         #[inline]
@@ -12805,10 +13987,40 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_player_roster {
+            #[link(wasm_import_module = "spring:player")]
+            extern "C" {
+                #[link_name = "get-player-roster"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:player.get-player-roster."]
+        #[inline]
+        pub unsafe fn get_player_roster(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_player_roster::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_player_statistics(player_id: i32) -> Result<PlayerStats> {
             let value = crate::generated::player::get_player_statistics(player_id)?;
             Ok(PlayerStats { mouse_pixels: value.mouse_pixels, mouse_clicks: value.mouse_clicks, key_presses: value.key_presses, unit_commands: value.unit_commands, avg_command_size: value.avg_command_size })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_player_traffic {
+            #[link(wasm_import_module = "spring:player")]
+            extern "C" {
+                #[link_name = "get-player-traffic"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:player.get-player-traffic."]
+        #[inline]
+        pub unsafe fn get_player_traffic(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_player_traffic::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -13787,6 +14999,66 @@ use crate::Result;
             pub has_water_plane: Option<bool>,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_decode_base64 {
+            #[link(wasm_import_module = "spring:encoding")]
+            extern "C" {
+                #[link_name = "decode-base64"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:encoding.decode-base64."]
+        #[inline]
+        pub unsafe fn decode_base64(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_decode_base64::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_decode_base64_url {
+            #[link(wasm_import_module = "spring:encoding")]
+            extern "C" {
+                #[link_name = "decode-base64-url"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:encoding.decode-base64-url."]
+        #[inline]
+        pub unsafe fn decode_base64_url(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_decode_base64_url::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_encode_base64 {
+            #[link(wasm_import_module = "spring:encoding")]
+            extern "C" {
+                #[link_name = "encode-base64"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:encoding.encode-base64."]
+        #[inline]
+        pub unsafe fn encode_base64(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_encode_base64::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_encode_base64_url {
+            #[link(wasm_import_module = "spring:encoding")]
+            extern "C" {
+                #[link_name = "encode-base64-url"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:encoding.encode-base64-url."]
+        #[inline]
+        pub unsafe fn encode_base64_url(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_encode_base64_url::call(p0, p1) }
+        }
+
         #[inline]
         pub fn is_valid_base64(text: &str) -> Result<bool> {
             let mut text_bytes = text.as_bytes().to_vec();
@@ -14348,6 +15620,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_next_way_point {
+            #[link(wasm_import_module = "spring:path-finder")]
+            extern "C" {
+                #[link_name = "get-next-way-point"]
+                pub fn call(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:path-finder.get-next-way-point."]
+        #[inline]
+        pub unsafe fn get_next_way_point(p0: i32, p1: f32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_get_next_way_point::call(p0, p1, p2, p3) }
+        }
+
         #[inline]
         pub fn get_path_node_cost(x: u32, z: u32) -> Result<f32> {
             let value = crate::generated::path_finder::get_path_node_cost(x, z)?;
@@ -14383,10 +15670,40 @@ use crate::Result;
             }
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_path_way_points {
+            #[link(wasm_import_module = "spring:path-finder")]
+            extern "C" {
+                #[link_name = "get-path-way-points"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:path-finder.get-path-way-points."]
+        #[inline]
+        pub unsafe fn get_path_way_points(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_path_way_points::call(p0, p1) }
+        }
+
         #[inline]
         pub fn init_path_node_costs_array(overlay_index: u32, size_x: u32, size_z: u32) -> Result<bool> {
             let value = crate::generated::path_finder::init_path_node_costs_array(overlay_index, size_x, size_z)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_request_path {
+            #[link(wasm_import_module = "spring:path-finder")]
+            extern "C" {
+                #[link_name = "request-path"]
+                pub fn call(p0: i32, p1: f32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:path-finder.request-path."]
+        #[inline]
+        pub unsafe fn request_path(p0: i32, p1: f32, p2: i32) -> i64 {
+            unsafe { __core_owned_request_path::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -14744,6 +16061,41 @@ use crate::Result;
                 #[link_name = "get-architecture"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
+        }
+
+        #[inline]
+        pub fn get_architecture(unused: u8) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_get_architecture::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unused as i32);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn is_headless(unused: u8) -> Result<bool> {
+            let value = crate::generated::platform::is_headless(unused)?;
+            Ok(value)
         }
 
     }
@@ -15306,6 +16658,231 @@ use crate::Result;
             pub exists: bool,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-feature-rules-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-feature-rules-param."]
+        #[inline]
+        pub unsafe fn get_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_feature_rules_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_feature_rules_params {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-feature-rules-params"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-feature-rules-params."]
+        #[inline]
+        pub unsafe fn get_feature_rules_params(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_feature_rules_params::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_game_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-game-rules-param"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-game-rules-param."]
+        #[inline]
+        pub unsafe fn get_game_rules_param(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_game_rules_param::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_game_rules_params {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-game-rules-params"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-game-rules-params."]
+        #[inline]
+        pub unsafe fn get_game_rules_params(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_game_rules_params::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_player_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-player-rules-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-player-rules-param."]
+        #[inline]
+        pub unsafe fn get_player_rules_param(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_player_rules_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_player_rules_params {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-player-rules-params"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-player-rules-params."]
+        #[inline]
+        pub unsafe fn get_player_rules_params(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_player_rules_params::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-team-rules-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-team-rules-param."]
+        #[inline]
+        pub unsafe fn get_team_rules_param(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_team_rules_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_team_rules_params {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-team-rules-params"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-team-rules-params."]
+        #[inline]
+        pub unsafe fn get_team_rules_params(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_team_rules_params::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-unit-rules-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-unit-rules-param."]
+        #[inline]
+        pub unsafe fn get_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_rules_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_rules_params {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "get-unit-rules-params"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-unit-rules-params."]
+        #[inline]
+        pub unsafe fn get_unit_rules_params(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_rules_params::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_feature_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "set-feature-rules-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.set-feature-rules-param."]
+        #[inline]
+        pub unsafe fn set_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_set_feature_rules_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_game_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "set-game-rules-param"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.set-game-rules-param."]
+        #[inline]
+        pub unsafe fn set_game_rules_param(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_set_game_rules_param::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_player_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "set-player-rules-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.set-player-rules-param."]
+        #[inline]
+        pub unsafe fn set_player_rules_param(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_set_player_rules_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_team_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "set-team-rules-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.set-team-rules-param."]
+        #[inline]
+        pub unsafe fn set_team_rules_param(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_set_team_rules_param::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_unit_rules_param {
+            #[link(wasm_import_module = "spring:rules-params")]
+            extern "C" {
+                #[link_name = "set-unit-rules-param"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.set-unit-rules-param."]
+        #[inline]
+        pub unsafe fn set_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_set_unit_rules_param::call(p0, p1, p2) }
+        }
+
     }
 
     pub mod move_ctrl {
@@ -15707,6 +17284,36 @@ use crate::Result;
         pub struct GetUnitEstimatedPathValue {
             pub waypoints: Vec<PathWaypoint>,
             pub starts: Vec<i32>,
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_estimated_path {
+            #[link(wasm_import_module = "spring:move-ctrl")]
+            extern "C" {
+                #[link_name = "get-unit-estimated-path"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:move-ctrl.get-unit-estimated-path."]
+        #[inline]
+        pub unsafe fn get_unit_estimated_path(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_estimated_path::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_move_type_data {
+            #[link(wasm_import_module = "spring:move-ctrl")]
+            extern "C" {
+                #[link_name = "get-unit-move-type-data"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:move-ctrl.get-unit-move-type-data."]
+        #[inline]
+        pub unsafe fn get_unit_move_type_data(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_move_type_data::call(p0, p1) }
         }
 
         #[inline]
@@ -19107,16 +20714,76 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_camera_names {
+            #[link(wasm_import_module = "spring:camera")]
+            extern "C" {
+                #[link_name = "get-camera-names"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:camera.get-camera-names."]
+        #[inline]
+        pub unsafe fn get_camera_names(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_camera_names::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_camera_position(unused: u8) -> Result<Float3> {
             let value = crate::generated::camera::get_camera_position(unused)?;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_camera_state {
+            #[link(wasm_import_module = "spring:camera")]
+            extern "C" {
+                #[link_name = "get-camera-state"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:camera.get-camera-state."]
+        #[inline]
+        pub unsafe fn get_camera_state(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_camera_state::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_pixel_dir(screen_x: f32, screen_y: f32) -> Result<Float3> {
             let value = crate::generated::camera::get_pixel_dir(screen_x, screen_y)?;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_camera_state {
+            #[link(wasm_import_module = "spring:camera")]
+            extern "C" {
+                #[link_name = "set-camera-state"]
+                pub fn call(p0: f32, p1: f32, p2: f32, p3: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:camera.set-camera-state."]
+        #[inline]
+        pub unsafe fn set_camera_state(p0: f32, p1: f32, p2: f32, p3: i32) -> i64 {
+            unsafe { __core_owned_set_camera_state::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_camera_target {
+            #[link(wasm_import_module = "spring:camera")]
+            extern "C" {
+                #[link_name = "set-camera-target"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:camera.set-camera-target."]
+        #[inline]
+        pub unsafe fn set_camera_target(p0: i32) -> i64 {
+            unsafe { __core_owned_set_camera_target::call(p0) }
         }
 
         #[inline]
@@ -19774,6 +21441,36 @@ use crate::Result;
             pub scan_code_default_name: String,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_action_hot_keys {
+            #[link(wasm_import_module = "spring:input")]
+            extern "C" {
+                #[link_name = "get-action-hot-keys"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:input.get-action-hot-keys."]
+        #[inline]
+        pub unsafe fn get_action_hot_keys(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_action_hot_keys::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_active_command {
+            #[link(wasm_import_module = "spring:input")]
+            extern "C" {
+                #[link_name = "get-active-command"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:input.get-active-command."]
+        #[inline]
+        pub unsafe fn get_active_command(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_active_command::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_active_page(unused: u8) -> Result<GetActivePageValue> {
             let value = crate::generated::input::get_active_page(unused)?;
@@ -19783,10 +21480,40 @@ use crate::Result;
             })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_default_command {
+            #[link(wasm_import_module = "spring:input")]
+            extern "C" {
+                #[link_name = "get-default-command"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:input.get-default-command."]
+        #[inline]
+        pub unsafe fn get_default_command(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_default_command::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_invert_queue_key(unused: u8) -> Result<bool> {
             let value = crate::generated::input::get_invert_queue_key(unused)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_key_bindings {
+            #[link(wasm_import_module = "spring:input")]
+            extern "C" {
+                #[link_name = "get-key-bindings"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:input.get-key-bindings."]
+        #[inline]
+        pub unsafe fn get_key_bindings(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_key_bindings::call(p0, p1) }
         }
 
         #[inline]
@@ -19798,10 +21525,40 @@ use crate::Result;
             crate::generated::borrowed::input::get_key_code(&key_sym_cstr)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_key_from_scan_symbol {
+            #[link(wasm_import_module = "spring:input")]
+            extern "C" {
+                #[link_name = "get-key-from-scan-symbol"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:input.get-key-from-scan-symbol."]
+        #[inline]
+        pub unsafe fn get_key_from_scan_symbol(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_key_from_scan_symbol::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_key_state(key_code: i32) -> Result<bool> {
             let value = crate::generated::input::get_key_state(key_code)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_key_symbol {
+            #[link(wasm_import_module = "spring:input")]
+            extern "C" {
+                #[link_name = "get-key-symbol"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:input.get-key-symbol."]
+        #[inline]
+        pub unsafe fn get_key_symbol(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_key_symbol::call(p0, p1) }
         }
 
         #[inline]
@@ -19813,6 +21570,21 @@ use crate::Result;
                 meta: value.2,
                 shift: value.3
             })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_mouse_buttons_pressed {
+            #[link(wasm_import_module = "spring:input")]
+            extern "C" {
+                #[link_name = "get-mouse-buttons-pressed"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:input.get-mouse-buttons-pressed."]
+        #[inline]
+        pub unsafe fn get_mouse_buttons_pressed(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_mouse_buttons_pressed::call(p0, p1) }
         }
 
         #[inline]
@@ -19916,6 +21688,21 @@ use crate::Result;
                 let _ = (unused as i32);
                 Err(unreachable!())
             }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_scan_symbol {
+            #[link(wasm_import_module = "spring:input")]
+            extern "C" {
+                #[link_name = "get-scan-symbol"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:input.get-scan-symbol."]
+        #[inline]
+        pub unsafe fn get_scan_symbol(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_scan_symbol::call(p0, p1) }
         }
 
         #[inline]
@@ -20314,6 +22101,54 @@ use crate::Result;
             pub shore_waves: Option<bool>,
             pub force_rendering: Option<bool>,
             pub has_water_plane: Option<bool>,
+        }
+
+        #[inline]
+        pub fn clear_emulated_input(fire_releases: bool) -> Result<()> {
+            crate::generated::debug_input::clear_emulated_input(fire_releases)?;
+            Ok(())
+        }
+
+        #[inline]
+        pub fn emulate_key(key_code: i32, pressed: bool) -> Result<()> {
+            crate::generated::debug_input::emulate_key(key_code, pressed)?;
+            Ok(())
+        }
+
+        #[inline]
+        pub fn emulate_mouse_button(button: i32, pressed: bool) -> Result<()> {
+            crate::generated::debug_input::emulate_mouse_button(button, pressed)?;
+            Ok(())
+        }
+
+        #[inline]
+        pub fn emulate_mouse_move(x: i32, y: i32) -> Result<()> {
+            crate::generated::debug_input::emulate_mouse_move(x, y)?;
+            Ok(())
+        }
+
+        #[inline]
+        pub fn emulate_mouse_wheel(delta: f32) -> Result<()> {
+            crate::generated::debug_input::emulate_mouse_wheel(delta)?;
+            Ok(())
+        }
+
+        #[inline]
+        pub fn emulate_text_editing(utf8_text: &str, start: u32, length: u32) -> Result<bool> {
+            let mut utf8_text_bytes = utf8_text.as_bytes().to_vec();
+            if utf8_text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            utf8_text_bytes.push(0);
+            let utf8_text_cstr = core::ffi::CStr::from_bytes_with_nul(&utf8_text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::debug_input::emulate_text_editing(&utf8_text_cstr, start, length)
+        }
+
+        #[inline]
+        pub fn emulate_text_input(utf8_text: &str) -> Result<bool> {
+            let mut utf8_text_bytes = utf8_text.as_bytes().to_vec();
+            if utf8_text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            utf8_text_bytes.push(0);
+            let utf8_text_cstr = core::ffi::CStr::from_bytes_with_nul(&utf8_text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::debug_input::emulate_text_input(&utf8_text_cstr)
         }
 
     }
@@ -21038,6 +22873,21 @@ use crate::Result;
             }
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_mini_map_dual_screen {
+            #[link(wasm_import_module = "spring:display")]
+            extern "C" {
+                #[link_name = "get-mini-map-dual-screen"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:display.get-mini-map-dual-screen."]
+        #[inline]
+        pub unsafe fn get_mini_map_dual_screen(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_mini_map_dual_screen::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_mini_map_geometry(unused: u8) -> Result<MinimapGeometry> {
             let value = crate::generated::display::get_mini_map_geometry(unused)?;
@@ -21078,6 +22928,21 @@ use crate::Result;
         pub fn get_view_geometry(unused: u8) -> Result<ViewGeometry> {
             let value = crate::generated::display::get_view_geometry(unused)?;
             Ok(ViewGeometry { view_size_x: value.view_size_x, view_size_y: value.view_size_y, view_pos_x: value.view_pos_x, view_pos_y: value.view_pos_y })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_water_mode {
+            #[link(wasm_import_module = "spring:display")]
+            extern "C" {
+                #[link_name = "get-water-mode"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:display.get-water-mode."]
+        #[inline]
+        pub unsafe fn get_water_mode(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_water_mode::call(p0, p1) }
         }
 
         #[inline]
@@ -22064,6 +23929,36 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_group_units_counts {
+            #[link(wasm_import_module = "spring:selection")]
+            extern "C" {
+                #[link_name = "get-group-units-counts"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:selection.get-group-units-counts."]
+        #[inline]
+        pub unsafe fn get_group_units_counts(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_group_units_counts::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_group_units_sorted {
+            #[link(wasm_import_module = "spring:selection")]
+            extern "C" {
+                #[link_name = "get-group-units-sorted"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:selection.get-group-units-sorted."]
+        #[inline]
+        pub unsafe fn get_group_units_sorted(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_group_units_sorted::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_selected_group(unused: u8) -> Result<i32> {
             let value = crate::generated::selection::get_selected_group(unused)?;
@@ -22103,6 +23998,21 @@ use crate::Result;
         pub fn get_selected_units_count(unused: u8) -> Result<u32> {
             let value = crate::generated::selection::get_selected_units_count(unused)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_selected_units_counts {
+            #[link(wasm_import_module = "spring:selection")]
+            extern "C" {
+                #[link_name = "get-selected-units-counts"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:selection.get-selected-units-counts."]
+        #[inline]
+        pub unsafe fn get_selected_units_counts(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_selected_units_counts::call(p0, p1) }
         }
 
         #[inline]
@@ -22589,6 +24499,21 @@ use crate::Result;
             pub has_water_plane: Option<bool>,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_sound_devices {
+            #[link(wasm_import_module = "spring:sound")]
+            extern "C" {
+                #[link_name = "get-sound-devices"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:sound.get-sound-devices."]
+        #[inline]
+        pub unsafe fn get_sound_devices(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_sound_devices::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_sound_effect_params(unused: u8) -> Result<bool> {
             let value = crate::generated::sound::get_sound_effect_params(unused)?;
@@ -22616,6 +24541,30 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_play_sound_file {
+            #[link(wasm_import_module = "spring:sound")]
+            extern "C" {
+                #[link_name = "play-sound-file"]
+                pub fn call(p0: f32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:sound.play-sound-file."]
+        #[inline]
+        pub unsafe fn play_sound_file(p0: f32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_play_sound_file::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn play_sound_stream(ogg_file: &str, volume: f32, enqueue: bool) -> Result<bool> {
+            let mut ogg_file_bytes = ogg_file.as_bytes().to_vec();
+            if ogg_file_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            ogg_file_bytes.push(0);
+            let ogg_file_cstr = core::ffi::CStr::from_bytes_with_nul(&ogg_file_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::sound::play_sound_stream(&ogg_file_cstr, volume, enqueue)
+        }
+
         #[inline]
         pub fn preload_sound_item(sound_name: &str) -> Result<bool> {
             let mut sound_name_bytes = sound_name.as_bytes().to_vec();
@@ -22623,6 +24572,21 @@ use crate::Result;
             sound_name_bytes.push(0);
             let sound_name_cstr = core::ffi::CStr::from_bytes_with_nul(&sound_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
             crate::generated::borrowed::sound::preload_sound_item(&sound_name_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_sound_effect_params {
+            #[link(wasm_import_module = "spring:sound")]
+            extern "C" {
+                #[link_name = "set-sound-effect-params"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:sound.set-sound-effect-params."]
+        #[inline]
+        pub unsafe fn set_sound_effect_params(p0: i32) -> i64 {
+            unsafe { __core_owned_set_sound_effect_params::call(p0) }
         }
 
         #[inline]
@@ -23193,6 +25157,21 @@ use crate::Result;
             crate::messages::echo(message, rest)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_console_buffer {
+            #[link(wasm_import_module = "spring:messages")]
+            extern "C" {
+                #[link_name = "get-console-buffer"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:messages.get-console-buffer."]
+        #[inline]
+        pub unsafe fn get_console_buffer(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_console_buffer::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_current_tooltip(unused: u8) -> Result<String> {
             #[cfg(target_arch = "wasm32")]
@@ -23239,6 +25218,11 @@ use crate::Result;
         }
 
         #[inline]
+        pub fn send_commands(command: &str, rest: &str) -> Result<bool> {
+            crate::messages::send_commands(command, rest)
+        }
+
+        #[inline]
         pub fn send_lua_gaia_msg(message: &str) -> Result<bool> {
             crate::messages::send_lua_gaia_msg(message)
         }
@@ -23276,6 +25260,21 @@ use crate::Result;
         #[inline]
         pub fn send_message_to_spectators(message: &str) -> Result<bool> {
             crate::messages::send_message_to_spectators(message)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_send_message_to_team {
+            #[link(wasm_import_module = "spring:messages")]
+            extern "C" {
+                #[link_name = "send-message-to-team"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:messages.send-message-to-team."]
+        #[inline]
+        pub unsafe fn send_message_to_team(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_send_message_to_team::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -23757,6 +25756,121 @@ use crate::Result;
         pub struct GetConfigStringValue {
             pub value: String,
             pub exists: bool,
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_config_float {
+            #[link(wasm_import_module = "spring:config")]
+            extern "C" {
+                #[link_name = "get-config-float"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:config.get-config-float."]
+        #[inline]
+        pub unsafe fn get_config_float(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_config_float::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_config_int {
+            #[link(wasm_import_module = "spring:config")]
+            extern "C" {
+                #[link_name = "get-config-int"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:config.get-config-int."]
+        #[inline]
+        pub unsafe fn get_config_int(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_config_int::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_config_params {
+            #[link(wasm_import_module = "spring:config")]
+            extern "C" {
+                #[link_name = "get-config-params"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:config.get-config-params."]
+        #[inline]
+        pub unsafe fn get_config_params(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_config_params::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_config_string {
+            #[link(wasm_import_module = "spring:config")]
+            extern "C" {
+                #[link_name = "get-config-string"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:config.get-config-string."]
+        #[inline]
+        pub unsafe fn get_config_string(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_config_string::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_log_sections {
+            #[link(wasm_import_module = "spring:config")]
+            extern "C" {
+                #[link_name = "get-log-sections"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:config.get-log-sections."]
+        #[inline]
+        pub unsafe fn get_log_sections(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_log_sections::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn set_config_float(key: &str, value: f32, use_overlay: bool) -> Result<bool> {
+            let mut key_bytes = key.as_bytes().to_vec();
+            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            key_bytes.push(0);
+            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::config::set_config_float(&key_cstr, value, use_overlay)
+        }
+
+        #[inline]
+        pub fn set_config_int(key: &str, value: i32, use_overlay: bool) -> Result<bool> {
+            let mut key_bytes = key.as_bytes().to_vec();
+            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            key_bytes.push(0);
+            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::config::set_config_int(&key_cstr, value, use_overlay)
+        }
+
+        #[inline]
+        pub fn set_config_string(key: &str, value: &str, use_overlay: bool) -> Result<bool> {
+            let mut key_bytes = key.as_bytes().to_vec();
+            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            key_bytes.push(0);
+            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::config::set_config_string(&key_cstr, &value_cstr, use_overlay)
+        }
+
+        #[inline]
+        pub fn set_log_section_filter_level(section: &str, level: i32) -> Result<bool> {
+            let mut section_bytes = section.as_bytes().to_vec();
+            if section_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            section_bytes.push(0);
+            let section_cstr = core::ffi::CStr::from_bytes_with_nul(&section_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::config::set_log_section_filter_level(&section_cstr, level)
         }
 
     }
@@ -24269,6 +26383,21 @@ use crate::Result;
             })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_trace_ray_between_positions {
+            #[link(wasm_import_module = "spring:tracing")]
+            extern "C" {
+                #[link_name = "trace-ray-between-positions"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:tracing.trace-ray-between-positions."]
+        #[inline]
+        pub unsafe fn trace_ray_between_positions(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_trace_ray_between_positions::call(p0, p1) }
+        }
+
         #[inline]
         pub fn trace_ray_features(ray: Ray) -> Result<TraceRayFeaturesValue> {
             let value = crate::generated::tracing::trace_ray_features(crate::generated::tracing::Ray { origin: crate::generated::tracing::Float3 { x: ray.origin.x, y: ray.origin.y, z: ray.origin.z }, direction: crate::generated::tracing::Float3 { x: ray.direction.x, y: ray.direction.y, z: ray.direction.z }, length: ray.length, flags: ray.flags, ally_team_id: ray.ally_team_id })?;
@@ -24279,6 +26408,51 @@ use crate::Result;
                 hit_pos: Float3 { x: value.3.x, y: value.3.y, z: value.3.z },
                 hit_normal: Float3 { x: value.4.x, y: value.4.y, z: value.4.z }
             })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_trace_ray_ground_between_positions {
+            #[link(wasm_import_module = "spring:tracing")]
+            extern "C" {
+                #[link_name = "trace-ray-ground-between-positions"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:tracing.trace-ray-ground-between-positions."]
+        #[inline]
+        pub unsafe fn trace_ray_ground_between_positions(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_trace_ray_ground_between_positions::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_trace_ray_ground_in_direction {
+            #[link(wasm_import_module = "spring:tracing")]
+            extern "C" {
+                #[link_name = "trace-ray-ground-in-direction"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:tracing.trace-ray-ground-in-direction."]
+        #[inline]
+        pub unsafe fn trace_ray_ground_in_direction(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_trace_ray_ground_in_direction::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_trace_ray_in_direction {
+            #[link(wasm_import_module = "spring:tracing")]
+            extern "C" {
+                #[link_name = "trace-ray-in-direction"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:tracing.trace-ray-in-direction."]
+        #[inline]
+        pub unsafe fn trace_ray_in_direction(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_trace_ray_in_direction::call(p0, p1) }
         }
 
         #[inline]
@@ -26468,6 +28642,48 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_water_texture {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "get-water-texture"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.get-water-texture."]
+        #[inline]
+        pub unsafe fn get_water_texture(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_water_texture::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn load_cmd_colors_config(filename: &str) -> Result<bool> {
+            let mut filename_bytes = filename.as_bytes().to_vec();
+            if filename_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            filename_bytes.push(0);
+            let filename_cstr = core::ffi::CStr::from_bytes_with_nul(&filename_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::unsynced_ctrl::load_cmd_colors_config(&filename_cstr)
+        }
+
+        #[inline]
+        pub fn load_ctrl_panel_config(filename: &str) -> Result<bool> {
+            let mut filename_bytes = filename.as_bytes().to_vec();
+            if filename_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            filename_bytes.push(0);
+            let filename_cstr = core::ffi::CStr::from_bytes_with_nul(&filename_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::unsynced_ctrl::load_ctrl_panel_config(&filename_cstr)
+        }
+
+        #[inline]
+        pub fn load_model_textures(model_name: &str) -> Result<bool> {
+            let mut model_name_bytes = model_name.as_bytes().to_vec();
+            if model_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            model_name_bytes.push(0);
+            let model_name_cstr = core::ffi::CStr::from_bytes_with_nul(&model_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::unsynced_ctrl::load_model_textures(&model_name_cstr)
+        }
+
         #[inline]
         pub fn pause_dolly_camera(percent: f32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::pause_dolly_camera(percent)?;
@@ -26512,6 +28728,24 @@ use crate::Result;
         }
 
         #[inline]
+        pub fn sdl_set_text_input_rect(x: i32, y: i32, w: i32, h: i32) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::sdl_set_text_input_rect(x, y, w, h)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn sdl_start_text_input(unused: u8) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::sdl_start_text_input(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn sdl_stop_text_input(unused: u8) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::sdl_stop_text_input(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
         pub fn select_unit_map(unit_i_ds: &Vec<i32>, append: bool) -> Result<bool> {
             crate::generated::borrowed::unsynced_ctrl::select_unit_map(unit_i_ds.as_slice(), append)
         }
@@ -26520,6 +28754,21 @@ use crate::Result;
         pub fn set_active_command(cmd_index: i32, button: i32, options: SetActiveCommandOptions) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_active_command(cmd_index, button, crate::generated::unsynced_ctrl::SetActiveCommandOptions { left_click: options.left_click, right_click: options.right_click, alt: options.alt, ctrl: options.ctrl, meta: options.meta, shift: options.shift })?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_atmosphere {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "set-atmosphere"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-atmosphere."]
+        #[inline]
+        pub unsafe fn set_atmosphere(p0: i32) -> i64 {
+            unsafe { __core_owned_set_atmosphere::call(p0) }
         }
 
         #[inline]
@@ -26553,9 +28802,63 @@ use crate::Result;
         }
 
         #[inline]
+        pub fn set_clipboard(text: &str) -> Result<bool> {
+            let mut text_bytes = text.as_bytes().to_vec();
+            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            text_bytes.push(0);
+            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::unsynced_ctrl::set_clipboard(&text_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_custom_command_draw_data {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "set-custom-command-draw-data"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-custom-command-draw-data."]
+        #[inline]
+        pub unsafe fn set_custom_command_draw_data(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_set_custom_command_draw_data::call(p0, p1, p2) }
+        }
+
+        #[inline]
         pub fn set_custom_palette_color(index: i32, r: f32, g: f32, b: f32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_custom_palette_color(index, r, g, b)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_dolly_camera_curve {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "set-dolly-camera-curve"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-dolly-camera-curve."]
+        #[inline]
+        pub unsafe fn set_dolly_camera_curve(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_set_dolly_camera_curve::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_dolly_camera_look_curve {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "set-dolly-camera-look-curve"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-dolly-camera-look-curve."]
+        #[inline]
+        pub unsafe fn set_dolly_camera_look_curve(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_set_dolly_camera_look_curve::call(p0, p1) }
         }
 
         #[inline]
@@ -26682,6 +28985,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_map_rendering_params {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "set-map-rendering-params"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-map-rendering-params."]
+        #[inline]
+        pub unsafe fn set_map_rendering_params(p0: i32) -> i64 {
+            unsafe { __core_owned_set_map_rendering_params::call(p0) }
+        }
+
         #[inline]
         pub fn set_map_shader(standard_shader_id: i32, deferred_shader_id: i32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_map_shader(standard_shader_id, deferred_shader_id)?;
@@ -26725,6 +29043,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_shock_front_factors {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "set-shock-front-factors"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-shock-front-factors."]
+        #[inline]
+        pub unsafe fn set_shock_front_factors(p0: i32) -> i64 {
+            unsafe { __core_owned_set_shock_front_factors::call(p0) }
+        }
+
         #[inline]
         pub fn set_sky_box_texture(tex_name: &str) -> Result<bool> {
             let mut tex_name_bytes = tex_name.as_bytes().to_vec();
@@ -26738,6 +29071,21 @@ use crate::Result;
         pub fn set_sun_direction(dir: Float3, intensity: f32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_sun_direction(crate::generated::unsynced_ctrl::Float3 { x: dir.x, y: dir.y, z: dir.z }, intensity)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_sun_lighting {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "set-sun-lighting"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-sun-lighting."]
+        #[inline]
+        pub unsafe fn set_sun_lighting(p0: i32) -> i64 {
+            unsafe { __core_owned_set_sun_lighting::call(p0) }
         }
 
         #[inline]
@@ -26822,6 +29170,55 @@ use crate::Result;
         }
 
         #[inline]
+        pub fn set_video_capturing_mode(allow_capture_mode: bool) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_video_capturing_mode(allow_capture_mode)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_video_capturing_time_offset(time_offset: f32) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_video_capturing_time_offset(time_offset)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_wm_caption(title: &str, title_short: &str) -> Result<bool> {
+            let mut title_bytes = title.as_bytes().to_vec();
+            if title_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            title_bytes.push(0);
+            let title_cstr = core::ffi::CStr::from_bytes_with_nul(&title_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut title_short_bytes = title_short.as_bytes().to_vec();
+            if title_short_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            title_short_bytes.push(0);
+            let title_short_cstr = core::ffi::CStr::from_bytes_with_nul(&title_short_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::unsynced_ctrl::set_wm_caption(&title_cstr, &title_short_cstr)
+        }
+
+        #[inline]
+        pub fn set_wm_icon(icon_file_name: &str, force_resolution: bool) -> Result<bool> {
+            let mut icon_file_name_bytes = icon_file_name.as_bytes().to_vec();
+            if icon_file_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            icon_file_name_bytes.push(0);
+            let icon_file_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_file_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::unsynced_ctrl::set_wm_icon(&icon_file_name_cstr, force_resolution)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_water_params {
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+            extern "C" {
+                #[link_name = "set-water-params"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-water-params."]
+        #[inline]
+        pub unsafe fn set_water_params(p0: i32) -> i64 {
+            unsafe { __core_owned_set_water_params::call(p0) }
+        }
+
+        #[inline]
         pub fn set_water_texture(tex_type: &str, tex_name: &str) -> Result<bool> {
             let mut tex_type_bytes = tex_type.as_bytes().to_vec();
             if tex_type_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
@@ -26832,6 +29229,30 @@ use crate::Result;
             tex_name_bytes.push(0);
             let tex_name_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
             crate::generated::borrowed::unsynced_ctrl::set_water_texture(&tex_type_cstr, &tex_name_cstr)
+        }
+
+        #[inline]
+        pub fn set_window_geometry(display_index: i32, window_pos_x: i32, window_pos_y: i32, window_size_x: i32, window_size_y: i32, options: SetWindowGeometryOptions) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_window_geometry(display_index, window_pos_x, window_pos_y, window_size_x, window_size_y, crate::generated::unsynced_ctrl::SetWindowGeometryOptions { full_screen: options.full_screen, borderless: options.borderless })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_window_maximized(unused: u8) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_window_maximized(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_window_minimized(unused: u8) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_window_minimized(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn warp_mouse(x: i32, y: i32) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::warp_mouse(x, y)?;
+            Ok(value)
         }
 
     }
@@ -28815,10 +31236,64 @@ use crate::Result;
             pub fbo: u32,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_active_fbo {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "active-fbo"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.active-fbo."]
+        #[inline]
+        pub unsafe fn active_fbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32 {
+            unsafe { __core_owned_active_fbo::call(p0, p1, p2, p3, p4) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_active_shader {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "active-shader"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.active-shader."]
+        #[inline]
+        pub unsafe fn active_shader(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_active_shader::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn active_texture(tex_num: i32) -> Result<()> {
             crate::generated::gfx::active_texture(tex_num)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_add_atlas_texture {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "add-atlas-texture"]
+                pub fn call(p0: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.add-atlas-texture."]
+        #[inline]
+        pub unsafe fn add_atlas_texture(p0: i32) -> i32 {
+            unsafe { __core_owned_add_atlas_texture::call(p0) }
+        }
+
+        #[inline]
+        pub fn add_fallback_font(value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::add_fallback_font(&value_cstr)
         }
 
         #[inline]
@@ -28871,6 +31346,21 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_begin_end {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "begin-end"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.begin-end."]
+        #[inline]
+        pub unsafe fn begin_end(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_begin_end::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn begin_text(value: bool) -> Result<()> {
             crate::generated::gfx::begin_text(value)?;
@@ -28887,6 +31377,30 @@ use crate::Result;
         pub fn bind_buffer_range_vbo(vbo_id: u32, binding_index: u32, element_offset: i32, element_count: i32, target: u32, bind: bool) -> Result<i32> {
             let value = crate::generated::gfx::bind_buffer_range_vbo(vbo_id, binding_index, element_offset, element_count, target, bind)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_bind_image_texture {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "bind-image-texture"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.bind-image-texture."]
+        #[inline]
+        pub unsafe fn bind_image_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32 {
+            unsafe { __core_owned_bind_image_texture::call(p0, p1, p2, p3, p4, p5, p6) }
+        }
+
+        #[inline]
+        pub fn bind_texture(name: &str, tex_num: i32, enable: bool) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::bind_texture(&name_cstr, tex_num, enable)
         }
 
         #[inline]
@@ -28929,6 +31443,21 @@ use crate::Result;
         pub fn call_list(value: u32) -> Result<()> {
             crate::generated::gfx::call_list(value)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_change_texture_params {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "change-texture-params"]
+                pub fn call(p0: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.change-texture-params."]
+        #[inline]
+        pub unsafe fn change_texture_params(p0: i32) -> i32 {
+            unsafe { __core_owned_change_texture_params::call(p0) }
         }
 
         #[inline]
@@ -28991,10 +31520,55 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_copy_to_texture {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "copy-to-texture"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.copy-to-texture."]
+        #[inline]
+        pub unsafe fn copy_to_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32) -> i32 {
+            unsafe { __core_owned_copy_to_texture::call(p0, p1, p2, p3, p4, p5, p6, p7, p8) }
+        }
+
         #[inline]
         pub fn copy_to_vbo(source_vboid: u32, destination_vboid: u32, copy_size_in_bytes: i32) -> Result<bool> {
             let value = crate::generated::gfx::copy_to_vbo(source_vboid, destination_vboid, copy_size_in_bytes)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_create_fbo {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "create-fbo"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-fbo."]
+        #[inline]
+        pub unsafe fn create_fbo(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_create_fbo::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_create_list {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "create-list"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-list."]
+        #[inline]
+        pub unsafe fn create_list(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_create_list::call(p0, p1) }
         }
 
         #[inline]
@@ -29009,10 +31583,70 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_create_shader {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "create-shader"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-shader."]
+        #[inline]
+        pub unsafe fn create_shader(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_create_shader::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_create_texture {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "create-texture"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-texture."]
+        #[inline]
+        pub unsafe fn create_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64 {
+            unsafe { __core_owned_create_texture::call(p0, p1, p2, p3, p4, p5) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_create_texture_atlas {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "create-texture-atlas"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-texture-atlas."]
+        #[inline]
+        pub unsafe fn create_texture_atlas(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64 {
+            unsafe { __core_owned_create_texture_atlas::call(p0, p1, p2, p3, p4) }
+        }
+
         #[inline]
         pub fn culling(value: bool) -> Result<()> {
             crate::generated::gfx::culling(value)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_define_vbo {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "define-vbo"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.define-vbo."]
+        #[inline]
+        pub unsafe fn define_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32 {
+            unsafe { __core_owned_define_vbo::call(p0, p1, p2, p3, p4, p5, p6) }
         }
 
         #[inline]
@@ -29153,6 +31787,21 @@ use crate::Result;
         pub fn draw_elements_vao(vao_id: u32, mode: u32, draw_count: i32, base_index: i32, instance_count: i32, base_vertex: i32, base_instance: i32) -> Result<()> {
             crate::generated::gfx::draw_elements_vao(vao_id, mode, draw_count, base_index, instance_count, base_vertex, base_instance)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_draw_func_at_unit {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "draw-func-at-unit"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.draw-func-at-unit."]
+        #[inline]
+        pub unsafe fn draw_func_at_unit(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_draw_func_at_unit::call(p0, p1, p2, p3) }
         }
 
         #[inline]
@@ -29302,6 +31951,21 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_font_get_text_height {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "font-get-text-height"]
+                pub fn call(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.font-get-text-height."]
+        #[inline]
+        pub unsafe fn font_get_text_height(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32 {
+            unsafe { __core_owned_font_get_text_height::call(p0, p1, p2, p3, p4, p5) }
+        }
+
         #[inline]
         pub fn font_get_text_width(font_id: u32, text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<f32> {
             let mut text_bytes = text.as_bytes().to_vec();
@@ -29313,6 +31977,36 @@ use crate::Result;
             options_bytes.push(0);
             let options_cstr = core::ffi::CStr::from_bytes_with_nul(&options_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
             crate::generated::borrowed::gfx::font_get_text_width(font_id, &text_cstr, x, y, size, &options_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_font_print {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "font-print"]
+                pub fn call(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.font-print."]
+        #[inline]
+        pub unsafe fn font_print(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32 {
+            unsafe { __core_owned_font_print::call(p0, p1, p2, p3, p4) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_font_print_world {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "font-print-world"]
+                pub fn call(p0: i32, p1: f32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.font-print-world."]
+        #[inline]
+        pub unsafe fn font_print_world(p0: i32, p1: f32, p2: i32) -> i32 {
+            unsafe { __core_owned_font_print_world::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -29339,10 +32033,115 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_font_wrap_text {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "font-wrap-text"]
+                pub fn call(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.font-wrap-text."]
+        #[inline]
+        pub unsafe fn font_wrap_text(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32 {
+            unsafe { __core_owned_font_wrap_text::call(p0, p1, p2, p3, p4, p5) }
+        }
+
         #[inline]
         pub fn frustum(left: f32, right: f32, bottom: f32, top: f32, near_val: f32, far_val: f32) -> Result<()> {
             crate::generated::gfx::frustum(left, right, bottom, top, near_val, far_val)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_generate_mipmap {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "generate-mipmap"]
+                pub fn call(p0: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.generate-mipmap."]
+        #[inline]
+        pub unsafe fn generate_mipmap(p0: i32) -> i32 {
+            unsafe { __core_owned_generate_mipmap::call(p0) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_active_uniforms {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-active-uniforms"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-active-uniforms."]
+        #[inline]
+        pub unsafe fn get_active_uniforms(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_active_uniforms::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_atlas_texture {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-atlas-texture"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-atlas-texture."]
+        #[inline]
+        pub unsafe fn get_atlas_texture(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_atlas_texture::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_atmosphere {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-atmosphere"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-atmosphere."]
+        #[inline]
+        pub unsafe fn get_atmosphere(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_atmosphere::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_console_commands {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-console-commands"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-console-commands."]
+        #[inline]
+        pub unsafe fn get_console_commands(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_console_commands::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_engine_atlas_textures {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-engine-atlas-textures"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-engine-atlas-textures."]
+        #[inline]
+        pub unsafe fn get_engine_atlas_textures(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_engine_atlas_textures::call(p0, p1) }
         }
 
         #[inline]
@@ -29383,6 +32182,21 @@ use crate::Result;
             })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_engine_texture_names {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-engine-texture-names"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-engine-texture-names."]
+        #[inline]
+        pub unsafe fn get_engine_texture_names(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_engine_texture_names::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_engine_uniform_buffer_def(index: i32) -> Result<String> {
             #[cfg(target_arch = "wasm32")]
@@ -29412,10 +32226,85 @@ use crate::Result;
             }
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_fixed_state {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-fixed-state"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-fixed-state."]
+        #[inline]
+        pub unsafe fn get_fixed_state(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_fixed_state::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_font_info {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-font-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-font-info."]
+        #[inline]
+        pub unsafe fn get_font_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_font_info::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_global_tex_coords {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-global-tex-coords"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-global-tex-coords."]
+        #[inline]
+        pub unsafe fn get_global_tex_coords(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_global_tex_coords::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_global_tex_names {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-global-tex-names"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-global-tex-names."]
+        #[inline]
+        pub unsafe fn get_global_tex_names(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_global_tex_names::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_idvbo(value: u32) -> Result<u32> {
             let value = crate::generated::gfx::get_idvbo(value)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_map_rendering {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-map-rendering"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-map-rendering."]
+        #[inline]
+        pub unsafe fn get_map_rendering(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_map_rendering::call(p0, p1) }
         }
 
         #[inline]
@@ -29526,6 +32415,51 @@ use crate::Result;
             }
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_subroutine_index {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-subroutine-index"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-subroutine-index."]
+        #[inline]
+        pub unsafe fn get_subroutine_index(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_get_subroutine_index::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_sun {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-sun"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-sun."]
+        #[inline]
+        pub unsafe fn get_sun(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_sun::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_text_height {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-text-height"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-text-height."]
+        #[inline]
+        pub unsafe fn get_text_height(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_text_height::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_text_width(value: &str) -> Result<f32> {
             let mut value_bytes = value.as_bytes().to_vec();
@@ -29596,6 +32530,21 @@ use crate::Result;
             })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_water_rendering {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "get-water-rendering"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-water-rendering."]
+        #[inline]
+        pub unsafe fn get_water_rendering(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_water_rendering::call(p0, p1) }
+        }
+
         #[inline]
         pub fn has_extension(value: &str) -> Result<bool> {
             let mut value_bytes = value.as_bytes().to_vec();
@@ -29656,6 +32605,15 @@ use crate::Result;
         pub fn line_width(value: f32) -> Result<()> {
             crate::generated::gfx::line_width(value)?;
             Ok(())
+        }
+
+        #[inline]
+        pub fn load_font(path: &str, size: i32, outline_width: i32, outline_weight: f32) -> Result<u32> {
+            let mut path_bytes = path.as_bytes().to_vec();
+            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            path_bytes.push(0);
+            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::load_font(&path_cstr, size, outline_width, outline_weight)
         }
 
         #[inline]
@@ -29735,6 +32693,21 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_object_label {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "object-label"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.object-label."]
+        #[inline]
+        pub unsafe fn object_label(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_object_label::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near_val: f32, far_val: f32) -> Result<()> {
             crate::generated::gfx::ortho(left, right, bottom, top, near_val, far_val)?;
@@ -29795,10 +32768,40 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_push_debug_group {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "push-debug-group"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.push-debug-group."]
+        #[inline]
+        pub unsafe fn push_debug_group(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_push_debug_group::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn push_matrix(unused: u8) -> Result<()> {
             crate::generated::gfx::push_matrix(unused)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_push_pop_matrix {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "push-pop-matrix"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.push-pop-matrix."]
+        #[inline]
+        pub unsafe fn push_pop_matrix(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_push_pop_matrix::call(p0, p1) }
         }
 
         #[inline]
@@ -29808,6 +32811,21 @@ use crate::Result;
                 previously_bound_raw_fbo_id: value.0,
                 has_previous: value.1
             })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_read_pixels {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "read-pixels"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.read-pixels."]
+        #[inline]
+        pub unsafe fn read_pixels(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32 {
+            unsafe { __core_owned_read_pixels::call(p0, p1, p2, p3, p4, p5) }
         }
 
         #[inline]
@@ -29820,6 +32838,21 @@ use crate::Result;
         pub fn remove_from_submission_vao(vao_id: u32, index: i32) -> Result<()> {
             crate::generated::gfx::remove_from_submission_vao(vao_id, index)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_render_to_texture {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "render-to-texture"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.render-to-texture."]
+        #[inline]
+        pub unsafe fn render_to_texture(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_render_to_texture::call(p0, p1, p2, p3) }
         }
 
         #[inline]
@@ -29840,6 +32873,36 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_run_query {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "run-query"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.run-query."]
+        #[inline]
+        pub unsafe fn run_query(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_run_query::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_save_image {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "save-image"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.save-image."]
+        #[inline]
+        pub unsafe fn save_image(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64 {
+            unsafe { __core_owned_save_image::call(p0, p1, p2, p3, p4, p5) }
+        }
+
         #[inline]
         pub fn scale(x: f32, y: f32, z: f32) -> Result<()> {
             crate::generated::gfx::scale(x, y, z)?;
@@ -29856,6 +32919,36 @@ use crate::Result;
         pub fn secondary_color(x: f32, y: f32, z: f32) -> Result<()> {
             crate::generated::gfx::secondary_color(x, y, z)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_fbo_attachment {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "set-fbo-attachment"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.set-fbo-attachment."]
+        #[inline]
+        pub unsafe fn set_fbo_attachment(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32 {
+            unsafe { __core_owned_set_fbo_attachment::call(p0, p1, p2, p3, p4, p5, p6) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_fbo_draw_buffers {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "set-fbo-draw-buffers"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.set-fbo-draw-buffers."]
+        #[inline]
+        pub unsafe fn set_fbo_draw_buffers(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_set_fbo_draw_buffers::call(p0, p1) }
         }
 
         #[inline]
@@ -29890,6 +32983,21 @@ use crate::Result;
         pub fn shade_model(mode: u32) -> Result<()> {
             crate::generated::gfx::shade_model(mode)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_shape {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "shape"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.shape."]
+        #[inline]
+        pub unsafe fn shape(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_shape::call(p0, p1) }
         }
 
         #[inline]
@@ -29976,10 +33084,40 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_text {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "text"]
+                pub fn call(p0: f32, p1: f32, p2: f32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.text."]
+        #[inline]
+        pub unsafe fn text(p0: f32, p1: f32, p2: f32, p3: i32) -> i32 {
+            unsafe { __core_owned_text::call(p0, p1, p2, p3) }
+        }
+
         #[inline]
         pub fn text_env(target: u32, pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
             crate::generated::gfx::text_env(target, pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_texture_info {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "texture-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.texture-info."]
+        #[inline]
+        pub unsafe fn texture_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_texture_info::call(p0, p1) }
         }
 
         #[inline]
@@ -30000,10 +33138,55 @@ use crate::Result;
             Ok(())
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_uniform_array_float {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "uniform-array-float"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.uniform-array-float."]
+        #[inline]
+        pub unsafe fn uniform_array_float(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_uniform_array_float::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_uniform_array_int {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "uniform-array-int"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.uniform-array-int."]
+        #[inline]
+        pub unsafe fn uniform_array_int(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_uniform_array_int::call(p0, p1) }
+        }
+
         #[inline]
         pub fn uniform_int(location: i32, values: &Vec<i32>, count: u32) -> Result<()> {
             crate::generated::gfx::uniform_int(location, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_uniform_matrix {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "uniform-matrix"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.uniform-matrix."]
+        #[inline]
+        pub unsafe fn uniform_matrix(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_uniform_matrix::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -30064,6 +33247,36 @@ use crate::Result;
         pub fn unit_textures(object_id: i32, push: bool) -> Result<()> {
             crate::generated::gfx::unit_textures(object_id, push)?;
             Ok(())
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_unsafe_state {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "unsafe-state"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.unsafe-state."]
+        #[inline]
+        pub unsafe fn unsafe_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_unsafe_state::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_upload_texture {
+            #[link(wasm_import_module = "spring:gfx")]
+            extern "C" {
+                #[link_name = "upload-texture"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:gfx.upload-texture."]
+        #[inline]
+        pub unsafe fn upload_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32) -> i32 {
+            unsafe { __core_owned_upload_texture::call(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10) }
         }
 
         #[inline]
@@ -30966,6 +34179,36 @@ use crate::Result;
             crate::generated::borrowed::icons::free_unit_icon(&icon_name_cstr)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_all_icon_data_array {
+            #[link(wasm_import_module = "spring:icons")]
+            extern "C" {
+                #[link_name = "get-all-icon-data-array"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:icons.get-all-icon-data-array."]
+        #[inline]
+        pub unsafe fn get_all_icon_data_array(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_all_icon_data_array::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_icon_data {
+            #[link(wasm_import_module = "spring:icons")]
+            extern "C" {
+                #[link_name = "get-icon-data"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:icons.get-icon-data."]
+        #[inline]
+        pub unsafe fn get_icon_data(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_icon_data::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn unit_icon_get_draw(unit_id: i32) -> Result<bool> {
             let value = crate::generated::icons::unit_icon_get_draw(unit_id)?;
@@ -31380,6 +34623,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_add_world_text {
+            #[link(wasm_import_module = "spring:markers")]
+            extern "C" {
+                #[link_name = "add-world-text"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:markers.add-world-text."]
+        #[inline]
+        pub unsafe fn add_world_text(p0: i32) -> i64 {
+            unsafe { __core_owned_add_world_text::call(p0) }
+        }
+
         #[inline]
         pub fn add_world_unit(unit_def_id: i32, pos: Float3, team_id: i32, facing: i32) -> Result<bool> {
             let value = crate::generated::markers::add_world_unit(unit_def_id, crate::generated::markers::Float3 { x: pos.x, y: pos.y, z: pos.z }, team_id, facing)?;
@@ -31390,6 +34648,21 @@ use crate::Result;
         pub fn marker_add_line(from: Float3, to: Float3, local_only: bool, player_id: i32) -> Result<bool> {
             let value = crate::generated::markers::marker_add_line(crate::generated::markers::Float3 { x: from.x, y: from.y, z: from.z }, crate::generated::markers::Float3 { x: to.x, y: to.y, z: to.z }, local_only, player_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_marker_add_point {
+            #[link(wasm_import_module = "spring:markers")]
+            extern "C" {
+                #[link_name = "marker-add-point"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:markers.marker-add-point."]
+        #[inline]
+        pub unsafe fn marker_add_point(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_marker_add_point::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -32376,6 +35649,21 @@ use crate::Result;
             })
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_ground_decal_textures {
+            #[link(wasm_import_module = "spring:ground-decals")]
+            extern "C" {
+                #[link_name = "get-ground-decal-textures"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:ground-decals.get-ground-decal-textures."]
+        #[inline]
+        pub unsafe fn get_ground_decal_textures(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_ground_decal_textures::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_ground_decal_tint(decal_id: u32) -> Result<Vec<f32>> {
             let value = crate::generated::ground_decals::get_ground_decal_tint(decal_id)?;
@@ -33112,6 +36400,254 @@ use crate::Result;
             pub success: bool,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_call_as_team {
+            #[link(wasm_import_module = "spring:system-control")]
+            extern "C" {
+                #[link_name = "call-as-team"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:system-control.call-as-team."]
+        #[inline]
+        pub unsafe fn call_as_team(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_call_as_team::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn clear_watch_dog_timer(thread_name: &str, keep_stopped: bool) -> Result<bool> {
+            let mut thread_name_bytes = thread_name.as_bytes().to_vec();
+            if thread_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            thread_name_bytes.push(0);
+            let thread_name_cstr = core::ffi::CStr::from_bytes_with_nul(&thread_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::system_control::clear_watch_dog_timer(&thread_name_cstr, keep_stopped)
+        }
+
+        #[inline]
+        pub fn garbage_collect_ctrl(iters_per_batch: i32, num_steps_per_iter: i32, min_steps_per_iter: i32, max_steps_per_iter: i32, min_loop_run_time: f32, max_loop_run_time: f32, base_run_time_mult: f32, base_mem_load_mult: f32) -> Result<bool> {
+            let value = crate::generated::system_control::garbage_collect_ctrl(iters_per_batch, num_steps_per_iter, min_steps_per_iter, max_steps_per_iter, min_loop_run_time, max_loop_run_time, base_run_time_mult, base_mem_load_mult)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_game_name(unused: u8) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_get_game_name::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unused as i32);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn get_game_state(max_latency: f32) -> Result<GetGameStateValue> {
+            let value = crate::generated::system_control::get_game_state(max_latency)?;
+            Ok(GetGameStateValue {
+                done_loading: value.0,
+                is_saved_game: value.1,
+                is_client_paused: value.2,
+                is_sim_lagging: value.3
+            })
+        }
+
+        #[inline]
+        pub fn get_gather_mode(unused: u8) -> Result<i32> {
+            let value = crate::generated::system_control::get_gather_mode(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_menu_name(unused: u8) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_get_menu_name::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unused as i32);
+                Err(unreachable!())
+            }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_replay_file_path {
+            #[link(wasm_import_module = "spring:system-control")]
+            extern "C" {
+                #[link_name = "get-replay-file-path"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:system-control.get-replay-file-path."]
+        #[inline]
+        pub unsafe fn get_replay_file_path(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_replay_file_path::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn get_replay_length(unused: u8) -> Result<GetReplayLengthValue> {
+            let value = crate::generated::system_control::get_replay_length(unused)?;
+            Ok(GetReplayLengthValue {
+                seconds: value.0,
+                success: value.1
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_replay_recording_file_path {
+            #[link(wasm_import_module = "spring:system-control")]
+            extern "C" {
+                #[link_name = "get-replay-recording-file-path"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:system-control.get-replay-recording-file-path."]
+        #[inline]
+        pub unsafe fn get_replay_recording_file_path(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_replay_recording_file_path::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn get_video_capturing_mode(unused: u8) -> Result<bool> {
+            let value = crate::generated::system_control::get_video_capturing_mode(unused)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_window_display_mode {
+            #[link(wasm_import_module = "spring:system-control")]
+            extern "C" {
+                #[link_name = "get-window-display-mode"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:system-control.get-window-display-mode."]
+        #[inline]
+        pub unsafe fn get_window_display_mode(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_window_display_mode::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn is_replay(unused: u8) -> Result<bool> {
+            let value = crate::generated::system_control::is_replay(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn ping(tag: u32) -> Result<bool> {
+            let value = crate::generated::system_control::ping(tag)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn quit(unused: u8) -> Result<bool> {
+            let value = crate::generated::system_control::quit(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn reload(start_script: &str) -> Result<bool> {
+            let mut start_script_bytes = start_script.as_bytes().to_vec();
+            if start_script_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            start_script_bytes.push(0);
+            let start_script_cstr = core::ffi::CStr::from_bytes_with_nul(&start_script_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::system_control::reload(&start_script_cstr)
+        }
+
+        #[inline]
+        pub fn request_start_position(pos: Float3, ready: bool) -> Result<bool> {
+            let value = crate::generated::system_control::request_start_position(crate::generated::system_control::Float3 { x: pos.x, y: pos.y, z: pos.z }, ready)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn restart(cmd_args: &str, start_script: &str) -> Result<bool> {
+            let mut cmd_args_bytes = cmd_args.as_bytes().to_vec();
+            if cmd_args_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            cmd_args_bytes.push(0);
+            let cmd_args_cstr = core::ffi::CStr::from_bytes_with_nul(&cmd_args_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut start_script_bytes = start_script.as_bytes().to_vec();
+            if start_script_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            start_script_bytes.push(0);
+            let start_script_cstr = core::ffi::CStr::from_bytes_with_nul(&start_script_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::system_control::restart(&cmd_args_cstr, &start_script_cstr)
+        }
+
+        #[inline]
+        pub fn set_share_level(resource: &str, level: f32) -> Result<bool> {
+            let mut resource_bytes = resource.as_bytes().to_vec();
+            if resource_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            resource_bytes.push(0);
+            let resource_cstr = core::ffi::CStr::from_bytes_with_nul(&resource_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::system_control::set_share_level(&resource_cstr, level)
+        }
+
+        #[inline]
+        pub fn share_resources(team_id: i32, resource: &str, amount: f32) -> Result<bool> {
+            let mut resource_bytes = resource.as_bytes().to_vec();
+            if resource_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            resource_bytes.push(0);
+            let resource_cstr = core::ffi::CStr::from_bytes_with_nul(&resource_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::system_control::share_resources(team_id, &resource_cstr, amount)
+        }
+
+        #[inline]
+        pub fn start(cmd_args: &str, start_script: &str) -> Result<bool> {
+            let mut cmd_args_bytes = cmd_args.as_bytes().to_vec();
+            if cmd_args_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            cmd_args_bytes.push(0);
+            let cmd_args_cstr = core::ffi::CStr::from_bytes_with_nul(&cmd_args_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut start_script_bytes = start_script.as_bytes().to_vec();
+            if start_script_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            start_script_bytes.push(0);
+            let start_script_cstr = core::ffi::CStr::from_bytes_with_nul(&start_script_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::system_control::start(&cmd_args_cstr, &start_script_cstr)
+        }
+
+        #[inline]
+        pub fn yield_(unused: u8) -> Result<bool> {
+            let value = crate::generated::system_control::yield_(unused)?;
+            Ok(value)
+        }
+
     }
 
     pub mod profiling {
@@ -33576,6 +37112,96 @@ use crate::Result;
         pub struct GetVidMemUsageValue {
             pub used_mb: f32,
             pub available_mb: f32,
+        }
+
+        #[inline]
+        pub fn diff_timers(end_timer: u64, start_timer: u64, options: DiffTimersOptions) -> Result<f32> {
+            let value = crate::generated::profiling::diff_timers(end_timer, start_timer, crate::generated::profiling::DiffTimersOptions { return_ms: options.return_ms, from_micro_secs: options.from_micro_secs })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_draw_seconds(unused: u8) -> Result<f32> {
+            let value = crate::generated::profiling::get_draw_seconds(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
+            let value = crate::generated::profiling::get_frame_timer(last_frame_time)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_lua_mem_usage(unused: u8) -> Result<GetLuaMemUsageValue> {
+            let value = crate::generated::profiling::get_lua_mem_usage(unused)?;
+            Ok(GetLuaMemUsageValue {
+                handle_alloced_kb: value.0,
+                handle_allocs_k: value.1,
+                global_alloced_kb: value.2,
+                global_allocs_k: value.3,
+                unsynced_alloced_kb: value.4,
+                unsynced_allocs_k: value.5,
+                synced_alloced_kb: value.6,
+                synced_allocs_k: value.7
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_profiler_record_names {
+            #[link(wasm_import_module = "spring:profiling")]
+            extern "C" {
+                #[link_name = "get-profiler-record-names"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:profiling.get-profiler-record-names."]
+        #[inline]
+        pub unsafe fn get_profiler_record_names(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_profiler_record_names::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_profiler_time_record {
+            #[link(wasm_import_module = "spring:profiling")]
+            extern "C" {
+                #[link_name = "get-profiler-time-record"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:profiling.get-profiler-time-record."]
+        #[inline]
+        pub unsafe fn get_profiler_time_record(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_profiler_time_record::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn get_synced_gc_info(collect: bool) -> Result<f32> {
+            let value = crate::generated::profiling::get_synced_gc_info(collect)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_timer(unused: u8) -> Result<u64> {
+            let value = crate::generated::profiling::get_timer(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_timer_micros(unused: u8) -> Result<u64> {
+            let value = crate::generated::profiling::get_timer_micros(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_vid_mem_usage(unused: u8) -> Result<GetVidMemUsageValue> {
+            let value = crate::generated::profiling::get_vid_mem_usage(unused)?;
+            Ok(GetVidMemUsageValue {
+                used_mb: value.0,
+                available_mb: value.1
+            })
         }
 
     }
@@ -35354,6 +38980,1939 @@ use crate::Result;
             pub y: i32,
         }
 
+        #[inline]
+        pub fn add_translation_string(key: &str, translation: &str) -> Result<bool> {
+            let mut key_bytes = key.as_bytes().to_vec();
+            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            key_bytes.push(0);
+            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut translation_bytes = translation.as_bytes().to_vec();
+            if translation_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            translation_bytes.push(0);
+            let translation_cstr = core::ffi::CStr::from_bytes_with_nul(&translation_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::add_translation_string(&key_cstr, &translation_cstr)
+        }
+
+        #[inline]
+        pub fn clear_document_path_requests(document_path: &str) -> Result<bool> {
+            let mut document_path_bytes = document_path.as_bytes().to_vec();
+            if document_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            document_path_bytes.push(0);
+            let document_path_cstr = core::ffi::CStr::from_bytes_with_nul(&document_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::clear_document_path_requests(&document_path_cstr)
+        }
+
+        #[inline]
+        pub fn clear_translations(unused: u8) -> Result<bool> {
+            let value = crate::generated::rml_ui::clear_translations(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_activate_theme(context_handle: u64, name: &str, value: bool) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::context_activate_theme(context_handle, &name_cstr, value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_context_add_event_listener {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "context-add-event-listener"]
+                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-add-event-listener."]
+        #[inline]
+        pub unsafe fn context_add_event_listener(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_context_add_event_listener::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_context_create_data_model {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "context-create-data-model"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-create-data-model."]
+        #[inline]
+        pub unsafe fn context_create_data_model(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_context_create_data_model::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_context_create_document {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "context-create-document"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-create-document."]
+        #[inline]
+        pub unsafe fn context_create_document(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_context_create_document::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn context_enable_mouse_cursor(context_handle: u64, value: bool) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_enable_mouse_cursor(context_handle, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_get_density_independent_pixel_ratio(context_handle: u64) -> Result<f32> {
+            let value = crate::generated::rml_ui::context_get_density_independent_pixel_ratio(context_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_get_dimensions(context_handle: u64) -> Result<ContextGetDimensionsValue> {
+            let value = crate::generated::rml_ui::context_get_dimensions(context_handle)?;
+            Ok(ContextGetDimensionsValue {
+                x: value.0,
+                y: value.1
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_context_get_document {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "context-get-document"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-get-document."]
+        #[inline]
+        pub unsafe fn context_get_document(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_context_get_document::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn context_get_element_at_point(context_handle: u64, x: f32, y: f32, ignore_element_handle: u64) -> Result<ContextGetElementAtPointValue> {
+            let value = crate::generated::rml_ui::context_get_element_at_point(context_handle, x, y, ignore_element_handle)?;
+            Ok(ContextGetElementAtPointValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn context_get_focus_element(context_handle: u64) -> Result<ContextGetFocusElementValue> {
+            let value = crate::generated::rml_ui::context_get_focus_element(context_handle)?;
+            Ok(ContextGetFocusElementValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn context_get_hover_element(context_handle: u64) -> Result<ContextGetHoverElementValue> {
+            let value = crate::generated::rml_ui::context_get_hover_element(context_handle)?;
+            Ok(ContextGetHoverElementValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn context_get_name(context_handle: u64) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_context_get_name::call(context_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (context_handle as i64);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn context_get_root_element(context_handle: u64) -> Result<ContextGetRootElementValue> {
+            let value = crate::generated::rml_ui::context_get_root_element(context_handle)?;
+            Ok(ContextGetRootElementValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn context_is_mouse_interacting(context_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_is_mouse_interacting(context_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_is_theme_active(context_handle: u64, name: &str) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::context_is_theme_active(context_handle, &name_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_context_load_document {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "context-load-document"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-load-document."]
+        #[inline]
+        pub unsafe fn context_load_document(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_context_load_document::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_context_open_data_model {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "context-open-data-model"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-open-data-model."]
+        #[inline]
+        pub unsafe fn context_open_data_model(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_context_open_data_model::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn context_process_key_down(context_handle: u64, key: i32, key_modifier_state: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_process_key_down(context_handle, key, key_modifier_state)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_process_key_up(context_handle: u64, key: i32, key_modifier_state: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_process_key_up(context_handle, key, key_modifier_state)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_process_mouse_button_down(context_handle: u64, button: i32, key_modifier_state: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_process_mouse_button_down(context_handle, button, key_modifier_state)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_process_mouse_button_up(context_handle: u64, button: i32, key_modifier_state: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_process_mouse_button_up(context_handle, button, key_modifier_state)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_process_mouse_leave(context_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_process_mouse_leave(context_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_process_mouse_move(context_handle: u64, x: f32, y: f32, key_modifier_state: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_process_mouse_move(context_handle, x, y, key_modifier_state)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_process_mouse_wheel(context_handle: u64, x: f32, y: f32, key_modifier_state: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_process_mouse_wheel(context_handle, x, y, key_modifier_state)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_process_text_input(context_handle: u64, text: &str) -> Result<bool> {
+            let mut text_bytes = text.as_bytes().to_vec();
+            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            text_bytes.push(0);
+            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::context_process_text_input(context_handle, &text_cstr)
+        }
+
+        #[inline]
+        pub fn context_pull_document_to_front(context_handle: u64, document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_pull_document_to_front(context_handle, document_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_pull_to_front(context_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_pull_to_front(context_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_push_document_to_back(context_handle: u64, document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_push_document_to_back(context_handle, document_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_remove_data_model(context_handle: u64, name: &str) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::context_remove_data_model(context_handle, &name_cstr)
+        }
+
+        #[inline]
+        pub fn context_remove_event_listener(context_handle: u64, event_listener_handle: u64, event: &str, in_capture_phase: bool) -> Result<bool> {
+            let mut event_bytes = event.as_bytes().to_vec();
+            if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            event_bytes.push(0);
+            let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::context_remove_event_listener(context_handle, event_listener_handle, &event_cstr, in_capture_phase)
+        }
+
+        #[inline]
+        pub fn context_render(context_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_render(context_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_set_density_independent_pixel_ratio(context_handle: u64, value: f32) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_set_density_independent_pixel_ratio(context_handle, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_set_dimensions(context_handle: u64, x: i32, y: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_set_dimensions(context_handle, x, y)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_set_pointer_capture(context_handle: u64, anchor_x: i32, anchor_y: i32, active: bool) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_set_pointer_capture(context_handle, anchor_x, anchor_y, active)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_take_pointer_capture_delta(context_handle: u64) -> Result<ContextTakePointerCaptureDeltaValue> {
+            let value = crate::generated::rml_ui::context_take_pointer_capture_delta(context_handle)?;
+            Ok(ContextTakePointerCaptureDeltaValue {
+                delta_x: value.0,
+                delta_y: value.1,
+                status: value.2
+            })
+        }
+
+        #[inline]
+        pub fn context_unload_all_documents(context_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_unload_all_documents(context_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_unload_document(context_handle: u64, document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_unload_document(context_handle, document_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn context_update(context_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::context_update(context_handle)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_create_context {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "create-context"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.create-context."]
+        #[inline]
+        pub unsafe fn create_context(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_create_context::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_bool {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-bool"]
+                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-bool."]
+        #[inline]
+        pub unsafe fn data_model_bind_bool(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_bool::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_color {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-color"]
+                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-color."]
+        #[inline]
+        pub unsafe fn data_model_bind_color(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_color::call(p0, p1, p2, p3, p4, p5, p6) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_event {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-event"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-event."]
+        #[inline]
+        pub unsafe fn data_model_bind_event(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_event::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_float {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-float"]
+                pub fn call(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-float."]
+        #[inline]
+        pub unsafe fn data_model_bind_float(p0: i64, p1: f32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_float::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_int {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-int"]
+                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-int."]
+        #[inline]
+        pub unsafe fn data_model_bind_int(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_int::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_percent {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-percent"]
+                pub fn call(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-percent."]
+        #[inline]
+        pub unsafe fn data_model_bind_percent(p0: i64, p1: f32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_percent::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_pixels {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-pixels"]
+                pub fn call(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-pixels."]
+        #[inline]
+        pub unsafe fn data_model_bind_pixels(p0: i64, p1: f32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_pixels::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_rows {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-rows"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-rows."]
+        #[inline]
+        pub unsafe fn data_model_bind_rows(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_rows::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_bind_string {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-bind-string"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-string."]
+        #[inline]
+        pub unsafe fn data_model_bind_string(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_data_model_bind_string::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn data_model_get_bool(variable_handle: u64) -> Result<DataModelGetBoolValue> {
+            let value = crate::generated::rml_ui::data_model_get_bool(variable_handle)?;
+            Ok(DataModelGetBoolValue {
+                value: value.0,
+                success: value.1
+            })
+        }
+
+        #[inline]
+        pub fn data_model_get_color(variable_handle: u64) -> Result<DataModelGetColorValue> {
+            let value = crate::generated::rml_ui::data_model_get_color(variable_handle)?;
+            Ok(DataModelGetColorValue {
+                red: value.0,
+                green: value.1,
+                blue: value.2,
+                alpha: value.3,
+                success: value.4
+            })
+        }
+
+        #[inline]
+        pub fn data_model_get_float(variable_handle: u64) -> Result<DataModelGetFloatValue> {
+            let value = crate::generated::rml_ui::data_model_get_float(variable_handle)?;
+            Ok(DataModelGetFloatValue {
+                value: value.0,
+                success: value.1
+            })
+        }
+
+        #[inline]
+        pub fn data_model_get_int(variable_handle: u64) -> Result<DataModelGetIntValue> {
+            let value = crate::generated::rml_ui::data_model_get_int(variable_handle)?;
+            Ok(DataModelGetIntValue {
+                value: value.0,
+                success: value.1
+            })
+        }
+
+        #[inline]
+        pub fn data_model_get_percent(variable_handle: u64) -> Result<DataModelGetPercentValue> {
+            let value = crate::generated::rml_ui::data_model_get_percent(variable_handle)?;
+            Ok(DataModelGetPercentValue {
+                value: value.0,
+                success: value.1
+            })
+        }
+
+        #[inline]
+        pub fn data_model_get_pixels(variable_handle: u64) -> Result<DataModelGetPixelsValue> {
+            let value = crate::generated::rml_ui::data_model_get_pixels(variable_handle)?;
+            Ok(DataModelGetPixelsValue {
+                value: value.0,
+                success: value.1
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_get_string {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-get-string"]
+                pub fn call(p0: i64, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-get-string."]
+        #[inline]
+        pub unsafe fn data_model_get_string(p0: i64, p1: i32) -> i32 {
+            unsafe { __core_owned_data_model_get_string::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn data_model_set_bool(variable_handle: u64, value: bool) -> Result<bool> {
+            let value = crate::generated::rml_ui::data_model_set_bool(variable_handle, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn data_model_set_color(variable_handle: u64, red: u8, green: u8, blue: u8, alpha: u8) -> Result<bool> {
+            let value = crate::generated::rml_ui::data_model_set_color(variable_handle, red, green, blue, alpha)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn data_model_set_float(variable_handle: u64, value: f32) -> Result<bool> {
+            let value = crate::generated::rml_ui::data_model_set_float(variable_handle, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn data_model_set_int(variable_handle: u64, value: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::data_model_set_int(variable_handle, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn data_model_set_percent(variable_handle: u64, value: f32) -> Result<bool> {
+            let value = crate::generated::rml_ui::data_model_set_percent(variable_handle, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn data_model_set_pixels(variable_handle: u64, value: f32) -> Result<bool> {
+            let value = crate::generated::rml_ui::data_model_set_pixels(variable_handle, value)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_set_rows {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-set-rows"]
+                pub fn call(p0: i64, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-set-rows."]
+        #[inline]
+        pub unsafe fn data_model_set_rows(p0: i64, p1: i32) -> i64 {
+            unsafe { __core_owned_data_model_set_rows::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn data_model_set_string(variable_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::data_model_set_string(variable_handle, &value_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_data_model_unbind_event {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "data-model-unbind-event"]
+                pub fn call(p0: i64) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-unbind-event."]
+        #[inline]
+        pub unsafe fn data_model_unbind_event(p0: i64) -> i64 {
+            unsafe { __core_owned_data_model_unbind_event::call(p0) }
+        }
+
+        #[inline]
+        pub fn document_append_to_style_sheet(document_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::document_append_to_style_sheet(document_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn document_close(document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::document_close(document_handle)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_document_create_element {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "document-create-element"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.document-create-element."]
+        #[inline]
+        pub unsafe fn document_create_element(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_document_create_element::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_document_create_text_node {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "document-create-text-node"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.document-create-text-node."]
+        #[inline]
+        pub unsafe fn document_create_text_node(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_document_create_text_node::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn document_get_context(document_handle: u64) -> Result<DocumentGetContextValue> {
+            let value = crate::generated::rml_ui::document_get_context(document_handle)?;
+            Ok(DocumentGetContextValue {
+                context_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn document_get_title(document_handle: u64) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_document_get_title::call(document_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (document_handle as i64);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn document_get_url(document_handle: u64) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_document_get_url::call(document_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (document_handle as i64);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn document_hide(document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::document_hide(document_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn document_is_modal(document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::document_is_modal(document_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn document_load_external_script(document_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::document_load_external_script(document_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn document_load_inline_script(document_handle: u64, content: &str, source_path: &str, source_line: i32) -> Result<bool> {
+            let mut content_bytes = content.as_bytes().to_vec();
+            if content_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            content_bytes.push(0);
+            let content_cstr = core::ffi::CStr::from_bytes_with_nul(&content_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut source_path_bytes = source_path.as_bytes().to_vec();
+            if source_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            source_path_bytes.push(0);
+            let source_path_cstr = core::ffi::CStr::from_bytes_with_nul(&source_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::document_load_inline_script(document_handle, &content_cstr, &source_path_cstr, source_line)
+        }
+
+        #[inline]
+        pub fn document_pull_to_front(document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::document_pull_to_front(document_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn document_push_to_back(document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::document_push_to_back(document_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn document_reload_style_sheet(document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::document_reload_style_sheet(document_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn document_set_title(document_handle: u64, title: &str) -> Result<bool> {
+            let mut title_bytes = title.as_bytes().to_vec();
+            if title_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            title_bytes.push(0);
+            let title_cstr = core::ffi::CStr::from_bytes_with_nul(&title_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::document_set_title(document_handle, &title_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_document_show {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "document-show"]
+                pub fn call(p0: i64, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.document-show."]
+        #[inline]
+        pub unsafe fn document_show(p0: i64, p1: i32) -> i64 {
+            unsafe { __core_owned_document_show::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn document_update_document(document_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::document_update_document(document_handle)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_add_event_listener {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-add-event-listener"]
+                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-add-event-listener."]
+        #[inline]
+        pub unsafe fn element_add_event_listener(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_element_add_event_listener::call(p0, p1, p2, p3) }
+        }
+
+        #[inline]
+        pub fn element_append_child(element_handle: u64, element_ptr_handle: u64) -> Result<ElementAppendChildValue> {
+            let value = crate::generated::rml_ui::element_append_child(element_handle, element_ptr_handle)?;
+            Ok(ElementAppendChildValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn element_are_pseudo_classes_set(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_are_pseudo_classes_set(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_blur(element_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_blur(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_click(element_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_click(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_clone(element_handle: u64) -> Result<ElementCloneValue> {
+            let value = crate::generated::rml_ui::element_clone(element_handle)?;
+            Ok(ElementCloneValue {
+                element_ptr_handle: value.0,
+                success: value.1
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_closest {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-closest"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-closest."]
+        #[inline]
+        pub unsafe fn element_closest(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_element_closest::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn element_dispatch_event(element_handle: u64, event: &str) -> Result<bool> {
+            let mut event_bytes = event.as_bytes().to_vec();
+            if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            event_bytes.push(0);
+            let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_dispatch_event(element_handle, &event_cstr)
+        }
+
+        #[inline]
+        pub fn element_focus(element_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_focus(element_handle)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_form_control_input_get_selection {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-form-control-input-get-selection"]
+                pub fn call(p0: i64, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-form-control-input-get-selection."]
+        #[inline]
+        pub unsafe fn element_form_control_input_get_selection(p0: i64, p1: i32) -> i32 {
+            unsafe { __core_owned_element_form_control_input_get_selection::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn element_form_control_input_select(element_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_form_control_input_select(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_form_control_input_set_selection(element_handle: u64, start: i32, end: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_form_control_input_set_selection(element_handle, start, end)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_form_control_select_add(element_handle: u64, element_ptr_handle: u64, before: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_form_control_select_add(element_handle, element_ptr_handle, before)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_form_control_select_remove(element_handle: u64, index: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_form_control_select_remove(element_handle, index)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_form_control_select_remove_all(element_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_form_control_select_remove_all(element_handle)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_form_control_text_area_get_selection {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-form-control-text-area-get-selection"]
+                pub fn call(p0: i64, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-form-control-text-area-get-selection."]
+        #[inline]
+        pub unsafe fn element_form_control_text_area_get_selection(p0: i64, p1: i32) -> i32 {
+            unsafe { __core_owned_element_form_control_text_area_get_selection::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn element_form_control_text_area_select(element_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_form_control_text_area_select(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_form_control_text_area_set_selection(element_handle: u64, start: i32, end: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_form_control_text_area_set_selection(element_handle, start, end)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_form_submit(element_handle: u64, name: &str, value: &str) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_form_submit(element_handle, &name_cstr, &value_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_get_active_pseudo_classes {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-get-active-pseudo-classes"]
+                pub fn call(p0: i64, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-active-pseudo-classes."]
+        #[inline]
+        pub unsafe fn element_get_active_pseudo_classes(p0: i64, p1: i32) -> i32 {
+            unsafe { __core_owned_element_get_active_pseudo_classes::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_get_attribute {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-get-attribute"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-attribute."]
+        #[inline]
+        pub unsafe fn element_get_attribute(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_element_get_attribute::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn element_get_child(element_handle: u64, index: i32) -> Result<ElementGetChildValue> {
+            let value = crate::generated::rml_ui::element_get_child(element_handle, index)?;
+            Ok(ElementGetChildValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn element_get_class_name(element_handle: u64) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_element_get_class_name::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (element_handle as i64);
+                Err(unreachable!())
+            }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_get_element_by_id {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-get-element-by-id"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-element-by-id."]
+        #[inline]
+        pub unsafe fn element_get_element_by_id(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_element_get_element_by_id::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_get_elements_by_class_name {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-get-elements-by-class-name"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-elements-by-class-name."]
+        #[inline]
+        pub unsafe fn element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_element_get_elements_by_class_name::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn element_get_elements_by_class_name_count(element_handle: u64, value: &str) -> Result<i32> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_get_elements_by_class_name_count(element_handle, &value_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_get_elements_by_tag_name {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-get-elements-by-tag-name"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-elements-by-tag-name."]
+        #[inline]
+        pub unsafe fn element_get_elements_by_tag_name(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_element_get_elements_by_tag_name::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn element_get_elements_by_tag_name_count(element_handle: u64, value: &str) -> Result<i32> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_get_elements_by_tag_name_count(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_get_id(element_handle: u64) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_element_get_id::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (element_handle as i64);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn element_get_inner_rml(element_handle: u64) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_element_get_inner_rml::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (element_handle as i64);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn element_get_rect(element_handle: u64) -> Result<ElementGetRectValue> {
+            let value = crate::generated::rml_ui::element_get_rect(element_handle)?;
+            Ok(ElementGetRectValue {
+                left: value.0,
+                top: value.1,
+                width: value.2,
+                height: value.3
+            })
+        }
+
+        #[inline]
+        pub fn element_get_scroll_left(element_handle: u64) -> Result<i32> {
+            let value = crate::generated::rml_ui::element_get_scroll_left(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_get_scroll_top(element_handle: u64) -> Result<i32> {
+            let value = crate::generated::rml_ui::element_get_scroll_top(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_get_tag_name(element_handle: u64) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_element_get_tag_name::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (element_handle as i64);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn element_get_value(element_handle: u64) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_element_get_value::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (element_handle as i64);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn element_has_attribute(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_has_attribute(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_has_child_nodes(element_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_has_child_nodes(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_insert_before(element_handle: u64, element_ptr_handle: u64, adjacent_element_handle: u64) -> Result<ElementInsertBeforeValue> {
+            let value = crate::generated::rml_ui::element_insert_before(element_handle, element_ptr_handle, adjacent_element_handle)?;
+            Ok(ElementInsertBeforeValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn element_is_class_set(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_is_class_set(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_is_point_within_element(element_handle: u64, x: f32, y: f32) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_is_point_within_element(element_handle, x, y)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_is_pseudo_class_set(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_is_pseudo_class_set(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_is_visible(element_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_is_visible(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_matches(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_matches(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_process_default_action(element_handle: u64, event_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_process_default_action(element_handle, event_handle)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_query_selector {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-query-selector"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-query-selector."]
+        #[inline]
+        pub unsafe fn element_query_selector(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_element_query_selector::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_element_query_selector_all {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "element-query-selector-all"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-query-selector-all."]
+        #[inline]
+        pub unsafe fn element_query_selector_all(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_element_query_selector_all::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn element_query_selector_all_count(element_handle: u64, value: &str) -> Result<i32> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_query_selector_all_count(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_remove_attribute(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_remove_attribute(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_remove_child(element_handle: u64, child_element_handle: u64) -> Result<ElementRemoveChildValue> {
+            let value = crate::generated::rml_ui::element_remove_child(element_handle, child_element_handle)?;
+            Ok(ElementRemoveChildValue {
+                element_ptr_handle: value.0,
+                success: value.1
+            })
+        }
+
+        #[inline]
+        pub fn element_remove_event_listener(element_handle: u64, event_listener_handle: u64, event: &str, in_capture_phase: bool) -> Result<bool> {
+            let mut event_bytes = event.as_bytes().to_vec();
+            if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            event_bytes.push(0);
+            let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_remove_event_listener(element_handle, event_listener_handle, &event_cstr, in_capture_phase)
+        }
+
+        #[inline]
+        pub fn element_replace_child(element_handle: u64, element_ptr_handle: u64, replaced_element_handle: u64) -> Result<ElementReplaceChildValue> {
+            let value = crate::generated::rml_ui::element_replace_child(element_handle, element_ptr_handle, replaced_element_handle)?;
+            Ok(ElementReplaceChildValue {
+                element_ptr_handle: value.0,
+                success: value.1
+            })
+        }
+
+        #[inline]
+        pub fn element_scroll_into_view(element_handle: u64, align_with_top: bool) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_scroll_into_view(element_handle, align_with_top)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_set_attribute(element_handle: u64, name: &str, value: &str) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_set_attribute(element_handle, &name_cstr, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_set_class(element_handle: u64, name: &str, value: bool) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_set_class(element_handle, &name_cstr, value)
+        }
+
+        #[inline]
+        pub fn element_set_class_name(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_set_class_name(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_set_id(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_set_id(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_set_inner_rml(element_handle: u64, value: &str) -> Result<bool> {
+            let mut value_bytes = value.as_bytes().to_vec();
+            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            value_bytes.push(0);
+            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_set_inner_rml(element_handle, &value_cstr)
+        }
+
+        #[inline]
+        pub fn element_set_pseudo_class(element_handle: u64, name: &str, value: bool) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_set_pseudo_class(element_handle, &name_cstr, value)
+        }
+
+        #[inline]
+        pub fn element_set_scroll_left(element_handle: u64, value: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_set_scroll_left(element_handle, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_set_scroll_top(element_handle: u64, value: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_set_scroll_top(element_handle, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_tab_set_remove_tab(element_handle: u64, index: i32) -> Result<bool> {
+            let value = crate::generated::rml_ui::element_tab_set_remove_tab(element_handle, index)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_tab_set_set_panel(element_handle: u64, index: i32, rml: &str) -> Result<bool> {
+            let mut rml_bytes = rml.as_bytes().to_vec();
+            if rml_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            rml_bytes.push(0);
+            let rml_cstr = core::ffi::CStr::from_bytes_with_nul(&rml_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_tab_set_set_panel(element_handle, index, &rml_cstr)
+        }
+
+        #[inline]
+        pub fn element_tab_set_set_tab(element_handle: u64, index: i32, rml: &str) -> Result<bool> {
+            let mut rml_bytes = rml.as_bytes().to_vec();
+            if rml_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            rml_bytes.push(0);
+            let rml_cstr = core::ffi::CStr::from_bytes_with_nul(&rml_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::element_tab_set_set_tab(element_handle, index, &rml_cstr)
+        }
+
+        #[inline]
+        pub fn event_get_current(unused: u8) -> Result<EventGetCurrentValue> {
+            let value = crate::generated::rml_ui::event_get_current(unused)?;
+            Ok(EventGetCurrentValue {
+                event_handle: value.0,
+                element_handle: value.1,
+                document_handle: value.2,
+                exists: value.3
+            })
+        }
+
+        #[inline]
+        pub fn event_get_current_element(event_handle: u64) -> Result<EventGetCurrentElementValue> {
+            let value = crate::generated::rml_ui::event_get_current_element(event_handle)?;
+            Ok(EventGetCurrentElementValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_get_parameter_bool {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-get-parameter-bool"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-bool."]
+        #[inline]
+        pub unsafe fn event_get_parameter_bool(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_event_get_parameter_bool::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_get_parameter_float {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-get-parameter-float"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-float."]
+        #[inline]
+        pub unsafe fn event_get_parameter_float(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_event_get_parameter_float::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_get_parameter_int {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-get-parameter-int"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-int."]
+        #[inline]
+        pub unsafe fn event_get_parameter_int(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_event_get_parameter_int::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_get_parameter_string {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-get-parameter-string"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-string."]
+        #[inline]
+        pub unsafe fn event_get_parameter_string(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_event_get_parameter_string::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_get_parameter_type {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-get-parameter-type"]
+                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-type."]
+        #[inline]
+        pub unsafe fn event_get_parameter_type(p0: i64, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_event_get_parameter_type::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn event_get_phase(event_handle: u64) -> Result<EventGetPhaseValue> {
+            let value = crate::generated::rml_ui::event_get_phase(event_handle)?;
+            Ok(EventGetPhaseValue {
+                value: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn event_get_target_element(event_handle: u64) -> Result<EventGetTargetElementValue> {
+            let value = crate::generated::rml_ui::event_get_target_element(event_handle)?;
+            Ok(EventGetTargetElementValue {
+                element_handle: value.0,
+                exists: value.1
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_get_type {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-get-type"]
+                pub fn call(p0: i64, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-type."]
+        #[inline]
+        pub unsafe fn event_get_type(p0: i64, p1: i32) -> i32 {
+            unsafe { __core_owned_event_get_type::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn event_is_immediate_propagating(event_handle: u64) -> Result<EventIsImmediatePropagatingValue> {
+            let value = crate::generated::rml_ui::event_is_immediate_propagating(event_handle)?;
+            Ok(EventIsImmediatePropagatingValue {
+                value: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn event_is_interruptible(event_handle: u64) -> Result<EventIsInterruptibleValue> {
+            let value = crate::generated::rml_ui::event_is_interruptible(event_handle)?;
+            Ok(EventIsInterruptibleValue {
+                value: value.0,
+                exists: value.1
+            })
+        }
+
+        #[inline]
+        pub fn event_is_propagating(event_handle: u64) -> Result<EventIsPropagatingValue> {
+            let value = crate::generated::rml_ui::event_is_propagating(event_handle)?;
+            Ok(EventIsPropagatingValue {
+                value: value.0,
+                exists: value.1
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_listener_on_attach {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-listener-on-attach"]
+                pub fn call(p0: i64, p1: i64) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-listener-on-attach."]
+        #[inline]
+        pub unsafe fn event_listener_on_attach(p0: i64, p1: i64) -> i64 {
+            unsafe { __core_owned_event_listener_on_attach::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_listener_on_detach {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-listener-on-detach"]
+                pub fn call(p0: i64, p1: i64) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-listener-on-detach."]
+        #[inline]
+        pub unsafe fn event_listener_on_detach(p0: i64, p1: i64) -> i64 {
+            unsafe { __core_owned_event_listener_on_detach::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_event_listener_process_event {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "event-listener-process-event"]
+                pub fn call(p0: i64, p1: i64) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-listener-process-event."]
+        #[inline]
+        pub unsafe fn event_listener_process_event(p0: i64, p1: i64) -> i64 {
+            unsafe { __core_owned_event_listener_process_event::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn event_stop_immediate_propagation(event_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::event_stop_immediate_propagation(event_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn event_stop_propagation(event_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::event_stop_propagation(event_handle)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_context {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "get-context"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.get-context."]
+        #[inline]
+        pub unsafe fn get_context(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_context::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_document_path_requests {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "get-document-path-requests"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.get-document-path-requests."]
+        #[inline]
+        pub unsafe fn get_document_path_requests(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_document_path_requests::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn get_version(unused: u8) -> Result<String> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<u8>::new();
+                loop {
+                    let status = unsafe { __core_variable_output_get_version::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return String::from_utf8(output).map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, 0);
+                    descriptor[0] = output.as_mut_ptr() as usize as u32;
+                    descriptor[1] = output.len() as u32;
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unused as i32);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn is_ready(unused: u8) -> Result<bool> {
+            let value = crate::generated::rml_ui::is_ready(unused)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_load_font_face {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "load-font-face"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.load-font-face."]
+        #[inline]
+        pub unsafe fn load_font_face(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_load_font_face::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_regiser_event_type {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "regiser-event-type"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.regiser-event-type."]
+        #[inline]
+        pub unsafe fn regiser_event_type(p0: i32) -> i64 {
+            unsafe { __core_owned_regiser_event_type::call(p0) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_register_event_type {
+            #[link(wasm_import_module = "spring:rml-ui")]
+            extern "C" {
+                #[link_name = "register-event-type"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.register-event-type."]
+        #[inline]
+        pub unsafe fn register_event_type(p0: i32) -> i64 {
+            unsafe { __core_owned_register_event_type::call(p0) }
+        }
+
+        #[inline]
+        pub fn remove_context(context_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::remove_context(context_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn remove_context_by_name(name: &str) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::remove_context_by_name(&name_cstr)
+        }
+
+        #[inline]
+        pub fn set_debug_context(context_handle: u64) -> Result<bool> {
+            let value = crate::generated::rml_ui::set_debug_context(context_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_debug_context_by_name(name: &str) -> Result<bool> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::set_debug_context_by_name(&name_cstr)
+        }
+
+        #[inline]
+        pub fn set_mouse_cursor_alias(rml_name: &str, recoil_name: &str) -> Result<bool> {
+            let mut rml_name_bytes = rml_name.as_bytes().to_vec();
+            if rml_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            rml_name_bytes.push(0);
+            let rml_name_cstr = core::ffi::CStr::from_bytes_with_nul(&rml_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut recoil_name_bytes = recoil_name.as_bytes().to_vec();
+            if recoil_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            recoil_name_bytes.push(0);
+            let recoil_name_cstr = core::ffi::CStr::from_bytes_with_nul(&recoil_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::set_mouse_cursor_alias(&rml_name_cstr, &recoil_name_cstr)
+        }
+
+        #[inline]
+        pub fn sol_lua_data_model_set_dirty(data_model_handle: u64, property: &str) -> Result<bool> {
+            let mut property_bytes = property.as_bytes().to_vec();
+            if property_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            property_bytes.push(0);
+            let property_cstr = core::ffi::CStr::from_bytes_with_nul(&property_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::rml_ui::sol_lua_data_model_set_dirty(data_model_handle, &property_cstr)
+        }
+
+        #[inline]
+        pub fn vector2f_new(x: f32, y: f32) -> Result<Vector2fNewValue> {
+            let value = crate::generated::rml_ui::vector2f_new(x, y)?;
+            Ok(Vector2fNewValue {
+                x: value.0,
+                y: value.1
+            })
+        }
+
+        #[inline]
+        pub fn vector2i_new(x: i32, y: i32) -> Result<Vector2iNewValue> {
+            let value = crate::generated::rml_ui::vector2i_new(x, y)?;
+            Ok(Vector2iNewValue {
+                x: value.0,
+                y: value.1
+            })
+        }
+
     }
 
     pub mod vfs {
@@ -36269,6 +41828,721 @@ use crate::Result;
             pub square_size: i32,
             pub num_squares_x: i32,
             pub num_squares_z: i32,
+        }
+
+        #[inline]
+        pub fn abort_download(id: i32) -> Result<bool> {
+            let value = crate::generated::vfs::abort_download(id)?;
+            Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_calculate_hash {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "calculate-hash"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.calculate-hash."]
+        #[inline]
+        pub unsafe fn calculate_hash(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_calculate_hash::call(p0, p1, p2) }
+        }
+
+        #[inline]
+        pub fn compress_folder(folder_path: &str, archive_type: &str, compressed_file_path: &str, include_folder: bool, mode: &str) -> Result<bool> {
+            let mut folder_path_bytes = folder_path.as_bytes().to_vec();
+            if folder_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            folder_path_bytes.push(0);
+            let folder_path_cstr = core::ffi::CStr::from_bytes_with_nul(&folder_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut archive_type_bytes = archive_type.as_bytes().to_vec();
+            if archive_type_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            archive_type_bytes.push(0);
+            let archive_type_cstr = core::ffi::CStr::from_bytes_with_nul(&archive_type_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut compressed_file_path_bytes = compressed_file_path.as_bytes().to_vec();
+            if compressed_file_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            compressed_file_path_bytes.push(0);
+            let compressed_file_path_cstr = core::ffi::CStr::from_bytes_with_nul(&compressed_file_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut mode_bytes = mode.as_bytes().to_vec();
+            if mode_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            mode_bytes.push(0);
+            let mode_cstr = core::ffi::CStr::from_bytes_with_nul(&mode_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::compress_folder(&folder_path_cstr, &archive_type_cstr, &compressed_file_path_cstr, include_folder, &mode_cstr)
+        }
+
+        #[inline]
+        pub fn create_dir(path: &str) -> Result<bool> {
+            let mut path_bytes = path.as_bytes().to_vec();
+            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            path_bytes.push(0);
+            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::create_dir(&path_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_dir_list {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "dir-list"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.dir-list."]
+        #[inline]
+        pub unsafe fn dir_list(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_dir_list::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_download_archive {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "download-archive"]
+                pub fn call(p0: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.download-archive."]
+        #[inline]
+        pub unsafe fn download_archive(p0: i32) -> i32 {
+            unsafe { __core_owned_download_archive::call(p0) }
+        }
+
+        #[inline]
+        pub fn extract_mod_archive_file(path: &str) -> Result<bool> {
+            let mut path_bytes = path.as_bytes().to_vec();
+            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            path_bytes.push(0);
+            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::extract_mod_archive_file(&path_cstr)
+        }
+
+        #[inline]
+        pub fn file_exists(path: &str) -> Result<bool> {
+            let mut path_bytes = path.as_bytes().to_vec();
+            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            path_bytes.push(0);
+            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::file_exists(&path_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_all_archives {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-all-archives"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-all-archives."]
+        #[inline]
+        pub unsafe fn get_all_archives(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_all_archives::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_archive_checksum {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-archive-checksum"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-checksum."]
+        #[inline]
+        pub unsafe fn get_archive_checksum(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_archive_checksum::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_archive_containing_file {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-archive-containing-file"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-containing-file."]
+        #[inline]
+        pub unsafe fn get_archive_containing_file(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_archive_containing_file::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_archive_dependencies {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-archive-dependencies"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-dependencies."]
+        #[inline]
+        pub unsafe fn get_archive_dependencies(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_archive_dependencies::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_archive_info {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-archive-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-info."]
+        #[inline]
+        pub unsafe fn get_archive_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_archive_info::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_archive_path {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-archive-path"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-path."]
+        #[inline]
+        pub unsafe fn get_archive_path(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_archive_path::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_archive_replaces {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-archive-replaces"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-replaces."]
+        #[inline]
+        pub unsafe fn get_archive_replaces(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_archive_replaces::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_archives {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-archives"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archives."]
+        #[inline]
+        pub unsafe fn get_archives(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_archives::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_available_a_is {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-available-a-is"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-available-a-is."]
+        #[inline]
+        pub unsafe fn get_available_a_is(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_available_a_is::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_file_absolute_path {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-file-absolute-path"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-file-absolute-path."]
+        #[inline]
+        pub unsafe fn get_file_absolute_path(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_file_absolute_path::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_file_info {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-file-info"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-file-info."]
+        #[inline]
+        pub unsafe fn get_file_info(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_file_info::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn get_file_size(path: &str) -> Result<u32> {
+            let mut path_bytes = path.as_bytes().to_vec();
+            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            path_bytes.push(0);
+            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::get_file_size(&path_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_games {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-games"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-games."]
+        #[inline]
+        pub unsafe fn get_games(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_games::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_loaded_archives {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-loaded-archives"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-loaded-archives."]
+        #[inline]
+        pub unsafe fn get_loaded_archives(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_loaded_archives::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn get_map_square_texture(tex_square_x: i32, tex_square_y: i32, lod_min: i32, texture_name: &str, lod_max: i32) -> Result<bool> {
+            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
+            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            texture_name_bytes.push(0);
+            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::get_map_square_texture(tex_square_x, tex_square_y, lod_min, &texture_name_cstr, lod_max)
+        }
+
+        #[inline]
+        pub fn get_map_square_texture_info(unused: u8) -> Result<GetMapSquareTextureInfoValue> {
+            let value = crate::generated::vfs::get_map_square_texture_info(unused)?;
+            Ok(GetMapSquareTextureInfoValue {
+                square_size: value.0,
+                num_squares_x: value.1,
+                num_squares_z: value.2
+            })
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_maps {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-maps"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-maps."]
+        #[inline]
+        pub unsafe fn get_maps(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_maps::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_name_from_rapid_tag {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "get-name-from-rapid-tag"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-name-from-rapid-tag."]
+        #[inline]
+        pub unsafe fn get_name_from_rapid_tag(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_name_from_rapid_tag::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn has_archive(archive_name: &str) -> Result<bool> {
+            let mut archive_name_bytes = archive_name.as_bytes().to_vec();
+            if archive_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            archive_name_bytes.push(0);
+            let archive_name_cstr = core::ffi::CStr::from_bytes_with_nul(&archive_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::has_archive(&archive_name_cstr)
+        }
+
+        #[inline]
+        pub fn is_directory(path: &str) -> Result<bool> {
+            let mut path_bytes = path.as_bytes().to_vec();
+            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            path_bytes.push(0);
+            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::is_directory(&path_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_list_dir {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "list-dir"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.list-dir."]
+        #[inline]
+        pub unsafe fn list_dir(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_list_dir::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_load_file {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "load-file"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.load-file."]
+        #[inline]
+        pub unsafe fn load_file(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_load_file::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_pack_f32 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "pack-f32"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.pack-f32."]
+        #[inline]
+        pub unsafe fn pack_f32(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_pack_f32::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_pack_s16 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "pack-s16"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.pack-s16."]
+        #[inline]
+        pub unsafe fn pack_s16(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_pack_s16::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_pack_s32 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "pack-s32"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.pack-s32."]
+        #[inline]
+        pub unsafe fn pack_s32(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_pack_s32::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_pack_s8 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "pack-s8"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.pack-s8."]
+        #[inline]
+        pub unsafe fn pack_s8(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_pack_s8::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_pack_u16 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "pack-u16"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.pack-u16."]
+        #[inline]
+        pub unsafe fn pack_u16(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_pack_u16::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_pack_u32 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "pack-u32"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.pack-u32."]
+        #[inline]
+        pub unsafe fn pack_u32(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_pack_u32::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_pack_u8 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "pack-u8"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.pack-u8."]
+        #[inline]
+        pub unsafe fn pack_u8(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_pack_u8::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_read_file {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "read-file"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.read-file."]
+        #[inline]
+        pub unsafe fn read_file(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_read_file::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_read_file_as_string {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "read-file-as-string"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.read-file-as-string."]
+        #[inline]
+        pub unsafe fn read_file_as_string(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_read_file_as_string::call(p0, p1) }
+        }
+
+        #[inline]
+        pub fn scan_all_dirs(unused: u8) -> Result<()> {
+            crate::generated::vfs::scan_all_dirs(unused)?;
+            Ok(())
+        }
+
+        #[inline]
+        pub fn set_map_square_texture(tex_square_x: i32, tex_square_y: i32, texture_name: &str) -> Result<bool> {
+            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
+            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            texture_name_bytes.push(0);
+            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::vfs::set_map_square_texture(tex_square_x, tex_square_y, &texture_name_cstr)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_sub_dirs {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "sub-dirs"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.sub-dirs."]
+        #[inline]
+        pub unsafe fn sub_dirs(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_sub_dirs::call(p0, p1, p2) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_unpack_f32 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "unpack-f32"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.unpack-f32."]
+        #[inline]
+        pub unsafe fn unpack_f32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_unpack_f32::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_unpack_s16 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "unpack-s16"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.unpack-s16."]
+        #[inline]
+        pub unsafe fn unpack_s16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_unpack_s16::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_unpack_s32 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "unpack-s32"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.unpack-s32."]
+        #[inline]
+        pub unsafe fn unpack_s32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_unpack_s32::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_unpack_s8 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "unpack-s8"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.unpack-s8."]
+        #[inline]
+        pub unsafe fn unpack_s8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_unpack_s8::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_unpack_u16 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "unpack-u16"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.unpack-u16."]
+        #[inline]
+        pub unsafe fn unpack_u16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_unpack_u16::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_unpack_u32 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "unpack-u32"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.unpack-u32."]
+        #[inline]
+        pub unsafe fn unpack_u32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_unpack_u32::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_unpack_u8 {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "unpack-u8"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.unpack-u8."]
+        #[inline]
+        pub unsafe fn unpack_u8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_unpack_u8::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_use_archive {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "use-archive"]
+                pub fn call(p0: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.use-archive."]
+        #[inline]
+        pub unsafe fn use_archive(p0: i32) -> i64 {
+            unsafe { __core_owned_use_archive::call(p0) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_zlib_compress {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "zlib-compress"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.zlib-compress."]
+        #[inline]
+        pub unsafe fn zlib_compress(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_zlib_compress::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_zlib_decompress {
+            #[link(wasm_import_module = "spring:vfs")]
+            extern "C" {
+                #[link_name = "zlib-decompress"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:vfs.zlib-decompress."]
+        #[inline]
+        pub unsafe fn zlib_decompress(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_zlib_decompress::call(p0, p1) }
         }
 
     }
@@ -37211,6 +43485,36 @@ use crate::Result;
             pub success: bool,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_active_cmd_desc {
+            #[link(wasm_import_module = "spring:unsynced-read")]
+            extern "C" {
+                #[link_name = "get-active-cmd-desc"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-read.get-active-cmd-desc."]
+        #[inline]
+        pub unsafe fn get_active_cmd_desc(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_active_cmd_desc::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_active_cmd_descs {
+            #[link(wasm_import_module = "spring:unsynced-read")]
+            extern "C" {
+                #[link_name = "get-active-cmd-descs"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-read.get-active-cmd-descs."]
+        #[inline]
+        pub unsafe fn get_active_cmd_descs(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_active_cmd_descs::call(p0, p1) }
+        }
+
         #[inline]
         pub fn get_box_selection_by_engine(unused: u8) -> Result<bool> {
             let value = crate::generated::unsynced_read::get_box_selection_by_engine(unused)?;
@@ -37294,6 +43598,21 @@ use crate::Result;
         pub fn get_game_seconds_interpolated(unused: u8) -> Result<f32> {
             let value = crate::generated::unsynced_read::get_game_seconds_interpolated(unused)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_last_message_positions {
+            #[link(wasm_import_module = "spring:unsynced-read")]
+            extern "C" {
+                #[link_name = "get-last-message-positions"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-read.get-last-message-positions."]
+        #[inline]
+        pub unsafe fn get_last_message_positions(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_last_message_positions::call(p0, p1) }
         }
 
         #[inline]
@@ -37396,6 +43715,21 @@ use crate::Result;
         pub fn is_unit_selected(unit_id: i32) -> Result<bool> {
             let value = crate::generated::unsynced_read::is_unit_selected(unit_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_solve_nurbs_curve {
+            #[link(wasm_import_module = "spring:unsynced-read")]
+            extern "C" {
+                #[link_name = "solve-nurbs-curve"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-read.solve-nurbs-curve."]
+        #[inline]
+        pub unsafe fn solve_nurbs_curve(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_solve_nurbs_curve::call(p0, p1, p2, p3) }
         }
 
     }
@@ -43249,16 +49583,61 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_bugger_off {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "bugger-off"]
+                pub fn call(p0: f32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.bugger-off."]
+        #[inline]
+        pub unsafe fn bugger_off(p0: f32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_bugger_off::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn clear_unit_goal(unit_id: i32, cancel_raw: bool) -> Result<bool> {
             let value = crate::generated::unit_control::clear_unit_goal(unit_id, cancel_raw)?;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_create_unit {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "create-unit"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.create-unit."]
+        #[inline]
+        pub unsafe fn create_unit(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_create_unit::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn destroy_unit(unit_id: i32, options: DestroyUnitOptions) -> Result<bool> {
             let value = crate::generated::unit_control::destroy_unit(unit_id, crate::generated::unit_control::DestroyUnitOptions { selfd: options.selfd, reclaimed: options.reclaimed, attacker_id: options.attacker_id, recycle_id: options.recycle_id })?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_edit_unit_cmd_desc {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "edit-unit-cmd-desc"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.edit-unit-cmd-desc."]
+        #[inline]
+        pub unsafe fn edit_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_edit_unit_cmd_desc::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -43285,9 +49664,69 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_give_order_array_to_unit {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "give-order-array-to-unit"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.give-order-array-to-unit."]
+        #[inline]
+        pub unsafe fn give_order_array_to_unit(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_give_order_array_to_unit::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_give_order_array_to_unit_array {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "give-order-array-to-unit-array"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.give-order-array-to-unit-array."]
+        #[inline]
+        pub unsafe fn give_order_array_to_unit_array(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_give_order_array_to_unit_array::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_give_order_to_unit {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "give-order-to-unit"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.give-order-to-unit."]
+        #[inline]
+        pub unsafe fn give_order_to_unit(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64 {
+            unsafe { __core_owned_give_order_to_unit::call(p0, p1, p2, p3, p4, p5) }
+        }
+
         #[inline]
         pub fn give_order_to_unit_array(unit_i_ds: &Vec<i32>, cmd_id: i32, params: &Vec<f32>, options: u32, timeout: i32) -> Result<bool> {
             crate::generated::borrowed::unit_control::give_order_to_unit_array(unit_i_ds.as_slice(), cmd_id, params.as_slice(), options, timeout)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_insert_unit_cmd_desc {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "insert-unit-cmd-desc"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.insert-unit-cmd-desc."]
+        #[inline]
+        pub unsafe fn insert_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i64 {
+            unsafe { __core_owned_insert_unit_cmd_desc::call(p0, p1, p2) }
         }
 
         #[inline]
@@ -43324,6 +49763,21 @@ use crate::Result;
         pub fn set_unit_blocking(unit_id: i32, options: SetUnitBlockingOptions) -> Result<bool> {
             let value = crate::generated::unit_control::set_unit_blocking(unit_id, crate::generated::unit_control::SetUnitBlockingOptions { blocking: options.blocking, solid_objects: options.solid_objects, projectiles: options.projectiles, quad_map_rays: options.quad_map_rays, crushable: options.crushable, block_enemy_pushing: options.block_enemy_pushing, block_height_changes: options.block_height_changes })?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_unit_build_params {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "set-unit-build-params"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.set-unit-build-params."]
+        #[inline]
+        pub unsafe fn set_unit_build_params(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_set_unit_build_params::call(p0, p1) }
         }
 
         #[inline]
@@ -43372,6 +49826,21 @@ use crate::Result;
         pub fn set_unit_experience(unit_id: i32, experience: f32) -> Result<bool> {
             let value = crate::generated::unit_control::set_unit_experience(unit_id, experience)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_unit_flanking {
+            #[link(wasm_import_module = "spring:unit-control")]
+            extern "C" {
+                #[link_name = "set-unit-flanking"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-control.set-unit-flanking."]
+        #[inline]
+        pub unsafe fn set_unit_flanking(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_set_unit_flanking::call(p0, p1) }
         }
 
         #[inline]
@@ -46584,6 +53053,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_create_feature {
+            #[link(wasm_import_module = "spring:feature-control")]
+            extern "C" {
+                #[link_name = "create-feature"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:feature-control.create-feature."]
+        #[inline]
+        pub unsafe fn create_feature(p0: i32, p1: i32, p2: i32, p3: i32) -> i64 {
+            unsafe { __core_owned_create_feature::call(p0, p1, p2, p3) }
+        }
+
         #[inline]
         pub fn create_feature_wreck(feature_id: i32, wreck_level: i32, do_smoke: bool) -> Result<i32> {
             let value = crate::generated::feature_control::create_feature_wreck(feature_id, wreck_level, do_smoke)?;
@@ -46720,6 +53204,21 @@ use crate::Result;
         pub fn set_feature_resources(feature_id: i32, metal: f32, energy: f32, reclaim_time: f32, reclaim_left: f32, feature_def_metal: f32, feature_def_energy: f32) -> Result<bool> {
             let value = crate::generated::feature_control::set_feature_resources(feature_id, metal, energy, reclaim_time, reclaim_left, feature_def_metal, feature_def_energy)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_feature_resurrect {
+            #[link(wasm_import_module = "spring:feature-control")]
+            extern "C" {
+                #[link_name = "set-feature-resurrect"]
+                pub fn call(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:feature-control.set-feature-resurrect."]
+        #[inline]
+        pub unsafe fn set_feature_resurrect(p0: i32, p1: i32, p2: f32, p3: i32) -> i64 {
+            unsafe { __core_owned_set_feature_resurrect::call(p0, p1, p2, p3) }
         }
 
         #[inline]
@@ -49733,6 +56232,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_height_map_func {
+            #[link(wasm_import_module = "spring:terrain-control")]
+            extern "C" {
+                #[link_name = "set-height-map-func"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:terrain-control.set-height-map-func."]
+        #[inline]
+        pub unsafe fn set_height_map_func(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_set_height_map_func::call(p0, p1) }
+        }
+
         #[inline]
         pub fn set_map_square_terrain_type(x: i32, z: i32, terrain_type: i32) -> Result<bool> {
             let value = crate::generated::terrain_control::set_map_square_terrain_type(x, z, terrain_type)?;
@@ -49745,10 +56259,40 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_original_height_map_func {
+            #[link(wasm_import_module = "spring:terrain-control")]
+            extern "C" {
+                #[link_name = "set-original-height-map-func"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:terrain-control.set-original-height-map-func."]
+        #[inline]
+        pub unsafe fn set_original_height_map_func(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_set_original_height_map_func::call(p0, p1) }
+        }
+
         #[inline]
         pub fn set_smooth_mesh(x: f32, z: f32, height: f32, terraform: f32) -> Result<bool> {
             let value = crate::generated::terrain_control::set_smooth_mesh(x, z, height, terraform)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_smooth_mesh_func {
+            #[link(wasm_import_module = "spring:terrain-control")]
+            extern "C" {
+                #[link_name = "set-smooth-mesh-func"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:terrain-control.set-smooth-mesh-func."]
+        #[inline]
+        pub unsafe fn set_smooth_mesh_func(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_set_smooth_mesh_func::call(p0, p1) }
         }
 
         #[inline]
@@ -52756,6 +59300,21 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_spawn_projectile {
+            #[link(wasm_import_module = "spring:projectile-control")]
+            extern "C" {
+                #[link_name = "spawn-projectile"]
+                pub fn call(p0: i32, p1: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:projectile-control.spawn-projectile."]
+        #[inline]
+        pub unsafe fn spawn_projectile(p0: i32, p1: i32) -> i64 {
+            unsafe { __core_owned_spawn_projectile::call(p0, p1) }
+        }
+
     }
 
     pub mod effects_control {
@@ -55661,6 +62220,21 @@ use crate::Result;
         pub struct SpawnCEGValue {
             pub success: bool,
             pub ceg_id: i32,
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_spawn_ceg {
+            #[link(wasm_import_module = "spring:effects-control")]
+            extern "C" {
+                #[link_name = "spawn-ceg"]
+                pub fn call(p0: f32, p1: f32, p2: f32, p3: i32, p4: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:effects-control.spawn-ceg."]
+        #[inline]
+        pub unsafe fn spawn_ceg(p0: f32, p1: f32, p2: f32, p3: i32, p4: i32) -> i32 {
+            unsafe { __core_owned_spawn_ceg::call(p0, p1, p2, p3, p4) }
         }
 
         #[inline]
@@ -61517,6 +68091,21 @@ use crate::Result;
             pub ret_values: Vec<i32>,
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_call_cob_script {
+            #[link(wasm_import_module = "spring:cob-script")]
+            extern "C" {
+                #[link_name = "call-cob-script"]
+                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:cob-script.call-cob-script."]
+        #[inline]
+        pub unsafe fn call_cob_script(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32) -> i64 {
+            unsafe { __core_owned_call_cob_script::call(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9) }
+        }
+
         #[inline]
         pub fn get_cob_script_id(unit_id: i32, func_name: &str) -> Result<i32> {
             let mut func_name_bytes = func_name.as_bytes().to_vec();
@@ -62529,6 +69118,36 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_icon {
+            #[link(wasm_import_module = "spring:unit-rendering")]
+            extern "C" {
+                #[link_name = "get-unit-icon"]
+                pub fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-rendering.get-unit-icon."]
+        #[inline]
+        pub unsafe fn get_unit_icon(p0: i32, p1: i32) -> i32 {
+            unsafe { __core_owned_get_unit_icon::call(p0, p1) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_icon_data {
+            #[link(wasm_import_module = "spring:unit-rendering")]
+            extern "C" {
+                #[link_name = "get-unit-icon-data"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-rendering.get-unit-icon-data."]
+        #[inline]
+        pub unsafe fn get_unit_icon_data(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_unit_icon_data::call(p0, p1, p2) }
+        }
+
         #[inline]
         pub fn get_unit_lua_draw(unit_id: i32) -> Result<bool> {
             let value = crate::generated::unit_rendering::get_unit_lua_draw(unit_id)?;
@@ -62611,6 +69230,36 @@ use crate::Result;
                 let _ = (left as f32, top as f32, right as f32, bottom as f32, allegiance as i32);
                 Err(unreachable!())
             }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_visible_features {
+            #[link(wasm_import_module = "spring:unit-rendering")]
+            extern "C" {
+                #[link_name = "get-visible-features"]
+                pub fn call(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-rendering.get-visible-features."]
+        #[inline]
+        pub unsafe fn get_visible_features(p0: i32, p1: f32, p2: i32, p3: i32) -> i32 {
+            unsafe { __core_owned_get_visible_features::call(p0, p1, p2, p3) }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_visible_projectiles {
+            #[link(wasm_import_module = "spring:unit-rendering")]
+            extern "C" {
+                #[link_name = "get-visible-projectiles"]
+                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-rendering.get-visible-projectiles."]
+        #[inline]
+        pub unsafe fn get_visible_projectiles(p0: i32, p1: i32, p2: i32) -> i32 {
+            unsafe { __core_owned_get_visible_projectiles::call(p0, p1, p2) }
         }
 
         #[inline]

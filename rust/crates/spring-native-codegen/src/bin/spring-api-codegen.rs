@@ -295,6 +295,18 @@ fn run() -> Result<()> {
 
     let sdk_dir = arguments.output.join("sdk");
     fs::create_dir_all(&sdk_dir)?;
+    let owned_sdk = render_core_wasm_owned_guest::render(&model);
+    let environment_sdk = render_core_wasm_owned_guest::render_environment_modules(&model);
+    if arguments.strict {
+        let owned_errors =
+            render_core_wasm_owned_guest::coverage_errors(&model, &owned_sdk, &environment_sdk);
+        if !owned_errors.is_empty() {
+            return Err(anyhow!(
+                "Core owned environment surface is incomplete:\n{}",
+                owned_errors.join("\n")
+            ));
+        }
+    }
     write(
         &sdk_dir.join("core_generated.rs"),
         &render_core_wasm_guest::render(&model),
@@ -315,14 +327,8 @@ fn run() -> Result<()> {
         &sdk_dir.join("core_dynamic_output.rs"),
         &render_core_wasm_dynamic_output_guest::render(&model),
     )?;
-    write(
-        &sdk_dir.join("core_owned.rs"),
-        &render_core_wasm_owned_guest::render(&model),
-    )?;
-    write(
-        &sdk_dir.join("core_environments.rs"),
-        &render_core_wasm_owned_guest::render_environment_modules(&model),
-    )?;
+    write(&sdk_dir.join("core_owned.rs"), &owned_sdk)?;
+    write(&sdk_dir.join("core_environments.rs"), &environment_sdk)?;
     write(
         &sdk_dir.join("core_callins.rs"),
         &render_core_wasm_callin_exec::render_rust(&model),

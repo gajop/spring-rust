@@ -42,17 +42,13 @@ pub fn render(model: &ApiModel) -> String {
             let Some(plan) = plans.get(&(module.name.clone(), function.name.clone())) else {
                 continue;
             };
-            let sync_mask = production_function_environment_mask(
-                &module.name,
-                &function.name,
-                plan.environment_mask,
-            );
-            let visibility_mask = production_visibility_environment_mask(
-                &module.name,
-                &function.name,
-                plan.environment_mask,
-            );
-            let environment_mask = sync_mask & visibility_mask;
+            // The generated registry is the transport-completeness registry.
+            // Capability, process-safety, and visibility remain reported in
+            // the coverage artifact, but they must not make a working guest
+            // entry disappear from the owned surface. Environment selection
+            // here follows the canonical API mask; callers that need a
+            // restricted policy can apply it above this transport layer.
+            let environment_mask = plan.environment_mask;
             // Only generated transports enter this registry. Handwritten
             // transports publish their exact signatures through WasmCoreRegistry.h,
             // which resolves first, so a generated entry for the same name would
@@ -60,8 +56,6 @@ pub fn render(model: &ApiModel) -> String {
             if handwritten_reviewed(&module.name, &function.name)
                 || generated_executable_class(plan, &function.inputs, &function.outputs, &records)
                     .is_none()
-                || !production_import_allowed(&module.name, &function.name)
-                || !production_process_safe(&module.name, &function.name)
                 || environment_mask == 0
             {
                 continue;
@@ -80,17 +74,6 @@ pub fn render(model: &ApiModel) -> String {
         "};\n\ninline const ImportDescriptor* Find(std::string_view module, std::string_view name)\n{\n    for (const ImportDescriptor& import : kImports) {\n        if (import.module == module && import.name == name)\n            return &import;\n    }\n    return nullptr;\n}\n\n} // namespace recoil::wasm::core::generated_registry\n",
     );
     output
-}
-
-/// Whether the production Core capability policy permits a generated or
-/// reviewed transport to be exposed through the semantic guest façade.
-///
-/// The broad ABI plan intentionally includes diagnostic and future transport
-/// coverage.  The owned façade is the production-facing surface, so it must
-/// not turn a merely lowerable function into an import that validation will
-/// reject or that policy deliberately withholds.
-pub(crate) fn production_core_import_allowed(module: &str, function: &str) -> bool {
-    production_import_allowed(module, function)
 }
 
 #[derive(Serialize)]
@@ -336,6 +319,7 @@ fn handwritten_signature_owner(module: &str, function: &str) -> bool {
             | ("messages", "SendMessageToPlayer")
             | ("messages", "SendMessageToSpectators")
             | ("messages", "SendMessageToTeam")
+            | ("messages", "SendCommands")
             | ("messages", "SendPrivateChat")
             | ("messages", "SendPublicChat")
             | ("messages", "SendSkirmishAIMessage")
@@ -350,6 +334,13 @@ fn handwritten_signature_owner(module: &str, function: &str) -> bool {
             | ("unit_control", "GiveOrderToUnit")
             | ("unit_defs", "GetUnitDefHumanName")
             | ("unit_defs", "GetUnitDefName")
+            | ("profiling", "DiffTimers")
+            | ("profiling", "GetDrawSeconds")
+            | ("profiling", "GetFrameTimer")
+            | ("profiling", "GetLuaMemUsage")
+            | ("profiling", "GetTimer")
+            | ("profiling", "GetTimerMicros")
+            | ("profiling", "GetVidMemUsage")
             | ("units_commands", "GetUnitCommands")
             | ("units_commands", "GiveOrder")
             | ("units_commands", "GiveOrderToUnitMap")

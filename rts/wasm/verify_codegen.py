@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import filecmp
+import json
 import re
 import subprocess
 import sys
@@ -213,6 +214,137 @@ def verify_core_callin_ordinals(regenerated: Path) -> list[str]:
     return findings
 
 
+def rust_snake(value: str) -> str:
+    value = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", value)
+    value = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value)
+    value = value.lower()
+    if value in {
+        "as",
+        "async",
+        "await",
+        "box",
+        "break",
+        "const",
+        "continue",
+        "crate",
+        "dyn",
+        "else",
+        "enum",
+        "extern",
+        "false",
+        "fn",
+        "for",
+        "if",
+        "impl",
+        "in",
+        "let",
+        "loop",
+        "match",
+        "mod",
+        "move",
+        "mut",
+        "pub",
+        "ref",
+        "return",
+        "self",
+        "Self",
+        "static",
+        "struct",
+        "super",
+        "trait",
+        "true",
+        "type",
+        "unsafe",
+        "use",
+        "where",
+        "while",
+        "yield",
+    }:
+        return f"{value}_"
+    return value
+
+
+def source_module_body(source: str, module: str, indent: str) -> str:
+    start = source.find(f"{indent}pub mod {module} {{")
+    if start < 0:
+        return ""
+    body = source[start:]
+    end = body[1:].find(f"\n{indent}pub mod ")
+    return body if end < 0 else body[: end + 1]
+
+
+def verify_owned_environment_surface(regenerated: Path) -> list[str]:
+    model_path = regenerated / "model.json"
+    callout_registry_path = regenerated / "WasmCalloutRegistry.h"
+    owned_path = regenerated / "sdk" / "core_owned.rs"
+    environments_path = regenerated / "sdk" / "core_environments.rs"
+    if (
+        not model_path.is_file()
+        or not callout_registry_path.is_file()
+        or not owned_path.is_file()
+        or not environments_path.is_file()
+    ):
+        return ["generated owned Core surface artifacts are incomplete"]
+
+    model = json.loads(model_path.read_text(encoding="utf-8"))
+    owned = owned_path.read_text(encoding="utf-8")
+    environments = environments_path.read_text(encoding="utf-8")
+    callouts = re.findall(
+        r'\{"([^\"]+)", "([^\"]+)", (\d+)u,',
+        callout_registry_path.read_text(encoding="utf-8"),
+    )
+    environment_bits = {
+        "rules_synced": 1,
+        "rules_unsynced": 2,
+        "gaia_synced": 4,
+        "gaia_unsynced": 8,
+        "ui": 16,
+    }
+    findings: list[str] = []
+
+    def check_surface(module_name: str, function_name: str, mask: int) -> None:
+        owned_body = source_module_body(owned, module_name, "    ")
+        if not re.search(
+            rf"^        pub (?:unsafe )?fn {re.escape(function_name)}\(",
+            owned_body,
+            re.MULTILINE,
+        ):
+            findings.append(f"owned surface omits {module_name}::{function_name}")
+        for environment, bit in environment_bits.items():
+            if not mask & bit:
+                continue
+            environment_body = source_module_body(environments, environment, "")
+            marker = (
+                f"        pub use super::super::owned::{module_name}::"
+                f"{function_name};"
+            )
+            if marker not in environment_body:
+                findings.append(
+                    f"{module_name}::{function_name} missing from {environment} SDK"
+                )
+
+    for module, function, mask in callouts:
+        check_surface(rust_snake(module), rust_snake(function), int(mask))
+
+    for module in model.get("modules", []):
+        module_name = rust_snake(module["name"])
+        for function in module.get("functions", []):
+            function_name = rust_snake(function["name"])
+            for environment in environment_bits:
+                if environment not in function.get("environments", []):
+                    continue
+                environment_body = source_module_body(environments, environment, "")
+                marker = (
+                    f"        pub use super::super::owned::{module_name}::"
+                    f"{function_name};"
+                )
+                if marker not in environment_body:
+                    findings.append(
+                        f"{module['name']}::{function['name']} missing from {environment} SDK"
+                    )
+    return findings
+
+
 def generate_core_surface(root: Path, regenerated: Path, output: Path) -> int:
     command = [
         sys.executable,
@@ -259,6 +391,12 @@ def main() -> int:
         completed = subprocess.run(command, cwd=root, check=False)
         if completed.returncode != 0:
             return completed.returncode
+
+        owned_findings = verify_owned_environment_surface(regenerated)
+        if owned_findings:
+            print("Generated owned Core environment surface is incomplete:", file=sys.stderr)
+            print("\n".join(owned_findings), file=sys.stderr)
+            return 1
 
         ordinal_findings = verify_core_callin_ordinals(regenerated)
         if ordinal_findings:

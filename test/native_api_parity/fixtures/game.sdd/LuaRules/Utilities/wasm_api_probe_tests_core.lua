@@ -139,6 +139,8 @@ return {
 
 		"get_team_units",
 
+		"get_unit_separation",
+
 		"get_team_max_units",
 
 		"get_unit_cost_table",
@@ -174,6 +176,8 @@ return {
 		"unit_add_damage",
 
 		"get_unit_nearest_ally",
+
+		"get_unit_nearest_enemy",
 
 		"get_unit_is_building",
 
@@ -293,6 +297,8 @@ return {
 
 		"unit_flanking_fixed_shape",
 
+		"unit_last_attacked_piece_fixed_shape",
+
 		"feature_health",
 
 		"feature_max_health",
@@ -318,6 +324,8 @@ return {
 		"feature_heading",
 
 		"feature_velocity",
+
+		"feature_direction",
 
 		"feature_no_select",
 
@@ -795,6 +803,10 @@ return {
 			y = 0.0,
 			z = 0.0,
 		},
+		["get_unit_separation"] = {
+			positional = true,
+			checkMap = false,
+		},
 		["unit_metal_extraction"] = {
 			depth = 1.05,
 			range = 144.0,
@@ -848,6 +860,12 @@ return {
 		},
 		["get_unit_nearest_ally"] = {
 			range = 4096,
+		},
+		["get_unit_nearest_enemy"] = {
+			range = 4096,
+			useLOS = false,
+			sphereDistTest = false,
+			checkSightDist = false,
 		},
 		["find_unit_cmd_desc_missing"] = {
 			cmdID = -999999,
@@ -1068,6 +1086,11 @@ return {
 			x = 1.0,
 			y = 0.0,
 			z = 0.0,
+		},
+		["feature_direction"] = {
+			x = 0.0,
+			y = 0.0,
+			z = 1.0,
 		},
 		["feature_no_select"] = {
 			noSelect = false,

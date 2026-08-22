@@ -1112,6 +1112,18 @@ fn probe_get_team_units(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_team_units|{fields}")
 }
 
+fn probe_get_unit_separation(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::units_query::get_unit_separation((fixture.unit_id) as i32, (fixture.unit_id) as i32, crate::bindings::recoil::spring_api::units_query::GetUnitSeparationOptions { positional: true, check_map: false });
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_f32("separation", value)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|get_unit_separation|{fields}")
+}
+
 fn probe_get_team_max_units(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::teams::get_team_max_units((fixture.team_id) as i32);
     let fields = match result {
@@ -1366,6 +1378,18 @@ fn probe_get_unit_nearest_ally(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_unit_nearest_ally|{fields}")
+}
+
+fn probe_get_unit_nearest_enemy(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::units_query::get_unit_nearest_enemy((fixture.unit_id) as i32, (4096f32) as f32, crate::bindings::recoil::spring_api::units_query::GetUnitNearestEnemyOptions { use_los: false, sphere_dist_test: false, check_sight_dist: false });
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_i32("unitIDResult", value)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|get_unit_nearest_enemy|{fields}")
 }
 
 fn probe_get_unit_is_building(fixture: &super::Fixture) -> String {
@@ -2121,6 +2145,18 @@ fn probe_unit_flanking_fixed_shape(fixture: &super::Fixture) -> String {
     format!("WASM_API|unit_flanking_fixed_shape|{fields}")
 }
 
+fn probe_unit_last_attacked_piece_fixed_shape(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::units_info::get_unit_last_attacked_piece((fixture.unit_id) as i32);
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_bool("wasHit", value.was_hit), encode_string("pieceName", &value.name), encode_i32("frame", value.frame)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|unit_last_attacked_piece_fixed_shape|{fields}")
+}
+
 fn probe_feature_health(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::feature_control::set_feature_health((fixture.feature_id) as i32, (525.0f32) as f32, false) {
         Ok(_) => {},
@@ -2307,6 +2343,23 @@ fn probe_feature_velocity(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|feature_velocity|{fields}")
+}
+
+fn probe_feature_direction(fixture: &super::Fixture) -> String {
+    let sequence_updated = match crate::bindings::recoil::spring_api::feature_control::set_feature_direction((fixture.feature_id) as i32, crate::bindings::recoil::spring_api::feature_control::Float3 { x: 0.0f32, y: 0.0f32, z: 1.0f32 }, crate::bindings::recoil::spring_api::feature_control::Float3 { x: 1.0f32, y: 0.0f32, z: 0.0f32 }) {
+        Ok(value) => value,
+        Err(error) => return format!("WASM_API|feature_direction|__error|i|{}", error.code),
+    };
+    if !sequence_updated { return format!("WASM_API|feature_direction|__error|i|{}", -1); }
+    let sequence_direction = match crate::bindings::recoil::spring_api::features::get_feature_direction((fixture.feature_id) as i32) {
+        Ok(value) => value,
+        Err(error) => return format!("WASM_API|feature_direction|__error|i|{}", error.code),
+    };
+    let fields = {
+        let output_fields: Vec<String> = vec![encode_f32("frontX", sequence_direction.x), encode_f32("frontY", sequence_direction.y), encode_f32("frontZ", sequence_direction.z)];
+        output_fields.join("|")
+    };
+    format!("WASM_API|feature_direction|{fields}")
 }
 
 fn probe_feature_no_select(fixture: &super::Fixture) -> String {
@@ -4685,6 +4738,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_team_unit_count(fixture));
     emit(probe_get_team_unit_def_count(fixture));
     emit(probe_get_team_units(fixture));
+    emit(probe_get_unit_separation(fixture));
     emit(probe_get_team_max_units(fixture));
     emit(probe_get_unit_cost_table(fixture));
     emit(probe_unit_metal_extraction(fixture));
@@ -4703,6 +4757,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_unit_direction_after_set(fixture));
     emit(probe_unit_add_damage(fixture));
     emit(probe_get_unit_nearest_ally(fixture));
+    emit(probe_get_unit_nearest_enemy(fixture));
     emit(probe_get_unit_is_building(fixture));
     emit(probe_get_unit_effective_build_range(fixture));
     emit(probe_get_unit_in_build_stance(fixture));
@@ -4762,6 +4817,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_unit_is_transporting_fixed_shape(fixture));
     emit(probe_unit_pos_error_params_fixed_shape(fixture));
     emit(probe_unit_flanking_fixed_shape(fixture));
+    emit(probe_unit_last_attacked_piece_fixed_shape(fixture));
     emit(probe_feature_health(fixture));
     emit(probe_feature_max_health(fixture));
     emit(probe_feature_mass(fixture));
@@ -4775,6 +4831,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_feature_radius(fixture));
     emit(probe_feature_heading(fixture));
     emit(probe_feature_velocity(fixture));
+    emit(probe_feature_direction(fixture));
     emit(probe_feature_no_select(fixture));
     emit(probe_valid_feature_id(fixture));
     emit(probe_get_all_features(fixture));

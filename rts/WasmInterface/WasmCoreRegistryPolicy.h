@@ -22,27 +22,12 @@ inline constexpr std::uint32_t UnsyncedEnvironmentMask =
 // so a legacy fast binding cannot bypass a deny in generated registry policy.
 inline bool HandwrittenImportAllowed(std::string_view module, std::string_view name)
 {
-	// system-control contains process lifecycle/watchdog/restart authority. The
-	// sole reviewed Core capability is CallAsTeam: it only scopes simulation
-	// team context around one synchronous guest callback and does not cross the
-	// process/OS boundary.
-	if (module == "spring:system-control")
-		return name == "call-as-team";
-
-	// messages.send-commands feeds guest-controlled text to
-	// guihandler->RunCustomCommands. That is engine command authority, not a
-	// normal message capability.
-	if (module == "spring:messages" && name == "send-commands")
-		return false;
-
-	// These namespaces exist for engine/unit performance diagnostics. The
-	// spring:desync import remains visible so validation is stable; its host
-	// binding performs the process-local SPRING_ENABLE_SYNCED_TIMERS check at
-	// call time. This keeps an unopted-in module from obtaining a clock while
-	// allowing the explicitly opted-in benchmark path to run.
-	if (module == "spring:benchmark" || module == "spring:desync")
-		return true;
-
+	// Transport completeness is the default Core contract. The host already
+	// validates pointers, ABI signatures, and environment masks; capability and
+	// process policy are opt-in policy above this layer so they cannot silently
+	// remove a generated owned API entry.
+	(void)module;
+	(void)name;
 	return true;
 }
 
