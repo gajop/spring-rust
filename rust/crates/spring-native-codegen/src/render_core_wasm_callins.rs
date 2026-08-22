@@ -276,7 +276,7 @@ fn manual_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bo
             manual_type(element, records)
         }
         SemanticType::List { element } => manual_type(element, records),
-        SemanticType::Record { name } => records.get(name).map_or(true, |record| {
+        SemanticType::Record { name } => records.get(name).is_none_or(|record| {
             record
                 .fields
                 .iter()

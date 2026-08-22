@@ -3,6 +3,13 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use spring_wasm_core as spring;
 
+#[cfg(benchmark_context_unsynced)]
+spring::export_environment_mask!(spring::rules_unsynced::ENVIRONMENT_MASK);
+#[cfg(benchmark_context_ui)]
+spring::export_environment_mask!(spring::ui::ENVIRONMENT_MASK);
+#[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
+spring::export_environment_mask!(spring::rules_synced::ENVIRONMENT_MASK);
+
 mod common;
 
 // The representative variable-callin exports are transport fixtures, not tied

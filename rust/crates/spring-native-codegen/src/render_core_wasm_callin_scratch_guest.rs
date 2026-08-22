@@ -107,7 +107,6 @@ fn render_rust_fields(
     {
         render_rust_type(
             &field.ty,
-            field,
             &format!("{prefix}{}", field.name.to_snake_case()),
             records,
             declarations,
@@ -118,7 +117,6 @@ fn render_rust_fields(
 
 fn render_rust_type(
     ty: &SemanticType,
-    field: &FieldModel,
     name: &str,
     records: &BTreeMap<String, RecordModel>,
     declarations: &mut String,
@@ -192,7 +190,6 @@ fn render_rust_type(
             for index in 0..*length {
                 render_rust_type(
                     element,
-                    field,
                     &format!("{name}_{index}"),
                     records,
                     declarations,

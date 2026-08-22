@@ -46,7 +46,22 @@ fn main() {
     append_generated(
         &mut contents,
         &generated_dir.join("core_owned.rs"),
-        "owned semantic Core callout SDK",
+        "owned semantic Core callout SDK prelude",
+    );
+    let owned_dir = generated_dir.join("core_owned");
+    let mut owned_shards = std::fs::read_dir(&owned_dir)
+        .expect("read generated owned Core SDK shards")
+        .map(|entry| entry.expect("read generated owned Core SDK shard").path())
+        .filter(|path| path.extension().is_some_and(|extension| extension == "rs"))
+        .collect::<Vec<_>>();
+    owned_shards.sort();
+    for shard in owned_shards {
+        append_generated(&mut contents, &shard, "owned semantic Core callout SDK shard");
+    }
+    append_generated(
+        &mut contents,
+        &generated_dir.join("core_owned_footer.rs"),
+        "owned semantic Core callout SDK footer",
     );
     append_generated(
         &mut contents,

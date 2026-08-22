@@ -1,7 +1,7 @@
 //! Generate allocation-free Wasmtime/Core host callbacks for the conservative
 //! automatic subset of the semantic API.
 
-use heck::{ToLowerCamelCase, ToSnakeCase};
+use heck::ToSnakeCase;
 use std::collections::BTreeMap;
 
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};

@@ -2,7 +2,7 @@
   "total": 1354,
   "executable_total": 1354,
   "verified_total": 0,
-  "production_import_total": 1047,
+  "production_import_total": 1055,
   "by_class": {
     "dynamic-output-caller-owned": 89,
     "fixed": 806,
@@ -4727,12 +4727,12 @@
       "import_name": "get-architecture",
       "class": "variable-output-caller-owned",
       "verified": false,
-      "production_import_allowed": false,
+      "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 31,
       "production_visibility_environment_mask": 31,
       "production_environment_mask": 31,
-      "reason": "withheld from production Core import registry by capability policy"
+      "reason": null
     },
     {
       "module": "platform",
@@ -4741,12 +4741,12 @@
       "import_name": "is-headless",
       "class": "fixed",
       "verified": false,
-      "production_import_allowed": false,
+      "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 31,
       "production_visibility_environment_mask": 31,
       "production_environment_mask": 31,
-      "reason": "withheld from production Core import registry by capability policy"
+      "reason": null
     },
     {
       "module": "rules_params",
@@ -12091,12 +12091,12 @@
       "import_name": "get-game-name",
       "class": "variable-output-caller-owned",
       "verified": false,
-      "production_import_allowed": false,
+      "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 26,
       "production_visibility_environment_mask": 26,
       "production_environment_mask": 26,
-      "reason": "withheld from production Core import registry by capability policy"
+      "reason": null
     },
     {
       "module": "system_control",
@@ -12105,12 +12105,12 @@
       "import_name": "get-game-state",
       "class": "fixed",
       "verified": false,
-      "production_import_allowed": false,
+      "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 26,
       "production_visibility_environment_mask": 26,
       "production_environment_mask": 26,
-      "reason": "withheld from production Core import registry by capability policy"
+      "reason": null
     },
     {
       "module": "system_control",
@@ -12133,12 +12133,12 @@
       "import_name": "get-menu-name",
       "class": "variable-output-caller-owned",
       "verified": false,
-      "production_import_allowed": false,
+      "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 26,
       "production_visibility_environment_mask": 26,
       "production_environment_mask": 26,
-      "reason": "withheld from production Core import registry by capability policy"
+      "reason": null
     },
     {
       "module": "system_control",
@@ -12161,12 +12161,12 @@
       "import_name": "get-replay-length",
       "class": "fixed",
       "verified": false,
-      "production_import_allowed": false,
+      "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 26,
       "production_visibility_environment_mask": 26,
       "production_environment_mask": 26,
-      "reason": "withheld from production Core import registry by capability policy"
+      "reason": null
     },
     {
       "module": "system_control",
@@ -12189,12 +12189,12 @@
       "import_name": "get-video-capturing-mode",
       "class": "fixed",
       "verified": false,
-      "production_import_allowed": false,
+      "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 26,
       "production_visibility_environment_mask": 26,
       "production_environment_mask": 26,
-      "reason": "withheld from production Core import registry by capability policy"
+      "reason": null
     },
     {
       "module": "system_control",
@@ -12217,12 +12217,12 @@
       "import_name": "is-replay",
       "class": "fixed",
       "verified": false,
-      "production_import_allowed": false,
+      "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 26,
       "production_visibility_environment_mask": 26,
       "production_environment_mask": 26,
-      "reason": "withheld from production Core import registry by capability policy"
+      "reason": null
     },
     {
       "module": "system_control",

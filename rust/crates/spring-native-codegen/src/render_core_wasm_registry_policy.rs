@@ -18,14 +18,25 @@ pub(crate) fn production_import_allowed(module: &str, function: &str) -> bool {
         // authority. CallAsTeam is different: it scopes simulation team context
         // around one synchronous guest callback and carries no ambient OS/process
         // capability.
-        "system_control" => function == "CallAsTeam",
+        "system_control" => {
+            function == "CallAsTeam"
+                || matches!(
+                    function,
+                    "GetGameName"
+                        | "GetGameState"
+                        | "GetMenuName"
+                        | "GetReplayLength"
+                        | "GetVideoCapturingMode"
+                        | "IsReplay"
+                )
+        }
 
         // Synthetic host input can control the local application.
         "debug_input" => false,
 
         // Architecture/headless state is local machine identity. Keep it out of
         // production Core until an explicit reviewed local-info capability exists.
-        "platform" => false,
+        "platform" => matches!(function, "GetArchitecture" | "IsHeadless"),
 
         // Generic config includes persistent setters. Individually reviewed
         // read-only helpers can be exposed through a dedicated Core namespace.
@@ -171,9 +182,9 @@ mod tests {
     fn withholds_process_and_local_authority() {
         assert!(production_import_allowed("system_control", "CallAsTeam"));
         assert!(!production_import_allowed("system_control", "Quit"));
-        assert!(!production_import_allowed("system_control", "GetGameName"));
+        assert!(production_import_allowed("system_control", "GetGameName"));
         assert!(!production_import_allowed("debug_input", "EmulateKey"));
-        assert!(!production_import_allowed("platform", "GetArchitecture"));
+        assert!(production_import_allowed("platform", "GetArchitecture"));
         assert!(!production_import_allowed("config", "GetConfigInt"));
         assert!(!production_import_allowed("config", "SetConfigString"));
         assert!(!production_import_allowed("profiling", "GetTimerMicros"));

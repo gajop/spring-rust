@@ -277,17 +277,26 @@ def verify_owned_environment_surface(regenerated: Path) -> list[str]:
     model_path = regenerated / "model.json"
     callout_registry_path = regenerated / "WasmCalloutRegistry.h"
     owned_path = regenerated / "sdk" / "core_owned.rs"
+    owned_shard_dir = regenerated / "sdk" / "core_owned"
+    owned_footer_path = regenerated / "sdk" / "core_owned_footer.rs"
     environments_path = regenerated / "sdk" / "core_environments.rs"
     if (
         not model_path.is_file()
         or not callout_registry_path.is_file()
         or not owned_path.is_file()
+        or not owned_shard_dir.is_dir()
+        or not owned_footer_path.is_file()
         or not environments_path.is_file()
     ):
         return ["generated owned Core surface artifacts are incomplete"]
 
     model = json.loads(model_path.read_text(encoding="utf-8"))
     owned = owned_path.read_text(encoding="utf-8")
+    owned += "".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(owned_shard_dir.glob("*.rs"))
+    )
+    owned += owned_footer_path.read_text(encoding="utf-8")
     environments = environments_path.read_text(encoding="utf-8")
     callouts = re.findall(
         r'\{"([^\"]+)", "([^\"]+)", (\d+)u,',

@@ -1,8 +1,8 @@
-# Run the synced Component Model fixture on every supported engine platform.
+# Run the synced Core-Wasm fixture on every supported engine platform.
 # The engine artifacts come from Build Engine v2 for the selected commit; the
 # guest component is rebuilt on each runner so the host/runtime boundary is
 # exercised natively on Linux, arm64 Linux, and Windows.
-name: Wasm cross-platform parity
+name: Wasm Core cross-platform parity
 
 on:
   workflow_dispatch:
@@ -115,7 +115,7 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
 
-      - name: Run synced Wasm Component parity
+      - name: Run synced Wasm Core parity
         env:
           PYTHONUTF8: "1"
         run: |
@@ -124,6 +124,8 @@ jobs:
             --spring "$engine" \
             --spring-headless "$engine" \
             --mode wasm \
+            --wasm-transport core \
+            --wasm-context synced_gadget \
             --cases 3 \
             --timeout 180 \
             --output-dir "test/native_api_parity/out-ci-wasm-${{ matrix.platform }}"
@@ -153,7 +155,7 @@ jobs:
           pattern: wasm-parity-*-${{ env.TESTED_SHA }}
           path: artifacts
 
-      - name: Compare synced Wasm observations
+      - name: Compare synced Core observations by frame
         run: |
           python3 - <<'PY'
           import json
@@ -180,14 +182,14 @@ jobs:
                       "fpEdgeSignature": row.get("fpEdgeSignature"),
                       "rngSignature": row.get("rngSignature"),
                   })
-              values[platform] = sorted(rows, key=lambda row: json.dumps(row, sort_keys=True))
+              values[platform] = sorted(rows, key=lambda row: (row.get("frame", -1), json.dumps(row, sort_keys=True)))
               print(platform, json.dumps(values[platform], sort_keys=True))
 
           expected = next(iter(values.values()))
           for platform, rows in values.items():
               if rows != expected:
                   raise SystemExit(f"cross-platform Wasm observation mismatch on {platform}")
-          print(f"Wasm synced observation matches across {len(values)} platforms")
+          print(f"Wasm Core synced per-frame observation matches across {len(values)} platforms")
           PY
 
       - name: Assert every platform job succeeded

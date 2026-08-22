@@ -23,7 +23,7 @@ work is Core-output sharding, package layout, and verification records.
 - [x] Delete the Component Model transport and its dead fixtures.
 - [x] Put the surviving Core parity generator behind a `probe/` package entry
       while preserving the existing CLI path and generated output.
-- [ ] Shard the surviving generated Core outputs.
+- [x] Shard the surviving generated Core outputs by owned API module.
 - [ ] Finish the semantic Python module split and any move-only handwritten
       directory layout changes.
 
@@ -118,25 +118,26 @@ files are already implicitly structured that way.
 
 ## 2. Generated output — fix the emitter, not the files
 
-`rts/wasm/generated/` is **377,591 LOC across 92 flat files** plus 85 more flat
-`.wit` files. These are machine-written, so nobody edits them — but they still
-hurt: git diffs, compile times (one 34k-line TU), IDE responsiveness, and
-review. Worst:
+`rts/wasm/generated/` contains machine-written output. The Component Model
+files and the 58 `WasmHostAdapter*` translation units are deleted. The
+remaining Core output is split by transport class and API module where the
+large files affect compile or review cost.
 
 | File | LOC |
 | --- | --- |
-| `sdk/core_owned.rs` | 64,049 (survives; façade gap is tracked explicitly) |
-| `sdk/core_owned.rs` | 64,049 |
+| `sdk/core_owned/*.rs` | one owned façade shard per API module |
 | `WasmCoreGeneratedBindings.cpp` | 34,263 |
 | `sdk/core_generated.rs` | 26,235 |
 | `WasmCoreGeneratedBorrowedBindings.cpp` | 15,093 |
 | `WasmCoreGeneratedVariableBindings.cpp` | 13,994 |
 
-The old `WasmHostAdapter_*.cpp` pattern was part of the deleted Component
-transport (58 translation units, including headers and support glue). Apply
-the same per-module idea to the surviving Core binding emitters in
-`bin/spring-api-codegen.rs` to write one TU per API module, and the Rust SDK
-emitters to write one `.rs` per module with a generated `mod.rs`.
+The old `WasmHostAdapter_*.cpp` pattern belonged to the deleted Component
+transport. It is not a keep-list and must not be recreated. The surviving
+Core Rust façade now uses `sdk/core_owned.rs` as a generated prelude,
+`sdk/core_owned/*.rs` as module shards, and `sdk/core_owned_footer.rs` as the
+closing fragment. `spring-wasm-core/build.rs` concatenates those fragments in
+sorted order. `verify_codegen.py` checks the assembled surface and every
+shard.
 
 **Directory tree** — the flat 92-file dir becomes:
 
@@ -151,21 +152,27 @@ rts/wasm/generated/
     registry/ WasmCoreGeneratedRegistry.h, WasmCalloutRegistry.h, WasmCallinRegistry.h,
               WasmCoreAbiInventory.h
   sdk/
-    core/     one .rs per API module per transport class, + mod.rs
-  wit/        (deleted with the Component transport)
+    core_owned.rs             generated prelude
+    core_owned/               one .rs per API module
+    core_owned_footer.rs      generated closing fragment
+    core_generated.rs         generated raw Core imports
+    core_borrowed.rs          generated borrowed Core imports
+    core_variable.rs          generated variable-input Core imports
+  wit/                        (deleted with the Component transport)
 ```
 
-Consequences to handle in the same change: the CMake `foreach` list becomes a
-`file(GLOB)` or an emitted `.cmake` manifest; `verify_codegen.py` and
-`WasmCoreRegistry.h`'s `LookupImport` path both need the new locations; the
-generated-registry drift guard's regexes need re-anchoring.
+The Rust build script reads the generated shard directory directly. The
+surface verifier assembles the prelude, shards, and footer before checking
+every callout and environment projection. C++ binding TU sharding remains a
+separate task; it must update CMake and the generated-file drift guard in the
+same change.
 
 Do the sharding now that the purge is complete: only surviving Core generated
 outputs are in scope. The per-module split of
 `WasmCoreGeneratedBindings.cpp` remains the first generated-output task.
 
-Sizing target: no generated file over ~2,000 lines. Per-module sharding gets
-`core_owned.rs` from 64k to ~1.2k average.
+Sizing result: `core_owned.rs` is now a small prelude. Owned module shards are
+kept near the existing per-module scale; no owned shard is a monolith.
 
 ## 3. Hand-written C++ — `rts/WasmInterface/` (Core-only remainder)
 

@@ -7,7 +7,7 @@
 use heck::ToSnakeCase;
 use std::collections::BTreeMap;
 
-use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
+use crate::model::{ApiModel, RecordModel, SemanticType};
 use crate::render_core_wasm::{self, CoreType, ResultStrategy};
 use crate::render_core_wasm_dynamic_input_host;
 

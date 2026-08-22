@@ -2006,8 +2006,15 @@ def core_owned_unsupported() -> frozenset[tuple[str, str]]:
     the parity manifest honest by excluding those tests at generation time;
     an absent Rust item must never be turned into a vacuous runtime result.
     """
-    owned_path = ROOT / "rts" / "wasm" / "generated" / "sdk" / "core_owned.rs"
+    owned_dir = ROOT / "rts" / "wasm" / "generated" / "sdk"
+    owned_path = owned_dir / "core_owned.rs"
     text = owned_path.read_text(encoding="utf-8")
+    shard_dir = owned_dir / "core_owned"
+    text += "".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(shard_dir.glob("*.rs"))
+    )
+    text += (owned_dir / "core_owned_footer.rs").read_text(encoding="utf-8")
     modules: dict[str, set[str]] = {}
     module_pattern = re.compile(
         r"^    pub mod ([A-Za-z0-9_]+) \{(?P<body>.*?)(?=^    pub mod |^    #\[doc\(hidden\)\])",

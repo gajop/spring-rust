@@ -5,7 +5,7 @@
 //! bytes and scalar/enum lists. Complex element records and list<string> remain
 //! outside this renderer because their native layout requires adaptation.
 
-use heck::{ToLowerCamelCase, ToSnakeCase};
+use heck::ToSnakeCase;
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::model::{ApiModel, FieldModel, FunctionModel, RecordModel, SemanticType};

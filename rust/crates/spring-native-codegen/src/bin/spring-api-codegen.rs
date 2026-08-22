@@ -327,7 +327,19 @@ fn run() -> Result<()> {
         &sdk_dir.join("core_dynamic_output.rs"),
         &render_core_wasm_dynamic_output_guest::render(&model),
     )?;
-    write(&sdk_dir.join("core_owned.rs"), &owned_sdk)?;
+    write(
+        &sdk_dir.join("core_owned.rs"),
+        &render_core_wasm_owned_guest::render_owned_prelude(),
+    )?;
+    let owned_dir = sdk_dir.join("core_owned");
+    fs::create_dir_all(&owned_dir)?;
+    for (module_name, module_source) in render_core_wasm_owned_guest::render_owned_shards(&model) {
+        write(&owned_dir.join(format!("{module_name}.rs")), &module_source)?;
+    }
+    write(
+        &sdk_dir.join("core_owned_footer.rs"),
+        &render_core_wasm_owned_guest::render_owned_footer(&model),
+    )?;
     write(&sdk_dir.join("core_environments.rs"), &environment_sdk)?;
     write(
         &sdk_dir.join("core_callins.rs"),

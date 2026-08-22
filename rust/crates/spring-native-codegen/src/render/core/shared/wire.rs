@@ -17,7 +17,6 @@ pub(crate) fn direct_type(ty: &SemanticType) -> bool {
 
 /// True for `option<string>`: a presence flag followed by the same
 /// pointer/length pair a plain string input uses.
-
 pub(crate) fn optional_string(field: &FieldModel) -> bool {
     matches!(&field.ty, SemanticType::Option { inner } if matches!(inner.as_ref(), SemanticType::String))
         && presence_field(field).is_some()
@@ -87,7 +86,6 @@ pub(crate) fn variable_type(ty: &SemanticType) -> bool {
 /// Field-aware fixed-wire test. An `option<T>` is fixed-size on the wire -- a
 /// u32 presence flag followed by an always-reserved payload -- but only the
 /// field carries the presence metadata, so options can only be recognised here.
-
 pub(crate) fn fixed_wire_field(
     field: &FieldModel,
     records: &BTreeMap<String, RecordModel>,
@@ -129,7 +127,6 @@ pub(crate) fn presence_field(field: &FieldModel) -> Option<String> {
 /// True when a record needs an explicit trailing alignment on the wire because
 /// one of its fields is an option. Records without options keep the historical
 /// encoding untouched.
-
 pub(crate) fn record_has_option(
     ty: &SemanticType,
     records: &BTreeMap<String, RecordModel>,

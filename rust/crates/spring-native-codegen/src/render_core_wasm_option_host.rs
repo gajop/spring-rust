@@ -2,7 +2,7 @@
 //! are encoded as a canonical u32 presence flag followed by the aligned fixed
 //! payload; raw NativeInterface presence fields come from semantic metadata.
 
-use heck::{ToLowerCamelCase, ToSnakeCase};
+use heck::ToSnakeCase;
 use std::collections::BTreeMap;
 
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};

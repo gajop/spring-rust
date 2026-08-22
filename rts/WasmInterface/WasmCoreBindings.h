@@ -162,6 +162,13 @@ public:
 		}
 
 		wasmtime_linker_allow_shadowing(linker, true);
+		// Register the legacy fast fallbacks first. Generated bindings use the
+		// canonical wire ABI and must shadow any legacy registration for the
+		// same import; otherwise a pointer-based generated call can be decoded
+		// by an older direct-flag handler.
+		if (host.environment != WasmEnvironment::UI &&
+			!RegisterFastImports(linker, &host, error))
+			return false;
 #if defined(RECOIL_WASM_CORE_GENERATED_BINDINGS)
 		if (!generated::RegisterGeneratedImports(linker, &host, error))
 			return false;
@@ -194,9 +201,6 @@ public:
 		if (!generated::RegisterGeneratedVariableIoImports(linker, &host, error))
 			return false;
 #endif
-		if (host.environment != WasmEnvironment::UI &&
-			!RegisterFastImports(linker, &host, error))
-			return false;
 		if (!RegisterUnitsInfoVariableImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitsQueryImports(linker, &host, error))

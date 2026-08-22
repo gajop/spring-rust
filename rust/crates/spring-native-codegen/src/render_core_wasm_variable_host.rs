@@ -3,7 +3,7 @@
 //! guest-memory descriptor; all guest data is validated and copied before the
 //! NativeInterface call.
 
-use heck::{ToLowerCamelCase, ToSnakeCase};
+use heck::ToSnakeCase;
 use std::collections::BTreeMap;
 
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};

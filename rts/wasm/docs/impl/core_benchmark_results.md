@@ -1,6 +1,7 @@
 # Core Wasm benchmark results
 
-Run: 2026-08-22, bounded suite, seed `424242`, scale `0.1`, timeout `30s`.
+Run: 2026-08-22, bounded draw suite, seed `424242`, scale `0.1`, timeout `30s`,
+five repeats.
 Docker-built headless and legacy binaries.
 
 Core replaces Lua, so Lua vs Core is the headline comparison:
@@ -32,8 +33,8 @@ measurements to quote.
 | workloads | rules params | 0.491900 ms | 0.022000 ms | 22.36× |
 | workloads | commands | 0.377910 ms | 0.055000 ms | 6.87× |
 | workloads | compute | 1.535490 ms | 0.336000 ms | 4.57× |
-| draw | draw callout | 82.500 ns | 15.425 ns | 5.35× |
-| draw | UI draw workload | 0.033000 ms | 0.006250 ms | 5.28× |
+| draw | draw callout | 77.000 ns | 14.688 ns | 5.24× |
+| draw | UI draw workload | 0.031000 ms | 0.005875 ms | 5.28× |
 
 ## Native floor reference
 
@@ -45,9 +46,10 @@ Core/native ranges were 1.66–5.58× for callins, 1.01–4.39× for callouts,
 backends were available. Core loses to native on most rows; that is expected
 from the boundary and remains useful for regression tracking.
 
-The two material regressions are `callin_drawworld` (Core 5311 ns versus Lua
-2731 ns) and `callin_unimplemented` (Core 1483 ns versus Lua 1015 ns). They are
-tracked in the handoff for profiling and dispatch short-circuit work.
+The current `callin_drawworld` sample is Core 4434 ns versus Lua 2700 ns.
+The prior samples were Core 4711 ns versus Lua 2090 ns and Core 5311 ns versus
+Lua 2731 ns. Both backends carry microsecond-scale spread on this 2–5 µs row,
+so this remains a profile target rather than an unverified optimization target.
 
 Rows marked `unavailable` by the harness remain unavailable. They are not zero
 and are not treated as passing comparisons.

@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 MODEL = ROOT / "rts/wasm/generated/model.json"
 COVERAGE = ROOT / "rts/wasm/generated/core-executable-coverage.json"
+ABI = ROOT / "rts/wasm/generated/core-abi.json"
 OUTPUT = ROOT / "rts/wasm/docs/generated/core_api_reference.md"
 
 ENVIRONMENTS = (
@@ -26,9 +27,14 @@ ENVIRONMENTS = (
 def main() -> None:
     model = json.loads(MODEL.read_text())
     coverage = json.loads(COVERAGE.read_text())
+    abi = json.loads(ABI.read_text())
     coverage_by_callout = {
         (entry["module"], entry["function"]): entry
         for entry in coverage["executable"]
+    }
+    signature_by_callout = {
+        (entry["module"], entry["function"]): entry["signature"]
+        for entry in abi["functions"]
     }
     callout_count = sum(len(module.get("functions", [])) for module in model["modules"])
 
@@ -58,8 +64,8 @@ def main() -> None:
                 "",
                 f"## `{module['name']}`",
                 "",
-                "| callout | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |",
-                "| --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |",
+                "| callout | signature | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |",
+                "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |",
             ]
         )
         for function in functions:
@@ -72,6 +78,7 @@ def main() -> None:
             lines.append(
                 "| `{}` | {} | {} | {} | {} | {} | {} | {} | {} |".format(
                     function["name"],
+                    signature_by_callout.get(key, "not-listed"),
                     *values,
                     sync,
                     transport,

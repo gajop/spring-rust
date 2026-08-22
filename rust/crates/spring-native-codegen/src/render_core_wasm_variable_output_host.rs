@@ -2,7 +2,7 @@
 //! Each variable result uses a descriptor entry `{data_ptr, capacity, length}`;
 //! fixed result fields are written after the descriptor header.
 
-use heck::{ToLowerCamelCase, ToSnakeCase};
+use heck::ToSnakeCase;
 use std::collections::BTreeMap;
 
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};

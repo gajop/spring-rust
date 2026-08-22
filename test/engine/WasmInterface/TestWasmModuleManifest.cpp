@@ -93,9 +93,12 @@ void AddCoreMemory(std::vector<std::uint8_t>& module, bool fixed)
 void AddCoreMemoryExport(std::vector<std::uint8_t>& module)
 {
 	std::vector<std::uint8_t> payload;
-	AppendCoreLeb(payload, 1);
+	AppendCoreLeb(payload, 2);
 	AppendCoreString(payload, "memory");
 	payload.push_back(2); // memory
+	AppendCoreLeb(payload, 0);
+	AppendCoreString(payload, "SPRING_ENV_MASK");
+	payload.push_back(0); // function
 	AppendCoreLeb(payload, 0);
 	AddCoreSection(module, 7, payload);
 }

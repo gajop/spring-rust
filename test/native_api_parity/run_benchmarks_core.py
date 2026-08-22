@@ -310,7 +310,10 @@ def run_backend_with_core(
     wasm_context: str = "synced_gadget",
     wasm_module_count: int = 1,
     load_native_module: bool = True,
+    wasm_component: Path | None = None,
 ) -> list[dict]:
+    if wasm_component is not None:
+        backend_artifact = wasm_component
     if backend != "wasm_core":
         return _ORIGINAL_RUN_BACKEND(
             backend,
@@ -325,7 +328,7 @@ def run_backend_with_core(
             benchmark_repeats,
             expected_tests,
             callin_variant=callin_variant,
-            backend_artifact=backend_artifact,
+            wasm_component=backend_artifact,
             output_name=output_name,
             wasm_context=wasm_context,
             wasm_module_count=wasm_module_count,

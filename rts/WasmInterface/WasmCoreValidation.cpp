@@ -13,6 +13,8 @@
 #include "System/Sync/SHA512.hpp"
 #include "WasmCoreRegistry.h"
 
+// Keep validation recompilation tied to generated registry changes.
+
 namespace recoil::wasm::core {
 namespace {
 
