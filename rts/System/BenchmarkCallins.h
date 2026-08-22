@@ -25,6 +25,19 @@ using Clock = std::chrono::steady_clock;
 constexpr std::size_t kWarmupSamples = 1;
 constexpr std::size_t kMinimumSamples = 32;
 
+inline std::size_t ConfiguredMeasurementSamples()
+{
+	const char* value = std::getenv("SPRING_NATIVE_BENCHMARK_REPEATS");
+	if (value == nullptr)
+		return kMinimumSamples;
+
+	char* end = nullptr;
+	const unsigned long parsed = std::strtoul(value, &end, 10);
+	if (end == value || *end != '\0' || parsed == 0)
+		return kMinimumSamples;
+	return std::max<std::size_t>(kMinimumSamples, parsed);
+}
+
 struct Token {
 	std::string test;
 	Clock::time_point start;
@@ -237,7 +250,10 @@ inline void End(Token token)
 
 	const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
 		Clock::now() - token.start).count();
-	Samples()[token.test].samples.push_back(static_cast<uint64_t>(elapsed));
+	Stats& stats = Samples()[token.test];
+	const std::size_t sampleLimit = kWarmupSamples + ConfiguredMeasurementSamples();
+	if (stats.samples.size() < sampleLimit)
+		stats.samples.push_back(static_cast<uint64_t>(elapsed));
 }
 
 // Cost of the clock reads that bracket a single dispatch. Reported alongside

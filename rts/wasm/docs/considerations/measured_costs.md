@@ -1,5 +1,12 @@
 # Measured host-call costs
 
+> Historical Component Model transport measurements. The Component Model is
+> no longer the active transport. Keep this document for transport-history and
+> regression context; current Core-vs-Lua results are generated in
+> [`rts/wasm/docs/generated/benchmarking_results.md`](../generated/benchmarking_results.md)
+> and interpreted in [`../impl/core_benchmark_results.md`](../impl/core_benchmark_results.md).
+> The CM columns and CSVs below are not active Core comparison inputs.
+
 What a Wasm host call costs before any engine logic runs. Numbers are medians,
 Wasmtime 42.0.1, one P-core of a 12700, scalar signature unless stated.
 
@@ -85,8 +92,9 @@ Rust static bindings instead of the dynamic C API
 (`rust/crates/spring-wasm-typed-host/`). Same WIT, same wit-bindgen, same
 componentize step, same `.wasm` bytes: only the host differs, so the pair
 isolates the transport. Both run in the same suite as separate backends, so
-`generated/benchmarking_results.md` carries the current numbers and these are a
-snapshot of the shape.
+The tables below are a historical snapshot of the CM experiment. They do not
+describe the current benchmark matrix; use the generated Core artifacts linked
+at the top for current numbers.
 
 It covers all three worlds (rules-synced, rules-unsynced, UI), so every row in
 the table is measured on all four backends and none is reported unavailable.
@@ -161,12 +169,12 @@ draw workload `wl_ui_draw` still wins: 0.169 ms typed against 0.324 ms for
 Lua, because the callouts inside the draw entry are fast (41 ns each) and
 there are many of them.
 
-`benchmarking_results.md` states its ratios against the active Core host rather than
-against the dynamic C API. Its columns name all three axes, `Wasm (C API,
-dynamic, CM)` and `Wasm (Rust, typed, CM)`, because the native backend is also
-written in Rust and the language is not the difference being measured.
+The historical CM tables state their ratios against the then-active host
+comparison. Their columns name the two CM transports because the native
+backend is also written in Rust and the language is not the difference being
+measured. They must not be read as current Core results.
 
-## Where this leaves the transport choice
+## Historical transport recommendation
 
 On these numbers the typed Component Model host is a viable shipping
 transport and the dynamic C API is not.
@@ -197,8 +205,9 @@ path, and higher on the render path.** This is cache and TLB reload, not
 dispatch logic. It is small in absolute terms (0.03% to 0.07% of a 16.7 ms
 frame) and is amortised by any real work inside the callin.
 
-The recommendation is to commit to the typed Component Model host and drop the
-dynamic C API as a candidate.
+The original recommendation was to commit to the typed Component Model host
+and drop the dynamic C API as a candidate. That recommendation is historical;
+the active implementation and performance decision now concern Core Wasm.
 
 ## Notes that cost time to rediscover
 

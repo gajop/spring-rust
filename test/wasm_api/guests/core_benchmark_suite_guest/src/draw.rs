@@ -19,7 +19,7 @@ pub fn callback() {
 pub fn run() -> spring::Result<()> {
     let mut callout_samples = Vec::new();
     let callout_vertices = common::count(100_000);
-    for _ in 0..5 {
+    for _ in 0..common::repeats() {
         VERTICES.store(callout_vertices, Ordering::Relaxed);
         let start = common::timer_micros()?;
         for _ in 0..DRAW_BATCHES {
@@ -44,7 +44,7 @@ pub fn run() -> spring::Result<()> {
 
     let mut workload_samples = Vec::new();
     let workload_vertices = common::count(4_000);
-    for _ in 0..5 {
+    for _ in 0..common::repeats() {
         VERTICES.store(workload_vertices, Ordering::Relaxed);
         let start = common::timer_micros()?;
         for _ in 0..DRAW_BATCHES {

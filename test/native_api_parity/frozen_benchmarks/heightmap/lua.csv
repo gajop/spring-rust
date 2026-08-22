@@ -1,6 +1,6 @@
 backend,test,status,scale,iterations,innerCalls,innerNs,invocations,measurement,medianMs,nominalInvocations,nominalSize,p99Ms,reason,regions,samplesMs,spreadMs
-lua,hm_callback_empty,unavailable,0.1,100,,,,,,10000,0,,sample of 27180 ns is below the 47684 ns timer-resolution floor,1,,
-lua,hm_brush_small,unavailable,0.1,10,,,,,,1000,32,,sample of 39101 ns is below the 47684 ns timer-resolution floor,1,,
-lua,hm_brush_medium,unavailable,0.1,1,,,,,,100,128,,sample of 45061 ns is below the 47684 ns timer-resolution floor,1,,
-lua,hm_brush_large,pass,0.1,,8281,81.3922577,1,Lua callback boundary with zero terraform; terrain rebuild excluded,0.674963,10,512,0.67710876,,,"[0.65398216,0.674963,0.67710876,0.67806244,0.65898895]",0.02408025
-lua,hm_region_op,unavailable,0.1,10,,,,,,1000,0,,sample of 10967 ns is below the 47684 ns timer-resolution floor,1,,
+lua,hm_callback_empty,unavailable,0.1,100,,,,,,10000,0,,sample of 27895 ns is below the 47684 ns timer-resolution floor,1,,
+lua,hm_brush_small,unavailable,0.1,10,,,,,,1000,32,,sample of 42915 ns is below the 47684 ns timer-resolution floor,1,,
+lua,hm_brush_medium,unavailable,0.1,1,,,,,,100,128,,sample of 43869 ns is below the 47684 ns timer-resolution floor,1,,
+lua,hm_brush_large,pass,0.1,,8281,79.3193054,1,Lua callback boundary with zero terraform; terrain rebuild excluded,0.65898895,10,512,0.72908401,,,"[0.65898895,0.66113478,0.65994263,0.65612793,0.65517426,0.65898895,0.65588951,0.65302849,0.65612793,0.65302849,0.65302849,0.65493584,0.6518364,0.65517426,0.65922737,0.65898895,0.65302849,0.66399574,0.65398216,0.66113478,0.65898895,0.65493584,0.66804886,0.65207481,0.71597099,0.69999695,0.71907043,0.63896179,0.70786476,0.65112114,0.65588951,0.66781044,0.66900253,0.66494942,0.71597099,0.6518364,0.65493584,0.65612793,0.65493584,0.6570816,0.65517426,0.69189072,0.84590912,0.65898895,0.67210197,0.72908401,0.66184998,0.66184998,0.67710876,0.65588951]",0.20694731
+lua,hm_region_op,unavailable,0.1,10,,,,,,1000,0,,sample of 11206 ns is below the 47684 ns timer-resolution floor,1,,

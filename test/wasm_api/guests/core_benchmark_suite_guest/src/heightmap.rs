@@ -95,8 +95,8 @@ where
         return Ok(None);
     }
 
-    let mut samples = Vec::with_capacity(5);
-    for _ in 0..5 {
+    let mut samples = Vec::with_capacity(crate::common::repeats());
+    for _ in 0..crate::common::repeats() {
         let start = timer_micros()?;
         for _ in 0..count {
             operation()?;

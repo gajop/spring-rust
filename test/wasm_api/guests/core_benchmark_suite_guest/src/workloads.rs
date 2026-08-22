@@ -171,8 +171,14 @@ pub fn step() -> spring::Result<bool> {
     let Some((frames, samples, checksums)) = completed else {
         return Ok(false);
     };
+    let sample_count = common::repeats().min(frames).max(1);
     for (index, name) in NAMES.iter().enumerate() {
-        let mut sorted = samples[index].clone();
+        let frames_per_sample = frames.div_ceil(sample_count);
+        let mut grouped = Vec::with_capacity(sample_count);
+        for chunk in samples[index].chunks(frames_per_sample) {
+            grouped.push(chunk.iter().sum::<f64>() / chunk.len() as f64);
+        }
+        let mut sorted = grouped;
         sorted.sort_by(|left, right| left.total_cmp(right));
         let median = sorted[(sorted.len() - 1) / 2];
         let spread = sorted[sorted.len() - 1] - sorted[0];

@@ -1,6 +1,6 @@
 backend,test,status,scale,allocations,bytes,elapsedMs,frames,gcKB,p99Ms,peakBytes,steadyBytes,totalPauseMs,worstMs
-lua,mem_per_call_small,pass,0.1,0,0,0.40200001,,,,,,,
-lua,mem_per_call_list,pass,0.1,200,1606400,0.47799999,,,,,,,
-lua,gc_pause,pass,0.1,,,,,569,,,,0.484,
-lua,frame_spike,pass,0.1,,,,500,,0.008,,,,0.011
-lua,mem_growth,pass,0.1,,,,,,,3771854,3771854,,
+lua,mem_per_call_small,pass,0.1,0,0,0.38299999,,,,,,,
+lua,mem_per_call_list,pass,0.1,200,1606400,0.514,,,,,,,
+lua,gc_pause,pass,0.1,,,,,571,,,,0.505,
+lua,frame_spike,pass,0.1,,,,500,,0.009,,,,0.012
+lua,mem_growth,pass,0.1,,,,,,,3773425,3773425,,

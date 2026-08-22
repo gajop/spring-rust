@@ -819,6 +819,8 @@ def run_suite(args: argparse.Namespace) -> int:
             str(scale),
             "--timeout",
             str(timeout),
+            "--repeats",
+            str(args.repeats),
             "--spring-headless",
             str(args.spring_headless),
             "--spring",
@@ -920,6 +922,12 @@ def main() -> int:
         help="bounded-profile call count (default: 1,000,000)",
     )
     parser.add_argument("--timeout", type=int)
+    parser.add_argument(
+        "--repeats",
+        type=int,
+        default=50,
+        help="number of timing samples per benchmark row (default: 50)",
+    )
     parser.add_argument("--skip-build", action="store_true")
     args = parser.parse_args()
     if args.check_regression:
@@ -955,7 +963,9 @@ def main() -> int:
         else ""
     )
     benchmark_iterations = args.iterations if args.quick else 0
-    benchmark_repeats = 3 if args.quick else 5
+    if args.repeats <= 0:
+        raise RuntimeError("--repeats must be positive")
+    benchmark_repeats = args.repeats
     expected_tests = (
         ("callout_scalar",)
         if args.quick

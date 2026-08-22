@@ -1,6 +1,6 @@
 {
-  "updated": "2026-08-22T15:10:18+09:00",
-  "engineVersion": "2026.07.01-194-g88d9241640-dirty",
+  "updated": "2026-08-22T18:09:52+09:00",
+  "engineVersion": "2026.07.01-195-g92675a0e4d-dirty",
   "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
   "note": "bounded Lua/Core freeze; CM columns and CSVs retained as historical reference"
 }

@@ -82,6 +82,12 @@ fn scaled_brush_size(value: usize, scale: f64) -> usize {
     }
 }
 
+fn percentile99(samples: &[f64]) -> f64 {
+	let mut sorted = samples.to_vec();
+	sorted.sort_by(|left, right| left.total_cmp(right));
+	sorted[((sorted.len() - 1) * 99) / 100]
+}
+
 struct NativeApiParity {
     interface: NativeInterfaceRef,
     failures: u32,
@@ -386,12 +392,14 @@ impl NativeApiParity {
             None => return Ok(()),
         };
         let (median, spread, samples) = self.benchmark_samples(iterations, &mut operation)?;
+        let p99 = percentile99(&samples);
         self.write_benchmark_row(serde_json::json!({
             "backend": "native",
             "test": name,
             "status": "pass",
             "iterations": iterations,
             "medianNs": median,
+            "p99Ns": p99,
             "spreadNs": spread,
             "totalMedianNs": median * iterations as f64,
             "totalSpreadNs": spread * iterations as f64,
@@ -489,7 +497,7 @@ impl NativeApiParity {
             let mut totals = Vec::new();
             let mut inner = Vec::new();
             let mut sample_ns = 0.0f64;
-            for _ in 0..5 {
+            for _ in 0..benchmark_repeats() {
                 let mut calls = 0usize;
                 let total_start = Instant::now();
                 let mut inner_elapsed = std::time::Duration::ZERO;
@@ -536,6 +544,7 @@ impl NativeApiParity {
             sorted.sort_by(|left, right| left.total_cmp(right));
             let median = sorted[(sorted.len() - 1) / 2];
             let spread = sorted[sorted.len() - 1] - sorted[0];
+            let p99 = sorted[((sorted.len() - 1) * 99) / 100];
             let mut inner_sorted = inner.clone();
             inner_sorted.sort_by(|left, right| left.total_cmp(right));
             self.write_benchmark_row(serde_json::json!({
@@ -545,7 +554,9 @@ impl NativeApiParity {
                 "invocations": invocations,
                 "innerCalls": size * size,
                 "medianMs": median,
+                "p99Ms": p99,
                 "spreadMs": spread,
+                "samplesMs": totals,
                 "innerNs": inner_sorted[(inner_sorted.len() - 1) / 2],
                 "scale": scale,
                 "nominalSize": nominal_size,
@@ -557,7 +568,7 @@ impl NativeApiParity {
         let floor_ns = resolution_floor_ns(clock_quantum_ns(), 1);
         let mut samples = Vec::new();
         let mut sample_ns = 0.0f64;
-        for _ in 0..5 {
+        for _ in 0..benchmark_repeats() {
             let start = Instant::now();
             for _ in 0..invocations {
                 interface
@@ -583,13 +594,16 @@ impl NativeApiParity {
         }
         let mut sorted = samples.clone();
         sorted.sort_by(|left, right| left.total_cmp(right));
+        let p99 = sorted[((sorted.len() - 1) * 99) / 100];
         self.write_benchmark_row(serde_json::json!({
             "backend": "native",
             "test": "hm_region_op",
             "status": "pass",
             "invocations": invocations,
             "medianMs": sorted[(sorted.len() - 1) / 2],
+            "p99Ms": p99,
             "spreadMs": sorted[sorted.len() - 1] - sorted[0],
+            "samplesMs": samples,
             "innerNs": 0.0,
             "scale": scale,
             "nominalInvocations": 1_000,
@@ -636,12 +650,16 @@ impl NativeApiParity {
                 .push(start.elapsed().as_secs_f64() * 1_000_000_000.0 / callout_vertices as f64);
         }
         callout_samples.sort_by(|left, right| left.total_cmp(right));
+        let callout_p99 = callout_samples[((callout_samples.len() - 1) * 99) / 100];
         self.write_draw_row(serde_json::json!({
             "backend": "native",
             "test": "callout_draw",
             "status": "pass",
             "iterations": callout_vertices,
             "medianNs": callout_samples[(callout_samples.len() - 1) / 2],
+            "p99Ns": callout_p99,
+            "spreadNs": callout_samples[callout_samples.len() - 1] - callout_samples[0],
+            "samplesNs": callout_samples,
             "scale": scale,
         }))?;
 
@@ -661,12 +679,16 @@ impl NativeApiParity {
             workload_samples.push(start.elapsed().as_secs_f64() * 1000.0);
         }
         workload_samples.sort_by(|left, right| left.total_cmp(right));
+        let workload_p99 = workload_samples[((workload_samples.len() - 1) * 99) / 100];
         self.write_draw_row(serde_json::json!({
             "backend": "native",
             "test": "wl_ui_draw",
             "status": "pass",
             "lines": workload_lines,
             "medianMs": workload_samples[(workload_samples.len() - 1) / 2],
+            "p99Ms": workload_p99,
+            "spreadMs": workload_samples[workload_samples.len() - 1] - workload_samples[0],
+            "samplesMs": workload_samples,
             "scale": scale,
         }))?;
         self.write_draw_row(serde_json::json!({
@@ -706,6 +728,7 @@ impl NativeApiParity {
             "status": "pass",
             "iterations": iterations,
             "medianNs": median,
+            "p99Ns": percentile99(&samples),
             "spreadNs": spread,
             "samplesNs": samples,
             "bytes": ((after.2 - before.2).max(0.0) * 1024.0),
@@ -730,6 +753,7 @@ impl NativeApiParity {
             "status": "pass",
             "iterations": iterations,
             "medianNs": median,
+            "p99Ns": percentile99(&samples),
             "spreadNs": spread,
             "samplesNs": samples,
             "bytes": ((after.2 - before.2).max(0.0) * 1024.0),
@@ -924,6 +948,66 @@ impl NativeApiParity {
                     .map(|_| ())
                     .map_err(|err| format!("{err:?}"))
             })?;
+            let physics_position = spring_native::sys::Float3 {
+                x: position.x,
+                y: position.y,
+                z: position.z,
+            };
+            let velocity = spring_native::sys::Float3 {
+                x: 1.0,
+                y: 0.0,
+                z: 0.0,
+            };
+            let rotation = spring_native::sys::Float3 {
+                x: 0.0,
+                y: 1.0,
+                z: 0.0,
+            };
+            let drag = spring_native::sys::Float3 {
+                x: 1.0,
+                y: 0.0,
+                z: 0.0,
+            };
+            self.benchmark_measure(
+                "callout_wide_unit_physics",
+                scaled_count(20_000, scale),
+                || {
+                    interface
+                        .synced_ctrl()
+                        .unit()
+                        .set_unit_physics(
+                            unit_id,
+                            physics_position,
+                            velocity,
+                            rotation,
+                            drag,
+                        )
+                        .map(|_| ())
+                        .map_err(|err| format!("{err:?}"))
+                },
+            )?;
+            for (name, payload) in [
+                ("callout_payload_8", "terrain"),
+                (
+                    "callout_payload_64",
+                    "terrain-payload-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                ),
+                (
+                    "callout_payload_256",
+                    "terrain-payload-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                ),
+            ] {
+                self.benchmark_measure(name, scaled_count(20_000, scale), || {
+                    interface
+                        .synced_ctrl()
+                        .terrain()
+                        .set_terrain_type_data(
+                            0, 1.0, 1.0, 1.0, 1.0, 1.0, true, payload,
+                        )
+                        .map(|_| ())
+                        .map_err(|err| format!("{err:?}"))
+                })?;
+            }
         }
         if profile.as_deref() == Some("callouts") {
             return self.write_benchmark_row(serde_json::json!({
@@ -1077,6 +1161,7 @@ impl NativeApiParity {
             "iterations": small_iterations,
             "nominalIterations": 100_000,
             "medianNs": small_median,
+            "p99Ns": percentile99(&small_samples),
             "spreadNs": small_spread,
             "samplesNs": small_samples,
             "bytes": ((memory_after.2 - memory_before.2).max(0.0) * 1024.0),
@@ -1108,6 +1193,7 @@ impl NativeApiParity {
             "iterations": list_iterations,
             "nominalIterations": 1_000,
             "medianNs": list_median,
+            "p99Ns": percentile99(&list_samples),
             "spreadNs": list_spread,
             "samplesNs": list_samples,
             "bytes": ((memory_after.2 - memory_before.2).max(0.0) * 1024.0),

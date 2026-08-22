@@ -363,6 +363,7 @@ local function finishCallout()
 		status = "pass",
 		iterations = case.iterations,
 		medianNs = median(calloutSamples),
+		p99Ns = percentile(calloutSamples, 0.99),
 		spreadNs = spread(calloutSamples),
 		totalMedianNs = median(calloutSamples) * case.iterations,
 		totalSpreadNs = spread(calloutSamples) * case.iterations,
@@ -677,7 +678,7 @@ beginWorkloads = function()
 	workloadFrame = 0
 	workloadSamples = {}
 	workloadChecksum = 0
-	workloadBatchFrames = math.min(100, workloadFrames)
+	workloadBatchFrames = math.max(1, math.floor(workloadFrames / repeats + 0.5))
 	workloadBatchStart = 0
 	workloadBatchCount = 0
 	if benchmarkCase ~= "workloads" then
@@ -752,6 +753,7 @@ local function finishWorkload()
 		nominalIterations = 5000,
 		scale = benchmarkScale,
 		medianNs = medianValue,
+		p99Ns = percentile(workloadSamples, 0.99),
 		spreadNs = high - low,
 		checksum = workloadChecksum,
 		samplesNs = workloadSamples,
@@ -855,12 +857,14 @@ local function runLuaBenchmark()
 			backend = "lua",
 			test = callin.name,
 			status = "pass",
-				iterations = callin.iterations,
-				medianNs = median(samples),
-				spreadNs = spread(samples),
-				scale = benchmarkScale,
-				nominalIterations = callin.iterations / benchmarkScale,
-				measurement = "Lua callback body loop",
+			iterations = callin.iterations,
+			medianNs = median(samples),
+			p99Ns = percentile(samples, 0.99),
+			spreadNs = spread(samples),
+			samplesNs = samples,
+			scale = benchmarkScale,
+			nominalIterations = callin.iterations / benchmarkScale,
+			measurement = "Lua callback body loop",
 		})
 	end
 	beginCallouts()

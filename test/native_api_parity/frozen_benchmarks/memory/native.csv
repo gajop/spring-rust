@@ -1,7 +1,6 @@
-backend,test,status,scale,iterations,allocations,benchmarkCase,bytes,frames,gcKB,measurement,medianNs,p99Ms,peakBytes,samplesNs,spreadNs,steadyBytes,totalPauseMs,worstMs
-native,mem_per_call_small,pass,1.0,100000,0.0,,0.0,,,Profiling.get_lua_mem_usage,6.17884,,,"[5.74634, 6.42398, 7.95724, 5.79, 6.17884]",2.2108999999999996,,,
-native,mem_per_call_list,pass,1.0,1000,0.0,,0.0,,,Profiling.get_lua_mem_usage,494.452,,,"[497.601, 505.28, 494.452, 491.323, 492.979]",13.956999999999994,,,
-native,gc_pause,pass,1.0,,,,,,560.0,Profiling.get_synced_gcinfo,,,,,,,0.502844,
-native,frame_spike,pass,1.0,,,,,5000,,bounded workload samples,,0.005315,,,,,,0.024064
-native,mem_growth,pass,1.0,,,,,,,Profiling.get_lua_mem_usage,,,2135292.0,,,2135292.0,,
-native,complete,pass,1.0,,,memory,,,,,,,,,,,,
+backend,test,status,scale,iterations,allocations,bytes,frames,gcKB,measurement,medianNs,p99Ms,p99Ns,peakBytes,samplesNs,spreadNs,steadyBytes,totalPauseMs,worstMs
+native,mem_per_call_small,pass,0.1,10000,0.0,0.0,,,Profiling.get_lua_mem_usage,6.3859,,7.9966,,"[6.754,6.3872,6.3871,6.3859,6.3986,7.9966,10.6832,7.3969,6.2398,6.442,6.7173,6.6661,6.4178,6.2378,6.4059,6.2391,6.9056,6.3898,6.2377,6.2374,6.4071,6.2377,6.2378,6.3957,6.2377,6.2377,6.6349,6.5868,6.2381,6.2371,6.2381,6.2378,6.9609,6.2378,6.2377,6.2381,6.2376,6.2374,6.9669,6.2374,6.2376,6.2377,6.7391,6.4608,6.4608,6.461,6.9777,6.2376,6.238,6.2374]",4.4460999999999995,,,
+native,mem_per_call_list,pass,0.1,100,0.0,0.0,,,Profiling.get_lua_mem_usage,492.09,,524.81,,"[523.16,493.06,492.49,509.63,492.24,491.82,492.34,525.89,492.02,492.15,491.74,492.09,491.96,492.19,491.89,492.01,491.64,491.84,507.52,491.87,492.28,492.2,492.01,492.44,492.59,492.1,492.31,524.81,492.3,492.26,492.45,492.01,492.09,492.65,491.83,509.74,491.93,491.88,491.81,491.71,491.89,491.56,492.01,491.72,491.88,492.03,491.55,513.89,492.02,492.61]",34.339999999999975,,,
+native,gc_pause,pass,0.1,,,,,571.0,Profiling.get_synced_gcinfo,,,,,,,,0.507417,
+native,frame_spike,pass,0.1,,,,500,,bounded workload samples,,0.005901,,,,,,,0.015809999999999998
+native,mem_growth,pass,0.1,,,,,,Profiling.get_lua_mem_usage,,,,2152795.0,,,2152795.0,,
