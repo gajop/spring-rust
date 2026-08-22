@@ -16,8 +16,8 @@ from pathlib import Path
 
 
 IGNORED_ARTIFACTS = {"model.json", "signatures.json"}
-PROBE_GENERATOR = "test/wasm_api/parity_guest/generate_probe.py"
-CORE_SURFACE_GENERATOR = "test/wasm_api/generate_core_abi_surface.py"
+PROBE_GENERATOR = "test/wasm_api/guests/parity_guest/generate_probe.py"
+CORE_SURFACE_GENERATOR = "test/wasm_api/tools/generate_core_abi_surface.py"
 PROBE_CONTEXTS = (
     "synced_gadget",
     "unsynced_gadget",
@@ -70,8 +70,8 @@ def checked_probe_path(root: Path, context: str, relative: str) -> Path:
         )
     if relative == "probe_manifest.json":
         suffix = "_synced_gadget.core" if context == "synced_gadget" else f"_{context}.core"
-        return root / "test/wasm_api/parity_guest" / f"probe_manifest{suffix}.json"
-    return root / "test/wasm_api/parity_guest" / relative
+        return root / "test/wasm_api/guests/parity_guest" / f"probe_manifest{suffix}.json"
+    return root / "test/wasm_api/guests/parity_guest" / relative
 
 
 def generated_probe_path(probe_root: Path, relative: str) -> Path:

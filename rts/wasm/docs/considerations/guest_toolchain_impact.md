@@ -4,23 +4,17 @@ The binding style is invisible to guests. The ABI choice is not. This is the
 part of [abi_choice.md](abi_choice.md) that reaches users, and it is the main
 non-performance argument in that decision.
 
-## On the Component Model
+## On the Core-Wasm ABI
 
 A guest author's workflow:
 
-1. Take the WIT from `rts/wasm/generated/wit/`
-2. Run wit-bindgen, which generates the bindings
+1. Take the Core ABI specification and generated SDK from `rts/wasm/generated/`
+2. Use the language binding generator, or declare the raw imports directly
 3. `cargo build --target wasm32-unknown-unknown`
-4. Componentize with wit-component
-5. Ship the `.wasm`
+4. Ship the raw `.wasm`
 
-Steps 2 and 4 are Bytecode Alliance tools. We publish WIT and nothing else.
-Rust, C, Go, C# and several other languages get bindings without any work from
-us, and componentize-py and jco cover Python and JavaScript.
-
-Every guest in the tree works this way today: `benchmark_guest`,
-`parity_guest`, `aggregation_guest`, `allocator_guest` and `value_guest` all
-call `wit_bindgen::generate!` on our WIT directly.
+The repository's parity and benchmark guests use the generated Rust Core SDK.
+The old Component guest crates and componentization step were removed.
 
 ## On core wasm with our own layout
 

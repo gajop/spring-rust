@@ -25,9 +25,9 @@ mod raw {
     #[link(wasm_import_module = "spring:profiling")]
     extern "C" {
         #[link_name = "get-timer"]
-        pub fn get_timer() -> i64;
+        pub fn get_timer(unused: i32, output: i32) -> i32;
         #[link_name = "get-timer-micros"]
-        pub fn get_timer_micros() -> i64;
+        pub fn get_timer_micros(unused: i32, output: i32) -> i32;
         #[link_name = "diff-timers"]
         pub fn diff_timers(
             end_timer: i64,
@@ -36,13 +36,13 @@ mod raw {
             from_micros: i32,
         ) -> i64;
         #[link_name = "get-frame-timer"]
-        pub fn get_frame_timer(last_frame_time: i32) -> i64;
+        pub fn get_frame_timer(last_frame_time: i32, output: i32) -> i32;
         #[link_name = "get-draw-seconds"]
-        pub fn get_draw_seconds() -> i64;
+        pub fn get_draw_seconds(unused: i32) -> i64;
         #[link_name = "get-lua-mem-usage"]
-        pub fn get_lua_mem_usage(output: i32) -> i32;
+        pub fn get_lua_mem_usage(unused: i32, output: i32) -> i32;
         #[link_name = "get-vid-mem-usage"]
-        pub fn get_vid_mem_usage(output: i32) -> i32;
+        pub fn get_vid_mem_usage(unused: i32, output: i32) -> i32;
         #[link_name = "get-synced-gc-info"]
         pub fn get_synced_gc_info(collect: i32) -> i64;
     }
@@ -52,7 +52,16 @@ mod raw {
 pub fn get_timer() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        return Ok(unsafe { raw::get_timer() } as u64);
+        let mut value = [0u8; 8];
+        let pointer = value.as_mut_ptr() as usize;
+        if pointer > u32::MAX as usize {
+            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+        }
+        let status = unsafe { raw::get_timer(0, pointer as u32 as i32) };
+        if status != 0 {
+            return Err(ApiError::new(status));
+        }
+        return Ok(u64::from_le_bytes(value));
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -64,7 +73,16 @@ pub fn get_timer() -> Result<u64> {
 pub fn get_timer_micros() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        return Ok(unsafe { raw::get_timer_micros() } as u64);
+        let mut value = [0u8; 8];
+        let pointer = value.as_mut_ptr() as usize;
+        if pointer > u32::MAX as usize {
+            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+        }
+        let status = unsafe { raw::get_timer_micros(0, pointer as u32 as i32) };
+        if status != 0 {
+            return Err(ApiError::new(status));
+        }
+        return Ok(u64::from_le_bytes(value));
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -101,7 +119,18 @@ pub fn diff_timers(
 pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        return Ok(unsafe { raw::get_frame_timer(last_frame_time as i32) } as u64);
+        let mut value = [0u8; 8];
+        let pointer = value.as_mut_ptr() as usize;
+        if pointer > u32::MAX as usize {
+            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+        }
+        let status = unsafe {
+            raw::get_frame_timer(last_frame_time as i32, pointer as u32 as i32)
+        };
+        if status != 0 {
+            return Err(ApiError::new(status));
+        }
+        return Ok(u64::from_le_bytes(value));
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -114,7 +143,7 @@ pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
 pub fn get_draw_seconds() -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        return crate::unpack_f32(unsafe { raw::get_draw_seconds() });
+        return crate::unpack_f32(unsafe { raw::get_draw_seconds(0) });
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -131,7 +160,7 @@ pub fn get_lua_mem_usage() -> Result<LuaMemUsage> {
         if pointer > u32::MAX as usize {
             return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
         }
-        let status = unsafe { raw::get_lua_mem_usage(pointer as u32 as i32) };
+        let status = unsafe { raw::get_lua_mem_usage(0, pointer as u32 as i32) };
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -161,7 +190,7 @@ pub fn get_vid_mem_usage() -> Result<VidMemUsage> {
         if pointer > u32::MAX as usize {
             return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
         }
-        let status = unsafe { raw::get_vid_mem_usage(pointer as u32 as i32) };
+        let status = unsafe { raw::get_vid_mem_usage(0, pointer as u32 as i32) };
         if status != 0 {
             return Err(ApiError::new(status));
         }

@@ -98,6 +98,19 @@ inline bool IsVariant(std::string_view variant)
 	return configured == variant;
 }
 
+inline bool StagesEnabled()
+{
+	static const bool enabled = [] {
+		const char* value = std::getenv("SPRING_NATIVE_BENCHMARK_STAGES");
+		if (value == nullptr)
+			return false;
+		const std::string_view setting(value);
+		return setting == "1" || setting == "true" || setting == "TRUE" ||
+			setting == "yes" || setting == "YES" || setting == "on" || setting == "ON";
+	}();
+	return enabled;
+}
+
 inline std::string_view GameFrameTestName()
 {
 	if (IsVariant("unimplemented"))
@@ -201,6 +214,20 @@ inline Token BeginConfigured(std::string_view test)
 	if (backend == "wasm" || backend == "wasm_rust_typed" || backend == "wasm_core")
 		return Begin("wasm", test);
 	return {};
+}
+
+// Diagnostic stage rows are opt-in because they add extra clock reads to the
+// hot path. Unlike the decision rows above, a stage name is not required to be
+// one of the canonical callin events.
+inline Token BeginStage(std::string_view backend, std::string_view stage)
+{
+	if (!StagesEnabled() || !IsEnabled() || !IsBackend(backend))
+		return {};
+	return {
+		.test = std::string(stage),
+		.start = Clock::now(),
+		.active = true,
+	};
 }
 
 inline void End(Token token)

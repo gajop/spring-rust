@@ -28,12 +28,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-ROOT = Path(__file__).resolve().parents[2]
-PARITY_ROOT = ROOT / "test" / "wasm_api" / "parity_guest"
+ROOT = Path(__file__).resolve().parents[3]
+PARITY_ROOT = ROOT / "test" / "wasm_api" / "guests" / "parity_guest"
 PROBE_SOURCE = PARITY_ROOT / "src" / "probe_generated.rs"
 CORE_COVERAGE = ROOT / "rts" / "wasm" / "generated" / "core-executable-coverage.json"
-REVIEWED_TRANSPORTS = ROOT / "test" / "wasm_api" / "core_reviewed_handwritten_transports.json"
-DEFAULT_OUTPUT = ROOT / "test" / "wasm_api" / "core_parity_plan.json"
+REVIEWED_TRANSPORTS = ROOT / "test" / "wasm_api" / "data" / "core_reviewed_handwritten_transports.json"
+DEFAULT_OUTPUT = ROOT / "test" / "wasm_api" / "data" / "core_parity_plan.json"
 
 PROBE_START = re.compile(r"(?m)^fn probe_([a-zA-Z0-9_]+)\(")
 CORE_CALL = re.compile(
@@ -353,7 +353,7 @@ def main() -> int:
             "reviewed_handwritten_transports": str(args.reviewed_transports.relative_to(ROOT)),
             "manifest_glob": (
                 "canonical Component manifests under "
-                "test/wasm_api/parity_guest/"
+                "test/wasm_api/guests/parity_guest/"
             ),
         },
         "summary": {

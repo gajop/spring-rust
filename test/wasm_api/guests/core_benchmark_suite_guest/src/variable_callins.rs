@@ -36,7 +36,7 @@ fn range(bytes: &[u8], offset: u32, length: u32) -> Option<&[u8]> {
 
 #[export_name = "spring:callin/scratch-info"]
 pub extern "C" fn scratch_info() -> i64 {
-    let pointer = core::ptr::addr_of_mut!(SCRATCH.0) as *mut u8 as usize;
+    let pointer = unsafe { core::ptr::addr_of_mut!(SCRATCH.0) as *mut u8 as usize };
     debug_assert!(pointer <= u32::MAX as usize);
     (((SCRATCH_BYTES as u64) << 32) | pointer as u32 as u64) as i64
 }

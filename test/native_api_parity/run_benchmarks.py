@@ -33,50 +33,49 @@ from run_harness import (
 )
 
 
-BENCHMARK_CRATE = ROOT / "test" / "wasm_api" / "benchmark_guest" / "Cargo.toml"
+BENCHMARK_CRATE = ROOT / "test" / "wasm_api" / "guests" / "core_benchmark_suite_guest" / "Cargo.toml"
 BENCHMARK_CORE = (
     ROOT
     / "test"
     / "wasm_api"
-    / "benchmark_guest"
+    / "guests"
+    / "core_benchmark_suite_guest"
     / "target"
     / "wasm32-unknown-unknown"
     / "release"
-    / "recoil_wasm_benchmark_guest.wasm"
+    / "recoil_wasm_core_benchmark_suite_guest.wasm"
 )
-BENCHMARK_COMPONENT = (
-    ROOT
-    / "test"
-    / "wasm_api"
-    / "benchmark_guest"
-    / "target"
-    / "recoil_wasm_benchmark_guest.component.wasm"
+# These names are shared by the historical runner's variant mapping.  They
+# are raw Core-Wasm artifacts; the Component transport is no longer built.
+BENCHMARK_COMPONENT = BENCHMARK_CORE.with_name(
+    "recoil_wasm_core_benchmark_suite_guest.default.wasm"
 )
 BENCHMARK_COMPONENT_EMPTY = BENCHMARK_COMPONENT.with_name(
-    "recoil_wasm_benchmark_guest.empty.component.wasm"
+    "recoil_wasm_core_benchmark_suite_guest.empty.wasm"
 )
 BENCHMARK_COMPONENT_GAMEFRAME = BENCHMARK_COMPONENT.with_name(
-    "recoil_wasm_benchmark_guest.gameframe.component.wasm"
+    "recoil_wasm_core_benchmark_suite_guest.gameframe.wasm"
 )
 BENCHMARK_COMPONENT_UNIMPLEMENTED = BENCHMARK_COMPONENT.with_name(
-    "recoil_wasm_benchmark_guest.unimplemented.component.wasm"
+    "recoil_wasm_core_benchmark_suite_guest.unimplemented.wasm"
 )
 BENCHMARK_COMPONENT_MEMORY = BENCHMARK_COMPONENT.with_name(
-    "recoil_wasm_benchmark_guest.memory.component.wasm"
+    "recoil_wasm_core_benchmark_suite_guest.memory.wasm"
 )
 BENCHMARK_COMPONENT_DRAW = BENCHMARK_COMPONENT.with_name(
-    "recoil_wasm_benchmark_guest.draw.component.wasm"
+    "recoil_wasm_core_benchmark_suite_guest.draw.wasm"
 )
 # Update is dispatched unsynced-only, so the callin profile times it against an
 # unsynced guest.  A synced guest never receives it.
 BENCHMARK_COMPONENT_UPDATE = BENCHMARK_COMPONENT.with_name(
-    "recoil_wasm_benchmark_guest.update.component.wasm"
+    "recoil_wasm_core_benchmark_suite_guest.update.wasm"
 )
 BENCHMARK_STAMP = (
     ROOT
     / "test"
     / "wasm_api"
-    / "benchmark_guest"
+    / "guests"
+    / "core_benchmark_suite_guest"
     / "target"
     / "benchmark-profile.json"
 )
@@ -214,14 +213,14 @@ def build_typed_host() -> None:
 def prepare_benchmark_context(context: str) -> None:
     if context == "synced_gadget":
         lua_output = GAME_FIXTURE / "LuaRules/Utilities/wasm_api_probe_tests.lua"
-        manifest_output = ROOT / "test" / "wasm_api" / "parity_guest" / "probe_manifest.json"
+        manifest_output = ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / "probe_manifest.json"
     else:
         lua_output = GAME_FIXTURE / f"LuaRules/Utilities/wasm_api_probe_tests_{context}.lua"
-        manifest_output = ROOT / "test" / "wasm_api" / "parity_guest" / f"probe_manifest_{context}.json"
+        manifest_output = ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / f"probe_manifest_{context}.json"
     run_checked(
         [
             "python3",
-            str(ROOT / "test" / "wasm_api" / "parity_guest" / "generate_probe.py"),
+            str(ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / "generate_probe.py"),
             "--context",
             context,
             "--lua-output",

@@ -3,7 +3,7 @@
 What a Wasm host call costs before any engine logic runs. Numbers are medians,
 Wasmtime 42.0.1, one P-core of a 12700, scalar signature unless stated.
 
-Reproduce with `test/wasm_api/hostcall_bench/run.sh`. That harness runs the
+Reproduce with `test/wasm_api/guests/hostcall_bench/run.sh`. That harness runs the
 same two guests against two hosts, the Wasmtime C API and the Wasmtime Rust
 API, and checks guest return values so an optimised-away loop cannot pass as a
 fast one.

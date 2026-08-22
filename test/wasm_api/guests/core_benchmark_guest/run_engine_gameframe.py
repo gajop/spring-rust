@@ -18,13 +18,13 @@ from pathlib import Path
 import subprocess
 import sys
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "test" / "native_api_parity"))
 
 import run_benchmarks as bench  # noqa: E402
 
-BASE_CRATE_DIR = ROOT / "test" / "wasm_api" / "core_benchmark_guest"
-ROUNDTRIP_CRATE_DIR = ROOT / "test" / "wasm_api" / "core_roundtrip_guest"
+BASE_CRATE_DIR = ROOT / "test" / "wasm_api" / "guests" / "core_benchmark_guest"
+ROUNDTRIP_CRATE_DIR = ROOT / "test" / "wasm_api" / "guests" / "core_roundtrip_guest"
 BASE_WASM = (
     BASE_CRATE_DIR
     / "target"

@@ -8,7 +8,7 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-spring-wasm-core = { path = "../../../rust/crates/spring-wasm-core" }
+spring-wasm-core = { path = "../../../../rust/crates/spring-wasm-core", features = ["alloc"] }
 
 [profile.release]
 lto = "fat"

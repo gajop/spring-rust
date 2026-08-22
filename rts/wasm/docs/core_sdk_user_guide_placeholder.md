@@ -33,7 +33,7 @@
 - No random device in synced code
 - No filesystem authority in synced code
 - No process control in synced code
-- Replay check: `python3 test/wasm_api/check_sync_replay.py`
+- Replay check: `python3 test/wasm_api/tools/check_sync_replay.py`
 
 ## Debugging
 

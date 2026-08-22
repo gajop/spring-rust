@@ -33,15 +33,15 @@ Use `--mode lua` to refresh Lua baselines, then `--mode native` while iterating 
 By default the runner uses Spring's built-in blank-map generator:
 `InitBlank=1`, a random `MapName`, and `blank_map_x/y` map options.
 
-Use `--mode wasm` to build the Rust wit-bindgen/componentize guest, package it
-under `LuaRules/wasm/manifest.txt`, load it through the game VFS, and run the
-Lua reference plus Wasm observation in one in-engine fixture process. This
-avoids booting a second Spring instance solely to collect the baseline. The
-fixture records both streams in `wasm.jsonl` and requests `quitforce` itself
-when its checks are complete; the outer runner only waits for that process and
-applies a bounded timeout. It never injects mouse or keyboard events.
+Use `--mode wasm` to build the raw Core-Wasm guest, package it under
+`LuaRules/wasm/manifest.txt`, load it through the game VFS, and run the Lua
+reference plus Core observation in one in-engine fixture process. This avoids
+booting a second Spring instance solely to collect the baseline. The fixture
+records both streams in `wasm.jsonl` and requests `quitforce` itself when its
+checks are complete; the outer runner only waits for that process and applies
+a bounded timeout. It never injects mouse or keyboard events.
 
-The Component Model guest uses `test/wasm_api/parity_guest/` and requires the
+The Core guest uses `test/wasm_api/guests/parity_guest/` and requires the
 `wasm32-unknown-unknown` Rust target. The observation includes the synced unit
 count plus explicit floating-point edge-case and deterministic RNG signatures.
 The cross-platform workflow compares all of these fields, so a

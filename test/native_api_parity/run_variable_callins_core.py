@@ -27,7 +27,7 @@ CORE_VARIABLE = core.CORE_RAW.with_name(
     "recoil_wasm_core_benchmark_suite_guest.variable-callins.wasm"
 )
 VARIABLE_COMPONENT_KEY = base.BENCHMARK_COMPONENT.with_name(
-    "recoil_wasm_benchmark_guest.variable-callins.component.wasm"
+    "recoil_wasm_core_benchmark_suite_guest.variable-callins.wasm"
 )
 VARIABLE_CONTEXT = "unsynced_gadget"
 
@@ -93,9 +93,9 @@ def run(args: argparse.Namespace) -> dict:
         load_native_module=False,
     )
 
-    original_mapping = core.core_artifact_for_component
+    original_mapping = core.core_artifact_for_backend
     try:
-        core.core_artifact_for_component = lambda component: (
+        core.core_artifact_for_backend = lambda component: (
             CORE_VARIABLE
             if Path(component) == VARIABLE_COMPONENT_KEY
             else original_mapping(component)
@@ -117,7 +117,7 @@ def run(args: argparse.Namespace) -> dict:
             wasm_module_count=1,
         )
     finally:
-        core.core_artifact_for_component = original_mapping
+        core.core_artifact_for_backend = original_mapping
 
     return {
         "profile": "variable-callins",

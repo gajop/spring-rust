@@ -65,7 +65,7 @@ work. Skip these entirely:
 | `rts/wasm/generated/wit/` and `sdk/{generated,callins}.rs` | deleted | purge |
 | `rts/wasm/generated/WasmHostAdapter*.{cpp,h}` (58 adapter TUs) | deleted | purge |
 | `test/wasm_api/{value,allocator,aggregation,guest,benchmark}_guest` | deleted | purge |
-| `test/wasm_api/parity_guest` | retained and ported | Core-only oracle |
+| `test/wasm_api/guests/parity_guest` | retained and ported | Core-only oracle |
 
 Everything below therefore assumes: **Phase 3 (Core parity) → Phase 4 (delete
 Component Model) → this refactor.** The deletion includes the 58 generated
@@ -209,7 +209,7 @@ unreadable.
 
 ## 4. Python tooling
 
-The active CLI remains `test/wasm_api/parity_guest/generate_probe.py`, a
+The active CLI remains `test/wasm_api/guests/parity_guest/generate_probe.py`, a
 compatibility entry point for `probe/core.py`. Its active CLI is Core-only and
 the package entry preserves generated probe output byte-for-byte. The semantic
 module split remains independent of the transport purge.
@@ -217,7 +217,7 @@ module split remains independent of the transport purge.
 Make it a package before Phase 3 touches it:
 
 ```
-test/wasm_api/parity_guest/probe/
+test/wasm_api/guests/parity_guest/probe/
   __init__.py     CLI entry
   types.py        snake/pascal/kebab/wit_identifier/wit_type/type_kind
   model.py        load_tests, load_model, native_function

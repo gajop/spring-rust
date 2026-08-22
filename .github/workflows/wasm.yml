@@ -74,61 +74,20 @@ jobs:
       - name: Check parity generated artifacts
         run: |
           python3 test/native_api_parity/generate_from_spec.py
-          python3 test/wasm_api/parity_guest/generate_probe.py
+          python3 test/wasm_api/guests/parity_guest/generate_probe.py
           git diff --exit-code -- \
             test/native_api_parity/native/src/generated_tests.rs \
             test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/generated_api_tests.lua \
             test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/wasm_api_probe_tests.lua \
-            test/wasm_api/parity_guest/wit/parity.wit \
-            test/wasm_api/parity_guest/src/probe_generated.rs \
-            test/wasm_api/parity_guest/probe_manifest.json
+            test/wasm_api/guests/parity_guest/wit/parity.wit \
+            test/wasm_api/guests/parity_guest/src/probe_generated.rs \
+            test/wasm_api/guests/parity_guest/probe_manifest.json
 
       - name: Build engine and Wasm tests with ASAN
         run: ./docker-build-v2/build.sh linux -DUSE_ASAN=ON
 
       - name: Run engine tests
         run: ./docker-build-v2/build.sh --compile linux -t check
-
-      - name: Test Wasm guest fixture
-        run: |
-          cargo fmt --manifest-path test/wasm_api/guest/Cargo.toml --all --check
-          cargo fmt --manifest-path test/wasm_api/parity_guest/Cargo.toml --all --check
-          cargo fmt --manifest-path test/wasm_api/value_guest/Cargo.toml --all --check
-          cargo fmt --manifest-path test/wasm_api/allocator_guest/Cargo.toml --all --check
-          cargo test --manifest-path test/wasm_api/guest/Cargo.toml
-          cargo test --manifest-path test/wasm_api/parity_guest/Cargo.toml
-          cargo test --manifest-path test/wasm_api/value_guest/Cargo.toml
-          cargo test --manifest-path test/wasm_api/allocator_guest/Cargo.toml
-
-      - name: Build and verify Component value fixture
-        run: |
-          cargo build --manifest-path test/wasm_api/value_guest/Cargo.toml \
-            --target wasm32-unknown-unknown --release
-          cargo run --manifest-path test/wasm_api/value_guest/Cargo.toml \
-            --bin componentize -- \
-            test/wasm_api/value_guest/target/wasm32-unknown-unknown/release/recoil_wasm_value_guest.wasm \
-            /tmp/recoil_wasm_value_guest.component.wasm
-          python3 test/wasm_api/embed_component.py \
-            /tmp/recoil_wasm_value_guest.component.wasm \
-            /tmp/ComponentValueFixture.h \
-            kComponentValueFixture \
-            'the Rust wit-bindgen variant/resource fixture'
-          cmp /tmp/ComponentValueFixture.h test/engine/WasmInterface/ComponentValueFixture.h
-
-      - name: Build and verify hostile allocator fixture
-        run: |
-          cargo build --manifest-path test/wasm_api/allocator_guest/Cargo.toml \
-            --target wasm32-unknown-unknown --release
-          cargo run --manifest-path test/wasm_api/allocator_guest/Cargo.toml \
-            --bin componentize -- \
-            test/wasm_api/allocator_guest/target/wasm32-unknown-unknown/release/recoil_wasm_allocator_guest.wasm \
-            /tmp/recoil_wasm_allocator_guest.component.wasm
-          python3 test/wasm_api/embed_component.py \
-            /tmp/recoil_wasm_allocator_guest.component.wasm \
-            /tmp/ComponentAllocatorFixture.h \
-            kComponentAllocatorFixture \
-            'the hostile canonical allocator fixture'
-          cmp /tmp/ComponentAllocatorFixture.h test/engine/WasmInterface/ComponentAllocatorFixture.h
 
       - name: Run native parity fixture
         run: |

@@ -131,23 +131,23 @@ must not be represented by empty or skipped results.
 Regenerate the Core parity probe:
 
 ```sh
-python3 test/wasm_api/parity_guest/generate_probe.py \
+python3 test/wasm_api/guests/parity_guest/generate_probe.py \
   --context synced_gadget \
-  --output-root test/wasm_api/parity_guest \
-  --manifest-output test/wasm_api/parity_guest/probe_manifest.json \
+  --output-root test/wasm_api/guests/parity_guest \
+  --manifest-output test/wasm_api/guests/parity_guest/probe_manifest.json \
   --lua-output test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/wasm_api_probe_tests.lua
 ```
 
 Generate and build a Core context:
 
 ```sh
-python3 test/wasm_api/parity_guest/generate_probe.py \
+python3 test/wasm_api/guests/parity_guest/generate_probe.py \
   --context synced_gadget --transport core \
-  --output-root test/wasm_api/parity_guest \
-  --manifest-output test/wasm_api/parity_guest/probe_manifest_synced_gadget.core.json \
+  --output-root test/wasm_api/guests/parity_guest \
+  --manifest-output test/wasm_api/guests/parity_guest/probe_manifest_synced_gadget.core.json \
   --lua-output test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/wasm_api_probe_tests_core.lua
 
-cargo build --manifest-path test/wasm_api/parity_guest/Cargo.toml \
+cargo build --manifest-path test/wasm_api/guests/parity_guest/Cargo.toml \
   --target wasm32-unknown-unknown --release \
   --features core,core_rules_synced
 ```
@@ -186,7 +186,7 @@ python3 test/native_api_parity/run_harness.py \
 Regenerate and inspect the inventory:
 
 ```sh
-python3 test/wasm_api/generate_core_parity_plan.py \
+python3 test/wasm_api/tools/generate_core_parity_plan.py \
   --output /tmp/core-plan.json
 python3 rts/wasm/verify_codegen.py
 ```

@@ -42,45 +42,78 @@ bool WriteF32Values(HostState* state, std::uint32_t output, std::span<const floa
 	return writer.Finish(4);
 }
 
-wasm_trap_t* GetTimer(void* environment, wasmtime_caller_t*,
+bool WriteU64Value(HostState* state, std::uint32_t output, std::uint64_t value)
+{
+	std::span<std::uint8_t> bytes;
+	if (!state->memory.MutableView(output, sizeof(value), bytes))
+		return false;
+	WireWriter writer(bytes);
+	return writer.U64(value) && writer.Finish(8);
+}
+
+wasm_trap_t* GetTimer(void* environment, wasmtime_caller_t* caller,
 	wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
 	auto* state = static_cast<HostState*>(environment);
 	if (state == nullptr || state->native == nullptr || state->native->profiling == nullptr ||
 		state->native->profiling->GetTimer == nullptr)
 		return Trap("GetTimer Core binding is unavailable");
-	if (slots == nullptr || slotCount != 1)
+	if (slots == nullptr || slotCount != 2)
 		return Trap("GetTimer Core ABI signature mismatch");
-	ImportGuard guard(state, 1);
+	ImportGuard guard(state, 2);
 	if (!guard.Ok())
 		return Trap(guard.Error());
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError))
+		return Trap(memoryError);
+	const auto output = static_cast<std::uint32_t>(slots[1].i32);
+	if (!state->memory.Contains(output, sizeof(std::uint64_t))) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+		return nullptr;
+	}
 	GetTimerQuery query{};
 	GetTimerResult result{};
 	state->native->profiling->GetTimer(&query, &result);
-	if (result.error != nullptr)
-		return Trap("GetTimer unexpectedly returned a native error");
-	slots[0].i64 = static_cast<std::int64_t>(result.timer);
+	if (result.error != nullptr) {
+		slots[0].i32 = result.error->code;
+		return nullptr;
+	}
+	if (!WriteU64Value(state, output, result.timer))
+		return Trap("GetTimer Core output range changed unexpectedly");
+	slots[0].i32 = 0;
 	return nullptr;
 }
 
-wasm_trap_t* GetTimerMicros(void* environment, wasmtime_caller_t*,
+wasm_trap_t* GetTimerMicros(void* environment, wasmtime_caller_t* caller,
 	wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
 	auto* state = static_cast<HostState*>(environment);
 	if (state == nullptr || state->native == nullptr || state->native->profiling == nullptr ||
 		state->native->profiling->GetTimerMicros == nullptr)
 		return Trap("GetTimerMicros Core binding is unavailable");
-	if (slots == nullptr || slotCount != 1)
+	if (slots == nullptr || slotCount != 2)
 		return Trap("GetTimerMicros Core ABI signature mismatch");
-	ImportGuard guard(state, 1);
+	ImportGuard guard(state, 2);
 	if (!guard.Ok())
 		return Trap(guard.Error());
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError))
+		return Trap(memoryError);
+	const auto output = static_cast<std::uint32_t>(slots[1].i32);
+	if (!state->memory.Contains(output, sizeof(std::uint64_t))) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+		return nullptr;
+	}
 	GetTimerMicrosQuery query{};
 	GetTimerMicrosResult result{};
 	state->native->profiling->GetTimerMicros(&query, &result);
-	if (result.error != nullptr)
-		return Trap("GetTimerMicros unexpectedly returned a native error");
-	slots[0].i64 = static_cast<std::int64_t>(result.timer);
+	if (result.error != nullptr) {
+		slots[0].i32 = result.error->code;
+		return nullptr;
+	}
+	if (!WriteU64Value(state, output, result.timer))
+		return Trap("GetTimerMicros Core output range changed unexpectedly");
+	slots[0].i32 = 0;
 	return nullptr;
 }
 
@@ -107,24 +140,36 @@ wasm_trap_t* DiffTimers(void* environment, wasmtime_caller_t*,
 	return nullptr;
 }
 
-wasm_trap_t* GetFrameTimer(void* environment, wasmtime_caller_t*,
+wasm_trap_t* GetFrameTimer(void* environment, wasmtime_caller_t* caller,
 	wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
 	auto* state = static_cast<HostState*>(environment);
 	if (state == nullptr || state->native == nullptr || state->native->profiling == nullptr ||
 		state->native->profiling->GetFrameTimer == nullptr)
 		return Trap("GetFrameTimer Core binding is unavailable");
-	if (slots == nullptr || slotCount != 1)
+	if (slots == nullptr || slotCount != 2)
 		return Trap("GetFrameTimer Core ABI signature mismatch");
 	ImportGuard guard(state, 2);
 	if (!guard.Ok())
 		return Trap(guard.Error());
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError))
+		return Trap(memoryError);
+	const auto output = static_cast<std::uint32_t>(slots[1].i32);
+	if (!state->memory.Contains(output, sizeof(std::uint64_t))) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+		return nullptr;
+	}
 	GetFrameTimerQuery query{slots[0].i32 != 0};
 	GetFrameTimerResult result{};
 	state->native->profiling->GetFrameTimer(&query, &result);
-	if (result.error != nullptr)
-		return Trap("GetFrameTimer unexpectedly returned a native error");
-	slots[0].i64 = static_cast<std::int64_t>(result.timer);
+	if (result.error != nullptr) {
+		slots[0].i32 = result.error->code;
+		return nullptr;
+	}
+	if (!WriteU64Value(state, output, result.timer))
+		return Trap("GetFrameTimer Core output range changed unexpectedly");
+	slots[0].i32 = 0;
 	return nullptr;
 }
 
@@ -137,7 +182,7 @@ wasm_trap_t* GetDrawSeconds(void* environment, wasmtime_caller_t*,
 		return Trap("GetDrawSeconds Core binding is unavailable");
 	if (slots == nullptr || slotCount != 1)
 		return Trap("GetDrawSeconds Core ABI signature mismatch");
-	ImportGuard guard(state, 1);
+	ImportGuard guard(state, 2);
 	if (!guard.Ok())
 		return Trap(guard.Error());
 	GetDrawSecondsQuery query{};
@@ -154,7 +199,7 @@ wasm_trap_t* GetLuaMemUsage(void* environment, wasmtime_caller_t* caller,
 	if (state == nullptr || state->native == nullptr || state->native->profiling == nullptr ||
 		state->native->profiling->GetLuaMemUsage == nullptr)
 		return Trap("GetLuaMemUsage Core binding is unavailable");
-	if (slots == nullptr || slotCount != 1)
+	if (slots == nullptr || slotCount != 2)
 		return Trap("GetLuaMemUsage Core ABI signature mismatch");
 	ImportGuard guard(state, 4);
 	if (!guard.Ok())
@@ -162,7 +207,7 @@ wasm_trap_t* GetLuaMemUsage(void* environment, wasmtime_caller_t* caller,
 	std::string memoryError;
 	if (!generated::EnsureMemory(state, caller, memoryError))
 		return Trap(memoryError);
-	const std::uint32_t output = static_cast<std::uint32_t>(slots[0].i32);
+	const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
 	if (!state->memory.Contains(output, 8u * sizeof(float))) {
 		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 		return nullptr;
@@ -200,7 +245,7 @@ wasm_trap_t* GetVidMemUsage(void* environment, wasmtime_caller_t* caller,
 	if (state == nullptr || state->native == nullptr || state->native->profiling == nullptr ||
 		state->native->profiling->GetVidMemUsage == nullptr)
 		return Trap("GetVidMemUsage Core binding is unavailable");
-	if (slots == nullptr || slotCount != 1)
+	if (slots == nullptr || slotCount != 2)
 		return Trap("GetVidMemUsage Core ABI signature mismatch");
 	ImportGuard guard(state, 2);
 	if (!guard.Ok())
@@ -208,7 +253,7 @@ wasm_trap_t* GetVidMemUsage(void* environment, wasmtime_caller_t* caller,
 	std::string memoryError;
 	if (!generated::EnsureMemory(state, caller, memoryError))
 		return Trap(memoryError);
-	const std::uint32_t output = static_cast<std::uint32_t>(slots[0].i32);
+	const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
 	if (!state->memory.Contains(output, 2u * sizeof(float))) {
 		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 		return nullptr;
@@ -273,21 +318,22 @@ bool RegisterProfilingImports(wasmtime_linker_t* linker, HostState* state,
 		return false;
 	}
 	const wasm_valkind_t i32[] = {WASM_I32};
+	const wasm_valkind_t twoI32[] = {WASM_I32, WASM_I32};
 	const wasm_valkind_t i64[] = {WASM_I64};
 	const wasm_valkind_t twoI64TwoI32[] = {WASM_I64, WASM_I64, WASM_I32, WASM_I32};
-	if (!Define(linker, "get-timer", MakeFuncType(nullptr, 0, i64, 1),
+	if (!Define(linker, "get-timer", MakeFuncType(twoI32, 2, i32, 1),
 			GetTimer, state, error) ||
-		!Define(linker, "get-timer-micros", MakeFuncType(nullptr, 0, i64, 1),
+		!Define(linker, "get-timer-micros", MakeFuncType(twoI32, 2, i32, 1),
 			GetTimerMicros, state, error) ||
 		!Define(linker, "diff-timers", MakeFuncType(twoI64TwoI32, 4, i64, 1),
 			DiffTimers, state, error) ||
-		!Define(linker, "get-frame-timer", MakeFuncType(i32, 1, i64, 1),
+		!Define(linker, "get-frame-timer", MakeFuncType(twoI32, 2, i32, 1),
 			GetFrameTimer, state, error) ||
-		!Define(linker, "get-draw-seconds", MakeFuncType(nullptr, 0, i64, 1),
+		!Define(linker, "get-draw-seconds", MakeFuncType(i32, 1, i64, 1),
 			GetDrawSeconds, state, error) ||
-		!Define(linker, "get-lua-mem-usage", MakeFuncType(i32, 1, i32, 1),
+		!Define(linker, "get-lua-mem-usage", MakeFuncType(twoI32, 2, i32, 1),
 			GetLuaMemUsage, state, error) ||
-		!Define(linker, "get-vid-mem-usage", MakeFuncType(i32, 1, i32, 1),
+		!Define(linker, "get-vid-mem-usage", MakeFuncType(twoI32, 2, i32, 1),
 			GetVidMemUsage, state, error))
 		return false;
 	return Define(linker, "get-synced-gc-info",

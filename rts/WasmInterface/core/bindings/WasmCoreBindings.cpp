@@ -2,6 +2,8 @@
 
 #include "WasmCoreBindings.h"
 
+#include "System/BenchmarkCallins.h"
+
 #include <array>
 #include <bit>
 #include <cstdint>
@@ -518,7 +520,11 @@ bool InstanceBindings::AllowUnitCreation(wasmtime_context_t* context,
 
 bool InstanceBindings::DrawWorld(wasmtime_context_t* context, std::string& error) const
 {
-	return drawWorld.Call(context, nullptr, 0, error);
+	const auto entryStage = spring::benchmark_callins::BeginStage(
+		"wasm", "callin_drawworld_wasmtime_entry");
+	const bool result = drawWorld.Call(context, nullptr, 0, error);
+	spring::benchmark_callins::End(entryStage);
+	return result;
 }
 
 #endif

@@ -37,11 +37,12 @@ GAME_FIXTURE = HARNESS / "fixtures" / "game.sdd"
 NATIVE_CRATE = HARNESS / "native" / "Cargo.toml"
 NATIVE_SO = HARNESS / "native" / "target" / "release" / "libnative_api_parity.so"
 LSAN_SUPPRESSION = HARNESS / "lsan.supp"
-WASM_PARITY_CRATE = ROOT / "test" / "wasm_api" / "parity_guest" / "Cargo.toml"
+WASM_PARITY_CRATE = ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / "Cargo.toml"
 WASM_PARITY_CORE = (
     ROOT
     / "test"
     / "wasm_api"
+    / "guests"
     / "parity_guest"
     / "target"
     / "wasm32-unknown-unknown"
@@ -52,13 +53,14 @@ WASM_PARITY_CORE_MODULE = (
     ROOT
     / "test"
     / "wasm_api"
+    / "guests"
     / "parity_guest"
     / "target"
     / "wasm32-unknown-unknown"
     / "release"
     / "recoil_wasm_parity_guest.core.wasm"
 )
-WASM_PROBE_GENERATOR = ROOT / "test" / "wasm_api" / "parity_guest" / "generate_probe.py"
+WASM_PROBE_GENERATOR = ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / "generate_probe.py"
 WASM_CONTEXTS = ("synced_gadget", "unsynced_gadget", "gaia_synced", "gaia_unsynced", "ui")
 WASM_CONTEXT_CORE_MODULES = {
 	context: WASM_PARITY_CORE_MODULE.with_name(
@@ -67,11 +69,11 @@ WASM_CONTEXT_CORE_MODULES = {
 	for context in WASM_CONTEXTS
 }
 WASM_CONTEXT_MANIFESTS = {
-	context: ROOT / "test" / "wasm_api" / "parity_guest" / f"probe_manifest_{context}.json"
+    context: ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / f"probe_manifest_{context}.json"
 	for context in WASM_CONTEXTS
 }
 WASM_CONTEXT_CORE_MANIFESTS = {
-	context: ROOT / "test" / "wasm_api" / "parity_guest" / f"probe_manifest_{context}.core.json"
+    context: ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / f"probe_manifest_{context}.core.json"
 	for context in WASM_CONTEXTS
 }
 WASM_CONTEXT_LUA_OUTPUTS = {
@@ -91,7 +93,7 @@ WASM_CONTEXT_CORE_LUA_OUTPUTS = {
 	for context in WASM_CONTEXTS
 }
 WASM_CONTEXT_MAP_MANIFESTS = {
-	context: ROOT / "test" / "wasm_api" / "parity_guest" / f"map_manifest_{context}.txt"
+        context: ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / f"map_manifest_{context}.txt"
 	for context in WASM_CONTEXTS
 }
 WASM_ENVIRONMENT_NAMES = {
@@ -116,7 +118,7 @@ RESULT_STREAMS = (
 CALLIN_LUA_STREAM = "callin_lua.jsonl"
 CALLIN_NATIVE_STREAM = "callin_native.jsonl"
 WASM_PARITY_STREAM = "wasm.jsonl"
-WASM_PROBE_MANIFEST = ROOT / "test" / "wasm_api" / "parity_guest" / "probe_manifest.json"
+WASM_PROBE_MANIFEST = ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / "probe_manifest.json"
 WASM_VACUITY_THRESHOLD = 0.05
 
 # Gaia parity injects these two map options only to tell the blank-map

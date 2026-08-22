@@ -10,7 +10,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 HARNESS = ROOT / "test" / "native_api_parity"
 sys.path.insert(0, str(HARNESS))
 

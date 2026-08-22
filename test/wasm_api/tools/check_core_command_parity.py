@@ -23,7 +23,7 @@ from generate_core_parity_plan import (
     load_json,
 )
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 REQUIRED_ORACLE_TESTS = (
     "unit_cmd_desc_lifecycle",

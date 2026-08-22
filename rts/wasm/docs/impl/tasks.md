@@ -1,58 +1,148 @@
-# Core-Wasm completion record
+# Open tasks
 
 Date: 2026-08-22
-Branch: `rust-wip`; implementation work is pushed, with external execution
-and human review boundaries called out below
+Branch: `rust-wip`, head `d96b50192c` at the start of this task; verification
+and the follow-up push are tracked below.
 
-Previous handoffs are deleted; they are done. Standing reference docs:
-`core_abi_contract.md`, `core_parity_handoff.md`, `core_security_review.md`,
+Reference docs: `core_abi_contract.md`, `core_parity_handoff.md`,
+`core_security_review.md`, `core_benchmark_results.md`,
 `rust_sdk_design_notes.md`, `refactor_plan.md`.
 
-Sections are independent. If one blocks, write down what you saw and move on.
-Commit as you go.
+## Done — do not redo
 
-## State
+Core is the only transport; the Component Model is gone. 1354/1354 callouts
+are reachable from the environment SDK, enforced by
+`verify_owned_environment_surface()` in `verify_codegen.py`. No runtime
+missing-wrapper sentinel. Environment modules with `SPRING_ENV_MASK` validated
+at load. All five parity contexts pass with zero vacuous results. CI green on
+Ubuntu and Windows. `rts/WasmInterface/` and the generated C++/Rust output are
+sharded. Sync rungs 1 and 2 exist. Generated API reference and a placeholder
+user guide exist.
 
-Core is the only transport. 1354/1354 callouts reachable from the environment
-SDK, enforced by `verify_owned_environment_surface()` in `verify_codegen.py` —
-regeneration cannot reduce the surface. No runtime missing-wrapper sentinel
-exists. Synced and Gaia-synced parity pass at 335 probes each. UI parity
-passes at 39 probes with zero vacuous results. Unsynced and Gaia-unsynced
-parity pass at 68 probes each after the reviewed read-only expansion.
+---
 
-## 0. CI is green
+## 1. PERFORMANCE — this phase
 
-The failing codegen clippy step in `.github/workflows/spring-native.yml:60`
-was fixed and the exact gate now passes locally:
+Performance was priority #1 of the whole project and remains the first
+decision gate. The expanded run below is still a representative sample, not
+permission to call the whole surface green:
 
-```sh
-cargo clippy --manifest-path rust/Cargo.toml --package spring-native-codegen \
-  --all-targets -- --deny warnings
-```
+| | exist | benchmarked | |
+| --- | ---: | ---: | ---: |
+| callins | 179 | 8 | **4%** |
+| callouts | 1354 | 15 | **1.1%** |
 
-The fixes remove five unused imports, one unused model import, three invalid
-doc-comment blank lines, one unnecessary `map_or`, and one recursive-only
-parameter. `cargo clippy --package spring-native-codegen --all-targets
--- --deny warnings` passes.
+`callin_drawworld` is not "the one bad row". It is the one bad row **in a 5%
+sample**. Assume there are others and go find them.
 
-`--deny warnings` means any new lint fails the build, so a clean local
-`cargo test` proves nothing. CI also runs on `windows-2022`, where a lint can
-fire that did not fire locally.
+### 1a. Fix or explain `callin_drawworld`
 
-## 1. UI parity: complete
+The current five-repeat run is Core 6166 ns (spread 3749, p99 10395) versus
+Lua 2322 ns (spread 2834, p99 5200). It remains the only loss in the eight
+measured callin rows, but it is a noisy 2–7 µs operation.
 
-`ui` runs 39 probes and passes with zero vacuous results.
+The stage run measured Core Wasmtime entry at 2191 ns and the diagnostic
+visibility context at 153 ns. DrawWorld has no arguments and no return value,
+so its ABI marshalling contribution is 0 bytes / no argument marshalling; the
+remaining time is host dispatch plus the empty guest body. The context stage
+is not the dominant cost. No optimization is claimed within the observed
+spread; repeat the run before changing the hot path.
 
-Root causes: `get_current_tooltip` discarded non-UTF-8 Lua bytes, and the
-renderer-position wrapper passed options through the wrong ABI shape. Core was
-wrong in both cases; the probe was not bent to accept either result.
+This time, produce an **explanation with evidence**, not another attempt.
+Instrument the path and attribute the time: how much is Wasmtime entry, how
+much is the visibility context, how much is marshalling, how much is the
+actual draw work. A number per stage. Then either fix it or state which stage
+is irreducible and why.
 
-Fixes: byte-preserving Lua string decoding and generated fixed-record option
-marshalling. The final run compares 39/39 with zero vacuous results.
+±2–4 µs spread on a 2–5 µs row: any claimed fix must beat that noise across
+repeated runs, not one sample. Do not report a within-noise change as a win.
+
+### 1b. Benchmark every callin
+
+All 179, not 9. The current set includes synthetic rows (`empty`,
+`unimplemented`, `4modules`) that measure dispatch, not real work.
+
+The authoritative event inventory is 169 `SETUP_EVENT` entries / 163 loaded
+native symbols; this phase measured the eight runnable benchmark rows plus the
+draw row separately. The variable-callin fixture was not counted: it does not
+stimulate `AddConsoleLine` in the current headless run, so treating its missing
+row as zero would violate the no-vacuous-results rule. Group the remaining
+inventory by argument shape before adding more fixtures. The current measured
+loss is `callin_unimplemented` (Lua 1438 ns, Core 1454 ns); the other seven
+rows are Core-faster, subject to the same microsecond-scale noise.
+
+### 1c. Benchmark callouts by transport class and by argument weight
+
+The expanded callout run has the seven cross-backend rows plus eight Core-only
+transport-ceiling rows. It still cannot characterise 1354 callouts across 10
+transport classes, so the class inventory and unpaired measurements are
+reported explicitly:
+
+| class | count |
+| --- | ---: |
+| `fixed` | 806 |
+| `variable-input-borrowed` | 191 |
+| `variable-output-caller-owned` | 90 |
+| `dynamic-output-caller-owned` | 89 |
+| `handwritten-reviewed` | 71 |
+| `variable-io-borrowed-input-caller-owned-output` | 52 |
+| `variable-input-nested-adapted` | 22 |
+| `variable-input-borrowed-mixed-fixed` | 16 |
+| `fixed-option` | 13 |
+| `variable-input-adapted` | 4 |
+
+`dynamic-output-caller-owned` (89) and `variable-input-nested-adapted` (22)
+have never been measured and are the most expensive-looking shapes.
+
+**Priority: wide-argument and large-struct callouts.** This is where Core's
+hand-rolled wire protocol should hurt most against Lua's native tables, and it
+is exactly what the current 8 rows avoid. Mean input count is 2.1; the tail is
+what matters.
+
+Widest inputs:
+
+| callout | inputs |
+| --- | ---: |
+| `gfx::BlitFBO`, `gfx::UploadTexture` | 12 |
+| `ground_decals::SetGroundDecalQuadPosAndHeight` | 10 |
+| `gfx::CopyToTexture`, `gfx::DrawGroundQuad`, `icons::AddUnitIcon` | 9 |
+| `gfx::CreateShader`, `gfx::TexRect`, `system_control::GarbageCollectCtrl`, `terrain_control::SetTerrainTypeData` | 8 |
+
+Widest outputs:
+
+| callout | outputs |
+| --- | ---: |
+| `gfx::GetFontInfo` | 10 |
+| `unit_defs::GetUnitDefByID`, `terrain::GetGroundInfo` | 9 |
+| `terrain::GetTerrainTypeData`, `profiling::GetLuaMemUsage` | 8 |
+
+Largest record payloads, for struct-argument rows: `WaterParams` (34 fields),
+`GameRulesInfo` (27), `TeamStatsHistoryPoint` (19), `TeamResources` (18),
+`MoveTypeData` (18), `LightParams` (17).
+
+The measured Core-only representatives now cover fixed struct, borrowed string
+input, borrowed `f32` list input, reusable string/list/nested-list/spatial
+outputs, and adapted `list<string>` output. The listed widest real callouts
+remain an unmeasured backlog; no synthetic ceiling row is presented as a
+production callout result.
+
+### 1d. Deliverable
+
+Update `core_benchmark_results.md` with:
+
+- Lua vs Core for every measured callin and every measured transport-class
+  representative, with the unmeasured inventory visible as such
+- an explicit list of every row where Core loses to Lua
+- the drawworld stage-by-stage attribution
+- what is noise-limited and therefore not a usable signal
+
+If Core loses somewhere it should not, that is the finding. Report it plainly;
+a regression found is worth more than a green table.
 
 ## 2. Parity depth
 
-Selected cases against available cases:
+Selected against available (the two synced contexts have identical selection
+and the two Gaia contexts have identical selection):
 
 | context | selected | source | |
 | --- | ---: | ---: | ---: |
@@ -62,99 +152,88 @@ Selected cases against available cases:
 | `gaia_unsynced` | 68 | 283 | 24% |
 | `ui` | 39 | 76 | 51% |
 
-About half the available cases run. `unsynced` remains the outlier at 24%,
-but its selected runtime stream now passes.
+The unselected cases are categorised, not hidden. Exact breakdowns from the
+current manifests:
 
-The unselected cases are accounted for by generator limitation, manifest
-policy, or genuine inapplicability; they are not silently moved out of the
-denominator.
+| context family | core-owned | policy | deferred | no Lua | no native | rendering | mutating | output | unclassified | total unselected |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| synced / Gaia synced | 152 | 13 | 2 | 1 | 0 | 2 | 0 | 2 | 0 | 172 |
+| unsynced / Gaia unsynced | 23 | 19 | 0 | 6 | 49 | 113 | 1 | 4 | 0 | 215 |
+| UI | 26 | 3 | 0 | 0 | 0 | 1 | 7 | 0 | 0 | 37 |
 
-The increase covers `platform` read-only metadata and reviewed
-`system_control` metadata. For unsynced, the 215 unselected cases break down
-as: 113 rendering-disabled, 49 no-native-function, 23 owned-surface gaps, 19
-policy exclusions, 6 no-Lua-runtime, 4 unsupported-output, and 1 mutating or
-unsupported getter. Profiling remains excluded because its legacy handwritten
-ABI disagrees with the generated signature.
+The unsynced rendering-disabled, no-native-function, policy, no-Lua-runtime,
+and mutating rows are inapplicable by the current environment rules. The
+actionable remainder is the 23 owned-surface gaps plus four unsupported-output
+cases. The exact owned gaps are recorded in the generated coverage JSON; the
+largest groups are config accessors, player/replay metadata, profiler record
+helpers, visible projectiles/icons, and `solve_nurbscurve`.
 
-0 vacuous results remains part of pass. Never treat a missing observation as
-success.
+**Actionable remainder:**
 
-## 3. `callin_drawworld` remains a measured regression
+- 23 owned-surface gaps
+- 4 unsupported-output cases
+The profiling disagreement was real and is now fixed: generated Core expects
+the buffer/status signatures in `core-abi.json`, and the handwritten host plus
+specialized SDK now use those same signatures. Production import authorization
+for the generic profiling namespace remains a separate capability-policy
+decision; it is not being mislabeled as an ABI blocker.
 
-The one remaining performance regression. The bounded rerun after the
-dispatch/visibility cleanup measured Core 5150 ns ± 3114 versus Lua 2520 ns ±
-2686. Core still loses this row. Every other headline profile has Core ahead of
-Lua.
+The synced and UI splits are included in the table above; they are not being
+treated as unexplained parity failures. Zero vacuous results stays part of
+pass.
 
-`callin_unimplemented` was fixed by short-circuiting missing callins; this one
-was not. It was profiled and the result is recorded in
-`core_benchmark_results.md`. Candidates remain per-callin dispatch cost, the
-UI visibility context (`WasmUiVisibility::ScopedContext`), or argument
-marshalling on the draw path.
+## 3. Refactor leftovers
 
-Note callin rows carry ±2–4 µs variance on 2–5 µs measurements. Confirm the
-regression is real before optimising, and confirm any fix against the same
-noise.
+- **`generate_probe.py` split:** selection and projection are real modules;
+  `probe/core.py` is now 2894 lines and all five manifests regenerate
+  reproducibly. Expressions/rendering remain coupled and are not claimed
+  complete.
+- **`test/wasm_api/` is grouped** into `guests/`, `tools/`, and `data/`, with
+  stale workflow/docs paths updated.
+- **Dead Component-Model leftovers** were removed from the tracked tree:
+  `embed_component.py` and the empty `aggregation_guest/`, `allocator_guest/`,
+  `guest/`, and `value_guest/` shells.
 
-Reproduction is in `core_benchmark_results.md`.
+## 4. Sync rung 3 — local run complete, hosted run pending artifact
 
-## 4. Refactor remainder
+The cross-platform workflow (headless Linux, arm64 Linux, Windows; same
+fixture; canonical per-frame checksums) is wired. The local rung-3 headless
+run against the checked-in fixture passed with matching guest/reference
+streams for all five contexts and zero reported probe failures. The hosted
+three-platform job still requires a successful engine-build artifact for the
+tested pushed SHA; it has not been falsely marked green locally. A synthetic
+checksum stream is not an acceptable substitute. Desync = failing test naming
+the frame.
 
-`refactor_plan.md`, now much cheaper — the SDK shrank from 311k to 117k lines
-and the 58 `WasmHostAdapter*` TUs no longer exist:
+## 5. Unresolved from the concurrent-session incident
 
-- generated-output per-module sharding and directory tree — complete for the
-  Rust owned façade and fixed C++ Core bindings
-- `rts/WasmInterface/` directory tree — complete: runtime, core/host,
-  core/bindings, and system
-- `generate_probe.py` → package compatibility entry — complete
-- `test/wasm_api/` grouping
+`damage_check.md` records edits made by a second session while an agent was
+working. Three questions were never answered:
 
-`core_owned.rs` is now a generated prelude with 55 per-module shards. The
-fixed C++ dispatcher is small, with 55 per-module translation units discovered
-by CMake. The probe package now owns the shared type and metadata semantics in
-`probe/types.py` and `probe/model.py`; its compatibility entry and generated
-output remain unchanged.
+- `render_core_wasm_owned_guest.rs` still contains `decode_core_string` and
+  the shard refactor after fmt; no damage was found.
+- The nine reverted files were byte-identical to the baseline at the time of
+  the audit, and no in-flight work from this branch was present in them; the
+  clippy fixes were already committed in `1f96da955f`.
+- `probe_generated.rs` is 5007 lines both at the baseline path and now; the
+  reported -4657 was a stale path/baseline comparison. Regeneration is
+  reproducible and verifier-clean.
 
-## 5. Sync verification rung 3
+These checks are answered above; delete `damage_check.md` after this edit is
+committed with the audit text.
 
-Rungs 1 and 2 exist: `test/wasm_api/check_sync_replay.py` (same binary, same
-replay, three runs, exact per-frame equality) and
-`generated_synced_callout_audit.md` (heuristic inventory, human review still
-required).
+## 6. Needs a human, not an agent
 
-Rung 3 is cross-platform: headless Linux, arm64 Linux, and Windows, same
-fixture, compare canonical per-frame checksums derived from exported sync
-observations. One GitHub Actions workflow is wired. The workflow has not been
-run here because the replay asset and three external runners are required.
-Treat a desync as a failing test naming the frame, not as a proof obligation.
+- **`generated_synced_callout_review_list.md`** — 568 candidate and 175
+  review-required rows from a heuristic scan. No determinism claim can rest on
+  it until a person reviews it. This gates any real sync guarantee.
+- **`core_sdk_user_guide_placeholder.md`** — fragments are in place; the prose
+  rewrite is yours.
+- The four open questions in §7 below.
 
-The audit in `generated_synced_callout_audit.md` remains explicitly heuristic
-and needs a human pass. `generated_synced_callout_review_list.md` surfaces the
-568 candidate and 175 review-required rows as a short reviewable list rather
-than 753 lines. No deterministic safety claim is made from the heuristic.
+## 7. Out of scope — decisions for the human
 
-## 6. Documentation
-
-`rts/wasm/docs/generated/core_api_reference.md` exists at 1,676 lines.
-`rts/wasm/docs/core_sdk_user_guide_placeholder.md` is filled with install,
-quickstart, environment, sync, and debugging fragments.
-
-Generated reference — covers, per callout: environments, transport class,
-signature, and mutating flag. It has no not-implemented section.
-
-Hand-written guide — tables and bullet fragments: install, quickstart,
-environment model (one module per environment, `use
-spring_wasm_core::rules_synced as api`, the `SPRING_ENV_MASK` marker), sync
-rules, debugging. A human rewrites the prose later.
-
-Style, deliberately: tables and bullet fragments only; no sentence longer than
-one line; no adjectives; no intro or summary paragraphs; facts only. Do not
-improve this into prose.
-
-## 7. Out of scope
-
-Open questions for the human. Do not decide or implement:
+Do not decide or implement:
 
 - whether the environment model should apply to native
 - whether native and wasm should present identical Rust APIs, given native has
@@ -172,15 +251,16 @@ Stop at the boundary and write down the choice that would need making.
 - Regeneration must never reduce the reachable API surface.
 - Restructuring not meant to change output must produce a byte-identical
   generated tree. Diff it as proof.
+- Do not report a task complete when a shim or partial extraction stands in for
+  it. Partial is fine; say partial.
 - After each step, and always before pushing:
   `cargo clippy --manifest-path rust/Cargo.toml --package spring-native-codegen
   --all-targets -- --deny warnings`,
   `cargo fmt --manifest-path rust/Cargo.toml --all --check`,
   `cargo test --workspace`, guest crates for `wasm32-unknown-unknown`,
   `./docker-build-v2/build.sh linux`, `--compile linux -t check`,
-  `python3 rts/wasm/verify_codegen.py`, both parity gates.
+  `python3 rts/wasm/verify_codegen.py`, all five parity contexts.
 - Native cmake configure is broken; use `./docker-build-v2/build.sh linux`.
-- `verify_codegen.py` is green. Any failure is yours.
-- Never push with CI red. If a push turns CI red, fixing it is the next task,
-  ahead of whatever you were doing.
+- Never push with CI red. CI also runs `windows-2022`; a lint or path
+  assumption can fire there and not locally.
 - Report losses and blocks plainly.

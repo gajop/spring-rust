@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Run the established Lua/native benchmark suite with Core Wasm.
 
-This layers on run_benchmarks.py instead of forking the experiment. Existing
-fixture generation, process options, validation, scales and test names remain
-authoritative; this file supplies the Core-Wasm backend and report.
+This layers on the shared benchmark process helpers. Core is the only Wasm
+transport; no Component artifact is built or loaded.
 """
 
 from __future__ import annotations
@@ -22,11 +21,12 @@ import run_benchmarks as base
 
 
 ROOT = base.ROOT
-CORE_CRATE = ROOT / "test" / "wasm_api" / "core_benchmark_suite_guest" / "Cargo.toml"
+CORE_CRATE = ROOT / "test" / "wasm_api" / "guests" / "core_benchmark_suite_guest" / "Cargo.toml"
 CORE_RAW = (
     ROOT
     / "test"
     / "wasm_api"
+    / "guests"
     / "core_benchmark_suite_guest"
     / "target"
     / "wasm32-unknown-unknown"
@@ -103,6 +103,8 @@ def build_core_wasm(destination: Path, context: str = "synced_gadget") -> None:
             "--target",
             "wasm32-unknown-unknown",
             "--release",
+            "--features",
+            "transport_ceiling",
         ],
         cwd=ROOT,
         env=build_env,
@@ -213,6 +215,7 @@ def _run_core_backend(
         env["SPRING_NATIVE_BENCHMARK_BACKEND"] = backend
         env["SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT"] = callin_variant
         env["SPRING_NATIVE_BENCHMARK_MODULES"] = str(wasm_module_count)
+        env["SPRING_NATIVE_BENCHMARK_STAGES"] = "1" if benchmark_case == "draw" else "0"
         if benchmark_case in {"callins", "draw"}:
             env["SPRING_NATIVE_BENCHMARK_CALLINS"] = "1"
         else:
@@ -275,7 +278,9 @@ def _run_core_backend(
             rows = [
                 row
                 for row in rows
-                if row.get("test") in expected or row.get("test") == "complete"
+                if row.get("test") in expected
+                or row.get("test") == "complete"
+                or str(row.get("test", "")).startswith("callin_drawworld_")
             ]
 
         # Core-only transport-ceiling rows deliberately have no peer in the
@@ -285,6 +290,7 @@ def _run_core_backend(
             row
             for row in rows
             if not str(row.get("test", "")).startswith("core_ceiling_")
+            and not str(row.get("test", "")).startswith("callin_drawworld_")
         ]
         base.validate_rows(backend, validation_rows, expected_tests)
         return rows

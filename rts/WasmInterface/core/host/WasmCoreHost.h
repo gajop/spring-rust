@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "NativeInterface/WasmUiVisibility.h"
+#include "System/BenchmarkCallins.h"
 #include "WasmEnvironment.h"
 #include "WasmRuntime.h"
 #include "wasm/generated/WasmCallinRegistry.h"
@@ -112,7 +113,11 @@ public:
 		}
 		// Keep UI read visibility active for the whole guest invocation. All
 		// nested Core imports and re-entrant callbacks inherit this perspective.
+		const auto visibilityStage = callin == WasmCoreCallin::DrawWorld
+			? spring::benchmark_callins::BeginStage("wasm", "callin_drawworld_visibility")
+			: spring::benchmark_callins::Token{};
 		WasmUiVisibility::ScopedContext uiContext(host->environment == WasmEnvironment::UI);
+		spring::benchmark_callins::End(visibilityStage);
 		return host->Invoke(callin, query, result, error);
 	}
 	static bool DispatchModule(std::string_view moduleName, WasmCoreCallin callin,

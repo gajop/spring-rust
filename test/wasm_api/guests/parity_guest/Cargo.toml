@@ -16,4 +16,4 @@ core_gaia_unsynced = []
 core_ui = []
 
 [dependencies]
-spring-wasm-core = { path = "../../../rust/crates/spring-wasm-core", features = ["alloc"] }
+spring-wasm-core = { path = "../../../../rust/crates/spring-wasm-core", features = ["alloc"] }
