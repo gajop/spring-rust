@@ -57,7 +57,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -116,7 +116,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -175,7 +175,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -254,7 +254,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -301,7 +301,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -348,7 +348,7 @@ required,
         let _ = (p0, p1, p2);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -395,7 +395,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -442,7 +442,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -541,7 +541,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -588,7 +588,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -635,7 +635,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -682,7 +682,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -729,7 +729,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -776,7 +776,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -823,7 +823,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -870,7 +870,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -917,7 +917,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -991,7 +991,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1038,7 +1038,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1085,7 +1085,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1132,7 +1132,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1196,7 +1196,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1243,7 +1243,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1307,7 +1307,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1354,7 +1354,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1423,7 +1423,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1470,7 +1470,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1517,7 +1517,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1581,7 +1581,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1628,7 +1628,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1692,7 +1692,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1739,7 +1739,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1828,7 +1828,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1875,7 +1875,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1922,7 +1922,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -1969,7 +1969,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2016,7 +2016,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2063,7 +2063,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2110,7 +2110,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2169,7 +2169,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2273,7 +2273,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2320,7 +2320,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2367,7 +2367,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2414,7 +2414,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2461,7 +2461,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2508,7 +2508,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2555,7 +2555,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2602,7 +2602,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2649,7 +2649,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2696,7 +2696,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2755,7 +2755,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2819,7 +2819,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2866,7 +2866,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2935,7 +2935,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -2982,7 +2982,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3029,7 +3029,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3098,7 +3098,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3145,7 +3145,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3192,7 +3192,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3251,7 +3251,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3310,7 +3310,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3374,7 +3374,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3421,7 +3421,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3500,7 +3500,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3547,7 +3547,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3594,7 +3594,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3641,7 +3641,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3688,7 +3688,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3752,7 +3752,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3799,7 +3799,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3858,7 +3858,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3917,7 +3917,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -3981,7 +3981,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4028,7 +4028,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4147,7 +4147,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4194,7 +4194,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4241,7 +4241,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4288,7 +4288,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4335,7 +4335,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4382,7 +4382,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4429,7 +4429,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4476,7 +4476,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4523,7 +4523,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4570,7 +4570,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4617,7 +4617,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4664,7 +4664,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4711,7 +4711,7 @@ required,
         let _ = (p0, p1);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4775,7 +4775,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }
@@ -4822,7 +4822,7 @@ required,
         let _ = (p0);
 let _ = output;
 Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),
+error: unreachable!(),
 required: 0,
 })
 }

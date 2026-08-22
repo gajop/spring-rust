@@ -168,7 +168,7 @@ pub fn context_add_event_listener(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (context_handle, event, in_capture_phase, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -201,7 +201,7 @@ pub fn element_add_event_listener(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (element_handle, event, in_capture_phase, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -247,7 +247,7 @@ pub fn data_model_bind_event(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (data_model_handle, name, callback, field_types);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -260,7 +260,7 @@ pub fn data_model_unbind_event(event_handle: u64) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = event_handle;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -278,7 +278,7 @@ pub fn event_listener_on_attach(listener_handle: u64, element_handle: u64) -> Re
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (listener_handle, element_handle);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -293,7 +293,7 @@ pub fn event_listener_on_detach(listener_handle: u64, element_handle: u64) -> Re
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (listener_handle, element_handle);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -309,7 +309,7 @@ pub fn event_listener_process_event(listener_handle: u64, event_handle: u64) -> 
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (listener_handle, event_handle);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -331,7 +331,7 @@ pub fn data_model_current_event() -> Result<CurrentDataEvent> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -399,7 +399,7 @@ pub fn data_model_current_value<'a>(
     {
         let _ = (index, string_buffer);
         Err(DataEventValueError::Api(ApiError::new(
-            ErrorCode::UnsupportedHostTarget as i32,
+            ErrorCode::Internal as i32,
         )))
     }
 }

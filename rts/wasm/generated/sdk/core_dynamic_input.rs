@@ -52,7 +52,7 @@ if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: c
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (blob0, output);
-Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32), required: 0 })
+Err(super::VariableResultError { error: unreachable!(), required: 0 })
 }
 }
 
@@ -80,7 +80,7 @@ crate::unpack_i32(unsafe { raw::give_order_array_to_unit_map(descriptor_ptr as u
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -140,7 +140,7 @@ crate::unpack_bool(unsafe { raw::set_feature_rules_param(p0, p1, descriptor_ptr 
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -168,7 +168,7 @@ crate::unpack_bool(unsafe { raw::set_game_rules_param(p0, descriptor_ptr as u32 
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -196,7 +196,7 @@ crate::unpack_bool(unsafe { raw::set_player_rules_param(p0, p1, descriptor_ptr a
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -224,7 +224,7 @@ crate::unpack_bool(unsafe { raw::set_team_rules_param(p0, p1, descriptor_ptr as 
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -252,7 +252,7 @@ crate::unpack_bool(unsafe { raw::set_unit_rules_param(p0, p1, descriptor_ptr as 
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -286,7 +286,7 @@ crate::unpack_bool(unsafe { raw::set_camera_state(p0, p1, p2, descriptor_ptr as 
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, p2, blob0);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -320,7 +320,7 @@ crate::unpack_bool(unsafe { raw::set_sound_effect_params(descriptor_ptr as u32 a
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (blob0);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -360,7 +360,7 @@ crate::unpack_bool(unsafe { raw::set_custom_command_draw_data(p0, p1, descriptor
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -403,7 +403,7 @@ if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0, blob1, output);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -451,7 +451,7 @@ if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, blob0, blob1, output);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -473,7 +473,7 @@ crate::unpack_bool(unsafe { raw::data_model_set_rows(p0, descriptor_ptr as u32 a
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, blob0);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -539,7 +539,7 @@ crate::unpack_i32(unsafe { raw::create_unit(p0, p1, descriptor_ptr as u32 as i32
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0, blob1, blob2);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -561,7 +561,7 @@ crate::unpack_bool(unsafe { raw::edit_unit_cmd_desc(p0, p1, descriptor_ptr as u3
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -583,7 +583,7 @@ crate::unpack_bool(unsafe { raw::give_order_array_to_unit(p0, descriptor_ptr as 
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, blob0);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -611,7 +611,7 @@ crate::unpack_i32(unsafe { raw::give_order_array_to_unit_array(p0, descriptor_pt
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -633,7 +633,7 @@ crate::unpack_bool(unsafe { raw::insert_unit_cmd_desc(p0, p1, descriptor_ptr as 
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, blob0);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -678,7 +678,7 @@ crate::unpack_i32(unsafe { raw::create_feature(p0, p1, p2, descriptor_ptr as u32
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, p2, blob0, blob1);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -700,7 +700,7 @@ crate::unpack_bool(unsafe { raw::set_feature_resurrect(p0, p1, p2, descriptor_pt
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, p2, blob0);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -734,7 +734,7 @@ crate::unpack_i32(unsafe { raw::spawn_projectile(p0, descriptor_ptr as u32 as i3
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, blob0);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 
@@ -783,7 +783,7 @@ if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (p0, p1, p2, blob0, blob1, blob2, output);
-Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+Err(unreachable!())
 }
 }
 

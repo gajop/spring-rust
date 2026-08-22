@@ -37,6 +37,6 @@ pub fn normalize(vector: [f32; 3]) -> Result<NormalizedVec3> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = vector;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

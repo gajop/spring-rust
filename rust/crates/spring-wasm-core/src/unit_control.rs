@@ -54,6 +54,6 @@ pub fn give_order_to_unit(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, cmd_id, params, options, timeout);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

@@ -104,7 +104,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, param_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -127,7 +127,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, r#type);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -164,7 +164,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, weapon_num, key);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -201,7 +201,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (model_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -243,7 +243,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, resource);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -266,7 +266,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, resource);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -323,7 +323,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_def_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -346,7 +346,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_def_id, key);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -369,7 +369,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_def_id, key);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -392,7 +392,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_def_id, key);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -415,7 +415,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (key);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -452,7 +452,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (feature_def_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -489,7 +489,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (weapon_def_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -531,7 +531,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (bits);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -554,7 +554,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (values);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -596,7 +596,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (text);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -619,7 +619,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (text);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -661,7 +661,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (move_def_id, move_def_name, start_pos, end_pos, radius);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -698,7 +698,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (key_sym);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -740,7 +740,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (utf8_text, start, length);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -763,7 +763,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (utf8_text);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -805,7 +805,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_i_ds);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -828,7 +828,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_i_ds, append);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -880,7 +880,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (sound_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -907,7 +907,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (sound_file, volume, pos, velocity, channel);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -930,7 +930,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (ogg_file, volume, enqueue);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -953,7 +953,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (sound_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -994,7 +994,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (command, rest);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1058,7 +1058,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (key, default_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1083,7 +1083,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (key, default_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1106,7 +1106,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (key, value, use_overlay);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1129,7 +1129,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (key, value, use_overlay);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1156,7 +1156,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (key, value, use_overlay);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1179,7 +1179,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (section, level);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1216,7 +1216,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (ceg_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1342,7 +1342,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (command_name, cursor_file_name, overwrite, hot_spot_top_left);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1365,7 +1365,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_i_ds);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1388,7 +1388,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_i_ds, table_or_array, queue_draw_depth);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1411,7 +1411,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (filename);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1434,7 +1434,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (filename);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1457,7 +1457,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (model_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1484,7 +1484,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (old_cursor_file_name, new_cursor_file_name, hot_spot_top_left);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1507,7 +1507,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_i_ds, append);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1530,7 +1530,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (text);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1557,7 +1557,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (tex_type, tex_name, num);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1580,7 +1580,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (cursor_name, scale);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1603,7 +1603,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (tex_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1626,7 +1626,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_def_id, icon_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1649,7 +1649,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_def_id, image);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1672,7 +1672,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, icon_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1699,7 +1699,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (title, title_short);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1722,7 +1722,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (icon_file_name, force_resolution);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -1749,7 +1749,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (tex_type, tex_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2023,7 +2023,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (atlas_name, texture_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2046,7 +2046,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2069,7 +2069,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vao_id, ids);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2092,7 +2092,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vao_id, ids);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2115,7 +2115,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vao_id, ids);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2138,7 +2138,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vao_id, ids);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2159,7 +2159,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit, name, level, layer, layered, access, format);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2182,7 +2182,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name, tex_num, enable);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2205,7 +2205,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name, params);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2226,7 +2226,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name, xoff, yoff, x, y, width, height, target, level);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2275,7 +2275,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (definitions, vertex, tcs, tes, geometry, fragment, compute, options);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2298,7 +2298,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2321,7 +2321,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2344,7 +2344,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2367,7 +2367,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2394,7 +2394,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (font_id, text, x, y, size, options);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2421,7 +2421,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (font_id, text, x, y, size, options);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2446,7 +2446,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (font_id, text, x, y, size, options);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2473,7 +2473,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (font_id, text, pos, size, options);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2494,7 +2494,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2521,7 +2521,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (atlas_name, texture_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2544,7 +2544,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (param);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2567,7 +2567,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2590,7 +2590,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (shader_id, shader_type, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2613,7 +2613,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2636,7 +2636,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2659,7 +2659,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (shader_id, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2682,7 +2682,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2705,7 +2705,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vbo_id, ids, attribute_index, team_id, element_offset);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2728,7 +2728,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vbo_id, ids, attribute_index, team_id, element_offset);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2751,7 +2751,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vbo_id, ids, attribute_index, team_id, element_offset);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2774,7 +2774,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vbo_id, ids, attribute_index, team_id, element_offset);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2797,7 +2797,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (path, size, outline_width, outline_weight);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2820,7 +2820,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vbo_id, ids, attribute_index, team_id, element_offset);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2841,7 +2841,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (identifier, object_id, label);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2862,7 +2862,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (id, message, source_is_third_party);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2887,7 +2887,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (x, y, width, height, filename, options, read_buffer);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2908,7 +2908,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (fbo_id, attachment, texture_name, texture_target, mip_level, rbo_id, use_rbo);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2929,7 +2929,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (fbo_id, buffers);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2952,7 +2952,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (object_id, values, offset);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2975,7 +2975,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (object_id, values, offset);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3000,7 +3000,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (text, x, y, size, options);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3023,7 +3023,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3044,7 +3044,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (location, values);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3065,7 +3065,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (location, values);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3086,7 +3086,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (location, values, transpose);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3111,7 +3111,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name, target, level, xoff, yoff, zoff, width, height, depth, format, pixel_type, data);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3134,7 +3134,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vbo_id, data, attribute_index, element_offset, data_start_index, data_finish_index);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3180,7 +3180,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (icon_name, tex_file, size, distance, radius_adjust, u0, v0, u1, v1);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3203,7 +3203,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (icon_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3247,7 +3247,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (text, pos);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3272,7 +3272,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (pos, text, local_only, player_id);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3309,7 +3309,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (decal_id, texture_name, main_tex);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3371,7 +3371,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (thread_name, keep_stopped);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3394,7 +3394,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (start_script);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3421,7 +3421,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (cmd_args, start_script);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3444,7 +3444,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (resource, level);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3467,7 +3467,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, resource, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3494,7 +3494,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (cmd_args, start_script);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3840,7 +3840,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (key, translation);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3863,7 +3863,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (document_path);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3886,7 +3886,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, name, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3909,7 +3909,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3932,7 +3932,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, tag);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3955,7 +3955,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3978,7 +3978,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4001,7 +4001,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, document_path);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4024,7 +4024,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4047,7 +4047,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, text);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4070,7 +4070,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4093,7 +4093,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (context_handle, event_listener_handle, event, in_capture_phase);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4116,7 +4116,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4139,7 +4139,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (data_model_handle, name, initial_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4162,7 +4162,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (data_model_handle, name, red, green, blue, alpha);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4185,7 +4185,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (data_model_handle, name, initial_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4208,7 +4208,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (data_model_handle, name, initial_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4231,7 +4231,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (data_model_handle, name, initial_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4254,7 +4254,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (data_model_handle, name, initial_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4281,7 +4281,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (data_model_handle, name, initial_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4304,7 +4304,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (variable_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4327,7 +4327,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (document_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4350,7 +4350,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (document_handle, tag_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4373,7 +4373,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (document_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4396,7 +4396,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (document_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4423,7 +4423,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (document_handle, content, source_path, source_line);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4446,7 +4446,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (document_handle, title);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4469,7 +4469,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4492,7 +4492,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4515,7 +4515,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, event);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4542,7 +4542,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, name, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4565,7 +4565,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4588,7 +4588,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4611,7 +4611,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4634,7 +4634,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4657,7 +4657,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4680,7 +4680,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4703,7 +4703,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4726,7 +4726,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4749,7 +4749,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4772,7 +4772,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4795,7 +4795,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, event_listener_handle, event, in_capture_phase);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4822,7 +4822,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, name, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4845,7 +4845,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, name, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4868,7 +4868,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4891,7 +4891,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4914,7 +4914,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4937,7 +4937,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, name, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4960,7 +4960,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, index, rml);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4983,7 +4983,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (element_handle, index, rml);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5006,7 +5006,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (event_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5029,7 +5029,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (event_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5052,7 +5052,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (event_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5075,7 +5075,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (event_handle, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5098,7 +5098,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5123,7 +5123,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (file_path, fallback, weight);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5148,7 +5148,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (event_type, options);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5173,7 +5173,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (event_type, options);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5196,7 +5196,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5219,7 +5219,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5246,7 +5246,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (rml_name, recoil_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5269,7 +5269,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (data_model_handle, property);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5363,7 +5363,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (folder_path, archive_type, compressed_file_path, include_folder, mode);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5386,7 +5386,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (path);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5411,7 +5411,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (filename, category);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5434,7 +5434,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (path);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5457,7 +5457,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (path);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5480,7 +5480,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (path);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5503,7 +5503,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (tex_square_x, tex_square_y, lod_min, texture_name, lod_max);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5526,7 +5526,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (archive_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5549,7 +5549,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (path);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5572,7 +5572,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (tex_square_x, tex_square_y, texture_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5639,7 +5639,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, resource_type, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5662,7 +5662,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, resource_type, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5685,7 +5685,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (winning_ally_teams);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5708,7 +5708,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, resource_type, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5731,7 +5731,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, resource_type, share_level);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5754,7 +5754,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, target_team_id, resource_type, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5777,7 +5777,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id, resource_type, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5874,7 +5874,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, resource_type, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5901,7 +5901,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (pos, radius, team_id, options, exclude_unit_def_i_ds);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5928,7 +5928,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_i_ds, cmd_id, params, options, timeout);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5953,7 +5953,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, param_name, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -5978,7 +5978,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, r#type, args);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6001,7 +6001,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, piece_indices);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6024,7 +6024,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, r#type, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6047,7 +6047,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, sensor_type, radius);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6070,7 +6070,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, resource, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6093,7 +6093,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, tooltip);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6116,7 +6116,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, weapon_num, damage_key, damage_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6139,7 +6139,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, weapon_num, key, value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6162,7 +6162,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, resource_type, amount);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6199,7 +6199,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (type_index, tank_speed, kbot_speed, hover_speed, ship_speed, hardness, receive_tracks, name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6241,7 +6241,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (projectile_id, ceg_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6264,7 +6264,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (projectile_id, unused, damage_key, damage_value);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6301,7 +6301,7 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, func_name);
-                Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 

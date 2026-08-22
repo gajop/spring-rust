@@ -120,7 +120,7 @@ pub fn valid_unit_id(unit_id: i32) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = unit_id;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -140,7 +140,7 @@ pub fn get_team_unit_count(team_id: i32) -> Result<u32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = team_id;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -161,7 +161,7 @@ pub fn get_team_unit_def_count(team_id: i32, unit_def_id: i32) -> Result<u32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (team_id, unit_def_id);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -177,7 +177,7 @@ pub fn get_all_units_into(output: &mut [i32]) -> Result<BufferFill> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = output;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -194,7 +194,7 @@ pub fn get_team_units_into(team_id: i32, output: &mut [i32]) -> Result<BufferFil
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (team_id, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -220,7 +220,7 @@ pub fn get_units_in_rectangle_into(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (xmin, zmin, xmax, zmax, allegiance, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -244,7 +244,7 @@ pub fn get_units_in_box_into(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (min, max, allegiance, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -268,7 +268,7 @@ pub fn get_units_in_sphere_into(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (center, radius, allegiance, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -291,7 +291,7 @@ pub fn get_units_in_cylinder_into(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x, z, radius, allegiance, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -307,7 +307,7 @@ pub fn get_unit_nearest_ally(unit_id: i32, range: f32) -> Result<i32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, range);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -346,7 +346,7 @@ pub fn get_unit_nearest_enemy(
             sphere_distance,
             check_sight_distance,
         );
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -369,7 +369,7 @@ pub fn get_unit_separation(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id1, unit_id2, positional, check_map);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -408,7 +408,7 @@ pub fn get_all_units() -> Result<Vec<i32>> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -423,6 +423,6 @@ pub fn get_team_units(team_id: i32) -> Result<Vec<i32>> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = team_id;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

@@ -5,7 +5,7 @@ Repo: `beyond-all-reason/RecoilEngine`
 Branch: `rust-wip`
 Head observed: `rust-wip` Core purge in progress
 
-Read this with `rts/wasm/docs/impl/web_agent_handoff.md`. This handoff records
+Read this with `rts/wasm/docs/impl/next_agent_handoff_2.md`. This handoff records
 the implementation and verification state reached here; generated files must
 be reproduced with the commands below rather than edited by hand.
 
@@ -59,8 +59,9 @@ included by `rust/crates/spring-wasm-core/build.rs` as
 - caller-owned flat list and string output retries;
 - reviewed message, unit, projectile, terrain, and units-info adapters;
 - semantic enum, record, option, and multi-output conversions;
-- explicit typed `UnsupportedHostTarget` entries where the owned transport
-  does not yet have a decoder or input adapter.
+- compile-time omission for owned shapes without a reviewed decoder or input
+  adapter; the generator records those rows as absent rather than publishing
+  a runtime-failing stub.
 
 The Core guest supports context feature flags:
 
@@ -194,11 +195,11 @@ python3 rts/wasm/verify_codegen.py
 ## 4. Remaining work
 
 The remaining `core_owned_unsupported` rows are not hidden transport failures;
-they are explicit adapter work. The generated owned façade currently contains
-574 `UnsupportedHostTarget` fallback entries; this is the present coverage
-ceiling for semantic convenience wrappers, not a Core transport ceiling. The
-main groups are dynamic/recursive output
-decoders, variable-input descriptors, command and piece record lists, rules and
+they are explicit adapter work. The generated owned façade no longer publishes
+runtime-failing fallback entries. Missing lowerings are omitted and excluded
+from the parity guest at generation time, with the generated coverage report
+retaining the reason. The main groups are dynamic/recursive output decoders,
+variable-input descriptors, command and piece record lists, rules and
 configuration string/list APIs, and mutating control callouts. Extend the
 generator from the shared Core field walk, reduce the manifest exclusions, and
 rerun all five contexts.
@@ -230,8 +231,8 @@ headline claim.
 
 ## 6. Assumptions and review notes
 
-- Core pointer values are valid only on `wasm32`; non-wasm façade calls return
-  `UnsupportedHostTarget`.
+- Core pointer values are valid only on `wasm32`; the wasm-only façade is not a
+  host fallback API.
 - Caller-owned output capacities are retried only after the host reports the
   required count/byte length.
 - Reviewed handwritten signatures in `WasmCoreRegistry.h` win over generated

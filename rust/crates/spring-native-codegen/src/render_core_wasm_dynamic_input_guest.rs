@@ -208,7 +208,7 @@ fn render_wrapper(
                      #[cfg(not(target_arch = \"wasm32\"))]\n\
                      {{\n\
                          let _ = ({non_wasm_ignored}, output);\n\
-                         Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))\n\
+                         Err(unreachable!())\n\
                      }}\n\
                  }}\n",
                 ident = ident,
@@ -259,7 +259,7 @@ fn render_wrapper(
                      #[cfg(not(target_arch = \"wasm32\"))]\n\
                      {{\n\
                          let _ = ({non_wasm_ignored}, output);\n\
-                         Err(super::VariableResultError {{ error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32), required: 0 }})\n\
+                         Err(super::VariableResultError {{ error: unreachable!(), required: 0 }})\n\
                      }}\n\
                  }}\n",
                 ident = ident,
@@ -321,8 +321,10 @@ fn bounds_return(plan: &render_core_wasm::FunctionPlan) -> String {
 
 fn unsupported_return(plan: &render_core_wasm::FunctionPlan) -> String {
     match plan.result_strategy {
-        ResultStrategy::VariableOutputBuffer => "Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32), required: 0 })".to_owned(),
-        _ => "Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))".to_owned(),
+        ResultStrategy::VariableOutputBuffer => {
+            "Err(super::VariableResultError { error: unreachable!(), required: 0 })".to_owned()
+        }
+        _ => "Err(unreachable!())".to_owned(),
     }
 }
 

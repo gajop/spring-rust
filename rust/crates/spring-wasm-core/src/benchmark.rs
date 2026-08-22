@@ -123,7 +123,7 @@ pub fn benchmark_consume_string(value: &str) -> Result<u32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = value;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -137,7 +137,7 @@ pub fn benchmark_consume_f32_list(value: &[f32]) -> Result<u32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = value;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -150,7 +150,7 @@ pub fn set_height_map(x: f32, z: f32, height: f32, terraform: f32) -> Result<boo
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x, z, height, terraform);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -163,7 +163,7 @@ pub fn level_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Resu
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x1, z1, x2, z2, height);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -176,7 +176,7 @@ pub fn gfx_vertex(x: f32, y: f32, z: f32, w: f32, count: u32) -> Result<()> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x, y, z, w, count);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -191,6 +191,6 @@ pub fn gfx_begin_end(primitive: u32, callback_id: u32, user_data: u32) -> Result
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (primitive, callback_id, user_data);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

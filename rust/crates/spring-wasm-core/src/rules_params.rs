@@ -45,7 +45,7 @@ pub fn get_unit_rules_param_f32(unit_id: i32, name: &str) -> Result<f32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, name);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -61,6 +61,6 @@ pub fn set_unit_rules_param_f32(unit_id: i32, name: &str, value: f32, los: i32) 
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, name, value, los);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

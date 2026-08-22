@@ -136,6 +136,7 @@
     ],
     "excluded": {
       "core_owned_unsupported": [
+        "platform_architecture",
         "platform_is_headless",
         "get_config_int",
         "get_config_float",
@@ -185,9 +186,6 @@
         "set_share_level",
         "share_resources",
         "solve_nurbscurve"
-      ],
-      "core_policy": [
-        "platform_architecture"
       ],
       "mutating_getter_or_unsupported": [
         "unit_set_selection_volume_data"

@@ -65,11 +65,6 @@ fn string_parts(value: &str) -> Result<(i32, i32)> {
     Ok((pointer as u32 as i32, value.len() as u32 as i32))
 }
 
-#[inline]
-fn unsupported() -> Result<bool> {
-    Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-}
-
 macro_rules! one_string {
     ($name:ident, $raw:ident) => {
         #[inline]
@@ -82,7 +77,7 @@ macro_rules! one_string {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = message;
-                unsupported()
+                Err(unreachable!())
             }
         }
     };
@@ -100,7 +95,7 @@ macro_rules! id_string {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = ($id, message);
-                unsupported()
+                Err(unreachable!())
             }
         }
     };
@@ -137,7 +132,7 @@ pub fn echo(message: &str, rest: &str) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (message, rest);
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -160,7 +155,7 @@ pub fn log(section: &str, level: i32, message: &str) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (section, level, message);
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -174,7 +169,7 @@ pub fn send_private_chat(message: &str, player_id: i32) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (message, player_id);
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -191,7 +186,7 @@ pub fn send_commands(command: &str, rest: &str) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (command, rest);
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -208,6 +203,6 @@ pub fn send_lua_ui_msg(message: &str, mode: &str) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (message, mode);
-        unsupported()
+        Err(unreachable!())
     }
 }

@@ -11,7 +11,9 @@
 use heck::{ToKebabCase, ToSnakeCase};
 use std::collections::BTreeMap;
 
-use crate::model::{ApiModel, ApiModule, Environment, EnumModel, FunctionModel, RecordModel, SemanticType};
+use crate::model::{
+    ApiModel, ApiModule, EnumModel, Environment, FunctionModel, RecordModel, SemanticType,
+};
 use crate::render_core_wasm::{self, FunctionPlan};
 
 pub fn render(model: &ApiModel) -> String {
@@ -53,10 +55,25 @@ pub fn render(model: &ApiModel) -> String {
 /// a crate can choose an API without Cargo feature unification changing it.
 pub fn render_environment_modules(model: &ApiModel) -> String {
     const ENVIRONMENTS: [(&str, &str, u32, Environment); 5] = [
-        ("rules_synced", "rules-synced", 1u32, Environment::RulesSynced),
-        ("rules_unsynced", "rules-unsynced", 2u32, Environment::RulesUnsynced),
+        (
+            "rules_synced",
+            "rules-synced",
+            1u32,
+            Environment::RulesSynced,
+        ),
+        (
+            "rules_unsynced",
+            "rules-unsynced",
+            2u32,
+            Environment::RulesUnsynced,
+        ),
         ("gaia_synced", "gaia-synced", 4u32, Environment::GaiaSynced),
-        ("gaia_unsynced", "gaia-unsynced", 8u32, Environment::GaiaUnsynced),
+        (
+            "gaia_unsynced",
+            "gaia-unsynced",
+            8u32,
+            Environment::GaiaUnsynced,
+        ),
         ("ui", "ui", 16u32, Environment::Ui),
     ];
     let all_plans = render_core_wasm::plan(model)
@@ -116,7 +133,7 @@ pub fn render_environment_modules(model: &ApiModel) -> String {
             .collect::<BTreeMap<_, _>>();
 
         output.push_str(&format!(
-            "pub mod {module_name} {{\n    use alloc::{{string::String, vec::Vec}};\n    use crate::Result;\n\n    pub const ENVIRONMENT_NAME: &str = \"{environment_name}\";\n    pub const ENVIRONMENT_MASK: u32 = {environment_mask};\n    pub use crate::export_environment_mask;\n\n"
+            "#[cfg(feature = \"alloc\")]\npub mod {module_name} {{\n    use alloc::{{string::String, vec::Vec}};\n    use crate::Result;\n\n    pub const ENVIRONMENT_NAME: &str = \"{environment_name}\";\n    pub const ENVIRONMENT_MASK: u32 = {environment_mask};\n    pub use crate::export_environment_mask;\n\n"
         ));
         for module in &environment_model.modules {
             render_module(&mut output, module, &records, &plans);
@@ -361,7 +378,7 @@ fn render_variable_list_forward(
             #[cfg(not(target_arch = "wasm32"))]
             {{
                 let _ = ({args});
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }}
         }}
 
@@ -438,7 +455,7 @@ fn render_variable_output_forward(
             #[cfg(not(target_arch = "wasm32"))]
             {{
                 let _ = ({args});
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }}
         }}
 
@@ -598,41 +615,41 @@ fn render_special_forward(
     }
     if module.name == "units_info" && rust_ident(&function.name) == "get_unit_nano_pieces" {
         output.push_str(
-            "        #[inline]\n        pub fn get_unit_nano_pieces(unit_id: i32) -> Result<Vec<i32>> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = Vec::<i32>::new();\n                loop {\n                    let packed = unsafe { __core_units_info_nano_pieces::call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32) } as u64;\n                    let status = (packed >> 32) as u32 as i32;\n                    let required = packed as u32 as usize;\n                    if status == 0 { output.truncate(required); return Ok(output); }\n                    if status != crate::ErrorCode::BufferOverflow as i32 { return Err(crate::ApiError::new(status)); }\n                    output.resize(required, 0);\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = unit_id; Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_units_info_nano_pieces {\n            #[link(wasm_import_module = \"spring:units-info\")]\n            extern \"C\" {\n                #[link_name = \"get-unit-nano-pieces\"]\n                pub fn call(unit_id: i32, output: i32, capacity: i32) -> i64;\n            }\n        }\n\n",
+            "        #[inline]\n        pub fn get_unit_nano_pieces(unit_id: i32) -> Result<Vec<i32>> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = Vec::<i32>::new();\n                loop {\n                    let packed = unsafe { __core_units_info_nano_pieces::call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32) } as u64;\n                    let status = (packed >> 32) as u32 as i32;\n                    let required = packed as u32 as usize;\n                    if status == 0 { output.truncate(required); return Ok(output); }\n                    if status != crate::ErrorCode::BufferOverflow as i32 { return Err(crate::ApiError::new(status)); }\n                    output.resize(required, 0);\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = unit_id; Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_units_info_nano_pieces {\n            #[link(wasm_import_module = \"spring:units-info\")]\n            extern \"C\" {\n                #[link_name = \"get-unit-nano-pieces\"]\n                pub fn call(unit_id: i32, output: i32, capacity: i32) -> i64;\n            }\n        }\n\n",
         );
         return true;
     }
     if module.name == "units_info" && rust_ident(&function.name) == "get_unit_is_transporting" {
         output.push_str(
-            "        #[inline]\n        pub fn get_unit_is_transporting(unit_id: i32) -> Result<GetUnitIsTransportingValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = Vec::<i32>::new();\n                let mut state = [0u8; 4];\n                loop {\n                    let packed = unsafe { __core_units_info_is_transporting::call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32, state.as_mut_ptr() as usize as u32 as i32) } as u64;\n                    let status = (packed >> 32) as u32 as i32;\n                    let required = packed as u32 as usize;\n                    if status == 0 {\n                        output.truncate(required);\n                        return Ok(GetUnitIsTransportingValue { unit_i_ds: output, is_transporting: u32::from_le_bytes(state) != 0 });\n                    }\n                    if status != crate::ErrorCode::BufferOverflow as i32 { return Err(crate::ApiError::new(status)); }\n                    output.resize(required, 0);\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = unit_id; Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_units_info_is_transporting {\n            #[link(wasm_import_module = \"spring:units-info\")]\n            extern \"C\" {\n                #[link_name = \"get-unit-is-transporting\"]\n                pub fn call(unit_id: i32, output: i32, capacity: i32, state: i32) -> i64;\n            }\n        }\n\n",
+            "        #[inline]\n        pub fn get_unit_is_transporting(unit_id: i32) -> Result<GetUnitIsTransportingValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = Vec::<i32>::new();\n                let mut state = [0u8; 4];\n                loop {\n                    let packed = unsafe { __core_units_info_is_transporting::call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32, state.as_mut_ptr() as usize as u32 as i32) } as u64;\n                    let status = (packed >> 32) as u32 as i32;\n                    let required = packed as u32 as usize;\n                    if status == 0 {\n                        output.truncate(required);\n                        return Ok(GetUnitIsTransportingValue { unit_i_ds: output, is_transporting: u32::from_le_bytes(state) != 0 });\n                    }\n                    if status != crate::ErrorCode::BufferOverflow as i32 { return Err(crate::ApiError::new(status)); }\n                    output.resize(required, 0);\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = unit_id; Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_units_info_is_transporting {\n            #[link(wasm_import_module = \"spring:units-info\")]\n            extern \"C\" {\n                #[link_name = \"get-unit-is-transporting\"]\n                pub fn call(unit_id: i32, output: i32, capacity: i32, state: i32) -> i64;\n            }\n        }\n\n",
         );
         return true;
     }
     if module.name == "projectiles" && rust_ident(&function.name) == "get_all_projectiles" {
         output.push_str(
-            "        #[inline]\n        pub fn get_all_projectiles(options: GetAllProjectilesOptions) -> Result<Vec<i32>> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut input = [0u8; 8];\n                input[0..4].copy_from_slice(&u32::from(options.exclude_weapon_projectiles).to_le_bytes());\n                input[4..8].copy_from_slice(&u32::from(options.exclude_piece_projectiles).to_le_bytes());\n                let mut descriptor = [0u32; 3];\n                let mut output = Vec::<i32>::new();\n                loop {\n                    let status = unsafe { crate::generated::projectiles::raw::core_get_all_projectiles(input.as_ptr() as usize as u32 as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };\n                    let required = descriptor[2] as usize;\n                    if status == 0 {\n                        output.truncate(required);\n                        return Ok(output);\n                    }\n                    if status != crate::ErrorCode::BufferOverflow as i32 {\n                        return Err(crate::ApiError::new(status));\n                    }\n                    output.resize(required, 0);\n                    descriptor[0] = output.as_mut_ptr() as usize as u32;\n                    descriptor[1] = output.len() as u32;\n                    descriptor[2] = 0;\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            {\n                let _ = options;\n                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))\n            }\n        }\n\n",
+            "        #[inline]\n        pub fn get_all_projectiles(options: GetAllProjectilesOptions) -> Result<Vec<i32>> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut input = [0u8; 8];\n                input[0..4].copy_from_slice(&u32::from(options.exclude_weapon_projectiles).to_le_bytes());\n                input[4..8].copy_from_slice(&u32::from(options.exclude_piece_projectiles).to_le_bytes());\n                let mut descriptor = [0u32; 3];\n                let mut output = Vec::<i32>::new();\n                loop {\n                    let status = unsafe { crate::generated::projectiles::raw::core_get_all_projectiles(input.as_ptr() as usize as u32 as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };\n                    let required = descriptor[2] as usize;\n                    if status == 0 {\n                        output.truncate(required);\n                        return Ok(output);\n                    }\n                    if status != crate::ErrorCode::BufferOverflow as i32 {\n                        return Err(crate::ApiError::new(status));\n                    }\n                    output.resize(required, 0);\n                    descriptor[0] = output.as_mut_ptr() as usize as u32;\n                    descriptor[1] = output.len() as u32;\n                    descriptor[2] = 0;\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            {\n                let _ = options;\n                Err(unreachable!())\n            }\n        }\n\n",
         );
         return true;
     }
     if module.name == "units_info" && rust_ident(&function.name) == "get_unit_position" {
         output.push_str(
-            "        #[inline]\n        pub fn get_unit_position(unit_id: i32, options: GetUnitPositionOptions) -> Result<Float3> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let flags = u32::from(options.mid_pos) | (u32::from(options.aim_pos) << 1);\n                let mut output = [0u8; 12];\n                let status = unsafe { crate::generated::units_info::raw::core_get_unit_position(unit_id, flags as i32, output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 {\n                    return Err(crate::ApiError::new(status));\n                }\n                return Ok(Float3 {\n                    x: f32::from_le_bytes([output[0], output[1], output[2], output[3]]),\n                    y: f32::from_le_bytes([output[4], output[5], output[6], output[7]]),\n                    z: f32::from_le_bytes([output[8], output[9], output[10], output[11]]),\n                });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            {\n                let _ = (unit_id, options);\n                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))\n            }\n        }\n\n",
+            "        #[inline]\n        pub fn get_unit_position(unit_id: i32, options: GetUnitPositionOptions) -> Result<Float3> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let flags = u32::from(options.mid_pos) | (u32::from(options.aim_pos) << 1);\n                let mut output = [0u8; 12];\n                let status = unsafe { crate::generated::units_info::raw::core_get_unit_position(unit_id, flags as i32, output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 {\n                    return Err(crate::ApiError::new(status));\n                }\n                return Ok(Float3 {\n                    x: f32::from_le_bytes([output[0], output[1], output[2], output[3]]),\n                    y: f32::from_le_bytes([output[4], output[5], output[6], output[7]]),\n                    z: f32::from_le_bytes([output[8], output[9], output[10], output[11]]),\n                });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            {\n                let _ = (unit_id, options);\n                Err(unreachable!())\n            }\n        }\n\n",
         );
         return true;
     }
     if module.name == "terrain" {
         match rust_ident(&function.name).as_str() {
             "get_water_plane_level" => output.push_str(
-                "        #[inline]\n        pub fn get_water_plane_level(_unused: u8) -> Result<f32> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_water_plane_level::call() } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(f32::from_bits(packed as u32));\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_water_plane_level {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-water-plane-level\"]\n                pub fn call() -> i64;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_water_plane_level(_unused: u8) -> Result<f32> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_water_plane_level::call() } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(f32::from_bits(packed as u32));\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_water_plane_level {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-water-plane-level\"]\n                pub fn call() -> i64;\n            }\n        }\n\n",
             ),
             "is_pos_in_map" => output.push_str(
-                "        #[inline]\n        pub fn is_pos_in_map(x: f32, z: f32) -> Result<IsPosInMapValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_is_pos_in_map::call(x, z) } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                let flags = packed as u32;\n                return Ok(IsPosInMapValue { in_map: flags & 1 != 0, in_play_area: flags & 2 != 0 });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = (x, z); Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_is_pos_in_map {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"is-pos-in-map\"]\n                pub fn call(x: f32, z: f32) -> i64;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn is_pos_in_map(x: f32, z: f32) -> Result<IsPosInMapValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_is_pos_in_map::call(x, z) } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                let flags = packed as u32;\n                return Ok(IsPosInMapValue { in_map: flags & 1 != 0, in_play_area: flags & 2 != 0 });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = (x, z); Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_is_pos_in_map {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"is-pos-in-map\"]\n                pub fn call(x: f32, z: f32) -> i64;\n            }\n        }\n\n",
             ),
             "get_ground_extremes" => output.push_str(
-                "        #[inline]\n        pub fn get_ground_extremes(_unused: u8) -> Result<GetGroundExtremesValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 16];\n                let status = unsafe { __core_terrain_ground_extremes::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(GetGroundExtremesValue {\n                    init_min_height: f32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    init_max_height: f32::from_le_bytes(output[4..8].try_into().unwrap()),\n                    curr_min_height: f32::from_le_bytes(output[8..12].try_into().unwrap()),\n                    curr_max_height: f32::from_le_bytes(output[12..16].try_into().unwrap()),\n                });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_ground_extremes {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-ground-extremes\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_ground_extremes(_unused: u8) -> Result<GetGroundExtremesValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 16];\n                let status = unsafe { __core_terrain_ground_extremes::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(GetGroundExtremesValue {\n                    init_min_height: f32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    init_max_height: f32::from_le_bytes(output[4..8].try_into().unwrap()),\n                    curr_min_height: f32::from_le_bytes(output[8..12].try_into().unwrap()),\n                    curr_max_height: f32::from_le_bytes(output[12..16].try_into().unwrap()),\n                });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_ground_extremes {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-ground-extremes\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
             ),
             "get_height_map_size" => output.push_str(
-                "        #[inline]\n        pub fn get_height_map_size(_unused: u8) -> Result<GetHeightMapSizeValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 8];\n                let status = unsafe { __core_terrain_height_map_size::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(GetHeightMapSizeValue {\n                    points_x: i32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    points_z: i32::from_le_bytes(output[4..8].try_into().unwrap()),\n                });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_height_map_size {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-height-map-size\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_height_map_size(_unused: u8) -> Result<GetHeightMapSizeValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 8];\n                let status = unsafe { __core_terrain_height_map_size::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(GetHeightMapSizeValue {\n                    points_x: i32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    points_z: i32::from_le_bytes(output[4..8].try_into().unwrap()),\n                });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_height_map_size {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-height-map-size\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
             ),
             _ => return false,
         }
@@ -754,40 +771,13 @@ fn render_output_record(
 }
 
 fn render_function(
-    output: &mut String,
-    function: &FunctionModel,
-    records: &BTreeMap<String, &RecordModel>,
-    enums: &BTreeMap<String, &EnumModel>,
+    _output: &mut String,
+    _function: &FunctionModel,
+    _records: &BTreeMap<String, &RecordModel>,
+    _enums: &BTreeMap<String, &EnumModel>,
 ) {
-    let params = function
-        .inputs
-        .iter()
-        .map(|field| {
-            let ty = rust_param_type(&field.ty, records, enums);
-            format!("{}: {ty}", rust_ident(&field.name))
-        })
-        .collect::<Vec<_>>()
-        .join(", ");
-    let return_type = match function.outputs.as_slice() {
-        [] => "()".to_owned(),
-        [field] => rust_type(&field.ty, records, enums),
-        _ => format!("{}Value", function.name),
-    };
-    let arguments = function
-        .inputs
-        .iter()
-        .map(|field| rust_ident(&field.name))
-        .collect::<Vec<_>>()
-        .join(", ");
-    let ignored = if arguments.is_empty() {
-        "        let _ = ();\n".to_owned()
-    } else {
-        format!("        let _ = ({arguments});\n")
-    };
-    output.push_str(&format!(
-        "        #[inline]\n        pub fn {}({params}) -> Result<{return_type}> {{\n{ignored}        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))\n        }}\n\n",
-        rust_ident(&function.name),
-    ));
+    // A missing lowering is a compile-time API omission. Do not publish a
+    // callable wrapper that turns generator coverage into a runtime failure.
 }
 
 fn render_normalize_forward(output: &mut String) {
@@ -833,7 +823,7 @@ fn render_normalize_forward(output: &mut String) {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = vec;
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 

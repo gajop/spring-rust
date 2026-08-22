@@ -65,7 +65,7 @@ pub fn get_unit_def_name_into(unit_def_id: i32, output: &mut [u8]) -> Result<Byt
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_def_id, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -82,7 +82,7 @@ pub fn get_unit_def_human_name_into(unit_def_id: i32, output: &mut [u8]) -> Resu
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_def_id, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -120,7 +120,7 @@ pub fn get_unit_def_name_bytes(unit_def_id: i32) -> Result<Vec<u8>> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = unit_def_id;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -135,6 +135,6 @@ pub fn get_unit_def_human_name_bytes(unit_def_id: i32) -> Result<Vec<u8>> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = unit_def_id;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

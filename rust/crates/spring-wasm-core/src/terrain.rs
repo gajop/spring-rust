@@ -52,11 +52,6 @@ mod raw {
 }
 
 #[inline]
-fn unsupported<T>() -> Result<T> {
-    Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-}
-
-#[inline]
 pub fn is_pos_in_map(x: f32, z: f32) -> Result<MapPosition> {
     #[cfg(target_arch = "wasm32")]
     {
@@ -77,7 +72,7 @@ pub fn is_pos_in_map(x: f32, z: f32) -> Result<MapPosition> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x, z);
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -92,7 +87,7 @@ macro_rules! scalar_f32_query {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (x, z);
-                unsupported()
+                Err(unreachable!())
             }
         }
     };
@@ -112,7 +107,7 @@ pub fn get_water_plane_level() -> Result<f32> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -125,7 +120,7 @@ pub fn get_ground_blocked(x1: f32, z1: f32, x2: f32, z2: f32) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x1, z1, x2, z2);
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -147,7 +142,7 @@ pub fn get_height_map_size() -> Result<[i32; 2]> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -173,7 +168,7 @@ pub fn get_ground_extremes() -> Result<GroundExtremes> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -199,6 +194,6 @@ pub fn get_ground_normal(x: f32, z: f32, smoothed: bool) -> Result<GroundNormal>
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x, z, smoothed);
-        unsupported()
+        Err(unreachable!())
     }
 }

@@ -2247,7 +2247,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (draw_mask as i32, u32::from(send_mask) as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2276,7 +2276,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (u32::from(send_mask) as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -2298,36 +2298,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_team_units_by_defs(team_id: i32, unit_def_i_ds: &Vec<i32>) -> Result<Vec<i32>> {
-        let _ = (team_id, unit_def_i_ds);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_team_units_counts(team_id: i32) -> Result<Vec<UnitDefCount>> {
-        let _ = (team_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_team_units_sorted(team_id: i32) -> Result<Vec<TeamUnitsByDef>> {
-        let _ = (team_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_array_centroid(unit_i_ds: &Vec<i32>) -> Result<Float3> {
-        let _ = (unit_i_ds);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_map_centroid(unit_i_ds: &Vec<i32>) -> Result<Float3> {
-        let _ = (unit_i_ds);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_unit_nearest_ally(unit_id: i32, range: f32) -> Result<i32> {
             let value = crate::generated::units_query::get_unit_nearest_ally(unit_id, range)?;
             Ok(value)
@@ -2343,36 +2313,6 @@ use crate::Result;
         pub fn get_unit_separation(unit_id1: i32, unit_id2: i32, options: GetUnitSeparationOptions) -> Result<f32> {
             let value = crate::generated::units_query::get_unit_separation(unit_id1, unit_id2, crate::generated::units_query::GetUnitSeparationOptions { positional: options.positional, check_map: options.check_map })?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_units_in_box(xmin: f32, ymin: f32, zmin: f32, xmax: f32, ymax: f32, zmax: f32, allegiance: i32) -> Result<Vec<i32>> {
-        let _ = (xmin, ymin, zmin, xmax, ymax, zmax, allegiance);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_units_in_cylinder(x: f32, z: f32, radius: f32, allegiance: i32) -> Result<Vec<i32>> {
-        let _ = (x, z, radius, allegiance);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_units_in_planes(planes: &PlanesQuery, allegiance: i32) -> Result<Vec<i32>> {
-        let _ = (planes, allegiance);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_units_in_rectangle(xmin: f32, zmin: f32, xmax: f32, zmax: f32, allegiance: i32) -> Result<Vec<i32>> {
-        let _ = (xmin, zmin, xmax, zmax, allegiance);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_units_in_sphere(x: f32, y: f32, z: f32, radius: f32, allegiance: i32) -> Result<Vec<i32>> {
-        let _ = (x, y, z, radius, allegiance);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -3530,12 +3470,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_unit_build_params(unit_id: i32, param_name: &str) -> Result<Option<NumberOrBool>> {
-        let _ = (unit_id, param_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_unit_buildee_radius(unit_id: i32) -> Result<f32> {
             let value = crate::generated::units_info::get_unit_buildee_radius(unit_id)?;
             Ok(value)
@@ -3689,7 +3623,7 @@ use crate::Result;
                 }
             }
             #[cfg(not(target_arch = "wasm32"))]
-            { let _ = unit_id; Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }
+            { let _ = unit_id; Err(unreachable!()) }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -3699,18 +3633,6 @@ use crate::Result;
                 #[link_name = "get-unit-is-transporting"]
                 pub fn call(unit_id: i32, output: i32, capacity: i32, state: i32) -> i64;
             }
-        }
-
-        #[inline]
-        pub fn get_unit_last_attacked_piece(unit_id: i32) -> Result<LastHitPiece> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_last_attacker(unit_id: i32) -> Result<Option<UnitLastAttacker>> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -3752,7 +3674,7 @@ use crate::Result;
                 }
             }
             #[cfg(not(target_arch = "wasm32"))]
-            { let _ = unit_id; Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }
+            { let _ = unit_id; Err(unreachable!()) }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -3801,7 +3723,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id, options);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -3836,27 +3758,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_unit_sensor_radius(unit_id: i32, type_: &str) -> Result<UnitSensorRadius> {
-        let _ = (unit_id, type_);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_shield_state(unit_id: i32, weapon_num: i32) -> Result<Option<UnitShieldState>> {
-        let _ = (unit_id, weapon_num);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_unit_states(unit_id: i32, options: UnitStatesOptions) -> Result<UnitStates> {
             let value = crate::generated::units_info::get_unit_states(unit_id, crate::generated::units_info::UnitStatesOptions { ret_table: options.ret_table, bin_state: options.bin_state, amt_state: options.amt_state })?;
             Ok(UnitStates { fire_state: value.fire_state, move_state: value.move_state, auto_repair_level: value.auto_repair_level, repeat: value.repeat, cloak: value.cloak, active: value.active, trajectory: value.trajectory, auto_land: value.auto_land, loopback_attack: value.loopback_attack })
-        }
-
-        #[inline]
-        pub fn get_unit_stockpile(unit_id: i32) -> Result<Option<UnitStockpile>> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -3896,7 +3800,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -4448,21 +4352,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_unit_weapon_damages(unit_id: i32, weapon_num: i32) -> Result<UnitWeaponDamages> {
-        let _ = (unit_id, weapon_num);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_unit_weapon_have_free_line_of_fire(unit_id: i32, weapon_num: i32, target_id: i32, source_pos: Float3, target_pos: Float3, options: GetUnitWeaponHaveFreeLineOfFireOptions) -> Result<bool> {
             let value = crate::generated::units_weapons::get_unit_weapon_have_free_line_of_fire(unit_id, weapon_num, target_id, crate::generated::units_weapons::Float3 { x: source_pos.x, y: source_pos.y, z: source_pos.z }, crate::generated::units_weapons::Float3 { x: target_pos.x, y: target_pos.y, z: target_pos.z }, crate::generated::units_weapons::GetUnitWeaponHaveFreeLineOfFireOptions { is_ground_target: options.is_ground_target })?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_unit_weapon_state(unit_id: i32, weapon_num: i32, key: &str) -> Result<UnitWeaponState> {
-        let _ = (unit_id, weapon_num, key);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -5068,18 +4960,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_command_params(command: &CommandFFI) -> Result<Vec<f32>> {
-        let _ = (command);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_command_queue(unit_id: i32, max_commands: u32) -> Result<Vec<CommandFFI>> {
-        let _ = (unit_id, max_commands);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_factory_bugger_off(unit_id: i32) -> Result<GetFactoryBuggerOffValue> {
             let value = crate::generated::units_commands::get_factory_bugger_off(unit_id)?;
             Ok(GetFactoryBuggerOffValue {
@@ -5096,24 +4976,6 @@ use crate::Result;
         pub fn get_factory_command_count(unit_id: i32) -> Result<u32> {
             let value = crate::generated::units_commands::get_factory_command_count(unit_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_factory_commands(unit_id: i32, max_commands: u32) -> Result<Vec<CommandFFI>> {
-        let _ = (unit_id, max_commands);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_factory_counts(unit_id: i32, count: i32, add_cmds: bool) -> Result<FactoryQueueInfo> {
-        let _ = (unit_id, count, add_cmds);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_full_build_queue(unit_id: i32) -> Result<Vec<BuildQueueEntry>> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -5141,50 +5003,14 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unit_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_unit_cmd_descs(unit_id: i32) -> Result<Vec<CommandDescription>> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
         pub fn get_unit_command_count(unit_id: i32) -> Result<u32> {
             let value = crate::generated::units_commands::get_unit_command_count(unit_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_unit_commands(unit_id: i32, max_commands: u32) -> Result<Vec<CommandFFI>> {
-        let _ = (unit_id, max_commands);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_current_command(unit_id: i32, cmd_index: i32) -> Result<Option<CommandFFI>> {
-        let _ = (unit_id, cmd_index);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn give_order(cmd_id: i32, params: &Vec<f32>, options: u32, timeout: i32) -> Result<bool> {
-        let _ = (cmd_id, params, options, timeout);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn give_order_array_to_unit_map(unit_i_ds: &Vec<i32>, commands: &Vec<CommandFFI>) -> Result<i32> {
-        let _ = (unit_i_ds, commands);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn give_order_to_unit_map(unit_i_ds: &Vec<i32>, cmd_id: i32, params: &Vec<f32>, options: u32, timeout: i32) -> Result<i32> {
-        let _ = (unit_i_ds, cmd_id, params, options, timeout);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -5775,24 +5601,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_feature_piece_info(feature_id: i32, piece_num: i32) -> Result<GetFeaturePieceInfoValue> {
-        let _ = (feature_id, piece_num);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_feature_piece_list(feature_id: i32) -> Result<Vec<String>> {
-        let _ = (feature_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_feature_piece_map(feature_id: i32) -> Result<Vec<PieceMapEntry>> {
-        let _ = (feature_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_feature_piece_matrix(feature_id: i32, piece_num: i32) -> Result<PieceMatrix> {
             let value = crate::generated::units_pieces::get_feature_piece_matrix(feature_id, piece_num)?;
             Ok(PieceMatrix { m: value.m.into_iter().map(|value| Ok(value)).collect::<crate::Result<Vec<_>>>()? })
@@ -5817,18 +5625,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_model_piece_list(model_name: &str) -> Result<Vec<String>> {
-        let _ = (model_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_model_piece_map(model_name: &str) -> Result<Vec<PieceMapEntry>> {
-        let _ = (model_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_model_root_piece(model_name: &str) -> Result<i32> {
             let mut model_name_bytes = model_name.as_bytes().to_vec();
             if model_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
@@ -5841,24 +5637,6 @@ use crate::Result;
         pub fn get_unit_piece_direction(unit_id: i32, piece_num: i32) -> Result<Float3> {
             let value = crate::generated::units_pieces::get_unit_piece_direction(unit_id, piece_num)?;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
-        }
-
-        #[inline]
-        pub fn get_unit_piece_info(unit_id: i32, piece_num: i32) -> Result<GetUnitPieceInfoValue> {
-        let _ = (unit_id, piece_num);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_piece_list(unit_id: i32) -> Result<Vec<String>> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_piece_map(unit_id: i32) -> Result<Vec<PieceMapEntry>> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -5883,12 +5661,6 @@ use crate::Result;
         pub fn get_unit_root_piece(unit_id: i32) -> Result<i32> {
             let value = crate::generated::units_pieces::get_unit_root_piece(unit_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_unit_script_names(unit_id: i32) -> Result<Vec<String>> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -6599,18 +6371,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_ai_info(team_id: i32) -> Result<GetAIInfoValue> {
-        let _ = (team_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_ally_team_info(ally_team_id: i32) -> Result<AllyTeamInfo> {
-        let _ = (ally_team_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_ally_team_list(unused: u8) -> Result<Vec<i32>> {
             #[cfg(target_arch = "wasm32")]
             {
@@ -6635,7 +6395,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6646,12 +6406,6 @@ use crate::Result;
                 unit_id: value.0,
                 has_unit: value.1
             })
-        }
-
-        #[inline]
-        pub fn get_player_info(player_id: i32, get_player_opts: bool) -> Result<PlayerInfo> {
-        let _ = (player_id, get_player_opts);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -6679,7 +6433,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id as i32, u32::from(active) as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6708,7 +6462,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (ally_team_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6737,7 +6491,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6745,12 +6499,6 @@ use crate::Result;
         pub fn get_team_ally_team_id(team_id: i32) -> Result<i32> {
             let value = crate::generated::teams::get_team_ally_team_id(team_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_team_info(team_id: i32, get_team_keys: bool) -> Result<TeamInfo> {
-        let _ = (team_id, get_team_keys);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -6778,7 +6526,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (ally_team_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6807,7 +6555,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -6815,24 +6563,6 @@ use crate::Result;
         pub fn get_team_max_units(team_id: i32) -> Result<i32> {
             let value = crate::generated::teams::get_team_max_units(team_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_team_resource_stats(team_id: i32, resource: &str) -> Result<TeamResources> {
-        let _ = (team_id, resource);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_team_resources(team_id: i32, resource: &str) -> Result<TeamResources> {
-        let _ = (team_id, resource);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_team_stats_history(team_id: i32, start_index: i32, end_index: i32) -> Result<Vec<TeamStatsHistoryPoint>> {
-        let _ = (team_id, start_index, end_index);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -7704,7 +7434,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -7781,12 +7511,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_feature_last_attacked_piece(feature_id: i32) -> Result<FeatureLastHitPiece> {
-        let _ = (feature_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_feature_lua_draw(feature_id: i32) -> Result<bool> {
             let value = crate::generated::features::get_feature_lua_draw(feature_id)?;
             Ok(value)
@@ -7838,12 +7562,6 @@ use crate::Result;
         pub fn get_feature_resources(feature_id: i32) -> Result<FeatureResources> {
             let value = crate::generated::features::get_feature_resources(feature_id)?;
             Ok(FeatureResources { metal: value.metal, def_metal: value.def_metal, energy: value.energy, def_energy: value.def_energy, reclaim_left: value.reclaim_left, reclaim_time: value.reclaim_time })
-        }
-
-        #[inline]
-        pub fn get_feature_resurrect(feature_id: i32) -> Result<GetFeatureResurrectValue> {
-        let _ = (feature_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -7913,7 +7631,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (x as f32, z as f32, radius as f32, height as f32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -7942,14 +7660,8 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (min_x as f32, min_z as f32, max_x as f32, max_z as f32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_features_in_sphere(center: Float3, radius: f32) -> Result<Vec<i32>> {
-        let _ = (center, radius);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -7977,7 +7689,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (draw_mask as i32, u32::from(send_mask) as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -8006,7 +7718,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (u32::from(send_mask) as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -8610,26 +8322,14 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = options;
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_piece_projectile_params(projectile_id: i32) -> Result<GetPieceProjectileParamsValue> {
-        let _ = (projectile_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
         pub fn get_projectile_ally_team_id(projectile_id: i32) -> Result<i32> {
             let value = crate::generated::projectiles::get_projectile_ally_team_id(projectile_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_projectile_damages(projectile_id: i32, tag: &str) -> Result<ProjectileDamages> {
-        let _ = (projectile_id, tag);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -8699,18 +8399,6 @@ use crate::Result;
         pub fn get_projectile_velocity(projectile_id: i32) -> Result<Float3> {
             let value = crate::generated::projectiles::get_projectile_velocity(projectile_id)?;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
-        }
-
-        #[inline]
-        pub fn get_projectiles_in_rectangle(min_x: f32, min_z: f32, max_x: f32, max_z: f32, options: GetProjectilesInRectangleOptions) -> Result<Vec<i32>> {
-        let _ = (min_x, min_z, max_x, max_z, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_projectiles_in_sphere(center: Float3, radius: f32, options: GetProjectilesInSphereOptions) -> Result<Vec<i32>> {
-        let _ = (center, radius, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -9856,12 +9544,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_unit_def_by_id(unit_def_id: i32) -> Result<GetUnitDefByIDValue> {
-        let _ = (unit_def_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_unit_def_classify(unit_def_id: i32) -> Result<UnitDefClassify> {
             let value = crate::generated::unit_defs::get_unit_def_classify(unit_def_id)?;
             Ok(UnitDefClassify { is_transport: value.is_transport, is_immobile: value.is_immobile, is_building: value.is_building, is_builder: value.is_builder, is_mobile_builder: value.is_mobile_builder, is_static_builder: value.is_static_builder, is_factory: value.is_factory, is_extractor: value.is_extractor, is_ground_unit: value.is_ground_unit, is_air_unit: value.is_air_unit, is_strafing_air_unit: value.is_strafing_air_unit, is_hovering_air_unit: value.is_hovering_air_unit, is_fighter_air_unit: value.is_fighter_air_unit, is_bomber_air_unit: value.is_bomber_air_unit })
@@ -9880,27 +9562,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_unit_def_custom_param(unit_def_id: i32, key: &str) -> Result<String> {
-        let _ = (unit_def_id, key);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_def_custom_param_keys(unit_def_id: i32) -> Result<Vec<String>> {
-        let _ = (unit_def_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_unit_def_health(unit_def_id: i32) -> Result<f32> {
             let value = crate::generated::unit_defs::get_unit_def_health(unit_def_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_unit_def_human_name(unit_def_id: i32) -> Result<String> {
-        let _ = (unit_def_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -9937,14 +9601,8 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_unit_def_name(unit_def_id: i32) -> Result<String> {
-        let _ = (unit_def_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -9972,18 +9630,6 @@ use crate::Result;
             key_bytes.push(0);
             let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
             crate::generated::borrowed::unit_defs::get_unit_def_param_int(unit_def_id, &key_cstr)
-        }
-
-        #[inline]
-        pub fn get_unit_def_param_keys(unused: u8) -> Result<Vec<UnitDefParamKey>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_def_param_string(unit_def_id: i32, key: &str) -> Result<String> {
-        let _ = (unit_def_id, key);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -10471,27 +10117,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_feature_def_by_id(feature_def_id: i32) -> Result<GetFeatureDefByIDValue> {
-        let _ = (feature_def_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_feature_def_count(unused: u8) -> Result<u32> {
             let value = crate::generated::feature_defs::get_feature_def_count(unused)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_feature_def_custom_param(feature_def_id: i32, key: &str) -> Result<String> {
-        let _ = (feature_def_id, key);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_feature_def_custom_param_keys(feature_def_id: i32) -> Result<Vec<String>> {
-        let _ = (feature_def_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -10534,7 +10162,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -10569,7 +10197,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (feature_def_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -11038,27 +10666,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_weapon_def_by_id(weapon_def_id: i32) -> Result<GetWeaponDefByIDValue> {
-        let _ = (weapon_def_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_weapon_def_count(unused: u8) -> Result<u32> {
             let value = crate::generated::weapon_defs::get_weapon_def_count(unused)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_weapon_def_custom_param(weapon_def_id: i32, key: &str) -> Result<String> {
-        let _ = (weapon_def_id, key);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_weapon_def_custom_param_keys(weapon_def_id: i32) -> Result<Vec<String>> {
-        let _ = (weapon_def_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -11101,7 +10711,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -11130,7 +10740,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (weapon_def_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -11980,18 +11590,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_game_map_info(unused: u8) -> Result<GameMapInfo> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_game_mod_info(unused: u8) -> Result<GameModInfo> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_game_rules_info(unused: u8) -> Result<GameRulesInfo> {
             let value = crate::generated::game::get_game_rules_info(unused)?;
             Ok(GameRulesInfo { max_units: value.max_units, construction_decay: value.construction_decay, construction_decay_time: value.construction_decay_time, construction_decay_speed: value.construction_decay_speed, multi_reclaim: value.multi_reclaim, reclaim_method: value.reclaim_method, reclaim_unit_method: value.reclaim_unit_method, reclaim_unit_energy_cost_factor: value.reclaim_unit_energy_cost_factor, reclaim_unit_efficiency: value.reclaim_unit_efficiency, reclaim_feature_energy_cost_factor: value.reclaim_feature_energy_cost_factor, reclaim_unit_drain_health: value.reclaim_unit_drain_health, reclaim_allow_enemies: value.reclaim_allow_enemies, reclaim_allow_allies: value.reclaim_allow_allies, repair_energy_cost_factor: value.repair_energy_cost_factor, resurrect_energy_cost_factor: value.resurrect_energy_cost_factor, capture_energy_cost_factor: value.capture_energy_cost_factor, transport_air: value.transport_air, transport_ship: value.transport_ship, transport_hover: value.transport_hover, transport_ground: value.transport_ground, fire_at_killed: value.fire_at_killed, fire_at_crashing: value.fire_at_crashing, require_sonar_under_water: value.require_sonar_under_water, paralyze_on_max_health: value.paralyze_on_max_health, paralyze_decline_rate: value.paralyze_decline_rate, allow_engine_playerlist: value.allow_engine_playerlist, native_excess_sharing: value.native_excess_sharing })
@@ -12010,12 +11608,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_game_setup_info(unused: u8) -> Result<GameSetupInfo> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_global_los(ally_team_id: i32) -> Result<i32> {
             let value = crate::generated::game::get_global_los(ally_team_id)?;
             Ok(value)
@@ -12031,48 +11623,6 @@ use crate::Result;
         pub fn get_heading_from_vector(x: f32, z: f32) -> Result<i32> {
             let value = crate::generated::game::get_heading_from_vector(x, z)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_map_option(key: &str) -> Result<GetMapOptionValue> {
-        let _ = (key);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_map_options(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_map_start_positions(unused: u8) -> Result<Vec<StartPosition>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_mod_option(key: &str) -> Result<GetModOptionValue> {
-        let _ = (key);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_mod_options(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_side_data(side_name: &str) -> Result<SideData> {
-        let _ = (side_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_side_data_by_index(side_index: u32) -> Result<SideData> {
-        let _ = (side_index);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -12701,7 +12251,7 @@ use crate::Result;
                 });
             }
             #[cfg(not(target_arch = "wasm32"))]
-            { Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }
+            { Err(unreachable!()) }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -12717,12 +12267,6 @@ use crate::Result;
         pub fn get_ground_height(x: f32, z: f32) -> Result<f32> {
             let value = crate::generated::terrain::get_ground_height(x, z)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_ground_info(x: f32, z: f32) -> Result<GetGroundInfoValue> {
-        let _ = (x, z);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -12753,7 +12297,7 @@ use crate::Result;
                 });
             }
             #[cfg(not(target_arch = "wasm32"))]
-            { Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }
+            { Err(unreachable!()) }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -12772,12 +12316,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_terrain_type_data(terrain_type_index: i32) -> Result<GetTerrainTypeDataValue> {
-        let _ = (terrain_type_index);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_water_level(x: f32, z: f32) -> Result<f32> {
             let value = crate::generated::terrain::get_water_level(x, z)?;
             Ok(value)
@@ -12793,7 +12331,7 @@ use crate::Result;
                 return Ok(f32::from_bits(packed as u32));
             }
             #[cfg(not(target_arch = "wasm32"))]
-            { Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }
+            { Err(unreachable!()) }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -12816,7 +12354,7 @@ use crate::Result;
                 return Ok(IsPosInMapValue { in_map: flags & 1 != 0, in_play_area: flags & 2 != 0 });
             }
             #[cfg(not(target_arch = "wasm32"))]
-            { let _ = (x, z); Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32)) }
+            { let _ = (x, z); Err(unreachable!()) }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -13268,21 +12806,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_player_roster(sort_mode: i32, show_pathing_players: bool) -> Result<Vec<RosterEntry>> {
-        let _ = (sort_mode, show_pathing_players);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_player_statistics(player_id: i32) -> Result<PlayerStats> {
             let value = crate::generated::player::get_player_statistics(player_id)?;
             Ok(PlayerStats { mouse_pixels: value.mouse_pixels, mouse_clicks: value.mouse_clicks, key_presses: value.key_presses, unit_commands: value.unit_commands, avg_command_size: value.avg_command_size })
-        }
-
-        #[inline]
-        pub fn get_player_traffic(player_id: i32, packet_id: i32) -> Result<Vec<PlayerTraffic>> {
-        let _ = (player_id, packet_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -13862,7 +13388,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = vec;
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -14259,30 +13785,6 @@ use crate::Result;
             pub shore_waves: Option<bool>,
             pub force_rendering: Option<bool>,
             pub has_water_plane: Option<bool>,
-        }
-
-        #[inline]
-        pub fn decode_base64(text: &str) -> Result<Vec<u8>> {
-        let _ = (text);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn decode_base64_url(text: &str) -> Result<Vec<u8>> {
-        let _ = (text);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn encode_base64(text: &Vec<u8>, strip_padding: bool) -> Result<String> {
-        let _ = (text, strip_padding);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn encode_base64_url(text: &Vec<u8>) -> Result<String> {
-        let _ = (text);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -14847,12 +14349,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_next_way_point(path_id: u32, caller_pos: Float3, min_dist: f32) -> Result<Option<Float3>> {
-        let _ = (path_id, caller_pos, min_dist);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_path_node_cost(x: u32, z: u32) -> Result<f32> {
             let value = crate::generated::path_finder::get_path_node_cost(x, z)?;
             Ok(value)
@@ -14883,26 +14379,14 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (overlay_index as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_path_way_points(path_id: u32) -> Result<GetPathWayPointsValue> {
-        let _ = (path_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
         pub fn init_path_node_costs_array(overlay_index: u32, size_x: u32, size_z: u32) -> Result<bool> {
             let value = crate::generated::path_finder::init_path_node_costs_array(overlay_index, size_x, size_z)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn request_path(move_def_id: u32, move_def_name: Option<&str>, start_pos: Float3, end_pos: Float3, radius: f32) -> Result<u32> {
-        let _ = (move_def_id, move_def_name, start_pos, end_pos, radius);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -15260,18 +14744,6 @@ use crate::Result;
                 #[link_name = "get-architecture"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
-        }
-
-        #[inline]
-        pub fn get_architecture(unused: u8) -> Result<String> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn is_headless(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -15834,96 +15306,6 @@ use crate::Result;
             pub exists: bool,
         }
 
-        #[inline]
-        pub fn get_feature_rules_param(feature_id: i32, param_name: &str) -> Result<GetFeatureRulesParamValue> {
-        let _ = (feature_id, param_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_feature_rules_params(feature_id: i32) -> Result<Vec<String>> {
-        let _ = (feature_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_game_rules_param(param_name: &str) -> Result<GetGameRulesParamValue> {
-        let _ = (param_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_game_rules_params(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_player_rules_param(player_id: i32, param_name: &str) -> Result<GetPlayerRulesParamValue> {
-        let _ = (player_id, param_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_player_rules_params(player_id: i32) -> Result<Vec<String>> {
-        let _ = (player_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_team_rules_param(team_id: i32, param_name: &str) -> Result<GetTeamRulesParamValue> {
-        let _ = (team_id, param_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_team_rules_params(team_id: i32) -> Result<Vec<String>> {
-        let _ = (team_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_rules_param(unit_id: i32, param_name: &str) -> Result<GetUnitRulesParamValue> {
-        let _ = (unit_id, param_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_rules_params(unit_id: i32) -> Result<Vec<String>> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_feature_rules_param(feature_id: i32, param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
-        let _ = (feature_id, param_name, value, los);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_game_rules_param(param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
-        let _ = (param_name, value, los);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_player_rules_param(player_id: i32, param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
-        let _ = (player_id, param_name, value, los);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_team_rules_param(team_id: i32, param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
-        let _ = (team_id, param_name, value, los);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_unit_rules_param(unit_id: i32, param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
-        let _ = (unit_id, param_name, value, los);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
     }
 
     pub mod move_ctrl {
@@ -16325,18 +15707,6 @@ use crate::Result;
         pub struct GetUnitEstimatedPathValue {
             pub waypoints: Vec<PathWaypoint>,
             pub starts: Vec<i32>,
-        }
-
-        #[inline]
-        pub fn get_unit_estimated_path(unit_id: i32) -> Result<GetUnitEstimatedPathValue> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_move_type_data(unit_id: i32) -> Result<MoveTypeData> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -19738,39 +19108,15 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_camera_names(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_camera_position(unused: u8) -> Result<Float3> {
             let value = crate::generated::camera::get_camera_position(unused)?;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
         }
 
         #[inline]
-        pub fn get_camera_state(use_table: bool) -> Result<CameraState> {
-        let _ = (use_table);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_pixel_dir(screen_x: f32, screen_y: f32) -> Result<Float3> {
             let value = crate::generated::camera::get_pixel_dir(screen_x, screen_y)?;
             Ok(Float3 { x: value.x, y: value.y, z: value.z })
-        }
-
-        #[inline]
-        pub fn set_camera_state(state: &CameraState, transition_time: f32, transition_time_factor: f32, transition_time_exponent: f32) -> Result<bool> {
-        let _ = (state, transition_time, transition_time_factor, transition_time_exponent);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_camera_target(target: Float3, options: SetCameraTargetOptions) -> Result<bool> {
-        let _ = (target, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -20429,18 +19775,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_action_hot_keys(action: &str) -> Result<Vec<String>> {
-        let _ = (action);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_active_command(unused: u8) -> Result<GetActiveCommandValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_active_page(unused: u8) -> Result<GetActivePageValue> {
             let value = crate::generated::input::get_active_page(unused)?;
             Ok(GetActivePageValue {
@@ -20450,21 +19784,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_default_command(unused: u8) -> Result<GetDefaultCommandValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_invert_queue_key(unused: u8) -> Result<bool> {
             let value = crate::generated::input::get_invert_queue_key(unused)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_key_bindings(key_set1: &str, key_set2: &str) -> Result<Vec<KeyBindingEntry>> {
-        let _ = (key_set1, key_set2);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -20477,21 +19799,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_key_from_scan_symbol(scan_symbol: &str) -> Result<String> {
-        let _ = (scan_symbol);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_key_state(key_code: i32) -> Result<bool> {
             let value = crate::generated::input::get_key_state(key_code)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_key_symbol(key_code: i32) -> Result<GetKeySymbolValue> {
-        let _ = (key_code);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -20503,12 +19813,6 @@ use crate::Result;
                 meta: value.2,
                 shift: value.3
             })
-        }
-
-        #[inline]
-        pub fn get_mouse_buttons_pressed(buttons: &Vec<i32>) -> Result<Vec<bool>> {
-        let _ = (buttons);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -20536,7 +19840,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -20581,7 +19885,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -20610,14 +19914,8 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_scan_symbol(scan_code: i32) -> Result<GetScanSymbolValue> {
-        let _ = (scan_code);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -21016,48 +20314,6 @@ use crate::Result;
             pub shore_waves: Option<bool>,
             pub force_rendering: Option<bool>,
             pub has_water_plane: Option<bool>,
-        }
-
-        #[inline]
-        pub fn clear_emulated_input(fire_releases: bool) -> Result<()> {
-        let _ = (fire_releases);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn emulate_key(key_code: i32, pressed: bool) -> Result<()> {
-        let _ = (key_code, pressed);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn emulate_mouse_button(button: i32, pressed: bool) -> Result<()> {
-        let _ = (button, pressed);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn emulate_mouse_move(x: i32, y: i32) -> Result<()> {
-        let _ = (x, y);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn emulate_mouse_wheel(delta: f32) -> Result<()> {
-        let _ = (delta);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn emulate_text_editing(utf8_text: &str, start: u32, length: u32) -> Result<bool> {
-        let _ = (utf8_text, start, length);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn emulate_text_input(utf8_text: &str) -> Result<bool> {
-        let _ = (utf8_text);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -21778,14 +21034,8 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_mini_map_dual_screen(unused: u8) -> Result<GetMiniMapDualScreenValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -21828,12 +21078,6 @@ use crate::Result;
         pub fn get_view_geometry(unused: u8) -> Result<ViewGeometry> {
             let value = crate::generated::display::get_view_geometry(unused)?;
             Ok(ViewGeometry { view_size_x: value.view_size_x, view_size_y: value.view_size_y, view_pos_x: value.view_pos_x, view_pos_y: value.view_pos_y })
-        }
-
-        #[inline]
-        pub fn get_water_mode(unused: u8) -> Result<GetWaterModeValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -22781,7 +22025,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -22810,7 +22054,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (group_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -22818,18 +22062,6 @@ use crate::Result;
         pub fn get_group_units_count(group_id: i32) -> Result<u32> {
             let value = crate::generated::selection::get_group_units_count(group_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_group_units_counts(group_id: i32) -> Result<SelectionCounts> {
-        let _ = (group_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_group_units_sorted(group_id: i32) -> Result<Vec<TeamUnitsByDef>> {
-        let _ = (group_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -22863,7 +22095,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -22871,12 +22103,6 @@ use crate::Result;
         pub fn get_selected_units_count(unused: u8) -> Result<u32> {
             let value = crate::generated::selection::get_selected_units_count(unused)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_selected_units_counts(unused: u8) -> Result<SelectionCounts> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -22904,7 +22130,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -23364,12 +22590,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_sound_devices(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_sound_effect_params(unused: u8) -> Result<bool> {
             let value = crate::generated::sound::get_sound_effect_params(unused)?;
             Ok(value)
@@ -23397,30 +22617,12 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn play_sound_file(sound_file: &str, volume: f32, pos: Float3, velocity: Float3, channel: i32) -> Result<bool> {
-        let _ = (sound_file, volume, pos, velocity, channel);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn play_sound_stream(ogg_file: &str, volume: f32, enqueue: bool) -> Result<bool> {
-        let _ = (ogg_file, volume, enqueue);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn preload_sound_item(sound_name: &str) -> Result<bool> {
             let mut sound_name_bytes = sound_name.as_bytes().to_vec();
             if sound_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             sound_name_bytes.push(0);
             let sound_name_cstr = core::ffi::CStr::from_bytes_with_nul(&sound_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
             crate::generated::borrowed::sound::preload_sound_item(&sound_name_cstr)
-        }
-
-        #[inline]
-        pub fn set_sound_effect_params(params: &SoundEffectParams) -> Result<bool> {
-        let _ = (params);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -23992,12 +23194,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_console_buffer(max_lines: u32) -> Result<Vec<ConsoleEntry>> {
-        let _ = (max_lines);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_current_tooltip(unused: u8) -> Result<String> {
             #[cfg(target_arch = "wasm32")]
             {
@@ -24022,7 +23218,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -24040,12 +23236,6 @@ use crate::Result;
         #[inline]
         pub fn send_ally_chat(message: &str) -> Result<bool> {
             crate::messages::send_ally_chat(message)
-        }
-
-        #[inline]
-        pub fn send_commands(command: &str, rest: &str) -> Result<bool> {
-        let _ = (command, rest);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -24086,12 +23276,6 @@ use crate::Result;
         #[inline]
         pub fn send_message_to_spectators(message: &str) -> Result<bool> {
             crate::messages::send_message_to_spectators(message)
-        }
-
-        #[inline]
-        pub fn send_message_to_team(team_id: i32, message: &str) -> Result<bool> {
-        let _ = (team_id, message);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -24573,60 +23757,6 @@ use crate::Result;
         pub struct GetConfigStringValue {
             pub value: String,
             pub exists: bool,
-        }
-
-        #[inline]
-        pub fn get_config_float(key: &str, default_value: Option<f32>) -> Result<GetConfigFloatValue> {
-        let _ = (key, default_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_config_int(key: &str, default_value: Option<i32>) -> Result<GetConfigIntValue> {
-        let _ = (key, default_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_config_params(unused: u8) -> Result<Vec<ConfigParam>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_config_string(key: &str, default_value: Option<&str>) -> Result<GetConfigStringValue> {
-        let _ = (key, default_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_log_sections(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_config_float(key: &str, value: f32, use_overlay: bool) -> Result<bool> {
-        let _ = (key, value, use_overlay);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_config_int(key: &str, value: i32, use_overlay: bool) -> Result<bool> {
-        let _ = (key, value, use_overlay);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_config_string(key: &str, value: &str, use_overlay: bool) -> Result<bool> {
-        let _ = (key, value, use_overlay);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_log_section_filter_level(section: &str, level: i32) -> Result<bool> {
-        let _ = (section, level);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -25140,12 +24270,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn trace_ray_between_positions(start: Float3, end: Float3, type_: &str) -> Result<Vec<TraceRayHit>> {
-        let _ = (start, end, type_);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn trace_ray_features(ray: Ray) -> Result<TraceRayFeaturesValue> {
             let value = crate::generated::tracing::trace_ray_features(crate::generated::tracing::Ray { origin: crate::generated::tracing::Float3 { x: ray.origin.x, y: ray.origin.y, z: ray.origin.z }, direction: crate::generated::tracing::Float3 { x: ray.direction.x, y: ray.direction.y, z: ray.direction.z }, length: ray.length, flags: ray.flags, ally_team_id: ray.ally_team_id })?;
             Ok(TraceRayFeaturesValue {
@@ -25155,24 +24279,6 @@ use crate::Result;
                 hit_pos: Float3 { x: value.3.x, y: value.3.y, z: value.3.z },
                 hit_normal: Float3 { x: value.4.x, y: value.4.y, z: value.4.z }
             })
-        }
-
-        #[inline]
-        pub fn trace_ray_ground_between_positions(start: Float3, end: Float3, options: TraceRayGroundBetweenPositionsOptions) -> Result<TraceRayGroundBetweenPositionsValue> {
-        let _ = (start, end, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn trace_ray_ground_in_direction(start: Float3, dir: Float3, options: TraceRayGroundInDirectionOptions) -> Result<TraceRayGroundInDirectionValue> {
-        let _ = (start, dir, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn trace_ray_in_direction(pos: Float3, dir: Float3, options: TraceRayInDirectionOptions, type_: &str) -> Result<Vec<TraceRayHit>> {
-        let _ = (pos, dir, options, type_);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -27363,30 +26469,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_water_texture(tex_type: &str) -> Result<String> {
-        let _ = (tex_type);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn load_cmd_colors_config(filename: &str) -> Result<bool> {
-        let _ = (filename);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn load_ctrl_panel_config(filename: &str) -> Result<bool> {
-        let _ = (filename);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn load_model_textures(model_name: &str) -> Result<bool> {
-        let _ = (model_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn pause_dolly_camera(percent: f32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::pause_dolly_camera(percent)?;
             Ok(value)
@@ -27430,24 +26512,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn sdl_set_text_input_rect(x: i32, y: i32, w: i32, h: i32) -> Result<bool> {
-        let _ = (x, y, w, h);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn sdl_start_text_input(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn sdl_stop_text_input(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn select_unit_map(unit_i_ds: &Vec<i32>, append: bool) -> Result<bool> {
             crate::generated::borrowed::unsynced_ctrl::select_unit_map(unit_i_ds.as_slice(), append)
         }
@@ -27456,12 +26520,6 @@ use crate::Result;
         pub fn set_active_command(cmd_index: i32, button: i32, options: SetActiveCommandOptions) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_active_command(cmd_index, button, crate::generated::unsynced_ctrl::SetActiveCommandOptions { left_click: options.left_click, right_click: options.right_click, alt: options.alt, ctrl: options.ctrl, meta: options.meta, shift: options.shift })?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn set_atmosphere(params: AtmosphereParams) -> Result<bool> {
-        let _ = (params);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -27495,33 +26553,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn set_clipboard(text: &str) -> Result<bool> {
-        let _ = (text);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_custom_command_draw_data(cmd_id: i32, cmd_reference: &DefRef, color: Float4, show_area: bool) -> Result<bool> {
-        let _ = (cmd_id, cmd_reference, color, show_area);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn set_custom_palette_color(index: i32, r: f32, g: f32, b: f32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_custom_palette_color(index, r, g, b)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn set_dolly_camera_curve(degree: i32, control_points: &Vec<Float4>, knots: &Vec<f32>) -> Result<bool> {
-        let _ = (degree, control_points, knots);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_dolly_camera_look_curve(degree: i32, control_points: &Vec<Float4>, knots: &Vec<f32>) -> Result<bool> {
-        let _ = (degree, control_points, knots);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -27649,12 +26683,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn set_map_rendering_params(params: MapRenderingParams) -> Result<bool> {
-        let _ = (params);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn set_map_shader(standard_shader_id: i32, deferred_shader_id: i32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_map_shader(standard_shader_id, deferred_shader_id)?;
             Ok(value)
@@ -27698,12 +26726,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn set_shock_front_factors(options: SetShockFrontFactorsOptions) -> Result<bool> {
-        let _ = (options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn set_sky_box_texture(tex_name: &str) -> Result<bool> {
             let mut tex_name_bytes = tex_name.as_bytes().to_vec();
             if tex_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
@@ -27716,12 +26738,6 @@ use crate::Result;
         pub fn set_sun_direction(dir: Float3, intensity: f32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_sun_direction(crate::generated::unsynced_ctrl::Float3 { x: dir.x, y: dir.y, z: dir.z }, intensity)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn set_sun_lighting(params: SunLightingParams) -> Result<bool> {
-        let _ = (params);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -27806,36 +26822,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn set_video_capturing_mode(allow_capture_mode: bool) -> Result<bool> {
-        let _ = (allow_capture_mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_video_capturing_time_offset(time_offset: f32) -> Result<bool> {
-        let _ = (time_offset);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_wm_caption(title: &str, title_short: &str) -> Result<bool> {
-        let _ = (title, title_short);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_wm_icon(icon_file_name: &str, force_resolution: bool) -> Result<bool> {
-        let _ = (icon_file_name, force_resolution);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_water_params(params: WaterParams) -> Result<bool> {
-        let _ = (params);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn set_water_texture(tex_type: &str, tex_name: &str) -> Result<bool> {
             let mut tex_type_bytes = tex_type.as_bytes().to_vec();
             if tex_type_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
@@ -27846,30 +26832,6 @@ use crate::Result;
             tex_name_bytes.push(0);
             let tex_name_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
             crate::generated::borrowed::unsynced_ctrl::set_water_texture(&tex_type_cstr, &tex_name_cstr)
-        }
-
-        #[inline]
-        pub fn set_window_geometry(display_index: i32, window_pos_x: i32, window_pos_y: i32, window_size_x: i32, window_size_y: i32, options: SetWindowGeometryOptions) -> Result<bool> {
-        let _ = (display_index, window_pos_x, window_pos_y, window_size_x, window_size_y, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_window_maximized(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_window_minimized(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn warp_mouse(x: i32, y: i32) -> Result<bool> {
-        let _ = (x, y);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -29854,33 +28816,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn active_fbo(fbo_id: u32, target: u32, identities: bool, callback: u32, user_data: u32) -> Result<()> {
-        let _ = (fbo_id, target, identities, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn active_shader(shader_id: u32, callback: u32, user_data: u32) -> Result<()> {
-        let _ = (shader_id, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn active_texture(tex_num: i32) -> Result<()> {
             crate::generated::gfx::active_texture(tex_num)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn add_atlas_texture(atlas_name: &str, texture_name: &str) -> Result<()> {
-        let _ = (atlas_name, texture_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn add_fallback_font(value: &str) -> Result<bool> {
-        let _ = (value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -29934,12 +28872,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn begin_end(primitive: u32, callback: u32, user_data: u32) -> Result<()> {
-        let _ = (primitive, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn begin_text(value: bool) -> Result<()> {
             crate::generated::gfx::begin_text(value)?;
             Ok(())
@@ -29955,18 +28887,6 @@ use crate::Result;
         pub fn bind_buffer_range_vbo(vbo_id: u32, binding_index: u32, element_offset: i32, element_count: i32, target: u32, bind: bool) -> Result<i32> {
             let value = crate::generated::gfx::bind_buffer_range_vbo(vbo_id, binding_index, element_offset, element_count, target, bind)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn bind_image_texture(unit: u32, name: &str, level: i32, layer: i32, layered: bool, access: u32, format: u32) -> Result<()> {
-        let _ = (unit, name, level, layer, layered, access, format);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn bind_texture(name: &str, tex_num: i32, enable: bool) -> Result<bool> {
-        let _ = (name, tex_num, enable);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30009,12 +28929,6 @@ use crate::Result;
         pub fn call_list(value: u32) -> Result<()> {
             crate::generated::gfx::call_list(value)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn change_texture_params(name: &str, params: GfxTextureParams) -> Result<()> {
-        let _ = (name, params);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30078,27 +28992,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn copy_to_texture(name: &str, xoff: i32, yoff: i32, x: i32, y: i32, width: i32, height: i32, target: u32, level: u32) -> Result<()> {
-        let _ = (name, xoff, yoff, x, y, width, height, target, level);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn copy_to_vbo(source_vboid: u32, destination_vboid: u32, copy_size_in_bytes: i32) -> Result<bool> {
             let value = crate::generated::gfx::copy_to_vbo(source_vboid, destination_vboid, copy_size_in_bytes)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn create_fbo(target: u32, attachments: &Vec<GfxFBOAttachment>, draw_buffers: &Vec<u32>, read_buffer: u32) -> Result<CreateFBOValue> {
-        let _ = (target, attachments, draw_buffers, read_buffer);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn create_list(callback: u32, user_data: u32) -> Result<u32> {
-        let _ = (callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30114,33 +29010,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn create_shader(definitions: &str, vertex: &str, tcs: &str, tes: &str, geometry: &str, fragment: &str, compute: &str, options: GfxCreateShaderOptions) -> Result<CreateShaderValue> {
-        let _ = (definitions, vertex, tcs, tes, geometry, fragment, compute, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn create_texture(xsize: i32, ysize: i32, zsize: i32, params: GfxTextureParams) -> Result<String> {
-        let _ = (xsize, ysize, zsize, params);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn create_texture_atlas(xsize: i32, ysize: i32, alloc_type: i32) -> Result<String> {
-        let _ = (xsize, ysize, alloc_type);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn culling(value: bool) -> Result<()> {
             crate::generated::gfx::culling(value)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn define_vbo(vbo_id: u32, elements_count: i32, element_array: bool, index_type: u32, use_default_attributes: bool, default_attribute_count: u32, attributes: &Vec<GfxVBOAttributeOptions>) -> Result<()> {
-        let _ = (vbo_id, elements_count, element_array, index_type, use_default_attributes, default_attribute_count, attributes);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30267,7 +29139,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (vbo_id as i32, attribute_index as i32, element_offset as i32, element_count as i32, u32::from(force_gpu_read) as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -30281,12 +29153,6 @@ use crate::Result;
         pub fn draw_elements_vao(vao_id: u32, mode: u32, draw_count: i32, base_index: i32, instance_count: i32, base_vertex: i32, base_instance: i32) -> Result<()> {
             crate::generated::gfx::draw_elements_vao(vao_id, mode, draw_count, base_index, instance_count, base_vertex, base_instance)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn draw_func_at_unit(unit_id: i32, use_mid_pos: bool, callback: u32, user_data: u32) -> Result<()> {
-        let _ = (unit_id, use_mid_pos, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30437,12 +29303,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn font_get_text_height(font_id: u32, text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<FontGetTextHeightValue> {
-        let _ = (font_id, text, x, y, size, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn font_get_text_width(font_id: u32, text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<f32> {
             let mut text_bytes = text.as_bytes().to_vec();
             if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
@@ -30453,18 +29313,6 @@ use crate::Result;
             options_bytes.push(0);
             let options_cstr = core::ffi::CStr::from_bytes_with_nul(&options_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
             crate::generated::borrowed::gfx::font_get_text_width(font_id, &text_cstr, x, y, size, &options_cstr)
-        }
-
-        #[inline]
-        pub fn font_print(font_id: u32, text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<()> {
-        let _ = (font_id, text, x, y, size, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn font_print_world(font_id: u32, text: &str, pos: Float3, size: f32, options: &str) -> Result<()> {
-        let _ = (font_id, text, pos, size, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30492,51 +29340,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn font_wrap_text(font_id: u32, text: &str, max_width: f32, max_height: f32, size: f32) -> Result<FontWrapTextValue> {
-        let _ = (font_id, text, max_width, max_height, size);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn frustum(left: f32, right: f32, bottom: f32, top: f32, near_val: f32, far_val: f32) -> Result<()> {
             crate::generated::gfx::frustum(left, right, bottom, top, near_val, far_val)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn generate_mipmap(name: &str) -> Result<()> {
-        let _ = (name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_active_uniforms(shader_id: u32) -> Result<Vec<GfxActiveUniformEntry>> {
-        let _ = (shader_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_atlas_texture(atlas_name: &str, texture_name: &str) -> Result<GetAtlasTextureValue> {
-        let _ = (atlas_name, texture_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_atmosphere(key: &str, mode: &str) -> Result<GetAtmosphereValue> {
-        let _ = (key, mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_console_commands(unused: u8) -> Result<Vec<GfxConsoleCommandEntry>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_engine_atlas_textures(name: &str) -> Result<Vec<GfxAtlasTextureEntry>> {
-        let _ = (name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30564,7 +29370,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -30575,12 +29381,6 @@ use crate::Result;
                 size_in_elements: value.0,
                 size_in_bytes_on_cpu: value.1
             })
-        }
-
-        #[inline]
-        pub fn get_engine_texture_names(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30608,44 +29408,14 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (index as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_fixed_state(param: &str) -> Result<GetFixedStateValue> {
-        let _ = (param);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_font_info(font_id: u32) -> Result<GetFontInfoValue> {
-        let _ = (font_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_global_tex_coords(value: &str) -> Result<GetGlobalTexCoordsValue> {
-        let _ = (value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_global_tex_names(unused: u8) -> Result<Vec<GfxAtlasTextureEntry>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
         pub fn get_idvbo(value: u32) -> Result<u32> {
             let value = crate::generated::gfx::get_idvbo(value)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_map_rendering(key: &str, mode: &str) -> Result<GetMapRenderingValue> {
-        let _ = (key, mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30717,7 +29487,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -30752,26 +29522,8 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (pname as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_subroutine_index(shader_id: u32, shader_type: u32, name: &str) -> Result<GetSubroutineIndexValue> {
-        let _ = (shader_id, shader_type, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_sun(key: &str, mode: &str) -> Result<GetSunValue> {
-        let _ = (key, mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_text_height(value: &str) -> Result<GetTextHeightValue> {
-        let _ = (value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30845,12 +29597,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_water_rendering(key: &str, mode: &str) -> Result<GetWaterRenderingValue> {
-        let _ = (key, mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn has_extension(value: &str) -> Result<bool> {
             let mut value_bytes = value.as_bytes().to_vec();
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
@@ -30910,12 +29656,6 @@ use crate::Result;
         pub fn line_width(value: f32) -> Result<()> {
             crate::generated::gfx::line_width(value)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn load_font(path: &str, size: i32, outline_width: i32, outline_weight: f32) -> Result<u32> {
-        let _ = (path, size, outline_width, outline_weight);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -30996,12 +29736,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn object_label(identifier: u32, object_id: u32, label: &str) -> Result<()> {
-        let _ = (identifier, object_id, label);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near_val: f32, far_val: f32) -> Result<()> {
             crate::generated::gfx::ortho(left, right, bottom, top, near_val, far_val)?;
             Ok(())
@@ -31062,21 +29796,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn push_debug_group(id: u32, message: &str, source_is_third_party: bool) -> Result<()> {
-        let _ = (id, message, source_is_third_party);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn push_matrix(unused: u8) -> Result<()> {
             crate::generated::gfx::push_matrix(unused)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn push_pop_matrix(callback: u32, user_data: u32) -> Result<()> {
-        let _ = (callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -31089,12 +29811,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn read_pixels(x: i32, y: i32, width: i32, height: i32, format: u32) -> Result<ReadPixelsValue> {
-        let _ = (x, y, width, height, format);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn rect(x1: f32, y1: f32, x2: f32, y2: f32) -> Result<()> {
             crate::generated::gfx::rect(x1, y1, x2, y2)?;
             Ok(())
@@ -31104,12 +29820,6 @@ use crate::Result;
         pub fn remove_from_submission_vao(vao_id: u32, index: i32) -> Result<()> {
             crate::generated::gfx::remove_from_submission_vao(vao_id, index)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn render_to_texture(name: &str, callback: u32, user_data: u32) -> Result<()> {
-        let _ = (name, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -31131,18 +29841,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn run_query(id: u32, callback: u32, user_data: u32) -> Result<()> {
-        let _ = (id, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn save_image(x: i32, y: i32, width: i32, height: i32, filename: &str, options: GfxSaveImageOptions, read_buffer: u32) -> Result<bool> {
-        let _ = (x, y, width, height, filename, options, read_buffer);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn scale(x: f32, y: f32, z: f32) -> Result<()> {
             crate::generated::gfx::scale(x, y, z)?;
             Ok(())
@@ -31158,18 +29856,6 @@ use crate::Result;
         pub fn secondary_color(x: f32, y: f32, z: f32) -> Result<()> {
             crate::generated::gfx::secondary_color(x, y, z)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn set_fbo_attachment(fbo_id: u32, attachment: u32, texture_name: &str, texture_target: u32, mip_level: i32, rbo_id: u32, use_rbo: bool) -> Result<()> {
-        let _ = (fbo_id, attachment, texture_name, texture_target, mip_level, rbo_id, use_rbo);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_fbo_draw_buffers(fbo_id: u32, buffers: &Vec<u32>) -> Result<()> {
-        let _ = (fbo_id, buffers);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -31204,12 +29890,6 @@ use crate::Result;
         pub fn shade_model(mode: u32) -> Result<()> {
             crate::generated::gfx::shade_model(mode)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn shape(primitive: u32, vertices: &Vec<GfxVertexData>) -> Result<()> {
-        let _ = (primitive, vertices);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -31297,21 +29977,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn text(text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<()> {
-        let _ = (text, x, y, size, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn text_env(target: u32, pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
             crate::generated::gfx::text_env(target, pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn texture_info(name: &str) -> Result<TextureInfoValue> {
-        let _ = (name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -31333,27 +30001,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn uniform_array_float(location: i32, values: &Vec<f32>) -> Result<()> {
-        let _ = (location, values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn uniform_array_int(location: i32, values: &Vec<i32>) -> Result<()> {
-        let _ = (location, values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn uniform_int(location: i32, values: &Vec<i32>, count: u32) -> Result<()> {
             crate::generated::gfx::uniform_int(location, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn uniform_matrix(location: i32, values: &Vec<f32>, transpose: bool) -> Result<()> {
-        let _ = (location, values, transpose);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -31414,18 +30064,6 @@ use crate::Result;
         pub fn unit_textures(object_id: i32, push: bool) -> Result<()> {
             crate::generated::gfx::unit_textures(object_id, push)?;
             Ok(())
-        }
-
-        #[inline]
-        pub fn unsafe_state(state: u32, reverse: bool, callback: u32, user_data: u32) -> Result<()> {
-        let _ = (state, reverse, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn upload_texture(name: &str, target: u32, level: i32, xoff: i32, yoff: i32, zoff: i32, width: i32, height: i32, depth: i32, format: u32, pixel_type: u32, data: &Vec<u8>) -> Result<()> {
-        let _ = (name, target, level, xoff, yoff, zoff, width, height, depth, format, pixel_type, data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -32329,18 +30967,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_all_icon_data_array(full_data: bool) -> Result<Vec<IconDataEntry>> {
-        let _ = (full_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_icon_data(icon_name: &str, full_data: bool) -> Result<IconDataEntry> {
-        let _ = (icon_name, full_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn unit_icon_get_draw(unit_id: i32) -> Result<bool> {
             let value = crate::generated::icons::unit_icon_get_draw(unit_id)?;
             Ok(value)
@@ -32755,12 +31381,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn add_world_text(text: &str, pos: Float3) -> Result<bool> {
-        let _ = (text, pos);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn add_world_unit(unit_def_id: i32, pos: Float3, team_id: i32, facing: i32) -> Result<bool> {
             let value = crate::generated::markers::add_world_unit(unit_def_id, crate::generated::markers::Float3 { x: pos.x, y: pos.y, z: pos.z }, team_id, facing)?;
             Ok(value)
@@ -32770,12 +31390,6 @@ use crate::Result;
         pub fn marker_add_line(from: Float3, to: Float3, local_only: bool, player_id: i32) -> Result<bool> {
             let value = crate::generated::markers::marker_add_line(crate::generated::markers::Float3 { x: from.x, y: from.y, z: from.z }, crate::generated::markers::Float3 { x: to.x, y: to.y, z: to.z }, local_only, player_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn marker_add_point(pos: Float3, text: &str, local_only: bool, player_id: i32) -> Result<bool> {
-        let _ = (pos, text, local_only, player_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -33628,7 +32242,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -33749,7 +32363,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (decal_id as i32, u32::from(main_tex) as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -33760,12 +32374,6 @@ use crate::Result;
                 tex_wrap_distance: value.0,
                 tex_traveled_distance: value.1
             })
-        }
-
-        #[inline]
-        pub fn get_ground_decal_textures(options: GetGroundDecalTexturesOptions) -> Result<GetGroundDecalTexturesValue> {
-        let _ = (options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -33799,7 +32407,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (decal_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -34504,138 +33112,6 @@ use crate::Result;
             pub success: bool,
         }
 
-        #[inline]
-        pub fn call_as_team(team_id: i32, callback: u32, user_data: u32) -> Result<bool> {
-        let _ = (team_id, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn clear_watch_dog_timer(thread_name: &str, keep_stopped: bool) -> Result<bool> {
-        let _ = (thread_name, keep_stopped);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn garbage_collect_ctrl(iters_per_batch: i32, num_steps_per_iter: i32, min_steps_per_iter: i32, max_steps_per_iter: i32, min_loop_run_time: f32, max_loop_run_time: f32, base_run_time_mult: f32, base_mem_load_mult: f32) -> Result<bool> {
-        let _ = (iters_per_batch, num_steps_per_iter, min_steps_per_iter, max_steps_per_iter, min_loop_run_time, max_loop_run_time, base_run_time_mult, base_mem_load_mult);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_game_name(unused: u8) -> Result<String> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_game_state(max_latency: f32) -> Result<GetGameStateValue> {
-        let _ = (max_latency);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_gather_mode(unused: u8) -> Result<i32> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_menu_name(unused: u8) -> Result<String> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_replay_file_path(unused: u8) -> Result<GetReplayFilePathValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_replay_length(unused: u8) -> Result<GetReplayLengthValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_replay_recording_file_path(unused: u8) -> Result<GetReplayRecordingFilePathValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_video_capturing_mode(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_window_display_mode(unused: u8) -> Result<GetWindowDisplayModeValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn is_replay(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn ping(tag: u32) -> Result<bool> {
-        let _ = (tag);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn quit(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn reload(start_script: &str) -> Result<bool> {
-        let _ = (start_script);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn request_start_position(pos: Float3, ready: bool) -> Result<bool> {
-        let _ = (pos, ready);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn restart(cmd_args: &str, start_script: &str) -> Result<bool> {
-        let _ = (cmd_args, start_script);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_share_level(resource: &str, level: f32) -> Result<bool> {
-        let _ = (resource, level);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn share_resources(team_id: i32, resource: &str, amount: f32) -> Result<bool> {
-        let _ = (team_id, resource, amount);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn start(cmd_args: &str, start_script: &str) -> Result<bool> {
-        let _ = (cmd_args, start_script);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn yield_(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
     }
 
     pub mod profiling {
@@ -35100,66 +33576,6 @@ use crate::Result;
         pub struct GetVidMemUsageValue {
             pub used_mb: f32,
             pub available_mb: f32,
-        }
-
-        #[inline]
-        pub fn diff_timers(end_timer: u64, start_timer: u64, options: DiffTimersOptions) -> Result<f32> {
-        let _ = (end_timer, start_timer, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_draw_seconds(unused: u8) -> Result<f32> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
-        let _ = (last_frame_time);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_lua_mem_usage(unused: u8) -> Result<GetLuaMemUsageValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_profiler_record_names(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_profiler_time_record(name: &str, include_frame_data: bool) -> Result<GetProfilerTimeRecordValue> {
-        let _ = (name, include_frame_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_synced_gc_info(collect: bool) -> Result<f32> {
-        let _ = (collect);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_timer(unused: u8) -> Result<u64> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_timer_micros(unused: u8) -> Result<u64> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_vid_mem_usage(unused: u8) -> Result<GetVidMemUsageValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -36938,1086 +35354,6 @@ use crate::Result;
             pub y: i32,
         }
 
-        #[inline]
-        pub fn add_translation_string(key: &str, translation: &str) -> Result<bool> {
-        let _ = (key, translation);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn clear_document_path_requests(document_path: &str) -> Result<bool> {
-        let _ = (document_path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn clear_translations(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_activate_theme(context_handle: u64, name: &str, value: bool) -> Result<bool> {
-        let _ = (context_handle, name, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_add_event_listener(context_handle: u64, event: &str, in_capture_phase: bool, callback: u32, user_data: u32, destroy_callback: u32) -> Result<ContextAddEventListenerValue> {
-        let _ = (context_handle, event, in_capture_phase, callback, user_data, destroy_callback);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_create_data_model(context_handle: u64, name: &str) -> Result<ContextCreateDataModelValue> {
-        let _ = (context_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_create_document(context_handle: u64, tag: &str) -> Result<ContextCreateDocumentValue> {
-        let _ = (context_handle, tag);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_enable_mouse_cursor(context_handle: u64, value: bool) -> Result<bool> {
-        let _ = (context_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_get_density_independent_pixel_ratio(context_handle: u64) -> Result<f32> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_get_dimensions(context_handle: u64) -> Result<ContextGetDimensionsValue> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_get_document(context_handle: u64, name: &str) -> Result<ContextGetDocumentValue> {
-        let _ = (context_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_get_element_at_point(context_handle: u64, x: f32, y: f32, ignore_element_handle: u64) -> Result<ContextGetElementAtPointValue> {
-        let _ = (context_handle, x, y, ignore_element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_get_focus_element(context_handle: u64) -> Result<ContextGetFocusElementValue> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_get_hover_element(context_handle: u64) -> Result<ContextGetHoverElementValue> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_get_name(context_handle: u64) -> Result<String> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_get_root_element(context_handle: u64) -> Result<ContextGetRootElementValue> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_is_mouse_interacting(context_handle: u64) -> Result<bool> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_is_theme_active(context_handle: u64, name: &str) -> Result<bool> {
-        let _ = (context_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_load_document(context_handle: u64, document_path: &str) -> Result<ContextLoadDocumentValue> {
-        let _ = (context_handle, document_path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_open_data_model(context_handle: u64, name: &str) -> Result<ContextOpenDataModelValue> {
-        let _ = (context_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_process_key_down(context_handle: u64, key: i32, key_modifier_state: i32) -> Result<bool> {
-        let _ = (context_handle, key, key_modifier_state);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_process_key_up(context_handle: u64, key: i32, key_modifier_state: i32) -> Result<bool> {
-        let _ = (context_handle, key, key_modifier_state);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_process_mouse_button_down(context_handle: u64, button: i32, key_modifier_state: i32) -> Result<bool> {
-        let _ = (context_handle, button, key_modifier_state);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_process_mouse_button_up(context_handle: u64, button: i32, key_modifier_state: i32) -> Result<bool> {
-        let _ = (context_handle, button, key_modifier_state);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_process_mouse_leave(context_handle: u64) -> Result<bool> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_process_mouse_move(context_handle: u64, x: f32, y: f32, key_modifier_state: i32) -> Result<bool> {
-        let _ = (context_handle, x, y, key_modifier_state);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_process_mouse_wheel(context_handle: u64, x: f32, y: f32, key_modifier_state: i32) -> Result<bool> {
-        let _ = (context_handle, x, y, key_modifier_state);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_process_text_input(context_handle: u64, text: &str) -> Result<bool> {
-        let _ = (context_handle, text);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_pull_document_to_front(context_handle: u64, document_handle: u64) -> Result<bool> {
-        let _ = (context_handle, document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_pull_to_front(context_handle: u64) -> Result<bool> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_push_document_to_back(context_handle: u64, document_handle: u64) -> Result<bool> {
-        let _ = (context_handle, document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_remove_data_model(context_handle: u64, name: &str) -> Result<bool> {
-        let _ = (context_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_remove_event_listener(context_handle: u64, event_listener_handle: u64, event: &str, in_capture_phase: bool) -> Result<bool> {
-        let _ = (context_handle, event_listener_handle, event, in_capture_phase);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_render(context_handle: u64) -> Result<bool> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_set_density_independent_pixel_ratio(context_handle: u64, value: f32) -> Result<bool> {
-        let _ = (context_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_set_dimensions(context_handle: u64, x: i32, y: i32) -> Result<bool> {
-        let _ = (context_handle, x, y);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_set_pointer_capture(context_handle: u64, anchor_x: i32, anchor_y: i32, active: bool) -> Result<bool> {
-        let _ = (context_handle, anchor_x, anchor_y, active);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_take_pointer_capture_delta(context_handle: u64) -> Result<ContextTakePointerCaptureDeltaValue> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_unload_all_documents(context_handle: u64) -> Result<bool> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_unload_document(context_handle: u64, document_handle: u64) -> Result<bool> {
-        let _ = (context_handle, document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn context_update(context_handle: u64) -> Result<bool> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn create_context(name: &str) -> Result<CreateContextValue> {
-        let _ = (name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_bool(data_model_handle: u64, name: &str, initial_value: bool) -> Result<DataModelBindBoolValue> {
-        let _ = (data_model_handle, name, initial_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_color(data_model_handle: u64, name: &str, red: u8, green: u8, blue: u8, alpha: u8) -> Result<DataModelBindColorValue> {
-        let _ = (data_model_handle, name, red, green, blue, alpha);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_event(data_model_handle: u64, name: &str, callback: u32, user_data: u32, destroy_callback: u32, field_types: &Vec<u8>) -> Result<DataModelBindEventValue> {
-        let _ = (data_model_handle, name, callback, user_data, destroy_callback, field_types);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_float(data_model_handle: u64, name: &str, initial_value: f32) -> Result<DataModelBindFloatValue> {
-        let _ = (data_model_handle, name, initial_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_int(data_model_handle: u64, name: &str, initial_value: i32) -> Result<DataModelBindIntValue> {
-        let _ = (data_model_handle, name, initial_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_percent(data_model_handle: u64, name: &str, initial_value: f32) -> Result<DataModelBindPercentValue> {
-        let _ = (data_model_handle, name, initial_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_pixels(data_model_handle: u64, name: &str, initial_value: f32) -> Result<DataModelBindPixelsValue> {
-        let _ = (data_model_handle, name, initial_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_rows(data_model_handle: u64, name: &str, fields: &Vec<RmlDataFieldDef>) -> Result<DataModelBindRowsValue> {
-        let _ = (data_model_handle, name, fields);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_bind_string(data_model_handle: u64, name: &str, initial_value: &str) -> Result<DataModelBindStringValue> {
-        let _ = (data_model_handle, name, initial_value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_get_bool(variable_handle: u64) -> Result<DataModelGetBoolValue> {
-        let _ = (variable_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_get_color(variable_handle: u64) -> Result<DataModelGetColorValue> {
-        let _ = (variable_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_get_float(variable_handle: u64) -> Result<DataModelGetFloatValue> {
-        let _ = (variable_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_get_int(variable_handle: u64) -> Result<DataModelGetIntValue> {
-        let _ = (variable_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_get_percent(variable_handle: u64) -> Result<DataModelGetPercentValue> {
-        let _ = (variable_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_get_pixels(variable_handle: u64) -> Result<DataModelGetPixelsValue> {
-        let _ = (variable_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_get_string(variable_handle: u64) -> Result<DataModelGetStringValue> {
-        let _ = (variable_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_set_bool(variable_handle: u64, value: bool) -> Result<bool> {
-        let _ = (variable_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_set_color(variable_handle: u64, red: u8, green: u8, blue: u8, alpha: u8) -> Result<bool> {
-        let _ = (variable_handle, red, green, blue, alpha);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_set_float(variable_handle: u64, value: f32) -> Result<bool> {
-        let _ = (variable_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_set_int(variable_handle: u64, value: i32) -> Result<bool> {
-        let _ = (variable_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_set_percent(variable_handle: u64, value: f32) -> Result<bool> {
-        let _ = (variable_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_set_pixels(variable_handle: u64, value: f32) -> Result<bool> {
-        let _ = (variable_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_set_rows(rows_handle: u64, values: &Vec<RmlDataValue>) -> Result<bool> {
-        let _ = (rows_handle, values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_set_string(variable_handle: u64, value: &str) -> Result<bool> {
-        let _ = (variable_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn data_model_unbind_event(event_handle: u64) -> Result<bool> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_append_to_style_sheet(document_handle: u64, value: &str) -> Result<bool> {
-        let _ = (document_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_close(document_handle: u64) -> Result<bool> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_create_element(document_handle: u64, tag_name: &str) -> Result<DocumentCreateElementValue> {
-        let _ = (document_handle, tag_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_create_text_node(document_handle: u64, value: &str) -> Result<DocumentCreateTextNodeValue> {
-        let _ = (document_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_get_context(document_handle: u64) -> Result<DocumentGetContextValue> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_get_title(document_handle: u64) -> Result<String> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_get_url(document_handle: u64) -> Result<String> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_hide(document_handle: u64) -> Result<bool> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_is_modal(document_handle: u64) -> Result<bool> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_load_external_script(document_handle: u64, value: &str) -> Result<bool> {
-        let _ = (document_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_load_inline_script(document_handle: u64, content: &str, source_path: &str, source_line: i32) -> Result<bool> {
-        let _ = (document_handle, content, source_path, source_line);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_pull_to_front(document_handle: u64) -> Result<bool> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_push_to_back(document_handle: u64) -> Result<bool> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_reload_style_sheet(document_handle: u64) -> Result<bool> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_set_title(document_handle: u64, title: &str) -> Result<bool> {
-        let _ = (document_handle, title);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_show(document_handle: u64, options: RmlDocumentShowOptions) -> Result<bool> {
-        let _ = (document_handle, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn document_update_document(document_handle: u64) -> Result<bool> {
-        let _ = (document_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_add_event_listener(element_handle: u64, event: &str, in_capture_phase: bool, callback: u32, user_data: u32, destroy_callback: u32) -> Result<ElementAddEventListenerValue> {
-        let _ = (element_handle, event, in_capture_phase, callback, user_data, destroy_callback);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_append_child(element_handle: u64, element_ptr_handle: u64) -> Result<ElementAppendChildValue> {
-        let _ = (element_handle, element_ptr_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_are_pseudo_classes_set(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_blur(element_handle: u64) -> Result<bool> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_click(element_handle: u64) -> Result<bool> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_clone(element_handle: u64) -> Result<ElementCloneValue> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_closest(element_handle: u64, value: &str) -> Result<ElementClosestValue> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_dispatch_event(element_handle: u64, event: &str) -> Result<bool> {
-        let _ = (element_handle, event);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_focus(element_handle: u64) -> Result<bool> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_input_get_selection(element_handle: u64) -> Result<ElementFormControlInputGetSelectionValue> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_input_select(element_handle: u64) -> Result<bool> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_input_set_selection(element_handle: u64, start: i32, end: i32) -> Result<bool> {
-        let _ = (element_handle, start, end);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_select_add(element_handle: u64, element_ptr_handle: u64, before: i32) -> Result<bool> {
-        let _ = (element_handle, element_ptr_handle, before);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_select_remove(element_handle: u64, index: i32) -> Result<bool> {
-        let _ = (element_handle, index);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_select_remove_all(element_handle: u64) -> Result<bool> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_text_area_get_selection(element_handle: u64) -> Result<ElementFormControlTextAreaGetSelectionValue> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_text_area_select(element_handle: u64) -> Result<bool> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_control_text_area_set_selection(element_handle: u64, start: i32, end: i32) -> Result<bool> {
-        let _ = (element_handle, start, end);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_form_submit(element_handle: u64, name: &str, value: &str) -> Result<bool> {
-        let _ = (element_handle, name, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_active_pseudo_classes(element_handle: u64) -> Result<Vec<String>> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_attribute(element_handle: u64, name: &str) -> Result<ElementGetAttributeValue> {
-        let _ = (element_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_child(element_handle: u64, index: i32) -> Result<ElementGetChildValue> {
-        let _ = (element_handle, index);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_class_name(element_handle: u64) -> Result<String> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_element_by_id(element_handle: u64, value: &str) -> Result<ElementGetElementByIdValue> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_elements_by_class_name(element_handle: u64, value: &str) -> Result<Vec<u64>> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_elements_by_class_name_count(element_handle: u64, value: &str) -> Result<i32> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_elements_by_tag_name(element_handle: u64, value: &str) -> Result<Vec<u64>> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_elements_by_tag_name_count(element_handle: u64, value: &str) -> Result<i32> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_id(element_handle: u64) -> Result<String> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_inner_rml(element_handle: u64) -> Result<String> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_rect(element_handle: u64) -> Result<ElementGetRectValue> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_scroll_left(element_handle: u64) -> Result<i32> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_scroll_top(element_handle: u64) -> Result<i32> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_tag_name(element_handle: u64) -> Result<String> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_get_value(element_handle: u64) -> Result<String> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_has_attribute(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_has_child_nodes(element_handle: u64) -> Result<bool> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_insert_before(element_handle: u64, element_ptr_handle: u64, adjacent_element_handle: u64) -> Result<ElementInsertBeforeValue> {
-        let _ = (element_handle, element_ptr_handle, adjacent_element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_is_class_set(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_is_point_within_element(element_handle: u64, x: f32, y: f32) -> Result<bool> {
-        let _ = (element_handle, x, y);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_is_pseudo_class_set(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_is_visible(element_handle: u64) -> Result<bool> {
-        let _ = (element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_matches(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_process_default_action(element_handle: u64, event_handle: u64) -> Result<bool> {
-        let _ = (element_handle, event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_query_selector(element_handle: u64, value: &str) -> Result<ElementQuerySelectorValue> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_query_selector_all(element_handle: u64, value: &str) -> Result<Vec<u64>> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_query_selector_all_count(element_handle: u64, value: &str) -> Result<i32> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_remove_attribute(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_remove_child(element_handle: u64, child_element_handle: u64) -> Result<ElementRemoveChildValue> {
-        let _ = (element_handle, child_element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_remove_event_listener(element_handle: u64, event_listener_handle: u64, event: &str, in_capture_phase: bool) -> Result<bool> {
-        let _ = (element_handle, event_listener_handle, event, in_capture_phase);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_replace_child(element_handle: u64, element_ptr_handle: u64, replaced_element_handle: u64) -> Result<ElementReplaceChildValue> {
-        let _ = (element_handle, element_ptr_handle, replaced_element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_scroll_into_view(element_handle: u64, align_with_top: bool) -> Result<bool> {
-        let _ = (element_handle, align_with_top);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_set_attribute(element_handle: u64, name: &str, value: &str) -> Result<bool> {
-        let _ = (element_handle, name, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_set_class(element_handle: u64, name: &str, value: bool) -> Result<bool> {
-        let _ = (element_handle, name, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_set_class_name(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_set_id(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_set_inner_rml(element_handle: u64, value: &str) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_set_pseudo_class(element_handle: u64, name: &str, value: bool) -> Result<bool> {
-        let _ = (element_handle, name, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_set_scroll_left(element_handle: u64, value: i32) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_set_scroll_top(element_handle: u64, value: i32) -> Result<bool> {
-        let _ = (element_handle, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_tab_set_remove_tab(element_handle: u64, index: i32) -> Result<bool> {
-        let _ = (element_handle, index);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_tab_set_set_panel(element_handle: u64, index: i32, rml: &str) -> Result<bool> {
-        let _ = (element_handle, index, rml);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn element_tab_set_set_tab(element_handle: u64, index: i32, rml: &str) -> Result<bool> {
-        let _ = (element_handle, index, rml);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_current(unused: u8) -> Result<EventGetCurrentValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_current_element(event_handle: u64) -> Result<EventGetCurrentElementValue> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_parameter_bool(event_handle: u64, name: &str) -> Result<EventGetParameterBoolValue> {
-        let _ = (event_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_parameter_float(event_handle: u64, name: &str) -> Result<EventGetParameterFloatValue> {
-        let _ = (event_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_parameter_int(event_handle: u64, name: &str) -> Result<EventGetParameterIntValue> {
-        let _ = (event_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_parameter_string(event_handle: u64, name: &str) -> Result<EventGetParameterStringValue> {
-        let _ = (event_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_parameter_type(event_handle: u64, name: &str) -> Result<EventGetParameterTypeValue> {
-        let _ = (event_handle, name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_phase(event_handle: u64) -> Result<EventGetPhaseValue> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_target_element(event_handle: u64) -> Result<EventGetTargetElementValue> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_get_type(event_handle: u64) -> Result<EventGetTypeValue> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_is_immediate_propagating(event_handle: u64) -> Result<EventIsImmediatePropagatingValue> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_is_interruptible(event_handle: u64) -> Result<EventIsInterruptibleValue> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_is_propagating(event_handle: u64) -> Result<EventIsPropagatingValue> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_listener_on_attach(event_listener_handle: u64, element_handle: u64) -> Result<bool> {
-        let _ = (event_listener_handle, element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_listener_on_detach(event_listener_handle: u64, element_handle: u64) -> Result<bool> {
-        let _ = (event_listener_handle, element_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_listener_process_event(event_listener_handle: u64, event_handle: u64) -> Result<bool> {
-        let _ = (event_listener_handle, event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_stop_immediate_propagation(event_handle: u64) -> Result<bool> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn event_stop_propagation(event_handle: u64) -> Result<bool> {
-        let _ = (event_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_context(name: &str) -> Result<GetContextValue> {
-        let _ = (name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_document_path_requests(document_path: &str) -> Result<Vec<String>> {
-        let _ = (document_path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_version(unused: u8) -> Result<String> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn is_ready(unused: u8) -> Result<bool> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn load_font_face(file_path: &str, fallback: bool, weight: Option<i32>) -> Result<bool> {
-        let _ = (file_path, fallback, weight);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn regiser_event_type(event_type: &str, options: RmlRegisterEventTypeOptions) -> Result<i32> {
-        let _ = (event_type, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn register_event_type(event_type: &str, options: RmlRegisterEventTypeOptions) -> Result<i32> {
-        let _ = (event_type, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn remove_context(context_handle: u64) -> Result<bool> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn remove_context_by_name(name: &str) -> Result<bool> {
-        let _ = (name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_debug_context(context_handle: u64) -> Result<bool> {
-        let _ = (context_handle);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_debug_context_by_name(name: &str) -> Result<bool> {
-        let _ = (name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_mouse_cursor_alias(rml_name: &str, recoil_name: &str) -> Result<bool> {
-        let _ = (rml_name, recoil_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn sol_lua_data_model_set_dirty(data_model_handle: u64, property: &str) -> Result<bool> {
-        let _ = (data_model_handle, property);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn vector2f_new(x: f32, y: f32) -> Result<Vector2fNewValue> {
-        let _ = (x, y);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn vector2i_new(x: i32, y: i32) -> Result<Vector2iNewValue> {
-        let _ = (x, y);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
     }
 
     pub mod vfs {
@@ -38933,318 +36269,6 @@ use crate::Result;
             pub square_size: i32,
             pub num_squares_x: i32,
             pub num_squares_z: i32,
-        }
-
-        #[inline]
-        pub fn abort_download(id: i32) -> Result<bool> {
-        let _ = (id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn calculate_hash(data: &Vec<u8>, hash_type: i32) -> Result<String> {
-        let _ = (data, hash_type);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn compress_folder(folder_path: &str, archive_type: &str, compressed_file_path: &str, include_folder: bool, mode: &str) -> Result<bool> {
-        let _ = (folder_path, archive_type, compressed_file_path, include_folder, mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn create_dir(path: &str) -> Result<bool> {
-        let _ = (path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn dir_list(path: &str, pattern: &str, mode: &str, recursive: bool) -> Result<Vec<DirEntry>> {
-        let _ = (path, pattern, mode, recursive);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn download_archive(filename: &str, category: &str) -> Result<()> {
-        let _ = (filename, category);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn extract_mod_archive_file(path: &str) -> Result<bool> {
-        let _ = (path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn file_exists(path: &str) -> Result<bool> {
-        let _ = (path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_all_archives(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_archive_checksum(archive_name: &str) -> Result<GetArchiveChecksumValue> {
-        let _ = (archive_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_archive_containing_file(path: &str, mode: &str) -> Result<String> {
-        let _ = (path, mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_archive_dependencies(archive_name: &str) -> Result<Vec<String>> {
-        let _ = (archive_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_archive_info(archive_name: &str) -> Result<Vec<ArchiveInfoEntry>> {
-        let _ = (archive_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_archive_path(archive_name: &str) -> Result<String> {
-        let _ = (archive_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_archive_replaces(archive_name: &str) -> Result<Vec<String>> {
-        let _ = (archive_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_archives(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_available_a_is(game_archive_name: &str, map_archive_name: &str) -> Result<Vec<AIInfoEntry>> {
-        let _ = (game_archive_name, map_archive_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_file_absolute_path(path: &str, mode: &str) -> Result<String> {
-        let _ = (path, mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_file_info(path: &str) -> Result<GetFileInfoValue> {
-        let _ = (path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_file_size(path: &str) -> Result<u32> {
-        let _ = (path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_games(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_loaded_archives(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_map_square_texture(tex_square_x: i32, tex_square_y: i32, lod_min: i32, texture_name: &str, lod_max: i32) -> Result<bool> {
-        let _ = (tex_square_x, tex_square_y, lod_min, texture_name, lod_max);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_map_square_texture_info(unused: u8) -> Result<GetMapSquareTextureInfoValue> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_maps(unused: u8) -> Result<Vec<String>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_name_from_rapid_tag(rapid_tag: &str) -> Result<String> {
-        let _ = (rapid_tag);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn has_archive(archive_name: &str) -> Result<bool> {
-        let _ = (archive_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn is_directory(path: &str) -> Result<bool> {
-        let _ = (path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn list_dir(path: &str, pattern: &str, mode: &str, recursive: bool) -> Result<Vec<DirEntry>> {
-        let _ = (path, pattern, mode, recursive);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn load_file(path: &str, mode: &str) -> Result<Vec<u8>> {
-        let _ = (path, mode);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn pack_f32(values: &Vec<f32>) -> Result<Vec<u8>> {
-        let _ = (values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn pack_s16(values: &Vec<i16>) -> Result<Vec<u8>> {
-        let _ = (values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn pack_s32(values: &Vec<i32>) -> Result<Vec<u8>> {
-        let _ = (values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn pack_s8(values: &Vec<i8>) -> Result<Vec<u8>> {
-        let _ = (values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn pack_u16(values: &Vec<u16>) -> Result<Vec<u8>> {
-        let _ = (values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn pack_u32(values: &Vec<u32>) -> Result<Vec<u8>> {
-        let _ = (values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn pack_u8(values: &Vec<u8>) -> Result<Vec<u8>> {
-        let _ = (values);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn read_file(path: &str) -> Result<Vec<u8>> {
-        let _ = (path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn read_file_as_string(path: &str) -> Result<String> {
-        let _ = (path);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn scan_all_dirs(unused: u8) -> Result<()> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn set_map_square_texture(tex_square_x: i32, tex_square_y: i32, texture_name: &str) -> Result<bool> {
-        let _ = (tex_square_x, tex_square_y, texture_name);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn sub_dirs(path: &str, pattern: &str, mode: &str, recursive: bool) -> Result<Vec<String>> {
-        let _ = (path, pattern, mode, recursive);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn unpack_f32(data: &Vec<u8>, byte_offset: u32, count: u32) -> Result<Vec<f32>> {
-        let _ = (data, byte_offset, count);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn unpack_s16(data: &Vec<u8>, byte_offset: u32, count: u32) -> Result<Vec<i16>> {
-        let _ = (data, byte_offset, count);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn unpack_s32(data: &Vec<u8>, byte_offset: u32, count: u32) -> Result<Vec<i32>> {
-        let _ = (data, byte_offset, count);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn unpack_s8(data: &Vec<u8>, byte_offset: u32, count: u32) -> Result<Vec<i8>> {
-        let _ = (data, byte_offset, count);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn unpack_u16(data: &Vec<u8>, byte_offset: u32, count: u32) -> Result<Vec<u16>> {
-        let _ = (data, byte_offset, count);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn unpack_u32(data: &Vec<u8>, byte_offset: u32, count: u32) -> Result<Vec<u32>> {
-        let _ = (data, byte_offset, count);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn unpack_u8(data: &Vec<u8>, byte_offset: u32, count: u32) -> Result<Vec<u8>> {
-        let _ = (data, byte_offset, count);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn use_archive(archive_name: &str, callback: u32, user_data: u32) -> Result<bool> {
-        let _ = (archive_name, callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn zlib_compress(data: &Vec<u8>) -> Result<Vec<u8>> {
-        let _ = (data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn zlib_decompress(data: &Vec<u8>) -> Result<Vec<u8>> {
-        let _ = (data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -40188,18 +37212,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_active_cmd_desc(cmd_index: i32) -> Result<GetActiveCmdDescValue> {
-        let _ = (cmd_index);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_active_cmd_descs(unused: u8) -> Result<Vec<ActiveCommandDescription>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_box_selection_by_engine(unused: u8) -> Result<bool> {
             let value = crate::generated::unsynced_read::get_box_selection_by_engine(unused)?;
             Ok(value)
@@ -40242,7 +37254,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -40285,12 +37297,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn get_last_message_positions(unused: u8) -> Result<Vec<Float3>> {
-        let _ = (unused);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_nano_projectile_params(unused: u8) -> Result<GetNanoProjectileParamsValue> {
             let value = crate::generated::unsynced_read::get_nano_projectile_params(unused)?;
             Ok(GetNanoProjectileParamsValue {
@@ -40328,7 +37334,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (projectile_id as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -40357,7 +37363,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (unused as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -40390,12 +37396,6 @@ use crate::Result;
         pub fn is_unit_selected(unit_id: i32) -> Result<bool> {
             let value = crate::generated::unsynced_read::is_unit_selected(unit_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn solve_nurbs_curve(degree: i32, points: &Vec<Float4>, knots: &Vec<f32>, segments: i32) -> Result<SolveNURBSCurveValue> {
-        let _ = (degree, points, knots, segments);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
     }
@@ -46250,33 +43250,15 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn bugger_off(pos: Float3, radius: f32, team_id: i32, options: BuggerOffOptions, exclude_unit_def_i_ds: &Vec<i32>) -> Result<bool> {
-        let _ = (pos, radius, team_id, options, exclude_unit_def_i_ds);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn clear_unit_goal(unit_id: i32, cancel_raw: bool) -> Result<bool> {
             let value = crate::generated::unit_control::clear_unit_goal(unit_id, cancel_raw)?;
             Ok(value)
         }
 
         #[inline]
-        pub fn create_unit(unit_def: &DefRef, pos: Float3, facing: i32, team_id: i32, options: CreateUnitOptions) -> Result<i32> {
-        let _ = (unit_def, pos, facing, team_id, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn destroy_unit(unit_id: i32, options: DestroyUnitOptions) -> Result<bool> {
             let value = crate::generated::unit_control::destroy_unit(unit_id, crate::generated::unit_control::DestroyUnitOptions { selfd: options.selfd, reclaimed: options.reclaimed, attacker_id: options.attacker_id, recycle_id: options.recycle_id })?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn edit_unit_cmd_desc(unit_id: i32, cmd_desc_index: u32, cmd_desc: &NativeCommandDescription) -> Result<bool> {
-        let _ = (unit_id, cmd_desc_index, cmd_desc);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -46304,32 +43286,8 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn give_order_array_to_unit(unit_id: i32, commands: &Vec<NativeCommand>) -> Result<bool> {
-        let _ = (unit_id, commands);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn give_order_array_to_unit_array(unit_i_ds: &Vec<i32>, commands: &Vec<NativeCommand>, pairwise: bool) -> Result<i32> {
-        let _ = (unit_i_ds, commands, pairwise);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn give_order_to_unit(unit_id: i32, cmd_id: i32, params: &Vec<f32>, options: u32, timeout: i32) -> Result<bool> {
-        let _ = (unit_id, cmd_id, params, options, timeout);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn give_order_to_unit_array(unit_i_ds: &Vec<i32>, cmd_id: i32, params: &Vec<f32>, options: u32, timeout: i32) -> Result<bool> {
             crate::generated::borrowed::unit_control::give_order_to_unit_array(unit_i_ds.as_slice(), cmd_id, params.as_slice(), options, timeout)
-        }
-
-        #[inline]
-        pub fn insert_unit_cmd_desc(unit_id: i32, cmd_desc_index: i32, cmd_desc: &NativeCommandDescription) -> Result<bool> {
-        let _ = (unit_id, cmd_desc_index, cmd_desc);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -46366,12 +43324,6 @@ use crate::Result;
         pub fn set_unit_blocking(unit_id: i32, options: SetUnitBlockingOptions) -> Result<bool> {
             let value = crate::generated::unit_control::set_unit_blocking(unit_id, crate::generated::unit_control::SetUnitBlockingOptions { blocking: options.blocking, solid_objects: options.solid_objects, projectiles: options.projectiles, quad_map_rays: options.quad_map_rays, crushable: options.crushable, block_enemy_pushing: options.block_enemy_pushing, block_height_changes: options.block_height_changes })?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn set_unit_build_params(unit_id: i32, param_name: &str, value: NumberOrBool) -> Result<bool> {
-        let _ = (unit_id, param_name, value);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -46420,12 +43372,6 @@ use crate::Result;
         pub fn set_unit_experience(unit_id: i32, experience: f32) -> Result<bool> {
             let value = crate::generated::unit_control::set_unit_experience(unit_id, experience)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn set_unit_flanking(unit_id: i32, type_: &str, args: Float3) -> Result<bool> {
-        let _ = (unit_id, type_, args);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -49639,12 +46585,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn create_feature(feature_def: &DefRef, pos: Float3, facing: i32, team_id: i32, feature_id: i32) -> Result<i32> {
-        let _ = (feature_def, pos, facing, team_id, feature_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn create_feature_wreck(feature_id: i32, wreck_level: i32, do_smoke: bool) -> Result<i32> {
             let value = crate::generated::feature_control::create_feature_wreck(feature_id, wreck_level, do_smoke)?;
             Ok(value)
@@ -49780,12 +46720,6 @@ use crate::Result;
         pub fn set_feature_resources(feature_id: i32, metal: f32, energy: f32, reclaim_time: f32, reclaim_left: f32, feature_def_metal: f32, feature_def_energy: f32) -> Result<bool> {
             let value = crate::generated::feature_control::set_feature_resources(feature_id, metal, energy, reclaim_time, reclaim_left, feature_def_metal, feature_def_energy)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn set_feature_resurrect(feature_id: i32, unit_def: &DefRef, facing: i32, progress: f32) -> Result<bool> {
-        let _ = (feature_id, unit_def, facing, progress);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -52800,12 +49734,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn set_height_map_func(callback: u32, user_data: u32) -> Result<bool> {
-        let _ = (callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn set_map_square_terrain_type(x: i32, z: i32, terrain_type: i32) -> Result<bool> {
             let value = crate::generated::terrain_control::set_map_square_terrain_type(x, z, terrain_type)?;
             Ok(value)
@@ -52818,21 +49746,9 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn set_original_height_map_func(callback: u32, user_data: u32) -> Result<bool> {
-        let _ = (callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn set_smooth_mesh(x: f32, z: f32, height: f32, terraform: f32) -> Result<bool> {
             let value = crate::generated::terrain_control::set_smooth_mesh(x, z, height, terraform)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn set_smooth_mesh_func(callback: u32, user_data: u32) -> Result<bool> {
-        let _ = (callback, user_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -55840,12 +52756,6 @@ use crate::Result;
             Ok(value)
         }
 
-        #[inline]
-        pub fn spawn_projectile(weapon_def_id: i32, projectile_params: &NativeProjectileParams) -> Result<i32> {
-        let _ = (weapon_def_id, projectile_params);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
     }
 
     pub mod effects_control {
@@ -58751,12 +55661,6 @@ use crate::Result;
         pub struct SpawnCEGValue {
             pub success: bool,
             pub ceg_id: i32,
-        }
-
-        #[inline]
-        pub fn spawn_ceg(ceg: &DefRef, pos: Float3, dir: Float3, radius: f32, damage: f32, dmg_mod: f32) -> Result<SpawnCEGValue> {
-        let _ = (ceg, pos, dir, radius, damage, dmg_mod);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -64614,12 +61518,6 @@ use crate::Result;
         }
 
         #[inline]
-        pub fn call_cob_script(unit_id: i32, func: &CobFunctionRef, ret_args: u32, args: &Vec<i32>) -> Result<CallCOBScriptValue> {
-        let _ = (unit_id, func, ret_args, args);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
         pub fn get_cob_script_id(unit_id: i32, func_name: &str) -> Result<i32> {
             let mut func_name_bytes = func_name.as_bytes().to_vec();
             if func_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
@@ -65603,7 +62501,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (left as f32, top as f32, right as f32, bottom as f32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 
@@ -65629,18 +62527,6 @@ use crate::Result;
         pub fn get_unit_engine_draw_mask(unit_id: i32) -> Result<u32> {
             let value = crate::generated::unit_rendering::get_unit_engine_draw_mask(unit_id)?;
             Ok(value)
-        }
-
-        #[inline]
-        pub fn get_unit_icon(unit_id: i32) -> Result<GetUnitIconValue> {
-        let _ = (unit_id);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_unit_icon_data(unit_id: i32, full_data: bool) -> Result<GetUnitIconDataValue> {
-        let _ = (unit_id, full_data);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -65723,20 +62609,8 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (left as f32, top as f32, right as f32, bottom as f32, allegiance as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
-        }
-
-        #[inline]
-        pub fn get_visible_features(ally_team_id: i32, radius: f32, options: GetVisibleFeaturesOptions) -> Result<Vec<i32>> {
-        let _ = (ally_team_id, radius, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
-        }
-
-        #[inline]
-        pub fn get_visible_projectiles(ally_team_id: i32, options: GetVisibleProjectilesOptions) -> Result<Vec<i32>> {
-        let _ = (ally_team_id, options);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
         }
 
         #[inline]
@@ -65764,7 +62638,7 @@ use crate::Result;
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (team_id as i32, radius as f32, u32::from(include_icons) as i32);
-                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+                Err(unreachable!())
             }
         }
 

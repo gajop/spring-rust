@@ -56,6 +56,13 @@ Fuel and epoch interruption were disabled for this baseline. The default
 runtime is throughput-first. Opt-in hostile or diagnostic budgets require a
 separate run and must not be mixed into gameplay measurements.
 
+## Reference floor
+
+Naked Wasmtime Core crossings, measured outside the engine: about 4 ns/call
+guest→host and about 11 ns/call host→guest. Engine paths are not comparable to
+these directly — they include Spring dispatch, safety policy, and real
+NativeInterface work — but they bound what the transport itself can cost.
+
 ## Reproduction
 
 ```sh

@@ -59,7 +59,7 @@ pub fn get_unit_script_names_into<'a>(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, ranges, bytes);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 

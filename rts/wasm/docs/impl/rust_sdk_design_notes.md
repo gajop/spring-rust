@@ -2,7 +2,7 @@
 
 Date: 2026-08-22
 Status: discussion notes. Decisions marked DECIDED are settled; OPEN items are
-deliberately not decided yet. Not a work plan — see `next_agent_handoff.md` for
+deliberately not decided yet. Not a work plan — see `next_agent_handoff_2.md` for
 what is actually queued.
 
 ## 1. Verified facts (checked in repo, not assumed)
@@ -158,9 +158,9 @@ has none of these structural properties.
   editing a `.lua` and reloading will feel any regression here badly.
 - **A real example module.** Not a test guest — a small recognizable gadget
   someone can copy.
-- **Error ergonomics.** 574 callouts currently return `UnsupportedHostTarget`.
-  Users must be able to tell "not implemented yet" from "wrong environment"
-  from "bad input".
+- **Error ergonomics.** Former missing-wrapper fallbacks are now compile-time
+  omissions. Users must be able to tell "not implemented yet" from "wrong
+  environment" from "bad input".
 
 ## 9. Corrections made during this discussion
 

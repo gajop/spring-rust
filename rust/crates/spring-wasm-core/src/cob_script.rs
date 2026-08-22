@@ -89,6 +89,6 @@ pub fn call_cob_script(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, func_id, func_name, ret_args, args, ret_values);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

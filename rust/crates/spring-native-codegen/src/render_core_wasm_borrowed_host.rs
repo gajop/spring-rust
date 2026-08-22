@@ -983,7 +983,7 @@ fn render_rust_wrapper(
         .collect::<Vec<_>>()
         .join(", ");
     format!(
-        "{pad}#[inline]\n{pad}pub fn {name}({params}) -> {return_type} {{\n{pad}    #[cfg(target_arch = \"wasm32\")]\n{pad}    {{\n{wasm_body}\n{pad}    }}\n{pad}    #[cfg(not(target_arch = \"wasm32\"))]\n{pad}    {{\n{pad}        let _ = ({non_wasm_uses});\n{pad}        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))\n{pad}    }}\n{pad}}}\n",
+        "{pad}#[inline]\n{pad}pub fn {name}({params}) -> {return_type} {{\n{pad}    #[cfg(target_arch = \"wasm32\")]\n{pad}    {{\n{wasm_body}\n{pad}    }}\n{pad}    #[cfg(not(target_arch = \"wasm32\"))]\n{pad}    {{\n{pad}        let _ = ({non_wasm_uses});\n{pad}        Err(unreachable!())\n{pad}    }}\n{pad}}}\n",
         name = rust_ident(&function.name.to_snake_case()),
         params = params.join(", "),
         return_type = return_type,

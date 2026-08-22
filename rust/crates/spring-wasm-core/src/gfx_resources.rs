@@ -157,7 +157,7 @@ pub fn create_texture<'a>(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (xsize, ysize, zsize, params, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -179,6 +179,6 @@ pub fn create_texture_atlas<'a>(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (xsize, ysize, alloc_type, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

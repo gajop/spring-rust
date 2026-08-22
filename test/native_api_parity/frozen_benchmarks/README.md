@@ -2,7 +2,7 @@
 
 Real measurements for backends that are not currently being changed, so a run
 can re-measure only the backend under work and still produce the complete
-comparison table in `rts/wasm/docs/impl/benchmarking_results.md`.
+comparison table in `rts/wasm/docs/impl/core_benchmark_results.md`.
 
 One CSV per profile and backend, plus `metadata.json` recording the engine
 revision and CPU the numbers came from. The columns are the raw row fields the

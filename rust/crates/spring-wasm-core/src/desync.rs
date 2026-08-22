@@ -29,12 +29,6 @@ mod raw {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
-#[inline]
-fn unsupported<T>() -> Result<T> {
-    Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-}
-
 /// Host timer ticks. Desyncs synced guests.
 #[inline]
 pub fn get_timer() -> Result<u64> {
@@ -44,7 +38,7 @@ pub fn get_timer() -> Result<u64> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -57,7 +51,7 @@ pub fn get_timer_micros() -> Result<u64> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -88,6 +82,6 @@ pub fn diff_timers(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (end_timer, start_timer, return_ms, from_micro_secs);
-        unsupported()
+        Err(unreachable!())
     }
 }

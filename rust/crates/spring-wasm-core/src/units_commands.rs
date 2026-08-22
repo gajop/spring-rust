@@ -112,7 +112,7 @@ pub fn get_unit_command_count(unit_id: i32) -> Result<u32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = unit_id;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -141,7 +141,7 @@ pub fn get_unit_commands_into(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, max_commands, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -162,7 +162,7 @@ pub fn give_order(cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Re
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (cmd_id, params, options, timeout);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -197,7 +197,7 @@ pub fn give_order_to_unit_map(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_ids, cmd_id, params, options, timeout);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -298,6 +298,6 @@ pub fn get_unit_commands(unit_id: i32, max_commands: u32) -> Result<Vec<UnitComm
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, max_commands);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

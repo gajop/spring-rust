@@ -175,7 +175,7 @@ fn render_wrapper(plan: &render_core_wasm::FunctionPlan) -> String {
          {ignored}\
                          let _ = output;\n\
                          Err(super::DynamicOutputError {{\n\
-                             error: crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32),\n\
+                             error: unreachable!(),\n\
                              required: 0,\n\
                          }})\n\
                      }}\n\

@@ -25,6 +25,6 @@ pub fn call_as_team(team_id: i32, callback: SyncCallback) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (team_id, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

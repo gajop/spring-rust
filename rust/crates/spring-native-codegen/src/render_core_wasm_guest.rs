@@ -375,7 +375,7 @@ fn render_direct_wrapper(
              {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
              {pad}    {{\n\
              {pad}        let _ = ({unused});\n\
-             {pad}        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))\n\
+             {pad}        Err(unreachable!())\n\
              {pad}    }}\n\
              {pad}}}\n",
             unused = unused_tuple(&function.inputs),
@@ -400,7 +400,7 @@ fn render_direct_wrapper(
                  {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
                  {pad}    {{\n\
                  {pad}        let _ = ({unused});\n\
-                 {pad}        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))\n\
+                 {pad}        Err(unreachable!())\n\
                  {pad}    }}\n\
                  {pad}}}\n",
                 unused = unused_tuple(&function.inputs),
@@ -457,7 +457,7 @@ fn render_fixed_output_wrapper(
          {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
          {pad}    {{\n\
          {pad}        let _ = ({unused});\n\
-         {pad}        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))\n\
+         {pad}        Err(unreachable!())\n\
          {pad}    }}\n\
          {pad}}}\n",
         unused = unused_tuple(&function.inputs),
@@ -572,7 +572,7 @@ fn render_fixed_input_wrapper(
          {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
          {pad}    {{\n\
          {pad}        let _ = ({unused});\n\
-         {pad}        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))\n\
+         {pad}        Err(unreachable!())\n\
          {pad}    }}\n\
          {pad}}}\n",
         unused = unused_tuple(&function.inputs),

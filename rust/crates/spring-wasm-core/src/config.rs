@@ -253,7 +253,7 @@ pub fn get_log_sections_into<'a>(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (ranges, bytes);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 

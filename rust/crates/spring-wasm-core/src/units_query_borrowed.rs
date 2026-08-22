@@ -85,7 +85,7 @@ pub fn get_team_units_by_defs_into(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (team_id, unit_def_ids, output);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -118,7 +118,7 @@ pub fn get_unit_array_centroid(unit_ids: &[i32]) -> Result<[f32; 3]> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = unit_ids;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -131,6 +131,6 @@ pub fn get_unit_map_centroid(unit_ids: &[i32]) -> Result<[f32; 3]> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = unit_ids;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

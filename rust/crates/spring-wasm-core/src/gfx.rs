@@ -79,7 +79,7 @@ pub fn begin_end(primitive: u32, callback: SyncCallback) -> Result<()> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (primitive, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -105,7 +105,7 @@ pub fn active_fbo(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (fbo_id, target, identities, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -124,7 +124,7 @@ pub fn active_shader(shader_id: u32, callback: SyncCallback) -> Result<()> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (shader_id, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -140,7 +140,7 @@ pub fn create_list(callback: SyncCallback) -> Result<u32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = callback;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -160,7 +160,7 @@ pub fn draw_func_at_unit(unit_id: i32, use_mid_pos: bool, callback: SyncCallback
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, use_mid_pos, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -175,7 +175,7 @@ pub fn push_pop_matrix(callback: SyncCallback) -> Result<()> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = callback;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -196,7 +196,7 @@ pub fn render_to_texture(name: &str, callback: SyncCallback) -> Result<()> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (name, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -215,7 +215,7 @@ pub fn run_query(query_id: u32, callback: SyncCallback) -> Result<()> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (query_id, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }
 
@@ -235,6 +235,6 @@ pub fn unsafe_state(state_id: u32, reverse: bool, callback: SyncCallback) -> Res
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (state_id, reverse, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

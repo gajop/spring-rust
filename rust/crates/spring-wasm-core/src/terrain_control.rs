@@ -15,11 +15,6 @@ mod raw {
     }
 }
 
-#[inline]
-fn unsupported() -> Result<bool> {
-    Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-}
-
 macro_rules! sync_callback_import {
     ($name:ident, $raw:ident) => {
         #[inline]
@@ -33,7 +28,7 @@ macro_rules! sync_callback_import {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = callback;
-                unsupported()
+                Err(unreachable!())
             }
         }
     };

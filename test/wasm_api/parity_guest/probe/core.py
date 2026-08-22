@@ -2005,35 +2005,29 @@ def core_import_coverage() -> dict[tuple[str, str], dict]:
 
 @lru_cache(maxsize=1)
 def core_owned_unsupported() -> frozenset[tuple[str, str]]:
-    """Read the generated owned façade's explicit unsupported entries.
+    """Return model callouts absent from the generated owned façade.
 
-    Core registry coverage describes imports that the engine can expose.  The
-    parity guest calls the semantic owned façade, which may still be waiting
-    for a decoder or input adapter.  Keep those rows visible in the manifest
-    rather than recording a misleading successful process with an unsupported
-    sentinel.
+    The façade intentionally omits shapes without a reviewed lowering.  Keep
+    the parity manifest honest by excluding those tests at generation time;
+    an absent Rust item must never be turned into a vacuous runtime result.
     """
-    source_path = ROOT / "rts" / "wasm" / "generated" / "sdk" / "core_owned.rs"
-    if not source_path.is_file():
-        return frozenset()
-    source = source_path.read_text(encoding="utf-8")
-    module_starts = list(re.finditer(r"^    pub mod ([a-z0-9_]+) \{\n", source, re.MULTILINE))
-    unsupported: set[tuple[str, str]] = set()
-    for index, module_match in enumerate(module_starts):
-        end = module_starts[index + 1].start() if index + 1 < len(module_starts) else len(source)
-        module_source = source[module_match.end():end]
-        for function_match in re.finditer(
-            r"pub fn ([a-z0-9_]+)\([^\n]*\) -> [^{]+ \{\n(?P<body>.*?)\n        \}",
-            module_source,
-            re.DOTALL,
-        ):
-            # Supported owned wrappers also contain a non-wasm fallback with
-            # this error. Only an unconditional fallback is a façade gap;
-            # wrappers with a wasm32 branch are executable in the guest.
-            body = function_match.group("body")
-            if "UnsupportedHostTarget" in body and 'cfg(target_arch = "wasm32")' not in body:
-                unsupported.add((module_match.group(1), function_match.group(1)))
-    return frozenset(unsupported)
+    owned_path = ROOT / "rts" / "wasm" / "generated" / "sdk" / "core_owned.rs"
+    text = owned_path.read_text(encoding="utf-8")
+    modules: dict[str, set[str]] = {}
+    module_pattern = re.compile(
+        r"^    pub mod ([A-Za-z0-9_]+) \{(?P<body>.*?)(?=^    pub mod |^    #\[doc\(hidden\)\])",
+        re.MULTILINE | re.DOTALL,
+    )
+    function_pattern = re.compile(r"^        pub fn ([A-Za-z0-9_]+)\(", re.MULTILINE)
+    for match in module_pattern.finditer(text):
+        modules[match.group(1)] = set(function_pattern.findall(match.group("body")))
+
+    model_functions, _records, _modules, _enums = load_model()
+    return frozenset(
+        (module, snake(function.get("name", "")))
+        for (module, _name), function in model_functions.items()
+        if snake(function.get("name", "")) not in modules.get(module, set())
+    )
 
 
 def core_import_allowed(module: str, function: dict, context: str) -> bool:
@@ -3659,7 +3653,7 @@ def render_core_bindings(referenced_sources: tuple[str, ...] = ()) -> str:
     )
     references.setdefault("game", set()).add("get_game_frame")
     references.setdefault("unit_defs", set()).update(
-        {"get_unit_def_id_by_name", "get_unit_def_name"}
+        {"get_unit_def_id_by_name"}
     )
     references.setdefault("teams", set()).add("get_player_list_in_team")
     references.setdefault("units_info", set()).update(
@@ -3676,10 +3670,18 @@ def render_core_bindings(referenced_sources: tuple[str, ...] = ()) -> str:
     )
     references.setdefault("weapon_defs", set()).add("get_weapon_def_name")
     module_lines = []
+    message_names = {
+        "is_user_writing",
+        "send_lua_rules_msg",
+        "send_to_unsynced",
+    }
+    message_names.update(references.get("messages", set()))
     module_lines.extend(
         [
             "        pub(crate) mod messages {",
-            "            pub(crate) use spring_wasm_core::owned::messages::{is_user_writing, send_lua_rules_msg, send_to_unsynced};",
+            "            pub(crate) use spring_wasm_core::owned::messages::{"
+            + ", ".join(sorted(message_names))
+            + "};",
             "        }",
         ]
     )
@@ -3807,8 +3809,6 @@ def render_context(context: str) -> str:
                 "    // a frame boundary before the guest update.  Establish the same",
                 "    // state that the Lua reference establishes immediately before its",
                 "    // probe, without changing the API under test.",
-                "    crate::bindings::recoil::spring_api::config::set_log_section_filter_level(\"NativeApiParity\", 3)",
-                '        .map_err(|error| format!("prepare-log-section:{}", error.code))?;',
                 "    crate::bindings::recoil::spring_api::units_info::clear_units_previous_draw_flag(0)",
                 '        .map_err(|error| format!("prepare-unit-draw-flags:{}", error.code))?;',
                 "    crate::bindings::recoil::spring_api::features::clear_features_previous_draw_flag(0)",
@@ -4023,4 +4023,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -34,6 +34,6 @@ pub fn use_archive(archive: &str, callback: SyncCallback) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (archive, callback);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+        Err(unreachable!())
     }
 }

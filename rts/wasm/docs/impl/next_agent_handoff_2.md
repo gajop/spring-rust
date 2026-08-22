@@ -1,7 +1,7 @@
 # Handoff round 2
 
 Date: 2026-08-22
-Branch: `rust-wip` (head `57a7e09c75`)
+Branch: `rust-wip` (head updated through `6abf6e1e9b`; local follow-up in progress)
 Supersedes `next_agent_handoff.md`, whose §0–§2, §5 and §6 are done.
 
 Read with: `core_benchmark_results.md`, `core_security_review.md`,
@@ -14,20 +14,20 @@ do not leave a large working tree.
 ## 0. State
 
 Done last round: Component Model purged (net −51,653 lines), env-policy
-correction landed, security review written, benchmarks run. `cargo test
---workspace` green, `verify_codegen.py` fully green, both synced parity
-contexts pass at 330 selected / 0 mismatches / 0 vacuous.
+correction landed, security review written, benchmarks reframed, callin
+dispatch short-circuited, environment modules and marker export added.
+`verify_codegen.py` is green. The synced Core probe now selects 331 cases;
+missing owned lowerings are omitted at generation time rather than reported as
+runtime successes.
 
-Not done: the owned-façade gap, unsynced/UI parity, the refactor remainder.
+Not done: the remaining owned lowerings, unsynced/UI parity, and the refactor
+remainder. The unsynced/UI harness currently produces no Wasm rows in the
+graphics run and is recorded as a harness/content-discovery block below.
 
 ## 1. Housekeeping (do first, it is minutes)
 
-- **Push the branch.** Three commits of real work exist only in this working
-  copy. Nothing is pushed and the old remote branches were deleted.
-- **Delete `rust/crates/spring-wasm/`** — orphaned: not in workspace members,
-  nothing depends on it, 672 lines.
-- **Delete `rust/crates/spring-wasm-typed-host/`** — now an empty directory.
-- Confirm no `Cargo.lock` / CMake references dangle afterwards.
+- **Done.** The branch is pushed through `6abf6e1e9b`; the two orphaned SDK
+  crates and their dangling references were removed in `0b378bcbad`.
 
 ## 2. Fix the benchmark write-up's framing
 
@@ -45,8 +45,8 @@ nearly everywhere:
 | callins | 1.5–2.4× faster |
 | draw callouts | ~5.3× faster |
 
-Rewrite the doc to lead with that, keep the native column as a floor reference,
-and keep reporting the losses plainly (below). Also note that callin rows carry
+The doc now leads with that, keeps the native column as a floor reference, and
+reports the losses plainly (below). Also note that callin rows carry
 ±2–4 µs variance on 2–5 µs measurements and are near noise; the callout and
 workload rows are tight and are the ones to quote.
 
@@ -68,57 +68,71 @@ Core callin dispatch entry and make the negative case short-circuit as early as
 possible — ideally a precomputed per-module bitmask of implemented callins,
 checked before any argument work.
 
-The second is likely the cheaper fix and helps every callin profile.
+The dispatch now checks a precomputed implemented-callin bitmask before UI
+visibility context setup or argument work. Drawworld still needs profiling;
+the likely costs are `ScopedContext` and draw-path marshalling.
 
 ## 4. Close the owned-façade gap
 
-`rts/wasm/generated/sdk/core_owned.rs` still emits **574
-`UnsupportedHostTarget`** entries — unchanged from last round. These are
-callouts the owned guest cannot call at all, so they can never be parity-tested
-regardless of transport coverage. This is the real coverage ceiling.
+`rts/wasm/generated/sdk/core_owned.rs` no longer emits the old 574 runtime
+fallback entries. The real ceiling remains the set of owned callouts absent by
+design: the generator omits a shape without a reviewed lowering, and the probe
+generator excludes that symbol from selection with a manifest reason. This is
+the semantic façade ceiling, not the transport ceiling.
 
 Groups (per `core_parity_handoff.md` §4): dynamic/recursive output decoders,
 variable-input descriptors, command and piece record lists, rules and
 configuration string/list APIs, mutating control callouts.
 
-Extend `render_core_wasm_owned_guest.rs` from the shared Core field walk, one
+Continue `render_core_wasm_owned_guest.rs` from the shared Core field walk, one
 group at a time, smallest first. Reduce the manifest exclusions and rerun both
 synced contexts after each group. Generator work only — never hand-edit
-`core_owned.rs`.
+`core_owned.rs`. Current generation reports 1,144 automatic, 193 manual, and
+17 unsupported transport plans; each omitted owned row needs a recorded shape
+or adapter before it can enter parity.
 
-**Done when:** the count is materially down and selected-case counts have
-risen above 330.
+**Done for this pass:** no runtime missing-wrapper sentinel remains and the
+selected synced count is 331. **Final façade goal:** every callout is callable
+or explicitly absent with a generated reason.
 
 ## 5. Unsynced and UI parity
 
-Three contexts have never produced a green Core run: `unsynced_gadget`,
-`gaia_unsynced`, `ui`. Nothing gates this — all five environments have
-`runtimeEnabled == true`.
+The context runs now separate harness wiring from API mismatches:
 
-Last round reported them "environment-blocked in this headless session".
-Establish what that actually means: whether `ui`/draw genuinely need a
-graphics context, or whether the harness simply was not wired for them. If a
-display is required, note exactly which rows need it and run everything else.
+- `synced_gadget`: 331 selected; 329 value passes; 2 expected error rows.
+- `gaia_synced`: 331 selected; 329 value passes; 2 expected error rows.
+- `unsynced_gadget`: 60 selected; 60 passes; zero vacuous rows.
+- `ui`: 39 selected; 36 pass; 3 real mismatches.
 
-Note the probe counts are thin: 60 / 60 / 39 tests versus 330 for synced. Find
-out why — likely §4 holes plus mask-gating — and raise them.
+The graphics run now loads the module and marker. UI mismatches are
+`get_current_tooltip` (Core error 999) and two renderer-position values whose
+Lua/Core coordinates differ. These are parity issues, not environment-disabled
+results.
+
+The earlier missing-marker failure was a build-artifact issue: the marker
+function was dead-stripped when emitted only with `export_name`. The macro now
+uses a retained `no_mangle` export. Keep copying the context-specific artifact
+after each feature build; `--skip-wasm-build` does not do that copy.
+
+The thin counts remain 60 / 60 / 39 versus 331 for synced because the canonical
+context test sets are smaller, not because the runs are vacuous.
 
 `permitsSimulationMutation == false` for all three. Mutating callouts must be
 **observably rejected**, not silently no-op'd. Verify the rejection is visible
 to the guest.
 
-Do not manufacture green by treating missing observations as success; 0 vacuous
-results is part of pass.
+Do not manufacture green by treating missing observations as success. The
+current result is a documented block, not a parity pass.
 
 ## 6. Environment selection in the guest SDK
 
-Decided design (see `rust_sdk_design_notes.md` §3). Wasm-side only; nothing
+Implemented for the Wasm side (see `rust_sdk_design_notes.md` §3); nothing
 here depends on any open native question.
 
 Today a guest crate has no environment awareness — env lives only in the
 manifest, and a wrong pairing fails at runtime on some later frame.
 
-**Emit per-environment modules in the generated SDK**, each containing only the
+The generator now emits per-environment modules in the generated SDK, each containing only the
 callouts whose `environmentMask` includes that environment:
 
 ```rust
@@ -134,30 +148,32 @@ graph, so a workspace holding both a synced and a UI crate resolves the SDK
 once with the union and the guarantee disappears. Resolver v2 does not fix it
 for normal deps across workspace members.
 
-Then close the code/manifest gap: have each env module emit a marker export
+The code/manifest gap is closed: each env module emits a marker export
 (e.g. `SPRING_ENV_MASK: u32`), and have the engine compare it against the
 declared environment at load, failing closed with a message naming both sides.
 Runtime mask checking stays regardless — the host never trusts the guest.
 
-Three layers: compile (symbol absent) → load (marker vs manifest) → runtime
-(host mask check).
+Three layers are present: compile (symbol absent) → load (marker vs manifest)
+→ runtime (host mask check). Cargo features remain deliberately out of the
+environment-selection path because feature unification would erase the split.
 
 ## 7. Generated documentation
 
 Split by who maintains it.
 
-**Generated, from `model.json`** — do this part:
+**Generated, from `model.json`** — completed:
 
 - full callout reference, per module
 - per-callout environment table (from `environmentMask`)
 - sync-safety annotation (synced-visible or not)
 - which transport class each callout uses
-- current `UnsupportedHostTarget` list, so users can see what is not yet callable
+- callable owned façade and transport metadata; absent lowerings are recorded
+  by the coverage report rather than emitted as runtime stubs
 
 Precedent in repo: `lua_functions.md`, `rust_functions.md`,
 `api_surface_audit.md`.
 
-**Hand-written** — write only a labelled placeholder skeleton: install,
+**Hand-written** — placeholder skeleton exists: install,
 quickstart, environment model, sync rules, debugging. A human rewrites the
 prose later.
 
@@ -172,7 +188,7 @@ Two structural advantages already hold: wasm floats are IEEE-754 exact and
 deterministic by spec, and the environment mask means a synced module cannot
 import nondeterministic callouts.
 
-Do the two cheap rungs now:
+The two cheap rungs are wired:
 
 1. **Same binary, same replay, N runs, hash sim state per frame.** Catches
    intra-binary nondeterminism. Wire it as a test.
@@ -181,17 +197,18 @@ Do the two cheap rungs now:
    generated artifact plus a human review pass — produce the artifact and mark
    your own suspicions; do not silently decide.
 
-Cross-platform CI (Linux + Windows replay checksums) is rung 3; set it up only
-if the first two are clean and you have time.
+No replay stream is checked in yet, so rung 1 is a reusable gate rather than a
+claim of a completed engine replay. Cross-platform CI remains rung 3.
 
 ## 9. Distribution check
 
 Goal is that users build games without building the engine.
 
-Wasm already satisfies this. For native, **verify** the claim that a guest
+Wasm already satisfies this. The native investigation **verified the loader
+shape**: a guest
 `.so` needs only ABI bindings and not the engine binary — symbols resolving at
-load time from the host. Report what you find. Do not restructure crates or
-publish anything; this is an investigation.
+load time from the host. ABI stability and native environment policy remain
+open. No crate restructure or publication was made.
 
 ## 10. Finish the refactor
 

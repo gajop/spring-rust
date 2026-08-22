@@ -49,11 +49,6 @@ mod raw {
 }
 
 #[inline]
-fn unsupported<T>() -> Result<T> {
-    Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-}
-
-#[inline]
 pub fn get_timer() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
@@ -61,7 +56,7 @@ pub fn get_timer() -> Result<u64> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -73,7 +68,7 @@ pub fn get_timer_micros() -> Result<u64> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -98,7 +93,7 @@ pub fn diff_timers(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (end_timer, start_timer, return_ms, from_microseconds);
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -111,7 +106,7 @@ pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = last_frame_time;
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -123,7 +118,7 @@ pub fn get_draw_seconds() -> Result<f32> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -153,7 +148,7 @@ pub fn get_lua_mem_usage() -> Result<LuaMemUsage> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -177,7 +172,7 @@ pub fn get_vid_mem_usage() -> Result<VidMemUsage> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        unsupported()
+        Err(unreachable!())
     }
 }
 
@@ -190,6 +185,6 @@ pub fn get_synced_gc_info(collect: bool) -> Result<f32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = collect;
-        unsupported()
+        Err(unreachable!())
     }
 }
