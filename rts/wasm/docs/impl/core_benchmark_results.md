@@ -20,10 +20,13 @@ reference; they are not active comparison inputs.
 
 ## Interpretation
 
-Core/Lua is the headline comparison. A loss is a row where the Core median is
-not below the Lua median; the generated loss artifact is authoritative. The
-comparison table deliberately does not hide missing backends by converting
-them to zero or by treating an unavailable measurement as a win.
+Core/Lua is the headline comparison. The generated table also reports Core vs
+Native and Lua vs Native ratios, with each ratio comparing the left-hand
+backend against the right-hand backend. A Core/Lua loss is a row where the Core
+median is not below the Lua median; the generated loss artifact is
+authoritative. The comparison table deliberately does not hide missing
+backends by converting them to zero or by treating an unavailable measurement
+as a win.
 
 The benchmark producers use one configured repeat count for every timed row.
 The runner validates that count before freezing baselines. CSVs retain every

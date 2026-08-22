@@ -38,13 +38,14 @@ per backend **in the table**. That was wrong. Fix it as follows.
 **Split it into three things.**
 
 **1. The comparison table** — `docs/generated/benchmarking_results.md`.
-One row per test, six columns, nothing else:
+One row per test, eight columns, nothing else:
 
-| Profile | Test | Lua | Native | Core | Core vs Lua |
-| --- | --- | ---: | ---: | ---: | ---: |
+| Profile | Test | Lua | Native | Core | Core vs Lua | Core vs Native | Lua vs Native |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 
 - one number per backend, the median, with its unit
-- `Core vs Lua` as a ratio, with a clear marker when Core loses
+- `Core vs Lua`, `Core vs Native`, and `Lua vs Native` as ratios, each with a
+  clear marker when the left-hand backend loses
 - **only rows where Lua, Native and Core were all measured.** A row with an
   empty column does not belong in a comparison table.
 
