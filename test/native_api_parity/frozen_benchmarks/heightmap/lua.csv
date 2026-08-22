@@ -1,7 +1,6 @@
-backend,test,status,scale,benchmarkCase,innerCalls,innerNs,invocations,measurement,medianMs,nominalInvocations,nominalSize,spreadMs
-lua,hm_callback_empty,pass,1,,0,0,10000,Lua callback boundary with zero terraform; terrain rebuild excluded,0.00025511,10000,0,7.03e-06
-lua,hm_brush_small,pass,1,,1024,72.388916,1000,Lua callback boundary with zero terraform; terrain rebuild excluded,0.07433152,1000,32,0.00060392
-lua,hm_brush_medium,pass,1,,16384,70.6413956,100,Lua callback boundary with zero terraform; terrain rebuild excluded,1.15773928,100,128,0.0031685
-lua,hm_brush_large,pass,1,,262144,69.8040009,10,Lua callback boundary with zero terraform; terrain rebuild excluded,18.2987938,10,512,0.310112
-lua,hm_region_op,pass,1,,0,0,1000,Lua callback boundary with zero terraform; terrain rebuild excluded,0.00075006,1000,0,2.766e-05
-lua,complete,pass,,heightmap,,,,,,,,
+backend,test,status,scale,iterations,innerCalls,innerNs,invocations,measurement,medianMs,nominalInvocations,nominalSize,p99Ms,reason,regions,samplesMs,spreadMs
+lua,hm_callback_empty,unavailable,0.1,100,,,,,,10000,0,,sample of 27180 ns is below the 47684 ns timer-resolution floor,1,,
+lua,hm_brush_small,unavailable,0.1,10,,,,,,1000,32,,sample of 39101 ns is below the 47684 ns timer-resolution floor,1,,
+lua,hm_brush_medium,unavailable,0.1,1,,,,,,100,128,,sample of 45061 ns is below the 47684 ns timer-resolution floor,1,,
+lua,hm_brush_large,pass,0.1,,8281,81.3922577,1,Lua callback boundary with zero terraform; terrain rebuild excluded,0.674963,10,512,0.67710876,,,"[0.65398216,0.674963,0.67710876,0.67806244,0.65898895]",0.02408025
+lua,hm_region_op,unavailable,0.1,10,,,,,,1000,0,,sample of 10967 ns is below the 47684 ns timer-resolution floor,1,,

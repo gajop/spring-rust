@@ -2,12 +2,16 @@
 
 Real measurements for backends that are not currently being changed, so a run
 can re-measure only the backend under work and still produce the complete
-comparison table in `rts/wasm/docs/impl/core_benchmark_results.md`.
+comparison table in `rts/wasm/docs/generated/benchmarking_results.md`.
 
 One CSV per profile and backend, plus `metadata.json` recording the engine
 revision and CPU the numbers came from. The columns are the raw row fields the
 runner emits, so a frozen row round-trips into exactly the record a live run
 would have produced. Nothing here is interpolated or hand-edited.
+
+The historical `wasm.csv` and `wasm_rust_typed.csv` files are retained for
+Component-Model reference. They are excluded from the active Lua/native/Core
+comparison.
 
 ## Re-measure only the backend you are working on
 
@@ -16,8 +20,7 @@ RECOIL_BENCHMARK_BACKENDS=wasm_core \
   python3 test/native_api_parity/run_benchmarks_core.py --suite
 ```
 
-The other four columns come from this directory, and the generated report says
-so in a note above the table.
+The other columns come from this directory when they are not measured live.
 
 ## Record a new baseline
 

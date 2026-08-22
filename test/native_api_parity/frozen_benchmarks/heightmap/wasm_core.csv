@@ -1,7 +1,6 @@
-backend,test,status,scale,benchmarkCase,innerCalls,innerNs,invocations,measurement,medianMs,nominalInvocations,nominalSize,spreadMs
-wasm_core,hm_callback_empty,pass,1,,0,0.0,10000,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,2.7e-05,10000,0,1e-06
-wasm_core,hm_brush_small,pass,1,,1024,10.466,1000,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,0.010717,1000,32,0.000455
-wasm_core,hm_brush_medium,pass,1,,16384,10.248,100,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,0.16791,100,128,0.00523
-wasm_core,hm_brush_large,pass,1,,262144,10.106,10,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,2.6493,10,512,0.0645
-wasm_core,hm_region_op,pass,1,,,0,1000,Core Wasm region boundary with unchanged height; terrain rebuild excluded,0.000731,1000,,0.000269
-wasm_core,complete,pass,1,heightmap,,,,,,,,
+backend,test,status,scale,innerCalls,innerNs,invocations,measurement,medianMs,nominalInvocations,nominalSize,p99Ms,samplesMs,spreadMs
+wasm_core,hm_callback_empty,pass,0.1,0,0.0,2000,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,2.7e-05,10000,0,2.7e-05,"[2.6e-05,2.7e-05,2.7e-05,2.7e-05,2.8e-05]",2e-06
+wasm_core,hm_brush_small,pass,0.1,36,12.639,200,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,0.000455,1000,32,0.00047,"[0.000445,0.00045,0.000455,0.00047,0.00047]",2.5e-05
+wasm_core,hm_brush_medium,pass,0.1,529,11.815,8,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,0.00625,100,128,0.0065,"[0.006125,0.00625,0.00625,0.0065,0.006625]",0.0005
+wasm_core,hm_brush_large,pass,0.1,8281,11.231,1,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,0.093,10,512,0.094,"[0.088,0.092,0.093,0.094,0.096]",0.008
+wasm_core,hm_region_op,pass,0.1,,0,100,Core Wasm region boundary with unchanged height; terrain rebuild excluded,0.00089,1000,,0.00089,"[0.00088,0.00088,0.00089,0.00089,0.0009]",2e-05

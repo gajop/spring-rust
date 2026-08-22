@@ -131,6 +131,12 @@ pub fn run(scale: f64) -> spring::Result<()> {
         };
         let median_ms = sorted[(sorted.len() - 1) / 2];
         let spread_ms = sorted[sorted.len() - 1] - sorted[0];
+        let p99_ms = sorted[((sorted.len() - 1) * 99) / 100];
+        let samples_json = sorted
+            .iter()
+            .map(|sample| format!("{sample:.6}"))
+            .collect::<Vec<_>>()
+            .join(",");
         let inner_calls = size * size;
         let inner_ns = if inner_calls == 0 {
             0.0
@@ -138,7 +144,7 @@ pub fn run(scale: f64) -> spring::Result<()> {
             median_ms * 1_000_000.0 / inner_calls as f64
         };
         send_row(&format!(
-            "{{\"backend\":\"wasm_core\",\"test\":\"{name}\",\"status\":\"pass\",\"invocations\":{invocations},\"innerCalls\":{inner_calls},\"medianMs\":{median_ms:.6},\"spreadMs\":{spread_ms:.6},\"innerNs\":{inner_ns:.3},\"scale\":{scale},\"nominalSize\":{nominal_size},\"nominalInvocations\":{nominal_invocations},\"measurement\":\"Core Wasm callback boundary with zero terraform; terrain rebuild excluded\"}}"
+            "{{\"backend\":\"wasm_core\",\"test\":\"{name}\",\"status\":\"pass\",\"invocations\":{invocations},\"innerCalls\":{inner_calls},\"medianMs\":{median_ms:.6},\"p99Ms\":{p99_ms:.6},\"spreadMs\":{spread_ms:.6},\"samplesMs\":[{samples_json}],\"innerNs\":{inner_ns:.3},\"scale\":{scale},\"nominalSize\":{nominal_size},\"nominalInvocations\":{nominal_invocations},\"measurement\":\"Core Wasm callback boundary with zero terraform; terrain rebuild excluded\"}}"
         ));
     }
 
@@ -148,8 +154,14 @@ pub fn run(scale: f64) -> spring::Result<()> {
         scale,
         || spring::level_height_map(8.0, 8.0, 248.0, 248.0, terrain_height).map(|_| ()),
     )? {
+        let p99_ms = sorted[((sorted.len() - 1) * 99) / 100];
+        let samples_json = sorted
+            .iter()
+            .map(|sample| format!("{sample:.6}"))
+            .collect::<Vec<_>>()
+            .join(",");
         send_row(&format!(
-            "{{\"backend\":\"wasm_core\",\"test\":\"hm_region_op\",\"status\":\"pass\",\"invocations\":{invocations},\"medianMs\":{:.6},\"spreadMs\":{:.6},\"innerNs\":0,\"scale\":{scale},\"nominalInvocations\":1000,\"measurement\":\"Core Wasm region boundary with unchanged height; terrain rebuild excluded\"}}",
+            "{{\"backend\":\"wasm_core\",\"test\":\"hm_region_op\",\"status\":\"pass\",\"invocations\":{invocations},\"medianMs\":{:.6},\"p99Ms\":{p99_ms:.6},\"spreadMs\":{:.6},\"samplesMs\":[{samples_json}],\"innerNs\":0,\"scale\":{scale},\"nominalInvocations\":1000,\"measurement\":\"Core Wasm region boundary with unchanged height; terrain rebuild excluded\"}}",
             sorted[(sorted.len() - 1) / 2],
             sorted[sorted.len() - 1] - sorted[0]
         ));

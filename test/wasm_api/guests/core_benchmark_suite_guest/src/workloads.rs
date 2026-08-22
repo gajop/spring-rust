@@ -176,8 +176,14 @@ pub fn step() -> spring::Result<bool> {
         sorted.sort_by(|left, right| left.total_cmp(right));
         let median = sorted[(sorted.len() - 1) / 2];
         let spread = sorted[sorted.len() - 1] - sorted[0];
+        let p99 = sorted[((sorted.len() - 1) * 99) / 100];
+        let samples_json = sorted
+            .iter()
+            .map(|sample| format!("{sample:.3}"))
+            .collect::<Vec<_>>()
+            .join(",");
         common::send_row(&format!(
-            "{{\"backend\":\"wasm_core\",\"test\":\"{name}\",\"status\":\"pass\",\"iterations\":{frames},\"medianNs\":{median:.3},\"spreadNs\":{spread:.3},\"checksum\":{:.3},\"scale\":{},\"measurement\":\"Core Wasm workload measured per GameFrame callback\"}}",
+            "{{\"backend\":\"wasm_core\",\"test\":\"{name}\",\"status\":\"pass\",\"iterations\":{frames},\"medianNs\":{median:.3},\"p99Ns\":{p99:.3},\"spreadNs\":{spread:.3},\"samplesNs\":[{samples_json}],\"checksum\":{:.3},\"scale\":{},\"measurement\":\"Core Wasm workload measured per GameFrame callback\"}}",
             checksums[index],
             common::scale()
         ));

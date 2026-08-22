@@ -1,6 +1,6 @@
 # Synced callout review list
 
-Source: `generated_synced_callout_audit.md`.
+Source: `../generated/generated_synced_callout_audit.md`.
 
 Status: heuristic output; human decision required.
 

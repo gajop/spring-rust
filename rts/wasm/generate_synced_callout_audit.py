@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 MODEL = ROOT / "rts/wasm/generated/model.json"
 COVERAGE = ROOT / "rts/wasm/generated/core-executable-coverage.json"
-OUTPUT = ROOT / "rts/wasm/docs/impl/generated_synced_callout_audit.md"
+OUTPUT = ROOT / "rts/wasm/docs/generated/generated_synced_callout_audit.md"
 
 SUSPICIOUS_MODULES = {
     "camera",

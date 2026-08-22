@@ -91,6 +91,10 @@ CALLOUT_TESTS = (
     "callout_biglist",
     "callout_spatial",
     "callout_mutate",
+    "callout_wide_unit_physics",
+    "callout_payload_8",
+    "callout_payload_64",
+    "callout_payload_256",
 )
 HEIGHTMAP_TESTS = (
     "hm_callback_empty",
@@ -842,7 +846,7 @@ def main() -> int:
     parser.add_argument("--spring-headless", type=Path, default=ENGINE_INSTALL / "spring-headless")
     parser.add_argument("--spring", type=Path, default=ENGINE_INSTALL / "spring")
     parser.add_argument("--output-root", type=Path, default=ROOT / "test" / "native_api_parity" / "out" / "benchmark")
-    parser.add_argument("--results", type=Path, default=ROOT / "rts" / "wasm" / "docs" / "impl" / "benchmarking_results.md")
+    parser.add_argument("--results", type=Path, default=ROOT / "rts" / "wasm" / "docs" / "generated" / "benchmarking_results.md")
     parser.add_argument(
         "--suite",
         action="store_true",
@@ -862,6 +866,11 @@ def main() -> int:
         "--no-report",
         action="store_true",
         help="run a profile without writing its Markdown report",
+    )
+    parser.add_argument(
+        "--check-regression",
+        action="store_true",
+        help="fail when a live timing median exceeds its frozen noise band",
     )
     parser.add_argument("--seed", type=int, default=424242)
     parser.add_argument(
@@ -913,6 +922,8 @@ def main() -> int:
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--skip-build", action="store_true")
     args = parser.parse_args()
+    if args.check_regression:
+        os.environ["RECOIL_BENCHMARK_CHECK_REGRESSION"] = "1"
 
     if args.bounded_suite and not args.suite:
         raise RuntimeError("--bounded-suite requires --suite")

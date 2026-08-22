@@ -252,6 +252,63 @@ pub fn run(scalar_only: bool) -> spring::Result<()> {
             .map(|_| ())
     })?;
 
+    // Paired wide-argument callout: Lua exposes these twelve scalar physics
+    // fields directly, while Core carries the same payload as four Float3
+    // records. Keep the values stable so the row measures transport and host
+    // adaptation rather than a changing simulation outcome.
+    let physics_position = spring::rules_synced::unit_control::Float3 {
+        x: position[0],
+        y: position[1],
+        z: position[2],
+    };
+    let velocity = spring::rules_synced::unit_control::Float3 {
+        x: 1.0,
+        y: 0.0,
+        z: 0.0,
+    };
+    let rotation = spring::rules_synced::unit_control::Float3 {
+        x: 0.0,
+        y: 1.0,
+        z: 0.0,
+    };
+    let drag = spring::rules_synced::unit_control::Float3 {
+        x: 1.0,
+        y: 0.0,
+        z: 0.0,
+    };
+    common::measure(
+        "callout_wide_unit_physics",
+        common::scaled_count(20_000, scale),
+        || {
+            spring::rules_synced::unit_control::set_unit_physics(
+                unit_id,
+                physics_position.clone(),
+                velocity.clone(),
+                rotation.clone(),
+                drag.clone(),
+            )
+            .map(|value| black_box(value))
+            .map(|_| ())
+        },
+    )?;
+
+    // The terrain name is a real variable input. These paired rows make the
+    // payload-size slope visible instead of leaving string marshalling as a
+    // single arbitrary point.
+    for (name, payload) in [
+        ("callout_payload_8", "terrain"),
+        ("callout_payload_64", "terrain-payload-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+        ("callout_payload_256", "terrain-payload-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+    ] {
+        common::measure(name, common::scaled_count(20_000, scale), || {
+            spring::rules_synced::terrain_control::set_terrain_type_data(
+                0, 1.0, 1.0, 1.0, 1.0, 1.0, true, payload,
+            )
+            .map(|value| black_box(value))
+            .map(|_| ())
+        })?;
+    }
+
     #[cfg(feature = "transport_ceiling")]
     run_transport_ceiling(unit_id, unit_def_id, position, scale)?;
     #[cfg(not(feature = "transport_ceiling"))]

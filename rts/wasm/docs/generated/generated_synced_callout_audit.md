@@ -199,7 +199,7 @@
 | `messages` | `Echo` |  | `handwritten-reviewed` | `candidate` |
 | `messages` | `Log` |  | `handwritten-reviewed` | `candidate` |
 | `messages` | `SendAllyChat` |  | `handwritten-reviewed` | `candidate` |
-| `messages` | `SendCommands` |  | `variable-input-borrowed` | `candidate` |
+| `messages` | `SendCommands` |  | `handwritten-reviewed` | `candidate` |
 | `messages` | `SendLuaGaiaMsg` |  | `handwritten-reviewed` | `candidate` |
 | `messages` | `SendLuaMenuMsg` |  | `handwritten-reviewed` | `candidate` |
 | `messages` | `SendLuaRulesMsg` |  | `handwritten-reviewed` | `candidate` |
@@ -235,7 +235,7 @@
 | `path_finder` | `SetPathNodeCosts` | x | `fixed` | `review-required` |
 | `platform` | `GetArchitecture` |  | `variable-output-caller-owned` | `candidate` |
 | `platform` | `IsHeadless` |  | `fixed` | `candidate` |
-| `profiling` | `GetTimerMicros` |  | `fixed` | `review-required` |
+| `profiling` | `GetTimerMicros` |  | `handwritten-reviewed` | `review-required` |
 | `projectile_control` | `DeleteProjectile` | x | `fixed` | `candidate` |
 | `projectile_control` | `SetPieceProjectileParams` | x | `fixed` | `candidate` |
 | `projectile_control` | `SetProjectileAlwaysVisible` | x | `fixed` | `candidate` |

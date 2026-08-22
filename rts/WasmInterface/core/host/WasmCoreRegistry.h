@@ -147,8 +147,8 @@ inline constexpr ImportDescriptor kImports[] = {
 	{ProfilingModule, "diff-timers", "i64,i64,i32,i32->i64", UnsyncedEnvironmentMask},
 	{ProfilingModule, "get-frame-timer", "i32->i64", UnsyncedEnvironmentMask},
 	{ProfilingModule, "get-draw-seconds", "->i64", UnsyncedEnvironmentMask},
-	{ProfilingModule, "get-lua-mem-usage", "i32->i32", UnsyncedEnvironmentMask},
-	{ProfilingModule, "get-vid-mem-usage", "i32->i32", UnsyncedEnvironmentMask},
+	{ProfilingModule, "get-lua-mem-usage", "i32,i32->i32", UnsyncedEnvironmentMask},
+	{ProfilingModule, "get-vid-mem-usage", "i32,i32->i32", UnsyncedEnvironmentMask},
 	{ProfilingModule, "get-synced-gc-info", "i32->i64", UnsyncedEnvironmentMask},
 
 	// Message strings are copied into call-scoped NUL-terminated storage before

@@ -90,6 +90,13 @@ Goal: **users build games without building the engine.**
 - Native likely also needs nothing: native modules are loaded *by* the engine,
   so the guest `.so` needs ABI bindings, not the engine binary — symbols
   resolve at load time from the host. **UNVERIFIED; confirm before promising.**
+- The loader currently accepts either a VFS-relative module path or
+  `SPRING_NATIVE_MODULE`, copies VFS modules to a temporary filesystem path,
+  checks `NativeModuleApiVersion`, requires equal major versions and rejects a
+  module minor newer than the host. It passes engine-owned `NativeInterface`
+  tables to the event client and does not require an explicit engine-library
+  link. The native guest dependency closure has not yet been measured with
+  `ldd`, so the distribution claim remains an investigation, not a promise.
 
 Crates to publish: a facade (`spring-api`), plus the wasm and native backends.
 
@@ -168,8 +175,9 @@ Recorded so they are not reintroduced:
 
 - The Component Model was **never** the parity oracle. Lua is. Deleting CM
   costs nothing verification-wise.
-- `rules-unsynced` / `gaia-unsynced` / `ui` are **not** runtime-disabled;
-  `core_parity_handoff.md` misreads the `synced` column as `runtimeEnabled`.
+- `rules-unsynced` / `gaia-unsynced` / `ui` are **not** runtime-disabled; the
+  environment decision must use the declared environment and runtime marker,
+  not a mistaken `synced`/`runtimeEnabled` substitution.
 - Cargo features are the wrong mechanism for env selection (§3).
 - Native vs wasm is **not** a trust distinction, and native is not "the
   permissive case". It is a capability distinction (§2).

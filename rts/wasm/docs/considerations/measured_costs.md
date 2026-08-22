@@ -41,7 +41,7 @@ the same structure.
 
 ## Reference points
 
-End-to-end engine measurements from `impl/benchmarking_results.md`, for scale.
+End-to-end engine measurements from `generated/benchmarking_results.md`, for scale.
 These include real engine work, so they are not directly comparable to the
 transport floors above; they are what any Wasm path has to beat.
 
@@ -85,7 +85,7 @@ Rust static bindings instead of the dynamic C API
 (`rust/crates/spring-wasm-typed-host/`). Same WIT, same wit-bindgen, same
 componentize step, same `.wasm` bytes: only the host differs, so the pair
 isolates the transport. Both run in the same suite as separate backends, so
-`impl/benchmarking_results.md` carries the current numbers and these are a
+`generated/benchmarking_results.md` carries the current numbers and these are a
 snapshot of the shape.
 
 It covers all three worlds (rules-synced, rules-unsynced, UI), so every row in
@@ -161,7 +161,7 @@ draw workload `wl_ui_draw` still wins: 0.169 ms typed against 0.324 ms for
 Lua, because the callouts inside the draw entry are fast (41 ns each) and
 there are many of them.
 
-`benchmarking_results.md` states its ratios against the typed host rather than
+`benchmarking_results.md` states its ratios against the active Core host rather than
 against the dynamic C API. Its columns name all three axes, `Wasm (C API,
 dynamic, CM)` and `Wasm (Rust, typed, CM)`, because the native backend is also
 written in Rust and the language is not the difference being measured.

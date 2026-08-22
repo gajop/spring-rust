@@ -24,6 +24,24 @@ if tostring(parityOptions.native_api_parity_mode or "") == "benchmark" then
 			return values[math.floor((#values + 1) / 2)]
 		end
 
+		local function percentile(values, fraction)
+			local sorted = {}
+			for index, value in ipairs(values) do sorted[index] = value end
+			table.sort(sorted)
+			local index = math.floor(fraction * (#sorted - 1)) + 1
+			return sorted[math.max(1, math.min(#sorted, index))]
+		end
+
+		local function spread(values)
+			local low = values[1]
+			local high = values[1]
+			for index = 2, #values do
+				low = math.min(low, values[index])
+				high = math.max(high, values[index])
+			end
+			return high - low
+		end
+
 		local function writeRow(name, payload)
 			local file = io.open(outputDir .. "/benchmark_" .. name .. ".jsonl", "a")
 			if file then
@@ -55,6 +73,9 @@ if tostring(parityOptions.native_api_parity_mode or "") == "benchmark" then
 				status = "pass",
 				iterations = calloutIterations,
 				medianNs = median(calloutSamples),
+				p99Ns = percentile(calloutSamples, 0.99),
+				spreadNs = spread(calloutSamples),
+				samplesNs = calloutSamples,
 				scale = scale,
 			})
 
@@ -71,6 +92,9 @@ if tostring(parityOptions.native_api_parity_mode or "") == "benchmark" then
 				status = "pass",
 				lines = workloadLines,
 				medianMs = median(workloadSamples),
+				p99Ms = percentile(workloadSamples, 0.99),
+				spreadMs = spread(workloadSamples),
+				samplesMs = workloadSamples,
 				scale = scale,
 			})
 			writeRow("lua", { backend = "lua", test = "complete", status = "pass" })

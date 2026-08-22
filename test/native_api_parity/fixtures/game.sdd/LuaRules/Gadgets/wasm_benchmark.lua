@@ -142,6 +142,14 @@ local function spread(values)
 	return high - low
 end
 
+local function percentile(values, fraction)
+	local sorted = {}
+	for index, value in ipairs(values) do sorted[index] = value end
+	table.sort(sorted)
+	local index = math.floor(fraction * (#sorted - 1)) + 1
+	return sorted[math.max(1, math.min(#sorted, index))]
+end
+
 local function measure(name, iterations, callback, extra)
 	local floorNs = resolutionFloorNs(clockQuantumNs(), 1)
 	-- Grow the loop until a sample clears the floor; the discarded pass is warmup.
@@ -289,6 +297,29 @@ local function beginCallouts()
 				Spring.SetUnitRulesParam(unitID, "bench", offset + index, {public = true})
 			end
 			return iterations
+		end },
+		-- Keep the Lua call shape explicit: this is the twelve-scalar peer of
+		-- Core's four Float3 records, not a synthetic loop over scalar setters.
+		{ name = "callout_wide_unit_physics", iterations = scaledCount(20000), batch = 100, nominalIterations = 20000, callback = function(iterations)
+			for _ = 1, iterations do
+				Spring.SetUnitPhysics(unitID, x, 96, z, 1, 0, 0, 0, 1, 0, 1, 0, 0)
+			end
+			return iterations
+		end },
+		{ name = "callout_payload_8", iterations = scaledCount(20000), batch = 1000, nominalIterations = 20000, callback = function(iterations)
+			local value
+			for _ = 1, iterations do value = Spring.SetTerrainTypeData(0, 1, 1, 1, 1, 1, true, "terrain") end
+			return value
+		end },
+		{ name = "callout_payload_64", iterations = scaledCount(20000), batch = 1000, nominalIterations = 20000, callback = function(iterations)
+			local value
+			for _ = 1, iterations do value = Spring.SetTerrainTypeData(0, 1, 1, 1, 1, 1, true, "terrain-payload-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") end
+			return value
+		end },
+		{ name = "callout_payload_256", iterations = scaledCount(20000), batch = 1000, nominalIterations = 20000, callback = function(iterations)
+			local value
+			for _ = 1, iterations do value = Spring.SetTerrainTypeData(0, 1, 1, 1, 1, 1, true, "terrain-payload-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") end
+			return value
 		end },
 	}
 	if benchmarkCase == "callout_scalar" then
@@ -459,6 +490,10 @@ local function finishHeightmapCase()
 		heightmapInnerRegions = 0
 		return
 	end
+	local heightmapSampleMs = {}
+	for index, value in ipairs(heightmapSamples) do
+		heightmapSampleMs[index] = value / 1000000
+	end
 	appendJSON(outputPath("lua"), {
 		backend = "lua",
 		test = case.name,
@@ -466,7 +501,9 @@ local function finishHeightmapCase()
 		invocations = case.invocations,
 		innerCalls = case.size * case.size,
 		medianMs = median(heightmapSamples) / 1000000,
+		p99Ms = percentile(heightmapSamples, 0.99) / 1000000,
 		spreadMs = spread(heightmapSamples) / 1000000,
+		samplesMs = heightmapSampleMs,
 		innerNs = median(heightmapInnerSamples),
 		scale = benchmarkScale,
 		nominalSize = case.nominalSize,

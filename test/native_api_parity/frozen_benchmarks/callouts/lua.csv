@@ -1,9 +1,12 @@
-backend,test,status,scale,iterations,benchmarkCase,checksum,measurement,medianNs,nominalIterations,samplesNs,spreadNs,totalMedianNs,totalSpreadNs
-lua,callout_scalar,pass,1,100000,,30,Lua API call loop sliced across GameFrame callbacks,31.1398506,100000,"[30.1170349, 30.6177158, 31.1923008, 31.1398506, 31.1493874]",1.07526588,3113985,107526.586
-lua,callout_vec3,pass,1,100000,,1120,Lua API call loop sliced across GameFrame callbacks,60.6584549,100000,"[60.6584549, 60.2817535, 61.3689384, 60.6393814, 60.6775246]",1.08718491,6065845.5,108718.492
-lua,callout_string,pass,1,50000,,200,Lua API call loop sliced across GameFrame callbacks,69.1795273,50000,"[68.7694473, 69.1795273, 68.693161, 69.39888, 70.0044632]",1.31130219,3458976.25,65565.1094
-lua,callout_smalllist,pass,1,20000,,200,Lua API call loop sliced across GameFrame callbacks,623.655396,20000,"[623.655396, 596.690002, 622.892456, 628.101868, 629.699097]",33.0090942,12473108,660181.875
-lua,callout_biglist,pass,1,1000,,50000,Lua API call loop sliced across GameFrame callbacks,8064.50879,1000,"[7184.50586, 8064.50879, 8116.48438, 8108.37744, 8023.73877]",931.978516,8064509,931978.5
-lua,callout_spatial,pass,1,10000,,4300,Lua API call loop sliced across GameFrame callbacks,577.735779,10000,"[586.294983, 579.476318, 577.735779, 575.446838, 575.732971]",10.8481445,5777358,108481.445
-lua,callout_mutate,pass,1,100000,,100000,Lua API call loop sliced across GameFrame callbacks,195.131302,100000,"[167.989716, 176.289078, 195.131302, 202.374466, 212.953094]",44.9633789,19513130,4496338
-lua,complete,pass,,,callouts,,,,,,,,
+backend,test,status,scale,iterations,checksum,measurement,medianNs,nominalIterations,samplesNs,spreadNs,totalMedianNs,totalSpreadNs
+lua,callout_scalar,pass,0.1,10000,3,Lua API call loop sliced across GameFrame callbacks,30.0884247,100000,"[32.3057175,29.2777996,30.0884247,31.2089901,30.0884247]",3.02791786,300884.25,30279.1777
+lua,callout_vec3,pass,0.1,10000,112,Lua API call loop sliced across GameFrame callbacks,58.2933426,100000,"[61.0828362,58.2933426,62.6087189,58.2933426,57.9118767]",4.69684219,582933.438,46968.4219
+lua,callout_string,pass,0.1,5000,20,Lua API call loop sliced across GameFrame callbacks,77.1999359,50000,"[79.3933868,76.007843,79.202652,76.8184662,77.1999359]",3.38554382,385999.688,16927.7188
+lua,callout_smalllist,pass,0.1,2000,20,Lua API call loop sliced across GameFrame callbacks,637.173706,20000,"[663.518921,637.173706,647.664001,595.688721,620.24585]",67.8302002,1274347.38,135660.406
+lua,callout_biglist,pass,0.1,100,5000,Lua API call loop sliced across GameFrame callbacks,5190.37256,1000,"[5009.17432,4694.46191,5190.37256,8239.74609,8230.20996]",3545.28418,519037.25,354528.406
+lua,callout_spatial,pass,0.1,1000,430,Lua API call loop sliced across GameFrame callbacks,748.634399,10000,"[593.900696,756.263672,766.992554,748.634399,746.965393]",173.091858,748634.375,173091.859
+lua,callout_mutate,pass,0.1,10000,10000,Lua API call loop sliced across GameFrame callbacks,172.305115,100000,"[171.518326,172.305115,172.781952,171.804428,173.711777]",2.19345093,1723051.13,21934.5098
+lua,callout_wide_unit_physics,pass,0.1,2000,2000,Lua API call loop sliced across GameFrame callbacks,414.848389,20000,"[420.332001,413.060211,414.848389,413.060211,426.292511]",13.2322998,829696.75,26464.5996
+lua,callout_payload_8,pass,0.1,2000,2,Lua API call loop sliced across GameFrame callbacks,95.4866409,20000,"[93.9369202,95.4866409,95.0098038,97.3939896,95.4866409]",3.4570694,190973.281,6914.13867
+lua,callout_payload_64,pass,0.1,2000,2,Lua API call loop sliced across GameFrame callbacks,96.4403152,20000,"[95.4866409,95.9634857,96.4403152,97.3939896,97.5132065]",2.02656555,192880.625,4053.1311
+lua,callout_payload_256,pass,0.1,2000,2,Lua API call loop sliced across GameFrame callbacks,100.016594,20000,"[100.016594,100.493431,100.970268,97.0363617,99.1821213]",3.93390656,200033.188,7867.81299

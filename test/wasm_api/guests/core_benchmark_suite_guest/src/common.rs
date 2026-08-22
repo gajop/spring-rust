@@ -123,8 +123,14 @@ where
     samples.sort_by(|left, right| left.total_cmp(right));
     let median = samples[(samples.len() - 1) / 2];
     let spread = samples[samples.len() - 1] - samples[0];
+    let p99 = samples[((samples.len() - 1) * 99) / 100];
+    let samples_json = samples
+        .iter()
+        .map(|sample| format!("{sample:.3}"))
+        .collect::<Vec<_>>()
+        .join(",");
     send_row(&format!(
-        "{{\"backend\":\"wasm_core\",\"test\":\"{name}\",\"status\":\"pass\",\"iterations\":{calls},\"medianNs\":{median:.3},\"spreadNs\":{spread:.3},\"totalMedianNs\":{:.3},\"totalSpreadNs\":{:.3},\"quantumNs\":{quantum_ns:.0},\"scale\":{},\"measurement\":\"Core Wasm callout loop\"}}",
+        "{{\"backend\":\"wasm_core\",\"test\":\"{name}\",\"status\":\"pass\",\"iterations\":{calls},\"medianNs\":{median:.3},\"spreadNs\":{spread:.3},\"p99Ns\":{p99:.3},\"samplesNs\":[{samples_json}],\"totalMedianNs\":{:.3},\"totalSpreadNs\":{:.3},\"quantumNs\":{quantum_ns:.0},\"scale\":{},\"measurement\":\"Core Wasm callout loop\"}}",
         median * calls as f64,
         spread * calls as f64,
         scale()

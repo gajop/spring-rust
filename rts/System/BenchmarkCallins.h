@@ -311,10 +311,18 @@ inline void Flush()
 			 << "\",\"test\":\"" << test
 			 << "\",\"status\":\"pass\",\"iterations\":" << sorted.size()
 			 << ",\"medianNs\":" << std::fixed << std::setprecision(3) << median
-			 << ",\"spreadNs\":" << spread
-			 << ",\"p99Ns\":" << Percentile(sorted, 0.99) * fanout
-			 << ",\"clockOverheadNs\":" << clockOverhead
-			 << ",\"measurement\":\"engine callin boundary, cold cache; median of per-dispatch samples\"}\n";
+				 << ",\"spreadNs\":" << spread
+				 << ",\"p99Ns\":" << Percentile(sorted, 0.99) * fanout
+				 << ",\"clockOverheadNs\":" << clockOverhead
+				 << ",\"samplesNs\":[";
+		for (std::size_t index = 0; index < sorted.size(); ++index) {
+			if (index != 0)
+				file << ',';
+			file << sorted[index] * fanout;
+		}
+		file
+				 << "]"
+				 << ",\"measurement\":\"engine callin boundary, cold cache; median of per-dispatch samples\"}\n";
 	}
 	file.flush();
 	flushed = true;

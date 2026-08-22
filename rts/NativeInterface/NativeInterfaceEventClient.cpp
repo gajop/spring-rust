@@ -537,7 +537,13 @@ void NativeInterfaceEventClient::DrawScreen() {
 		SimpleCallinQuery query = {};                                           \
 		const auto wasmToken = spring::benchmark_callins::Begin(                 \
 			"wasm", spring::benchmark_callins::EventTestName(#EventName));       \
+		const auto dispatchStage =                                            \
+			strcmp(#EventName, "DrawWorld") == 0                                \
+			? spring::benchmark_callins::BeginStage(                              \
+				"wasm", "callin_drawworld_native_dispatch")                      \
+			: spring::benchmark_callins::Token{};                                 \
 		DispatchWasmCallin(#EventName, &query, false);                           \
+		spring::benchmark_callins::End(dispatchStage);                          \
 		spring::benchmark_callins::End(wasmToken);                               \
 		if (m_##EventName##FuncPtr) {                                             \
 			const auto nativeToken = spring::benchmark_callins::Begin(              \

@@ -30,8 +30,15 @@ pub fn run() -> spring::Result<()> {
     }
     callout_samples.sort_by(|left, right| left.total_cmp(right));
     let callout_median = callout_samples[(callout_samples.len() - 1) / 2];
+    let callout_spread = callout_samples[callout_samples.len() - 1] - callout_samples[0];
+    let callout_p99 = callout_samples[((callout_samples.len() - 1) * 99) / 100];
+    let callout_samples_json = callout_samples
+        .iter()
+        .map(|sample| format!("{sample:.3}"))
+        .collect::<Vec<_>>()
+        .join(",");
     common::send_draw_row(&format!(
-        "{{\"backend\":\"wasm_core\",\"test\":\"callout_draw\",\"status\":\"pass\",\"iterations\":{callout_vertices},\"batches\":{DRAW_BATCHES},\"medianNs\":{callout_median:.3},\"scale\":{}}}",
+        "{{\"backend\":\"wasm_core\",\"test\":\"callout_draw\",\"status\":\"pass\",\"iterations\":{callout_vertices},\"batches\":{DRAW_BATCHES},\"medianNs\":{callout_median:.3},\"p99Ns\":{callout_p99:.3},\"spreadNs\":{callout_spread:.3},\"samplesNs\":[{callout_samples_json}],\"scale\":{}}}",
         common::scale()
     ));
 
@@ -48,8 +55,15 @@ pub fn run() -> spring::Result<()> {
     }
     workload_samples.sort_by(|left, right| left.total_cmp(right));
     let workload_median = workload_samples[(workload_samples.len() - 1) / 2];
+    let workload_spread = workload_samples[workload_samples.len() - 1] - workload_samples[0];
+    let workload_p99 = workload_samples[((workload_samples.len() - 1) * 99) / 100];
+    let workload_samples_json = workload_samples
+        .iter()
+        .map(|sample| format!("{sample:.6}"))
+        .collect::<Vec<_>>()
+        .join(",");
     common::send_draw_row(&format!(
-        "{{\"backend\":\"wasm_core\",\"test\":\"wl_ui_draw\",\"status\":\"pass\",\"lines\":{},\"batches\":{DRAW_BATCHES},\"medianMs\":{workload_median:.6},\"scale\":{}}}",
+        "{{\"backend\":\"wasm_core\",\"test\":\"wl_ui_draw\",\"status\":\"pass\",\"lines\":{},\"batches\":{DRAW_BATCHES},\"medianMs\":{workload_median:.6},\"p99Ms\":{workload_p99:.6},\"spreadMs\":{workload_spread:.6},\"samplesMs\":[{workload_samples_json}],\"scale\":{}}}",
         workload_vertices / 2,
         common::scale()
     ));

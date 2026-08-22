@@ -48,6 +48,12 @@ def _coerce(field: str, value: str):
         return None
     if field in TEXT_FIELDS:
         return value
+    if field in {"samplesNs", "samplesMs"}:
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return value
+        return parsed if isinstance(parsed, list) else value
     try:
         number = float(value)
     except ValueError:
@@ -86,10 +92,21 @@ def save_rows(frozen_root: Path, profile: str, backend: str, rows: list[dict]) -
     fields = leading + remaining
 
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=fields,
+            extrasaction="ignore",
+            lineterminator="\n",
+        )
         writer.writeheader()
         for row in rows:
-            writer.writerow({field: row.get(field, "") for field in fields})
+            values = {}
+            for field in fields:
+                value = row.get(field, "")
+                if field in {"samplesNs", "samplesMs"} and isinstance(value, list):
+                    value = json.dumps(value, separators=(",", ":"))
+                values[field] = value
+            writer.writerow(values)
     return path
 
 
@@ -98,7 +115,8 @@ def freeze_summary(frozen_root: Path, summary: dict) -> list[Path]:
     profile = str(summary["profile"])
     written = []
     for backend, rows in summary.get("rows", {}).items():
-        written.append(save_rows(frozen_root, profile, backend, list(rows)))
+        benchmark_rows = [row for row in rows if row.get("test") != "complete"]
+        written.append(save_rows(frozen_root, profile, backend, benchmark_rows))
     return written
 
 
@@ -145,3 +163,40 @@ def fill_missing(summary: dict, backends: tuple[str, ...], frozen_root: Path) ->
     merged = dict(summary)
     merged["rows"] = rows
     return merged, from_frozen
+
+
+def _timing_value(row: dict) -> float | None:
+    for field in ("medianNs", "medianMs"):
+        if field in row:
+            return float(row[field])
+    return None
+
+
+def regression_failures(summary: dict, frozen_root: Path) -> list[dict]:
+    """Compare live timing medians against the same backend's frozen noise band."""
+    failures = []
+    profile = str(summary["profile"])
+    for backend, live_rows in summary.get("rows", {}).items():
+        baseline_rows = load_rows(frozen_root, profile, str(backend)) or []
+        baseline = {str(row.get("test")): row for row in baseline_rows}
+        for row in live_rows:
+            test = str(row.get("test", ""))
+            live = _timing_value(row)
+            old = baseline.get(test)
+            old_value = _timing_value(old or {})
+            if live is None or old_value is None:
+                continue
+            spread = float((old or {}).get("spreadNs", 0.0))
+            if "medianMs" in (old or {}):
+                spread = float((old or {}).get("spreadMs", 0.0))
+            allowance = max(spread, old_value * 0.10)
+            if live > old_value + allowance:
+                failures.append({
+                    "profile": profile,
+                    "backend": backend,
+                    "test": test,
+                    "baseline": old_value,
+                    "current": live,
+                    "allowance": allowance,
+                })
+    return failures

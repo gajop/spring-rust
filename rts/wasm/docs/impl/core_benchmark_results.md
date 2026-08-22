@@ -1,22 +1,22 @@
 # Core Wasm benchmark results
 
-Run: 2026-08-22, bounded Core comparison suites, seed `424242`, scale `0.1`, timeout `40s`,
-five repeats.
+Run: 2026-08-22, paired Core comparison runs, seed `424242`, five repeats.
 Docker-built headless and legacy binaries.
 
 Core replaces Lua, so Lua vs Core is the headline comparison:
 
 | Profile | Core vs Lua |
 | --- | --- |
-| workloads | 4.0–24.6× faster |
-| callouts | 1.1–6.8× faster |
-| callins | 7/8 measured rows faster; `unimplemented` loses |
-| draw callouts | approximately 5.3× faster |
+| workloads | Core is faster in the measured rows |
+| callouts | Core wins most rows; the 256-byte payload row loses |
+| callins | differences are inside the observed noise band |
+| DrawWorld | Core is slower in the current paired UI fixture |
 
-The callin rows measure 2–5 µs operations with approximately ±2–4 µs variance.
-The table reports the measured loss instead of hiding it behind a favorable
-aggregate; all callin ratios are noise-sensitive. Callout and workload rows
-are tighter and are the measurements to quote.
+The generated report is the authoritative data artifact. It records sample
+count, p50, p99 and spread for every emitted row; the CSV baselines retain the
+raw samples. Callin rows measure 2–10 µs operations with spreads comparable to
+their medians, so individual callin wins and losses are not stable findings
+without more repeats.
 
 ## Selected Lua versus Core measurements
 
@@ -47,9 +47,9 @@ Core/native ranges were 1.66–5.58× for callins, 1.01–4.39× for callouts,
 backends were available. Core loses to native on most rows; that is expected
 from the boundary and remains useful for regression tracking.
 
-The current `callin_drawworld` run is Core 6166 ns versus Lua 2322 ns. Both
-backends carry microsecond-scale spread on this row, so the loss is recorded as
-a performance target without claiming a noise-sized optimization.
+The current `callin_drawworld` run is Core 9609 ns versus Lua 2064 ns. Both
+backends carry microsecond-scale spread on this row, so it is a target for
+investigation, not evidence that a small optimization is real.
 
 Rows marked `unavailable` by the harness remain unavailable. They are not zero
 and are not treated as passing comparisons.
@@ -70,8 +70,9 @@ The callin run measured eight rows. Seven were faster on Core; one was slower:
 | `update` | 4228 | 2844 | Core faster |
 
 These are cold-cache engine-boundary medians with spreads between 1666 and
-4487 ns. The `unimplemented` loss is therefore a finding, but not a basis for
-claiming a stable percentage improvement.
+4487 ns. The spread is large enough that none of these eight rows supports a
+stable percentage claim. The generated table remains useful as a regression
+signal when compared against its frozen noise band.
 
 The authoritative event inventory has 169 event declarations and 163 loaded
 native symbols. The benchmark fixture currently reaches eight representative
@@ -82,20 +83,32 @@ missing observation into zero.
 
 ## Drawworld attribution
 
-The repeated draw run measured:
+The repeated draw run measured the following nested diagnostics:
 
 | Stage | Core median ns | Notes |
 | --- | ---: | --- |
-| complete `callin_drawworld` boundary | 6166 | spread 3749, p99 10395 |
-| Wasmtime entry / empty guest body | 2191 | spread 2360, p99 4512 |
-| visibility-context diagnostic | 153 | spread 655, p99 1530 |
+| complete `callin_drawworld` boundary | 9609 | spread 5046, p99 17196 |
+| native dispatch boundary | 8820 | spread 4999, p99 15232 |
+| core selection | 461 | spread 963, p99 2272 |
+| core aggregation | 5999 | spread 3936, p99 11013 |
+| module dispatch | 4762 | spread 3772, p99 9748 |
+| Wasmtime entry / empty guest body | 2368 | spread 2299, p99 4351 |
+| visibility-context diagnostic | 116 | spread 892, p99 4630 |
 | argument marshalling | 0 bytes | DrawWorld has no arguments or return value |
 
-Lua measured 2322 ns for the same callin boundary. The unaccounted remainder
-is host dispatch and binding work around the Wasmtime entry; the fixture's guest
-draw body is intentionally empty. The visibility stage is not the dominant
-cost. The spreads are large relative to the medians, so no within-noise change
-is reported as a performance win.
+Lua measured 2064 ns for the same UI `DrawWorld` boundary. The diagnostic
+stages are nested, not additive: they must not be summed. The useful bounded
+differences are approximately 789 ns from the complete boundary to native
+dispatch, 1237 ns from aggregation to module dispatch, and 2394 ns from
+module dispatch to Wasmtime entry. The remaining dispatch/binding work is
+therefore located between those boundaries, rather than being one unmeasured
+3822 ns block.
+
+Lua's `empty` row is a synced GameFrame fixture, while `callin_drawworld`
+is a UI DrawWorld fixture. They are different contexts and are not valid
+baselines for one another. The fair comparison is the paired UI DrawWorld row;
+the old 5498-versus-2322 comparison was a fixture mismatch, not evidence of a
+Lua special case.
 
 ## Transport-class coverage
 
@@ -139,5 +152,5 @@ python3 test/native_api_parity/run_benchmarks_core.py \
   --suite --bounded-suite --seed 424242 --scale 0.1 --timeout 30 \
   --spring-headless build-amd64-linux/install/spring-headless \
   --spring build-amd64-linux/install/spring \
-  --results /tmp/core-bench-bounded.md
+  --results rts/wasm/docs/generated/benchmarking_results.md
 ```

@@ -117,8 +117,15 @@ bool DispatchCoreModule(const WasmInterfaceSystem::CoreCallinInvocation& invocat
 	std::string_view name, void* result, std::string& error)
 {
 	std::string moduleError;
+	const auto dispatchStage = name == "DrawWorld"
+		? spring::benchmark_callins::BeginStage("wasm", "callin_drawworld_module_dispatch")
+		: spring::benchmark_callins::Token{};
 	if (WasmCoreHost::DispatchModule(host, callin, invocation.query, result, moduleError))
+	{
+		spring::benchmark_callins::End(dispatchStage);
 		return true;
+	}
+	spring::benchmark_callins::End(dispatchStage);
 	error = "Core Wasm callin " + std::string(name) + " failed in module " +
 		module.name + ": " + moduleError;
 	return false;
@@ -152,6 +159,9 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
 	if (callin == WasmCoreCallin::Invalid)
 		return true;
+	const auto selectionStage = name == "DrawWorld"
+		? spring::benchmark_callins::BeginStage("wasm", "callin_drawworld_core_selection")
+		: spring::benchmark_callins::Token{};
 
 	// Budgets are frame-scoped rather than call-scoped. Reset every synced
 	// instance immediately before the simulation GameFrame boundary and every
@@ -214,12 +224,19 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 		}
 	}
 
-	if (invocationCount == 0)
+	if (invocationCount == 0) {
+		spring::benchmark_callins::End(selectionStage);
 		return true;
+	}
 
+	spring::benchmark_callins::End(selectionStage);
+	const auto aggregationStage = name == "DrawWorld"
+		? spring::benchmark_callins::BeginStage("wasm", "callin_drawworld_core_aggregation")
+		: spring::benchmark_callins::Token{};
 	const bool success = system->DispatchCoreCallin(callin, name,
 		std::span<const CoreCallinInvocation>(invocations.data(), invocationCount),
 		nativeResult, handled, error);
+	spring::benchmark_callins::End(aggregationStage);
 	if (!synced && WasmCoreHost::RemoveFaultedUnsynced() != 0) {
 		system->coreModules.erase(std::remove_if(system->coreModules.begin(),
 			system->coreModules.end(), [](const CoreModuleRecord& module) {
