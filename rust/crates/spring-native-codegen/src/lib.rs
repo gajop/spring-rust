@@ -1884,10 +1884,22 @@ mod semantic_codegen_tests {
 
     #[test]
     fn synthetic_header_covers_all_phase_zero_shapes() {
+        let test_name: String = std::thread::current()
+            .name()
+            .unwrap_or("test")
+            .chars()
+            .map(|character| {
+                if character.is_ascii_alphanumeric() || character == '-' || character == '_' {
+                    character
+                } else {
+                    '_'
+                }
+            })
+            .collect();
         let path = std::env::temp_dir().join(format!(
             "recoil-wasm-semantic-{}-{}.h",
             std::process::id(),
-            std::thread::current().name().unwrap_or("test")
+            test_name
         ));
         fs::write(
             &path,
