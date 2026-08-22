@@ -420,8 +420,7 @@ def _comparison_rows(summary: dict) -> list[tuple[str, dict, dict, dict, tuple[f
 
 def _ratio_marker(left_metric: tuple[float, str], right_metric: tuple[float, str]) -> str:
     ratio = left_metric[0] / right_metric[0]
-    marker = "faster" if left_metric[0] < right_metric[0] else "not faster"
-    return f"{ratio:.2f}x {marker}"
+    return f"{ratio:.2f}x"
 
 
 def _render_comparison(summaries: list[dict]) -> str:

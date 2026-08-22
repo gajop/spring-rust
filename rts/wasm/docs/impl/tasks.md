@@ -44,8 +44,7 @@ One row per test, eight columns, nothing else:
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 
 - one number per backend, the median, with its unit
-- `Core vs Lua`, `Core vs Native`, and `Lua vs Native` as ratios, each with a
-  plain-text `faster` or `not faster` label
+- `Core vs Lua`, `Core vs Native`, and `Lua vs Native` as numeric ratios
 - **only rows where Lua, Native and Core were all measured.** A row with an
   empty column does not belong in a comparison table.
 

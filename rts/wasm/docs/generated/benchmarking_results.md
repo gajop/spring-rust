@@ -2,31 +2,31 @@
 
 | Profile | Test | Lua | Native | Core | Core vs Lua | Core vs Native | Lua vs Native |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `callins` | `callin_empty` | 6579.000 ns | 678.000 ns | 3164.000 ns | 0.48x faster | 4.67x not faster | 9.70x not faster |
-| `callins` | `callin_gameframe` | 5664.000 ns | 1076.000 ns | 2657.000 ns | 0.47x faster | 2.47x not faster | 5.26x not faster |
-| `callins` | `callin_update` | 3705.000 ns | 582.000 ns | 3029.000 ns | 0.82x faster | 5.20x not faster | 6.37x not faster |
-| `callins` | `callin_unitcreated` | 5508.000 ns | 1103.000 ns | 2444.000 ns | 0.44x faster | 2.22x not faster | 4.99x not faster |
-| `callins` | `callin_unitpredamaged` | 6362.000 ns | 779.000 ns | 2803.000 ns | 0.44x faster | 3.60x not faster | 8.17x not faster |
-| `callins` | `callin_allowunitcreation` | 5388.000 ns | 718.000 ns | 2825.000 ns | 0.52x faster | 3.93x not faster | 7.50x not faster |
-| `callins` | `callin_unimplemented` | 1229.000 ns | 51.000 ns | 1695.000 ns | 1.38x not faster | 33.24x not faster | 24.10x not faster |
-| `callins` | `callin_4modules` | 5262.000 ns | 2400.000 ns | 4905.000 ns | 0.93x faster | 2.04x not faster | 2.19x not faster |
-| `callouts` | `callout_scalar` | 32.210 ns | 6.482 ns | 11.200 ns | 0.35x faster | 1.73x not faster | 4.97x not faster |
-| `callouts` | `callout_vec3` | 59.009 ns | 6.237 ns | 33.300 ns | 0.56x faster | 5.34x not faster | 9.46x not faster |
-| `callouts` | `callout_string` | 76.628 ns | 27.587 ns | 60.800 ns | 0.79x faster | 2.20x not faster | 2.78x not faster |
-| `callouts` | `callout_smalllist` | 611.067 ns | 21.044 ns | 95.000 ns | 0.16x faster | 4.51x not faster | 29.04x not faster |
-| `callouts` | `callout_biglist` | 7872.582 ns | 493.170 ns | 1010.000 ns | 0.13x faster | 2.05x not faster | 15.96x not faster |
-| `callouts` | `callout_spatial` | 607.014 ns | 220.156 ns | 500.000 ns | 0.82x faster | 2.27x not faster | 2.76x not faster |
-| `callouts` | `callout_mutate` | 196.099 ns | 35.671 ns | 37.100 ns | 0.19x faster | 1.04x not faster | 5.50x not faster |
-| `callouts` | `callout_wide_unit_physics` | 420.451 ns | 286.932 ns | 353.000 ns | 0.84x faster | 1.23x not faster | 1.47x not faster |
-| `callouts` | `callout_payload_8` | 91.553 ns | 25.655 ns | 53.000 ns | 0.58x faster | 2.07x not faster | 3.57x not faster |
-| `callouts` | `callout_payload_64` | 99.063 ns | 28.105 ns | 54.500 ns | 0.55x faster | 1.94x not faster | 3.52x not faster |
-| `callouts` | `callout_payload_256` | 100.017 ns | 36.897 ns | 108.000 ns | 1.08x not faster | 2.93x not faster | 2.71x not faster |
-| `draw` | `callin_drawworld` | 2604.000 ns | 1318.000 ns | 13524.000 ns | 5.19x not faster | 10.26x not faster | 1.98x not faster |
-| `draw` | `callout_draw` | 77.300 ns | 6.028 ns | 15.512 ns | 0.20x faster | 2.57x not faster | 12.82x not faster |
-| `draw` | `wl_ui_draw` | 0.031000 ms | 0.002493 ms | 0.006125 ms | 0.20x faster | 2.46x not faster | 12.43x not faster |
-| `heightmap` | `hm_brush_large` | 0.658989 ms | 0.048582 ms | 0.093000 ms | 0.14x faster | 1.91x not faster | 13.56x not faster |
-| `workloads` | `wl_unit_scan` | 0.404000 ms | 0.005001 ms | 0.023400 ms | 0.06x faster | 4.68x not faster | 80.78x not faster |
-| `workloads` | `wl_area_effect` | 0.347495 ms | 0.040805 ms | 0.093300 ms | 0.27x faster | 2.29x not faster | 8.52x not faster |
-| `workloads` | `wl_rules_params` | 0.495815 ms | 0.021745 ms | 0.021800 ms | 0.04x faster | 1.00x not faster | 22.80x not faster |
-| `workloads` | `wl_commands` | 0.335884 ms | 0.030246 ms | 0.060800 ms | 0.18x faster | 2.01x not faster | 11.10x not faster |
-| `workloads` | `wl_compute` | 1.607800 ms | 0.193395 ms | 0.331300 ms | 0.21x faster | 1.71x not faster | 8.31x not faster |
+| `callins` | `callin_empty` | 6579.000 ns | 678.000 ns | 3164.000 ns | 0.48x | 4.67x | 9.70x |
+| `callins` | `callin_gameframe` | 5664.000 ns | 1076.000 ns | 2657.000 ns | 0.47x | 2.47x | 5.26x |
+| `callins` | `callin_update` | 3705.000 ns | 582.000 ns | 3029.000 ns | 0.82x | 5.20x | 6.37x |
+| `callins` | `callin_unitcreated` | 5508.000 ns | 1103.000 ns | 2444.000 ns | 0.44x | 2.22x | 4.99x |
+| `callins` | `callin_unitpredamaged` | 6362.000 ns | 779.000 ns | 2803.000 ns | 0.44x | 3.60x | 8.17x |
+| `callins` | `callin_allowunitcreation` | 5388.000 ns | 718.000 ns | 2825.000 ns | 0.52x | 3.93x | 7.50x |
+| `callins` | `callin_unimplemented` | 1229.000 ns | 51.000 ns | 1695.000 ns | 1.38x | 33.24x | 24.10x |
+| `callins` | `callin_4modules` | 5262.000 ns | 2400.000 ns | 4905.000 ns | 0.93x | 2.04x | 2.19x |
+| `callouts` | `callout_scalar` | 32.210 ns | 6.482 ns | 11.200 ns | 0.35x | 1.73x | 4.97x |
+| `callouts` | `callout_vec3` | 59.009 ns | 6.237 ns | 33.300 ns | 0.56x | 5.34x | 9.46x |
+| `callouts` | `callout_string` | 76.628 ns | 27.587 ns | 60.800 ns | 0.79x | 2.20x | 2.78x |
+| `callouts` | `callout_smalllist` | 611.067 ns | 21.044 ns | 95.000 ns | 0.16x | 4.51x | 29.04x |
+| `callouts` | `callout_biglist` | 7872.582 ns | 493.170 ns | 1010.000 ns | 0.13x | 2.05x | 15.96x |
+| `callouts` | `callout_spatial` | 607.014 ns | 220.156 ns | 500.000 ns | 0.82x | 2.27x | 2.76x |
+| `callouts` | `callout_mutate` | 196.099 ns | 35.671 ns | 37.100 ns | 0.19x | 1.04x | 5.50x |
+| `callouts` | `callout_wide_unit_physics` | 420.451 ns | 286.932 ns | 353.000 ns | 0.84x | 1.23x | 1.47x |
+| `callouts` | `callout_payload_8` | 91.553 ns | 25.655 ns | 53.000 ns | 0.58x | 2.07x | 3.57x |
+| `callouts` | `callout_payload_64` | 99.063 ns | 28.105 ns | 54.500 ns | 0.55x | 1.94x | 3.52x |
+| `callouts` | `callout_payload_256` | 100.017 ns | 36.897 ns | 108.000 ns | 1.08x | 2.93x | 2.71x |
+| `draw` | `callin_drawworld` | 2604.000 ns | 1318.000 ns | 13524.000 ns | 5.19x | 10.26x | 1.98x |
+| `draw` | `callout_draw` | 77.300 ns | 6.028 ns | 15.512 ns | 0.20x | 2.57x | 12.82x |
+| `draw` | `wl_ui_draw` | 0.031000 ms | 0.002493 ms | 0.006125 ms | 0.20x | 2.46x | 12.43x |
+| `heightmap` | `hm_brush_large` | 0.658989 ms | 0.048582 ms | 0.093000 ms | 0.14x | 1.91x | 13.56x |
+| `workloads` | `wl_unit_scan` | 0.404000 ms | 0.005001 ms | 0.023400 ms | 0.06x | 4.68x | 80.78x |
+| `workloads` | `wl_area_effect` | 0.347495 ms | 0.040805 ms | 0.093300 ms | 0.27x | 2.29x | 8.52x |
+| `workloads` | `wl_rules_params` | 0.495815 ms | 0.021745 ms | 0.021800 ms | 0.04x | 1.00x | 22.80x |
+| `workloads` | `wl_commands` | 0.335884 ms | 0.030246 ms | 0.060800 ms | 0.18x | 2.01x | 11.10x |
+| `workloads` | `wl_compute` | 1.607800 ms | 0.193395 ms | 0.331300 ms | 0.21x | 1.71x | 8.31x |
