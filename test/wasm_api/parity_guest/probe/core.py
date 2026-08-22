@@ -239,186 +239,6 @@ FIXTURE_FIELDS = {
     "groundZ": "ground_z",
 }
 
-
-def snake(value: str) -> str:
-    value = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", value)
-    value = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value)
-    return value.lower()
-
-
-def pascal(value: str) -> str:
-    return "".join(
-        part.capitalize()
-        for part in snake(value.replace("-", "_")).split("_")
-        if part
-    )
-
-
-def kebab(value: str) -> str:
-    return snake(value).strip("_").replace("_", "-")
-
-
-def wit_identifier(value: str) -> str:
-    value = kebab(value)
-    return f"%{value}" if value in WIT_KEYWORDS else value
-
-
-def rust_identifier(value: str) -> str:
-    identifier = snake(value)
-    # wit-bindgen follows Rust's conventional generated-name policy and
-    # appends an underscore to keyword-shaped record fields (`box_`, `type_`)
-    # rather than emitting raw identifiers.
-    return f"{identifier}_" if identifier in RUST_KEYWORDS else identifier
-
-
-def type_kind(type_info: dict) -> str:
-    return type_info["kind"]
-
-
-def wit_type(type_info: dict) -> str:
-    kind = type_kind(type_info)
-    if kind == "scalar":
-        return SCALAR_WIT_TYPES[type_info["name"]]
-    if kind == "enum":
-        return kebab(type_info["name"])
-    if kind == "string":
-        return "string"
-    if kind == "bytes":
-        return "list<u8>"
-    if kind == "list":
-        return f"list<{wit_type(type_info['element'])}>"
-    if kind == "fixed-array":
-        return f"list<{wit_type(type_info['element'])}>"
-    if kind == "option":
-        return f"option<{wit_type(type_info.get('inner', type_info.get('element'))) }>"
-    # Native callbacks and opaque user-data pointers are represented by the
-    # component callback registry/handle ABI.  The generated host adapter
-    # consumes both as u32 values; keeping that lowering explicit lets the
-    # parity guest exercise callback ownership instead of dropping these rows
-    # as unsupported C types.
-    if kind in {"callback", "pointer", "opaque"}:
-        return "u32"
-    if kind == "record":
-        return kebab(type_info["name"])
-    raise ValueError(f"unsupported probe WIT type: {type_info}")
-
-
-def simple_type(type_info: dict) -> bool:
-    return type_info.get("kind") in {"scalar", "enum", "string"}
-
-
-def records_field(record: dict, name: str) -> dict | None:
-    wanted = snake(name)
-    for field in record.get("fields", []):
-        candidate = snake(field["name"])
-        if candidate == wanted or candidate.replace("_", "") == wanted.replace("_", ""):
-            return field
-    return None
-
-
-def vector_component(type_info: dict, index: int, records: dict[str, dict]) -> dict | None:
-    """Return the one-based component of a Float2/Float3-like record."""
-    if type_info.get("kind") != "record":
-        return None
-    record = records.get(type_info["name"])
-    if record is None or index < 1:
-        return None
-    fields = record.get("fields", [])
-    if index > len(fields):
-        return None
-    candidate = fields[index - 1]
-    if candidate["type"].get("kind") != "scalar":
-        return None
-    return candidate
-
-
-def semantic_path(
-    type_info: dict,
-    path: list[str | int],
-    records: dict[str, dict],
-) -> tuple[dict, list[str | int]] | None:
-    """Resolve an explicit Lua path into a safe native semantic path.
-
-    Lua vectors are one-based tables while the generated Rust values are
-    records.  Native lists and fixed arrays are indexed with a zero-based
-    Rust expression, so the conversion is performed here rather than in the
-    generated guest.
-    """
-    current = type_info
-    resolved: list[str | int] = []
-    for component in path:
-        if isinstance(component, str):
-            if current.get("kind") != "record":
-                return None
-            record = records.get(current["name"])
-            if record is None:
-                return None
-            field = records_field(record, component)
-            if field is None:
-                return None
-            resolved.append(field["name"])
-            current = field["type"]
-            continue
-
-        if not isinstance(component, int) or component < 0:
-            return None
-        if current.get("kind") == "record":
-            field = vector_component(current, component, records)
-            if field is None:
-                return None
-            resolved.append(field["name"])
-            current = field["type"]
-            continue
-        if current.get("kind") in {"list", "fixed-array"}:
-            element = current["element"]
-            # Lua's damage arrays use key 0, while ordinary Lua arrays and
-            # fixed matrix tables use one-based keys.
-            index = component if component == 0 else component - 1
-            if current.get("kind") == "fixed-array" and component > 0:
-                index = component - 1
-            resolved.append(index)
-            current = element
-            continue
-        if current.get("kind") == "bytes":
-            resolved.append(component)
-            current = {"kind": "scalar", "name": "u8"}
-            continue
-        return None
-    return current, resolved
-
-
-def rust_semantic_path(expression: str, path: list[str | int]) -> str:
-    """Render a resolved path without ever indexing a guest-owned pointer."""
-    for component in path:
-        if isinstance(component, int):
-            expression += f".get({component}).copied().unwrap_or_default()"
-        else:
-            expression += f".{rust_identifier(component)}"
-    return expression
-
-
-def type_supported_by_probe(type_info: dict, records: dict[str, dict], seen: set[str] | None = None) -> bool:
-    """Whether a semantic type can be represented by the probe WIT world."""
-    kind = type_info.get("kind")
-    if kind in {"scalar", "enum", "string", "bytes", "callback", "pointer", "opaque"}:
-        return True
-    if kind in {"list", "fixed-array"}:
-        return type_supported_by_probe(type_info["element"], records, seen)
-    if kind == "option":
-        return type_supported_by_probe(type_info.get("inner", type_info.get("element")), records, seen)
-    if kind != "record":
-        return False
-    name = type_info["name"]
-    seen = set() if seen is None else seen
-    if name in seen:
-        return True
-    record = records.get(name)
-    if record is None:
-        return False
-    seen.add(name)
-    return all(type_supported_by_probe(field["type"], records, seen) for field in record["fields"])
-
-
 def record_path(
     type_info: dict,
     desired: str,
@@ -1038,104 +858,6 @@ def supported_output(
         return None
     projection = output_projection(test, function, records, functions)
     return "projected" if projection is not None else None
-
-
-def load_tests() -> list[dict]:
-    manifest = json.loads(API_MANIFEST.read_text(encoding="utf-8"))
-    tests: list[dict] = []
-    for relative in manifest["includes"]:
-        source = json.loads((API_ROOT / relative).read_text(encoding="utf-8"))
-        tests.extend(source.get("tests", source if isinstance(source, list) else []))
-    return tests
-
-
-def load_model(
-    model_path: Path = MODEL_PATH,
-) -> tuple[
-    dict[tuple[str, str], dict],
-    dict[str, dict],
-    dict[str, dict],
-    dict[str, dict],
-]:
-    model = json.loads(model_path.read_text(encoding="utf-8"))
-    functions = {
-        (module["name"], snake(function["name"])): function
-        for module in model["modules"]
-        for function in module["functions"]
-    }
-    records = {
-        record["name"]: record
-        for module in model["modules"]
-        for record in module.get("records", [])
-    }
-    enums = {
-        enum["name"]: enum
-        for module in model["modules"]
-        for enum in module.get("enums", [])
-    }
-    modules = {module["name"]: module for module in model["modules"]}
-    return functions, records, modules, enums
-
-
-def native_function(test: dict, functions: dict[tuple[str, str], dict]) -> tuple[str, str, dict] | None:
-    override = NATIVE_TEST_FUNCTION_OVERRIDES.get(test.get("id"))
-    if override is not None:
-        module, function_name = override
-        function = functions.get((module, function_name))
-        if function is not None:
-            return module, function_name, function
-
-    native_get = test.get("native", {}).get("get", [])
-    if not native_get:
-        sequence = test.get("wasm_sequence") or []
-        if sequence:
-            target = runtime_call_target(sequence[0].get("call", ""), functions)
-            if target is not None:
-                return target
-        return None
-    # Native parity metadata uses both the public class spelling
-    # (`Game.get_wind`) and the Rust-facing accessor spelling
-    # (`game().get_game_frame`).  They identify the same generated interface;
-    # the selector must normalize the accessor syntax before deciding that a
-    # test has no Wasm counterpart.
-    match = re.fullmatch(r"([^.]+?)(?:\(\))?\.([^.]+)", native_get[0])
-    if not match:
-        return None
-    class_name = match.group(1)
-    module = MODULE_BY_NATIVE_CLASS.get(class_name)
-    if module is None:
-        module = MODULE_BY_NATIVE_CLASS.get(class_name[:1].upper() + class_name[1:])
-    if module is None:
-        module = next(
-            (
-                candidate_module
-                for candidate_class, candidate_module in MODULE_BY_NATIVE_CLASS.items()
-                if snake(candidate_class) == snake(class_name)
-            ),
-            None,
-        )
-    if module is None:
-        return None
-    function_name = match.group(2)
-    function = functions.get((module, function_name))
-    if function is None:
-        # The C++ spelling is authoritative, but the existing native parity
-        # labels intentionally use a few human-friendly acronym spellings
-        # (`get_aiinfo`, `get_unit_def_ids`).  Compare the compact spelling so
-        # those labels still resolve to the generated semantic function without
-        # adding a second hand-maintained API inventory.
-        compact_name = function_name.replace("_", "").lower()
-        matches = [
-            (candidate_name, candidate)
-            for (candidate_module, candidate_name), candidate in functions.items()
-            if candidate_module == module and candidate_name.replace("_", "").lower() == compact_name
-        ]
-        if len(matches) == 1:
-            function_name, function = matches[0]
-    if function is None:
-        return None
-    return module, function_name, function
-
 
 def deterministic_param_values(test: dict) -> dict[str, tuple[object, str]]:
     """Return stable probe values for generated Lua parameters.
@@ -3930,6 +3652,27 @@ def render_context(context: str) -> str:
             ]
         )
     return "\n".join(lines)
+
+
+# Keep the historical module as the compatibility implementation while the
+# semantic helpers live in focused modules. Importing these names at the end
+# preserves every existing call site and the generated output byte-for-byte.
+from .model import load_model, load_tests, native_function
+from .types import (
+    kebab,
+    pascal,
+    records_field,
+    rust_identifier,
+    rust_semantic_path,
+    semantic_path,
+    simple_type,
+    snake,
+    type_kind,
+    type_supported_by_probe,
+    vector_component,
+    wit_identifier,
+    wit_type,
+)
 
 
 def main() -> None:

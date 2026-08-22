@@ -11,9 +11,9 @@
 #include <type_traits>
 
 #include "NativeInterface/NativeInterface.h"
-#include "WasmInterface/WasmCoreAbi.h"
-#include "WasmInterface/WasmCoreGeneratedSupport.h"
-#include "WasmInterface/WasmCoreWire.h"
+#include "WasmInterface/core/host/WasmCoreAbi.h"
+#include "WasmInterface/core/host/WasmCoreGeneratedSupport.h"
+#include "WasmInterface/core/host/WasmCoreWire.h"
 
 namespace recoil::wasm::core::generated {
 namespace {

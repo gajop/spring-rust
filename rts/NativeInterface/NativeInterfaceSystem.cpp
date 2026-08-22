@@ -17,7 +17,7 @@
 #include "NativeModulePath.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Game/GameSetup.h"
-#include "WasmInterface/WasmInterfaceSystem.h"
+#include "WasmInterface/system/WasmInterfaceSystem.h"
 
 #include "Rml/Backends/RmlUi_Backend.h"
 

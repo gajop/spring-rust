@@ -20,7 +20,7 @@ pub(super) fn render_header(model: &ApiModel) -> String {
 #include <cstdint>
 #include <string>
 
-#include "WasmInterface/WasmCoreAbi.h"
+#include "WasmInterface/core/host/WasmCoreAbi.h"
 
 class WasmExecutionBudget;
 
@@ -75,9 +75,9 @@ pub(super) fn render_cpp(model: &ApiModel) -> String {
 #include <type_traits>
 
 #include "NativeInterface/api/Callins.h"
-#include "WasmInterface/WasmCoreVariableCallins.h"
-#include "WasmInterface/WasmCoreWire.h"
-#include "WasmInterface/WasmResources.h"
+#include "WasmInterface/core/bindings/WasmCoreVariableCallins.h"
+#include "WasmInterface/core/host/WasmCoreWire.h"
+#include "WasmInterface/runtime/WasmResources.h"
 
 namespace recoil::wasm::core::generated {{
 namespace {{

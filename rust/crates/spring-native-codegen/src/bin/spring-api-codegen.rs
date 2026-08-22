@@ -1,6 +1,7 @@
 //! Maintainer/CI entry point for normalized Spring API generation.
 
 use anyhow::{anyhow, Context, Result};
+use heck::ToSnakeCase;
 use spring_native_codegen::{
     annotations, callins, extract_api_version,
     manifest::API_DEFINITIONS,
@@ -211,6 +212,18 @@ fn run() -> Result<()> {
         &arguments.output.join("WasmCoreGeneratedBindings.cpp"),
         &render_core_wasm_host::render_cpp(&model),
     )?;
+    let fixed_host_dir = arguments.output.join("host/core/fixed");
+    if fixed_host_dir.exists() {
+        fs::remove_dir_all(&fixed_host_dir)
+            .with_context(|| format!("removing {}", fixed_host_dir.display()))?;
+    }
+    fs::create_dir_all(&fixed_host_dir)?;
+    for module in &model.modules {
+        write(
+            &fixed_host_dir.join(format!("{}.cpp", module.name.to_snake_case())),
+            &render_core_wasm_host::render_module_cpp(&model, &module.name),
+        )?;
+    }
     write(
         &arguments.output.join("WasmCoreGeneratedOptionBindings.h"),
         &render_core_wasm_option_host::render_header(),

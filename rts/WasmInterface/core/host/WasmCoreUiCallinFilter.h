@@ -41,6 +41,10 @@ public:
 			name = "UnitMoveEvent";
 		else if (name == "ProjectileCreated" || name == "ProjectileDestroyed")
 			name = "ProjectileEvent";
+		// DrawWorld is a hot UI callin with no visibility-sensitive payload. Do
+		// not construct a UI perspective just to pass its empty query through.
+		if (name == "DrawWorld")
+			return true;
 
 		WasmUiVisibility::ScopedContext uiContext(true);
 

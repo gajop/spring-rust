@@ -2,39 +2,39 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/WasmtimeDependency.cmake)
 recoil_wasm_configure_wasmtime(RECOIL_WASMTIME_TARGET)
 
 set(sources_engine_WasmInterface
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmEnvironment.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreAbi.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsInfoVariableBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsQueryBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsQueryBorrowedBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitDefsBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsCommandsBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreCobScriptBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsPiecesBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitControlBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreTerrainControlBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreSystemControlBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreMathExtraBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreTerrainReadBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreGfxBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreGfxResourceBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreVfsBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreRmlUiBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreProfilingBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreMessagesBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreRulesParamsBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreConfigBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreBenchmarkBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreDesyncBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreVariableCallins.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreHost.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreValidation.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmModuleManifest.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmResources.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmRuntime.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterfaceSystem.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterfaceSystemCore.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/runtime/WasmEnvironment.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/host/WasmCoreAbi.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitsInfoVariableBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitsQueryBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitsQueryBorrowedBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitDefsBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitsCommandsBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreCobScriptBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitsPiecesBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitControlBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreTerrainControlBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreSystemControlBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreMathExtraBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreTerrainReadBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreGfxBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreGfxResourceBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreVfsBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreRmlUiBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreProfilingBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreMessagesBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreRulesParamsBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreConfigBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreBenchmarkBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreDesyncBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreVariableCallins.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/host/WasmCoreHost.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/host/WasmCoreValidation.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/runtime/WasmModuleManifest.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/runtime/WasmResources.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/runtime/WasmRuntime.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/system/WasmInterfaceSystem.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/system/WasmInterfaceSystemCore.cpp
 )
 
 # Generated variable transports are layered by specialization. Nested dynamic
@@ -57,10 +57,22 @@ foreach(RECOIL_WASM_CORE_GENERATED_SOURCE
 	endif()
 endforeach()
 
+file(GLOB_RECURSE RECOIL_WASM_CORE_FIXED_GENERATED_SOURCES CONFIGURE_DEPENDS
+	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/host/core/fixed/*.cpp
+)
+list(APPEND sources_engine_WasmInterface ${RECOIL_WASM_CORE_FIXED_GENERATED_SOURCES})
+
 set(sources_engine_WasmInterface ${sources_engine_WasmInterface} PARENT_SCOPE)
 
 list(APPEND engineCommonLibraries ${RECOIL_WASMTIME_TARGET})
 set(engineCommonLibraries "${engineCommonLibraries}" PARENT_SCOPE)
 list(APPEND engineIncludes "${CMAKE_CURRENT_SOURCE_DIR}/../wasm")
+set(engineIncludes "${engineIncludes}" PARENT_SCOPE)
+list(APPEND engineIncludes
+	"${CMAKE_CURRENT_SOURCE_DIR}/runtime"
+	"${CMAKE_CURRENT_SOURCE_DIR}/core/host"
+	"${CMAKE_CURRENT_SOURCE_DIR}/core/bindings"
+	"${CMAKE_CURRENT_SOURCE_DIR}/system"
+)
 set(engineIncludes "${engineIncludes}" PARENT_SCOPE)
 set(RECOIL_WASMTIME_TARGET "${RECOIL_WASMTIME_TARGET}" PARENT_SCOPE)

@@ -10,7 +10,7 @@
 #include <type_traits>
 
 #include "NativeInterface/api/Callins.h"
-#include "WasmInterface/WasmResources.h"
+#include "WasmInterface/runtime/WasmResources.h"
 
 namespace recoil::wasm::core::generated {
 

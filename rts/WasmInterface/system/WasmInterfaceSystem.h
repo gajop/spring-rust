@@ -81,5 +81,6 @@ private:
 	std::unique_ptr<WasmRuntime> runtime;
 	NativeInterface* nativeInterface = nullptr;
 	std::vector<CoreModuleRecord> coreModules;
+	std::uint32_t coreEnvironmentMask = 0;
 	CoreDispatchRegistration coreDispatchRegistration{this};
 };

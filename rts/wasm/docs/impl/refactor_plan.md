@@ -24,8 +24,10 @@ work is Core-output sharding, package layout, and verification records.
 - [x] Put the surviving Core parity generator behind a `probe/` package entry
       while preserving the existing CLI path and generated output.
 - [x] Shard the surviving generated Core outputs by owned API module.
-- [ ] Finish the semantic Python module split and any move-only handwritten
-      directory layout changes.
+- [x] Finish the semantic Python module split for shared type and metadata
+      semantics while preserving the compatibility CLI and generated output.
+- [x] Move handwritten Wasm files into runtime, core/host, core/bindings, and
+      system directories.
 
 The wrapper-table change is intentionally output-neutral: it preserves all 54
 public `generate_*` entry points and is covered by the existing codegen test
@@ -163,13 +165,15 @@ rts/wasm/generated/
 
 The Rust build script reads the generated shard directory directly. The
 surface verifier assembles the prelude, shards, and footer before checking
-every callout and environment projection. C++ binding TU sharding remains a
-separate task; it must update CMake and the generated-file drift guard in the
-same change.
+every callout and environment projection. C++ binding TU sharding is now
+emitted under `rts/wasm/generated/host/core/fixed/`, with a small generated
+dispatcher and one fixed-binding translation unit per API module. CMake
+discovers the shards with `CONFIGURE_DEPENDS`; the codegen verifier regenerates
+and checks them.
 
-Do the sharding now that the purge is complete: only surviving Core generated
-outputs are in scope. The per-module split of
-`WasmCoreGeneratedBindings.cpp` remains the first generated-output task.
+The sharding was performed after the purge, so only surviving Core generated
+outputs are in scope. The dispatcher and fixed per-module shards are the
+generated-output result.
 
 Sizing result: `core_owned.rs` is now a small prelude. Owned module shards are
 kept near the existing per-module scale; no owned shard is a monolith.
@@ -177,8 +181,8 @@ kept near the existing per-module scale; no owned shard is a monolith.
 ## 3. Hand-written C++ — `rts/WasmInterface/` (Core-only remainder)
 
 The Component/typed system and adapter sources are deleted. The remaining
-runtime, Core host, manifest, and system files are intentionally kept in their
-existing flat layout until a move-only directory change is worthwhile.
+runtime, Core host, manifest, and system files use the following move-only
+directory layout.
 
 ```
 rts/WasmInterface/
@@ -246,9 +250,11 @@ the shape the rest of the project should look like.
    native registry path.
 2. **Completed:** delete the Component transport, its WIT/SDK output, the 58
    generated adapter TUs, and the obsolete guest fixtures.
-3. Shard surviving generated Core bindings and SDK output (§2).
-4. Package `generate_probe.py`, then make any move-only `rts/WasmInterface/`
-   and `test/wasm_api/` directory changes (§3–4).
+3. Shard surviving generated Core bindings and SDK output (§2) — complete.
+4. Package `generate_probe.py` — complete as a compatibility package entry;
+   shared type and metadata semantics now live in `probe/types.py` and
+   `probe/model.py`.
+5. Move-only `rts/WasmInterface/` directory changes — complete.
 
 ## 7. Ground rules
 

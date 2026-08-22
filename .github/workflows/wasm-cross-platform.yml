@@ -158,6 +158,7 @@ jobs:
       - name: Compare synced Core observations by frame
         run: |
           python3 - <<'PY'
+          import hashlib
           import json
           import os
           from pathlib import Path
@@ -175,21 +176,28 @@ jobs:
                   if not line.strip():
                       continue
                   row = json.loads(line)
-                  rows.append({
+                  observation = {
                       "source": row.get("source"),
                       "frame": row.get("frame"),
                       "teamUnitCount": row.get("teamUnitCount"),
                       "fpEdgeSignature": row.get("fpEdgeSignature"),
                       "rngSignature": row.get("rngSignature"),
+                  }
+                  encoded = json.dumps(
+                      observation, sort_keys=True, separators=(",", ":")
+                  ).encode("utf-8")
+                  rows.append({
+                      "frame": observation["frame"],
+                      "checksum": hashlib.sha256(encoded).hexdigest(),
                   })
-              values[platform] = sorted(rows, key=lambda row: (row.get("frame", -1), json.dumps(row, sort_keys=True)))
+              values[platform] = sorted(rows, key=lambda row: row.get("frame", -1))
               print(platform, json.dumps(values[platform], sort_keys=True))
 
           expected = next(iter(values.values()))
           for platform, rows in values.items():
               if rows != expected:
-                  raise SystemExit(f"cross-platform Wasm observation mismatch on {platform}")
-          print(f"Wasm Core synced per-frame observation matches across {len(values)} platforms")
+                  raise SystemExit(f"cross-platform Wasm observation checksum mismatch on {platform}")
+          print(f"Wasm Core synced per-frame observation checksums match across {len(values)} platforms")
           PY
 
       - name: Assert every platform job succeeded

@@ -132,6 +132,12 @@ add_subdirectory(Map)
 add_subdirectory(Net)
 add_subdirectory(Sim)
 add_subdirectory(WasmInterface)
+include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterface/runtime
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterface/core/host
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterface/core/bindings
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterface/system
+)
 #add_subdirectory(System) # this is already added in ../
 
 make_global_var(engineSources

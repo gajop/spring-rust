@@ -17,7 +17,7 @@ pub fn render_header() -> String {
 
 #include <string>
 
-#include "WasmInterface/WasmCoreBindings.h"
+#include "WasmInterface/core/bindings/WasmCoreBindings.h"
 
 namespace recoil::wasm::core::generated {
 
@@ -85,9 +85,9 @@ pub fn render_cpp(model: &ApiModel) -> String {
 #include <vector>
 
 #include "NativeInterface/NativeInterface.h"
-#include "WasmInterface/WasmCoreAbi.h"
-#include "WasmInterface/WasmCoreGeneratedSupport.h"
-#include "WasmInterface/WasmCoreWire.h"
+#include "WasmInterface/core/host/WasmCoreAbi.h"
+#include "WasmInterface/core/host/WasmCoreGeneratedSupport.h"
+#include "WasmInterface/core/host/WasmCoreWire.h"
 
 namespace recoil::wasm::core::generated {{
 namespace {{

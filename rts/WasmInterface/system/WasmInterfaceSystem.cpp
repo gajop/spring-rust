@@ -79,6 +79,7 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 		return false;
 	}
 	coreModules.push_back({std::move(descriptor), std::move(identity)});
+	coreEnvironmentMask |= 1u << static_cast<std::uint32_t>(coreModules.back().descriptor.environment);
 	std::stable_sort(coreModules.begin(), coreModules.end(),
 		[](const CoreModuleRecord& left, const CoreModuleRecord& right) {
 			return DescriptorLess(left.descriptor, right.descriptor);
@@ -172,12 +173,16 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 		return false;
 	coreModules.erase(iter);
 	WasmCoreHost::Unload(moduleName);
+	coreEnvironmentMask = 0;
+	for (const CoreModuleRecord& module : coreModules)
+		coreEnvironmentMask |= 1u << static_cast<std::uint32_t>(module.descriptor.environment);
 	return true;
 }
 
 void WasmInterfaceSystem::UnloadAll()
 {
 	coreModules.clear();
+	coreEnvironmentMask = 0;
 	WasmCoreHost::UnloadAll();
 }
 

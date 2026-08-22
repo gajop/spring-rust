@@ -35,7 +35,7 @@
 #include "System/Platform/SharedLib.h"
 #include "System/Rectangle.h"
 #include "System/float3.h"
-#include "WasmInterface/WasmInterfaceSystem.h"
+#include "WasmInterface/system/WasmInterfaceSystem.h"
 #include "NativeInterface/WasmUiVisibility.h"
 
 #include <SDL_keyboard.h>

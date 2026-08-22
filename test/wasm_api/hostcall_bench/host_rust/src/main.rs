@@ -42,7 +42,7 @@ struct Sample {
 }
 
 fn engine() -> Result<Engine> {
-    // Mirrors rts/WasmInterface/WasmRuntime.cpp so both harnesses measure the
+    // Mirrors rts/WasmInterface/runtime/WasmRuntime.cpp so both harnesses measure the
     // same Cranelift and trap configuration.
     let mut config = Config::new();
     config.consume_fuel(false);

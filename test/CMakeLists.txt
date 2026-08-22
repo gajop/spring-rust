@@ -27,6 +27,10 @@ set(ENGINE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/rts")
 include_directories(${ENGINE_SOURCE_DIR})
 include_directories(${ENGINE_SOURCE_DIR}/lib/asio/include)
 include_directories(${ENGINE_SOURCE_DIR}/lib/nowide/include)
+include_directories(${ENGINE_SOURCE_DIR}/WasmInterface/runtime)
+include_directories(${ENGINE_SOURCE_DIR}/WasmInterface/core/host)
+include_directories(${ENGINE_SOURCE_DIR}/WasmInterface/core/bindings)
+include_directories(${ENGINE_SOURCE_DIR}/WasmInterface/system)
 
 add_definitions(-DSYNCCHECK -DUNIT_TEST)
 remove_definitions(-DTHREADPOOL)
@@ -100,8 +104,8 @@ endmacro()
 	set(test_name WasmModuleManifest)
 	set(test_src
 			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmModuleManifest.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmEnvironment.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModuleManifest.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmEnvironment.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmModuleManifest.cpp"
 			"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
 			${test_List_sources}
 			${test_Catch_main}

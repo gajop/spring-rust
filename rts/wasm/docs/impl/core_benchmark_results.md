@@ -46,10 +46,12 @@ Core/native ranges were 1.66–5.58× for callins, 1.01–4.39× for callouts,
 backends were available. Core loses to native on most rows; that is expected
 from the boundary and remains useful for regression tracking.
 
-The current `callin_drawworld` sample is Core 4434 ns versus Lua 2700 ns.
-The prior samples were Core 4711 ns versus Lua 2090 ns and Core 5311 ns versus
-Lua 2731 ns. Both backends carry microsecond-scale spread on this 2–5 µs row,
-so this remains a profile target rather than an unverified optimization target.
+The current `callin_drawworld` rerun after the dispatch and visibility hot-path
+cleanup is Core 5150 ns ± 3114 versus Lua 2520 ns ± 2686. The prior samples
+were Core 4434 ns versus Lua 2700 ns, Core 4711 ns versus Lua 2090 ns, and Core
+5311 ns versus Lua 2731 ns. Core still loses this row. Both backends carry
+microsecond-scale spread on this 2–5 µs row, so the regression is recorded and
+confirmed as a noisy but real profile target; no unsafe optimization is claimed.
 
 Rows marked `unavailable` by the harness remain unavailable. They are not zero
 and are not treated as passing comparisons.

@@ -18,7 +18,7 @@ ABI, and the parity guest/harness are now Core-only after the Component purge.
 The environment matrix has five independent fields:
 `{environment, name, synced, runtimeEnabled, permitsSimulationMutation}`.
 The previous handoff misread `synced` as `runtimeEnabled` and therefore called
-three environments disabled. In `rts/WasmInterface/WasmEnvironment.cpp`, all
+three environments disabled. In `rts/WasmInterface/runtime/WasmEnvironment.cpp`, all
 five environments have `runtimeEnabled == true`; only `rules-synced` and
 `gaia-synced` have `synced == true`, and only those two permit simulation
 mutation. Unsynced and UI contexts are runtime-enabled but must be validated
@@ -147,8 +147,7 @@ python3 test/wasm_api/parity_guest/generate_probe.py \
   --manifest-output test/wasm_api/parity_guest/probe_manifest_synced_gadget.core.json \
   --lua-output test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/wasm_api_probe_tests_core.lua
 
-RUSTFLAGS='-C link-arg=--initial-memory=67108864 -C link-arg=--max-memory=67108864' \
-  cargo build --manifest-path test/wasm_api/parity_guest/Cargo.toml \
+cargo build --manifest-path test/wasm_api/parity_guest/Cargo.toml \
   --target wasm32-unknown-unknown --release \
   --features core,core_rules_synced
 ```

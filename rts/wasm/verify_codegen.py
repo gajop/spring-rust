@@ -138,7 +138,9 @@ def verify_core_import_registries(root: Path, regenerated: Path) -> list[str]:
     unreachable: any module built against it is rejected by the validator, while
     the coverage report still counts it as an executable generated transport.
     """
-    handwritten_path = root / "rts" / "WasmInterface" / "WasmCoreRegistry.h"
+    handwritten_path = (
+        root / "rts" / "WasmInterface" / "core" / "host" / "WasmCoreRegistry.h"
+    )
     generated_path = regenerated / "WasmCoreGeneratedRegistry.h"
     if not handwritten_path.is_file():
         return [f"missing handwritten Core import registry: {handwritten_path}"]

@@ -177,16 +177,11 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 		}
 	}
 
-	std::uint32_t coreEnvironmentMask = 0;
-	for (const CoreModuleRecord& module : system->coreModules) {
-		coreEnvironmentMask |=
-			1u << static_cast<std::uint32_t>(module.descriptor.environment);
-	}
-	if (coreEnvironmentMask == 0)
+	if (system->coreEnvironmentMask == 0)
 		return true;
-	const auto hasCoreEnvironment = [coreEnvironmentMask](WasmEnvironment environment) {
+	const auto hasCoreEnvironment = [mask = system->coreEnvironmentMask](WasmEnvironment environment) {
 		const std::uint32_t bit = 1u << static_cast<std::uint32_t>(environment);
-		return (coreEnvironmentMask & bit) != 0;
+		return (mask & bit) != 0;
 	};
 
 	static constexpr std::array<WasmEnvironment, 2> syncedEnvironments{

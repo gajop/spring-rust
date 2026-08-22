@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string>
 
-#include "WasmInterface/WasmCoreAbi.h"
+#include "WasmInterface/core/host/WasmCoreAbi.h"
 
 class WasmExecutionBudget;
 

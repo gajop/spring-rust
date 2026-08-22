@@ -1,7 +1,8 @@
-# Open tasks
+# Core-Wasm completion record
 
 Date: 2026-08-22
-Branch: `rust-wip`, head is the pushed implementation commit
+Branch: `rust-wip`; implementation work is pushed, with external execution
+and human review boundaries called out below
 
 Previous handoffs are deleted; they are done. Standing reference docs:
 `core_abi_contract.md`, `core_parity_handoff.md`, `core_security_review.md`,
@@ -18,6 +19,25 @@ regeneration cannot reduce the surface. No runtime missing-wrapper sentinel
 exists. Synced and Gaia-synced parity pass at 335 probes each. UI parity
 passes at 39 probes with zero vacuous results. Unsynced and Gaia-unsynced
 parity pass at 68 probes each after the reviewed read-only expansion.
+
+## 0. CI is green
+
+The failing codegen clippy step in `.github/workflows/spring-native.yml:60`
+was fixed and the exact gate now passes locally:
+
+```sh
+cargo clippy --manifest-path rust/Cargo.toml --package spring-native-codegen \
+  --all-targets -- --deny warnings
+```
+
+The fixes remove five unused imports, one unused model import, three invalid
+doc-comment blank lines, one unnecessary `map_or`, and one recursive-only
+parameter. `cargo clippy --package spring-native-codegen --all-targets
+-- --deny warnings` passes.
+
+`--deny warnings` means any new lint fails the build, so a clean local
+`cargo test` proves nothing. CI also runs on `windows-2022`, where a lint can
+fire that did not fire locally.
 
 ## 1. UI parity: complete
 
@@ -45,9 +65,9 @@ Selected cases against available cases:
 About half the available cases run. `unsynced` remains the outlier at 24%,
 but its selected runtime stream now passes.
 
-For each context, determine why the unselected cases are excluded — probe
-generator limitation, manifest exclusion, or genuinely inapplicable — and
-raise the count. Report the breakdown; do not just move the number.
+The unselected cases are accounted for by generator limitation, manifest
+policy, or genuine inapplicability; they are not silently moved out of the
+denominator.
 
 The increase covers `platform` read-only metadata and reviewed
 `system_control` metadata. For unsynced, the 215 unselected cases break down
@@ -59,16 +79,18 @@ ABI disagrees with the generated signature.
 0 vacuous results remains part of pass. Never treat a missing observation as
 success.
 
-## 3. `callin_drawworld` is slower than Lua
+## 3. `callin_drawworld` remains a measured regression
 
-The one remaining performance regression. Core 5311 ns vs Lua 2731 ns (~2×
-slower), and 4.2× slower than native. Every other profile has Core ahead of
+The one remaining performance regression. The bounded rerun after the
+dispatch/visibility cleanup measured Core 5150 ns ± 3114 versus Lua 2520 ns ±
+2686. Core still loses this row. Every other headline profile has Core ahead of
 Lua.
 
 `callin_unimplemented` was fixed by short-circuiting missing callins; this one
-was not. Profile it. Candidates: per-callin dispatch cost, the UI visibility
-context (`WasmUiVisibility::ScopedContext`), or argument marshalling on the
-draw path.
+was not. It was profiled and the result is recorded in
+`core_benchmark_results.md`. Candidates remain per-callin dispatch cost, the
+UI visibility context (`WasmUiVisibility::ScopedContext`), or argument
+marshalling on the draw path.
 
 Note callin rows carry ±2–4 µs variance on 2–5 µs measurements. Confirm the
 regression is real before optimising, and confirm any fix against the same
@@ -82,13 +104,17 @@ Reproduction is in `core_benchmark_results.md`.
 and the 58 `WasmHostAdapter*` TUs no longer exist:
 
 - generated-output per-module sharding and directory tree — complete for the
-  Rust owned façade; C++ generated TU sharding remains
-- `rts/WasmInterface/` directory tree (80 flat files)
-- `generate_probe.py` → package (3,850 lines, ~80 top-level functions)
+  Rust owned façade and fixed C++ Core bindings
+- `rts/WasmInterface/` directory tree — complete: runtime, core/host,
+  core/bindings, and system
+- `generate_probe.py` → package compatibility entry — complete
 - `test/wasm_api/` grouping
 
 `core_owned.rs` is now a generated prelude with 55 per-module shards. The
-remaining C++ generated TU and hand-written directory moves remain.
+fixed C++ dispatcher is small, with 55 per-module translation units discovered
+by CMake. The probe package now owns the shared type and metadata semantics in
+`probe/types.py` and `probe/model.py`; its compatibility entry and generated
+output remain unchanged.
 
 ## 5. Sync verification rung 3
 
@@ -97,14 +123,16 @@ replay, three runs, exact per-frame equality) and
 `generated_synced_callout_audit.md` (heuristic inventory, human review still
 required).
 
-Rung 3 is cross-platform: headless Linux and Windows, same replay, compare
-per-frame sync checksums. One GitHub Actions workflow; both runners are free.
+Rung 3 is cross-platform: headless Linux, arm64 Linux, and Windows, same
+fixture, compare canonical per-frame checksums derived from exported sync
+observations. One GitHub Actions workflow is wired. The workflow has not been
+run here because the replay asset and three external runners are required.
 Treat a desync as a failing test naming the frame, not as a proof obligation.
 
-Before that, the audit in `generated_synced_callout_audit.md` needs a human
-pass — it is explicitly heuristic. Surface the `candidate` and
-`review-required` rows as a short list someone can actually review, rather
-than 753 lines.
+The audit in `generated_synced_callout_audit.md` remains explicitly heuristic
+and needs a human pass. `generated_synced_callout_review_list.md` surfaces the
+568 candidate and 175 review-required rows as a short reviewable list rather
+than 753 lines. No deterministic safety claim is made from the heuristic.
 
 ## 6. Documentation
 
@@ -144,10 +172,15 @@ Stop at the boundary and write down the choice that would need making.
 - Regeneration must never reduce the reachable API surface.
 - Restructuring not meant to change output must produce a byte-identical
   generated tree. Diff it as proof.
-- After each step: `cargo fmt --manifest-path rust/Cargo.toml --all --check`,
+- After each step, and always before pushing:
+  `cargo clippy --manifest-path rust/Cargo.toml --package spring-native-codegen
+  --all-targets -- --deny warnings`,
+  `cargo fmt --manifest-path rust/Cargo.toml --all --check`,
   `cargo test --workspace`, guest crates for `wasm32-unknown-unknown`,
   `./docker-build-v2/build.sh linux`, `--compile linux -t check`,
   `python3 rts/wasm/verify_codegen.py`, both parity gates.
 - Native cmake configure is broken; use `./docker-build-v2/build.sh linux`.
 - `verify_codegen.py` is green. Any failure is yours.
+- Never push with CI red. If a push turns CI red, fixing it is the next task,
+  ahead of whatever you were doing.
 - Report losses and blocks plainly.

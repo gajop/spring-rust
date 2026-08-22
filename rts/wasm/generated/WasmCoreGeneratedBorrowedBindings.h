@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "WasmInterface/WasmCoreBindings.h"
+#include "WasmInterface/core/bindings/WasmCoreBindings.h"
 
 namespace recoil::wasm::core::generated {
 

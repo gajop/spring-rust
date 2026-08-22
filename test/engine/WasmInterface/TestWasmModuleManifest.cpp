@@ -7,15 +7,15 @@
 #include <string_view>
 #include <vector>
 
-#include "WasmInterface/WasmCoreValidation.h"
-#include "WasmInterface/WasmModuleManifest.h"
+#include "WasmInterface/core/host/WasmCoreValidation.h"
+#include "WasmInterface/runtime/WasmModuleManifest.h"
 
 // The WasmInterface unit-test target predates the production fast-Core path and
 // does not yet compile WasmCoreValidation.cpp as a separate source. Include the
 // implementation here so these policy tests exercise that exact validator.
 // Normalize this into test/CMakeLists.txt when the test target is next edited
 // from a normal checkout.
-#include "WasmInterface/WasmCoreValidation.cpp"
+#include "WasmInterface/core/host/WasmCoreValidation.cpp"
 
 namespace {
 
