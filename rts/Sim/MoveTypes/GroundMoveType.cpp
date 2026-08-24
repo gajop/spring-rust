@@ -899,7 +899,7 @@ void CGroundMoveType::SlowUpdate()
 }
 
 
-void CGroundMoveType::StartMovingRaw(const float3 moveGoalPos, float moveGoalRadius) {
+void CGroundMoveType::StartMovingRaw(const float3 moveGoalPos, float moveGoalRadius, float speed) {
 	RECOIL_DETAILED_TRACY_ZONE;
 	const float deltaRadius = std::max(0.0f, ownerRadius - moveGoalRadius);
 
@@ -943,6 +943,11 @@ void CGroundMoveType::StartMovingRaw(const float3 moveGoalPos, float moveGoalRad
 
 	pathingArrived = false;
 	pathingFailed = false;
+
+	// Raw goals deliberately skip pathfinding, but their speed argument must
+	// still be honored.  Previously it was discarded at the API boundary,
+	// leaving raw callers unable to control movement speed.
+	wantedSpeed = (speed > 0.0f) ? speed : maxSpeed;
 }
 
 void CGroundMoveType::StartMoving(float3 moveGoalPos, float moveGoalRadius) {
@@ -2441,6 +2446,7 @@ void CGroundMoveType::StartEngine(bool callScript) {
 void CGroundMoveType::StopEngine(bool callScript, bool hardStop) {
 	RECOIL_DETAILED_TRACY_ZONE;
 	assert(!ThreadPool::IsInMultiThreadedSection());
+	const bool hadActiveMovement = (pathID != 0 || nextPathId != 0 || useRawMovement);
 	if (pathID != 0 || nextPathId != 0) {
 		if (pathID != 0) {
 			pathManager->DeletePath(pathID);
@@ -2451,9 +2457,9 @@ void CGroundMoveType::StopEngine(bool callScript, bool hardStop) {
 			nextPathId = 0;
 		}
 
-		if (callScript)
-			owner->script->StopMoving();
 	}
+	if (callScript && hadActiveMovement)
+		owner->script->StopMoving();
 
 	owner->SetVelocityAndSpeed(owner->speed * (1 - hardStop));
 
@@ -3731,4 +3737,3 @@ bool CGroundMoveType::SetMemberValue(unsigned int memberHash, void* memberValue)
 
 	return false;
 }
-

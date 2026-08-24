@@ -75,6 +75,7 @@
 #include "System/float3.h"
 #include "System/Matrix44f.h"
 #include "System/creg/STL_Map.h"
+#include "System/Log/ILog.h"
 #include "Sim/Units/Scripts/CobInstance.h"
 #include "Sim/Units/Scripts/NullUnitScript.h"
 
@@ -108,6 +109,11 @@ static const Error INVALID_ALLYTEAM_ERROR = {
 static const Error INVALID_UNIT_ERROR = {
 	.code = ERROR_INVALID_ARGUMENT,
 	.message = "Invalid unit ID"
+};
+
+static const Error UNIT_CREATION_FAILED_ERROR = {
+	.code = ERROR_NOT_AVAILABLE,
+	.message = "Unit loader could not create the requested unit"
 };
 
 static const Error INVALID_UNITDEF_ERROR = {
@@ -748,6 +754,10 @@ static void NativeCreateUnit(const CreateUnitQuery* query, CreateUnitResult* res
 		if (builder != nullptr && unitDef != nullptr) {
 			unit->SetSoloBuilder(const_cast<CUnit*>(builder), unitDef);
 		}
+	} else {
+		result->error = &UNIT_CREATION_FAILED_ERROR;
+		LOG_L(L_WARNING, "NativeCreateUnit: UnitLoader returned null for '%s' at (%f, %f, %f), team=%d",
+			unitDef->name.c_str(), pos.x, pos.y, pos.z, query->teamID);
 	}
 }
 
@@ -2284,7 +2294,7 @@ static void NativeSetUnitMoveGoal(const SetUnitMoveGoalQuery* query, SetUnitMove
 	const float speed = (query->speed > 0.0f) ? query->speed : unit->moveType->GetMaxSpeed();
 
 	if (query->raw) {
-		unit->moveType->StartMovingRaw(pos, query->radius);
+		unit->moveType->StartMovingRaw(pos, query->radius, speed);
 	} else {
 		unit->moveType->StartMoving(pos, query->radius, speed);
 	}

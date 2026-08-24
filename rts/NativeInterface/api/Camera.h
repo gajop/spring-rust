@@ -28,6 +28,7 @@ struct CameraState {
 	float dist;
 	float height;
 	float angle;
+	int32_t mode;      // CCameraHandler controller index, as in Spring.GetCameraState
 };
 
 // Queries

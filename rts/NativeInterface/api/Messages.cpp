@@ -11,12 +11,14 @@
 #include "Game/UI/MouseHandler.h"
 #include "ExternalAI/EngineOutHandler.h"
 #include "System/EventClient.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 #include "Lua/LuaHandle.h"
 #include "Lua/LuaMenu.h"
 #include "Lua/LuaRules.h"
 #include "Lua/LuaUI.h"
 #include "Sim/Misc/TeamHandler.h"
 #include <algorithm>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -351,13 +353,23 @@ static void NativeSendLuaRulesMsg(const SendLuaRulesQuery* query, SendLuaRulesRe
 		result->success = false;
 		return;
 	}
-	if (luaRules == nullptr || gu == nullptr) {
+	if (gu == nullptr || (luaRules == nullptr && NativeInterfaceSystem::s_instance == nullptr)) {
 		result->error = &NOT_READY_ERROR;
 		result->success = false;
 		return;
 	}
 
-	luaRules->RecvLuaMsg(query->message, gu->myPlayerNum);
+	if (luaRules != nullptr)
+		luaRules->RecvLuaMsg(query->message, gu->myPlayerNum);
+	// LuaRules normally owns RecvLuaMsg. When the rules implementation is a
+	// Core-WASM module there may be no Lua callin to receive the message, so
+	// route the same generic message through the native event bridge as well.
+	if (NativeInterfaceSystem::s_instance != nullptr) {
+		const auto* begin = reinterpret_cast<const std::uint8_t*>(query->message);
+		const auto* end = begin + std::strlen(query->message);
+		NativeInterfaceSystem::s_instance->HandleLuaMsg(
+			gu->myPlayerNum, LUA_HANDLE_ORDER_RULES, 0, std::vector<std::uint8_t>(begin, end));
+	}
 	result->error = nullptr;
 	result->success = true;
 }
@@ -370,7 +382,18 @@ static void NativeSendToUnsynced(const SendToUnsyncedQuery* query, SendToUnsynce
 	if (query->message == nullptr) {
 		return;
 	}
-	if (luaRules == nullptr || !luaRules->SendToUnsyncedMessage(query->message)) {
+	if (luaRules != nullptr) {
+		if (!luaRules->SendToUnsyncedMessage(query->message)) {
+			result->error = &NOT_READY_ERROR;
+			return;
+		}
+	} else if (NativeInterfaceSystem::s_instance != nullptr) {
+		std::string error;
+		if (!NativeInterfaceSystem::s_instance->DispatchWasmSyncedMessage(query->message, error)) {
+			result->error = &NOT_READY_ERROR;
+			return;
+		}
+	} else {
 		result->error = &NOT_READY_ERROR;
 		return;
 	}

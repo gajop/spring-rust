@@ -21,6 +21,10 @@ public:
 	AMoveType(CUnit* owner);
 	virtual ~AMoveType() {}
 
+	virtual void StartMovingRaw(const float3 moveGoalPos, float moveGoalRadius, float speed) {
+		(void)speed;
+		StartMovingRaw(moveGoalPos, moveGoalRadius);
+	}
 	virtual void StartMovingRaw(const float3 moveGoalPos, float moveGoalRadius) {}
 	virtual void StartMoving(float3 pos, float goalRadius) = 0;
 	virtual void StartMoving(float3 pos, float goalRadius, float speed) = 0;

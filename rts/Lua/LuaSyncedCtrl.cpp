@@ -4019,7 +4019,7 @@ int LuaSyncedCtrl::SetUnitMoveGoal(lua_State* L)
 	const float speed  = luaL_optfloat(L, 6, unit->moveType->GetMaxSpeed());
 
 	if (luaL_optboolean(L, 7, false)) {
-		unit->moveType->StartMovingRaw(pos, radius);
+		unit->moveType->StartMovingRaw(pos, radius, speed);
 	} else {
 		unit->moveType->StartMoving(pos, radius, speed);
 	}

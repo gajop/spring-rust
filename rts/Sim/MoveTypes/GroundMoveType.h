@@ -64,7 +64,7 @@ public:
 
 	void UpdateObstacleAvoidance();
 
-	void StartMovingRaw(const float3 moveGoalPos, float moveGoalRadius) override;
+	void StartMovingRaw(const float3 moveGoalPos, float moveGoalRadius, float speed) override;
 	void StartMoving(float3 pos, float moveGoalRadius) override;
 	void StartMoving(float3 pos, float moveGoalRadius, float speed) override { StartMoving(pos, moveGoalRadius); }
 	void StopMoving(bool callScript = false, bool hardStop = false, bool cancelRaw = false) override;

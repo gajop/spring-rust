@@ -136,6 +136,7 @@ static void NativeGetCameraState(const GetCameraStateQuery* query, GetCameraStat
 	result->state.dist = camState["dist"];
 	result->state.height = camState["height"];
 	result->state.angle = camState["angle"];
+	result->state.mode = static_cast<int32_t>(camHandler->GetCurrentControllerNum());
 }
 
 static void NativeGetCameraPosition(const GetCameraPositionQuery* query, GetCameraPositionResult* result)
@@ -357,6 +358,7 @@ static void NativeSetCameraState(const SetCameraStateQuery* query, SetCameraStat
 	state["height"] = query->state.height;
 	state["angle"] = query->state.angle;
 	state["dist"] = query->state.dist;
+	state["mode"] = static_cast<float>(query->state.mode);
 
 	camHandler->SetTransitionParams(query->transitionTimeFactor, query->transitionTimeExponent);
 	const bool success = camHandler->SetState(state);

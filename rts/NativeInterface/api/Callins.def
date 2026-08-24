@@ -156,7 +156,7 @@ CALLIN(ProjectileEvent, ProjectileEventQuery, ProjectileEventResult, rules-synce
 CALLIN(RectChanged, RectChangedQuery, RectChangedResult, rules-synced|rules-unsynced|gaia-synced|gaia-unsynced|ui, ignore, none)
 CALLIN(RenderUnitDestroyed, RenderUnitDestroyedQuery, RenderUnitDestroyedResult, rules-synced|rules-unsynced|gaia-synced|gaia-unsynced|ui, ignore, none)
 CALLIN(ResourceExcess, ResourceExcessQuery, BoolCallinResult, rules-synced|rules-unsynced|gaia-synced|gaia-unsynced, or-true, none)
-CALLIN(RecvFromSynced, RecvFromSyncedQuery, RecvFromSyncedResult, rules-unsynced|gaia-unsynced, ignore, none)
+CALLIN(RecvFromSynced, RecvFromSyncedQuery, RecvFromSyncedResult, rules-unsynced|gaia-unsynced|ui, ignore, none)
 CALLIN(ScreenPosition, ScreenPositionQuery, BoolCallinResult, rules-synced|rules-unsynced|gaia-synced|gaia-unsynced|ui, or-true, none)
 CALLIN(ScreenTooltip, ScreenPositionQuery, StringCallinResult, rules-synced|rules-unsynced|gaia-synced|gaia-unsynced|ui, first-non-empty, none)
 CALLIN(ShieldPreDamaged, ShieldPreDamagedQuery, BoolCallinResult, rules-synced|rules-unsynced|gaia-synced|gaia-unsynced, or-true, none)
