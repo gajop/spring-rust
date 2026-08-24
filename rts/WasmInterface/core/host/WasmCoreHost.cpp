@@ -27,6 +27,14 @@
 
 namespace {
 
+// Bumped when an unsynced guest faults and cleared by the sweep that removes
+// it. Dispatch reads this instead of scanning the registry every call.
+std::size_t& PendingUnsyncedFaultCount()
+{
+	static std::size_t pending = 0;
+	return pending;
+}
+
 std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 {
 	static std::vector<std::unique_ptr<WasmCoreHost>> hosts;
@@ -104,10 +112,10 @@ struct WasmCoreHost::Backend {
 	Backend(NativeInterface* nativeInterface, const WasmRuntime& runtime,
 		WasmEnvironment environment)
 		: runtime(&runtime)
-		, budget(runtime.Config().instructionFuel, runtime.Config().hostWorkLimit,
-			runtime.Config().resultBytesLimit)
+		, hot{false, WasmExecutionBudget(runtime.Config().instructionFuel,
+			runtime.Config().hostWorkLimit, runtime.Config().resultBytesLimit)}
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-		, bindings(nativeInterface, &budget,
+		, bindings(nativeInterface, &hot.budget,
 			WasmEnvironmentMatrix::Policy(environment).synced, environment,
 			runtime.Config().maxValueNodes)
 #endif
@@ -129,7 +137,10 @@ struct WasmCoreHost::Backend {
 	}
 
 	const WasmRuntime* runtime = nullptr;
-	WasmExecutionBudget budget;
+	recoil::wasm::core::HotGuestState hot;
+	// Resolved once at load: one entry per callin the guest exports. Handed to
+	// the dispatcher as stable pointers, so this vector is never grown again.
+	std::vector<recoil::wasm::core::WasmCoreDispatchPlan> plans;
 	std::array<std::uint64_t, (CALLIN_COUNT + 63u) / 64u> implementedCallins{};
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	recoil::wasm::core::InstanceBindings bindings;
@@ -146,7 +157,6 @@ struct WasmCoreHost::Backend {
 	wasmtime_module_t* module = nullptr;
 	wasmtime_instance_t instance{};
 #endif
-	bool faulted = false;
 	std::string faultReason;
 };
 
@@ -352,6 +362,8 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 	Unload(moduleName);
 	Hosts().emplace_back(new WasmCoreHost(std::move(moduleName), environment,
 		std::move(backend)));
+	// Resolve the dispatch plans once, now, so no callin ever pays for it.
+	Hosts().back()->BuildDispatchPlans();
 	return true;
 }
 
@@ -361,11 +373,20 @@ void WasmCoreHost::Unload(std::string_view moduleName)
 	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
 		return host != nullptr && host->moduleName == moduleName;
 	}), hosts.end());
+	// Unloading may have taken a faulted guest with it. Leaving the pending
+	// count high would put the fault sweep back on every dispatch.
+	RecountPendingUnsyncedFaults();
 }
 
 void WasmCoreHost::UnloadAll()
 {
 	Hosts().clear();
+	PendingUnsyncedFaultCount() = 0;
+}
+
+std::string_view WasmCoreHost::ModuleName(const WasmCoreHost* host)
+{
+	return host != nullptr ? std::string_view(host->moduleName) : std::string_view{};
 }
 
 bool WasmCoreHost::AnyActive()
@@ -388,15 +409,17 @@ bool WasmCoreHost::HasModule(std::string_view moduleName)
 bool WasmCoreHost::ModuleFaulted(std::string_view moduleName)
 {
 	const WasmCoreHost* host = Find(moduleName);
-	return host != nullptr && host->backend != nullptr && host->backend->faulted;
+	return host != nullptr && host->backend != nullptr && host->backend->hot.faulted;
 }
 
 void WasmCoreHost::Fault(std::string reason)
 {
-	if (backend == nullptr)
+	if (backend == nullptr || backend->hot.faulted)
 		return;
-	backend->faulted = true;
+	backend->hot.faulted = true;
 	backend->faultReason = reason.empty() ? "Core Wasm module faulted" : std::move(reason);
+	if (!WasmEnvironmentMatrix::Policy(environment).synced)
+		++PendingUnsyncedFaultCount();
 }
 
 bool WasmCoreHost::FaultModule(std::string_view moduleName, std::string reason)
@@ -408,12 +431,33 @@ bool WasmCoreHost::FaultModule(std::string_view moduleName, std::string reason)
 	return true;
 }
 
+void WasmCoreHost::RecountPendingUnsyncedFaults()
+{
+	std::size_t pending = 0;
+	for (const auto& host : Hosts()) {
+		if (host != nullptr && host->backend != nullptr && host->backend->hot.faulted &&
+			!WasmEnvironmentMatrix::Policy(host->environment).synced)
+			++pending;
+	}
+	PendingUnsyncedFaultCount() = pending;
+}
+
+std::size_t WasmCoreHost::PendingUnsyncedFaults()
+{
+	return PendingUnsyncedFaultCount();
+}
+
 std::size_t WasmCoreHost::RemoveFaultedUnsynced()
 {
+	// Callers poll this on the dispatch path, so a run with no faults must not
+	// touch the registry at all.
+	if (PendingUnsyncedFaultCount() == 0)
+		return 0;
+	PendingUnsyncedFaultCount() = 0;
 	auto& hosts = Hosts();
 	const std::size_t before = hosts.size();
 	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [](const auto& host) {
-		return host != nullptr && host->backend != nullptr && host->backend->faulted &&
+		return host != nullptr && host->backend != nullptr && host->backend->hot.faulted &&
 			!WasmEnvironmentMatrix::Policy(host->environment).synced;
 	}), hosts.end());
 	return before - hosts.size();
@@ -426,7 +470,7 @@ bool WasmCoreHost::ResetBudgetImpl(std::string& error)
 		return false;
 	}
 	const WasmRuntimeConfig& config = backend->runtime->Config();
-	backend->budget.Reset(config.instructionFuel, config.hostWorkLimit,
+	backend->hot.budget.Reset(config.instructionFuel, config.hostWorkLimit,
 		config.resultBytesLimit);
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	if (config.instructionFuel != 0) {
@@ -499,133 +543,177 @@ bool WasmCoreHost::HasCallin(WasmCoreCallin callin) const
 			(std::uint64_t{1} << (ordinal % 64u))) != 0;
 }
 
-bool WasmCoreHost::InvokeGameFrame(const void* query, std::string& error)
-{
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	const auto* typed = static_cast<const GameFrameQuery*>(query);
-	if (typed == nullptr) {
-		error = "Core Wasm GameFrame query is null";
-		return false;
+namespace {
+
+using recoil::wasm::core::HotGuestState;
+using recoil::wasm::core::WasmCoreDispatchPlan;
+
+// One unchecked host->guest call through the function cached in the plan. This
+// is the only place a Core callin enters Wasmtime.
+bool CallPlan(const WasmCoreDispatchPlan& plan, wasmtime_val_raw_t* slots,
+	std::size_t slotCount, std::string& error)
+{
+	const auto entryStage = spring::benchmark_callins::BeginStage(
+		spring::benchmark_callins::Stage::WasmtimeEntry);
+	bool success = true;
+	wasm_trap_t* trap = nullptr;
+	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(
+			plan.context, &plan.function, slots, slotCount, &trap);
+		callError != nullptr) {
+		error = "core Wasm export call failed: " +
+			recoil::wasm::core::ErrorMessage(callError);
+		if (trap != nullptr)
+			error += ": " + recoil::wasm::core::TrapMessage(trap);
+		success = false;
+	} else if (trap != nullptr) {
+		error = "core Wasm export trapped: " + recoil::wasm::core::TrapMessage(trap);
+		success = false;
 	}
-	return backend->bindings.GameFrame(wasmtime_store_context(backend->store),
-		typed->gameFrame, error);
-#else
-	(void)query;
-	error = "Wasmtime is unavailable for the Core Wasm host";
-	return false;
-#endif
+	spring::benchmark_callins::End(entryStage);
+	return success;
 }
 
-bool WasmCoreHost::InvokeGameFramePost(const void* query, std::string& error)
+template<typename T>
+const T* TypedQuery(const void* query, std::string_view name, std::string& error)
 {
-#if defined(RECOIL_WASMTIME_AVAILABLE)
-	const auto* typed = static_cast<const GameFramePostQuery*>(query);
-	if (typed == nullptr) {
-		error = "Core Wasm GameFramePost query is null";
-		return false;
-	}
-	return backend->bindings.GameFramePost(wasmtime_store_context(backend->store),
-		typed->gameFrame, error);
-#else
-	(void)query;
-	error = "Wasmtime is unavailable for the Core Wasm host";
-	return false;
-#endif
+	if (query != nullptr)
+		return static_cast<const T*>(query);
+	error = "Core Wasm " + std::string(name) + " query is null";
+	return nullptr;
 }
 
-bool WasmCoreHost::InvokeUpdate(const void* query, std::string& error)
+bool PlanVoid(const WasmCoreDispatchPlan& plan, const void*, void*, std::string& error)
 {
-#if defined(RECOIL_WASMTIME_AVAILABLE)
-	const auto* typed = static_cast<const UpdateQuery*>(query);
-	if (typed == nullptr) {
-		error = "Core Wasm Update query is null";
-		return false;
-	}
-	return backend->bindings.Update(wasmtime_store_context(backend->store),
-		typed->deltaSeconds, error);
-#else
-	(void)query;
-	error = "Wasmtime is unavailable for the Core Wasm host";
-	return false;
-#endif
+	return CallPlan(plan, nullptr, 0, error);
 }
 
-bool WasmCoreHost::InvokeUnitCreated(const void* query, std::string& error)
-{
-#if defined(RECOIL_WASMTIME_AVAILABLE)
-	const auto* typed = static_cast<const UnitCreatedQuery*>(query);
-	if (typed == nullptr) {
-		error = "Core Wasm UnitCreated query is null";
-		return false;
-	}
-	return backend->bindings.UnitCreated(wasmtime_store_context(backend->store),
-		typed->unitID, typed->unitDefID, typed->unitTeam, typed->builderID, error);
-#else
-	(void)query;
-	error = "Wasmtime is unavailable for the Core Wasm host";
-	return false;
-#endif
-}
-
-bool WasmCoreHost::InvokeUnitPreDamaged(const void* query, void* result,
+bool PlanGameFrame(const WasmCoreDispatchPlan& plan, const void* query, void*,
 	std::string& error)
 {
-#if defined(RECOIL_WASMTIME_AVAILABLE)
-	const auto* typed = static_cast<const UnitDamagedQuery*>(query);
+	const auto* typed = TypedQuery<GameFrameQuery>(query, "GameFrame", error);
+	if (typed == nullptr)
+		return false;
+	wasmtime_val_raw_t slot{};
+	slot.i32 = typed->gameFrame;
+	return CallPlan(plan, &slot, 1, error);
+}
+
+bool PlanGameFramePost(const WasmCoreDispatchPlan& plan, const void* query, void*,
+	std::string& error)
+{
+	const auto* typed = TypedQuery<GameFramePostQuery>(query, "GameFramePost", error);
+	if (typed == nullptr)
+		return false;
+	wasmtime_val_raw_t slot{};
+	slot.i32 = typed->gameFrame;
+	return CallPlan(plan, &slot, 1, error);
+}
+
+bool PlanUpdate(const WasmCoreDispatchPlan& plan, const void* query, void*,
+	std::string& error)
+{
+	const auto* typed = TypedQuery<UpdateQuery>(query, "Update", error);
+	if (typed == nullptr)
+		return false;
+	wasmtime_val_raw_t slot{};
+	slot.f32 = typed->deltaSeconds;
+	return CallPlan(plan, &slot, 1, error);
+}
+
+bool PlanUnitCreated(const WasmCoreDispatchPlan& plan, const void* query, void*,
+	std::string& error)
+{
+	const auto* typed = TypedQuery<UnitCreatedQuery>(query, "UnitCreated", error);
+	if (typed == nullptr)
+		return false;
+	std::array<wasmtime_val_raw_t, 4> slots{};
+	slots[0].i32 = typed->unitID;
+	slots[1].i32 = typed->unitDefID;
+	slots[2].i32 = typed->unitTeam;
+	slots[3].i32 = typed->builderID;
+	return CallPlan(plan, slots.data(), slots.size(), error);
+}
+
+bool PlanUnitPreDamaged(const WasmCoreDispatchPlan& plan, const void* query, void* result,
+	std::string& error)
+{
+	const auto* typed = TypedQuery<UnitDamagedQuery>(query, "UnitPreDamaged", error);
+	if (typed == nullptr)
+		return false;
 	auto* typedResult = static_cast<DamageCallinResult*>(result);
-	if (typed == nullptr) {
-		error = "Core Wasm UnitPreDamaged query is null";
+	std::array<wasmtime_val_raw_t, 10> slots{};
+	slots[0].i32 = typed->unitID;
+	slots[1].i32 = typed->unitDefID;
+	slots[2].i32 = typed->unitTeam;
+	slots[3].f32 = typed->damage;
+	slots[4].i32 = typed->paralyzer ? 1 : 0;
+	slots[5].i32 = typed->weaponDefID;
+	slots[6].i32 = typed->projectileID;
+	slots[7].i32 = typed->attackerID;
+	slots[8].i32 = typed->attackerDefID;
+	slots[9].i32 = typed->attackerTeam;
+	if (!CallPlan(plan, slots.data(), slots.size(), error))
 		return false;
-	}
-	float newDamage = typedResult == nullptr ? typed->damage : typedResult->newDamage;
-	float impulseMult = typedResult == nullptr ? 1.0f : typedResult->impulseMult;
-	if (!backend->bindings.UnitPreDamaged(wasmtime_store_context(backend->store),
-		typed->unitID, typed->unitDefID, typed->unitTeam, typed->damage, typed->paralyzer,
-		typed->weaponDefID, typed->projectileID, typed->attackerID,
-		typed->attackerDefID, typed->attackerTeam, newDamage, impulseMult, error))
-		return false;
-	if (typedResult != nullptr) {
-		typedResult->newDamage = newDamage;
-		typedResult->impulseMult = impulseMult;
-	}
+	if (typedResult == nullptr)
+		return true;
+	recoil::wasm::core::UnpackF32Pair(static_cast<std::uint64_t>(slots[0].i64),
+		typedResult->newDamage, typedResult->impulseMult);
 	return true;
-#else
-	(void)query;
-	(void)result;
-	error = "Wasmtime is unavailable for the Core Wasm host";
-	return false;
-#endif
 }
 
-bool WasmCoreHost::InvokeAllowUnitCreation(const void* query, void* result,
-	std::string& error)
+bool PlanAllowUnitCreation(const WasmCoreDispatchPlan& plan, const void* query,
+	void* result, std::string& error)
 {
-#if defined(RECOIL_WASMTIME_AVAILABLE)
-	const auto* typed = static_cast<const AllowUnitCreationQuery*>(query);
-	auto* typedResult = static_cast<AllowUnitCreationResult*>(result);
-	if (typed == nullptr) {
-		error = "Core Wasm AllowUnitCreation query is null";
+	const auto* typed = TypedQuery<AllowUnitCreationQuery>(query, "AllowUnitCreation", error);
+	if (typed == nullptr)
+		return false;
+	std::array<wasmtime_val_raw_t, 8> slots{};
+	slots[0].i32 = typed->unitDefID;
+	slots[1].i32 = typed->builderID;
+	slots[2].i32 = typed->builderTeam;
+	slots[3].i32 = typed->hasBuildInfo ? 1 : 0;
+	slots[4].f32 = typed->buildPos.x;
+	slots[5].f32 = typed->buildPos.y;
+	slots[6].f32 = typed->buildPos.z;
+	slots[7].i32 = typed->buildFacing;
+	if (!CallPlan(plan, slots.data(), slots.size(), error))
+		return false;
+	const std::uint32_t flags = static_cast<std::uint32_t>(slots[0].i32);
+	if ((flags & ~0x3u) != 0) {
+		error = "core Wasm allow-unit-creation returned invalid result flags";
 		return false;
 	}
-	bool allow = typedResult == nullptr ? true : typedResult->allow;
-	bool dropOrder = typedResult == nullptr ? false : typedResult->dropOrder;
-	if (!backend->bindings.AllowUnitCreation(wasmtime_store_context(backend->store),
-		typed->unitDefID, typed->builderID, typed->builderTeam, typed->hasBuildInfo,
-		typed->buildPos.x, typed->buildPos.y, typed->buildPos.z, typed->buildFacing,
-		allow, dropOrder, error))
-		return false;
-	if (typedResult != nullptr) {
-		typedResult->allow = allow;
-		typedResult->dropOrder = dropOrder;
+	if (auto* typedResult = static_cast<AllowUnitCreationResult*>(result);
+		typedResult != nullptr) {
+		typedResult->allow = (flags & 0x1u) != 0;
+		typedResult->dropOrder = (flags & 0x2u) != 0;
 	}
 	return true;
-#else
-	(void)query;
-	(void)result;
-	error = "Wasmtime is unavailable for the Core Wasm host";
-	return false;
-#endif
 }
+
+// Variable-payload and generated callins keep their existing marshalling, which
+// needs the backend's scratch region and binding tables.
+bool PlanAddConsoleLine(const WasmCoreDispatchPlan& plan, const void* query, void* result,
+	std::string& error)
+{
+	return plan.host->InvokeAddConsoleLine(query, result, error);
+}
+
+bool PlanCommandNotify(const WasmCoreDispatchPlan& plan, const void* query, void* result,
+	std::string& error)
+{
+	return plan.host->InvokeCommandNotify(query, result, error);
+}
+
+bool PlanGenerated(const WasmCoreDispatchPlan& plan, const void* query, void* result,
+	std::string& error)
+{
+	return plan.host->InvokeGenerated(plan.callin, query, result, error);
+}
+
+} // namespace
+#endif
 
 bool WasmCoreHost::InvokeAddConsoleLine(const void* query, void* result,
 	std::string& error)
@@ -641,7 +729,7 @@ bool WasmCoreHost::InvokeAddConsoleLine(const void* query, void* result,
 	if (typedResult == nullptr)
 		typedResult = &fallback;
 	return backend->variableCallins.AddConsoleLine(
-		wasmtime_store_context(backend->store), backend->budget,
+		wasmtime_store_context(backend->store), backend->hot.budget,
 		backend->bindings.Host().memory, *typed, *typedResult, error);
 #else
 	(void)query;
@@ -665,7 +753,7 @@ bool WasmCoreHost::InvokeCommandNotify(const void* query, void* result,
 	if (typedResult == nullptr)
 		typedResult = &fallback;
 	return backend->variableCallins.CommandNotify(
-		wasmtime_store_context(backend->store), backend->budget,
+		wasmtime_store_context(backend->store), backend->hot.budget,
 		backend->bindings.Host().memory, *typed, *typedResult, error);
 #else
 	(void)query;
@@ -675,77 +763,203 @@ bool WasmCoreHost::InvokeCommandNotify(const void* query, void* result,
 #endif
 }
 
-bool WasmCoreHost::InvokeDrawWorld(std::string& error)
+bool WasmCoreHost::InvokeGenerated(WasmCoreCallin callin, const void* query,
+	void* result, std::string& error)
 {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	return backend->bindings.DrawWorld(wasmtime_store_context(backend->store), error);
+	const std::uint16_t ordinal = static_cast<std::uint16_t>(callin);
+#if defined(RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS)
+	if (backend->generatedCallins.Has(ordinal)) {
+		return backend->generatedCallins.Invoke(ordinal,
+			wasmtime_store_context(backend->store), backend->hot.budget,
+			backend->bindings.Host().memory, backend->generatedStringResultStorage,
+			query, result, error);
+	}
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS)
+	if (backend->generatedScratchCallins.Has(ordinal)) {
+		return backend->generatedScratchCallins.Invoke(ordinal,
+			wasmtime_store_context(backend->store), backend->hot.budget,
+			backend->bindings.Host().memory, query, result, error);
+	}
+#endif
+	error = "Core Wasm callin has no generated binding";
+	return false;
 #else
+	(void)callin;
+	(void)query;
+	(void)result;
 	error = "Wasmtime is unavailable for the Core Wasm host";
 	return false;
 #endif
 }
 
+// Build one plan per exported callin. Everything resolved here — the guest
+// function, the store context, the invoker, the mutable hot state — is fixed
+// for the module's lifetime, so no dispatch has to rediscover any of it.
+void WasmCoreHost::BuildDispatchPlans()
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	using recoil::wasm::core::WasmCoreDispatchPlan;
+	if (backend == nullptr)
+		return;
+
+	wasmtime_context_t* context = wasmtime_store_context(backend->store);
+	const bool ui = environment == WasmEnvironment::UI;
+
+	std::vector<WasmCoreDispatchPlan>& plans = backend->plans;
+	plans.clear();
+	std::size_t exported = 0;
+	for (std::uint16_t ordinal = 1; ordinal <= CALLIN_COUNT; ++ordinal) {
+		if (HasCallin(static_cast<WasmCoreCallin>(ordinal)))
+			++exported;
+	}
+	plans.reserve(exported);
+
+	const auto add = [&](WasmCoreCallin callin, WasmCoreDispatchPlan::Invoke invoke,
+		const recoil::wasm::core::RawExport* function) {
+		WasmCoreDispatchPlan plan;
+		plan.invoke = invoke;
+		plan.context = context;
+		plan.hot = &backend->hot;
+		plan.host = this;
+		plan.callin = callin;
+		plan.uiEnvironment = ui;
+		if (function != nullptr)
+			plan.function = function->Function();
+		plans.push_back(plan);
+	};
+
+	for (std::uint16_t ordinal = 1; ordinal <= CALLIN_COUNT; ++ordinal) {
+		const auto callin = static_cast<WasmCoreCallin>(ordinal);
+		if (!HasCallin(callin))
+			continue;
+		const recoil::wasm::core::InstanceBindings& bindings = backend->bindings;
+		switch (callin) {
+			case WasmCoreCallin::GameFrame:
+				add(callin, &PlanGameFrame, &bindings.GameFrameExport());
+				break;
+			case WasmCoreCallin::GameFramePost:
+				add(callin, &PlanGameFramePost, &bindings.GameFramePostExport());
+				break;
+			case WasmCoreCallin::Update:
+				add(callin, &PlanUpdate, &bindings.UpdateExport());
+				break;
+			case WasmCoreCallin::UnitCreated:
+				add(callin, &PlanUnitCreated, &bindings.UnitCreatedExport());
+				break;
+			case WasmCoreCallin::UnitPreDamaged:
+				add(callin, &PlanUnitPreDamaged, &bindings.UnitPreDamagedExport());
+				break;
+			case WasmCoreCallin::AllowUnitCreation:
+				add(callin, &PlanAllowUnitCreation, &bindings.AllowUnitCreationExport());
+				break;
+			case WasmCoreCallin::DrawWorld:
+				add(callin, &PlanVoid, &bindings.DrawWorldExport());
+				break;
+			case WasmCoreCallin::AddConsoleLine:
+				add(callin, &PlanAddConsoleLine, nullptr);
+				break;
+			case WasmCoreCallin::CommandNotify:
+				add(callin, &PlanCommandNotify, nullptr);
+				break;
+			default:
+				add(callin, &PlanGenerated, nullptr);
+				break;
+		}
+	}
+#endif
+}
+
+const recoil::wasm::core::WasmCoreDispatchPlan* WasmCoreHost::PlanFor(
+	WasmCoreCallin callin) const
+{
+	if (backend == nullptr)
+		return nullptr;
+	for (const auto& plan : backend->plans) {
+		if (plan.callin == callin)
+			return &plan;
+	}
+	return nullptr;
+}
+
+const recoil::wasm::core::WasmCoreDispatchPlan* WasmCoreHost::ModulePlan(
+	const WasmCoreHost* host, WasmCoreCallin callin)
+{
+	return host != nullptr ? host->PlanFor(callin) : nullptr;
+}
+
+namespace recoil::wasm::core {
+
+bool DispatchPlanRejected(const WasmCoreDispatchPlan* plan, std::string& error)
+{
+	if (plan == nullptr) {
+		error = "Core Wasm dispatch plan is null";
+		return false;
+	}
+	error = WasmCoreHost::FaultReason(plan->host);
+	return false;
+}
+
+bool DispatchPlanExhausted(const WasmCoreDispatchPlan* plan, std::string& error)
+{
+	error = "Core Wasm callin host-work budget exhausted";
+	WasmCoreHost::FaultHost(plan->host, error);
+	return false;
+}
+
+bool DispatchPlanFailed(const WasmCoreDispatchPlan* plan, std::string& error)
+{
+	WasmCoreHost::FaultHost(plan->host,
+		error.empty() ? "Core Wasm callin failed" : error);
+	return false;
+}
+
+} // namespace recoil::wasm::core
+
+std::string WasmCoreHost::FaultReason(const WasmCoreHost* host)
+{
+	return host != nullptr && host->backend != nullptr ? host->backend->faultReason
+		: std::string("Core Wasm module faulted");
+}
+
+void WasmCoreHost::FaultHost(WasmCoreHost* host, std::string reason)
+{
+	if (host != nullptr)
+		host->Fault(std::move(reason));
+}
+
+bool WasmCoreHost::Dispatch(const recoil::wasm::core::WasmCoreDispatchPlan* plan,
+	const void* query, void* result, std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	return recoil::wasm::core::DispatchPlan(plan, query, result, error);
+#else
+	(void)plan;
+	(void)query;
+	(void)result;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::DispatchModule(WasmCoreHost* host, WasmCoreCallin callin,
+	const void* query, void* result, std::string& error)
+{
+	if (host == nullptr) {
+		error = "Core Wasm module handle is null";
+		return false;
+	}
+	const recoil::wasm::core::WasmCoreDispatchPlan* plan = host->PlanFor(callin);
+	if (plan == nullptr)
+		return true;
+	return Dispatch(plan, query, result, error);
+}
+
 bool WasmCoreHost::Invoke(WasmCoreCallin callin, const void* query, void* result,
 	std::string& error)
 {
-	if (backend == nullptr) {
-		error = "Core Wasm host has no backend";
-		return false;
-	}
-	if (backend->faulted) {
-		error = backend->faultReason;
-		return false;
-	}
-	if (callin == WasmCoreCallin::Invalid) {
-		error = "unsupported Core Wasm callin";
-		return false;
-	}
-	if (!HasCallin(callin))
-		return true;
-	if (!backend->budget.ChargeHost(1)) {
-		error = "Core Wasm callin host-work budget exhausted";
-		Fault(error);
-		return false;
-	}
-
-	bool success = false;
-	switch (callin) {
-		case WasmCoreCallin::GameFrame: success = InvokeGameFrame(query, error); break;
-		case WasmCoreCallin::GameFramePost: success = InvokeGameFramePost(query, error); break;
-		case WasmCoreCallin::Update: success = InvokeUpdate(query, error); break;
-		case WasmCoreCallin::UnitCreated: success = InvokeUnitCreated(query, error); break;
-		case WasmCoreCallin::UnitPreDamaged: success = InvokeUnitPreDamaged(query, result, error); break;
-		case WasmCoreCallin::AllowUnitCreation: success = InvokeAllowUnitCreation(query, result, error); break;
-		case WasmCoreCallin::AddConsoleLine: success = InvokeAddConsoleLine(query, result, error); break;
-		case WasmCoreCallin::CommandNotify: success = InvokeCommandNotify(query, result, error); break;
-		case WasmCoreCallin::DrawWorld: success = InvokeDrawWorld(error); break;
-		case WasmCoreCallin::Invalid: break;
-		default: {
-			const std::uint16_t ordinal = static_cast<std::uint16_t>(callin);
-#if defined(RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS)
-			if (backend->generatedCallins.Has(ordinal)) {
-				success = backend->generatedCallins.Invoke(ordinal,
-					wasmtime_store_context(backend->store), backend->budget,
-					backend->bindings.Host().memory, backend->generatedStringResultStorage,
-					query, result, error);
-				break;
-			}
-#endif
-#if defined(RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS)
-			if (backend->generatedScratchCallins.Has(ordinal)) {
-				success = backend->generatedScratchCallins.Invoke(ordinal,
-					wasmtime_store_context(backend->store), backend->budget,
-					backend->bindings.Host().memory, query, result, error);
-				break;
-			}
-#endif
-			break;
-		}
-	}
-
-	if (!success)
-		Fault(error.empty() ? "Core Wasm callin failed" : error);
-	return success;
+	return DispatchModule(this, callin, query, result, error);
 }
 
 bool WasmCoreHost::DispatchModule(std::string_view moduleName, WasmCoreCallin callin,

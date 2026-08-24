@@ -11,45 +11,13 @@
 
 #include "NativeInterface/WasmUiVisibility.h"
 #include "System/BenchmarkCallins.h"
+#include "WasmCoreCallinId.h"
+#include "WasmCoreDispatchPlan.h"
 #include "WasmEnvironment.h"
 #include "WasmRuntime.h"
 #include "wasm/generated/WasmCallinRegistry.h"
 
 struct NativeInterface;
-
-namespace recoil::wasm::core::detail {
-
-consteval std::uint16_t CoreCallinOrdinal(std::string_view name)
-{
-	for (std::size_t index = 0;
-		index < sizeof(recoil::wasm::generated::kCallins) /
-			sizeof(recoil::wasm::generated::kCallins[0]);
-		++index) {
-		if (name == recoil::wasm::generated::kCallins[index].name)
-			return static_cast<std::uint16_t>(index + 1u);
-	}
-	return 0;
-}
-
-} // namespace recoil::wasm::core::detail
-
-// Every generated Callins.def descriptor has a stable per-build numeric Core
-// ID: generated-registry index + 1. Only the hand-specialized hot callins need
-// named enum constants here; every other valid ID is represented by casting the
-// generated ordinal returned by ResolveCallin(). This avoids a hand-maintained
-// 126-entry enum while keeping the hot specialized comparisons compile-time.
-enum class WasmCoreCallin : std::uint16_t {
-	Invalid = 0,
-	GameFrame = recoil::wasm::core::detail::CoreCallinOrdinal("GameFrame"),
-	GameFramePost = recoil::wasm::core::detail::CoreCallinOrdinal("GameFramePost"),
-	Update = recoil::wasm::core::detail::CoreCallinOrdinal("Update"),
-	UnitCreated = recoil::wasm::core::detail::CoreCallinOrdinal("UnitCreated"),
-	UnitPreDamaged = recoil::wasm::core::detail::CoreCallinOrdinal("UnitPreDamaged"),
-	AllowUnitCreation = recoil::wasm::core::detail::CoreCallinOrdinal("AllowUnitCreation"),
-	AddConsoleLine = recoil::wasm::core::detail::CoreCallinOrdinal("AddConsoleLine"),
-	CommandNotify = recoil::wasm::core::detail::CoreCallinOrdinal("CommandNotify"),
-	DrawWorld = recoil::wasm::core::detail::CoreCallinOrdinal("DrawWorld"),
-};
 
 // Native C++ host for the Spring Core-Wasm ABI. Each guest owns a separate
 // Wasmtime store/linker/instance. Production dispatch keeps the host object
@@ -77,6 +45,10 @@ public:
 	{
 		return Find(moduleName);
 	}
+	// Diagnostic name for a resolved module handle; dispatch carries the handle
+	// and only needs the name when reporting an error.
+	static std::string_view ModuleName(const WasmCoreHost* host);
+
 	static bool ModuleHasCallin(const WasmCoreHost* host, WasmCoreCallin callin)
 	{
 		return host != nullptr && host->HasCallin(callin);
@@ -102,24 +74,30 @@ public:
 		return host->ResetBudgetImpl(error);
 	}
 
-	// Pointer + numeric-callin overload is the steady-state hot path. String
-	// overloads remain only for legacy/diagnostic callers.
+	// Plan invokers for callins that cannot be reduced to filling raw slots:
+	// variable payloads serialize into guest scratch memory first, and
+	// generated callins marshal through the generated binding table.
+	bool InvokeAddConsoleLine(const void* query, void* result, std::string& error);
+	bool InvokeCommandNotify(const void* query, void* result, std::string& error);
+	bool InvokeGenerated(WasmCoreCallin callin, const void* query, void* result,
+		std::string& error);
+
+	// The steady-state hot path. `plan` was resolved when the module was loaded
+	// and holds, in one cache line, everything reaching the guest requires.
+	static bool Dispatch(const recoil::wasm::core::WasmCoreDispatchPlan* plan,
+		const void* query, void* result, std::string& error);
+
+	// Used by the out-of-line plan error paths, which must not see Backend.
+	static std::string FaultReason(const WasmCoreHost* host);
+	static void FaultHost(WasmCoreHost* host, std::string reason);
+
+	// Resolved dispatch plan for one callin, or null when the guest does not
+	// export it. Callers cache this; it is stable for the module's lifetime.
+	static const recoil::wasm::core::WasmCoreDispatchPlan* ModulePlan(
+		const WasmCoreHost* host, WasmCoreCallin callin);
+
 	static bool DispatchModule(WasmCoreHost* host, WasmCoreCallin callin,
-		const void* query, void* result, std::string& error)
-	{
-		if (host == nullptr) {
-			error = "Core Wasm module handle is null";
-			return false;
-		}
-		// Keep UI read visibility active for the whole guest invocation. All
-		// nested Core imports and re-entrant callbacks inherit this perspective.
-		const auto visibilityStage = callin == WasmCoreCallin::DrawWorld
-			? spring::benchmark_callins::BeginStage("wasm", "callin_drawworld_visibility")
-			: spring::benchmark_callins::Token{};
-		WasmUiVisibility::ScopedContext uiContext(host->environment == WasmEnvironment::UI);
-		spring::benchmark_callins::End(visibilityStage);
-		return host->Invoke(callin, query, result, error);
-	}
+		const void* query, void* result, std::string& error);
 	static bool DispatchModule(std::string_view moduleName, WasmCoreCallin callin,
 		const void* query, void* result, std::string& error);
 	static bool DispatchModule(std::string_view moduleName, std::string_view name,
@@ -134,6 +112,11 @@ public:
 		std::string& error);
 
 	static bool FaultModule(std::string_view moduleName, std::string reason);
+
+	// Faults are rare, so the sweep is flag-gated: an unsynced fault bumps this
+	// counter and the next dispatch or Update() pays for the scan. Without a
+	// pending fault the sweep must not touch the host registry at all.
+	static std::size_t PendingUnsyncedFaults();
 	static std::size_t RemoveFaultedUnsynced();
 
 	static bool ResetBudget(std::string_view moduleName, std::string& error);
@@ -150,17 +133,11 @@ private:
 		std::unique_ptr<Backend> backend);
 
 	static WasmCoreHost* Find(std::string_view moduleName);
+	static void RecountPendingUnsyncedFaults();
 	bool HasCallin(WasmCoreCallin callin) const;
+	const recoil::wasm::core::WasmCoreDispatchPlan* PlanFor(WasmCoreCallin callin) const;
+	void BuildDispatchPlans();
 	bool Invoke(WasmCoreCallin callin, const void* query, void* result, std::string& error);
-	bool InvokeGameFrame(const void* query, std::string& error);
-	bool InvokeGameFramePost(const void* query, std::string& error);
-	bool InvokeUpdate(const void* query, std::string& error);
-	bool InvokeUnitCreated(const void* query, std::string& error);
-	bool InvokeUnitPreDamaged(const void* query, void* result, std::string& error);
-	bool InvokeAllowUnitCreation(const void* query, void* result, std::string& error);
-	bool InvokeAddConsoleLine(const void* query, void* result, std::string& error);
-	bool InvokeCommandNotify(const void* query, void* result, std::string& error);
-	bool InvokeDrawWorld(std::string& error);
 	bool ResetBudgetImpl(std::string& error);
 	bool FuelRemainingImpl(std::uint64_t& fuel, std::string& error) const;
 	void Fault(std::string reason);

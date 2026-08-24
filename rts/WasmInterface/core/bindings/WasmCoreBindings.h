@@ -249,22 +249,16 @@ public:
 	bool Bind(wasmtime_context_t* context, const wasmtime_instance_t& instance,
 		std::string& error);
 
-	bool GameFrame(wasmtime_context_t* context, std::int32_t frame, std::string& error) const;
-	bool GameFramePost(wasmtime_context_t* context, std::int32_t frame, std::string& error) const;
-	bool Update(wasmtime_context_t* context, float deltaSeconds, std::string& error) const;
-	bool UnitCreated(wasmtime_context_t* context, std::int32_t unitID,
-		std::int32_t unitDefID, std::int32_t unitTeam, std::int32_t builderID,
-		std::string& error) const;
-	bool UnitPreDamaged(wasmtime_context_t* context, std::int32_t unitID,
-		std::int32_t unitDefID, std::int32_t unitTeam, float damage, bool paralyzer,
-		std::int32_t weaponDefID, std::int32_t projectileID, std::int32_t attackerID,
-		std::int32_t attackerDefID, std::int32_t attackerTeam,
-		float& newDamage, float& impulseMult, std::string& error) const;
-	bool AllowUnitCreation(wasmtime_context_t* context, std::int32_t unitDefID,
-		std::int32_t builderID, std::int32_t builderTeam, bool hasBuildInfo,
-		float buildX, float buildY, float buildZ, std::int32_t buildFacing,
-		bool& allow, bool& dropOrder, std::string& error) const;
-	bool DrawWorld(wasmtime_context_t* context, std::string& error) const;
+	// Argument marshalling lives with the dispatch plan in WasmCoreHost, which
+	// calls the resolved function directly. This class only resolves and holds
+	// the exports.
+	const RawExport& GameFrameExport() const { return gameFrame.Raw(); }
+	const RawExport& GameFramePostExport() const { return gameFramePost.Raw(); }
+	const RawExport& UpdateExport() const { return update; }
+	const RawExport& UnitCreatedExport() const { return unitCreated; }
+	const RawExport& UnitPreDamagedExport() const { return unitPreDamaged; }
+	const RawExport& AllowUnitCreationExport() const { return allowUnitCreation; }
+	const RawExport& DrawWorldExport() const { return drawWorld; }
 
 	bool HasGameFrame() const { return gameFrame.Present(); }
 	bool HasGameFramePost() const { return gameFramePost.Present(); }

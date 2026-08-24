@@ -3,6 +3,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
@@ -25,21 +26,60 @@ using Clock = std::chrono::steady_clock;
 constexpr std::size_t kWarmupSamples = 1;
 constexpr std::size_t kMinimumSamples = 32;
 
+// Read once. End() consults this on every recorded sample, and a getenv scan
+// there lands inside the timed region of every enclosing stage.
 inline std::size_t ConfiguredMeasurementSamples()
 {
-	const char* value = std::getenv("SPRING_NATIVE_BENCHMARK_REPEATS");
-	if (value == nullptr)
-		return kMinimumSamples;
+	static const std::size_t samples = [] {
+		const char* value = std::getenv("SPRING_NATIVE_BENCHMARK_REPEATS");
+		if (value == nullptr)
+			return kMinimumSamples;
 
-	char* end = nullptr;
-	const unsigned long parsed = std::strtoul(value, &end, 10);
-	if (end == value || *end != '\0' || parsed == 0)
-		return kMinimumSamples;
-	return std::max<std::size_t>(kMinimumSamples, parsed);
+		char* end = nullptr;
+		const unsigned long parsed = std::strtoul(value, &end, 10);
+		if (end == value || *end != '\0' || parsed == 0)
+			return kMinimumSamples;
+		return std::max<std::size_t>(kMinimumSamples, parsed);
+	}();
+	return samples;
+}
+
+// Stage rows decompose the one callin the run is already measuring. They are
+// identified by an enumerator rather than a name so that entering a stage costs
+// a clock read and nothing else: no allocation, no hashing, no name compare.
+// Nothing here may allocate, because every stage sits inside the timed region
+// of the callin row it is decomposing.
+enum class Stage : std::uint8_t {
+	NativeDispatch,
+	CoreSelection,
+	CoreAggregation,
+	ModuleDispatch,
+	Visibility,
+	WasmtimeEntry,
+	Count,
+};
+
+constexpr std::size_t kStageCount = static_cast<std::size_t>(Stage::Count);
+
+constexpr std::string_view StageSuffix(Stage stage)
+{
+	switch (stage) {
+		case Stage::NativeDispatch: return "native_dispatch";
+		case Stage::CoreSelection: return "core_selection";
+		case Stage::CoreAggregation: return "core_aggregation";
+		case Stage::ModuleDispatch: return "module_dispatch";
+		case Stage::Visibility: return "visibility";
+		case Stage::WasmtimeEntry: return "wasmtime_entry";
+		case Stage::Count: break;
+	}
+	return {};
 }
 
 struct Token {
-	std::string test;
+	// Callin rows are keyed by a literal test name; stage rows by enumerator.
+	// Both are trivially copyable, so a token never reaches the allocator.
+	std::string_view test;
+	Stage stage = Stage::Count;
 	Clock::time_point start;
 	bool active = false;
 };
@@ -133,10 +173,42 @@ inline std::string_view GameFrameTestName()
 	return GameFrameReadsArgument() ? "callin_gameframe" : "callin_empty";
 }
 
-inline std::unordered_map<std::string, Stats>& Samples()
+inline std::unordered_map<std::string_view, Stats>& Samples()
 {
-	static std::unordered_map<std::string, Stats> samples;
+	// Keys are string literals with static storage, so string_view is a stable
+	// key and the hot path never builds a std::string.
+	static std::unordered_map<std::string_view, Stats> samples;
 	return samples;
+}
+
+// Stage samples live in a flat array indexed by enumerator: recording one is a
+// push_back into a pre-reserved vector, with no key to hash.
+inline std::array<Stats, kStageCount>& StageSamples()
+{
+	static std::array<Stats, kStageCount> samples = [] {
+		std::array<Stats, kStageCount> entries;
+		for (Stats& stats : entries)
+			stats.samples.reserve(1024);
+		return entries;
+	}();
+	return samples;
+}
+
+// The callin whose dispatch the stage rows decompose. Stages are only recorded
+// while such a callin is being timed, so they can never be attributed to the
+// wrong row.
+inline std::string_view& ActiveStageTest()
+{
+	static std::string_view test;
+	return test;
+}
+
+// Retained across dispatches so Flush can label the stage rows after the last
+// callin has ended.
+inline std::string_view& StageOwnerTest()
+{
+	static std::string_view test;
+	return test;
 }
 
 inline bool IsTrackedTest(std::string_view test)
@@ -210,8 +282,12 @@ inline Token Begin(std::string_view backend, std::string_view test)
 	if (!IsEnabled() || !IsBackend(backend) || !IsTrackedTest(test))
 		return {};
 	EvictCache();
+	if (StagesEnabled()) {
+		ActiveStageTest() = test;
+		StageOwnerTest() = test;
+	}
 	return {
-		.test = std::string(test),
+		.test = test,
 		.start = Clock::now(),
 		.active = true,
 	};
@@ -229,15 +305,19 @@ inline Token BeginConfigured(std::string_view test)
 	return {};
 }
 
-// Diagnostic stage rows are opt-in because they add extra clock reads to the
-// hot path. Unlike the decision rows above, a stage name is not required to be
-// one of the canonical callin events.
-inline Token BeginStage(std::string_view backend, std::string_view stage)
+// Diagnostic stage rows are opt-in: they nest inside the timed region of the
+// callin row they decompose, so their own cost is charged to that row. A run
+// that reports a headline callin number must therefore leave stages off, and a
+// stage run reports only the decomposition.
+inline Token BeginStage(Stage stage)
 {
-	if (!StagesEnabled() || !IsEnabled() || !IsBackend(backend))
+	// Armed by Begin() only while a tracked callin is being timed with stages
+	// on, so entering a stage reads one flag and takes one clock sample.
+	if (ActiveStageTest().empty())
 		return {};
 	return {
-		.test = std::string(stage),
+		.test = {},
+		.stage = stage,
 		.start = Clock::now(),
 		.active = true,
 	};
@@ -250,10 +330,18 @@ inline void End(Token token)
 
 	const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
 		Clock::now() - token.start).count();
-	Stats& stats = Samples()[token.test];
 	const std::size_t sampleLimit = kWarmupSamples + ConfiguredMeasurementSamples();
+	if (token.stage != Stage::Count) {
+		Stats& stats = StageSamples()[static_cast<std::size_t>(token.stage)];
+		if (stats.samples.size() < sampleLimit)
+			stats.samples.push_back(static_cast<uint64_t>(elapsed));
+		return;
+	}
+
+	Stats& stats = Samples()[token.test];
 	if (stats.samples.size() < sampleLimit)
 		stats.samples.push_back(static_cast<uint64_t>(elapsed));
+	ActiveStageTest() = {};
 }
 
 // Cost of the clock reads that bracket a single dispatch. Reported alongside
@@ -280,6 +368,44 @@ inline double Percentile(const std::vector<uint64_t>& sorted, double fraction)
 	return static_cast<double>(sorted[std::min(index, sorted.size() - 1)]);
 }
 
+inline void WriteRow(std::ofstream& file, std::string_view backend,
+	std::string_view test, const Stats& sample, double clockOverhead, double fanout)
+{
+	if (sample.samples.empty())
+		return;
+	if (sample.samples.size() <= kWarmupSamples ||
+		sample.samples.size() - kWarmupSamples < kMinimumSamples) {
+		file << "{\"backend\":\"" << backend
+			 << "\",\"test\":\"" << test
+			 << "\",\"status\":\"unavailable\",\"iterations\":" << sample.samples.size()
+			 << ",\"reason\":\"only " << sample.samples.size()
+			 << " dispatches were recorded; a callin row needs at least "
+			 << (kMinimumSamples + kWarmupSamples) << "\"}\n";
+		return;
+	}
+	std::vector<uint64_t> sorted(
+		sample.samples.begin() + kWarmupSamples, sample.samples.end());
+	std::sort(sorted.begin(), sorted.end());
+	const double median = Percentile(sorted, 0.5) * fanout;
+	// Central 90%: per-dispatch samples always contain scheduling outliers.
+	const double spread = (Percentile(sorted, 0.95) - Percentile(sorted, 0.05)) * fanout;
+	file << "{\"backend\":\"" << backend
+		 << "\",\"test\":\"" << test
+		 << "\",\"status\":\"pass\",\"iterations\":" << sorted.size()
+		 << ",\"medianNs\":" << std::fixed << std::setprecision(3) << median
+		 << ",\"spreadNs\":" << spread
+		 << ",\"p99Ns\":" << Percentile(sorted, 0.99) * fanout
+		 << ",\"clockOverheadNs\":" << clockOverhead
+		 << ",\"samplesNs\":[";
+	for (std::size_t index = 0; index < sorted.size(); ++index) {
+		if (index != 0)
+			file << ',';
+		file << sorted[index] * fanout;
+	}
+	file << "]"
+		 << ",\"measurement\":\"engine callin boundary, cold cache; median of per-dispatch samples\"}\n";
+}
+
 inline void Flush()
 {
 	static bool flushed = false;
@@ -299,46 +425,24 @@ inline void Flush()
 		return;
 
 	const double clockOverhead = ClockOverheadNanoseconds();
-	for (const auto& [test, sample] : Samples()) {
-		if (sample.samples.empty())
-			continue;
-		// Native modules are separate event clients, so a four-module run
-		// records one token per client. Report the per-engine-event fan-out
-		// cost, matching the single dispatch token used by Lua and Wasm.
-		const double fanout = std::string_view(backend) == "native" &&
-			IsVariant("fourmodules") ? 4.0 : 1.0;
-		if (sample.samples.size() <= kWarmupSamples ||
-			sample.samples.size() - kWarmupSamples < kMinimumSamples) {
-			file << "{\"backend\":\"" << backend
-				 << "\",\"test\":\"" << test
-				 << "\",\"status\":\"unavailable\",\"iterations\":" << sample.samples.size()
-				 << ",\"reason\":\"only " << sample.samples.size()
-				 << " dispatches were recorded; a callin row needs at least "
-				 << (kMinimumSamples + kWarmupSamples) << "\"}\n";
-			continue;
+	// Native modules are separate event clients, so a four-module run records
+	// one token per client. Report the per-engine-event fan-out cost, matching
+	// the single dispatch token used by Lua and Wasm.
+	const double fanout = std::string_view(backend) == "native" &&
+		IsVariant("fourmodules") ? 4.0 : 1.0;
+	for (const auto& [test, sample] : Samples())
+		WriteRow(file, backend, test, sample, clockOverhead, fanout);
+
+	// Stage rows are named only here, where naming costs nothing.
+	if (StagesEnabled() && !StageOwnerTest().empty()) {
+		for (std::size_t index = 0; index < kStageCount; ++index) {
+			const Stats& sample = StageSamples()[index];
+			if (sample.samples.empty())
+				continue;
+			const std::string name = std::string(StageOwnerTest()) + "_" +
+				std::string(StageSuffix(static_cast<Stage>(index)));
+			WriteRow(file, backend, name, sample, clockOverhead, 1.0);
 		}
-		std::vector<uint64_t> sorted(
-			sample.samples.begin() + kWarmupSamples, sample.samples.end());
-		std::sort(sorted.begin(), sorted.end());
-		const double median = Percentile(sorted, 0.5) * fanout;
-		// Central 90%: per-dispatch samples always contain scheduling outliers.
-		const double spread = (Percentile(sorted, 0.95) - Percentile(sorted, 0.05)) * fanout;
-		file << "{\"backend\":\"" << backend
-			 << "\",\"test\":\"" << test
-			 << "\",\"status\":\"pass\",\"iterations\":" << sorted.size()
-			 << ",\"medianNs\":" << std::fixed << std::setprecision(3) << median
-				 << ",\"spreadNs\":" << spread
-				 << ",\"p99Ns\":" << Percentile(sorted, 0.99) * fanout
-				 << ",\"clockOverheadNs\":" << clockOverhead
-				 << ",\"samplesNs\":[";
-		for (std::size_t index = 0; index < sorted.size(); ++index) {
-			if (index != 0)
-				file << ',';
-			file << sorted[index] * fanout;
-		}
-		file
-				 << "]"
-				 << ",\"measurement\":\"engine callin boundary, cold cache; median of per-dispatch samples\"}\n";
 	}
 	file.flush();
 	flushed = true;

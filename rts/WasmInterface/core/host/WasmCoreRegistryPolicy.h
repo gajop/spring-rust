@@ -51,6 +51,14 @@ inline std::uint32_t HandwrittenEnvironmentMask(
 	// fixture protocol while the host still bounds/copies the input string.
 	if (name == "send-lua-rules-msg")
 		return sourceMask;
+	// Logging is an explicitly side-effect-only diagnostic operation.  It does
+	// not expose wall-clock state or feed simulation decisions, and Spring.Log
+	// has always been available from synced LuaRules for this purpose.  Keep the
+	// Core-WASM API consistent with that contract so synced guests can report
+	// deterministic state transitions without routing diagnostics through a
+	// game-specific message gadget.
+	if (name == "log")
+		return sourceMask;
 
 	return sourceMask & UnsyncedEnvironmentMask;
 }

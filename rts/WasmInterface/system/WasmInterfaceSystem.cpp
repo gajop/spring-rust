@@ -79,11 +79,11 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 		return false;
 	}
 	coreModules.push_back({std::move(descriptor), std::move(identity)});
-	coreEnvironmentMask |= 1u << static_cast<std::uint32_t>(coreModules.back().descriptor.environment);
 	std::stable_sort(coreModules.begin(), coreModules.end(),
 		[](const CoreModuleRecord& left, const CoreModuleRecord& right) {
 			return DescriptorLess(left.descriptor, right.descriptor);
 		});
+	InvalidateSubscribers();
 	return true;
 }
 
@@ -173,27 +173,22 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 		return false;
 	coreModules.erase(iter);
 	WasmCoreHost::Unload(moduleName);
-	coreEnvironmentMask = 0;
-	for (const CoreModuleRecord& module : coreModules)
-		coreEnvironmentMask |= 1u << static_cast<std::uint32_t>(module.descriptor.environment);
+	InvalidateSubscribers();
 	return true;
 }
 
 void WasmInterfaceSystem::UnloadAll()
 {
 	coreModules.clear();
-	coreEnvironmentMask = 0;
+	InvalidateSubscribers();
 	WasmCoreHost::UnloadAll();
 }
 
 void WasmInterfaceSystem::Update()
 {
-	if (WasmCoreHost::RemoveFaultedUnsynced() == 0)
+	if (WasmCoreHost::PendingUnsyncedFaults() == 0)
 		return;
-	coreModules.erase(std::remove_if(coreModules.begin(), coreModules.end(),
-		[](const CoreModuleRecord& module) {
-			return !WasmCoreHost::HasModule(module.descriptor.name);
-		}), coreModules.end());
+	RemoveFaultedUnsyncedModules();
 }
 
 bool WasmInterfaceSystem::DispatchSyncedMessage(std::string_view message, std::string& error)
@@ -204,7 +199,8 @@ bool WasmInterfaceSystem::DispatchSyncedMessage(std::string_view message, std::s
 	}
 	RecvFromSyncedQuery query{message.data(), static_cast<std::uint32_t>(message.size())};
 	bool handled = false;
-	return DispatchActiveCoreCallin("RecvFromSynced", &query, false, nullptr, handled, error);
+	return DispatchActiveCoreCallin(CoreCallinOf("RecvFromSynced"), &query, false,
+		nullptr, handled, error);
 }
 
 std::size_t WasmInterfaceSystem::ModuleCount() const

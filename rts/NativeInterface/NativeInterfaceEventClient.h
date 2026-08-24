@@ -11,6 +11,7 @@
 #include "NativeInterface.h"
 #include "NativeInterface/api/Callins.h"
 #include "System/EventClient.h"
+#include "WasmInterface/core/host/WasmCoreCallinId.h"
 
 class CUnit;
 class CFeature;
@@ -424,13 +425,13 @@ private:
 	// Dispatch a native query to the Core guest set. `nativeResult`, when
 	// supplied, points at the generated native result struct for result-bearing
 	// callins.
-	bool DispatchWasmCallin(std::string_view name, const void* query, bool synced,
+	bool DispatchWasmCallin(WasmCoreCallin callin, const void* query, bool synced,
 		void* nativeResult = nullptr);
-	bool DispatchWasmBoolCallin(std::string_view name, const void* query, bool synced,
+	bool DispatchWasmBoolCallin(WasmCoreCallin callin, const void* query, bool synced,
 		bool& result);
-	bool DispatchWasmStringCallin(std::string_view name, const void* query, bool synced,
+	bool DispatchWasmStringCallin(WasmCoreCallin callin, const void* query, bool synced,
 		std::string& result);
-	bool DispatchWasmIntegerCallin(std::string_view name, const void* query, bool synced,
+	bool DispatchWasmIntegerCallin(WasmCoreCallin callin, const void* query, bool synced,
 		int& result);
 
 	NativeInterface* m_nativeInterface;

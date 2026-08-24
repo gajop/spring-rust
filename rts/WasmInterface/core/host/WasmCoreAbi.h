@@ -169,6 +169,9 @@ public:
 
 	bool Present() const { return present; }
 	std::size_t SlotCount() const { return slotCount; }
+	// Exposed so a dispatch plan can cache the resolved function and call it
+	// without walking back through the binding table.
+	const wasmtime_func_t& Function() const { return function; }
 
 private:
 	wasmtime_func_t function{};
@@ -182,6 +185,7 @@ public:
 		const char* name, std::size_t nameLength, bool optional, std::string& error);
 	bool Call(wasmtime_context_t* context, std::int32_t value, std::string& error) const;
 	bool Present() const { return raw.Present(); }
+	const RawExport& Raw() const { return raw; }
 
 private:
 	RawExport raw;

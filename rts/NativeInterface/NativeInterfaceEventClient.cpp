@@ -15,6 +15,7 @@
 #include "Game/UI/MiniMap.h"
 #include "Rendering/GlobalRendering.h"
 #include "Lua/LuaConfig.h"
+#include "Lua/LuaHandle.h"
 #include "Lua/LuaMaterial.h"
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureDef.h"
@@ -30,6 +31,7 @@
 #include "Sim/Weapons/Weapon.h"
 #include "System/Log/ILog.h"
 #include "System/BenchmarkCallins.h"
+#include "WasmInterface/core/host/WasmCoreCallinPolicy.h"
 #include "System/Input/KeyInput.h"
 #include "System/Platform/SDL1_keysym.h"
 #include "System/Platform/SharedLib.h"
@@ -118,7 +120,7 @@ NativeInterfaceEventClient::NativeInterfaceEventClient(NativeInterface* nativeIn
 {
 }
 
-bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
+bool NativeInterfaceEventClient::DispatchWasmCallin(WasmCoreCallin callin,
 	const void* query, bool synced, void* nativeResult)
 {
 	// Core is the sole Wasm transport. Supported Core callins run before the
@@ -127,10 +129,11 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 		bool coreHandled = false;
 		std::string coreError;
 		if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
-				name, query, synced, nativeResult, coreHandled, coreError)) {
+				callin, query, synced, nativeResult, coreHandled, coreError)) {
 			if (!coreError.empty()) {
 				LOG_L(L_ERROR, "Core Wasm callin %s failed: %s",
-					std::string(name).c_str(), coreError.c_str());
+					std::string(recoil::wasm::core::CallinName(callin)).c_str(),
+					coreError.c_str());
 			}
 			return false;
 		}
@@ -142,45 +145,48 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 	return false;
 }
 
-bool NativeInterfaceEventClient::DispatchWasmBoolCallin(std::string_view name,
+bool NativeInterfaceEventClient::DispatchWasmBoolCallin(WasmCoreCallin callin,
 	const void* query, bool synced, bool& result)
 {
 	BoolCallinResult directResult = {.error = nullptr, .value = false};
-	if (!DispatchWasmCallin(name, query, synced, &directResult))
+	if (!DispatchWasmCallin(callin, query, synced, &directResult))
 		return false;
 	if (directResult.error != nullptr) {
 		LOG_L(L_WARNING, "Wasm callin %s returned a direct boolean error: %s",
-			std::string(name).c_str(), directResult.error->message);
+			std::string(recoil::wasm::core::CallinName(callin)).c_str(),
+			directResult.error->message);
 		return false;
 	}
 	result = directResult.value;
 	return true;
 }
 
-bool NativeInterfaceEventClient::DispatchWasmStringCallin(std::string_view name,
+bool NativeInterfaceEventClient::DispatchWasmStringCallin(WasmCoreCallin callin,
 	const void* query, bool synced, std::string& result)
 {
 	StringCallinResult directResult = {.error = nullptr, .value = nullptr};
-	if (!DispatchWasmCallin(name, query, synced, &directResult))
+	if (!DispatchWasmCallin(callin, query, synced, &directResult))
 		return false;
 	if (directResult.error != nullptr) {
 		LOG_L(L_WARNING, "Wasm callin %s returned a direct string error: %s",
-			std::string(name).c_str(), directResult.error->message);
+			std::string(recoil::wasm::core::CallinName(callin)).c_str(),
+			directResult.error->message);
 		return false;
 	}
 	result = directResult.value == nullptr ? std::string{} : std::string(directResult.value);
 	return true;
 }
 
-bool NativeInterfaceEventClient::DispatchWasmIntegerCallin(std::string_view name,
+bool NativeInterfaceEventClient::DispatchWasmIntegerCallin(WasmCoreCallin callin,
 	const void* query, bool synced, int& result)
 {
 	IntCallinResult directResult = {.error = nullptr, .value = 0};
-	if (!DispatchWasmCallin(name, query, synced, &directResult))
+	if (!DispatchWasmCallin(callin, query, synced, &directResult))
 		return false;
 	if (directResult.error != nullptr) {
 		LOG_L(L_WARNING, "Wasm callin %s returned a direct integer error: %s",
-			std::string(name).c_str(), directResult.error->message);
+			std::string(recoil::wasm::core::CallinName(callin)).c_str(),
+			directResult.error->message);
 		return false;
 	}
 	result = directResult.value;
@@ -438,7 +444,7 @@ static NativeCallinCommand ToNativeCallinCommand(const Command& command)
 
 void NativeInterfaceEventClient::Load(IArchive* archive) {
 	ArchiveCallinQuery query = {.archive = archive};
-	DispatchWasmCallin("Load", &query, true);
+	DispatchWasmCallin(CoreCallinOf("Load"), &query, true);
 	if (m_LoadFuncPtr) {
 		ArchiveCallinResult result = {};
 		m_LoadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -447,7 +453,7 @@ void NativeInterfaceEventClient::Load(IArchive* archive) {
 
 void NativeInterfaceEventClient::GamePreload() {
 	GamePreloadQuery query = {};
-	DispatchWasmCallin("GamePreload", &query, true);
+	DispatchWasmCallin(CoreCallinOf("GamePreload"), &query, true);
 	if (m_GamePreloadFuncPtr) {
 		GamePreloadResult result = {};
 		m_GamePreloadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -456,7 +462,7 @@ void NativeInterfaceEventClient::GamePreload() {
 
 void NativeInterfaceEventClient::GameStart() {
 	GameStartQuery query = {};
-	DispatchWasmCallin("GameStart", &query, true);
+	DispatchWasmCallin(CoreCallinOf("GameStart"), &query, true);
 	if (m_GameStartFuncPtr) {
 		GameStartResult result = {};
 		m_GameStartFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -468,7 +474,7 @@ void NativeInterfaceEventClient::GameOver(const std::vector<unsigned char>& winn
 		.winningAllyTeams = winningAllyTeams.data(),
 		.count = static_cast<uint32_t>(winningAllyTeams.size())
 	};
-	DispatchWasmCallin("GameOver", &query, true);
+	DispatchWasmCallin(CoreCallinOf("GameOver"), &query, true);
 	if (m_GameOverFuncPtr) {
 		GameOverEventResult result = {};
 		m_GameOverFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -479,7 +485,7 @@ void NativeInterfaceEventClient::GameFrame(int gameFrame) {
 	GameFrameQuery query = {.gameFrame = gameFrame};
 	const auto wasmToken = spring::benchmark_callins::Begin(
 		"wasm", spring::benchmark_callins::GameFrameTestName());
-	DispatchWasmCallin("GameFrame", &query, true);
+	DispatchWasmCallin(CoreCallinOf("GameFrame"), &query, true);
 	spring::benchmark_callins::End(wasmToken);
 	const bool benchmarkUnimplemented = spring::benchmark_callins::IsCase("callins") &&
 		spring::benchmark_callins::IsVariant("unimplemented");
@@ -498,7 +504,7 @@ void NativeInterfaceEventClient::GameFrame(int gameFrame) {
 
 void NativeInterfaceEventClient::GameFramePost(int gameFrame) {
 	GameFramePostQuery query = {.gameFrame = gameFrame};
-	DispatchWasmCallin("GameFramePost", &query, true);
+	DispatchWasmCallin(CoreCallinOf("GameFramePost"), &query, true);
 	if (m_GameFramePostFuncPtr) {
 		GameFramePostResult result = {};
 		m_GameFramePostFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -510,7 +516,7 @@ void NativeInterfaceEventClient::Update() {
 		.deltaSeconds = (game != nullptr) ? game->updateDeltaSeconds : 0.0f,
 	};
 	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_update");
-	DispatchWasmCallin("Update", &query, false);
+	DispatchWasmCallin(CoreCallinOf("Update"), &query, false);
 	spring::benchmark_callins::End(wasmToken);
 	if (m_UpdateFuncPtr) {
 		const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_update");
@@ -525,7 +531,7 @@ void NativeInterfaceEventClient::DrawScreen() {
 		.viewSizeX = (globalRendering != nullptr) ? globalRendering->viewSizeX : 0,
 		.viewSizeY = (globalRendering != nullptr) ? globalRendering->viewSizeY : 0,
 	};
-	DispatchWasmCallin("DrawScreen", &query, false);
+	DispatchWasmCallin(CoreCallinOf("DrawScreen"), &query, false);
 	if (m_DrawScreenFuncPtr) {
 		DrawScreenResult result = {};
 		m_DrawScreenFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -536,13 +542,10 @@ void NativeInterfaceEventClient::DrawScreen() {
 	void NativeInterfaceEventClient::EventName() {                              \
 		SimpleCallinQuery query = {};                                           \
 		const auto wasmToken = spring::benchmark_callins::Begin(                 \
-			"wasm", spring::benchmark_callins::EventTestName(#EventName));       \
-		const auto dispatchStage =                                            \
-			strcmp(#EventName, "DrawWorld") == 0                                \
-			? spring::benchmark_callins::BeginStage(                              \
-				"wasm", "callin_drawworld_native_dispatch")                      \
-			: spring::benchmark_callins::Token{};                                 \
-		DispatchWasmCallin(#EventName, &query, false);                           \
+			"wasm", #EventName);                                                 \
+		const auto dispatchStage = spring::benchmark_callins::BeginStage(        \
+			spring::benchmark_callins::Stage::NativeDispatch);                    \
+		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                           \
 		spring::benchmark_callins::End(dispatchStage);                          \
 		spring::benchmark_callins::End(wasmToken);                               \
 		if (m_##EventName##FuncPtr) {                                             \
@@ -581,7 +584,7 @@ DISPATCH_SIMPLE_CALLIN(DrawShadowFeaturesLua)
 			.viewSizeX = (globalRendering != nullptr) ? globalRendering->viewSizeX : 0, \
 			.viewSizeY = (globalRendering != nullptr) ? globalRendering->viewSizeY : 0, \
 		};                                                                         \
-		DispatchWasmCallin(#EventName, &query, false);                              \
+		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                              \
 		if (m_##EventName##FuncPtr) {                                               \
 			DrawScreenResult result = {};                                              \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result);  \
@@ -599,7 +602,7 @@ DISPATCH_SCREEN_CALLIN(DrawScreenPost)
 			.sizeX = (minimap != nullptr) ? minimap->GetSizeX() : 0,                  \
 			.sizeY = (minimap != nullptr) ? minimap->GetSizeY() : 0,                  \
 		};                                                                         \
-		DispatchWasmCallin(#EventName, &query, false);                              \
+		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                              \
 		if (m_##EventName##FuncPtr) {                                               \
 			SimpleCallinResult result = {};                                            \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result);  \
@@ -617,7 +620,7 @@ bool NativeInterfaceEventClient::DrawUnit(const CUnit* unit) {
 		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("DrawUnit", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("DrawUnit"), &query, false, wasmValue);
 	if (m_DrawUnitFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -632,7 +635,7 @@ bool NativeInterfaceEventClient::DrawFeature(const CFeature* feature) {
 		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("DrawFeature", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("DrawFeature"), &query, false, wasmValue);
 	if (m_DrawFeatureFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -648,7 +651,7 @@ bool NativeInterfaceEventClient::DrawShield(const CUnit* unit, const CWeapon* we
 		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("DrawShield", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("DrawShield"), &query, false, wasmValue);
 	if (m_DrawShieldFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -663,7 +666,7 @@ bool NativeInterfaceEventClient::DrawProjectile(const CProjectile* projectile) {
 		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("DrawProjectile", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("DrawProjectile"), &query, false, wasmValue);
 	if (m_DrawProjectileFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -678,7 +681,7 @@ bool NativeInterfaceEventClient::DrawMaterial(const LuaMaterial* material) {
 		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("DrawMaterial", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("DrawMaterial"), &query, false, wasmValue);
 	if (m_DrawMaterialFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -694,7 +697,7 @@ void NativeInterfaceEventClient::DrawWorldPreParticles(bool drawAboveWater, bool
 		.drawReflection = drawReflection,
 		.drawRefraction = drawRefraction
 	};
-	DispatchWasmCallin("DrawWorldPreParticles", &query, false);
+	DispatchWasmCallin(CoreCallinOf("DrawWorldPreParticles"), &query, false);
 	if (m_DrawWorldPreParticlesFuncPtr) {
 		DrawWorldPreParticlesResult result = {};
 		m_DrawWorldPreParticlesFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -711,7 +714,7 @@ void NativeInterfaceEventClient::DrawBuildSquare(int unitDefID, int x, int z, in
 		.statuses = statuses.data(),
 		.statusCount = static_cast<uint32_t>(statuses.size()),
 	};
-	DispatchWasmCallin("DrawBuildSquare", &query, false);
+	DispatchWasmCallin(CoreCallinOf("DrawBuildSquare"), &query, false);
 	if (m_DrawBuildSquareFuncPtr) {
 		DrawBuildSquareResult result = {};
 		m_DrawBuildSquareFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -725,7 +728,7 @@ void NativeInterfaceEventClient::DrawBuildSquare(int unitDefID, int x, int z, in
 			.drawReflection = drawReflection,                                    \
 			.drawRefraction = drawRefraction                                     \
 		};                                                                       \
-		DispatchWasmCallin(#EventName, &query, false);                           \
+		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                           \
 		if (m_##EventName##FuncPtr) {                                             \
 			DrawObjectsLuaResult result = {};                                        \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
@@ -743,7 +746,7 @@ DISPATCH_DRAW_OBJECTS_LUA(DrawOpaqueFeaturesLua)
 			.drawReflection = drawReflection,                                    \
 			.drawRefraction = drawRefraction                                     \
 		};                                                                       \
-		DispatchWasmCallin(#EventName, &query, false);                           \
+		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                           \
 		if (m_##EventName##FuncPtr) {                                             \
 			DrawAlphaObjectsLuaResult result = {};                                   \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
@@ -760,7 +763,7 @@ void NativeInterfaceEventClient::GamePaused(int playerID, bool paused) {
 		.playerID = playerID,
 		.paused = paused
 	};
-	DispatchWasmCallin("GamePaused", &query, true);
+	DispatchWasmCallin(CoreCallinOf("GamePaused"), &query, true);
 	if (m_GamePausedFuncPtr) {
 		GamePausedResult result = {};
 		m_GamePausedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -772,7 +775,7 @@ void NativeInterfaceEventClient::GameID(const unsigned char* gameID, unsigned in
 		.gameID = gameID,
 		.numBytes = numBytes
 	};
-	DispatchWasmCallin("GameID", &query, true);
+	DispatchWasmCallin(CoreCallinOf("GameID"), &query, true);
 	if (m_GameIDFuncPtr) {
 		GameIDResult result = {};
 		m_GameIDFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -781,7 +784,7 @@ void NativeInterfaceEventClient::GameID(const unsigned char* gameID, unsigned in
 
 void NativeInterfaceEventClient::TeamDied(int teamID) {
 	TeamDiedQuery query = {.teamID = teamID};
-	DispatchWasmCallin("TeamDied", &query, true);
+	DispatchWasmCallin(CoreCallinOf("TeamDied"), &query, true);
 	if (m_TeamDiedFuncPtr) {
 		TeamDiedResult result = {};
 		m_TeamDiedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -790,7 +793,7 @@ void NativeInterfaceEventClient::TeamDied(int teamID) {
 
 void NativeInterfaceEventClient::TeamChanged(int teamID) {
 	TeamChangedQuery query = {.teamID = teamID};
-	DispatchWasmCallin("TeamChanged", &query, true);
+	DispatchWasmCallin(CoreCallinOf("TeamChanged"), &query, true);
 	if (m_TeamChangedFuncPtr) {
 		TeamChangedResult result = {};
 		m_TeamChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -799,7 +802,7 @@ void NativeInterfaceEventClient::TeamChanged(int teamID) {
 
 void NativeInterfaceEventClient::PlayerChanged(int playerID) {
 	PlayerChangedQuery query = {.playerID = playerID};
-	DispatchWasmCallin("PlayerChanged", &query, true);
+	DispatchWasmCallin(CoreCallinOf("PlayerChanged"), &query, true);
 	if (m_PlayerChangedFuncPtr) {
 		PlayerChangedResult result = {};
 		m_PlayerChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -808,7 +811,7 @@ void NativeInterfaceEventClient::PlayerChanged(int playerID) {
 
 void NativeInterfaceEventClient::PlayerAdded(int playerID) {
 	PlayerAddedQuery query = {.playerID = playerID};
-	DispatchWasmCallin("PlayerAdded", &query, true);
+	DispatchWasmCallin(CoreCallinOf("PlayerAdded"), &query, true);
 	if (m_PlayerAddedFuncPtr) {
 		PlayerAddedResult result = {};
 		m_PlayerAddedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -820,7 +823,7 @@ void NativeInterfaceEventClient::PlayerRemoved(int playerID, int reason) {
 		.playerID = playerID,
 		.reason = reason
 	};
-	DispatchWasmCallin("PlayerRemoved", &query, true);
+	DispatchWasmCallin(CoreCallinOf("PlayerRemoved"), &query, true);
 	if (m_PlayerRemovedFuncPtr) {
 		PlayerRemovedResult result = {};
 		m_PlayerRemovedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -835,7 +838,7 @@ void NativeInterfaceEventClient::UnitCreated(const CUnit* unit, const CUnit* bui
 		.builderID = builder != nullptr ? builder->id : -1
 	};
 	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_unitcreated");
-	DispatchWasmCallin("UnitCreated", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitCreated"), &query, true);
 	spring::benchmark_callins::End(wasmToken);
 	if (m_UnitCreatedFuncPtr) {
 		const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_unitcreated");
@@ -851,7 +854,7 @@ void NativeInterfaceEventClient::UnitFinished(const CUnit* unit) {
 		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 		.unitTeam = unit->team,
 	};
-	DispatchWasmCallin("UnitFinished", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitFinished"), &query, true);
 	if (m_UnitFinishedFuncPtr) {
 		UnitFinishedResult result = {};
 		m_UnitFinishedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -864,7 +867,7 @@ void NativeInterfaceEventClient::UnitReverseBuilt(const CUnit* unit) {
 		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 		.unitTeam = unit->team,
 	};
-	DispatchWasmCallin("UnitReverseBuilt", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitReverseBuilt"), &query, true);
 	if (m_UnitReverseBuiltFuncPtr) {
 		UnitReverseBuiltResult result = {};
 		m_UnitReverseBuiltFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -880,7 +883,7 @@ void NativeInterfaceEventClient::UnitConstructionDecayed(const CUnit* unit, floa
 		.iterationPeriod = iterationPeriod,
 		.part = part
 	};
-	DispatchWasmCallin("UnitConstructionDecayed", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitConstructionDecayed"), &query, true);
 	if (m_UnitConstructionDecayedFuncPtr) {
 		UnitConstructionDecayedResult result = {};
 		m_UnitConstructionDecayedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -896,7 +899,7 @@ void NativeInterfaceEventClient::UnitFromFactory(const CUnit* unit, const CUnit*
 		.factoryDefID = (factory->unitDef != nullptr) ? factory->unitDef->id : -1,
 		.userOrders = userOrders
 	};
-	DispatchWasmCallin("UnitFromFactory", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitFromFactory"), &query, true);
 	if (m_UnitFromFactoryFuncPtr) {
 		UnitFromFactoryResult result = {};
 		m_UnitFromFactoryFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -913,7 +916,7 @@ void NativeInterfaceEventClient::UnitDestroyed(const CUnit* unit, const CUnit* a
 		.attackerTeam = attacker != nullptr ? attacker->team : -1,
 		.weaponDefID = weaponDefID,
 	};
-	DispatchWasmCallin("UnitDestroyed", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitDestroyed"), &query, true);
 	if (m_UnitDestroyedFuncPtr) {
 		UnitDestroyedResult result = {};
 		m_UnitDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -927,7 +930,7 @@ void NativeInterfaceEventClient::UnitTaken(const CUnit* unit, int oldTeam, int n
 		.oldTeam = oldTeam,
 		.newTeam = newTeam
 	};
-	DispatchWasmCallin("UnitTaken", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitTaken"), &query, true);
 	if (m_UnitTakenFuncPtr) {
 		UnitTakenResult result = {};
 		m_UnitTakenFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -941,7 +944,7 @@ void NativeInterfaceEventClient::UnitGiven(const CUnit* unit, int oldTeam, int n
 		.oldTeam = oldTeam,
 		.newTeam = newTeam
 	};
-	DispatchWasmCallin("UnitGiven", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitGiven"), &query, true);
 	if (m_UnitGivenFuncPtr) {
 		UnitGivenResult result = {};
 		m_UnitGivenFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -954,7 +957,7 @@ void NativeInterfaceEventClient::UnitIdle(const CUnit* unit) {
 		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 		.unitTeam = unit->team,
 	};
-	DispatchWasmCallin("UnitIdle", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitIdle"), &query, true);
 	if (m_UnitIdleFuncPtr) {
 		UnitIdleResult result = {};
 		m_UnitIdleFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -971,7 +974,7 @@ void NativeInterfaceEventClient::UnitCommand(const CUnit* unit, const Command& c
 		.fromSynced = fromSynced,
 		.fromLua = fromLua
 	};
-	DispatchWasmCallin("UnitCommand", &query, fromSynced);
+	DispatchWasmCallin(CoreCallinOf("UnitCommand"), &query, fromSynced);
 	if (m_UnitCommandFuncPtr) {
 		UnitCommandResult result = {};
 		m_UnitCommandFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -986,7 +989,7 @@ bool NativeInterfaceEventClient::CommandFallback(const CUnit* unit, const Comman
 		.command = ToNativeCallinCommand(command),
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("CommandFallback", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("CommandFallback"), &query, true, wasmValue);
 	if (m_CommandFallbackFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -1006,7 +1009,7 @@ bool NativeInterfaceEventClient::AllowCommand(const CUnit* unit, const Command& 
 		.fromLua = fromLua,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowCommand", &query, fromSynced, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowCommand"), &query, fromSynced, wasmValue);
 	if (m_AllowCommandFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1026,7 +1029,7 @@ std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDe
 	};
 	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_allowunitcreation");
 	AllowUnitCreationResult directResult = {.allow = true, .dropOrder = true};
-	const bool hasWasmResult = DispatchWasmCallin("AllowUnitCreation", &query, true,
+	const bool hasWasmResult = DispatchWasmCallin(CoreCallinOf("AllowUnitCreation"), &query, true,
 		&directResult);
 	spring::benchmark_callins::End(wasmToken);
 	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
@@ -1050,7 +1053,7 @@ bool NativeInterfaceEventClient::AllowUnitTransfer(const CUnit* unit, int newTea
 		.capture = capture,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitTransfer", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitTransfer"), &query, true, wasmValue);
 	if (m_AllowUnitTransferFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1068,7 +1071,7 @@ bool NativeInterfaceEventClient::AllowUnitBuildStep(const CUnit* builder, const 
 		.part = part,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitBuildStep", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitBuildStep"), &query, true, wasmValue);
 	if (m_AllowUnitBuildStepFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1086,7 +1089,7 @@ bool NativeInterfaceEventClient::AllowUnitCaptureStep(const CUnit* builder, cons
 		.part = part,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitCaptureStep", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitCaptureStep"), &query, true, wasmValue);
 	if (m_AllowUnitCaptureStepFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1105,7 +1108,7 @@ bool NativeInterfaceEventClient::AllowUnitTransport(const CUnit* transporter, co
 		.transporteeTeam = transportee->team,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitTransport", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitTransport"), &query, true, wasmValue);
 	if (m_AllowUnitTransportFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1128,7 +1131,7 @@ bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter
 		.allowed = allowed,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitTransportLoad", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitTransportLoad"), &query, true, wasmValue);
 	if (m_AllowUnitTransportLoadFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : allowed;
 
@@ -1151,7 +1154,7 @@ bool NativeInterfaceEventClient::AllowUnitTransportUnload(const CUnit* transport
 		.allowed = allowed,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitTransportUnload", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitTransportUnload"), &query, true, wasmValue);
 	if (m_AllowUnitTransportUnloadFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : allowed;
 
@@ -1167,7 +1170,7 @@ bool NativeInterfaceEventClient::AllowUnitCloak(const CUnit* unit, const CUnit* 
 		.enemyID = (enemy != nullptr) ? enemy->id : -1,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitCloak", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitCloak"), &query, true, wasmValue);
 	if (m_AllowUnitCloakFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1185,7 +1188,7 @@ bool NativeInterfaceEventClient::AllowUnitDecloak(const CUnit* unit, const CSoli
 		.weaponNum = (weapon != nullptr) ? weapon->weaponNum : -1,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitDecloak", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitDecloak"), &query, true, wasmValue);
 	if (m_AllowUnitDecloakFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1201,7 +1204,7 @@ bool NativeInterfaceEventClient::AllowUnitKamikaze(const CUnit* unit, const CUni
 		.allowed = allowed,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowUnitKamikaze", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowUnitKamikaze"), &query, true, wasmValue);
 	if (m_AllowUnitKamikazeFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : allowed;
 
@@ -1217,7 +1220,7 @@ void NativeInterfaceEventClient::UnitCmdDone(const CUnit* unit, const Command& c
 		.unitTeam = unit->team,
 		.command = ToNativeCallinCommand(command)
 	};
-	DispatchWasmCallin("UnitCmdDone", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitCmdDone"), &query, true);
 	if (m_UnitCmdDoneFuncPtr) {
 		UnitCmdDoneResult result = {};
 		m_UnitCmdDoneFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1237,7 +1240,7 @@ void NativeInterfaceEventClient::UnitDamaged(const CUnit* unit, const CUnit* att
 		.attackerDefID = (attacker != nullptr && attacker->unitDef != nullptr) ? attacker->unitDef->id : -1,
 		.attackerTeam = (attacker != nullptr) ? attacker->team : -1
 	};
-	DispatchWasmCallin("UnitDamaged", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitDamaged"), &query, true);
 	if (m_UnitDamagedFuncPtr) {
 		UnitDamagedResult result = {};
 		m_UnitDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1250,7 +1253,7 @@ void NativeInterfaceEventClient::UnitHarvestStorageFull(const CUnit* unit) {
 		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 		.unitTeam = unit->team,
 	};
-	DispatchWasmCallin("UnitHarvestStorageFull", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitHarvestStorageFull"), &query, true);
 	if (m_UnitHarvestStorageFullFuncPtr) {
 		UnitHarvestStorageFullResult result = {};
 		m_UnitHarvestStorageFullFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1265,7 +1268,7 @@ void NativeInterfaceEventClient::UnitSeismicPing(const CUnit* unit, int allyTeam
 		.unitID = unit->id,
 		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1
 	};
-	DispatchWasmCallin("UnitSeismicPing", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitSeismicPing"), &query, true);
 	if (m_UnitSeismicPingFuncPtr) {
 		UnitSeismicPingResult result = {};
 		m_UnitSeismicPingFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1280,7 +1283,7 @@ void NativeInterfaceEventClient::UnitSeismicPing(const CUnit* unit, int allyTeam
 			.unitTeam = unit->team,                                                  \
 			.allyTeam = allyTeam,                                                     \
 		};                                                                          \
-		DispatchWasmCallin(#EventName, &query, true);                              \
+		DispatchWasmCallin(CoreCallinOf(#EventName), &query, true);                              \
 		if (m_##EventName##FuncPtr) {                                             \
 			UnitLosEventResult result = {};                                        \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
@@ -1301,7 +1304,7 @@ DISPATCH_UNIT_LOS_EVENT(UnitLeftLos)
 			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,       \
 			.unitTeam = unit->team,                                                  \
 		};                                                                          \
-		DispatchWasmCallin(#EventName, &query, true);                              \
+		DispatchWasmCallin(CoreCallinOf(#EventName), &query, true);                              \
 		if (m_##EventName##FuncPtr) {                                             \
 			UnitMovementClassEventResult result = {};                             \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
@@ -1324,7 +1327,7 @@ void NativeInterfaceEventClient::UnitStunned(const CUnit* unit, bool stunned) {
 		.unitTeam = unit->team,
 		.stunned = stunned
 	};
-	DispatchWasmCallin("UnitStunned", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitStunned"), &query, true);
 	if (m_UnitStunnedFuncPtr) {
 		UnitStunnedResult result = {};
 		m_UnitStunnedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1339,7 +1342,7 @@ void NativeInterfaceEventClient::UnitExperience(const CUnit* unit, float oldExpe
 		.experience = unit->experience,
 		.oldExperience = oldExperience
 	};
-	DispatchWasmCallin("UnitExperience", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitExperience"), &query, true);
 	if (m_UnitExperienceFuncPtr) {
 		UnitExperienceResult result = {};
 		m_UnitExperienceFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1354,7 +1357,7 @@ void NativeInterfaceEventClient::UnitLoaded(const CUnit* unit, const CUnit* tran
 		.transportID = transport->id,
 		.transportTeam = transport->team,
 	};
-	DispatchWasmCallin("UnitLoaded", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitLoaded"), &query, true);
 	if (m_UnitLoadedFuncPtr) {
 		UnitLoadedResult result = {};
 		m_UnitLoadedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1369,7 +1372,7 @@ void NativeInterfaceEventClient::UnitUnloaded(const CUnit* unit, const CUnit* tr
 		.transportID = transport->id,
 		.transportTeam = transport->team,
 	};
-	DispatchWasmCallin("UnitUnloaded", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitUnloaded"), &query, true);
 	if (m_UnitUnloadedFuncPtr) {
 		UnitUnloadedResult result = {};
 		m_UnitUnloadedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1382,7 +1385,7 @@ void NativeInterfaceEventClient::UnitCloaked(const CUnit* unit) {
 		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 		.unitTeam = unit->team,
 	};
-	DispatchWasmCallin("UnitCloaked", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitCloaked"), &query, true);
 	if (m_UnitCloakedFuncPtr) {
 		UnitCloakEventResult result = {};
 		m_UnitCloakedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1395,7 +1398,7 @@ void NativeInterfaceEventClient::UnitDecloaked(const CUnit* unit) {
 		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 		.unitTeam = unit->team,
 	};
-	DispatchWasmCallin("UnitDecloaked", &query, true);
+	DispatchWasmCallin(CoreCallinOf("UnitDecloaked"), &query, true);
 	if (m_UnitDecloakedFuncPtr) {
 		UnitCloakEventResult result = {};
 		m_UnitDecloakedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1409,7 +1412,7 @@ void NativeInterfaceEventClient::UnitDecloaked(const CUnit* unit) {
 			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,       \
 			.unitTeam = unit->team,                                                  \
 		};                                                                          \
-		DispatchWasmCallin(#EventName, &query, true);                              \
+		DispatchWasmCallin(CoreCallinOf(#EventName), &query, true);                              \
 		if (m_##EventName##FuncPtr) {                                             \
 			UnitMoveEventResult result = {};                                      \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
@@ -1428,7 +1431,7 @@ bool NativeInterfaceEventClient::UnitUnitCollision(const CUnit* collider, const 
 		.collideeID = (collidee != nullptr) ? collidee->id : -1
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("UnitUnitCollision", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("UnitUnitCollision"), &query, true, wasmValue);
 	if (m_UnitUnitCollisionFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_UnitUnitCollisionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1443,7 +1446,7 @@ bool NativeInterfaceEventClient::UnitFeatureCollision(const CUnit* collider, con
 		.collideeID = (collidee != nullptr) ? collidee->id : -1
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("UnitFeatureCollision", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("UnitFeatureCollision"), &query, true, wasmValue);
 	if (m_UnitFeatureCollisionFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_UnitFeatureCollisionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1458,7 +1461,7 @@ void NativeInterfaceEventClient::RenderUnitDestroyed(const CUnit* unit) {
 		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 		.unitTeam = unit->team,
 	};
-	DispatchWasmCallin("RenderUnitDestroyed", &query, false);
+	DispatchWasmCallin(CoreCallinOf("RenderUnitDestroyed"), &query, false);
 	if (m_RenderUnitDestroyedFuncPtr) {
 		RenderUnitDestroyedResult result = {};
 		m_RenderUnitDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1470,7 +1473,7 @@ void NativeInterfaceEventClient::FeatureCreated(const CFeature* feature) {
 		.featureID = feature->id,
 		.allyTeamID = feature->allyteam,
 	};
-	DispatchWasmCallin("FeatureCreated", &query, true);
+	DispatchWasmCallin(CoreCallinOf("FeatureCreated"), &query, true);
 	if (m_FeatureCreatedFuncPtr) {
 		FeatureCreatedResult result = {};
 		m_FeatureCreatedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1482,7 +1485,7 @@ void NativeInterfaceEventClient::FeatureDestroyed(const CFeature* feature) {
 		.featureID = feature->id,
 		.allyTeamID = feature->allyteam,
 	};
-	DispatchWasmCallin("FeatureDestroyed", &query, true);
+	DispatchWasmCallin(CoreCallinOf("FeatureDestroyed"), &query, true);
 	if (m_FeatureDestroyedFuncPtr) {
 		FeatureDestroyedResult result = {};
 		m_FeatureDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1501,7 +1504,7 @@ void NativeInterfaceEventClient::FeatureDamaged(const CFeature* feature, const C
 		.attackerDefID = (attacker != nullptr && attacker->unitDef != nullptr) ? attacker->unitDef->id : -1,
 		.attackerTeam = (attacker != nullptr) ? attacker->team : -1
 	};
-	DispatchWasmCallin("FeatureDamaged", &query, true);
+	DispatchWasmCallin(CoreCallinOf("FeatureDamaged"), &query, true);
 	if (m_FeatureDamagedFuncPtr) {
 		FeatureDamagedResult result = {};
 		m_FeatureDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1515,7 +1518,7 @@ bool NativeInterfaceEventClient::AllowFeatureCreation(const FeatureDef* featureD
 		.position = {.x = pos.x, .y = pos.y, .z = pos.z},
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowFeatureCreation", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowFeatureCreation"), &query, true, wasmValue);
 	if (m_AllowFeatureCreationFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1533,7 +1536,7 @@ bool NativeInterfaceEventClient::AllowFeatureBuildStep(const CUnit* builder, con
 		.part = part,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowFeatureBuildStep", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowFeatureBuildStep"), &query, true, wasmValue);
 	if (m_AllowFeatureBuildStepFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1549,7 +1552,7 @@ bool NativeInterfaceEventClient::AllowResourceLevel(int teamID, const std::strin
 		.level = level,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowResourceLevel", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowResourceLevel"), &query, true, wasmValue);
 	if (m_AllowResourceLevelFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1566,7 +1569,7 @@ bool NativeInterfaceEventClient::AllowResourceTransfer(int oldTeam, int newTeam,
 		.amount = amount,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowResourceTransfer", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowResourceTransfer"), &query, true, wasmValue);
 	if (m_AllowResourceTransferFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1590,7 +1593,7 @@ bool NativeInterfaceEventClient::ResourceExcess(const std::map<int, SResourcePac
 		.count = static_cast<uint32_t>(entries.size()),
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("ResourceExcess", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("ResourceExcess"), &query, true, wasmValue);
 	if (m_ResourceExcessFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -1607,7 +1610,7 @@ bool NativeInterfaceEventClient::AllowDirectUnitControl(int playerID, const CUni
 		.playerID = playerID,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowDirectUnitControl", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowDirectUnitControl"), &query, true, wasmValue);
 	if (m_AllowDirectUnitControlFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1623,7 +1626,7 @@ bool NativeInterfaceEventClient::AllowBuilderHoldFire(const CUnit* unit, int act
 		.action = action,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowBuilderHoldFire", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowBuilderHoldFire"), &query, true, wasmValue);
 	if (m_AllowBuilderHoldFireFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1641,7 +1644,7 @@ bool NativeInterfaceEventClient::AllowStartPosition(int playerID, int teamID, un
 		.rawPickPos = {.x = rawPickPos.x, .y = rawPickPos.y, .z = rawPickPos.z},
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowStartPosition", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowStartPosition"), &query, true, wasmValue);
 	if (m_AllowStartPositionFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1660,7 +1663,7 @@ bool NativeInterfaceEventClient::TerraformComplete(const CUnit* unit, const CUni
 		.buildUnitTeam = build->team,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("TerraformComplete", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("TerraformComplete"), &query, true, wasmValue);
 	if (m_TerraformCompleteFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -1677,7 +1680,7 @@ bool NativeInterfaceEventClient::MoveCtrlNotify(const CUnit* unit, int data) {
 		.data = data,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("MoveCtrlNotify", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MoveCtrlNotify"), &query, true, wasmValue);
 	if (m_MoveCtrlNotifyFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -1691,7 +1694,7 @@ void NativeInterfaceEventClient::FeatureMoved(const CFeature* feature, const flo
 		.featureID = feature->id,
 		.oldPos = {.x = oldpos.x, .y = oldpos.y, .z = oldpos.z}
 	};
-	DispatchWasmCallin("FeatureMoved", &query, true);
+	DispatchWasmCallin(CoreCallinOf("FeatureMoved"), &query, true);
 	if (m_FeatureMovedFuncPtr) {
 		FeatureMovedResult result = {};
 		m_FeatureMovedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1706,7 +1709,7 @@ void NativeInterfaceEventClient::ProjectileCreated(const CProjectile* proj) {
 		.ownerID = static_cast<int32_t>(proj->GetOwnerID()),
 		.weaponDefID = (weaponDef != nullptr) ? weaponDef->id : -1,
 	};
-	DispatchWasmCallin("ProjectileCreated", &query, true);
+	DispatchWasmCallin(CoreCallinOf("ProjectileCreated"), &query, true);
 	if (m_ProjectileCreatedFuncPtr) {
 		ProjectileEventResult result = {};
 		m_ProjectileCreatedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1721,7 +1724,7 @@ void NativeInterfaceEventClient::ProjectileDestroyed(const CProjectile* proj) {
 		.ownerID = static_cast<int32_t>(proj->GetOwnerID()),
 		.weaponDefID = (weaponDef != nullptr) ? weaponDef->id : -1,
 	};
-	DispatchWasmCallin("ProjectileDestroyed", &query, true);
+	DispatchWasmCallin(CoreCallinOf("ProjectileDestroyed"), &query, true);
 	if (m_ProjectileDestroyedFuncPtr) {
 		ProjectileEventResult result = {};
 		m_ProjectileDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1741,7 +1744,7 @@ bool NativeInterfaceEventClient::Explosion(int weaponID, const WeaponDef* weapon
 		.projectileID = static_cast<int32_t>(params.projectileID)
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("Explosion", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("Explosion"), &query, true, wasmValue);
 	if (m_ExplosionFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_ExplosionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1758,7 +1761,7 @@ int NativeInterfaceEventClient::AllowWeaponTargetCheck(unsigned int attackerID, 
 	};
 	int wasmValue = -1;
 	const bool hasWasmValue = DispatchWasmIntegerCallin(
-		"AllowWeaponTargetCheck", &query, true, wasmValue);
+		CoreCallinOf("AllowWeaponTargetCheck"), &query, true, wasmValue);
 	if (m_AllowWeaponTargetCheckFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : -1;
 
@@ -1781,7 +1784,7 @@ bool NativeInterfaceEventClient::AllowWeaponTarget(unsigned int attackerID, unsi
 		.allowed = true,
 		.targetPriority = query.targetPriority,
 	};
-	const bool hasWasmResult = DispatchWasmCallin("AllowWeaponTarget", &query, true,
+	const bool hasWasmResult = DispatchWasmCallin(CoreCallinOf("AllowWeaponTarget"), &query, true,
 		&directResult);
 	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_AllowWeaponTargetFuncPtr == nullptr) {
@@ -1807,7 +1810,7 @@ bool NativeInterfaceEventClient::AllowWeaponInterceptTarget(const CUnit* interce
 		.interceptorTargetID = (interceptorTarget != nullptr) ? interceptorTarget->id : -1,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AllowWeaponInterceptTarget", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowWeaponInterceptTarget"), &query, true, wasmValue);
 	if (m_AllowWeaponInterceptTargetFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -1834,7 +1837,7 @@ bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* 
 		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
 		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
 	};
-	const bool hasWasmResult = DispatchWasmCallin("UnitPreDamaged", &query, true,
+	const bool hasWasmResult = DispatchWasmCallin(CoreCallinOf("UnitPreDamaged"), &query, true,
 		&directResult);
 	spring::benchmark_callins::End(wasmToken);
 	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
@@ -1878,7 +1881,7 @@ bool NativeInterfaceEventClient::FeaturePreDamaged(const CFeature* feature, cons
 		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
 		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
 	};
-	const bool hasWasmResult = DispatchWasmCallin("FeaturePreDamaged", &query, true,
+	const bool hasWasmResult = DispatchWasmCallin(CoreCallinOf("FeaturePreDamaged"), &query, true,
 		&directResult);
 	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_FeaturePreDamagedFuncPtr == nullptr) {
@@ -1919,7 +1922,7 @@ bool NativeInterfaceEventClient::ShieldPreDamaged(const CProjectile* projectile,
 		.hitPos = {.x = hitPos.x, .y = hitPos.y, .z = hitPos.z},
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("ShieldPreDamaged", &query, true, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("ShieldPreDamaged"), &query, true, wasmValue);
 	if (m_ShieldPreDamagedFuncPtr == nullptr)
 		return hasWasmValue && wasmValue;
 
@@ -1933,7 +1936,7 @@ void NativeInterfaceEventClient::DownloadFailed(int ID, int errorID) {
 		.downloadID = ID,
 		.errorID = errorID
 	};
-	DispatchWasmCallin("DownloadFailed", &query, false);
+	DispatchWasmCallin(CoreCallinOf("DownloadFailed"), &query, false);
 	if (m_DownloadFailedFuncPtr) {
 		DownloadFailedResult result = {};
 		m_DownloadFailedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1942,7 +1945,7 @@ void NativeInterfaceEventClient::DownloadFailed(int ID, int errorID) {
 
 void NativeInterfaceEventClient::DownloadFinished(int ID) {
 	DownloadFinishedQuery query = {.downloadID = ID};
-	DispatchWasmCallin("DownloadFinished", &query, false);
+	DispatchWasmCallin(CoreCallinOf("DownloadFinished"), &query, false);
 	if (m_DownloadFinishedFuncPtr) {
 		DownloadFinishedResult result = {};
 		m_DownloadFinishedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1955,7 +1958,7 @@ void NativeInterfaceEventClient::DownloadProgress(int ID, long downloaded, long 
 		.downloaded = downloaded,
 		.total = total
 	};
-	DispatchWasmCallin("DownloadProgress", &query, false);
+	DispatchWasmCallin(CoreCallinOf("DownloadProgress"), &query, false);
 	if (m_DownloadProgressFuncPtr) {
 		DownloadProgressResult result = {};
 		m_DownloadProgressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1968,7 +1971,7 @@ void NativeInterfaceEventClient::DownloadQueued(int ID, const std::string& archi
 		.archiveName = archiveName.c_str(),
 		.archiveType = archiveType.c_str()
 	};
-	DispatchWasmCallin("DownloadQueued", &query, false);
+	DispatchWasmCallin(CoreCallinOf("DownloadQueued"), &query, false);
 	if (m_DownloadQueuedFuncPtr) {
 		DownloadQueuedResult result = {};
 		m_DownloadQueuedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1977,7 +1980,7 @@ void NativeInterfaceEventClient::DownloadQueued(int ID, const std::string& archi
 
 void NativeInterfaceEventClient::DownloadStarted(int ID) {
 	DownloadStartedQuery query = {.downloadID = ID};
-	DispatchWasmCallin("DownloadStarted", &query, false);
+	DispatchWasmCallin(CoreCallinOf("DownloadStarted"), &query, false);
 	if (m_DownloadStartedFuncPtr) {
 		DownloadStartedResult result = {};
 		m_DownloadStartedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1986,7 +1989,7 @@ void NativeInterfaceEventClient::DownloadStarted(int ID) {
 
 void NativeInterfaceEventClient::Save(zipFile archive) {
 	ArchiveCallinQuery query = {.archive = archive};
-	DispatchWasmCallin("Save", &query, false);
+	DispatchWasmCallin(CoreCallinOf("Save"), &query, false);
 	if (m_SaveFuncPtr) {
 		ArchiveCallinResult result = {};
 		m_SaveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1997,7 +2000,7 @@ void NativeInterfaceEventClient::LastMessagePosition(const float3& pos) {
 	LastMessagePositionQuery query = {
 		.pos = {.x = pos.x, .y = pos.y, .z = pos.z}
 	};
-	DispatchWasmCallin("LastMessagePosition", &query, false);
+	DispatchWasmCallin(CoreCallinOf("LastMessagePosition"), &query, false);
 	if (m_LastMessagePositionFuncPtr) {
 		LastMessagePositionResult result = {};
 		m_LastMessagePositionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2011,7 +2014,7 @@ void NativeInterfaceEventClient::UnsyncedHeightMapUpdate(const SRectangle& rect)
 		.x2 = rect.x2,
 		.z2 = rect.z2
 	};
-	DispatchWasmCallin("UnsyncedHeightMapUpdate", &query, false);
+	DispatchWasmCallin(CoreCallinOf("UnsyncedHeightMapUpdate"), &query, false);
 	if (m_UnsyncedHeightMapUpdateFuncPtr) {
 		RectChangedResult result = {};
 		m_UnsyncedHeightMapUpdateFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2021,7 +2024,7 @@ void NativeInterfaceEventClient::UnsyncedHeightMapUpdate(const SRectangle& rect)
 bool NativeInterfaceEventClient::KeyMapChanged() {
 	SimpleCallinQuery query = {};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("KeyMapChanged", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("KeyMapChanged"), &query, false, wasmValue);
 	if (m_KeyMapChangedFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_KeyMapChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2062,7 +2065,7 @@ bool NativeInterfaceEventClient::KeyPress(int keyCode, int scanCode, bool isRepe
 		.actionCount = static_cast<uint32_t>(actions.size()),
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("KeyPress", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("KeyPress"), &query, false, wasmValue);
 	if (m_KeyPressFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_KeyPressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2102,7 +2105,7 @@ bool NativeInterfaceEventClient::KeyRelease(int keyCode, int scanCode) {
 		.actionCount = static_cast<uint32_t>(actions.size()),
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("KeyRelease", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("KeyRelease"), &query, false, wasmValue);
 	if (m_KeyReleaseFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_KeyReleaseFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2114,7 +2117,7 @@ bool NativeInterfaceEventClient::KeyRelease(int keyCode, int scanCode) {
 bool NativeInterfaceEventClient::TextInput(const std::string& utf8) {
 	TextInputQuery query = {.utf8 = utf8.c_str()};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("TextInput", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("TextInput"), &query, false, wasmValue);
 	if (m_TextInputFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_TextInputFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2126,7 +2129,7 @@ bool NativeInterfaceEventClient::TextInput(const std::string& utf8) {
 bool NativeInterfaceEventClient::TextEditing(const std::string& utf8, unsigned int start, unsigned int length) {
 	TextEditingQuery query = {.utf8 = utf8.c_str(), .start = start, .length = length};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("TextEditing", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("TextEditing"), &query, false, wasmValue);
 	if (m_TextEditingFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_TextEditingFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2145,7 +2148,7 @@ bool NativeInterfaceEventClient::MouseMove(int x, int y, int dx, int dy, int but
 		.button = button,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("MouseMove", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MouseMove"), &query, false, wasmValue);
 	if (m_MouseMoveFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_MouseMoveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2158,7 +2161,7 @@ bool NativeInterfaceEventClient::MousePress(int x, int y, int button) {
 	const LuaMousePosition position = ToLuaMousePosition(x, y);
 	MousePressQuery query = {.x = position.x, .y = position.y, .button = button};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("MousePress", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MousePress"), &query, false, wasmValue);
 	if (m_MousePressFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_MousePressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2170,7 +2173,7 @@ bool NativeInterfaceEventClient::MousePress(int x, int y, int button) {
 void NativeInterfaceEventClient::MouseRelease(int x, int y, int button) {
 	const LuaMousePosition position = ToLuaMousePosition(x, y);
 	MouseReleaseQuery query = {.x = position.x, .y = position.y, .button = button};
-	DispatchWasmCallin("MouseRelease", &query, false);
+	DispatchWasmCallin(CoreCallinOf("MouseRelease"), &query, false);
 	if (m_MouseReleaseFuncPtr) {
 		MouseReleaseResult result = {};
 		m_MouseReleaseFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2180,7 +2183,7 @@ void NativeInterfaceEventClient::MouseRelease(int x, int y, int button) {
 bool NativeInterfaceEventClient::MouseWheel(bool up, float value) {
 	MouseWheelQuery query = {.up = up, .value = value};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("MouseWheel", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MouseWheel"), &query, false, wasmValue);
 	if (m_MouseWheelFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_MouseWheelFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2193,7 +2196,7 @@ bool NativeInterfaceEventClient::IsAbove(int x, int y) {
 	const LuaMousePosition position = ToLuaMousePosition(x, y);
 	ScreenPositionQuery query = {.x = position.x, .y = position.y};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("IsAbove", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("IsAbove"), &query, false, wasmValue);
 	if (m_IsAboveFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_IsAboveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2206,7 +2209,7 @@ std::string NativeInterfaceEventClient::GetTooltip(int x, int y) {
 	const LuaMousePosition position = ToLuaMousePosition(x, y);
 	ScreenPositionQuery query = {.x = position.x, .y = position.y};
 	std::string wasmValue;
-	const bool hasWasmValue = DispatchWasmStringCallin("GetTooltip", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmStringCallin(CoreCallinOf("GetTooltip"), &query, false, wasmValue);
 	if (m_GetTooltipFuncPtr) {
 		StringCallinResult result = {};
 		m_GetTooltipFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2223,7 +2226,7 @@ bool NativeInterfaceEventClient::DefaultCommand(const CUnit* unit, const CFeatur
 		.currentCommand = cmd
 	};
 	DefaultCommandResult directResult = {.error = nullptr, .value = false, .command = cmd};
-	const bool hasWasmResult = DispatchWasmCallin("DefaultCommand", &query, false,
+	const bool hasWasmResult = DispatchWasmCallin(CoreCallinOf("DefaultCommand"), &query, false,
 		&directResult);
 	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_DefaultCommandFuncPtr) {
@@ -2246,7 +2249,7 @@ void NativeInterfaceEventClient::ActiveCommandChanged(const SCommandDescription*
 		.action = (cmdDesc != nullptr) ? cmdDesc->action.c_str() : "",
 		.tooltip = (cmdDesc != nullptr) ? cmdDesc->tooltip.c_str() : ""
 	};
-	DispatchWasmCallin("ActiveCommandChanged", &query, false);
+	DispatchWasmCallin(CoreCallinOf("ActiveCommandChanged"), &query, false);
 	if (m_ActiveCommandChangedFuncPtr) {
 		ActiveCommandChangedResult result = {};
 		m_ActiveCommandChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2257,7 +2260,7 @@ void NativeInterfaceEventClient::CameraRotationChanged(const float3& rot) {
 	Float3CallinQuery query = {
 		.value = {.x = rot.x, .y = rot.y, .z = rot.z}
 	};
-	DispatchWasmCallin("CameraRotationChanged", &query, false);
+	DispatchWasmCallin(CoreCallinOf("CameraRotationChanged"), &query, false);
 	if (m_CameraRotationChangedFuncPtr) {
 		Float3CallinResult result = {};
 		m_CameraRotationChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2268,7 +2271,7 @@ void NativeInterfaceEventClient::CameraPositionChanged(const float3& pos) {
 	Float3CallinQuery query = {
 		.value = {.x = pos.x, .y = pos.y, .z = pos.z}
 	};
-	DispatchWasmCallin("CameraPositionChanged", &query, false);
+	DispatchWasmCallin(CoreCallinOf("CameraPositionChanged"), &query, false);
 	if (m_CameraPositionChangedFuncPtr) {
 		Float3CallinResult result = {};
 		m_CameraPositionChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2278,7 +2281,7 @@ void NativeInterfaceEventClient::CameraPositionChanged(const float3& pos) {
 bool NativeInterfaceEventClient::CommandNotify(const Command& cmd) {
 	CommandNotifyQuery query = {.command = ToNativeCallinCommand(cmd)};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("CommandNotify", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("CommandNotify"), &query, false, wasmValue);
 	if (m_CommandNotifyFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_CommandNotifyFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2290,7 +2293,7 @@ bool NativeInterfaceEventClient::CommandNotify(const Command& cmd) {
 bool NativeInterfaceEventClient::AddConsoleLine(const std::string& msg, const std::string& section, int level) {
 	AddConsoleLineQuery query = {.message = msg.c_str(), .section = section.c_str(), .level = level};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("AddConsoleLine", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AddConsoleLine"), &query, false, wasmValue);
 	if (m_AddConsoleLineFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_AddConsoleLineFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2302,7 +2305,7 @@ bool NativeInterfaceEventClient::AddConsoleLine(const std::string& msg, const st
 bool NativeInterfaceEventClient::GroupChanged(int groupID) {
 	GroupChangedQuery query = {.groupID = groupID};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("GroupChanged", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("GroupChanged"), &query, false, wasmValue);
 	if (m_GroupChangedFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_GroupChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2313,7 +2316,7 @@ bool NativeInterfaceEventClient::GroupChanged(int groupID) {
 
 void NativeInterfaceEventClient::MiniMapRotationChanged(float newRot, float oldRot) {
 	MiniMapRotationChangedQuery query = {.newRot = newRot, .oldRot = oldRot};
-	DispatchWasmCallin("MiniMapRotationChanged", &query, false);
+	DispatchWasmCallin(CoreCallinOf("MiniMapRotationChanged"), &query, false);
 	if (m_MiniMapRotationChangedFuncPtr == nullptr)
 		return;
 
@@ -2327,7 +2330,7 @@ void NativeInterfaceEventClient::MiniMapStateChanged(bool isMinimized, bool isMa
 		.isMaximized = isMaximized,
 		.isSlaved = isSlaved,
 	};
-	DispatchWasmCallin("MiniMapStateChanged", &query, false);
+	DispatchWasmCallin(CoreCallinOf("MiniMapStateChanged"), &query, false);
 	if (m_MiniMapStateChangedFuncPtr == nullptr)
 		return;
 
@@ -2346,7 +2349,7 @@ void NativeInterfaceEventClient::MiniMapGeometryChanged(int2 newPos, int2 newDim
 		.oldDimX = oldDim.x,
 		.oldDimY = oldDim.y,
 	};
-	DispatchWasmCallin("MiniMapGeometryChanged", &query, false);
+	DispatchWasmCallin(CoreCallinOf("MiniMapGeometryChanged"), &query, false);
 	if (m_MiniMapGeometryChangedFuncPtr == nullptr)
 		return;
 
@@ -2369,7 +2372,7 @@ bool NativeInterfaceEventClient::GameSetup(const std::string& state, bool& ready
 		.playerStates = states.data(),
 		.playerStateCount = static_cast<uint32_t>(states.size()),
 	};
-	DispatchWasmCallin("GameSetup", &query, false);
+	DispatchWasmCallin(CoreCallinOf("GameSetup"), &query, false);
 	if (m_GameSetupFuncPtr) {
 		GameSetupResult result = {.handled = false, .ready = ready};
 		m_GameSetupFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2388,7 +2391,7 @@ std::string NativeInterfaceEventClient::WorldTooltip(const CUnit* unit, const CF
 		.groundPos = (groundPos != nullptr) ? Float3{.x = groundPos->x, .y = groundPos->y, .z = groundPos->z} : Float3{}
 	};
 	std::string wasmValue;
-	const bool hasWasmValue = DispatchWasmStringCallin("WorldTooltip", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmStringCallin(CoreCallinOf("WorldTooltip"), &query, false, wasmValue);
 	if (m_WorldTooltipFuncPtr) {
 		StringCallinResult result = {};
 		m_WorldTooltipFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2410,7 +2413,7 @@ bool NativeInterfaceEventClient::MapDrawCmd(int playerID, int type, const float3
 		.label = (label != nullptr) ? label->c_str() : ""
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin("MapDrawCmd", &query, false, wasmValue);
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MapDrawCmd"), &query, false, wasmValue);
 	if (m_MapDrawCmdFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		m_MapDrawCmdFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2441,7 +2444,7 @@ void NativeInterfaceEventClient::ViewResize() {
 		.viewPosX = (globalRendering != nullptr) ? globalRendering->viewPosX : 0,
 		.viewPosY = (globalRendering != nullptr) ? globalRendering->viewPosY : 0,
 	};
-	DispatchWasmCallin("ViewResize", &query, false);
+	DispatchWasmCallin(CoreCallinOf("ViewResize"), &query, false);
 	if (m_ViewResizeFuncPtr) {
 		ViewResizeResult result = {};
 		m_ViewResizeFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2450,7 +2453,7 @@ void NativeInterfaceEventClient::ViewResize() {
 
 void NativeInterfaceEventClient::SunChanged() {
 	SunChangedQuery query = {};
-	DispatchWasmCallin("SunChanged", &query, false);
+	DispatchWasmCallin(CoreCallinOf("SunChanged"), &query, false);
 	if (m_SunChangedFuncPtr) {
 		SunChangedResult result = {};
 		m_SunChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2459,7 +2462,7 @@ void NativeInterfaceEventClient::SunChanged() {
 
 void NativeInterfaceEventClient::FontsChanged() {
 	SimpleCallinQuery query = {};
-	DispatchWasmCallin("FontsChanged", &query, false);
+	DispatchWasmCallin(CoreCallinOf("FontsChanged"), &query, false);
 	if (m_FontsChangedFuncPtr) {
 		SimpleCallinResult result = {};
 		m_FontsChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2468,7 +2471,7 @@ void NativeInterfaceEventClient::FontsChanged() {
 
 void NativeInterfaceEventClient::GameProgress(int gameFrame) {
 	GameProgressQuery query = {.gameFrame = gameFrame};
-	DispatchWasmCallin("GameProgress", &query, false);
+	DispatchWasmCallin(CoreCallinOf("GameProgress"), &query, false);
 	if (m_GameProgressFuncPtr) {
 		GameProgressResult result = {};
 		m_GameProgressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2484,7 +2487,7 @@ void NativeInterfaceEventClient::StockpileChanged(const CUnit* unit, const CWeap
 		.oldCount = oldCount,
 		.newCount = (weapon != nullptr) ? weapon->numStockpiled : -1
 	};
-	DispatchWasmCallin("StockpileChanged", &query, true);
+	DispatchWasmCallin(CoreCallinOf("StockpileChanged"), &query, true);
 	if (m_StockpileChangedFuncPtr) {
 		StockpileChangedResult result = {};
 		m_StockpileChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2493,7 +2496,7 @@ void NativeInterfaceEventClient::StockpileChanged(const CUnit* unit, const CWeap
 
 void NativeInterfaceEventClient::CollectGarbage(bool forced) {
 	CollectGarbageQuery query = {.forced = forced};
-	DispatchWasmCallin("CollectGarbage", &query, false);
+	DispatchWasmCallin(CoreCallinOf("CollectGarbage"), &query, false);
 	if (m_CollectGarbageFuncPtr) {
 		CollectGarbageResult result = {};
 		m_CollectGarbageFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2506,7 +2509,7 @@ void NativeInterfaceEventClient::Pong(uint8_t pingTag, const spring_time pktSend
 		.packetSendTimeMillis = pktSendTime.toMilliSecsi(),
 		.packetRecvTimeMillis = pktRecvTime.toMilliSecsi()
 	};
-	DispatchWasmCallin("Pong", &query, false);
+	DispatchWasmCallin(CoreCallinOf("Pong"), &query, false);
 	if (m_PongFuncPtr) {
 		PongResult result = {};
 		m_PongFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2521,7 +2524,13 @@ void NativeInterfaceEventClient::HandleLuaMsg(int playerID, int script, int mode
 		.data = data.data(),
 		.dataLength = static_cast<int32_t>(data.size())
 	};
-	DispatchWasmCallin("HandleLuaMsg", &query, false);
+	// Rules/Gaia Lua messages originate on the simulation side and must reach
+	// their matching synced Core-WASM environment. UI messages remain
+	// unsynced. The old unconditional false routed rules messages away from
+	// rules-synced modules.
+	const bool syncedMessage =
+		script == LUA_HANDLE_ORDER_RULES || script == LUA_HANDLE_ORDER_GAIA;
+	DispatchWasmCallin(CoreCallinOf("HandleLuaMsg"), &query, syncedMessage);
 	if (m_HandleLuaMsgFuncPtr) {
 		HandleLuaMsgResult result = {};
 		m_HandleLuaMsgFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2533,7 +2542,7 @@ void NativeInterfaceEventClient::HandleLuaCall(const char* msg, size_t msgLength
 		.message = msg,
 		.messageLength = static_cast<uint32_t>(msgLength),
 	};
-	DispatchWasmCallin("HandleLuaCall", &query, synced);
+	DispatchWasmCallin(CoreCallinOf("HandleLuaCall"), &query, synced);
 	if (m_HandleLuaCallFuncPtr) {
 		HandleLuaCallResult result = {};
 		ScopedNativeSyncedCode syncedCode(synced);

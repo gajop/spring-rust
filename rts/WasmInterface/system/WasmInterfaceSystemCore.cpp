@@ -8,6 +8,9 @@
 #include <string_view>
 
 #include "NativeInterface/api/Callins.h"
+#include "WasmCoreCallinPolicy.h"
+#include "WasmCoreDispatchPlan.h"
+#include "WasmCoreUiCallinFilter.h"
 #include "WasmCoreHost.h"
 #include "WasmCoreUiCallinFilter.h"
 #include "wasm/generated/WasmCallinRegistry.h"
@@ -20,88 +23,12 @@ WasmInterfaceSystem*& ActiveCoreSystem()
 	return system;
 }
 
-constexpr std::size_t CORE_CALLIN_COUNT =
-	(sizeof(recoil::wasm::generated::kCallins) /
-		sizeof(recoil::wasm::generated::kCallins[0])) + 1u;
-
-enum class CoreAggregation : std::uint8_t {
-	Ignore,
-	OrTrue,
-	AndFalse,
-	First,
-	FirstNonEmpty,
-	Unsupported,
-};
-
-enum class CoreResultKind : std::uint8_t {
-	None,
-	Bool,
-	Int,
-	Damage,
-	AllowUnitCreation,
-	String,
-	// Generated fixed-result callins can write their concrete native result
-	// directly. For first-result aggregation the dispatcher does not need to
-	// understand that struct: only the first contributing module receives the
-	// caller's result pointer, while later modules still run with a null sink.
-	OpaqueFirst,
-	Unsupported,
-};
-
-CoreAggregation ResolveAggregation(std::string_view value)
-{
-	if (value == "ignore") return CoreAggregation::Ignore;
-	if (value == "or-true") return CoreAggregation::OrTrue;
-	if (value == "and-false") return CoreAggregation::AndFalse;
-	if (value == "first") return CoreAggregation::First;
-	if (value == "first-non-empty") return CoreAggregation::FirstNonEmpty;
-	return CoreAggregation::Unsupported;
-}
-
-CoreResultKind ResolveResultKind(std::string_view value, CoreAggregation aggregation)
-{
-	if (aggregation == CoreAggregation::Ignore)
-		return CoreResultKind::None;
-	if (value == "BoolCallinResult") return CoreResultKind::Bool;
-	if (value == "IntCallinResult") return CoreResultKind::Int;
-	if (value == "DamageCallinResult") return CoreResultKind::Damage;
-	if (value == "AllowUnitCreationResult") return CoreResultKind::AllowUnitCreation;
-	if (aggregation == CoreAggregation::FirstNonEmpty && value == "StringCallinResult")
-		return CoreResultKind::String;
-	if (aggregation == CoreAggregation::First)
-		return CoreResultKind::OpaqueFirst;
-	return CoreResultKind::Unsupported;
-}
-
-struct CoreCallinPolicy {
-	const recoil::wasm::generated::CallinDescriptor* descriptor = nullptr;
-	CoreAggregation aggregation = CoreAggregation::Unsupported;
-	CoreResultKind resultKind = CoreResultKind::Unsupported;
-};
-
-const CoreCallinPolicy* FindCoreCallinPolicy(WasmCoreCallin callin)
-{
-	static const std::array<CoreCallinPolicy, CORE_CALLIN_COUNT> index = [] {
-		std::array<CoreCallinPolicy, CORE_CALLIN_COUNT> entries{};
-		for (const auto& descriptor : recoil::wasm::generated::kCallins) {
-			const WasmCoreCallin key = WasmCoreHost::ResolveCallin(descriptor.name);
-			const std::size_t slot = static_cast<std::size_t>(key);
-			if (key == WasmCoreCallin::Invalid || slot >= entries.size())
-				continue;
-			const CoreAggregation aggregation = ResolveAggregation(descriptor.aggregation);
-			entries[slot] = {
-				.descriptor = &descriptor,
-				.aggregation = aggregation,
-				.resultKind = ResolveResultKind(descriptor.result, aggregation),
-			};
-		}
-		return entries;
-	}();
-	const std::size_t slot = static_cast<std::size_t>(callin);
-	if (slot >= index.size() || index[slot].descriptor == nullptr)
-		return nullptr;
-	return &index[slot];
-}
+using recoil::wasm::core::CallinName;
+using recoil::wasm::core::CallinPolicy;
+using recoil::wasm::core::CoreAggregation;
+using recoil::wasm::core::CoreCallinPolicy;
+using recoil::wasm::core::CoreResultKind;
+using recoil::wasm::core::CORE_CALLIN_COUNT;
 
 std::string& CoreStringResultStorage()
 {
@@ -112,26 +39,96 @@ std::string& CoreStringResultStorage()
 	return storage;
 }
 
-bool DispatchCoreModule(const WasmInterfaceSystem::CoreCallinInvocation& invocation,
-	WasmCoreHost* host, const WasmModuleDescriptor& module, WasmCoreCallin callin,
-	std::string_view name, void* result, std::string& error)
+bool DispatchCoreModule(const recoil::wasm::core::WasmCoreDispatchPlan* plan,
+	WasmCoreCallin callin, const void* query, void* result, std::string& error)
 {
-	std::string moduleError;
-	const auto dispatchStage = name == "DrawWorld"
-		? spring::benchmark_callins::BeginStage("wasm", "callin_drawworld_module_dispatch")
-		: spring::benchmark_callins::Token{};
-	if (WasmCoreHost::DispatchModule(host, callin, invocation.query, result, moduleError))
-	{
+	const auto dispatchStage = spring::benchmark_callins::BeginStage(
+		spring::benchmark_callins::Stage::ModuleDispatch);
+	if (recoil::wasm::core::DispatchPlan(plan, query, result, error)) {
 		spring::benchmark_callins::End(dispatchStage);
 		return true;
 	}
 	spring::benchmark_callins::End(dispatchStage);
-	error = "Core Wasm callin " + std::string(name) + " failed in module " +
-		module.name + ": " + moduleError;
+	// Only the failure path pays for building a message.
+	error = "Core Wasm callin " + std::string(CallinName(callin)) + " failed in module " +
+		std::string(WasmCoreHost::ModuleName(
+			recoil::wasm::core::PlanHost(plan))) + ": " + error;
 	return false;
 }
 
 } // namespace
+
+void WasmInterfaceSystem::CoreSubscriberIndex::Rebuild(
+	const std::vector<CoreModuleRecord>& modules)
+{
+	plans.clear();
+	routes.fill(CallinRoute{});
+
+	// Group subscribers by (callin, environment) so a dispatch reads one
+	// contiguous span and never re-tests the generated environment mask or the
+	// per-module callin bitset.
+	for (std::size_t ordinal = 1; ordinal < CORE_CALLIN_COUNT; ++ordinal) {
+		const auto callin = static_cast<WasmCoreCallin>(ordinal);
+		const CoreCallinPolicy& policy = CallinPolicy(callin);
+		if (!policy.valid)
+			continue;
+		// Fold the compile-time policy into the routing line so no dispatch has
+		// to read the policy tables at all.
+		CallinRoute& route = routes[ordinal];
+		const recoil::wasm::core::UiCallinPolicy& uiPolicy =
+			recoil::wasm::core::UI_CALLIN_POLICIES[ordinal];
+		route.valid = true;
+		route.aggregation = policy.aggregation;
+		route.resultKind = policy.resultKind;
+		route.uiNeedsFilter = uiPolicy.handler != nullptr;
+		route.uiContributesResult = uiPolicy.contributesResult;
+		for (const WasmEnvironment environment : WasmEnvironmentMatrix::All()) {
+			const std::uint32_t bit = 1u << static_cast<std::uint32_t>(environment);
+			if ((policy.environmentMask & bit) == 0)
+				continue;
+			Range& range = route.perEnvironment[static_cast<std::size_t>(environment)];
+			range.begin = static_cast<std::uint32_t>(plans.size());
+			for (const CoreModuleRecord& module : modules) {
+				if (module.descriptor.environment != environment)
+					continue;
+				WasmCoreHost* host = module.host != nullptr
+					? module.host
+					: WasmCoreHost::ModuleHandle(module.descriptor.name);
+				const auto* plan = WasmCoreHost::ModulePlan(host, callin);
+				if (plan == nullptr)
+					continue;
+				plans.push_back(plan);
+				++range.count;
+			}
+			if (range.count != 0)
+				route.environmentMask |= bit;
+		}
+	}
+}
+
+const WasmInterfaceSystem::CoreSubscriberIndex::CallinRoute&
+WasmInterfaceSystem::CoreSubscriberIndex::Route(WasmCoreCallin callin) const
+{
+	const std::size_t slot = static_cast<std::size_t>(callin);
+	return routes[slot < routes.size() ? slot : 0u];
+}
+
+std::span<const recoil::wasm::core::WasmCoreDispatchPlan* const>
+WasmInterfaceSystem::CoreSubscriberIndex::Plans(
+	const CallinRoute& route, WasmEnvironment environment) const
+{
+	const Range& range = route.perEnvironment[static_cast<std::size_t>(environment)];
+	return {plans.data() + range.begin, range.count};
+}
+
+const WasmInterfaceSystem::CoreSubscriberIndex& WasmInterfaceSystem::Subscribers()
+{
+	if (coreSubscribersDirty) {
+		coreSubscribers.Rebuild(coreModules);
+		coreSubscribersDirty = false;
+	}
+	return coreSubscribers;
+}
 
 WasmInterfaceSystem::CoreDispatchRegistration::CoreDispatchRegistration(
 	WasmInterfaceSystem* system)
@@ -147,7 +144,7 @@ WasmInterfaceSystem::CoreDispatchRegistration::~CoreDispatchRegistration()
 		ActiveCoreSystem() = previous;
 }
 
-bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
+bool WasmInterfaceSystem::DispatchActiveCoreCallin(WasmCoreCallin callin,
 	const void* query, bool synced, void* nativeResult, bool& handled,
 	std::string& error)
 {
@@ -155,13 +152,8 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	WasmInterfaceSystem* system = ActiveCoreSystem();
 	if (system == nullptr || system->coreModules.empty())
 		return true;
-
-	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
 	if (callin == WasmCoreCallin::Invalid)
 		return true;
-	const auto selectionStage = name == "DrawWorld"
-		? spring::benchmark_callins::BeginStage("wasm", "callin_drawworld_core_selection")
-		: spring::benchmark_callins::Token{};
 
 	// Budgets are frame-scoped rather than call-scoped. Reset every synced
 	// instance immediately before the simulation GameFrame boundary and every
@@ -171,56 +163,71 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	const bool resetBudgetWindow =
 		(synced && callin == WasmCoreCallin::GameFrame) ||
 		(!synced && callin == WasmCoreCallin::Update);
-	if (resetBudgetWindow) {
-		for (CoreModuleRecord& module : system->coreModules) {
-			if (WasmEnvironmentMatrix::Policy(module.descriptor.environment).synced != synced)
-				continue;
-			if (module.host == nullptr)
-				module.host = WasmCoreHost::ModuleHandle(module.descriptor.name);
-			std::string resetError;
-			if (!WasmCoreHost::ResetBudget(module.host, resetError)) {
-				error = "Core Wasm budget reset failed in module " +
-					module.descriptor.name + ": " + resetError;
-				WasmCoreHost::FaultModule(module.descriptor.name, error);
-				return false;
-			}
-		}
-	}
+	if (resetBudgetWindow && !system->ResetBudgetWindow(synced, error))
+		return false;
 
-	if (system->coreEnvironmentMask == 0)
+	const auto selectionStage = spring::benchmark_callins::BeginStage(
+		spring::benchmark_callins::Stage::CoreSelection);
+
+	// Which worlds this dispatch may reach is fixed by the callin id and the
+	// loaded module set, so the common "nobody implements this" case costs one
+	// mask test and never builds an invocation list or a UI perspective.
+	static constexpr std::uint32_t syncedBits =
+		(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesSynced)) |
+		(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaSynced));
+	static constexpr std::uint32_t unsyncedBits =
+		(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesUnsynced)) |
+		(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaUnsynced));
+	static constexpr std::uint32_t uiBit =
+		1u << static_cast<std::uint32_t>(WasmEnvironment::UI);
+
+	const CoreSubscriberIndex& subscribers = system->Subscribers();
+	const CoreSubscriberIndex::CallinRoute& route = subscribers.Route(callin);
+	const std::uint32_t reachable =
+		route.environmentMask & ((synced ? syncedBits : unsyncedBits) | uiBit);
+	if (reachable == 0) {
+		spring::benchmark_callins::End(selectionStage);
 		return true;
-	const auto hasCoreEnvironment = [mask = system->coreEnvironmentMask](WasmEnvironment environment) {
-		const std::uint32_t bit = 1u << static_cast<std::uint32_t>(environment);
-		return (mask & bit) != 0;
-	};
+	}
 
 	static constexpr std::array<WasmEnvironment, 2> syncedEnvironments{
 		WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced};
 	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
 		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
 
+	// Callins that discard guest return values — every draw and frame event
+	// among them — need no invocation list and no aggregation state. Run them
+	// straight off the routing line already loaded above.
+	if (route.aggregation == CoreAggregation::Ignore) {
+		spring::benchmark_callins::End(selectionStage);
+		const auto aggregationStage = spring::benchmark_callins::BeginStage(
+			spring::benchmark_callins::Stage::CoreAggregation);
+		bool success = system->DispatchIgnoredCallin(callin, route, query, reachable,
+			synced ? syncedEnvironments : unsyncedEnvironments, handled, error);
+		spring::benchmark_callins::End(aggregationStage);
+		if (!synced && WasmCoreHost::PendingUnsyncedFaults() != 0)
+			system->RemoveFaultedUnsyncedModules();
+		return success;
+	}
+
 	std::array<CoreCallinInvocation, 3> invocations{};
 	std::size_t invocationCount = 0;
 	const auto& primary = synced ? syncedEnvironments : unsyncedEnvironments;
 	for (const WasmEnvironment environment : primary) {
-		if (hasCoreEnvironment(environment))
+		if ((reachable & (1u << static_cast<std::uint32_t>(environment))) != 0)
 			invocations[invocationCount++] = {environment, query, true};
 	}
 
 	recoil::wasm::core::UiCallinFilter uiFilter;
-	if (hasCoreEnvironment(WasmEnvironment::UI)) {
+	if ((reachable & uiBit) != 0) {
 		bool includeUi = true;
 		const void* uiQuery = query;
-		if (!uiFilter.Prepare(name, query, includeUi, uiQuery, error))
+		if (route.uiNeedsFilter &&
+			!uiFilter.Prepare(callin, query, includeUi, uiQuery, error))
 			return false;
 		if (includeUi) {
-			// EventHandler discards UI return values for these synced-control
-			// events. The UI callback still runs, but cannot change simulation
-	// aggregation. Keep this identical to the Core path.
-			const bool contributesResult = name != "Explosion" &&
-				name != "UnitUnitCollision" && name != "UnitFeatureCollision";
-			invocations[invocationCount++] = {
-				WasmEnvironment::UI, uiQuery, contributesResult};
+			invocations[invocationCount++] = {WasmEnvironment::UI, uiQuery,
+				route.uiContributesResult};
 		}
 	}
 
@@ -230,20 +237,88 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	}
 
 	spring::benchmark_callins::End(selectionStage);
-	const auto aggregationStage = name == "DrawWorld"
-		? spring::benchmark_callins::BeginStage("wasm", "callin_drawworld_core_aggregation")
-		: spring::benchmark_callins::Token{};
-	const bool success = system->DispatchCoreCallin(callin, name,
+	const auto aggregationStage = spring::benchmark_callins::BeginStage(
+		spring::benchmark_callins::Stage::CoreAggregation);
+	const bool success = system->DispatchCoreCallin(callin,
 		std::span<const CoreCallinInvocation>(invocations.data(), invocationCount),
 		nativeResult, handled, error);
 	spring::benchmark_callins::End(aggregationStage);
-	if (!synced && WasmCoreHost::RemoveFaultedUnsynced() != 0) {
-		system->coreModules.erase(std::remove_if(system->coreModules.begin(),
-			system->coreModules.end(), [](const CoreModuleRecord& module) {
-				return !WasmCoreHost::HasModule(module.descriptor.name);
-			}), system->coreModules.end());
-	}
+
+	// Faults are rare. Only pay for the sweep when one actually happened.
+	if (!synced && WasmCoreHost::PendingUnsyncedFaults() != 0)
+		system->RemoveFaultedUnsyncedModules();
 	return success;
+}
+
+bool WasmInterfaceSystem::DispatchIgnoredCallin(WasmCoreCallin callin,
+	const CoreSubscriberIndex::CallinRoute& route, const void* query,
+	std::uint32_t reachable, std::span<const WasmEnvironment> primary,
+	bool& handled, std::string& error)
+{
+	const CoreSubscriberIndex& subscribers = coreSubscribers;
+	const auto run = [&](WasmEnvironment environment, const void* environmentQuery) {
+		for (const auto* plan : subscribers.Plans(route, environment)) {
+			handled = true;
+			if (!DispatchCoreModule(plan, callin, environmentQuery, nullptr, error))
+				return false;
+		}
+		return true;
+	};
+
+	for (const WasmEnvironment environment : primary) {
+		if ((reachable & (1u << static_cast<std::uint32_t>(environment))) == 0)
+			continue;
+		if (!run(environment, query))
+			return false;
+	}
+
+	static constexpr std::uint32_t uiBit =
+		1u << static_cast<std::uint32_t>(WasmEnvironment::UI);
+	if ((reachable & uiBit) == 0)
+		return true;
+
+	// Callins with no visibility-sensitive payload skip the filter entirely;
+	// the routing line already said so.
+	if (!route.uiNeedsFilter)
+		return run(WasmEnvironment::UI, query);
+
+	recoil::wasm::core::UiCallinFilter uiFilter;
+	bool includeUi = true;
+	const void* uiQuery = query;
+	if (!uiFilter.Prepare(callin, query, includeUi, uiQuery, error))
+		return false;
+	if (!includeUi)
+		return true;
+	return run(WasmEnvironment::UI, uiQuery);
+}
+
+bool WasmInterfaceSystem::ResetBudgetWindow(bool synced, std::string& error)
+{
+	for (CoreModuleRecord& module : coreModules) {
+		if (WasmEnvironmentMatrix::Policy(module.descriptor.environment).synced != synced)
+			continue;
+		if (module.host == nullptr)
+			module.host = WasmCoreHost::ModuleHandle(module.descriptor.name);
+		std::string resetError;
+		if (!WasmCoreHost::ResetBudget(module.host, resetError)) {
+			error = "Core Wasm budget reset failed in module " +
+				module.descriptor.name + ": " + resetError;
+			WasmCoreHost::FaultModule(module.descriptor.name, error);
+			return false;
+		}
+	}
+	return true;
+}
+
+void WasmInterfaceSystem::RemoveFaultedUnsyncedModules()
+{
+	if (WasmCoreHost::RemoveFaultedUnsynced() == 0)
+		return;
+	coreModules.erase(std::remove_if(coreModules.begin(), coreModules.end(),
+		[](const CoreModuleRecord& module) {
+			return !WasmCoreHost::HasModule(module.descriptor.name);
+		}), coreModules.end());
+	InvalidateSubscribers();
 }
 
 bool WasmInterfaceSystem::HasCoreModules(WasmEnvironment environment) const
@@ -254,46 +329,42 @@ bool WasmInterfaceSystem::HasCoreModules(WasmEnvironment environment) const
 		});
 }
 
-bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
+bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 	std::span<const CoreCallinInvocation> invocations,
 	void* nativeResult, bool& handled,
 	std::string& error)
 {
-	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
-	if (callin == WasmCoreCallin::Invalid) {
-		handled = false;
-		error = "unknown Core Wasm callin: " + std::string(name);
-		return false;
-	}
-	return DispatchCoreCallin(callin, name, invocations, nativeResult,
-		handled, error);
-}
-
-bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
-	std::string_view diagnosticName, std::span<const CoreCallinInvocation> invocations,
-	void* nativeResult, bool& handled,
-	std::string& error)
-{
 	handled = false;
-	if (callin == WasmCoreCallin::Invalid) {
-		error = "unknown Core Wasm callin: " + std::string(diagnosticName);
-		return false;
-	}
-
-	const CoreCallinPolicy* policy = FindCoreCallinPolicy(callin);
-	if (policy == nullptr) {
+	const CoreCallinPolicy& policy = CallinPolicy(callin);
+	if (!policy.valid) {
 		error = "Core Wasm callin has no generated descriptor: " +
-			std::string(diagnosticName);
+			std::string(CallinName(callin));
 		return false;
 	}
-	const auto* descriptor = policy->descriptor;
-	const CoreAggregation aggregation = policy->aggregation;
-	const CoreResultKind resultKind = policy->resultKind;
+	const CoreAggregation aggregation = policy.aggregation;
+	const CoreResultKind resultKind = policy.resultKind;
 	if (aggregation == CoreAggregation::Unsupported || resultKind == CoreResultKind::Unsupported) {
 		error = "native Core aggregation is not implemented for callin " +
-			std::string(diagnosticName) + " (result " + descriptor->result +
-			", aggregation " + descriptor->aggregation + ")";
+			std::string(CallinName(callin)) + " (result " + policy.descriptor->result +
+			", aggregation " + policy.descriptor->aggregation + ")";
 		return false;
+	}
+
+	const CoreSubscriberIndex& subscribers = Subscribers();
+	const CoreSubscriberIndex::CallinRoute& route = subscribers.Route(callin);
+
+	// Most callins — every draw and frame event among them — discard guest
+	// return values. Aggregation state for six result shapes is dead work
+	// there, so that case never builds any.
+	if (aggregation == CoreAggregation::Ignore) {
+		for (const CoreCallinInvocation& invocation : invocations) {
+			for (const auto* plan : subscribers.Plans(route, invocation.environment)) {
+				handled = true;
+				if (!DispatchCoreModule(plan, callin, invocation.query, nullptr, error))
+					return false;
+			}
+		}
+		return true;
 	}
 
 	bool haveResult = false;
@@ -336,27 +407,11 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 	std::string stringAggregate;
 
 	for (const CoreCallinInvocation& invocation : invocations) {
-		const std::uint32_t environmentBit =
-			1u << static_cast<std::uint32_t>(invocation.environment);
-		if ((descriptor->environmentMask & environmentBit) == 0)
-			continue;
-
-		for (CoreModuleRecord& module : coreModules) {
-			if (module.descriptor.environment != invocation.environment)
-				continue;
-			if (module.host == nullptr)
-				module.host = WasmCoreHost::ModuleHandle(module.descriptor.name);
-			if (!WasmCoreHost::ModuleHasCallin(module.host, callin))
-				continue;
-
+		// The subscriber list already excludes modules whose world the callin does
+		// not reach and modules that do not export it, so every entry here is a
+		// guest that will actually run.
+		for (const auto* plan : subscribers.Plans(route, invocation.environment)) {
 			handled = true;
-			if (aggregation == CoreAggregation::Ignore) {
-				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, diagnosticName, nullptr, error))
-					return false;
-				continue;
-			}
-
 			if (resultKind == CoreResultKind::Bool &&
 				(aggregation == CoreAggregation::OrTrue || aggregation == CoreAggregation::AndFalse)) {
 				BoolCallinResult moduleResult = boolDefault;
@@ -364,8 +419,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 					moduleResult.value = false;
 				if (aggregation == CoreAggregation::AndFalse && nativeResult == nullptr)
 					moduleResult.value = true;
-				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, diagnosticName, &moduleResult, error))
+				if (!DispatchCoreModule(plan, callin, invocation.query,
+						&moduleResult, error))
 					return false;
 				if (!invocation.contributesResult)
 					continue;
@@ -379,8 +434,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 
 			if (resultKind == CoreResultKind::Bool && aggregation == CoreAggregation::First) {
 				BoolCallinResult moduleResult = boolDefault;
-				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, diagnosticName, &moduleResult, error))
+				if (!DispatchCoreModule(plan, callin, invocation.query,
+						&moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					boolAggregate = moduleResult;
@@ -391,8 +446,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 
 			if (resultKind == CoreResultKind::Int && aggregation == CoreAggregation::First) {
 				IntCallinResult moduleResult = intDefault;
-				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, diagnosticName, &moduleResult, error))
+				if (!DispatchCoreModule(plan, callin, invocation.query,
+						&moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					intAggregate = moduleResult;
@@ -407,8 +462,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 					return false;
 				}
 				DamageCallinResult moduleResult = damageDefault;
-				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, diagnosticName, &moduleResult, error))
+				if (!DispatchCoreModule(plan, callin, invocation.query,
+						&moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					damageAggregate = moduleResult;
@@ -420,8 +475,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 			if (resultKind == CoreResultKind::AllowUnitCreation &&
 				aggregation == CoreAggregation::First) {
 				AllowUnitCreationResult moduleResult = creationDefault;
-				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, diagnosticName, &moduleResult, error))
+				if (!DispatchCoreModule(plan, callin, invocation.query,
+						&moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					creationAggregate = moduleResult;
@@ -437,8 +492,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 					.value = nullptr,
 				};
 				const bool mayContribute = invocation.contributesResult && !haveResult;
-				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, diagnosticName, mayContribute ? &moduleResult : nullptr, error))
+				if (!DispatchCoreModule(plan, callin, invocation.query,
+						mayContribute ? &moduleResult : nullptr, error))
 					return false;
 				if (mayContribute && moduleResult.value != nullptr && moduleResult.value[0] != '\0') {
 					stringAggregate.assign(moduleResult.value);
@@ -452,8 +507,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 				const bool takeResult = invocation.contributesResult && !haveResult;
 				if (takeResult)
 					moduleResult = nativeResult;
-				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, diagnosticName, moduleResult, error))
+				if (!DispatchCoreModule(plan, callin, invocation.query,
+						moduleResult, error))
 					return false;
 				if (takeResult)
 					haveResult = true;
@@ -461,7 +516,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 			}
 
 			error = "Core Wasm callin policy combination is unsupported: " +
-				std::string(diagnosticName);
+				std::string(CallinName(callin));
 			return false;
 		}
 	}
