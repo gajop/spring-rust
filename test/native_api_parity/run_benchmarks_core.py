@@ -140,6 +140,7 @@ def _run_core_backend(
     output_name: str | None,
     wasm_context: str,
     wasm_module_count: int,
+    stages: bool = False,
 ) -> list[dict]:
     backend = "wasm_core"
     selected_module = core_artifact_for_backend(backend_artifact)
@@ -215,7 +216,10 @@ def _run_core_backend(
         env["SPRING_NATIVE_BENCHMARK_BACKEND"] = backend
         env["SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT"] = callin_variant
         env["SPRING_NATIVE_BENCHMARK_MODULES"] = str(wasm_module_count)
-        env["SPRING_NATIVE_BENCHMARK_STAGES"] = "1" if benchmark_case == "draw" else "0"
+        # Stage timers nest inside the timed region of the callin row they
+        # decompose, so a run cannot report both an honest headline number and a
+        # breakdown. The caller asks for one or the other.
+        env["SPRING_NATIVE_BENCHMARK_STAGES"] = "1" if stages else "0"
         if benchmark_case in {"callins", "draw"}:
             env["SPRING_NATIVE_BENCHMARK_CALLINS"] = "1"
         else:
@@ -340,7 +344,7 @@ def run_backend_with_core(
             wasm_module_count=wasm_module_count,
             load_native_module=load_native_module,
         )
-    return _run_core_backend(
+    rows = _run_core_backend(
         root_output,
         seed,
         timeout,
@@ -356,6 +360,38 @@ def run_backend_with_core(
         wasm_context=wasm_context,
         wasm_module_count=wasm_module_count,
     )
+    if benchmark_case != "draw":
+        return rows
+
+    # Second pass purely for the stage breakdown. Its own callin row is
+    # discarded: it carries the cost of the stage timers nested inside it, so it
+    # is not comparable with the Lua and Native rows.
+    stage_rows = _run_core_backend(
+        root_output,
+        seed,
+        timeout,
+        spring,
+        scale,
+        benchmark_case,
+        benchmark_iterations,
+        benchmark_repeats,
+        expected_tests,
+        callin_variant=callin_variant,
+        backend_artifact=backend_artifact,
+        output_name=f"{output_name or 'wasm_core'}-stages",
+        wasm_context=wasm_context,
+        wasm_module_count=wasm_module_count,
+        stages=True,
+    )
+    rows.extend(
+        row
+        for row in stage_rows
+        if any(
+            str(row.get("test", "")).startswith(f"{test}_")
+            for test in expected_tests
+        )
+    )
+    return rows
 
 
 def _report_tests(summary: dict) -> list[str]:

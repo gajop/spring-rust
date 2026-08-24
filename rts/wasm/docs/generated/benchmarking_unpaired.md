@@ -2,12 +2,12 @@
 
 | Profile | Test | Lua | Native | Core |
 | --- | --- | --- | --- | --- |
-| `heightmap` | `hm_callback_empty` | unavailable | 0.000032 ms | 0.000027 ms |
-| `heightmap` | `hm_brush_small` | unavailable | 0.000301 ms | 0.000433 ms |
-| `heightmap` | `hm_brush_medium` | unavailable | 0.003260 ms | 0.006000 ms |
-| `heightmap` | `hm_region_op` | unavailable | 0.000833 ms | 0.000910 ms |
-| `memory` | `mem_per_call_small` | pass | 6.386 ns | pass |
-| `memory` | `mem_per_call_list` | pass | 492.090 ns | pass |
+| `heightmap` | `hm_callback_empty` | unavailable | 0.032 µs | 0.027 µs |
+| `heightmap` | `hm_brush_small` | unavailable | 0.301 µs | 0.433 µs |
+| `heightmap` | `hm_brush_medium` | unavailable | 3.260 µs | 6.000 µs |
+| `heightmap` | `hm_region_op` | unavailable | 0.833 µs | 0.910 µs |
+| `memory` | `mem_per_call_small` | pass | 0.006 µs | pass |
+| `memory` | `mem_per_call_list` | pass | 0.492 µs | pass |
 | `memory` | `gc_pause` | pass | pass | pass |
 | `memory` | `frame_spike` | pass | pass | pass |
 | `memory` | `mem_growth` | pass | pass | pass |

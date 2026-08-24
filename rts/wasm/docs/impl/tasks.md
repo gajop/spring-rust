@@ -60,7 +60,9 @@ should be readable in five seconds without scanning a wide table.
   Native peer. They are not comparisons and must not sit in the comparison
   table. Separate file.
 - `callin_drawworld_*` stage rows are instrumentation of one callin, not
-  independent tests. Separate file.
+  independent tests. Separate file. They also come from a separate engine run:
+  a stage timer nests inside the timed region of the callin row it decomposes,
+  so a run cannot report both an honest headline number and a breakdown.
 - `n`, `p99` and `spread` go in the CSVs under
   `test/native_api_parity/frozen_benchmarks/`, which is where per-sample detail
   belongs. Keep them there; keep them out of the markdown.

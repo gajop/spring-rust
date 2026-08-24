@@ -2,17 +2,17 @@
 
 | Profile | Test | Backend | Median |
 | --- | --- | --- | ---: |
-| `callouts` | `core_ceiling_fixed_struct` | `wasm_core` | 26.200 ns |
-| `callouts` | `core_ceiling_string_in_borrowed` | `wasm_core` | 11.000 ns |
-| `callouts` | `core_ceiling_f32_list_in_borrowed` | `wasm_core` | 10.800 ns |
-| `callouts` | `core_ceiling_string_out_reuse` | `wasm_core` | 22.800 ns |
-| `callouts` | `core_ceiling_list_out_reuse` | `wasm_core` | 493.500 ns |
-| `callouts` | `core_ceiling_nested_list_out_reuse` | `wasm_core` | 26.000 ns |
-| `callouts` | `core_ceiling_spatial_list_reuse` | `wasm_core` | 238.000 ns |
-| `callouts` | `core_ceiling_string_list_out_reuse` | `wasm_core` | 19.333 ns |
-| `draw` | `callin_drawworld_core_aggregation` | `wasm_core` | 7516.000 ns |
-| `draw` | `callin_drawworld_module_dispatch` | `wasm_core` | 6076.000 ns |
-| `draw` | `callin_drawworld_wasmtime_entry` | `wasm_core` | 2396.000 ns |
-| `draw` | `callin_drawworld_visibility` | `wasm_core` | 65.000 ns |
-| `draw` | `callin_drawworld_native_dispatch` | `wasm_core` | 12514.000 ns |
-| `draw` | `callin_drawworld_core_selection` | `wasm_core` | 607.000 ns |
+| `callouts` | `core_ceiling_fixed_struct` | `wasm_core` | 0.026 µs |
+| `callouts` | `core_ceiling_string_in_borrowed` | `wasm_core` | 0.011 µs |
+| `callouts` | `core_ceiling_f32_list_in_borrowed` | `wasm_core` | 0.011 µs |
+| `callouts` | `core_ceiling_string_out_reuse` | `wasm_core` | 0.023 µs |
+| `callouts` | `core_ceiling_list_out_reuse` | `wasm_core` | 0.493 µs |
+| `callouts` | `core_ceiling_nested_list_out_reuse` | `wasm_core` | 0.026 µs |
+| `callouts` | `core_ceiling_spatial_list_reuse` | `wasm_core` | 0.238 µs |
+| `callouts` | `core_ceiling_string_list_out_reuse` | `wasm_core` | 0.019 µs |
+| `draw` | `callin_drawworld_core_aggregation` | `wasm_core` | 7.516 µs |
+| `draw` | `callin_drawworld_module_dispatch` | `wasm_core` | 6.076 µs |
+| `draw` | `callin_drawworld_wasmtime_entry` | `wasm_core` | 2.396 µs |
+| `draw` | `callin_drawworld_visibility` | `wasm_core` | 0.065 µs |
+| `draw` | `callin_drawworld_native_dispatch` | `wasm_core` | 12.514 µs |
+| `draw` | `callin_drawworld_core_selection` | `wasm_core` | 0.607 µs |

@@ -582,8 +582,10 @@ def format_metric(metric: tuple[float, str] | None) -> str:
     if metric is None:
         return "—"
     value, unit = metric
+    if unit == "ns":
+        return f"{value / 1000:.3f} µs"
     if unit == "ms":
-        return f"{value:.6f} {unit}"
+        return f"{value * 1000:.3f} µs"
     return f"{value:.3f} {unit}"
 
 

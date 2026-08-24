@@ -2,6 +2,6 @@
 
 | Profile | Test | Lua | Core | Core vs Lua |
 | --- | --- | ---: | ---: | ---: |
-| `callins` | `callin_unimplemented` | 1229.000 ns | 1695.000 ns | 1.38x |
-| `callouts` | `callout_payload_256` | 100.017 ns | 108.000 ns | 1.08x |
-| `draw` | `callin_drawworld` | 2604.000 ns | 13524.000 ns | 5.19x |
+| `callins` | `callin_unimplemented` | 1.229 µs | 1.695 µs | 1.38x |
+| `callouts` | `callout_payload_256` | 0.100 µs | 0.108 µs | 1.08x |
+| `draw` | `callin_drawworld` | 2.604 µs | 13.524 µs | 5.19x |
