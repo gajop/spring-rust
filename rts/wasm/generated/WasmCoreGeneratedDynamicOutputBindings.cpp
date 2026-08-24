@@ -5290,6 +5290,7 @@ auto encode = [&](auto& writer) -> bool {
         if (!writer.F32(result.state.dist)) return false;
         if (!writer.F32(result.state.height)) return false;
         if (!writer.F32(result.state.angle)) return false;
+        if (!writer.I32(static_cast<std::int32_t>(result.state.mode))) return false;
 return writer.Align(8u);
 };
 DynamicSizeWriter sizer;

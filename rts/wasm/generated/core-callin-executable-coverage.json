@@ -1258,7 +1258,8 @@
       "aggregation": "ignore",
       "environments": [
         "rules-unsynced",
-        "gaia-unsynced"
+        "gaia-unsynced",
+        "ui"
       ],
       "class": "generated-shared-scratch-ignored-result",
       "verified": false,

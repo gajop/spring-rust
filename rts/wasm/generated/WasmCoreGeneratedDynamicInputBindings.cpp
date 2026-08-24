@@ -78,6 +78,7 @@ struct CoreOwned_CameraState {
         if (!reader.F32(value.dist)) return false;
         if (!reader.F32(value.height)) return false;
         if (!reader.F32(value.angle)) return false;
+        { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return false; value.mode = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.mode)>>>(coreRaw); }
         return true;
     }
 };

@@ -1730,7 +1730,8 @@
       "aggregation": "ignore",
       "environments": [
         "rules-unsynced",
-        "gaia-unsynced"
+        "gaia-unsynced",
+        "ui"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",

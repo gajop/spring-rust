@@ -56,7 +56,11 @@ fn main() {
         .collect::<Vec<_>>();
     owned_shards.sort();
     for shard in owned_shards {
-        append_generated(&mut contents, &shard, "owned semantic Core callout SDK shard");
+        append_generated(
+            &mut contents,
+            &shard,
+            "owned semantic Core callout SDK shard",
+        );
     }
     append_generated(
         &mut contents,

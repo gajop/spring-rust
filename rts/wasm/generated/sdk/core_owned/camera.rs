@@ -47,6 +47,7 @@
             pub dist: f32,
             pub height: f32,
             pub angle: f32,
+            pub mode: i32,
         }
 
         #[derive(Debug, Clone, PartialEq)]

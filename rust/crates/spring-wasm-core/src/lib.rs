@@ -41,6 +41,8 @@ mod terrain;
 #[cfg(target_arch = "wasm32")]
 mod terrain_control;
 #[cfg(target_arch = "wasm32")]
+pub mod typed;
+#[cfg(target_arch = "wasm32")]
 mod unit_control;
 #[cfg(target_arch = "wasm32")]
 mod unit_defs;
@@ -80,6 +82,8 @@ pub use system_control::*;
 pub use terrain::*;
 #[cfg(target_arch = "wasm32")]
 pub use terrain_control::*;
+#[cfg(target_arch = "wasm32")]
+pub use typed::*;
 #[cfg(target_arch = "wasm32")]
 pub use unit_control::*;
 #[cfg(target_arch = "wasm32")]

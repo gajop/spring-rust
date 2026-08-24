@@ -1037,7 +1037,8 @@
     "result": "RecvFromSyncedResult",
     "environments": [
       "rules-unsynced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },

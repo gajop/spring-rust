@@ -124,9 +124,7 @@ pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
         if pointer > u32::MAX as usize {
             return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
         }
-        let status = unsafe {
-            raw::get_frame_timer(last_frame_time as i32, pointer as u32 as i32)
-        };
+        let status = unsafe { raw::get_frame_timer(last_frame_time as i32, pointer as u32 as i32) };
         if status != 0 {
             return Err(ApiError::new(status));
         }

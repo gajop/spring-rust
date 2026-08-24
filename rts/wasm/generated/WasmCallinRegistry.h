@@ -108,7 +108,7 @@ inline constexpr CallinDescriptor kCallins[] = {
 	{"ProjectileDestroyed", "ProjectileEvent", "ProjectileEventQuery", "ProjectileEventResult", "ignore", 31u},
 	{"RectChanged", "RectChanged", "RectChangedQuery", "RectChangedResult", "ignore", 31u},
 	{"UnsyncedHeightMapUpdate", "RectChanged", "RectChangedQuery", "RectChangedResult", "ignore", 31u},
-	{"RecvFromSynced", "RecvFromSynced", "RecvFromSyncedQuery", "RecvFromSyncedResult", "ignore", 10u},
+	{"RecvFromSynced", "RecvFromSynced", "RecvFromSyncedQuery", "RecvFromSyncedResult", "ignore", 26u},
 	{"RenderUnitDestroyed", "RenderUnitDestroyed", "RenderUnitDestroyedQuery", "RenderUnitDestroyedResult", "ignore", 31u},
 	{"ResourceExcess", "ResourceExcess", "ResourceExcessQuery", "BoolCallinResult", "or-true", 15u},
 	{"Save", "Save", "SimpleCallinQuery", "ArchiveCallinResult", "ignore", 15u},

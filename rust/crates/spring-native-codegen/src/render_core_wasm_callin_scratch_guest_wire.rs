@@ -121,7 +121,7 @@ macro_rules! export_callin_scratch {{
         #[doc(hidden)]
         pub fn __spring_core_callin_scratch_view(used: i32) -> Option<&'static [u8]> {{
             if used < 0 || used as usize > $bytes {{ return None; }}
-            let pointer = core::ptr::addr_of!(__SPRING_CORE_CALLIN_SCRATCH.0).cast::<u8>();
+            let pointer = unsafe {{ core::ptr::addr_of!(__SPRING_CORE_CALLIN_SCRATCH.0).cast::<u8>() }};
             // SAFETY: the host writes this guest-owned region only while entering
             // one callin, and the host rejects nested scratch callins.
             Some(unsafe {{ core::slice::from_raw_parts(pointer, used as usize) }})
@@ -130,7 +130,7 @@ macro_rules! export_callin_scratch {{
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/scratch-info"]
         pub extern "C" fn __spring_core_callin_scratch_info() -> i64 {{
-            let pointer = core::ptr::addr_of_mut!(__SPRING_CORE_CALLIN_SCRATCH.0).cast::<u8>() as usize;
+            let pointer = unsafe {{ core::ptr::addr_of!(__SPRING_CORE_CALLIN_SCRATCH.0).cast::<u8>() as usize }};
             debug_assert!(pointer <= u32::MAX as usize && $bytes <= u32::MAX as usize);
             ((($bytes as u64) << 32) | pointer as u32 as u64) as i64
         }}
