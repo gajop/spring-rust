@@ -185,6 +185,15 @@ out/
 # must not leak into the main lockfile), so it builds into its own target dir.
 /rust/crates/spring-wasm-typed-host/target
 
+# spring-wasm-core builds in its own target dir and generates a local lockfile;
+# neither belongs in the repo.
+/rust/crates/spring-wasm-core/target
+/rust/crates/spring-wasm-core/Cargo.lock
+
+# Stale codegen output from running without --output; the canonical generated
+# files live at /rts/wasm/generated, not under /rust.
+/rust/rts
+
 # Wasm and native parity harness build/run products
 /test/wasm_api/**/target
 /test/wasm_api/benchmark_guest/wit
