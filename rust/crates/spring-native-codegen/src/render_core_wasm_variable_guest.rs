@@ -91,7 +91,6 @@ fn render_raw(plan: &render_core_wasm::FunctionPlan) -> String {
         .first()
         .map(|ty| format!(" -> {}", rust_core_type(*ty)))
         .unwrap_or_default();
-
     format!(
         "            #[link(wasm_import_module = \"{module}\")]\n\
                      extern \"C\" {{\n\

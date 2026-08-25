@@ -68,13 +68,13 @@ fn string_parts(value: &str) -> Result<(i32, i32)> {
 pub fn begin_end(primitive: u32, callback: SyncCallback) -> Result<()> {
     #[cfg(target_arch = "wasm32")]
     {
-        return status(unsafe {
+        status(unsafe {
             raw::begin_end(
                 primitive as i32,
                 callback.id as i32,
                 callback.user_data as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -92,7 +92,7 @@ pub fn active_fbo(
 ) -> Result<()> {
     #[cfg(target_arch = "wasm32")]
     {
-        return status(unsafe {
+        status(unsafe {
             raw::active_fbo(
                 fbo_id as i32,
                 target as i32,
@@ -100,7 +100,7 @@ pub fn active_fbo(
                 callback.id as i32,
                 callback.user_data as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -113,13 +113,13 @@ pub fn active_fbo(
 pub fn active_shader(shader_id: u32, callback: SyncCallback) -> Result<()> {
     #[cfg(target_arch = "wasm32")]
     {
-        return status(unsafe {
+        status(unsafe {
             raw::active_shader(
                 shader_id as i32,
                 callback.id as i32,
                 callback.user_data as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -132,10 +132,10 @@ pub fn active_shader(shader_id: u32, callback: SyncCallback) -> Result<()> {
 pub fn create_list(callback: SyncCallback) -> Result<u32> {
     #[cfg(target_arch = "wasm32")]
     {
-        return super::unpack_i32(unsafe {
+        super::unpack_i32(unsafe {
             raw::create_list(callback.id as i32, callback.user_data as i32)
         })
-        .map(|value| value as u32);
+        .map(|value| value as u32)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -148,14 +148,14 @@ pub fn create_list(callback: SyncCallback) -> Result<u32> {
 pub fn draw_func_at_unit(unit_id: i32, use_mid_pos: bool, callback: SyncCallback) -> Result<()> {
     #[cfg(target_arch = "wasm32")]
     {
-        return status(unsafe {
+        status(unsafe {
             raw::draw_func_at_unit(
                 unit_id,
                 use_mid_pos as i32,
                 callback.id as i32,
                 callback.user_data as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -168,9 +168,7 @@ pub fn draw_func_at_unit(unit_id: i32, use_mid_pos: bool, callback: SyncCallback
 pub fn push_pop_matrix(callback: SyncCallback) -> Result<()> {
     #[cfg(target_arch = "wasm32")]
     {
-        return status(unsafe {
-            raw::push_pop_matrix(callback.id as i32, callback.user_data as i32)
-        });
+        status(unsafe { raw::push_pop_matrix(callback.id as i32, callback.user_data as i32) })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -184,14 +182,14 @@ pub fn render_to_texture(name: &str, callback: SyncCallback) -> Result<()> {
     #[cfg(target_arch = "wasm32")]
     {
         let (pointer, length) = string_parts(name)?;
-        return status(unsafe {
+        status(unsafe {
             raw::render_to_texture(
                 pointer,
                 length,
                 callback.id as i32,
                 callback.user_data as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -204,13 +202,13 @@ pub fn render_to_texture(name: &str, callback: SyncCallback) -> Result<()> {
 pub fn run_query(query_id: u32, callback: SyncCallback) -> Result<()> {
     #[cfg(target_arch = "wasm32")]
     {
-        return status(unsafe {
+        status(unsafe {
             raw::run_query(
                 query_id as i32,
                 callback.id as i32,
                 callback.user_data as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -223,14 +221,14 @@ pub fn run_query(query_id: u32, callback: SyncCallback) -> Result<()> {
 pub fn unsafe_state(state_id: u32, reverse: bool, callback: SyncCallback) -> Result<()> {
     #[cfg(target_arch = "wasm32")]
     {
-        return status(unsafe {
+        status(unsafe {
             raw::unsafe_state(
                 state_id as i32,
                 reverse as i32,
                 callback.id as i32,
                 callback.user_data as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

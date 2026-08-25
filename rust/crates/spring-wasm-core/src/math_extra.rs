@@ -25,14 +25,14 @@ pub fn normalize(vector: [f32; 3]) -> Result<NormalizedVec3> {
         }
         let status =
             unsafe { raw::normalize(vector[0], vector[1], vector[2], pointer as u32 as i32) };
-        return if status == 0 {
+        if status == 0 {
             Ok(NormalizedVec3 {
                 vector: [output[0], output[1], output[2]],
                 length: output[3],
             })
         } else {
             Err(ApiError::new(status))
-        };
+        }
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

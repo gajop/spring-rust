@@ -126,6 +126,28 @@ struct COBScriptApi {
 	void (*GetCOBScriptID)(const GetCOBScriptIDQuery* query, GetCOBScriptIDResult* result);
 };
 
+// Numeric subset of Spring.UnitScript.CallAsUnit. The function name is
+// resolved in the target Lua unit-script environment. Arguments and return
+// values are variable-length arrays owned by the API call.
+struct CallUnitScriptQuery {
+	int32_t unitID;
+	const char* functionName;
+	const float* args;
+	uint32_t argCount;
+	uint32_t retCapacity;
+};
+struct CallUnitScriptResult {
+	const Error* error;
+	bool functionFound;
+	bool success;
+	const float* retValues;
+	uint32_t retCount;
+};
+
+struct UnitScriptApi {
+	void (*CallUnitScript)(const CallUnitScriptQuery* query, CallUnitScriptResult* result);
+};
+
 // ============================================================================
 // Unit Control
 // ============================================================================
@@ -1231,6 +1253,7 @@ struct SyncedCtrlApi {
 	const EffectsControlApi* effects;
 	const GameConfigApi* gameConfig;
 	const COBScriptApi* cobScript;
+	const UnitScriptApi* unitScript;
 };
 
 extern const SyncedCtrlApi SYNCED_CTRL_API;

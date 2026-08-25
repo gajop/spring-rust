@@ -245,6 +245,10 @@ pub const MODULE_SPECS: &[ModuleSpec] = &[
         api_struct: "UnitRenderingApi",
         wrapper_struct: "UnitRendering",
     },
+    ModuleSpec {
+        api_struct: "UnitScriptApi",
+        wrapper_struct: "UnitScript",
+    },
 ];
 
 fn generate_module(
@@ -330,6 +334,7 @@ legacy_generators! {
     (generate_cob_script, 51),
     (generate_unsynced_read, 52),
     (generate_unit_rendering, 53),
+    (generate_unit_script, 54),
 }
 pub struct CodeGenerator {
     clang: Clang,

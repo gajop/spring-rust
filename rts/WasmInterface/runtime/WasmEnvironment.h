@@ -12,6 +12,8 @@ enum class WasmEnvironment : std::uint8_t {
 	GaiaSynced,
 	GaiaUnsynced,
 	UI,
+	Menu,
+	Intro,
 };
 
 struct WasmEnvironmentPolicy {
@@ -24,10 +26,11 @@ struct WasmEnvironmentPolicy {
 
 class WasmEnvironmentMatrix {
 public:
-	static constexpr std::array<WasmEnvironment, 5> All() {
+	static constexpr std::array<WasmEnvironment, 7> All() {
 		return {WasmEnvironment::RulesSynced, WasmEnvironment::RulesUnsynced,
 			WasmEnvironment::GaiaSynced, WasmEnvironment::GaiaUnsynced,
-			WasmEnvironment::UI};
+			WasmEnvironment::UI, WasmEnvironment::Menu,
+			WasmEnvironment::Intro};
 	}
 
 	static const WasmEnvironmentPolicy& Policy(WasmEnvironment environment);

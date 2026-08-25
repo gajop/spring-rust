@@ -3,8 +3,11 @@
 #ifndef LUA_MENU_CONTROLLER
 #define LUA_MENU_CONTROLLER
 
+#include <memory>
 #include "Game/GameController.h"
 #include "System/Misc/SpringTime.h"
+
+class WasmStandaloneEnvironment;
 
 class CLuaMenuController : public CGameController
 {
@@ -27,14 +30,22 @@ public:
 	bool Draw() override;
 	void ResizeEvent() override;
 
-
-
 	bool Valid() const { return !menuArchive.empty(); }
 	const std::string& GetMenuName() const { return menuArchive; }
 
+	bool HasWasmMenu() const;
+	void ReloadWasmMenu();
+	void DispatchWasmActivateGame();
+
 private:
+	void InitWasmMenu();
+	void DispatchWasmActivateMenu(const std::string& msg);
+	bool WasmAllowDraw();
+
 	std::string menuArchive;
 	spring_time lastDrawFrameTime;
+
+	std::unique_ptr<WasmStandaloneEnvironment> m_wasmEnv;
 };
 
 extern CLuaMenuController* luaMenuController;

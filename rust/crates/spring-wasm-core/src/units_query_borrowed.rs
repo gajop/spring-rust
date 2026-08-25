@@ -78,9 +78,9 @@ pub fn get_team_units_by_defs_into(
     {
         let (input, input_count) = input_parts(unit_def_ids)?;
         let (output, capacity) = output_parts(output)?;
-        return decode_fill(unsafe {
+        decode_fill(unsafe {
             raw::get_team_units_by_defs(team_id, input, input_count, output, capacity)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -113,7 +113,7 @@ fn centroid(
 pub fn get_unit_array_centroid(unit_ids: &[i32]) -> Result<[f32; 3]> {
     #[cfg(target_arch = "wasm32")]
     {
-        return centroid(unit_ids, raw::get_unit_array_centroid);
+        centroid(unit_ids, raw::get_unit_array_centroid)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -126,7 +126,7 @@ pub fn get_unit_array_centroid(unit_ids: &[i32]) -> Result<[f32; 3]> {
 pub fn get_unit_map_centroid(unit_ids: &[i32]) -> Result<[f32; 3]> {
     #[cfg(target_arch = "wasm32")]
     {
-        return centroid(unit_ids, raw::get_unit_map_centroid);
+        centroid(unit_ids, raw::get_unit_map_centroid)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

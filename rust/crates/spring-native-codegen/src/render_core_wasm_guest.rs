@@ -46,6 +46,7 @@ pub fn render(model: &ApiModel) -> String {
         output.push_str(&format!("pub mod {module_ident} {{\n"));
         output.push_str("    use crate::{ApiError, ErrorCode, Result};\n\n");
         output.push_str(&render_fixed_record_types(&executable, &records, 4));
+        output.push_str(&render_output_type_aliases(&executable, &records, 4));
         output.push_str("    #[cfg(target_arch = \"wasm32\")]\n    pub mod raw {\n");
         for (function, plan) in &executable {
             output.push_str(&render_raw_import(function, plan, 8));
@@ -143,6 +144,20 @@ mod __core_wire {
             1 => Some(true),
             _ => None,
         }
+    }
+
+    #[inline]
+    pub fn bytes(bytes: &[u8], cursor: &mut usize) -> Option<alloc::vec::Vec<u8>> {
+        let length = u32(bytes, cursor)? as usize;
+        let end = cursor.checked_add(length)?;
+        let value = bytes.get(*cursor..end)?.to_vec();
+        *cursor = end;
+        Some(value)
+    }
+
+    #[inline]
+    pub fn string(input: &[u8], cursor: &mut usize) -> Option<alloc::string::String> {
+        alloc::string::String::from_utf8(bytes(input, cursor)?).ok()
     }
 
     #[inline]
@@ -361,16 +376,17 @@ fn render_direct_wrapper(
     let raw_ident = format!("core_{fn_ident}");
     let params = render_direct_params(&function.inputs);
     let args = render_direct_args(&function.inputs);
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), indent);
 
     match plan.result_strategy {
         ResultStrategy::Status => format!(
             "{pad}#[inline]\n\
-             {pad}pub fn {fn_ident}({params}) -> Result<()> {{\n\
+             {pad}{arity_lint}pub fn {fn_ident}({params}) -> Result<()> {{\n\
              {pad}    #[cfg(target_arch = \"wasm32\")]\n\
              {pad}    {{\n\
              {pad}        // SAFETY: generated scalar-only Core signature.\n\
              {pad}        let status = unsafe {{ raw::{raw_ident}({args}) }};\n\
-             {pad}        return if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }};\n\
+             {pad}        if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }}\n\
              {pad}    }}\n\
              {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
              {pad}    {{\n\
@@ -386,12 +402,12 @@ fn render_direct_wrapper(
             let decode = decode_packed_value(&output.ty, "packed as u32", &pad);
             format!(
                 "{pad}#[inline]\n\
-                 {pad}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
+                 {pad}{arity_lint}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
                  {pad}    #[cfg(target_arch = \"wasm32\")]\n\
                  {pad}    {{\n\
                  {pad}        // SAFETY: generated scalar-only Core signature.\n\
                  {pad}        let packed = unsafe {{ raw::{raw_ident}({args}) }} as u64;\n\
-                 {pad}        let status = (packed >> 32) as u32 as i32;\n\
+                 {pad}        let status = (packed >> 32) as i32;\n\
                  {pad}        if status != 0 {{\n\
                  {pad}            return Err(ApiError::new(status));\n\
                  {pad}        }}\n\
@@ -429,12 +445,13 @@ fn render_fixed_output_wrapper(
     } else {
         format!("{direct_args}, output_pointer")
     };
-    let return_ty = fixed_output_return_type(&function.outputs, records);
+    let return_ty = fixed_output_return_type(&function.outputs, records, &fn_ident);
     let value = render_fixed_output_decode(&function.outputs, records);
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), indent);
 
     format!(
         "{pad}#[inline]\n\
-         {pad}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
+         {pad}{arity_lint}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
          {pad}    #[cfg(target_arch = \"wasm32\")]\n\
          {pad}    {{\n\
          {pad}        let mut wire = [0u8; {bytes}];\n\
@@ -452,7 +469,7 @@ fn render_fixed_output_wrapper(
          {pad}        if !super::__core_wire::finish(&wire, &mut cursor, {alignment}) {{\n\
          {pad}            return Err(ApiError::new(ErrorCode::Internal as i32));\n\
          {pad}        }}\n\
-         {pad}        return Ok(value);\n\
+         {pad}        Ok(value)\n\
          {pad}    }}\n\
          {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
          {pad}    {{\n\
@@ -497,6 +514,7 @@ fn render_fixed_input_wrapper(
     } else {
         format!("{direct_args}, input_pointer")
     };
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), indent);
 
     let (return_ty, call_body) = match plan.result_strategy {
         ResultStrategy::Status => (
@@ -504,7 +522,7 @@ fn render_fixed_input_wrapper(
             format!(
                 "{pad}        // SAFETY: fixed inputs are encoded into this live stack buffer.\n\
                  {pad}        let status = unsafe {{ raw::{raw_ident}({call_prefix}) }};\n\
-                 {pad}        return if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }};\n"
+                 {pad}        if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }}\n"
             ),
         ),
         ResultStrategy::Packed32 => {
@@ -516,7 +534,7 @@ fn render_fixed_input_wrapper(
                 format!(
                     "{pad}        // SAFETY: fixed inputs are encoded into this live stack buffer.\n\
                      {pad}        let packed = unsafe {{ raw::{raw_ident}({call_prefix}) }} as u64;\n\
-                     {pad}        let status = (packed >> 32) as u32 as i32;\n\
+                     {pad}        let status = (packed >> 32) as i32;\n\
                      {pad}        if status != 0 {{\n\
                      {pad}            return Err(ApiError::new(status));\n\
                      {pad}        }}\n\
@@ -525,7 +543,7 @@ fn render_fixed_input_wrapper(
             )
         }
         ResultStrategy::FixedOutputBuffer { bytes, alignment } => {
-            let return_ty = fixed_output_return_type(&function.outputs, records);
+            let return_ty = fixed_output_return_type(&function.outputs, records, &fn_ident);
             let value = render_fixed_output_decode(&function.outputs, records);
             let call_args = format!("{call_prefix}, output_pointer");
             (
@@ -546,7 +564,7 @@ fn render_fixed_input_wrapper(
                      {pad}        if !super::__core_wire::finish(&wire, &mut cursor, {alignment}) {{\n\
                      {pad}            return Err(ApiError::new(ErrorCode::Internal as i32));\n\
                      {pad}        }}\n\
-                     {pad}        return Ok(value);\n"
+                     {pad}        Ok(value)\n"
                 ),
             )
         }
@@ -555,7 +573,7 @@ fn render_fixed_input_wrapper(
 
     format!(
         "{pad}#[inline]\n\
-         {pad}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
+         {pad}{arity_lint}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
          {pad}    #[cfg(target_arch = \"wasm32\")]\n\
          {pad}    {{\n\
          {pad}        let mut input_wire = [0u8; {input_bytes}];\n\
@@ -634,24 +652,39 @@ fn render_direct_args_only(inputs: &[FieldModel]) -> String {
 fn decode_packed_value(ty: &SemanticType, value: &str, pad: &str) -> String {
     match ty {
         SemanticType::Scalar { name } if name == "bool" => format!(
-            "{pad}        return match {value} {{\n\
+            "{pad}        match {value} {{\n\
              {pad}            0 => Ok(false),\n\
              {pad}            1 => Ok(true),\n\
              {pad}            _ => Err(ApiError::new(ErrorCode::Internal as i32)),\n\
-             {pad}        }};"
+             {pad}        }}"
         ),
         SemanticType::Scalar { name } if name == "f32" => {
-            format!("{pad}        return Ok(f32::from_bits({value}));")
+            format!("{pad}        Ok(f32::from_bits({value}))")
         }
         SemanticType::Scalar { name } if matches!(name.as_str(), "i8" | "i16" | "i32") => {
-            let rust = public_rust_type(ty);
-            format!("{pad}        return Ok(({value} as i32) as {rust});")
+            format!(
+                "{pad}        Ok({})",
+                cast_wire_value(value.to_owned(), "u32", public_rust_type(ty))
+            )
         }
         SemanticType::Scalar { .. } | SemanticType::Enum { .. } => {
-            let rust = public_rust_type(ty);
-            format!("{pad}        return Ok(({value}) as {rust});")
+            format!(
+                "{pad}        Ok({})",
+                cast_wire_value(value.to_owned(), "u32", public_rust_type(ty))
+            )
         }
         _ => unreachable!(),
+    }
+}
+
+fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
+    if count > 7 {
+        format!(
+            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
+            " ".repeat(indent)
+        )
+    } else {
+        String::new()
     }
 }
 
@@ -678,35 +711,37 @@ fn decode_fixed_value(
 ) -> String {
     let internal = "ApiError::new(ErrorCode::Internal as i32)";
     match ty {
-        SemanticType::Scalar { name } => {
-            match name.as_str() {
-                "bool" => format!(
-                    "super::__core_wire::boolean(&{wire}, &mut {cursor}).ok_or({internal})?"
-                ),
-                "f32" => {
-                    format!("super::__core_wire::f32(&{wire}, &mut {cursor}).ok_or({internal})?")
-                }
-                "f64" => {
-                    format!("super::__core_wire::f64(&{wire}, &mut {cursor}).ok_or({internal})?")
-                }
-                "i64" | "isize" => {
-                    let rust = public_rust_type(ty);
-                    format!("super::__core_wire::i64(&{wire}, &mut {cursor}).ok_or({internal})? as {rust}")
-                }
-                "u64" | "usize" => {
-                    let rust = public_rust_type(ty);
-                    format!("super::__core_wire::u64(&{wire}, &mut {cursor}).ok_or({internal})? as {rust}")
-                }
-                "i8" | "i16" | "i32" => {
-                    let rust = public_rust_type(ty);
-                    format!("super::__core_wire::i32(&{wire}, &mut {cursor}).ok_or({internal})? as {rust}")
-                }
-                _ => {
-                    let rust = public_rust_type(ty);
-                    format!("super::__core_wire::u32(&{wire}, &mut {cursor}).ok_or({internal})? as {rust}")
-                }
+        SemanticType::Scalar { name } => match name.as_str() {
+            "bool" => {
+                format!("super::__core_wire::boolean(&{wire}, &mut {cursor}).ok_or({internal})?")
             }
-        }
+            "f32" => {
+                format!("super::__core_wire::f32(&{wire}, &mut {cursor}).ok_or({internal})?")
+            }
+            "f64" => {
+                format!("super::__core_wire::f64(&{wire}, &mut {cursor}).ok_or({internal})?")
+            }
+            "i64" | "isize" => {
+                let value =
+                    format!("super::__core_wire::i64(&{wire}, &mut {cursor}).ok_or({internal})?");
+                cast_wire_value(value, "i64", public_rust_type(ty))
+            }
+            "u64" | "usize" => {
+                let value =
+                    format!("super::__core_wire::u64(&{wire}, &mut {cursor}).ok_or({internal})?");
+                cast_wire_value(value, "u64", public_rust_type(ty))
+            }
+            "i8" | "i16" | "i32" => {
+                let value =
+                    format!("super::__core_wire::i32(&{wire}, &mut {cursor}).ok_or({internal})?");
+                cast_wire_value(value, "i32", public_rust_type(ty))
+            }
+            _ => {
+                let value =
+                    format!("super::__core_wire::u32(&{wire}, &mut {cursor}).ok_or({internal})?");
+                cast_wire_value(value, "u32", public_rust_type(ty))
+            }
+        },
         SemanticType::Enum { .. } => {
             format!("super::__core_wire::i32(&{wire}, &mut {cursor}).ok_or({internal})?")
         }
@@ -745,6 +780,14 @@ fn decode_fixed_value(
     }
 }
 
+fn cast_wire_value(value: String, wire_type: &str, rust_type: String) -> String {
+    if wire_type == rust_type {
+        value
+    } else {
+        format!("{value} as {rust_type}")
+    }
+}
+
 fn encode_fixed_value(
     ty: &SemanticType,
     value: &str,
@@ -757,24 +800,25 @@ fn encode_fixed_value(
     let internal = "ApiError::new(ErrorCode::Internal as i32)";
     match ty {
         SemanticType::Scalar { name } => {
-            let (method, cast) = match name.as_str() {
-                "bool" => ("put_boolean", String::new()),
-                "f32" => ("put_f32", String::new()),
-                "f64" => ("put_f64", String::new()),
-                "i64" | "isize" => ("put_i64", " as i64".to_owned()),
-                "u64" | "usize" => ("put_u64", " as u64".to_owned()),
-                "i8" | "i16" | "i32" => ("put_i32", " as i32".to_owned()),
-                _ => ("put_u32", " as u32".to_owned()),
+            let (method, wire_type) = match name.as_str() {
+                "bool" => ("put_boolean", "bool"),
+                "f32" => ("put_f32", "f32"),
+                "f64" => ("put_f64", "f64"),
+                "i64" | "isize" => ("put_i64", "i64"),
+                "u64" | "usize" => ("put_u64", "u64"),
+                "i8" | "i16" | "i32" => ("put_i32", "i32"),
+                _ => ("put_u32", "u32"),
             };
+            let value = cast_wire_value(value.to_owned(), wire_type, public_rust_type(ty));
             format!(
-                "{pad}super::__core_wire::{method}(&mut {wire}, &mut {cursor}, {value}{cast}).ok_or({internal})?;\n"
+                "{pad}super::__core_wire::{method}(&mut {wire}, &mut {cursor}, {value}).ok_or({internal})?;\n"
             )
         }
         SemanticType::Enum { .. } => format!(
-            "{pad}super::__core_wire::put_i32(&mut {wire}, &mut {cursor}, {value} as i32).ok_or({internal})?;\n"
+            "{pad}super::__core_wire::put_i32(&mut {wire}, &mut {cursor}, {value}).ok_or({internal})?;\n"
         ),
         SemanticType::Handle { .. } => format!(
-            "{pad}super::__core_wire::put_u64(&mut {wire}, &mut {cursor}, {value} as u64).ok_or({internal})?;\n"
+            "{pad}super::__core_wire::put_u64(&mut {wire}, &mut {cursor}, {value}).ok_or({internal})?;\n"
         ),
         SemanticType::FixedArray { element, length } => (0..*length)
             .map(|index| {
@@ -817,9 +861,13 @@ fn encode_fixed_value(
 fn fixed_output_return_type(
     outputs: &[FieldModel],
     records: &BTreeMap<String, RecordModel>,
+    function_ident: &str,
 ) -> String {
     if outputs.len() == 1 {
         return public_fixed_rust_type(&outputs[0].ty, records);
+    }
+    if outputs.len() > 6 {
+        return format!("{}Value", rust_type_ident(function_ident));
     }
     format!(
         "({})",
@@ -829,6 +877,43 @@ fn fixed_output_return_type(
             .collect::<Vec<_>>()
             .join(", ")
     )
+}
+
+fn render_output_type_aliases(
+    executable: &[(&crate::model::FunctionModel, &FunctionPlan)],
+    records: &BTreeMap<String, RecordModel>,
+    indent: usize,
+) -> String {
+    let pad = " ".repeat(indent);
+    executable
+        .iter()
+        .filter(|(function, plan)| {
+            function.outputs.len() > 6
+                && (fixed_output_wrapper_eligible(
+                    plan,
+                    &function.inputs,
+                    &function.outputs,
+                    records,
+                ) || fixed_input_wrapper_eligible(
+                    plan,
+                    &function.inputs,
+                    &function.outputs,
+                    records,
+                ))
+        })
+        .map(|(function, _)| {
+            let fields = function
+                .outputs
+                .iter()
+                .map(|field| public_fixed_rust_type(&field.ty, records))
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!(
+                "{pad}pub type {}Value = ({fields});\n",
+                rust_type_ident(&function.name)
+            )
+        })
+        .collect::<String>()
 }
 
 fn render_fixed_record_types(
@@ -912,11 +997,13 @@ fn lower_direct_arg(ty: &SemanticType, name: &str) -> String {
         SemanticType::Scalar { name: scalar } if scalar == "f32" || scalar == "f64" => {
             name.to_owned()
         }
-        SemanticType::Scalar { name: scalar }
-            if matches!(scalar.as_str(), "i64" | "u64" | "isize" | "usize") =>
-        {
+        SemanticType::Scalar { name: scalar } if scalar == "i64" || scalar == "isize" => {
+            name.to_owned()
+        }
+        SemanticType::Scalar { name: scalar } if matches!(scalar.as_str(), "u64" | "usize") => {
             format!("{name} as i64")
         }
+        SemanticType::Scalar { name: scalar } if scalar == "i32" => name.to_owned(),
         SemanticType::Scalar { .. } | SemanticType::Enum { .. } => format!("{name} as i32"),
         SemanticType::Handle { .. } => format!("{name} as i64"),
         _ => unreachable!(),

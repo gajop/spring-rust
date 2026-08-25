@@ -40,7 +40,7 @@ pub fn get_unit_rules_param_f32(unit_id: i32, name: &str) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
         let (pointer, length) = string_parts(name)?;
-        return unpack_f32(unsafe { raw::get_unit_rules_param_f32(unit_id, pointer, length) });
+        unpack_f32(unsafe { raw::get_unit_rules_param_f32(unit_id, pointer, length) })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -54,9 +54,7 @@ pub fn set_unit_rules_param_f32(unit_id: i32, name: &str, value: f32, los: i32) 
     #[cfg(target_arch = "wasm32")]
     {
         let (pointer, length) = string_parts(name)?;
-        return unpack_bool(unsafe {
-            raw::set_unit_rules_param_f32(unit_id, pointer, length, value, los)
-        });
+        unpack_bool(unsafe { raw::set_unit_rules_param_f32(unit_id, pointer, length, value, los) })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

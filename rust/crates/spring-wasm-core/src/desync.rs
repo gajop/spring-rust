@@ -9,7 +9,7 @@
 // This module is deliberately NOT re-exported from the crate root, so reaching
 // it always means writing `spring_wasm_core::desync::` at the call site.
 
-use super::{ApiError, ErrorCode, Result};
+use super::{ApiError, Result};
 
 #[cfg(target_arch = "wasm32")]
 mod raw {
@@ -34,7 +34,7 @@ mod raw {
 pub fn get_timer() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        return Ok(unsafe { raw::get_timer() } as u64);
+        Ok(unsafe { raw::get_timer() } as u64)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -47,7 +47,7 @@ pub fn get_timer() -> Result<u64> {
 pub fn get_timer_micros() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        return Ok(unsafe { raw::get_timer_micros() } as u64);
+        Ok(unsafe { raw::get_timer_micros() } as u64)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -77,7 +77,7 @@ pub fn diff_timers(
         if status != 0 {
             return Err(ApiError::new(status));
         }
-        return Ok(f32::from_bits(packed as u32));
+        Ok(f32::from_bits(packed as u32))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

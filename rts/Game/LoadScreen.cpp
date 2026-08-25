@@ -13,6 +13,12 @@
 #include "ExternalAI/SkirmishAIHandler.h"
 #include "Lua/LuaIntro.h"
 #include "Lua/LuaMenu.h"
+#include "Menu/LuaMenuController.h"
+#include "NativeInterface/api/Callins.h"
+#include "WasmInterface/core/host/WasmCoreCallinId.h"
+#include "WasmInterface/runtime/WasmEnvironment.h"
+#include "WasmInterface/standalone/WasmStandaloneEnvironment.h"
+#include "WasmInterface/system/WasmInterfaceSystem.h"
 #include "Map/MapInfo.h"
 #include "Rendering/Fonts/glFont.h"
 #include "Rendering/GlobalRendering.h"
@@ -79,6 +85,8 @@ CLoadScreen::~CLoadScreen()
 
 		if (luaMenu != nullptr)
 			luaMenu->ActivateGame();
+		if (luaMenuController != nullptr)
+			luaMenuController->DispatchWasmActivateGame();
 	}
 
 	if (activeController == this)
@@ -137,6 +145,7 @@ bool CLoadScreen::Init()
 	{
 		auto lock = CLoadLock::GetUniqueLock();
 		CLuaIntro::LoadFreeHandler();
+		InitWasmIntro();
 	}
 
 	if (mtLoading)
@@ -157,6 +166,7 @@ void CLoadScreen::Kill()
 		luaIntro->Shutdown();
 
 	CLuaIntro::FreeHandler();
+	m_wasmEnv.reset();
 
 	// at this point, gameLoadThread running CGame::Load
 	// has finished and deregistered itself from WatchDog
@@ -260,13 +270,14 @@ bool CLoadScreen::Update()
 {
 	ZoneScoped;
 
-	if (luaIntro != nullptr) {
-		// keep checking this while we are the active controller
+	if (luaIntro != nullptr || HasWasmIntro()) {
 		std::lock_guard<spring::recursive_mutex> lck(mutex);
 
 		for (const auto& pair: loadMessages) {
 			good_fpu_control_registers(pair.first.c_str());
-			luaIntro->LoadProgress(pair.first, pair.second);
+			if (luaIntro != nullptr)
+				luaIntro->LoadProgress(pair.first, pair.second);
+			DispatchWasmLoadProgress(pair.first, pair.second);
 		}
 
 		loadMessages.clear();
@@ -314,6 +325,11 @@ bool CLoadScreen::Draw()
 		ClearScreen();
 		luaIntro->DrawLoadScreen();
 	}
+	if (HasWasmIntro()) {
+		m_wasmEnv->Update();
+		ClearScreen();
+		DispatchWasmDrawLoadScreen();
+	}
 
 	if (!mtLoading)
 		globalRendering->SwapBuffers(true, false);
@@ -349,3 +365,49 @@ void CLoadScreen::SetLoadMessage(const std::string& text, bool replaceLast)
 	Draw();
 }
 
+
+// --- Wasm intro support ---
+
+void CLoadScreen::InitWasmIntro()
+{
+	m_wasmEnv = WasmStandaloneEnvironment::Create();
+	m_wasmEnv->LoadManifest("WasmIntro/manifest.json");
+	m_wasmEnv->TryLoadNativeDLL("WasmIntro/NativeIntro");
+}
+
+bool CLoadScreen::HasWasmIntro() const
+{
+	return m_wasmEnv && m_wasmEnv->HasModules(WasmEnvironment::Intro);
+}
+
+void CLoadScreen::DispatchWasmDrawLoadScreen()
+{
+	if (!HasWasmIntro())
+		return;
+	SimpleCallinQuery query = {};
+	bool handled = false;
+	std::string error;
+	if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
+			CoreCallinOf("DrawLoadScreen"), &query, false, nullptr, handled, error)) {
+		if (!error.empty())
+			LOG_L(L_ERROR, "WasmIntro DrawLoadScreen failed: %s", error.c_str());
+	}
+}
+
+void CLoadScreen::DispatchWasmLoadProgress(const std::string& msg, bool replaceLastLine)
+{
+	if (!HasWasmIntro())
+		return;
+	LoadProgressQuery query = {
+		.message = msg.c_str(),
+		.messageLength = static_cast<uint32_t>(msg.size()),
+		.replaceLastLine = static_cast<uint8_t>(replaceLastLine),
+	};
+	bool handled = false;
+	std::string error;
+	if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
+			CoreCallinOf("LoadProgress"), &query, false, nullptr, handled, error)) {
+		if (!error.empty())
+			LOG_L(L_ERROR, "WasmIntro LoadProgress failed: %s", error.c_str());
+	}
+}

@@ -103,11 +103,11 @@ pub fn get_unit_command_count(unit_id: i32) -> Result<u32> {
         // SAFETY: generated scalar-only signature.
         let packed = unsafe { raw::get_unit_command_count(unit_id) } as u64;
         let status = (packed >> 32) as u32 as i32;
-        return if status == 0 {
+        if status == 0 {
             Ok(packed as u32)
         } else {
             Err(ApiError::new(status))
-        };
+        }
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -134,9 +134,9 @@ pub fn get_unit_commands_into(
         };
         // SAFETY: host validates the complete output byte range once and writes
         // the entire nested command representation synchronously.
-        return decode_fill(unsafe {
+        decode_fill(unsafe {
             raw::get_unit_commands(unit_id, max_commands as i32, pointer, capacity)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -154,10 +154,10 @@ pub fn give_order(cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Re
         let (params_ptr, param_count) = slice_parts(params);
         // SAFETY: `params` is a properly aligned Rust f32 slice and the host
         // validates the full range before borrowing it synchronously.
-        return decode_i32(unsafe {
+        decode_i32(unsafe {
             raw::give_order(cmd_id, params_ptr, param_count, options as i32, timeout)
         })
-        .map(|value| value != 0);
+        .map(|value| value != 0)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -182,7 +182,7 @@ pub fn give_order_to_unit_map(
         let (params_ptr, param_count) = slice_parts(params);
         // SAFETY: both Rust slices are naturally aligned and live for the full
         // synchronous host call; the host validates both ranges independently.
-        return decode_i32(unsafe {
+        decode_i32(unsafe {
             raw::give_order_to_unit_map(
                 unit_ids_ptr,
                 unit_count,
@@ -192,7 +192,7 @@ pub fn give_order_to_unit_map(
                 options as i32,
                 timeout,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

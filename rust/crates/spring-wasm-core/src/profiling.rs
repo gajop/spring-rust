@@ -61,7 +61,7 @@ pub fn get_timer() -> Result<u64> {
         if status != 0 {
             return Err(ApiError::new(status));
         }
-        return Ok(u64::from_le_bytes(value));
+        Ok(u64::from_le_bytes(value))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -82,7 +82,7 @@ pub fn get_timer_micros() -> Result<u64> {
         if status != 0 {
             return Err(ApiError::new(status));
         }
-        return Ok(u64::from_le_bytes(value));
+        Ok(u64::from_le_bytes(value))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -99,14 +99,14 @@ pub fn diff_timers(
 ) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        return crate::unpack_f32(unsafe {
+        crate::unpack_f32(unsafe {
             raw::diff_timers(
                 end_timer as i64,
                 start_timer as i64,
                 return_ms as i32,
                 from_microseconds as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -128,7 +128,7 @@ pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
         if status != 0 {
             return Err(ApiError::new(status));
         }
-        return Ok(u64::from_le_bytes(value));
+        Ok(u64::from_le_bytes(value))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -141,7 +141,7 @@ pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
 pub fn get_draw_seconds() -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        return crate::unpack_f32(unsafe { raw::get_draw_seconds(0) });
+        crate::unpack_f32(unsafe { raw::get_draw_seconds(0) })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -162,7 +162,7 @@ pub fn get_lua_mem_usage() -> Result<LuaMemUsage> {
         if status != 0 {
             return Err(ApiError::new(status));
         }
-        return Ok(LuaMemUsage {
+        Ok(LuaMemUsage {
             handle_alloced_kb: values[0],
             handle_allocs_k: values[1],
             global_alloced_kb: values[2],
@@ -171,7 +171,7 @@ pub fn get_lua_mem_usage() -> Result<LuaMemUsage> {
             unsynced_allocs_k: values[5],
             synced_alloced_kb: values[6],
             synced_allocs_k: values[7],
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -192,10 +192,10 @@ pub fn get_vid_mem_usage() -> Result<VidMemUsage> {
         if status != 0 {
             return Err(ApiError::new(status));
         }
-        return Ok(VidMemUsage {
+        Ok(VidMemUsage {
             used_mb: values[0],
             available_mb: values[1],
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -207,7 +207,7 @@ pub fn get_vid_mem_usage() -> Result<VidMemUsage> {
 pub fn get_synced_gc_info(collect: bool) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        return crate::unpack_f32(unsafe { raw::get_synced_gc_info(collect as i32) });
+        crate::unpack_f32(unsafe { raw::get_synced_gc_info(collect as i32) })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

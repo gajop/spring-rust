@@ -88,7 +88,6 @@ fn render_raw(plan: &render_core_wasm::FunctionPlan) -> String {
         .first()
         .map(|ty| format!(" -> {}", rust_core_type(*ty)))
         .unwrap_or_default();
-
     format!(
         "            #[link(wasm_import_module = \"{module}\")]\n\
                      extern \"C\" {{\n\
@@ -132,10 +131,11 @@ fn render_wrapper(plan: &render_core_wasm::FunctionPlan) -> String {
     } else {
         format!("{params}, output: &mut [u8]")
     };
+    let arity_lint = too_many_arguments_attribute(input_types.len() + 1, 20);
 
     format!(
         "        #[inline]\n\
-                 pub fn {function_ident}({signature_params})\n\
+                 {arity_lint}pub fn {function_ident}({signature_params})\n\
                      -> core::result::Result<usize, super::DynamicOutputError>\n\
                  {{\n\
                      #[cfg(target_arch = \"wasm32\")]\n\
@@ -185,6 +185,17 @@ fn render_wrapper(plan: &render_core_wasm::FunctionPlan) -> String {
         call_prefix = call_prefix,
         ignored = ignored,
     )
+}
+
+fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
+    if count > 7 {
+        format!(
+            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
+            " ".repeat(indent)
+        )
+    } else {
+        String::new()
+    }
 }
 
 fn rust_core_type(ty: CoreType) -> &'static str {

@@ -45,11 +45,11 @@ pub fn give_order_to_unit(
         if status != 0 {
             return Err(ApiError::new(status));
         }
-        return match packed as u32 {
+        match packed as u32 {
             0 => Ok(false),
             1 => Ok(true),
             _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-        };
+        }
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

@@ -142,11 +142,12 @@ bool Define(wasmtime_linker_t* linker, const char* name,
 bool RegisterUnitDefsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->unitDefs == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register UnitDefs Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->unitDefs == nullptr)
+		return true;
 	return Define(linker, "get-unit-def-name", GetUnitDefName, state, error) &&
 		Define(linker, "get-unit-def-human-name", GetUnitDefHumanName, state, error);
 }

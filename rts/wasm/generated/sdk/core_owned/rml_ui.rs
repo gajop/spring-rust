@@ -2,22 +2,6 @@
         use super::{Result, String, Vec};
 
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        pub enum CommonErrorCode {
-            ErrorAlreadyExists,
-            ErrorBufferOverflow,
-            ErrorInternal,
-            ErrorInvalidArgument,
-            ErrorInvalidId,
-            ErrorInvalidState,
-            ErrorNone,
-            ErrorNotAvailable,
-            ErrorNotFound,
-            ErrorOperationFailed,
-            ErrorOutOfBounds,
-            ErrorPermissionDenied,
-        }
-
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum RmlDataFieldType {
             RmlFieldBool,
             RmlFieldColor,
@@ -29,206 +13,12 @@
         }
 
         #[derive(Debug, Clone, PartialEq)]
-        pub struct AtmosphereParams {
-            pub fog_color: Option<Vec<f32>>,
-            pub sky_color: Option<Vec<f32>>,
-            pub sun_color: Option<Vec<f32>>,
-            pub cloud_color: Option<Vec<f32>>,
-            pub sky_axis_angle: Option<Vec<f32>>,
-            pub fog_start: Option<f32>,
-            pub fog_end: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct BoolResult {
-            pub value: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct CollisionVolumeData {
-            pub scale_x: f32,
-            pub scale_y: f32,
-            pub scale_z: f32,
-            pub offset_x: f32,
-            pub offset_y: f32,
-            pub offset_z: f32,
-            pub volume_type: i32,
-            pub test_type: i32,
-            pub primary_axis: i32,
-            pub disabled: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct DefRef {
-            pub name: String,
-            pub id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Error {
-            pub code: i32,
-            pub message: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2 {
-            pub x: f32,
-            pub y: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2Result {
-            pub value: Float2,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Result {
-            pub value: Float3,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-            pub w: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4Result {
-            pub value: Float4,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatResult {
-            pub value: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int2 {
-            pub x: i32,
-            pub y: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int3 {
-            pub x: i32,
-            pub y: i32,
-            pub z: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Result {
-            pub value: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct MapRenderingParams {
-            pub splat_tex_scales: Option<Vec<f32>>,
-            pub splat_tex_mults: Option<Vec<f32>>,
-            pub void_water: Option<bool>,
-            pub void_ground: Option<bool>,
-            pub splat_detail_normal_diffuse_alpha: Option<bool>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeExplosionParams {
-            pub damages: f32,
-            pub weapon_def_id: i32,
-            pub owner_id: i32,
-            pub hit_unit_id: i32,
-            pub hit_feature_id: i32,
-            pub crater_area_of_effect: f32,
-            pub damage_area_of_effect: f32,
-            pub edge_effectiveness: f32,
-            pub explosion_speed: f32,
-            pub gfx_mod: f32,
-            pub impact_only: bool,
-            pub ignore_owner: bool,
-            pub damage_ground: bool,
-            pub projectile_id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeProjectileParams {
-            pub pos: Float3,
-            pub speed: Float3,
-            pub spread: Float3,
-            pub end: Float3,
-            pub owner: i32,
-            pub team: i32,
-            pub weapon_num: i32,
-            pub ttl: f32,
-            pub gravity: f32,
-            pub tracking: f32,
-            pub max_range: f32,
-            pub up_time: f32,
-            pub start_alpha: f32,
-            pub end_alpha: f32,
-            pub model: String,
-            pub ceg_tag: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NumberOrBool {
-            pub number: f32,
-            pub boolean: bool,
-            pub use_boolean: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ProjectileTargetRef {
-            pub target_id: i32,
-            pub target_type: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ResourcePack {
-            pub metal: f32,
-            pub energy: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct RgbColor {
-            pub r: f32,
-            pub g: f32,
-            pub b: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
         pub struct RmlAddTranslationStringQuery {
             pub key: String,
             pub translation: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlAddTranslationStringResult {
             pub success: bool,
         }
@@ -238,28 +28,28 @@
             pub document_path: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlClearDocumentPathRequestsResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlClearTranslationsQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlClearTranslationsResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextBoolQuery {
             pub context_handle: u64,
             pub value: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextBoolResult {
             pub success: bool,
         }
@@ -276,13 +66,13 @@
             pub tag: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextCreateDocumentResult {
             pub document_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextDocumentQuery {
             pub context_handle: u64,
             pub document_handle: u64,
@@ -306,7 +96,7 @@
             pub in_capture_phase: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextGetDimensionsResult {
             pub x: i32,
             pub y: i32,
@@ -318,13 +108,13 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextGetDocumentResult {
             pub document_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextGetElementAtPointQuery {
             pub context_handle: u64,
             pub x: f32,
@@ -332,19 +122,19 @@
             pub ignore_element_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextGetElementAtPointResult {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextGetElementResult {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextGetFloatResult {
             pub value: f32,
         }
@@ -354,12 +144,12 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextHandleQuery {
             pub context_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextKeyQuery {
             pub context_handle: u64,
             pub key: i32,
@@ -372,20 +162,20 @@
             pub document_path: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextLoadDocumentResult {
             pub document_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextMouseButtonQuery {
             pub context_handle: u64,
             pub button: i32,
             pub key_modifier_state: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextMouseMoveQuery {
             pub context_handle: u64,
             pub x: f32,
@@ -393,7 +183,7 @@
             pub key_modifier_state: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextMouseWheelQuery {
             pub context_handle: u64,
             pub x: f32,
@@ -407,13 +197,13 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextOpenDataModelResult {
             pub data_model_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextPointerCaptureQuery {
             pub context_handle: u64,
             pub anchor_x: i32,
@@ -421,21 +211,21 @@
             pub active: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextPointerDeltaResult {
             pub delta_x: i32,
             pub delta_y: i32,
             pub status: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextSetDimensionsQuery {
             pub context_handle: u64,
             pub x: i32,
             pub y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlContextSetFloatQuery {
             pub context_handle: u64,
             pub value: f32,
@@ -465,7 +255,7 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlCreateContextResult {
             pub context_handle: u64,
             pub success: bool,
@@ -511,7 +301,7 @@
             pub field_types: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelBindEventResult {
             pub event_handle: u64,
             pub success: bool,
@@ -545,7 +335,7 @@
             pub initial_value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelBindResult {
             pub variable_handle: u64,
             pub success: bool,
@@ -565,18 +355,18 @@
             pub initial_value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelEventHandleQuery {
             pub event_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelGetBoolResult {
             pub value: bool,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelGetColorResult {
             pub red: u8,
             pub green: u8,
@@ -585,25 +375,25 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelGetFloatResult {
             pub value: f32,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelGetIntResult {
             pub value: i32,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelGetPercentResult {
             pub value: f32,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelGetPixelsResult {
             pub value: f32,
             pub success: bool,
@@ -615,7 +405,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelRowsResult {
             pub rows_handle: u64,
             pub success: bool,
@@ -627,13 +417,13 @@
             pub values: Vec<RmlDataValue>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelVariableBoolQuery {
             pub variable_handle: u64,
             pub value: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelVariableColorQuery {
             pub variable_handle: u64,
             pub red: u8,
@@ -642,30 +432,30 @@
             pub alpha: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelVariableFloatQuery {
             pub variable_handle: u64,
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelVariableHandleQuery {
             pub variable_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelVariableIntQuery {
             pub variable_handle: u64,
             pub value: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelVariablePercentQuery {
             pub variable_handle: u64,
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDataModelVariablePixelsQuery {
             pub variable_handle: u64,
             pub value: f32,
@@ -690,7 +480,7 @@
             pub alpha: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDocumentBoolResult {
             pub success: bool,
         }
@@ -701,13 +491,13 @@
             pub tag_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDocumentCreateElementResult {
             pub element_ptr_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDocumentGetContextResult {
             pub context_handle: u64,
             pub exists: bool,
@@ -718,7 +508,7 @@
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlDocumentHandleQuery {
             pub document_handle: u64,
         }
@@ -755,18 +545,18 @@
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementAppendChildQuery {
             pub element_handle: u64,
             pub element_ptr_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementBoolResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementChildQuery {
             pub element_handle: u64,
             pub child_element_handle: u64,
@@ -786,20 +576,20 @@
             pub in_capture_phase: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementFormControlSelectAddQuery {
             pub element_handle: u64,
             pub element_ptr_handle: u64,
             pub before: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementFormControlSelectRemoveQuery {
             pub element_handle: u64,
             pub index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementFormControlSelectionQuery {
             pub element_handle: u64,
             pub start: i32,
@@ -839,29 +629,29 @@
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementGetChildQuery {
             pub element_handle: u64,
             pub index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementGetElementResult {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementGetFloatResult {
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementGetIntResult {
             pub value: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementGetRectResult {
             pub left: f32,
             pub top: f32,
@@ -879,39 +669,39 @@
             pub element_handles: Vec<u64>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementHandleQuery {
             pub element_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementInsertBeforeQuery {
             pub element_handle: u64,
             pub element_ptr_handle: u64,
             pub adjacent_element_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementPointQuery {
             pub element_handle: u64,
             pub x: f32,
             pub y: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementProcessDefaultActionQuery {
             pub element_handle: u64,
             pub event_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementReplaceChildQuery {
             pub element_handle: u64,
             pub element_ptr_handle: u64,
             pub replaced_element_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementScrollIntoViewQuery {
             pub element_handle: u64,
             pub align_with_top: bool,
@@ -924,13 +714,13 @@
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementSetFloatQuery {
             pub element_handle: u64,
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementSetIntQuery {
             pub element_handle: u64,
             pub value: i32,
@@ -960,7 +750,7 @@
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlElementTabSetIndexQuery {
             pub element_handle: u64,
             pub index: i32,
@@ -973,12 +763,12 @@
             pub rml: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventCurrentQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventCurrentResult {
             pub event_handle: u64,
             pub element_handle: u64,
@@ -986,19 +776,19 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventGetBoolResult {
             pub value: bool,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventGetFloatResult {
             pub value: f32,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventGetIntResult {
             pub value: i32,
             pub exists: bool,
@@ -1010,7 +800,7 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventHandleQuery {
             pub event_handle: u64,
         }
@@ -1025,25 +815,25 @@
             pub destroy_callback: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventListenerCallbackResult {
             pub event_listener_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventListenerElementQuery {
             pub event_listener_handle: u64,
             pub element_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventListenerEventQuery {
             pub event_listener_handle: u64,
             pub event_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlEventListenerHandleQuery {
             pub event_listener_handle: u64,
         }
@@ -1059,7 +849,7 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlGetContextResult {
             pub context_handle: u64,
             pub exists: bool,
@@ -1075,7 +865,7 @@
             pub paths: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlGetVersionQuery {
             pub unused: u8,
         }
@@ -1085,12 +875,12 @@
             pub version: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlIsReadyQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlIsReadyResult {
             pub ready: bool,
         }
@@ -1102,7 +892,7 @@
             pub weight: Option<i32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlLoadFontFaceResult {
             pub success: bool,
         }
@@ -1120,7 +910,7 @@
             pub options: RmlRegisterEventTypeOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlRegisterEventTypeResult {
             pub event_id: i32,
         }
@@ -1130,17 +920,17 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlRemoveContextByNameResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlRemoveContextQuery {
             pub context_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlRemoveContextResult {
             pub success: bool,
         }
@@ -1150,17 +940,17 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlSetDebugContextByNameResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlSetDebugContextQuery {
             pub context_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlSetDebugContextResult {
             pub success: bool,
         }
@@ -1171,7 +961,7 @@
             pub recoil_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlSetMouseCursorAliasResult {
             pub success: bool,
         }
@@ -1182,130 +972,31 @@
             pub property: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlVector2fNewQuery {
             pub x: f32,
             pub y: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlVector2fNewResult {
             pub x: f32,
             pub y: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlVector2iNewQuery {
             pub x: i32,
             pub y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RmlVector2iNewResult {
             pub x: i32,
             pub y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SoundEffectParams {
-            pub preset: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringResult {
-            pub value: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SunLightingParams {
-            pub ground_ambient_color: Option<Vec<f32>>,
-            pub ground_diffuse_color: Option<Vec<f32>>,
-            pub ground_specular_color: Option<Vec<f32>>,
-            pub model_ambient_color: Option<Vec<f32>>,
-            pub model_diffuse_color: Option<Vec<f32>>,
-            pub model_specular_color: Option<Vec<f32>>,
-            pub specular_exponent: Option<f32>,
-            pub ground_shadow_density: Option<f32>,
-            pub model_shadow_density: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Result {
-            pub value: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitCostOverrides {
-            pub build_time: f32,
-            pub metal_cost: f32,
-            pub energy_cost: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitHealthValue {
-            pub health: f32,
-            pub capture: f32,
-            pub paralyze: f32,
-            pub build: f32,
-            pub use_amounts: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitTargetRef {
-            pub target_id: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct WaterParams {
-            pub absorb: Option<Vec<f32>>,
-            pub base_color: Option<Vec<f32>>,
-            pub min_color: Option<Vec<f32>>,
-            pub surface_color: Option<Vec<f32>>,
-            pub diffuse_color: Option<Vec<f32>>,
-            pub specular_color: Option<Vec<f32>>,
-            pub plane_color: Option<Vec<f32>>,
-            pub repeat_x: Option<f32>,
-            pub repeat_y: Option<f32>,
-            pub surface_alpha: Option<f32>,
-            pub ambient_factor: Option<f32>,
-            pub diffuse_factor: Option<f32>,
-            pub specular_factor: Option<f32>,
-            pub specular_power: Option<f32>,
-            pub fresnel_min: Option<f32>,
-            pub fresnel_max: Option<f32>,
-            pub fresnel_power: Option<f32>,
-            pub reflection_distortion: Option<f32>,
-            pub blur_base: Option<f32>,
-            pub blur_exponent: Option<f32>,
-            pub perlin_start_freq: Option<f32>,
-            pub perlin_lacunarity: Option<f32>,
-            pub perlin_amplitude: Option<f32>,
-            pub wind_speed: Option<f32>,
-            pub wave_offset_factor: Option<f32>,
-            pub wave_length: Option<f32>,
-            pub wave_foam_distortion: Option<f32>,
-            pub wave_foam_intensity: Option<f32>,
-            pub caustics_resolution: Option<f32>,
-            pub caustics_strength: Option<f32>,
-            pub num_tiles: Option<f32>,
-            pub shore_waves: Option<bool>,
-            pub force_rendering: Option<bool>,
-            pub has_water_plane: Option<bool>,
-        }
+        pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_context_get_name {
@@ -1388,146 +1079,146 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextAddEventListenerValue {
             pub event_listener_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextCreateDataModelValue {
             pub data_model_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextCreateDocumentValue {
             pub document_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextGetDimensionsValue {
             pub x: i32,
             pub y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextGetDocumentValue {
             pub document_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextGetElementAtPointValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextGetFocusElementValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextGetHoverElementValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextGetRootElementValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextLoadDocumentValue {
             pub document_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextOpenDataModelValue {
             pub data_model_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ContextTakePointerCaptureDeltaValue {
             pub delta_x: i32,
             pub delta_y: i32,
             pub status: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct CreateContextValue {
             pub context_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindBoolValue {
             pub variable_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindColorValue {
             pub variable_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindEventValue {
             pub event_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindFloatValue {
             pub variable_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindIntValue {
             pub variable_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindPercentValue {
             pub variable_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindPixelsValue {
             pub variable_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindRowsValue {
             pub rows_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelBindStringValue {
             pub variable_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelGetBoolValue {
             pub value: bool,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelGetColorValue {
             pub red: u8,
             pub green: u8,
@@ -1536,25 +1227,25 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelGetFloatValue {
             pub value: f32,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelGetIntValue {
             pub value: i32,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelGetPercentValue {
             pub value: f32,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DataModelGetPixelsValue {
             pub value: f32,
             pub success: bool,
@@ -1566,43 +1257,43 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DocumentCreateElementValue {
             pub element_ptr_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DocumentCreateTextNodeValue {
             pub element_ptr_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DocumentGetContextValue {
             pub context_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementAddEventListenerValue {
             pub event_listener_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementAppendChildValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementCloneValue {
             pub element_ptr_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementClosestValue {
             pub element_handle: u64,
             pub exists: bool,
@@ -1630,19 +1321,19 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementGetChildValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementGetElementByIdValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementGetRectValue {
             pub left: f32,
             pub top: f32,
@@ -1650,31 +1341,31 @@
             pub height: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementInsertBeforeValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementQuerySelectorValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementRemoveChildValue {
             pub element_ptr_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ElementReplaceChildValue {
             pub element_ptr_handle: u64,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventGetCurrentValue {
             pub event_handle: u64,
             pub element_handle: u64,
@@ -1682,25 +1373,25 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventGetCurrentElementValue {
             pub element_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventGetParameterBoolValue {
             pub value: bool,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventGetParameterFloatValue {
             pub value: f32,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventGetParameterIntValue {
             pub value: i32,
             pub exists: bool,
@@ -1712,19 +1403,19 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventGetParameterTypeValue {
             pub value: i32,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventGetPhaseValue {
             pub value: i32,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventGetTargetElementValue {
             pub element_handle: u64,
             pub exists: bool,
@@ -1736,37 +1427,37 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventIsImmediatePropagatingValue {
             pub value: bool,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventIsInterruptibleValue {
             pub value: bool,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct EventIsPropagatingValue {
             pub value: bool,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetContextValue {
             pub context_handle: u64,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct Vector2fNewValue {
             pub x: f32,
             pub y: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct Vector2iNewValue {
             pub x: i32,
             pub y: i32,
@@ -1782,7 +1473,7 @@
             if translation_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             translation_bytes.push(0);
             let translation_cstr = core::ffi::CStr::from_bytes_with_nul(&translation_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::add_translation_string(&key_cstr, &translation_cstr)
+            crate::generated::borrowed::rml_ui::add_translation_string(key_cstr, translation_cstr)
         }
 
         #[inline]
@@ -1791,7 +1482,7 @@
             if document_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             document_path_bytes.push(0);
             let document_path_cstr = core::ffi::CStr::from_bytes_with_nul(&document_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::clear_document_path_requests(&document_path_cstr)
+            crate::generated::borrowed::rml_ui::clear_document_path_requests(document_path_cstr)
         }
 
         #[inline]
@@ -1806,52 +1497,47 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_activate_theme(context_handle, &name_cstr, value)
+            crate::generated::borrowed::rml_ui::context_activate_theme(context_handle, name_cstr, value)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_context_add_event_listener {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "context-add-event-listener"]
-                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-add-event-listener."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn context_add_event_listener(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_context_add_event_listener::call(p0, p1, p2, p3) }
+        pub fn context_add_event_listener(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
+            __core_owned_context_add_event_listener::call(p0, p1, p2, p3)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_context_create_data_model {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "context-create-data-model"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-create-data-model."]
         #[inline]
-        pub unsafe fn context_create_data_model(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_context_create_data_model::call(p0, p1, p2) }
+        pub fn context_create_data_model(context_handle: u64, name: &str) -> Result<ContextCreateDataModelValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::context_create_data_model(context_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(ContextCreateDataModelValue {
+                data_model_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_context_create_document {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "context-create-document"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-create-document."]
         #[inline]
-        pub unsafe fn context_create_document(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_context_create_document::call(p0, p1, p2) }
+        pub fn context_create_document(context_handle: u64, tag: &str) -> Result<ContextCreateDocumentValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + tag.len()); __b.extend_from_slice(&(tag.len() as u32).to_le_bytes()); __b.extend_from_slice(tag.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::context_create_document(context_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(ContextCreateDocumentValue {
+                document_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -1875,19 +1561,16 @@
             })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_context_get_document {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "context-get-document"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-get-document."]
         #[inline]
-        pub unsafe fn context_get_document(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_context_get_document::call(p0, p1, p2) }
+        pub fn context_get_document(context_handle: u64, name: &str) -> Result<ContextGetDocumentValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::context_get_document(context_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(ContextGetDocumentValue {
+                document_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -1967,37 +1650,31 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_is_theme_active(context_handle, &name_cstr)
+            crate::generated::borrowed::rml_ui::context_is_theme_active(context_handle, name_cstr)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_context_load_document {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "context-load-document"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-load-document."]
         #[inline]
-        pub unsafe fn context_load_document(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_context_load_document::call(p0, p1, p2) }
+        pub fn context_load_document(context_handle: u64, document_path: &str) -> Result<ContextLoadDocumentValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + document_path.len()); __b.extend_from_slice(&(document_path.len() as u32).to_le_bytes()); __b.extend_from_slice(document_path.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::context_load_document(context_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(ContextLoadDocumentValue {
+                document_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_context_open_data_model {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "context-open-data-model"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.context-open-data-model."]
         #[inline]
-        pub unsafe fn context_open_data_model(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_context_open_data_model::call(p0, p1, p2) }
+        pub fn context_open_data_model(context_handle: u64, name: &str) -> Result<ContextOpenDataModelValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::context_open_data_model(context_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(ContextOpenDataModelValue {
+                data_model_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -2048,7 +1725,7 @@
             if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             text_bytes.push(0);
             let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_process_text_input(context_handle, &text_cstr)
+            crate::generated::borrowed::rml_ui::context_process_text_input(context_handle, text_cstr)
         }
 
         #[inline]
@@ -2075,7 +1752,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_remove_data_model(context_handle, &name_cstr)
+            crate::generated::borrowed::rml_ui::context_remove_data_model(context_handle, name_cstr)
         }
 
         #[inline]
@@ -2084,7 +1761,7 @@
             if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             event_bytes.push(0);
             let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_remove_event_listener(context_handle, event_listener_handle, &event_cstr, in_capture_phase)
+            crate::generated::borrowed::rml_ui::context_remove_event_listener(context_handle, event_listener_handle, event_cstr, in_capture_phase)
         }
 
         #[inline]
@@ -2139,154 +1816,130 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_create_context {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "create-context"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.create-context."]
         #[inline]
-        pub unsafe fn create_context(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_create_context::call(p0, p1) }
+        pub fn create_context(name: &str) -> Result<CreateContextValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::create_context(&__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(CreateContextValue {
+                context_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_bind_bool {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-bind-bool"]
-                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-bool."]
         #[inline]
-        pub unsafe fn data_model_bind_bool(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_bool::call(p0, p1, p2, p3) }
+        pub fn data_model_bind_bool(data_model_handle: u64, name: &str, initial_value: bool) -> Result<DataModelBindBoolValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::data_model_bind_bool(data_model_handle as i64, initial_value as i32, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DataModelBindBoolValue {
+                variable_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_bind_color {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-bind-color"]
-                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-color."]
         #[inline]
-        pub unsafe fn data_model_bind_color(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_color::call(p0, p1, p2, p3, p4, p5, p6) }
+        pub fn data_model_bind_color(data_model_handle: u64, name: &str, red: u8, green: u8, blue: u8, alpha: u8) -> Result<DataModelBindColorValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::data_model_bind_color(data_model_handle as i64, red as i32, green as i32, blue as i32, alpha as i32, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DataModelBindColorValue {
+                variable_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_data_model_bind_event {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "data-model-bind-event"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32, p2: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-event."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn data_model_bind_event(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_event::call(p0, p1, p2) }
+        pub fn data_model_bind_event(p0: i64, p1: i32, p2: i32) -> i32 {
+            __core_owned_data_model_bind_event::call(p0, p1, p2)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_bind_float {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-bind-float"]
-                pub fn call(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-float."]
         #[inline]
-        pub unsafe fn data_model_bind_float(p0: i64, p1: f32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_float::call(p0, p1, p2, p3) }
+        pub fn data_model_bind_float(data_model_handle: u64, name: &str, initial_value: f32) -> Result<DataModelBindFloatValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::data_model_bind_float(data_model_handle as i64, initial_value, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DataModelBindFloatValue {
+                variable_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_bind_int {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-bind-int"]
-                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-int."]
         #[inline]
-        pub unsafe fn data_model_bind_int(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_int::call(p0, p1, p2, p3) }
+        pub fn data_model_bind_int(data_model_handle: u64, name: &str, initial_value: i32) -> Result<DataModelBindIntValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::data_model_bind_int(data_model_handle as i64, initial_value, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DataModelBindIntValue {
+                variable_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_bind_percent {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-bind-percent"]
-                pub fn call(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-percent."]
         #[inline]
-        pub unsafe fn data_model_bind_percent(p0: i64, p1: f32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_percent::call(p0, p1, p2, p3) }
+        pub fn data_model_bind_percent(data_model_handle: u64, name: &str, initial_value: f32) -> Result<DataModelBindPercentValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::data_model_bind_percent(data_model_handle as i64, initial_value, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DataModelBindPercentValue {
+                variable_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_bind_pixels {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-bind-pixels"]
-                pub fn call(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-pixels."]
         #[inline]
-        pub unsafe fn data_model_bind_pixels(p0: i64, p1: f32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_pixels::call(p0, p1, p2, p3) }
+        pub fn data_model_bind_pixels(data_model_handle: u64, name: &str, initial_value: f32) -> Result<DataModelBindPixelsValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::data_model_bind_pixels(data_model_handle as i64, initial_value, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DataModelBindPixelsValue {
+                variable_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_bind_rows {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-bind-rows"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-rows."]
         #[inline]
-        pub unsafe fn data_model_bind_rows(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_rows::call(p0, p1, p2) }
+        pub fn data_model_bind_rows(data_model_handle: u64, name: &str, fields: &[RmlDataFieldDef]) -> Result<DataModelBindRowsValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(fields.len() as u32).to_le_bytes()); for __item in fields.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.name.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.name.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.type_ as u32).to_le_bytes());} __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::data_model_bind_rows(data_model_handle as i64, &__blob0, &__blob1, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DataModelBindRowsValue {
+                rows_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_bind_string {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-bind-string"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-bind-string."]
         #[inline]
-        pub unsafe fn data_model_bind_string(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_data_model_bind_string::call(p0, p1, p2) }
+        pub fn data_model_bind_string(data_model_handle: u64, name: &str, initial_value: &str) -> Result<DataModelBindStringValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + initial_value.len()); __b.extend_from_slice(&(initial_value.len() as u32).to_le_bytes()); __b.extend_from_slice(initial_value.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::data_model_bind_string(data_model_handle as i64, &__blob0, &__blob1, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DataModelBindStringValue {
+                variable_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -2349,16 +2002,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_data_model_get_string {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "data-model-get-string"]
-                pub fn call(p0: i64, p1: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-get-string."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn data_model_get_string(p0: i64, p1: i32) -> i32 {
-            unsafe { __core_owned_data_model_get_string::call(p0, p1) }
+        pub fn data_model_get_string(p0: i64, p1: i32) -> i32 {
+            __core_owned_data_model_get_string::call(p0, p1)
         }
 
         #[inline]
@@ -2397,19 +2051,10 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_data_model_set_rows {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "data-model-set-rows"]
-                pub fn call(p0: i64, p1: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-set-rows."]
         #[inline]
-        pub unsafe fn data_model_set_rows(p0: i64, p1: i32) -> i64 {
-            unsafe { __core_owned_data_model_set_rows::call(p0, p1) }
+        pub fn data_model_set_rows(rows_handle: u64, values: &[RmlDataValue]) -> Result<bool> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.type_ as u32).to_le_bytes()); __b.extend_from_slice(&(if __item.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.int_value.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.red as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.green as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.blue as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.alpha as u32).to_le_bytes());} __b };
+            crate::generated::dynamic_input::rml_ui::data_model_set_rows(rows_handle as i64, &__blob0)
         }
 
         #[inline]
@@ -2418,22 +2063,23 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::data_model_set_string(variable_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::data_model_set_string(variable_handle, value_cstr)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_data_model_unbind_event {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "data-model-unbind-event"]
-                pub fn call(p0: i64) -> i64;
+                pub safe fn call(p0: i64) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.data-model-unbind-event."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn data_model_unbind_event(p0: i64) -> i64 {
-            unsafe { __core_owned_data_model_unbind_event::call(p0) }
+        pub fn data_model_unbind_event(p0: i64) -> i64 {
+            __core_owned_data_model_unbind_event::call(p0)
         }
 
         #[inline]
@@ -2442,7 +2088,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::document_append_to_style_sheet(document_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::document_append_to_style_sheet(document_handle, value_cstr)
         }
 
         #[inline]
@@ -2451,34 +2097,28 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_document_create_element {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "document-create-element"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.document-create-element."]
         #[inline]
-        pub unsafe fn document_create_element(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_document_create_element::call(p0, p1, p2) }
+        pub fn document_create_element(document_handle: u64, tag_name: &str) -> Result<DocumentCreateElementValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + tag_name.len()); __b.extend_from_slice(&(tag_name.len() as u32).to_le_bytes()); __b.extend_from_slice(tag_name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::document_create_element(document_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DocumentCreateElementValue {
+                element_ptr_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_document_create_text_node {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "document-create-text-node"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.document-create-text-node."]
         #[inline]
-        pub unsafe fn document_create_text_node(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_document_create_text_node::call(p0, p1, p2) }
+        pub fn document_create_text_node(document_handle: u64, value: &str) -> Result<DocumentCreateTextNodeValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::document_create_text_node(document_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(DocumentCreateTextNodeValue {
+                element_ptr_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -2566,7 +2206,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::document_load_external_script(document_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::document_load_external_script(document_handle, value_cstr)
         }
 
         #[inline]
@@ -2579,7 +2219,7 @@
             if source_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             source_path_bytes.push(0);
             let source_path_cstr = core::ffi::CStr::from_bytes_with_nul(&source_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::document_load_inline_script(document_handle, &content_cstr, &source_path_cstr, source_line)
+            crate::generated::borrowed::rml_ui::document_load_inline_script(document_handle, content_cstr, source_path_cstr, source_line)
         }
 
         #[inline]
@@ -2606,22 +2246,23 @@
             if title_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             title_bytes.push(0);
             let title_cstr = core::ffi::CStr::from_bytes_with_nul(&title_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::document_set_title(document_handle, &title_cstr)
+            crate::generated::borrowed::rml_ui::document_set_title(document_handle, title_cstr)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_document_show {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "document-show"]
-                pub fn call(p0: i64, p1: i32) -> i64;
+                pub safe fn call(p0: i64, p1: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.document-show."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn document_show(p0: i64, p1: i32) -> i64 {
-            unsafe { __core_owned_document_show::call(p0, p1) }
+        pub fn document_show(p0: i64, p1: i32) -> i64 {
+            __core_owned_document_show::call(p0, p1)
         }
 
         #[inline]
@@ -2633,16 +2274,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_element_add_event_listener {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-add-event-listener"]
-                pub fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-add-event-listener."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn element_add_event_listener(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_element_add_event_listener::call(p0, p1, p2, p3) }
+        pub fn element_add_event_listener(p0: i64, p1: i32, p2: i32, p3: i32) -> i32 {
+            __core_owned_element_add_event_listener::call(p0, p1, p2, p3)
         }
 
         #[inline]
@@ -2660,7 +2302,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_are_pseudo_classes_set(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_are_pseudo_classes_set(element_handle, value_cstr)
         }
 
         #[inline]
@@ -2684,19 +2326,16 @@
             })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_element_closest {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "element-closest"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-closest."]
         #[inline]
-        pub unsafe fn element_closest(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_element_closest::call(p0, p1, p2) }
+        pub fn element_closest(element_handle: u64, value: &str) -> Result<ElementClosestValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::element_closest(element_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(ElementClosestValue {
+                element_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -2705,7 +2344,7 @@
             if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             event_bytes.push(0);
             let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_dispatch_event(element_handle, &event_cstr)
+            crate::generated::borrowed::rml_ui::element_dispatch_event(element_handle, event_cstr)
         }
 
         #[inline]
@@ -2717,16 +2356,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_element_form_control_input_get_selection {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-form-control-input-get-selection"]
-                pub fn call(p0: i64, p1: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-form-control-input-get-selection."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn element_form_control_input_get_selection(p0: i64, p1: i32) -> i32 {
-            unsafe { __core_owned_element_form_control_input_get_selection::call(p0, p1) }
+        pub fn element_form_control_input_get_selection(p0: i64, p1: i32) -> i32 {
+            __core_owned_element_form_control_input_get_selection::call(p0, p1)
         }
 
         #[inline]
@@ -2762,16 +2402,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_element_form_control_text_area_get_selection {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-form-control-text-area-get-selection"]
-                pub fn call(p0: i64, p1: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-form-control-text-area-get-selection."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn element_form_control_text_area_get_selection(p0: i64, p1: i32) -> i32 {
-            unsafe { __core_owned_element_form_control_text_area_get_selection::call(p0, p1) }
+        pub fn element_form_control_text_area_get_selection(p0: i64, p1: i32) -> i32 {
+            __core_owned_element_form_control_text_area_get_selection::call(p0, p1)
         }
 
         #[inline]
@@ -2796,37 +2437,45 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_form_submit(element_handle, &name_cstr, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_form_submit(element_handle, name_cstr, value_cstr)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_element_get_active_pseudo_classes {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "element-get-active-pseudo-classes"]
-                pub fn call(p0: i64, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-active-pseudo-classes."]
         #[inline]
-        pub unsafe fn element_get_active_pseudo_classes(p0: i64, p1: i32) -> i32 {
-            unsafe { __core_owned_element_get_active_pseudo_classes::call(p0, p1) }
+        pub fn element_get_active_pseudo_classes(element_handle: u64) -> Result<Vec<String>> {
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_output::rml_ui::element_get_active_pseudo_classes(element_handle as i64, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_element_get_attribute {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-get-attribute"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32, p2: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-attribute."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn element_get_attribute(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_element_get_attribute::call(p0, p1, p2) }
+        pub fn element_get_attribute(p0: i64, p1: i32, p2: i32) -> i32 {
+            __core_owned_element_get_attribute::call(p0, p1, p2)
         }
 
         #[inline]
@@ -2867,34 +2516,39 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_element_get_element_by_id {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "element-get-element-by-id"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-element-by-id."]
         #[inline]
-        pub unsafe fn element_get_element_by_id(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_element_get_element_by_id::call(p0, p1, p2) }
+        pub fn element_get_element_by_id(element_handle: u64, value: &str) -> Result<ElementGetElementByIdValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::element_get_element_by_id(element_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(ElementGetElementByIdValue {
+                element_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_element_get_elements_by_class_name {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "element-get-elements-by-class-name"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-elements-by-class-name."]
         #[inline]
-        pub unsafe fn element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_element_get_elements_by_class_name::call(p0, p1, p2) }
+        pub fn element_get_elements_by_class_name(element_handle: u64, value: &str) -> Result<Vec<u64>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::rml_ui::element_get_elements_by_class_name(element_handle as i64, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required * 8);
+                        let mut __result = Vec::<u64>::with_capacity(required);
+                        let mut __cursor = 0usize;
+                        for _ in 0..required {
+                            __result.push(crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?);
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required * 8, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -2903,22 +2557,30 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_get_elements_by_class_name_count(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_get_elements_by_class_name_count(element_handle, value_cstr)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_element_get_elements_by_tag_name {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "element-get-elements-by-tag-name"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-get-elements-by-tag-name."]
         #[inline]
-        pub unsafe fn element_get_elements_by_tag_name(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_element_get_elements_by_tag_name::call(p0, p1, p2) }
+        pub fn element_get_elements_by_tag_name(element_handle: u64, value: &str) -> Result<Vec<u64>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::rml_ui::element_get_elements_by_tag_name(element_handle as i64, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required * 8);
+                        let mut __result = Vec::<u64>::with_capacity(required);
+                        let mut __cursor = 0usize;
+                        for _ in 0..required {
+                            __result.push(crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?);
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required * 8, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -2927,7 +2589,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_get_elements_by_tag_name_count(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_get_elements_by_tag_name_count(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3075,7 +2737,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_has_attribute(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_has_attribute(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3099,7 +2761,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_is_class_set(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_is_class_set(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3114,7 +2776,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_is_pseudo_class_set(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_is_pseudo_class_set(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3129,7 +2791,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_matches(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_matches(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3138,34 +2800,39 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_element_query_selector {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "element-query-selector"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-query-selector."]
         #[inline]
-        pub unsafe fn element_query_selector(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_element_query_selector::call(p0, p1, p2) }
+        pub fn element_query_selector(element_handle: u64, value: &str) -> Result<ElementQuerySelectorValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::element_query_selector(element_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(ElementQuerySelectorValue {
+                element_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_element_query_selector_all {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "element-query-selector-all"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.element-query-selector-all."]
         #[inline]
-        pub unsafe fn element_query_selector_all(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_element_query_selector_all::call(p0, p1, p2) }
+        pub fn element_query_selector_all(element_handle: u64, value: &str) -> Result<Vec<u64>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::rml_ui::element_query_selector_all(element_handle as i64, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required * 8);
+                        let mut __result = Vec::<u64>::with_capacity(required);
+                        let mut __cursor = 0usize;
+                        for _ in 0..required {
+                            __result.push(crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?);
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required * 8, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -3174,7 +2841,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_query_selector_all_count(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_query_selector_all_count(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3183,7 +2850,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_remove_attribute(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_remove_attribute(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3201,7 +2868,7 @@
             if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             event_bytes.push(0);
             let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_remove_event_listener(element_handle, event_listener_handle, &event_cstr, in_capture_phase)
+            crate::generated::borrowed::rml_ui::element_remove_event_listener(element_handle, event_listener_handle, event_cstr, in_capture_phase)
         }
 
         #[inline]
@@ -3229,7 +2896,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_attribute(element_handle, &name_cstr, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_set_attribute(element_handle, name_cstr, value_cstr)
         }
 
         #[inline]
@@ -3238,7 +2905,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_class(element_handle, &name_cstr, value)
+            crate::generated::borrowed::rml_ui::element_set_class(element_handle, name_cstr, value)
         }
 
         #[inline]
@@ -3247,7 +2914,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_class_name(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_set_class_name(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3256,7 +2923,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_id(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_set_id(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3265,7 +2932,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_inner_rml(element_handle, &value_cstr)
+            crate::generated::borrowed::rml_ui::element_set_inner_rml(element_handle, value_cstr)
         }
 
         #[inline]
@@ -3274,7 +2941,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_pseudo_class(element_handle, &name_cstr, value)
+            crate::generated::borrowed::rml_ui::element_set_pseudo_class(element_handle, name_cstr, value)
         }
 
         #[inline]
@@ -3301,7 +2968,7 @@
             if rml_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             rml_bytes.push(0);
             let rml_cstr = core::ffi::CStr::from_bytes_with_nul(&rml_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_tab_set_set_panel(element_handle, index, &rml_cstr)
+            crate::generated::borrowed::rml_ui::element_tab_set_set_panel(element_handle, index, rml_cstr)
         }
 
         #[inline]
@@ -3310,7 +2977,7 @@
             if rml_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             rml_bytes.push(0);
             let rml_cstr = core::ffi::CStr::from_bytes_with_nul(&rml_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_tab_set_set_tab(element_handle, index, &rml_cstr)
+            crate::generated::borrowed::rml_ui::element_tab_set_set_tab(element_handle, index, rml_cstr)
         }
 
         #[inline]
@@ -3333,79 +3000,68 @@
             })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_event_get_parameter_bool {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "event-get-parameter-bool"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-bool."]
         #[inline]
-        pub unsafe fn event_get_parameter_bool(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_event_get_parameter_bool::call(p0, p1, p2) }
+        pub fn event_get_parameter_bool(event_handle: u64, name: &str) -> Result<EventGetParameterBoolValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 8];
+            crate::generated::dynamic_input::rml_ui::event_get_parameter_bool(event_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(EventGetParameterBoolValue {
+                value: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_event_get_parameter_float {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "event-get-parameter-float"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-float."]
         #[inline]
-        pub unsafe fn event_get_parameter_float(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_event_get_parameter_float::call(p0, p1, p2) }
+        pub fn event_get_parameter_float(event_handle: u64, name: &str) -> Result<EventGetParameterFloatValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 8];
+            crate::generated::dynamic_input::rml_ui::event_get_parameter_float(event_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(EventGetParameterFloatValue {
+                value: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_event_get_parameter_int {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "event-get-parameter-int"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-int."]
         #[inline]
-        pub unsafe fn event_get_parameter_int(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_event_get_parameter_int::call(p0, p1, p2) }
+        pub fn event_get_parameter_int(event_handle: u64, name: &str) -> Result<EventGetParameterIntValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 8];
+            crate::generated::dynamic_input::rml_ui::event_get_parameter_int(event_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(EventGetParameterIntValue {
+                value: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_event_get_parameter_string {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "event-get-parameter-string"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32, p2: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-string."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn event_get_parameter_string(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_event_get_parameter_string::call(p0, p1, p2) }
+        pub fn event_get_parameter_string(p0: i64, p1: i32, p2: i32) -> i32 {
+            __core_owned_event_get_parameter_string::call(p0, p1, p2)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_event_get_parameter_type {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "event-get-parameter-type"]
-                pub fn call(p0: i64, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-parameter-type."]
         #[inline]
-        pub unsafe fn event_get_parameter_type(p0: i64, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_event_get_parameter_type::call(p0, p1, p2) }
+        pub fn event_get_parameter_type(event_handle: u64, name: &str) -> Result<EventGetParameterTypeValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 8];
+            crate::generated::dynamic_input::rml_ui::event_get_parameter_type(event_handle as i64, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(EventGetParameterTypeValue {
+                value: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -3429,16 +3085,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_event_get_type {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "event-get-type"]
-                pub fn call(p0: i64, p1: i32) -> i32;
+                pub safe fn call(p0: i64, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-get-type."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn event_get_type(p0: i64, p1: i32) -> i32 {
-            unsafe { __core_owned_event_get_type::call(p0, p1) }
+        pub fn event_get_type(p0: i64, p1: i32) -> i32 {
+            __core_owned_event_get_type::call(p0, p1)
         }
 
         #[inline]
@@ -3471,46 +3128,49 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_event_listener_on_attach {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "event-listener-on-attach"]
-                pub fn call(p0: i64, p1: i64) -> i64;
+                pub safe fn call(p0: i64, p1: i64) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-listener-on-attach."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn event_listener_on_attach(p0: i64, p1: i64) -> i64 {
-            unsafe { __core_owned_event_listener_on_attach::call(p0, p1) }
+        pub fn event_listener_on_attach(p0: i64, p1: i64) -> i64 {
+            __core_owned_event_listener_on_attach::call(p0, p1)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_event_listener_on_detach {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "event-listener-on-detach"]
-                pub fn call(p0: i64, p1: i64) -> i64;
+                pub safe fn call(p0: i64, p1: i64) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-listener-on-detach."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn event_listener_on_detach(p0: i64, p1: i64) -> i64 {
-            unsafe { __core_owned_event_listener_on_detach::call(p0, p1) }
+        pub fn event_listener_on_detach(p0: i64, p1: i64) -> i64 {
+            __core_owned_event_listener_on_detach::call(p0, p1)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_event_listener_process_event {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "event-listener-process-event"]
-                pub fn call(p0: i64, p1: i64) -> i64;
+                pub safe fn call(p0: i64, p1: i64) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.event-listener-process-event."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn event_listener_process_event(p0: i64, p1: i64) -> i64 {
-            unsafe { __core_owned_event_listener_process_event::call(p0, p1) }
+        pub fn event_listener_process_event(p0: i64, p1: i64) -> i64 {
+            __core_owned_event_listener_process_event::call(p0, p1)
         }
 
         #[inline]
@@ -3525,34 +3185,32 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_context {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
-                #[link_name = "get-context"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.get-context."]
         #[inline]
-        pub unsafe fn get_context(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_context::call(p0, p1) }
+        pub fn get_context(name: &str) -> Result<GetContextValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 16];
+            crate::generated::dynamic_input::rml_ui::get_context(&__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(GetContextValue {
+                context_handle: crate::generated::__core_wire::u64(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_document_path_requests {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-document-path-requests"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.get-document-path-requests."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_document_path_requests(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_document_path_requests::call(p0, p1) }
+        pub fn get_document_path_requests(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_document_path_requests::call(p0, p1)
         }
 
         #[inline]
@@ -3593,46 +3251,49 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_load_font_face {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "load-font-face"]
-                pub fn call(p0: i32, p1: i32) -> i64;
+                pub safe fn call(p0: i32, p1: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.load-font-face."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn load_font_face(p0: i32, p1: i32) -> i64 {
-            unsafe { __core_owned_load_font_face::call(p0, p1) }
+        pub fn load_font_face(p0: i32, p1: i32) -> i64 {
+            __core_owned_load_font_face::call(p0, p1)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_regiser_event_type {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "regiser-event-type"]
-                pub fn call(p0: i32) -> i64;
+                pub safe fn call(p0: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.regiser-event-type."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn regiser_event_type(p0: i32) -> i64 {
-            unsafe { __core_owned_regiser_event_type::call(p0) }
+        pub fn regiser_event_type(p0: i32) -> i64 {
+            __core_owned_regiser_event_type::call(p0)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_register_event_type {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "register-event-type"]
-                pub fn call(p0: i32) -> i64;
+                pub safe fn call(p0: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.register-event-type."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn register_event_type(p0: i32) -> i64 {
-            unsafe { __core_owned_register_event_type::call(p0) }
+        pub fn register_event_type(p0: i32) -> i64 {
+            __core_owned_register_event_type::call(p0)
         }
 
         #[inline]
@@ -3647,7 +3308,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::remove_context_by_name(&name_cstr)
+            crate::generated::borrowed::rml_ui::remove_context_by_name(name_cstr)
         }
 
         #[inline]
@@ -3662,7 +3323,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::set_debug_context_by_name(&name_cstr)
+            crate::generated::borrowed::rml_ui::set_debug_context_by_name(name_cstr)
         }
 
         #[inline]
@@ -3675,7 +3336,7 @@
             if recoil_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             recoil_name_bytes.push(0);
             let recoil_name_cstr = core::ffi::CStr::from_bytes_with_nul(&recoil_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::set_mouse_cursor_alias(&rml_name_cstr, &recoil_name_cstr)
+            crate::generated::borrowed::rml_ui::set_mouse_cursor_alias(rml_name_cstr, recoil_name_cstr)
         }
 
         #[inline]
@@ -3684,7 +3345,7 @@
             if property_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             property_bytes.push(0);
             let property_cstr = core::ffi::CStr::from_bytes_with_nul(&property_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::sol_lua_data_model_set_dirty(data_model_handle, &property_cstr)
+            crate::generated::borrowed::rml_ui::sol_lua_data_model_set_dirty(data_model_handle, property_cstr)
         }
 
         #[inline]

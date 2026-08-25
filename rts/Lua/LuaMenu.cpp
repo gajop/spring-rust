@@ -19,6 +19,7 @@
 #include "LuaVFSDownload.h"
 #include "LuaZip.h"
 
+#include "Menu/LuaMenuController.h"
 #include "System/EventHandler.h"
 #include "System/Config/ConfigHandler.h"
 #include "System/FileSystem/FileHandler.h"
@@ -306,6 +307,8 @@ bool CLuaMenu::Enable(bool enableCommand)
 		return false;
 
 	luaMenu->ActivateGame();
+	if (luaMenuController != nullptr)
+		luaMenuController->DispatchWasmActivateGame();
 	return true;
 }
 

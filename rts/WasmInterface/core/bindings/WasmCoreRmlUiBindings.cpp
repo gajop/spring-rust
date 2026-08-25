@@ -417,11 +417,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterRmlUiImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->rmlUi == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register RmlUi Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->rmlUi == nullptr)
+		return true;
 	const wasm_valkind_t addParams[] = {
 		WASM_I64, WASM_I32, WASM_I32, WASM_I32,
 		WASM_I32, WASM_I32, WASM_I32, WASM_I32,

@@ -140,6 +140,7 @@
 #include "fmt/ranges.h"
 
 #include "NativeInterface/NativeInterfaceSystem.h"
+#include "WasmInterface/standalone/WasmDefsParser.h"
 
 #undef CreateDirectory
 
@@ -374,7 +375,12 @@ void CGame::Load(const std::string& mapFileName)
 	LuaParser baseDefsParser("gamedata/defs.lua", SPRING_VFS_MOD_BASE, SPRING_VFS_ZIP, {true}, {false});
 	LuaParser nullDefsParser("return {UnitDefs = {}, FeatureDefs = {}, WeaponDefs = {}, ArmorDefs = {}, MoveDefs = {}}", SPRING_VFS_ZIP, 0, {true}, {true});
 
-	LuaParser* defsParser = &baseDefsParser;
+	std::string wasmDefsError;
+	std::unique_ptr<LuaParser> wasmDefsParser(TryWasmDefsParser(wasmDefsError));
+	if (!wasmDefsError.empty())
+		LOG_L(L_WARNING, "[Game::%s] %s", __func__, wasmDefsError.c_str());
+
+	LuaParser* defsParser = wasmDefsParser ? wasmDefsParser.get() : &baseDefsParser;
 
 	try {
 		LOG("[Game::%s][1] globalQuit=%d threaded=%d", __func__, globalQuit.load(), !Threading::IsMainThread());

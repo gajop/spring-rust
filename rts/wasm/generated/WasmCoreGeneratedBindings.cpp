@@ -58,6 +58,7 @@ bool RegisterGeneratedImports_projectile_control(wasmtime_linker_t*, HostState*,
 bool RegisterGeneratedImports_effects_control(wasmtime_linker_t*, HostState*, std::string&);
 bool RegisterGeneratedImports_game_config(wasmtime_linker_t*, HostState*, std::string&);
 bool RegisterGeneratedImports_cob_script(wasmtime_linker_t*, HostState*, std::string&);
+bool RegisterGeneratedImports_unit_script(wasmtime_linker_t*, HostState*, std::string&);
 bool RegisterGeneratedImports_unit_rendering(wasmtime_linker_t*, HostState*, std::string&);
 
 bool RegisterGeneratedImports(wasmtime_linker_t* linker, HostState* state, std::string& error)
@@ -173,6 +174,8 @@ bool RegisterGeneratedImports(wasmtime_linker_t* linker, HostState* state, std::
     if (!RegisterGeneratedImports_game_config(linker, state, error))
         return false;
     if (!RegisterGeneratedImports_cob_script(linker, state, error))
+        return false;
+    if (!RegisterGeneratedImports_unit_script(linker, state, error))
         return false;
     if (!RegisterGeneratedImports_unit_rendering(linker, state, error))
         return false;

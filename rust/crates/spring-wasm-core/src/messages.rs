@@ -125,9 +125,9 @@ pub fn echo(message: &str, rest: &str) -> Result<bool> {
     {
         let (message_pointer, message_length) = string_parts(message)?;
         let (rest_pointer, rest_length) = string_parts(rest)?;
-        return unpack_bool(unsafe {
+        unpack_bool(unsafe {
             raw::echo(message_pointer, message_length, rest_pointer, rest_length)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -142,7 +142,7 @@ pub fn log(section: &str, level: i32, message: &str) -> Result<bool> {
     {
         let (section_pointer, section_length) = string_parts(section)?;
         let (message_pointer, message_length) = string_parts(message)?;
-        return unpack_bool(unsafe {
+        unpack_bool(unsafe {
             raw::log(
                 section_pointer,
                 section_length,
@@ -150,7 +150,7 @@ pub fn log(section: &str, level: i32, message: &str) -> Result<bool> {
                 message_pointer,
                 message_length,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -164,7 +164,7 @@ pub fn send_private_chat(message: &str, player_id: i32) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
         let (pointer, length) = string_parts(message)?;
-        return unpack_bool(unsafe { raw::send_private_chat(pointer, length, player_id) });
+        unpack_bool(unsafe { raw::send_private_chat(pointer, length, player_id) })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -179,9 +179,9 @@ pub fn send_commands(command: &str, rest: &str) -> Result<bool> {
     {
         let (command_pointer, command_length) = string_parts(command)?;
         let (rest_pointer, rest_length) = string_parts(rest)?;
-        return unpack_bool(unsafe {
+        unpack_bool(unsafe {
             raw::send_commands(command_pointer, command_length, rest_pointer, rest_length)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -196,9 +196,9 @@ pub fn send_lua_ui_msg(message: &str, mode: &str) -> Result<bool> {
     {
         let (message_pointer, message_length) = string_parts(message)?;
         let (mode_pointer, mode_length) = string_parts(mode)?;
-        return unpack_bool(unsafe {
+        unpack_bool(unsafe {
             raw::send_lua_ui_msg(message_pointer, message_length, mode_pointer, mode_length)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

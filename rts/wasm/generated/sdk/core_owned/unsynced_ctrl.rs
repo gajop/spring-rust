@@ -1,22 +1,6 @@
     pub mod unsynced_ctrl {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        pub enum CommonErrorCode {
-            ErrorAlreadyExists,
-            ErrorBufferOverflow,
-            ErrorInternal,
-            ErrorInvalidArgument,
-            ErrorInvalidId,
-            ErrorInvalidState,
-            ErrorNone,
-            ErrorNotAvailable,
-            ErrorNotFound,
-            ErrorOperationFailed,
-            ErrorOutOfBounds,
-            ErrorPermissionDenied,
-        }
-
         #[derive(Debug, Clone, PartialEq)]
         pub struct AssignMouseCursorQuery {
             pub command_name: String,
@@ -25,45 +9,9 @@
             pub hot_spot_top_left: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AssignMouseCursorResult {
             pub success: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct AtmosphereParams {
-            pub fog_color: Option<Vec<f32>>,
-            pub sky_color: Option<Vec<f32>>,
-            pub sun_color: Option<Vec<f32>>,
-            pub cloud_color: Option<Vec<f32>>,
-            pub sky_axis_angle: Option<Vec<f32>>,
-            pub fog_start: Option<f32>,
-            pub fog_end: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct BoolResult {
-            pub value: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct CollisionVolumeData {
-            pub scale_x: f32,
-            pub scale_y: f32,
-            pub scale_z: f32,
-            pub offset_x: f32,
-            pub offset_y: f32,
-            pub offset_z: f32,
-            pub volume_type: i32,
-            pub test_type: i32,
-            pub primary_axis: i32,
-            pub disabled: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct DefRef {
-            pub name: String,
-            pub id: i32,
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -71,7 +19,7 @@
             pub unit_i_ds: Vec<i32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DeselectUnitMapResult {
             pub success: bool,
         }
@@ -83,87 +31,28 @@
             pub queue_draw_depth: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawUnitCommandsResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Error {
-            pub code: i32,
-            pub message: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2 {
-            pub x: f32,
-            pub y: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2Result {
-            pub value: Float2,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Result {
-            pub value: Float3,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-            pub w: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4Result {
-            pub value: Float4,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatResult {
-            pub value: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ForceLayoutUpdateQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ForceLayoutUpdateResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ForceTesselationUpdateQuery {
             pub normal: bool,
             pub shadow: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ForceTesselationUpdateResult {
             pub success: bool,
         }
@@ -179,35 +68,11 @@
         }
 
         #[derive(Debug, Clone, PartialEq)]
-        pub struct Int2 {
-            pub x: i32,
-            pub y: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int3 {
-            pub x: i32,
-            pub y: i32,
-            pub z: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Result {
-            pub value: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
         pub struct LoadCmdColorsConfigQuery {
             pub filename: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct LoadCmdColorsConfigResult {
             pub success: bool,
         }
@@ -217,7 +82,7 @@
             pub filename: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct LoadCtrlPanelConfigResult {
             pub success: bool,
         }
@@ -227,101 +92,39 @@
             pub model_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct LoadModelTexturesResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct MapRenderingParams {
-            pub splat_tex_scales: Option<Vec<f32>>,
-            pub splat_tex_mults: Option<Vec<f32>>,
-            pub void_water: Option<bool>,
-            pub void_ground: Option<bool>,
-            pub splat_detail_normal_diffuse_alpha: Option<bool>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeExplosionParams {
-            pub damages: f32,
-            pub weapon_def_id: i32,
-            pub owner_id: i32,
-            pub hit_unit_id: i32,
-            pub hit_feature_id: i32,
-            pub crater_area_of_effect: f32,
-            pub damage_area_of_effect: f32,
-            pub edge_effectiveness: f32,
-            pub explosion_speed: f32,
-            pub gfx_mod: f32,
-            pub impact_only: bool,
-            pub ignore_owner: bool,
-            pub damage_ground: bool,
-            pub projectile_id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeProjectileParams {
-            pub pos: Float3,
-            pub speed: Float3,
-            pub spread: Float3,
-            pub end: Float3,
-            pub owner: i32,
-            pub team: i32,
-            pub weapon_num: i32,
-            pub ttl: f32,
-            pub gravity: f32,
-            pub tracking: f32,
-            pub max_range: f32,
-            pub up_time: f32,
-            pub start_alpha: f32,
-            pub end_alpha: f32,
-            pub model: String,
-            pub ceg_tag: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NumberOrBool {
-            pub number: f32,
-            pub boolean: bool,
-            pub use_boolean: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PauseDollyCameraQuery {
             pub percent: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PauseDollyCameraResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PreloadFeatureDefModelQuery {
             pub def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PreloadFeatureDefModelResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PreloadUnitDefModelQuery {
             pub def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PreloadUnitDefModelResult {
             pub success: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ProjectileTargetRef {
-            pub target_id: i32,
-            pub target_type: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -331,45 +134,32 @@
             pub hot_spot_top_left: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ReplaceMouseCursorResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ResourcePack {
-            pub metal: f32,
-            pub energy: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ResumeDollyCameraQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ResumeDollyCameraResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct RgbColor {
-            pub r: f32,
-            pub g: f32,
-            pub b: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RunDollyCameraQuery {
             pub runtime_ms: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RunDollyCameraResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SDLSetTextInputRectQuery {
             pub x: i32,
             pub y: i32,
@@ -377,27 +167,27 @@
             pub h: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SDLSetTextInputRectResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SDLStartTextInputQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SDLStartTextInputResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SDLStopTextInputQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SDLStopTextInputResult {
             pub success: bool,
         }
@@ -408,12 +198,12 @@
             pub append: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SelectUnitMapResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetActiveCommandOptions {
             pub left_click: bool,
             pub right_click: bool,
@@ -423,14 +213,14 @@
             pub shift: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetActiveCommandQuery {
             pub cmd_index: i32,
             pub button: i32,
             pub options: SetActiveCommandOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetActiveCommandResult {
             pub success: bool,
         }
@@ -440,58 +230,58 @@
             pub params: AtmosphereParams,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetAtmosphereResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetAutoShowMetalQuery {
             pub enable: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetAutoShowMetalResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetBoxSelectionByEngineQuery {
             pub state: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetBoxSelectionByEngineResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetBuildFacingQuery {
             pub facing: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetBuildFacingResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetBuildSpacingQuery {
             pub spacing: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetBuildSpacingResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetCameraOffsetQuery {
             pub pos_offset: Float3,
             pub tilt_offset: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetCameraOffsetResult {
             pub success: bool,
         }
@@ -501,7 +291,7 @@
             pub text: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetClipboardResult {
             pub success: bool,
         }
@@ -514,12 +304,12 @@
             pub show_area: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetCustomCommandDrawDataResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetCustomPaletteColorQuery {
             pub index: i32,
             pub r: f32,
@@ -527,7 +317,7 @@
             pub b: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetCustomPaletteColorResult {
             pub success: bool,
         }
@@ -539,7 +329,7 @@
             pub knots: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraCurveResult {
             pub success: bool,
         }
@@ -551,85 +341,85 @@
             pub knots: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraLookCurveResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraLookPositionQuery {
             pub position: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraLookPositionResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraLookUnitQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraLookUnitResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraModeQuery {
             pub mode: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraModeResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraPositionQuery {
             pub position: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraPositionResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraRelativeModeQuery {
             pub mode: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDollyCameraRelativeModeResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawGroundDeferredQuery {
             pub draw_deferred: bool,
             pub draw_forward: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawGroundDeferredResult {
             pub success: bool,
             pub deferred: bool,
             pub forward: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawGroundQuery {
             pub draw_ground: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawGroundResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawModelsDeferredQuery {
             pub draw_units_deferred: bool,
             pub draw_features_deferred: bool,
@@ -637,7 +427,7 @@
             pub draw_features_forward: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawModelsDeferredResult {
             pub success: bool,
             pub units_deferred: bool,
@@ -646,112 +436,112 @@
             pub features_forward: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawSelectionInfoQuery {
             pub draw: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawSelectionInfoResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawSkyQuery {
             pub draw_sky: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawSkyResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawWaterQuery {
             pub draw_water: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawWaterResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetEngineBuildSquareRenderingQuery {
             pub enabled: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetEngineBuildSquareRenderingResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureAlwaysUpdateMatrixQuery {
             pub feature_id: i32,
             pub enable: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureAlwaysUpdateMatrixResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureEngineDrawMaskQuery {
             pub feature_id: i32,
             pub mask: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureEngineDrawMaskResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureFadeQuery {
             pub feature_id: i32,
             pub allow: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureFadeResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureNoDrawQuery {
             pub feature_id: i32,
             pub no_draw: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureNoDrawResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeaturePaletteIndexQuery {
             pub feature_id: i32,
             pub custom_index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeaturePaletteIndexResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetLastMessagePositionQuery {
             pub pos: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetLastMessagePositionResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetLosViewColorsQuery {
             pub always: RgbColor,
             pub los: RgbColor,
@@ -760,7 +550,7 @@
             pub radar2: RgbColor,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetLosViewColorsResult {
             pub success: bool,
         }
@@ -770,18 +560,18 @@
             pub params: MapRenderingParams,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMapRenderingParamsResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMapShaderQuery {
             pub standard_shader_id: i32,
             pub deferred_shader_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMapShaderResult {
             pub success: bool,
         }
@@ -793,17 +583,17 @@
             pub num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMapShadingTextureResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMiniMapRotationQuery {
             pub radians: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMiniMapRotationResult {
             pub success: bool,
             pub rotation: i32,
@@ -815,12 +605,12 @@
             pub scale: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMouseCursorResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetNanoProjectileParamsQuery {
             pub r: f32,
             pub v: f32,
@@ -830,7 +620,7 @@
             pub rand_a: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetNanoProjectileParamsResult {
             pub success: bool,
         }
@@ -847,7 +637,7 @@
             pub options: SetShockFrontFactorsOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetShockFrontFactorsResult {
             pub success: bool,
         }
@@ -857,18 +647,18 @@
             pub tex_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetSkyBoxTextureResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetSunDirectionQuery {
             pub dir: Float3,
             pub intensity: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetSunDirectionResult {
             pub success: bool,
         }
@@ -878,18 +668,18 @@
             pub params: SunLightingParams,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetSunLightingResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitAlwaysUpdateMatrixQuery {
             pub unit_id: i32,
             pub always_update_matrix: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitAlwaysUpdateMatrixResult {
             pub success: bool,
         }
@@ -900,7 +690,7 @@
             pub icon_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitDefIconResult {
             pub success: bool,
         }
@@ -911,29 +701,29 @@
             pub image: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitDefImageResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitEngineDrawMaskQuery {
             pub unit_id: i32,
             pub draw_mask: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitEngineDrawMaskResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitIconDrawQuery {
             pub unit_id: i32,
             pub draw_icon: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitIconDrawResult {
             pub success: bool,
         }
@@ -944,93 +734,93 @@
             pub icon_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitIconResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitLeaveTracksQuery {
             pub unit_id: i32,
             pub leave_tracks: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitLeaveTracksResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoDrawQuery {
             pub unit_id: i32,
             pub no_draw: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoDrawResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoGroupQuery {
             pub unit_id: i32,
             pub no_group: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoGroupResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoMinimapQuery {
             pub unit_id: i32,
             pub no_minimap: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoMinimapResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoSelectQuery {
             pub unit_id: i32,
             pub no_select: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoSelectResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitPaletteIndexQuery {
             pub unit_id: i32,
             pub custom_index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitPaletteIndexResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetVideoCapturingModeQuery {
             pub allow_capture_mode: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetVideoCapturingModeResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetVideoCapturingTimeOffsetQuery {
             pub time_offset: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetVideoCapturingTimeOffsetResult {
             pub success: bool,
         }
@@ -1041,7 +831,7 @@
             pub title_short: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWMCaptionResult {
             pub success: bool,
         }
@@ -1052,7 +842,7 @@
             pub force_resolution: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWMIconResult {
             pub success: bool,
         }
@@ -1062,7 +852,7 @@
             pub params: WaterParams,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWaterParamsResult {
             pub success: bool,
         }
@@ -1073,18 +863,18 @@
             pub tex_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWaterTextureResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindowGeometryOptions {
             pub full_screen: bool,
             pub borderless: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindowGeometryQuery {
             pub display_index: i32,
             pub window_pos_x: i32,
@@ -1094,151 +884,52 @@
             pub options: SetWindowGeometryOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindowGeometryResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindowMaximizedQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindowMaximizedResult {
             pub maximized: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindowMinimizedQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindowMinimizedResult {
             pub minimized: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SoundEffectParams {
-            pub preset: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringResult {
-            pub value: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SunLightingParams {
-            pub ground_ambient_color: Option<Vec<f32>>,
-            pub ground_diffuse_color: Option<Vec<f32>>,
-            pub ground_specular_color: Option<Vec<f32>>,
-            pub model_ambient_color: Option<Vec<f32>>,
-            pub model_diffuse_color: Option<Vec<f32>>,
-            pub model_specular_color: Option<Vec<f32>>,
-            pub specular_exponent: Option<f32>,
-            pub ground_shadow_density: Option<f32>,
-            pub model_shadow_density: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Result {
-            pub value: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitCostOverrides {
-            pub build_time: f32,
-            pub metal_cost: f32,
-            pub energy_cost: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitHealthValue {
-            pub health: f32,
-            pub capture: f32,
-            pub paralyze: f32,
-            pub build: f32,
-            pub use_amounts: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitTargetRef {
-            pub target_id: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct WarpMouseQuery {
             pub x: i32,
             pub y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct WarpMouseResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct WaterParams {
-            pub absorb: Option<Vec<f32>>,
-            pub base_color: Option<Vec<f32>>,
-            pub min_color: Option<Vec<f32>>,
-            pub surface_color: Option<Vec<f32>>,
-            pub diffuse_color: Option<Vec<f32>>,
-            pub specular_color: Option<Vec<f32>>,
-            pub plane_color: Option<Vec<f32>>,
-            pub repeat_x: Option<f32>,
-            pub repeat_y: Option<f32>,
-            pub surface_alpha: Option<f32>,
-            pub ambient_factor: Option<f32>,
-            pub diffuse_factor: Option<f32>,
-            pub specular_factor: Option<f32>,
-            pub specular_power: Option<f32>,
-            pub fresnel_min: Option<f32>,
-            pub fresnel_max: Option<f32>,
-            pub fresnel_power: Option<f32>,
-            pub reflection_distortion: Option<f32>,
-            pub blur_base: Option<f32>,
-            pub blur_exponent: Option<f32>,
-            pub perlin_start_freq: Option<f32>,
-            pub perlin_lacunarity: Option<f32>,
-            pub perlin_amplitude: Option<f32>,
-            pub wind_speed: Option<f32>,
-            pub wave_offset_factor: Option<f32>,
-            pub wave_length: Option<f32>,
-            pub wave_foam_distortion: Option<f32>,
-            pub wave_foam_intensity: Option<f32>,
-            pub caustics_resolution: Option<f32>,
-            pub caustics_strength: Option<f32>,
-            pub num_tiles: Option<f32>,
-            pub shore_waves: Option<bool>,
-            pub force_rendering: Option<bool>,
-            pub has_water_plane: Option<bool>,
-        }
+        pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawGroundDeferredValue {
             pub success: bool,
             pub deferred: bool,
             pub forward: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetDrawModelsDeferredValue {
             pub success: bool,
             pub units_deferred: bool,
@@ -1247,7 +938,7 @@
             pub features_forward: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMiniMapRotationValue {
             pub success: bool,
             pub rotation: i32,
@@ -1263,17 +954,17 @@
             if cursor_file_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             cursor_file_name_bytes.push(0);
             let cursor_file_name_cstr = core::ffi::CStr::from_bytes_with_nul(&cursor_file_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::assign_mouse_cursor(&command_name_cstr, &cursor_file_name_cstr, overwrite, hot_spot_top_left)
+            crate::generated::borrowed::unsynced_ctrl::assign_mouse_cursor(command_name_cstr, cursor_file_name_cstr, overwrite, hot_spot_top_left)
         }
 
         #[inline]
-        pub fn deselect_unit_map(unit_i_ds: &Vec<i32>) -> Result<bool> {
-            crate::generated::borrowed::unsynced_ctrl::deselect_unit_map(unit_i_ds.as_slice())
+        pub fn deselect_unit_map(unit_i_ds: &[i32]) -> Result<bool> {
+            crate::generated::borrowed::unsynced_ctrl::deselect_unit_map(unit_i_ds)
         }
 
         #[inline]
-        pub fn draw_unit_commands(unit_i_ds: &Vec<i32>, table_or_array: bool, queue_draw_depth: i32) -> Result<bool> {
-            crate::generated::borrowed::unsynced_ctrl::draw_unit_commands(unit_i_ds.as_slice(), table_or_array, queue_draw_depth)
+        pub fn draw_unit_commands(unit_i_ds: &[i32], table_or_array: bool, queue_draw_depth: i32) -> Result<bool> {
+            crate::generated::borrowed::unsynced_ctrl::draw_unit_commands(unit_i_ds, table_or_array, queue_draw_depth)
         }
 
         #[inline]
@@ -1291,16 +982,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_water_texture {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-water-texture"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.get-water-texture."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_water_texture(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_water_texture::call(p0, p1) }
+        pub fn get_water_texture(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_water_texture::call(p0, p1)
         }
 
         #[inline]
@@ -1309,7 +1001,7 @@
             if filename_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             filename_bytes.push(0);
             let filename_cstr = core::ffi::CStr::from_bytes_with_nul(&filename_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::load_cmd_colors_config(&filename_cstr)
+            crate::generated::borrowed::unsynced_ctrl::load_cmd_colors_config(filename_cstr)
         }
 
         #[inline]
@@ -1318,7 +1010,7 @@
             if filename_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             filename_bytes.push(0);
             let filename_cstr = core::ffi::CStr::from_bytes_with_nul(&filename_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::load_ctrl_panel_config(&filename_cstr)
+            crate::generated::borrowed::unsynced_ctrl::load_ctrl_panel_config(filename_cstr)
         }
 
         #[inline]
@@ -1327,7 +1019,7 @@
             if model_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             model_name_bytes.push(0);
             let model_name_cstr = core::ffi::CStr::from_bytes_with_nul(&model_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::load_model_textures(&model_name_cstr)
+            crate::generated::borrowed::unsynced_ctrl::load_model_textures(model_name_cstr)
         }
 
         #[inline]
@@ -1358,7 +1050,7 @@
             if new_cursor_file_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             new_cursor_file_name_bytes.push(0);
             let new_cursor_file_name_cstr = core::ffi::CStr::from_bytes_with_nul(&new_cursor_file_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::replace_mouse_cursor(&old_cursor_file_name_cstr, &new_cursor_file_name_cstr, hot_spot_top_left)
+            crate::generated::borrowed::unsynced_ctrl::replace_mouse_cursor(old_cursor_file_name_cstr, new_cursor_file_name_cstr, hot_spot_top_left)
         }
 
         #[inline]
@@ -1392,8 +1084,8 @@
         }
 
         #[inline]
-        pub fn select_unit_map(unit_i_ds: &Vec<i32>, append: bool) -> Result<bool> {
-            crate::generated::borrowed::unsynced_ctrl::select_unit_map(unit_i_ds.as_slice(), append)
+        pub fn select_unit_map(unit_i_ds: &[i32], append: bool) -> Result<bool> {
+            crate::generated::borrowed::unsynced_ctrl::select_unit_map(unit_i_ds, append)
         }
 
         #[inline]
@@ -1405,16 +1097,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_set_atmosphere {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "set-atmosphere"]
-                pub fn call(p0: i32) -> i64;
+                pub safe fn call(p0: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-atmosphere."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn set_atmosphere(p0: i32) -> i64 {
-            unsafe { __core_owned_set_atmosphere::call(p0) }
+        pub fn set_atmosphere(p0: i32) -> i64 {
+            __core_owned_set_atmosphere::call(p0)
         }
 
         #[inline]
@@ -1453,22 +1146,14 @@
             if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             text_bytes.push(0);
             let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_clipboard(&text_cstr)
+            crate::generated::borrowed::unsynced_ctrl::set_clipboard(text_cstr)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_custom_command_draw_data {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
-                #[link_name = "set-custom-command-draw-data"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-custom-command-draw-data."]
         #[inline]
-        pub unsafe fn set_custom_command_draw_data(p0: i32, p1: i32, p2: i32) -> i64 {
-            unsafe { __core_owned_set_custom_command_draw_data::call(p0, p1, p2) }
+        pub fn set_custom_command_draw_data(cmd_id: i32, cmd_reference: &DefRef, color: Float4, show_area: bool) -> Result<bool> {
+            let __blob0 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(cmd_reference.name.len() as u32).to_le_bytes()); __b.extend_from_slice(cmd_reference.name.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&cmd_reference.id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&color.x.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&color.y.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&color.z.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&color.w.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            crate::generated::dynamic_input::unsynced_ctrl::set_custom_command_draw_data(cmd_id, show_area as i32, &__blob0, &__blob1)
         }
 
         #[inline]
@@ -1477,34 +1162,18 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_dolly_camera_curve {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
-                #[link_name = "set-dolly-camera-curve"]
-                pub fn call(p0: i32, p1: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-dolly-camera-curve."]
         #[inline]
-        pub unsafe fn set_dolly_camera_curve(p0: i32, p1: i32) -> i64 {
-            unsafe { __core_owned_set_dolly_camera_curve::call(p0, p1) }
+        pub fn set_dolly_camera_curve(degree: i32, control_points: &[Float4], knots: &[f32]) -> Result<bool> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(control_points.len() as u32).to_le_bytes()); for __item in control_points.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.x.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.y.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.z.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.w.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); }} __b };
+            let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(knots.len() as u32).to_le_bytes()); for __item in knots.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_bits().to_le_bytes());} __b };
+            crate::generated::dynamic_input::unsynced_ctrl::set_dolly_camera_curve(degree, &__blob0, &__blob1)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_dolly_camera_look_curve {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
-                #[link_name = "set-dolly-camera-look-curve"]
-                pub fn call(p0: i32, p1: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-dolly-camera-look-curve."]
         #[inline]
-        pub unsafe fn set_dolly_camera_look_curve(p0: i32, p1: i32) -> i64 {
-            unsafe { __core_owned_set_dolly_camera_look_curve::call(p0, p1) }
+        pub fn set_dolly_camera_look_curve(degree: i32, control_points: &[Float4], knots: &[f32]) -> Result<bool> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(control_points.len() as u32).to_le_bytes()); for __item in control_points.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.x.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.y.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.z.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.w.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); }} __b };
+            let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(knots.len() as u32).to_le_bytes()); for __item in knots.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_bits().to_le_bytes());} __b };
+            crate::generated::dynamic_input::unsynced_ctrl::set_dolly_camera_look_curve(degree, &__blob0, &__blob1)
         }
 
         #[inline]
@@ -1634,16 +1303,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_set_map_rendering_params {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "set-map-rendering-params"]
-                pub fn call(p0: i32) -> i64;
+                pub safe fn call(p0: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-map-rendering-params."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn set_map_rendering_params(p0: i32) -> i64 {
-            unsafe { __core_owned_set_map_rendering_params::call(p0) }
+        pub fn set_map_rendering_params(p0: i32) -> i64 {
+            __core_owned_set_map_rendering_params::call(p0)
         }
 
         #[inline]
@@ -1662,7 +1332,7 @@
             if tex_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             tex_name_bytes.push(0);
             let tex_name_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_map_shading_texture(&tex_type_cstr, &tex_name_cstr, num)
+            crate::generated::borrowed::unsynced_ctrl::set_map_shading_texture(tex_type_cstr, tex_name_cstr, num)
         }
 
         #[inline]
@@ -1680,7 +1350,7 @@
             if cursor_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             cursor_name_bytes.push(0);
             let cursor_name_cstr = core::ffi::CStr::from_bytes_with_nul(&cursor_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_mouse_cursor(&cursor_name_cstr, scale)
+            crate::generated::borrowed::unsynced_ctrl::set_mouse_cursor(cursor_name_cstr, scale)
         }
 
         #[inline]
@@ -1692,16 +1362,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_set_shock_front_factors {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "set-shock-front-factors"]
-                pub fn call(p0: i32) -> i64;
+                pub safe fn call(p0: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-shock-front-factors."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn set_shock_front_factors(p0: i32) -> i64 {
-            unsafe { __core_owned_set_shock_front_factors::call(p0) }
+        pub fn set_shock_front_factors(p0: i32) -> i64 {
+            __core_owned_set_shock_front_factors::call(p0)
         }
 
         #[inline]
@@ -1710,7 +1381,7 @@
             if tex_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             tex_name_bytes.push(0);
             let tex_name_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_sky_box_texture(&tex_name_cstr)
+            crate::generated::borrowed::unsynced_ctrl::set_sky_box_texture(tex_name_cstr)
         }
 
         #[inline]
@@ -1722,16 +1393,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_set_sun_lighting {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "set-sun-lighting"]
-                pub fn call(p0: i32) -> i64;
+                pub safe fn call(p0: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-sun-lighting."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn set_sun_lighting(p0: i32) -> i64 {
-            unsafe { __core_owned_set_sun_lighting::call(p0) }
+        pub fn set_sun_lighting(p0: i32) -> i64 {
+            __core_owned_set_sun_lighting::call(p0)
         }
 
         #[inline]
@@ -1746,7 +1418,7 @@
             if icon_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             icon_name_bytes.push(0);
             let icon_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_unit_def_icon(unit_def_id, &icon_name_cstr)
+            crate::generated::borrowed::unsynced_ctrl::set_unit_def_icon(unit_def_id, icon_name_cstr)
         }
 
         #[inline]
@@ -1755,7 +1427,7 @@
             if image_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             image_bytes.push(0);
             let image_cstr = core::ffi::CStr::from_bytes_with_nul(&image_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_unit_def_image(unit_def_id, &image_cstr)
+            crate::generated::borrowed::unsynced_ctrl::set_unit_def_image(unit_def_id, image_cstr)
         }
 
         #[inline]
@@ -1770,7 +1442,7 @@
             if icon_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             icon_name_bytes.push(0);
             let icon_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_unit_icon(unit_id, &icon_name_cstr)
+            crate::generated::borrowed::unsynced_ctrl::set_unit_icon(unit_id, icon_name_cstr)
         }
 
         #[inline]
@@ -1837,7 +1509,7 @@
             if title_short_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             title_short_bytes.push(0);
             let title_short_cstr = core::ffi::CStr::from_bytes_with_nul(&title_short_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_wm_caption(&title_cstr, &title_short_cstr)
+            crate::generated::borrowed::unsynced_ctrl::set_wm_caption(title_cstr, title_short_cstr)
         }
 
         #[inline]
@@ -1846,22 +1518,23 @@
             if icon_file_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             icon_file_name_bytes.push(0);
             let icon_file_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_file_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_wm_icon(&icon_file_name_cstr, force_resolution)
+            crate::generated::borrowed::unsynced_ctrl::set_wm_icon(icon_file_name_cstr, force_resolution)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_set_water_params {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "set-water-params"]
-                pub fn call(p0: i32) -> i64;
+                pub safe fn call(p0: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-water-params."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn set_water_params(p0: i32) -> i64 {
-            unsafe { __core_owned_set_water_params::call(p0) }
+        pub fn set_water_params(p0: i32) -> i64 {
+            __core_owned_set_water_params::call(p0)
         }
 
         #[inline]
@@ -1874,7 +1547,7 @@
             if tex_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             tex_name_bytes.push(0);
             let tex_name_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_water_texture(&tex_type_cstr, &tex_name_cstr)
+            crate::generated::borrowed::unsynced_ctrl::set_water_texture(tex_type_cstr, tex_name_cstr)
         }
 
         #[inline]

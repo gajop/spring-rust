@@ -13,6 +13,8 @@ namespace {
 		{WasmEnvironment::GaiaSynced, "gaia-synced", true, true, true},
 		{WasmEnvironment::GaiaUnsynced, "gaia-unsynced", false, true, false},
 		{WasmEnvironment::UI, "ui", false, true, false},
+		{WasmEnvironment::Menu, "menu", false, true, false},
+		{WasmEnvironment::Intro, "intro", false, true, false},
 	};
 	constexpr WasmEnvironmentPolicy INVALID_POLICY = {
 		WasmEnvironment::UI, "invalid", false, false, false,

@@ -279,6 +279,11 @@ pub const API_DEFINITIONS: &[ApiDefinition] = &[
         api_struct: "COBScriptApi",
     },
     ApiDefinition {
+        module: "unit_script",
+        header: "SyncedCtrl.h",
+        api_struct: "UnitScriptApi",
+    },
+    ApiDefinition {
         module: "unit_rendering",
         header: "UnsyncedRead.h",
         api_struct: "UnitRenderingApi",

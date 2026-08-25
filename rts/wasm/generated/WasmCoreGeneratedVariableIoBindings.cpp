@@ -4541,6 +4541,117 @@ wasm_trap_t* CoreVariableIo_unsynced_read_solve_nurbs_curve(void* environment, w
     return nullptr;
 }
 
+wasm_trap_t* CoreVariableIo_unit_script_call_unit_script(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unitScript == nullptr ||
+        state->native->syncedCtrl->unitScript->CallUnitScript == nullptr)
+        return Trap("CallUnitScript generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4)
+        return Trap("CallUnitScript generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 20u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader retValuesControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t retValuesPointer = 0;
+    std::uint32_t retValuesCapacity = 0;
+    std::uint32_t retValuesIgnoredLength = 0;
+    if (!retValuesControl.U32(retValuesPointer) || !retValuesControl.U32(retValuesCapacity) ||
+        !retValuesControl.U32(retValuesIgnoredLength) || !retValuesControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    const std::uint64_t retValuesCapacityBytes = static_cast<std::uint64_t>(retValuesCapacity) * 4u;
+    if (retValuesCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(retValuesPointer, static_cast<std::size_t>(retValuesCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    CallUnitScriptQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    std::uint32_t functionNameInputPointer = 0;
+    std::uint32_t functionNameInputCount = 0;
+    if (!reader.U32(functionNameInputPointer) || !reader.U32(functionNameInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> functionNameInputBytes;
+    if (!state->memory.View(functionNameInputPointer, functionNameInputCount, functionNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    std::string functionNameInputStorage(reinterpret_cast<const char*>(functionNameInputBytes.data()), functionNameInputBytes.size());
+    query.functionName = functionNameInputStorage.c_str();
+    std::uint32_t argsInputPointer = 0;
+    std::uint32_t argsInputCount = 0;
+    if (!reader.U32(argsInputPointer) || !reader.U32(argsInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (argsInputCount == 0) {
+        query.args = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
+        const std::uint64_t argsInputBytes64 = static_cast<std::uint64_t>(argsInputCount) * 4u;
+        if (argsInputBytes64 > std::numeric_limits<std::size_t>::max() || (argsInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+        std::span<const std::uint8_t> argsInputBytes;
+        if (!state->memory.View(argsInputPointer, static_cast<std::size_t>(argsInputBytes64), argsInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+        static_assert(sizeof(float) == 4u, "generated Core borrowed/native element width mismatch");
+        query.args = reinterpret_cast<std::remove_reference_t<decltype(query.args)>>(argsInputBytes.data());
+    }
+    if (!AssignCoreCount(argsInputCount, query.argCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.retCapacity = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.retCapacity)>>>(slots[1].i32);
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    CallUnitScriptResult result{};
+    state->native->syncedCtrl->unitScript->CallUnitScript(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    if (static_cast<std::uint64_t>(result.retCount) > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t retValuesRequired = static_cast<std::uint32_t>(result.retCount);
+    if (retValuesRequired != 0 && result.retValues == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteCoreU32(outputWire, 8u, retValuesRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || retValuesCapacity < retValuesRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (retValuesRequired != 0) {
+        const std::size_t retValuesBytes = static_cast<std::size_t>(retValuesRequired) * 4u;
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(float) == 4u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(retValuesPointer, result.retValues, retValuesBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> retValuesWire;
+            if (!state->memory.MutableView(retValuesPointer, retValuesBytes, retValuesWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter retValuesWriter(retValuesWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < retValuesRequired; ++coreIndex) {
+            if (!retValuesWriter.F32(result.retValues[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!retValuesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
+        }
+    }
+    std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 8u);
+    WireWriter writer(fixedWire);
+    if (!writer.Bool(result.functionFound)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.success)) return Trap("generated Core wire overflow");
+    if (!writer.Finish(4u)) return Trap("generated Core fixed output layout mismatch");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 
 } // namespace
 
@@ -4915,10 +5026,17 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
                 MakeFuncType(params, 4, results, 1), CoreVariableIo_unsynced_read_solve_nurbs_curve, state, error))
             return false;
     }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:unit-script", "call-unit-script",
+                MakeFuncType(params, 4, results, 1), CoreVariableIo_unit_script_call_unit_script, state, error))
+            return false;
+    }
 
     return true;
 }
 
-static_assert(52 >= 0, "generated variable-I/O Core callback count");
+static_assert(53 >= 0, "generated variable-I/O Core callback count");
 
 } // namespace recoil::wasm::core::generated

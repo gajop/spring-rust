@@ -6,7 +6,9 @@
 use super::config::{decode_string_list_result, mut_slice_parts};
 #[cfg(feature = "alloc")]
 use super::config::{StringListBuffer, StringListRequirements};
-use super::{ApiError, ErrorCode, Result, StringListFill, StringRange};
+#[cfg(feature = "alloc")]
+use super::{ApiError, ErrorCode};
+use super::{Result, StringListFill, StringRange};
 
 #[cfg(target_arch = "wasm32")]
 mod raw {
@@ -54,7 +56,7 @@ pub fn get_unit_script_names_into<'a>(
                 meta_ptr,
             )
         };
-        return decode_string_list_result(status, meta, ranges, bytes);
+        decode_string_list_result(status, meta, ranges, bytes)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

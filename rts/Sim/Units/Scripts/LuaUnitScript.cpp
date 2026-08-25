@@ -27,6 +27,8 @@
 
 #include "System/Misc/TracyDefs.h"
 
+#include <limits>
+
 CR_BIND_DERIVED(CLuaUnitScript, CUnitScript, )
 
 CR_REG_METADATA(CLuaUnitScript, (
@@ -1254,6 +1256,62 @@ int CLuaUnitScript::CallAsUnit(lua_State* L)
 		lua_error(L);
 
 	return (lua_gettop(L) - funcIndex + 1);
+}
+
+bool CLuaUnitScript::CallFunctionByName(const char* functionName, const float* args,
+	uint32_t argCount, float* retValues, uint32_t retCapacity, uint32_t& retCount, bool& found)
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	found = false;
+	retCount = 0;
+
+	if (functionName == nullptr)
+		return false;
+
+	const auto iter = scriptNames.find(functionName);
+	if (iter == scriptNames.end())
+		return false;
+
+	found = true;
+	if (argCount > 0 && args == nullptr)
+		return false;
+	if (argCount > static_cast<uint32_t>(std::numeric_limits<int>::max()) ||
+		retCapacity > static_cast<uint32_t>(std::numeric_limits<int>::max()) ||
+		argCount > static_cast<uint32_t>(std::numeric_limits<int>::max()) - retCapacity - 1)
+		return false;
+
+	LUA_CALL_IN_CHECK(L, false);
+	if (!lua_checkstack(L, static_cast<int>(argCount + retCapacity + 1)))
+		return false;
+
+	const int stackTop = lua_gettop(L);
+	RawPushFunction(iter->second);
+	for (uint32_t index = 0; index < argCount; ++index)
+		lua_pushnumber(L, args[index]);
+
+	if (!RawRunCallIn(iter->second, static_cast<int>(argCount), LUA_MULTRET)) {
+		lua_settop(L, stackTop);
+		return false;
+	}
+
+	const int resultCount = lua_gettop(L) - stackTop;
+	if (resultCount < 0 || static_cast<uint32_t>(resultCount) > retCapacity) {
+		lua_settop(L, stackTop);
+		return false;
+	}
+
+	for (int index = 0; index < resultCount; ++index) {
+		const int stackIndex = stackTop + index + 1;
+		if (!lua_isnumber(L, stackIndex)) {
+			lua_settop(L, stackTop);
+			return false;
+		}
+		retValues[index] = static_cast<float>(lua_tonumber(L, stackIndex));
+	}
+
+	retCount = static_cast<uint32_t>(resultCount);
+	lua_settop(L, stackTop);
+	return true;
 }
 
 

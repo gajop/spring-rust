@@ -1,5 +1,23 @@
 [
   {
+    "name": "ActivateGame",
+    "query": "SimpleCallinQuery",
+    "result": "SimpleCallinResult",
+    "environments": [
+      "menu"
+    ],
+    "aggregation": "ignore"
+  },
+  {
+    "name": "ActivateMenu",
+    "query": "ActivateMenuQuery",
+    "result": "ActivateMenuResult",
+    "environments": [
+      "menu"
+    ],
+    "aggregation": "ignore"
+  },
+  {
     "name": "ActiveCommandChanged",
     "query": "ActiveCommandChangedQuery",
     "result": "ActiveCommandChangedResult",
@@ -21,7 +39,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "or-true"
   },
@@ -52,6 +71,15 @@
     "environments": [
       "rules-synced",
       "gaia-synced"
+    ],
+    "aggregation": "and-false"
+  },
+  {
+    "name": "AllowDraw",
+    "query": "SimpleCallinQuery",
+    "result": "BoolCallinResult",
+    "environments": [
+      "menu"
     ],
     "aggregation": "and-false"
   },
@@ -246,7 +274,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -297,7 +326,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -310,7 +340,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -323,7 +354,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -336,7 +368,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -349,7 +382,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -394,6 +428,15 @@
       "gaia-unsynced"
     ],
     "aggregation": "or-true"
+  },
+  {
+    "name": "DrawLoadScreen",
+    "query": "SimpleCallinQuery",
+    "result": "SimpleCallinResult",
+    "environments": [
+      "intro"
+    ],
+    "aggregation": "ignore"
   },
   {
     "name": "DrawMaterial",
@@ -445,7 +488,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -699,6 +743,15 @@
     "aggregation": "ignore"
   },
   {
+    "name": "GenerateDefs",
+    "query": "SimpleCallinQuery",
+    "result": "StringCallinResult",
+    "environments": [
+      "rules-synced"
+    ],
+    "aggregation": "first-non-empty"
+  },
+  {
     "name": "GroupChanged",
     "query": "GroupChangedQuery",
     "result": "BoolCallinResult",
@@ -756,7 +809,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "or-true"
   },
@@ -769,7 +823,9 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu",
+      "intro"
     ],
     "aggregation": "or-true"
   },
@@ -782,7 +838,9 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu",
+      "intro"
     ],
     "aggregation": "or-true"
   },
@@ -814,6 +872,15 @@
     "flags": [
       "archive-notification"
     ]
+  },
+  {
+    "name": "LoadProgress",
+    "query": "LoadProgressQuery",
+    "result": "LoadProgressResult",
+    "environments": [
+      "intro"
+    ],
+    "aggregation": "ignore"
   },
   {
     "name": "MapDrawCmd",
@@ -893,7 +960,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "or-true"
   },
@@ -906,7 +974,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "or-true"
   },
@@ -919,7 +988,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -932,7 +1002,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "or-true"
   },
@@ -1091,7 +1162,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "or-true",
     "aliases": [
@@ -1107,7 +1179,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "first-non-empty",
     "aliases": [
@@ -1135,7 +1208,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -1148,7 +1222,9 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu",
+      "intro"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -1246,7 +1322,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "or-true"
   },
@@ -1259,7 +1336,8 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "or-true"
   },
@@ -1617,7 +1695,8 @@
     "environments": [
       "rules-unsynced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu"
     ],
     "aggregation": "ignore"
   },
@@ -1630,7 +1709,9 @@
       "rules-unsynced",
       "gaia-synced",
       "gaia-unsynced",
-      "ui"
+      "ui",
+      "menu",
+      "intro"
     ],
     "aggregation": "ignore"
   },

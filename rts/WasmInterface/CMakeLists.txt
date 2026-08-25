@@ -35,6 +35,8 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/runtime/WasmRuntime.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/system/WasmInterfaceSystem.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/system/WasmInterfaceSystemCore.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/standalone/WasmStandaloneEnvironment.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/standalone/WasmDefsParser.cpp
 )
 
 # Generated variable transports are layered by specialization. Nested dynamic

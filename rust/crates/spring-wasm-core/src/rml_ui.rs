@@ -1,5 +1,83 @@
 use super::{ApiError, ErrorCode, Result, RetainedCallback};
 
+#[cfg(feature = "alloc")]
+use alloc::ffi::CString;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RmlContextCreateResult {
+    pub context_handle: u64,
+    pub success: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RmlDocumentLoadResult {
+    pub document_handle: u64,
+    pub success: bool,
+}
+
+/// Create or retrieve an RmlUi context through the engine's borrowed-string
+/// contract. This keeps transport details out of guest code and avoids the
+/// variable-input façade, which is not the ABI shape of this entry point.
+#[cfg(feature = "alloc")]
+pub fn create_rml_context(name: &str) -> Result<RmlContextCreateResult> {
+    let name = CString::new(name).map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+    let output = crate::generated::borrowed::rml_ui::create_context(name.as_c_str())?;
+    let (context_handle, success) = decode_handle_bool(output)?;
+    Ok(RmlContextCreateResult {
+        context_handle,
+        success,
+    })
+}
+
+/// Load a document using the engine's borrowed-string contract.
+#[cfg(feature = "alloc")]
+pub fn load_rml_document(context_handle: u64, path: &str) -> Result<RmlDocumentLoadResult> {
+    let path = CString::new(path).map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+    let output =
+        crate::generated::borrowed::rml_ui::context_load_document(context_handle, path.as_c_str())?;
+    let (document_handle, success) = decode_handle_bool(output)?;
+    Ok(RmlDocumentLoadResult {
+        document_handle,
+        success,
+    })
+}
+
+/// Show a document with the default RmlUi modal/focus options.
+#[cfg(target_arch = "wasm32")]
+pub fn show_rml_document(document_handle: u64) -> Result<bool> {
+    let mut options = [0_u8; 16];
+    let packed = unsafe {
+        crate::generated::rml_ui::raw::core_document_show(
+            document_handle as i64,
+            options.as_mut_ptr() as usize as i32,
+        )
+    } as u64;
+    let error_code = (packed >> 32) as i32;
+    if error_code != 0 {
+        return Err(ApiError::new(error_code));
+    }
+    Ok((packed as u32) != 0)
+}
+
+#[cfg(feature = "alloc")]
+fn decode_handle_bool(output: [u8; 16]) -> Result<(u64, bool)> {
+    let handle = u64::from_le_bytes(
+        output[0..8]
+            .try_into()
+            .map_err(|_| ApiError::new(ErrorCode::Internal as i32))?,
+    );
+    let success = match u32::from_le_bytes(
+        output[8..12]
+            .try_into()
+            .map_err(|_| ApiError::new(ErrorCode::Internal as i32))?,
+    ) {
+        0 => false,
+        1 => true,
+        _ => return Err(ApiError::new(ErrorCode::Internal as i32)),
+    };
+    Ok((handle, success))
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EventListenerRegistration {
     pub handle: u64,
@@ -163,7 +241,7 @@ pub fn context_add_event_listener(
                 pointer,
             )
         };
-        return listener_result(status, output);
+        listener_result(status, output)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -196,7 +274,7 @@ pub fn element_add_event_listener(
                 pointer,
             )
         };
-        return listener_result(status, output);
+        listener_result(status, output)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -239,10 +317,10 @@ pub fn data_model_bind_event(
             1 => true,
             _ => return Err(ApiError::new(ErrorCode::Internal as i32)),
         };
-        return Ok(DataEventRegistration {
+        Ok(DataEventRegistration {
             handle: output[0],
             success,
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -255,7 +333,7 @@ pub fn data_model_bind_event(
 pub fn data_model_unbind_event(event_handle: u64) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        return super::unpack_bool(unsafe { raw::data_model_unbind_event(event_handle as i64) });
+        super::unpack_bool(unsafe { raw::data_model_unbind_event(event_handle as i64) })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -271,9 +349,9 @@ pub fn data_model_unbind_event(event_handle: u64) -> Result<bool> {
 pub fn event_listener_on_attach(listener_handle: u64, element_handle: u64) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        return super::unpack_bool(unsafe {
+        super::unpack_bool(unsafe {
             raw::event_listener_on_attach(listener_handle as i64, element_handle as i64)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -286,9 +364,9 @@ pub fn event_listener_on_attach(listener_handle: u64, element_handle: u64) -> Re
 pub fn event_listener_on_detach(listener_handle: u64, element_handle: u64) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        return super::unpack_bool(unsafe {
+        super::unpack_bool(unsafe {
             raw::event_listener_on_detach(listener_handle as i64, element_handle as i64)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -302,9 +380,9 @@ pub fn event_listener_on_detach(listener_handle: u64, element_handle: u64) -> Re
 pub fn event_listener_process_event(listener_handle: u64, event_handle: u64) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        return super::unpack_bool(unsafe {
+        super::unpack_bool(unsafe {
             raw::event_listener_process_event(listener_handle as i64, event_handle as i64)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -323,11 +401,11 @@ pub fn data_model_current_event() -> Result<CurrentDataEvent> {
         if status != 0 {
             return Err(ApiError::new(status));
         }
-        return Ok(CurrentDataEvent {
+        Ok(CurrentDataEvent {
             event_handle: output[0],
             target_element_handle: output[1],
             value_count: output[2],
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -362,7 +440,7 @@ pub fn data_model_current_value<'a>(
         if status != 0 {
             return Err(DataEventValueError::Api(ApiError::new(status)));
         }
-        return match output[0] {
+        match output[0] {
             0 => match output[1] {
                 0 => Ok(DataEventValue::Bool(false)),
                 1 => Ok(DataEventValue::Bool(true)),
@@ -393,7 +471,7 @@ pub fn data_model_current_value<'a>(
             _ => Err(DataEventValueError::Api(ApiError::new(
                 ErrorCode::Internal as i32,
             ))),
-        };
+        }
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

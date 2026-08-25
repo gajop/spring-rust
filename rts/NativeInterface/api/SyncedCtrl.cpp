@@ -77,6 +77,7 @@
 #include "System/creg/STL_Map.h"
 #include "System/Log/ILog.h"
 #include "Sim/Units/Scripts/CobInstance.h"
+#include "Sim/Units/Scripts/LuaUnitScript.h"
 #include "Sim/Units/Scripts/NullUnitScript.h"
 
 namespace {
@@ -6340,6 +6341,8 @@ static const GameConfigApi GAME_CONFIG_API = {
 
 // Thread-local storage for COB return values
 thread_local int32_t cobReturnValues[MAX_COB_ARGS];
+thread_local std::vector<float> unitScriptReturnValues;
+static constexpr uint32_t MAX_UNIT_SCRIPT_RETURN_VALUES = 256;
 
 static void NativeCallCOBScript(const CallCOBScriptQuery* query, CallCOBScriptResult* result)
 {
@@ -6429,6 +6432,65 @@ static const COBScriptApi COB_SCRIPT_API = {
 	.GetCOBScriptID = NativeGetCOBScriptID
 };
 
+static void NativeCallUnitScript(const CallUnitScriptQuery* query, CallUnitScriptResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->functionFound = false;
+	result->success = false;
+	result->retValues = nullptr;
+	result->retCount = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (query->functionName == nullptr || (query->argCount > 0 && query->args == nullptr)) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid unit-script call arguments");
+		return;
+	}
+	if (query->retCapacity > MAX_UNIT_SCRIPT_RETURN_VALUES) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit-script return capacity is too large");
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CLuaUnitScript* script = dynamic_cast<CLuaUnitScript*>(unit->script);
+	if (script == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not running a Lua unit script");
+		return;
+	}
+
+	unitScriptReturnValues.resize(query->retCapacity);
+	uint32_t retCount = 0;
+	bool found = false;
+	const bool success = script->CallFunctionByName(
+		query->functionName,
+		query->args,
+		query->argCount,
+		unitScriptReturnValues.data(),
+		query->retCapacity,
+		retCount,
+		found
+	);
+	result->functionFound = found;
+	result->success = success;
+	if (success && retCount > 0) {
+		result->retValues = unitScriptReturnValues.data();
+		result->retCount = retCount;
+	}
+}
+
+static const UnitScriptApi UNIT_SCRIPT_API = {
+	.CallUnitScript = NativeCallUnitScript,
+};
+
 } // namespace
 
 // ============================================================================
@@ -6443,5 +6505,6 @@ const SyncedCtrlApi SYNCED_CTRL_API = {
 	.projectile = &PROJECTILE_CONTROL_API,
 	.effects = &EFFECTS_CONTROL_API,
 	.gameConfig = &GAME_CONFIG_API,
-	.cobScript = &COB_SCRIPT_API
+	.cobScript = &COB_SCRIPT_API,
+	.unitScript = &UNIT_SCRIPT_API,
 };

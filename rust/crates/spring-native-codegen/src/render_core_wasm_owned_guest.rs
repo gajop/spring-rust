@@ -9,10 +9,12 @@
 //! second hand-maintained API inventory.
 
 use heck::{ToKebabCase, ToSnakeCase};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
-use crate::model::{ApiModel, EnumModel, Environment, FunctionModel, RecordModel, SemanticType};
-use crate::render_core_wasm::{self, FunctionPlan};
+use crate::model::{
+    ApiModel, EnumModel, Environment, FieldModel, FunctionModel, RecordModel, SemanticType,
+};
+use crate::render_core_wasm::{self, FunctionPlan, InputStrategy, ResultStrategy};
 
 pub fn render(model: &ApiModel) -> String {
     let mut output = render_owned_prelude();
@@ -62,20 +64,128 @@ pub fn render_owned_shards(model: &ApiModel) -> Vec<(String, String)> {
                 .map(|record| (record.name.clone(), record.clone()))
         })
         .collect::<BTreeMap<_, _>>();
+    let enums = model
+        .modules
+        .iter()
+        .flat_map(|module| {
+            module
+                .enums
+                .iter()
+                .map(|enum_model| (enum_model.name.clone(), enum_model.clone()))
+        })
+        .collect::<BTreeMap<_, _>>();
     let plans = render_core_wasm::plan(model)
         .functions
         .into_iter()
         .map(|plan| ((plan.module.clone(), plan.function.clone()), plan))
         .collect::<BTreeMap<_, _>>();
-    model
-        .modules
+
+    let (shared_records, shared_enums) = compute_shared_types(model);
+
+    let mut shards = Vec::new();
+
+    if !shared_records.is_empty() || !shared_enums.is_empty() {
+        let types_source =
+            render_shared_types_module(&shared_records, &shared_enums, &records, &enums);
+        shards.push(("types".to_owned(), types_source));
+    }
+
+    shards.extend(model.modules.iter().map(|module| {
+        let mut source = String::new();
+        render_module(
+            &mut source,
+            module,
+            &records,
+            &enums,
+            &plans,
+            &shared_records,
+            &shared_enums,
+        );
+        (rust_ident(&module.name), source)
+    }));
+    shards
+}
+
+fn compute_shared_types(model: &ApiModel) -> (BTreeSet<String>, BTreeSet<String>) {
+    use std::collections::HashMap;
+
+    let mut record_occurrences: HashMap<String, (Vec<&crate::model::FieldModel>, usize)> =
+        HashMap::new();
+    for module in &model.modules {
+        for record in &module.records {
+            let entry = record_occurrences
+                .entry(record.name.clone())
+                .or_insert_with(|| {
+                    (
+                        record.fields.iter().collect::<Vec<_>>(),
+                        0,
+                    )
+                });
+            let fields_match = entry.0.len() == record.fields.len()
+                && entry
+                    .0
+                    .iter()
+                    .zip(record.fields.iter())
+                    .all(|(a, b)| a.name == b.name && a.ty == b.ty);
+            if fields_match {
+                entry.1 += 1;
+            }
+        }
+    }
+    let shared_records: BTreeSet<String> = record_occurrences
+        .into_iter()
+        .filter(|(_, (_, count))| *count >= 2)
+        .map(|(name, _)| name)
+        .collect();
+
+    let mut enum_occurrences: HashMap<String, (&BTreeMap<String, i64>, usize)> = HashMap::new();
+    for module in &model.modules {
+        for enum_model in &module.enums {
+            let entry = enum_occurrences
+                .entry(enum_model.name.clone())
+                .or_insert((&enum_model.variants, 0));
+            if entry.0 == &enum_model.variants {
+                entry.1 += 1;
+            }
+        }
+    }
+    let shared_enums: BTreeSet<String> = enum_occurrences
+        .into_iter()
+        .filter(|(_, (_, count))| *count >= 2)
+        .map(|(name, _)| name)
+        .collect();
+
+    (shared_records, shared_enums)
+}
+
+fn render_shared_types_module(
+    shared_records: &BTreeSet<String>,
+    shared_enums: &BTreeSet<String>,
+    all_records: &BTreeMap<String, RecordModel>,
+    all_enums: &BTreeMap<String, EnumModel>,
+) -> String {
+    let mut output = String::new();
+    output.push_str("    pub mod types {\n");
+    output.push_str("        use super::{String, Vec};\n\n");
+
+    let records_for_resolution: BTreeMap<String, &RecordModel> = shared_records
         .iter()
-        .map(|module| {
-            let mut source = String::new();
-            render_module(&mut source, module, &records, &plans);
-            (rust_ident(&module.name), source)
-        })
-        .collect()
+        .filter_map(|name| all_records.get(name).map(|r| (name.clone(), r)))
+        .collect();
+    let enums_for_resolution: BTreeMap<String, &EnumModel> = shared_enums
+        .iter()
+        .filter_map(|name| all_enums.get(name).map(|e| (name.clone(), e)))
+        .collect();
+
+    for enum_model in enums_for_resolution.values() {
+        render_enum(&mut output, enum_model);
+    }
+    for record in records_for_resolution.values() {
+        render_record(&mut output, record, &records_for_resolution, &enums_for_resolution);
+    }
+
+    output.push_str("    }\n\n");
+    output
 }
 
 pub fn render_owned_footer(model: &ApiModel) -> String {
@@ -89,7 +199,7 @@ pub fn render_owned_footer(model: &ApiModel) -> String {
 /// owned implementation. Keeping the bodies in one module is important: the
 /// five environment projections must not multiply the guest code size.
 pub fn render_environment_modules(model: &ApiModel) -> String {
-    const ENVIRONMENTS: [(&str, &str, u32, Environment); 5] = [
+    const ENVIRONMENTS: [(&str, &str, u32, Environment); 7] = [
         (
             "rules_synced",
             "rules-synced",
@@ -110,6 +220,8 @@ pub fn render_environment_modules(model: &ApiModel) -> String {
             Environment::GaiaUnsynced,
         ),
         ("ui", "ui", 16u32, Environment::Ui),
+        ("menu", "menu", 32u32, Environment::Menu),
+        ("intro", "intro", 64u32, Environment::Intro),
     ];
     let all_plans = render_core_wasm::plan(model)
         .functions
@@ -169,12 +281,14 @@ pub fn render_environment_modules(model: &ApiModel) -> String {
 /// beside the renderer so `--strict` checks the artifact that will actually
 /// be written, rather than only checking the transport planner.
 pub fn coverage_errors(model: &ApiModel, owned: &str, environments: &str) -> Vec<String> {
-    const ENVIRONMENTS: [(&str, u32); 5] = [
+    const ENVIRONMENTS: [(&str, u32); 7] = [
         ("rules_synced", 1u32),
         ("rules_unsynced", 2u32),
         ("gaia_synced", 4u32),
         ("gaia_unsynced", 8u32),
         ("ui", 16u32),
+        ("menu", 32u32),
+        ("intro", 64u32),
     ];
     let plans = render_core_wasm::plan(model)
         .functions
@@ -251,7 +365,10 @@ fn render_module(
     output: &mut String,
     module: &crate::model::ApiModule,
     all_records: &BTreeMap<String, RecordModel>,
+    all_enums: &BTreeMap<String, EnumModel>,
     plans: &BTreeMap<(String, String), FunctionPlan>,
+    shared_records: &BTreeSet<String>,
+    shared_enums: &BTreeSet<String>,
 ) {
     let module_ident = rust_ident(&module.name);
     output.push_str(&format!("    pub mod {module_ident} {{\n"));
@@ -268,11 +385,33 @@ fn render_module(
         .map(|enum_model| (enum_model.name.clone(), enum_model))
         .collect::<BTreeMap<_, _>>();
 
+    let mut reexported_enums = Vec::new();
     for enum_model in enums.values() {
-        render_enum(output, enum_model);
+        if shared_enums.contains(&enum_model.name) {
+            reexported_enums.push(&enum_model.name);
+        } else {
+            render_enum(output, enum_model);
+        }
     }
+    let mut reexported_records = Vec::new();
     for record in records.values() {
-        render_record(output, record, &records, &enums);
+        if shared_records.contains(&record.name) {
+            reexported_records.push(&record.name);
+        } else {
+            render_record(output, record, &records, &enums);
+        }
+    }
+    if !reexported_enums.is_empty() || !reexported_records.is_empty() {
+        let mut names: Vec<&String> = Vec::new();
+        names.extend(&reexported_enums);
+        names.extend(&reexported_records);
+        names.sort();
+        let names_str = names
+            .iter()
+            .map(|n| n.as_str())
+            .collect::<Vec<_>>()
+            .join(", ");
+        output.push_str(&format!("        pub use super::types::{{{names_str}}};\n\n"));
     }
 
     for function in &module.functions {
@@ -290,6 +429,12 @@ fn render_module(
         let plan = plans
             .get(&(module.name.clone(), function.name.clone()))
             .expect("Core plan contains every API function");
+        if module.name == "unit_script" && function.name == "CallUnitScript" {
+            output.push_str(
+                "        #[inline]\n        pub fn call_unit_script(unit_id: i32, function_name: &str, args: &[f32], ret_capacity: usize) -> Result<CallUnitScriptValue> {\n            crate::generated::variable_io::unit_script::call_unit_script(unit_id, function_name, args, ret_capacity)\n        }\n\n",
+            );
+            continue;
+        }
         if module.name == "math_extra" && function.name == "Normalize" {
             render_normalize_forward(output);
             continue;
@@ -318,6 +463,29 @@ fn render_module(
             all_records,
         ) {
             render_fixed_forward(output, function, &records, &enums, &module_ident);
+        } else if render_dynamic_input_forward(
+            output,
+            function,
+            &module_ident,
+            &records,
+            &enums,
+            all_records,
+            plan,
+        ) {
+            // handled by dynamic-input typed forward
+        } else if render_dynamic_output_forward(
+            output,
+            function,
+            DynamicOutputRenderContext {
+                module_ident: &module_ident,
+                records: &records,
+                enums: &enums,
+                all_records,
+                all_enums,
+                plan,
+            },
+        ) {
+            // handled by the recursively-variable typed result forward
         } else {
             render_function(output, function, &records, &enums, plan);
         }
@@ -448,9 +616,10 @@ fn render_variable_list_forward(
         _ => unreachable!(),
     };
     let return_type = rust_type(&function.outputs[0].ty, &BTreeMap::new(), &BTreeMap::new());
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
     output.push_str(&format!(
         r#"        #[inline]
-        pub fn {name}({params}) -> Result<{return_type}> {{
+        {arity_lint}pub fn {name}({params}) -> Result<{return_type}> {{
             #[cfg(target_arch = "wasm32")]
             {{
                 let mut descriptor = [0u32; 3];
@@ -486,6 +655,7 @@ fn render_variable_list_forward(
         raw_module = raw_module,
         call_args = call_args,
         args = args.join(", "),
+        arity_lint = arity_lint,
     ));
     true
 }
@@ -517,6 +687,7 @@ fn render_variable_output_forward(
         .join(", ");
     let args = function.inputs.iter().map(core_abi_arg).collect::<Vec<_>>();
     let raw_module = format!("__core_variable_output_{}", rust_ident(&function.name));
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
     let call_args = args
         .iter()
         .cloned()
@@ -527,7 +698,7 @@ fn render_variable_output_forward(
         .join(", ");
     output.push_str(&format!(
         r#"        #[inline]
-        pub fn {name}({params}) -> Result<String> {{
+        {arity_lint}pub fn {name}({params}) -> Result<String> {{
             #[cfg(target_arch = "wasm32")]
             {{
                 let mut descriptor = [0u32; 3];
@@ -561,6 +732,7 @@ fn render_variable_output_forward(
         raw_module = raw_module,
         call_args = call_args,
         args = args.join(", "),
+        arity_lint = arity_lint,
     ));
     true
 }
@@ -585,6 +757,14 @@ fn core_abi_arg(field: &crate::model::FieldModel) -> String {
         SemanticType::Scalar { name: ty } if ty == "bool" => {
             format!("u32::from({name}) as i32")
         }
+        SemanticType::Scalar { name: ty }
+            if matches!(ty.as_str(), "i32" | "i64" | "f32" | "f64") =>
+        {
+            name
+        }
+        SemanticType::Scalar { name: ty } if ty == "u64" || ty == "usize" => {
+            format!("{name} as i64")
+        }
         SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => {
             format!("{name} as {}", rust_core_abi_type(&field.ty))
         }
@@ -601,19 +781,7 @@ fn render_borrowed_forward(
     all_records: &BTreeMap<String, RecordModel>,
     plan: &FunctionPlan,
 ) -> bool {
-    if function.outputs.len() != 1
-        || !matches!(
-            plan.result_strategy,
-            crate::render_core_wasm::ResultStrategy::Packed32
-        )
-        || !function.inputs.iter().all(borrowed_forward_input_supported)
-        || !crate::render_core_wasm_borrowed_host::eligible(
-            plan,
-            &function.inputs,
-            &function.outputs,
-            all_records,
-        )
-    {
+    if !routes_to_borrowed(plan, &function.inputs, &function.outputs, all_records) {
         return false;
     }
 
@@ -645,10 +813,10 @@ fn render_borrowed_forward(
                 setup.push_str(&format!(
                     "            let {name}_cstr = core::ffi::CStr::from_bytes_with_nul(&{name}_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;\n"
                 ));
-                args.push(format!("&{name}_cstr"));
+                args.push(format!("{name}_cstr"));
             }
             SemanticType::Bytes | SemanticType::List { .. } => {
-                args.push(format!("{name}.as_slice()"));
+                args.push(name);
             }
             _ => args.push(name),
         }
@@ -657,13 +825,43 @@ fn render_borrowed_forward(
         "crate::generated::borrowed::{module_ident}::{}",
         rust_ident(&function.name)
     );
-    let return_type = rust_type(&function.outputs[0].ty, records, enums);
-    output.push_str(&format!(
-        "        #[inline]\n        pub fn {}({params}) -> Result<{return_type}> {{\n{setup}            {core_path}({})\n        }}\n\n",
-        rust_ident(&function.name),
-        args.join(", "),
-    ));
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
+    if function.outputs.is_empty() {
+        output.push_str(&format!(
+            "        #[inline]\n        {arity_lint}pub fn {}({params}) -> Result<()> {{\n{setup}            {core_path}({})\n        }}\n\n",
+            rust_ident(&function.name),
+            args.join(", "),
+            arity_lint = arity_lint,
+        ));
+    } else {
+        let return_type = rust_type(&function.outputs[0].ty, records, enums);
+        output.push_str(&format!(
+            "        #[inline]\n        {arity_lint}pub fn {}({params}) -> Result<{return_type}> {{\n{setup}            {core_path}({})\n        }}\n\n",
+            rust_ident(&function.name),
+            args.join(", "),
+            arity_lint = arity_lint,
+        ));
+    }
     true
+}
+
+/// Whether the owned SDK routes this function through the borrowed wire
+/// format.  Host registration must match: only the borrowed handler should
+/// be registered for functions that return true here.
+pub fn routes_to_borrowed(
+    plan: &FunctionPlan,
+    inputs: &[crate::model::FieldModel],
+    outputs: &[crate::model::FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> bool {
+    let result_ok = match plan.result_strategy {
+        crate::render_core_wasm::ResultStrategy::Status => outputs.is_empty(),
+        crate::render_core_wasm::ResultStrategy::Packed32 => outputs.len() == 1,
+        _ => false,
+    };
+    result_ok
+        && inputs.iter().all(borrowed_forward_input_supported)
+        && crate::render_core_wasm_borrowed_host::eligible(plan, inputs, outputs, records)
 }
 
 fn borrowed_forward_input_supported(field: &crate::model::FieldModel) -> bool {
@@ -785,16 +983,16 @@ fn render_special_forward(
     if module.name == "terrain" {
         match rust_ident(&function.name).as_str() {
             "get_water_plane_level" => output.push_str(
-                "        #[inline]\n        pub fn get_water_plane_level(_unused: u8) -> Result<f32> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_water_plane_level::call() } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(f32::from_bits(packed as u32));\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_water_plane_level {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-water-plane-level\"]\n                pub fn call() -> i64;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_water_plane_level(_unused: u8) -> Result<f32> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_water_plane_level::call() } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(f32::from_bits(packed as u32))\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_water_plane_level {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-water-plane-level\"]\n                pub fn call() -> i64;\n            }\n        }\n\n",
             ),
             "is_pos_in_map" => output.push_str(
-                "        #[inline]\n        pub fn is_pos_in_map(x: f32, z: f32) -> Result<IsPosInMapValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_is_pos_in_map::call(x, z) } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                let flags = packed as u32;\n                return Ok(IsPosInMapValue { in_map: flags & 1 != 0, in_play_area: flags & 2 != 0 });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = (x, z); Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_is_pos_in_map {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"is-pos-in-map\"]\n                pub fn call(x: f32, z: f32) -> i64;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn is_pos_in_map(x: f32, z: f32) -> Result<IsPosInMapValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_is_pos_in_map::call(x, z) } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                let flags = packed as u32;\n                Ok(IsPosInMapValue { in_map: flags & 1 != 0, in_play_area: flags & 2 != 0 })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = (x, z); Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_is_pos_in_map {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"is-pos-in-map\"]\n                pub fn call(x: f32, z: f32) -> i64;\n            }\n        }\n\n",
             ),
             "get_ground_extremes" => output.push_str(
-                "        #[inline]\n        pub fn get_ground_extremes(_unused: u8) -> Result<GetGroundExtremesValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 16];\n                let status = unsafe { __core_terrain_ground_extremes::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(GetGroundExtremesValue {\n                    init_min_height: f32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    init_max_height: f32::from_le_bytes(output[4..8].try_into().unwrap()),\n                    curr_min_height: f32::from_le_bytes(output[8..12].try_into().unwrap()),\n                    curr_max_height: f32::from_le_bytes(output[12..16].try_into().unwrap()),\n                });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_ground_extremes {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-ground-extremes\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_ground_extremes(_unused: u8) -> Result<GetGroundExtremesValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 16];\n                let status = unsafe { __core_terrain_ground_extremes::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(GetGroundExtremesValue {\n                    init_min_height: f32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    init_max_height: f32::from_le_bytes(output[4..8].try_into().unwrap()),\n                    curr_min_height: f32::from_le_bytes(output[8..12].try_into().unwrap()),\n                    curr_max_height: f32::from_le_bytes(output[12..16].try_into().unwrap()),\n                })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_ground_extremes {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-ground-extremes\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
             ),
             "get_height_map_size" => output.push_str(
-                "        #[inline]\n        pub fn get_height_map_size(_unused: u8) -> Result<GetHeightMapSizeValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 8];\n                let status = unsafe { __core_terrain_height_map_size::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                return Ok(GetHeightMapSizeValue {\n                    points_x: i32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    points_z: i32::from_le_bytes(output[4..8].try_into().unwrap()),\n                });\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_height_map_size {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-height-map-size\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_height_map_size(_unused: u8) -> Result<GetHeightMapSizeValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 8];\n                let status = unsafe { __core_terrain_height_map_size::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(GetHeightMapSizeValue {\n                    points_x: i32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    points_z: i32::from_le_bytes(output[4..8].try_into().unwrap()),\n                })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_height_map_size {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-height-map-size\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
             ),
             _ => return false,
         }
@@ -879,13 +1077,81 @@ fn render_enum(output: &mut String, enum_model: &EnumModel) {
     output.push_str("        }\n\n");
 }
 
+fn is_copy_type(
+    ty: &SemanticType,
+    records: &BTreeMap<String, &RecordModel>,
+    enums: &BTreeMap<String, &EnumModel>,
+    visited: &mut BTreeSet<String>,
+) -> bool {
+    match ty {
+        SemanticType::Scalar { .. } => true,
+        SemanticType::Enum { name } => enums.contains_key(name),
+        SemanticType::Handle { .. } => true,
+        SemanticType::Record { name } => {
+            if !visited.insert(name.clone()) {
+                return false;
+            }
+            records.get(name).is_some_and(|r| {
+                r.fields
+                    .iter()
+                    .all(|f| is_copy_type(&f.ty, records, enums, visited))
+            })
+        }
+        _ => false,
+    }
+}
+
+fn is_default_type(
+    ty: &SemanticType,
+    records: &BTreeMap<String, &RecordModel>,
+    visited: &mut BTreeSet<String>,
+) -> bool {
+    match ty {
+        SemanticType::Scalar { .. } => true,
+        SemanticType::Handle { .. } => true,
+        SemanticType::Record { name } => {
+            if !visited.insert(name.clone()) {
+                return false;
+            }
+            records.get(name).is_some_and(|r| {
+                r.fields
+                    .iter()
+                    .all(|f| is_default_type(&f.ty, records, &mut *visited))
+            })
+        }
+        _ => false,
+    }
+}
+
+fn record_derives(
+    fields: &[FieldModel],
+    records: &BTreeMap<String, &RecordModel>,
+    enums: &BTreeMap<String, &EnumModel>,
+) -> String {
+    let all_copy = fields
+        .iter()
+        .all(|f| is_copy_type(&f.ty, records, enums, &mut BTreeSet::new()));
+    let all_default = fields
+        .iter()
+        .all(|f| is_default_type(&f.ty, records, &mut BTreeSet::new()));
+    let mut derives = vec!["Debug", "Clone"];
+    if all_copy {
+        derives.push("Copy");
+    }
+    derives.push("PartialEq");
+    if all_default {
+        derives.push("Default");
+    }
+    format!("        #[derive({})]\n", derives.join(", "))
+}
+
 fn render_record(
     output: &mut String,
     record: &RecordModel,
     records: &BTreeMap<String, &RecordModel>,
     enums: &BTreeMap<String, &EnumModel>,
 ) {
-    output.push_str("        #[derive(Debug, Clone, PartialEq)]\n");
+    output.push_str(&record_derives(&record.fields, records, enums));
     output.push_str(&format!("        pub struct {} {{\n", record.name));
     for field in &record.fields {
         output.push_str(&format!(
@@ -903,7 +1169,7 @@ fn render_output_record(
     records: &BTreeMap<String, &RecordModel>,
     enums: &BTreeMap<String, &EnumModel>,
 ) {
-    output.push_str("        #[derive(Debug, Clone, PartialEq)]\n");
+    output.push_str(&record_derives(&function.outputs, records, enums));
     output.push_str(&format!("        pub struct {}Value {{\n", function.name));
     for field in &function.outputs {
         output.push_str(&format!(
@@ -925,8 +1191,9 @@ fn render_function(
     // Every registry import must remain callable even when its ergonomic
     // semantic adapter is specialized elsewhere. This is an exact ABI
     // forwarding entry, not a fake Result or an unreachable stub. Safe typed
-    // wrappers take precedence above; callers using this last-resort entry
-    // must acknowledge the raw Core ABI with `unsafe`.
+    // wrappers take precedence above. The import itself is declared safe at
+    // the FFI boundary: the host validates every pointer/count pair before
+    // touching guest memory, and callers never need to write an unsafe block.
     let signature =
         handwritten_signature_override(&plan.module, &function.name).unwrap_or(&plan.signature);
     let (parameter_types, result_type) = signature
@@ -955,8 +1222,9 @@ fn render_function(
         .collect::<Vec<_>>()
         .join(", ");
     let raw_module = format!("__core_owned_{}", rust_ident(&function.name));
-    output.push_str(&format!(
-        "        #[cfg(target_arch = \"wasm32\")]\n        mod {raw_module} {{\n            #[link(wasm_import_module = \"{module}\")]\n            extern \"C\" {{\n                #[link_name = \"{import}\"]\n                pub fn call({params}) -> {result};\n            }}\n        }}\n\n        #[doc = \"Exact Core ABI forwarding entry for {module}.{import}.\"]\n        #[inline]\n        pub unsafe fn {name}({params}) -> {result} {{\n            unsafe {{ {raw_module}::call({args}) }}\n        }}\n\n",
+    let arity_lint = too_many_arguments_attribute(parameter_types.len(), 12);
+    output.push_str(format!(
+        "        #[cfg(target_arch = \"wasm32\")]\n        mod {raw_module} {{\n            #[link(wasm_import_module = \"{module}\")]\n            unsafe extern \"C\" {{\n                #[link_name = \"{import}\"]\n                pub safe fn call({params}) -> {result};\n            }}\n        }}\n\n        #[doc = \"Exact Core ABI forwarding entry for {module}.{import}.\"]\n        #[doc(hidden)]\n        #[inline]\n        pub fn {name}({params}) -> {result} {{\n            {raw_module}::call({args})\n        }}\n\n",
         raw_module = raw_module,
         module = plan.import_module,
         import = plan.import_name,
@@ -964,7 +1232,10 @@ fn render_function(
         params = params,
         result = result_type,
         args = args,
-    ));
+        )
+        .replace("pub fn ", &format!("{arity_lint}pub fn "))
+        .as_str(),
+    );
 }
 
 fn rust_signature_type(signature: &str) -> &'static str {
@@ -1075,14 +1346,14 @@ fn render_normalize_forward(output: &mut String) {
                 if status != 0 {
                     return Err(crate::ApiError::new(status));
                 }
-                return Ok(NormalizeValue {
+                Ok(NormalizeValue {
                     length: output[3],
                     vec: Float3 {
                         x: output[0],
                         y: output[1],
                         z: output[2],
                     },
-                });
+                })
             }
             #[cfg(not(target_arch = "wasm32"))]
             {
@@ -1163,9 +1434,11 @@ fn render_fixed_forward(
         [field] => rust_type(&field.ty, records, enums),
         _ => format!("{}Value", function.name),
     };
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
     output.push_str(&format!(
-        "        #[inline]\n        pub fn {}({params}) -> Result<{return_type}> {{\n            {body}\n        }}\n\n",
+        "        #[inline]\n        {arity_lint}pub fn {}({params}) -> Result<{return_type}> {{\n            {body}\n        }}\n\n",
         rust_ident(&function.name),
+        arity_lint = arity_lint,
     ));
 }
 
@@ -1201,7 +1474,7 @@ fn convert_to_core(
             format!("crate::generated::{module_ident}::{name} {{ {fields} }}")
         }
         SemanticType::FixedArray { .. } => format!(
-            "{expression}.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?"
+            "{expression}.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?"
         ),
         _ => expression.to_owned(),
     }
@@ -1251,10 +1524,14 @@ fn convert_from_core(
                 .join(", ");
             format!("{name} {{ {fields} }}")
         }
-        SemanticType::FixedArray { element, .. } => format!(
-            "{expression}.into_iter().map(|value| Ok({})).collect::<crate::Result<Vec<_>>>()?",
-            convert_from_core(element, "value", records, enums)
-        ),
+        SemanticType::FixedArray { element, .. } => {
+            let converted = convert_from_core(element, "value", records, enums);
+            if converted == "value" {
+                format!("{expression}.into_iter().collect::<Vec<_>>()")
+            } else {
+                format!("{expression}.into_iter().map(|value| Ok({converted})).collect::<crate::Result<Vec<_>>>()?")
+            }
+        }
         _ => expression.to_owned(),
     }
 }
@@ -1333,6 +1610,10 @@ fn rust_param_type(
 ) -> String {
     match ty {
         SemanticType::String => "&str".to_owned(),
+        SemanticType::Bytes => "&[u8]".to_owned(),
+        SemanticType::List { element } | SemanticType::FixedArray { element, .. } => {
+            format!("&[{}]", rust_type(element, records, enums))
+        }
         SemanticType::Option { inner } if matches!(inner.as_ref(), SemanticType::String) => {
             "Option<&str>".to_owned()
         }
@@ -1356,6 +1637,17 @@ fn enum_variant_ident(_enum_name: &str, variant: &str) -> String {
                 .unwrap_or_default()
         })
         .collect()
+}
+
+fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
+    if count > 7 {
+        format!(
+            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
+            " ".repeat(indent)
+        )
+    } else {
+        String::new()
+    }
 }
 
 fn rust_ident(value: &str) -> String {
@@ -1413,4 +1705,798 @@ fn rust_ident(value: &str) -> String {
     } else {
         value
     }
+}
+
+fn render_dynamic_input_forward(
+    output: &mut String,
+    function: &FunctionModel,
+    module_ident: &str,
+    records: &BTreeMap<String, &RecordModel>,
+    enums: &BTreeMap<String, &EnumModel>,
+    all_records: &BTreeMap<String, RecordModel>,
+    plan: &FunctionPlan,
+) -> bool {
+    if !matches!(plan.input_strategy, InputStrategy::VariableInputBuffer) {
+        return false;
+    }
+    if !crate::render_core_wasm_dynamic_input_host::eligible(
+        plan,
+        &function.inputs,
+        &function.outputs,
+        all_records,
+    ) {
+        return false;
+    }
+
+    let direct_inputs: Vec<_> = function
+        .inputs
+        .iter()
+        .filter(|f| di_direct_type(&f.ty))
+        .collect();
+    let blob_inputs: Vec<_> = function
+        .inputs
+        .iter()
+        .filter(|f| !di_direct_type(&f.ty))
+        .collect();
+
+    let params = function
+        .inputs
+        .iter()
+        .map(|field| {
+            format!(
+                "{}: {}",
+                rust_ident(&field.name),
+                rust_param_type(&field.ty, records, enums),
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    let mut blob_setup = String::new();
+    for (index, field) in blob_inputs.iter().enumerate() {
+        let name = rust_ident(&field.name);
+        blob_setup.push_str(&di_render_blob_encode(
+            &field.ty,
+            &name,
+            index,
+            all_records,
+            records,
+        ));
+    }
+
+    let direct_args: Vec<String> = direct_inputs
+        .iter()
+        .map(|field| di_direct_arg(&field.ty, &rust_ident(&field.name)))
+        .collect();
+
+    let blob_args: Vec<String> = (0..blob_inputs.len())
+        .map(|index| format!("&__blob{index}"))
+        .collect();
+
+    let di_path = format!(
+        "crate::generated::dynamic_input::{module_ident}::{}",
+        rust_ident(&function.name)
+    );
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
+
+    match plan.result_strategy {
+        ResultStrategy::Status => {
+            let all_args = direct_args
+                .iter()
+                .chain(blob_args.iter())
+                .cloned()
+                .collect::<Vec<_>>()
+                .join(", ");
+            output.push_str(&format!(
+                "        #[inline]\n        {arity_lint}pub fn {}({params}) -> Result<()> {{\n{blob_setup}            {di_path}({all_args})\n        }}\n\n",
+                rust_ident(&function.name),
+                arity_lint = arity_lint,
+            ));
+        }
+        ResultStrategy::Packed32 => {
+            let return_type = match &function.outputs[0].ty {
+                SemanticType::Scalar { name } if name == "bool" => "bool",
+                SemanticType::Scalar { name } if name == "f32" => "f32",
+                _ => "i32",
+            };
+            let all_args = direct_args
+                .iter()
+                .chain(blob_args.iter())
+                .cloned()
+                .collect::<Vec<_>>()
+                .join(", ");
+            output.push_str(&format!(
+                "        #[inline]\n        {arity_lint}pub fn {}({params}) -> Result<{return_type}> {{\n{blob_setup}            {di_path}({all_args})\n        }}\n\n",
+                rust_ident(&function.name),
+                arity_lint = arity_lint,
+            ));
+        }
+        ResultStrategy::FixedOutputBuffer { bytes, .. } => {
+            let all_args = direct_args
+                .iter()
+                .chain(blob_args.iter())
+                .cloned()
+                .collect::<Vec<_>>()
+                .join(", ");
+            let return_type = if function.outputs.len() == 1 {
+                rust_type(&function.outputs[0].ty, records, enums)
+            } else {
+                format!("{}Value", function.name)
+            };
+            let decode = di_render_output_decode(function, all_records);
+            output.push_str(&format!(
+                "        #[inline]\n        {arity_lint}pub fn {}({params}) -> Result<{return_type}> {{\n{blob_setup}            let mut __output = [0u8; {bytes}];\n            {di_path}({all_args}, &mut __output)?;\n            let mut __cursor = 0usize;\n{decode}        }}\n\n",
+                rust_ident(&function.name),
+                arity_lint = arity_lint,
+            ));
+        }
+        ResultStrategy::VariableOutputBuffer => {
+            return di_render_variable_output_forward(
+                output,
+                function,
+                VariableOutputRenderContext {
+                    records,
+                    enums,
+                    all_records,
+                    params: &params,
+                    blob_setup: &blob_setup,
+                    direct_args: &direct_args,
+                    blob_args: &blob_args,
+                    di_path: &di_path,
+                },
+            );
+        }
+        ResultStrategy::Unsupported => return false,
+    }
+    true
+}
+
+struct VariableOutputRenderContext<'a> {
+    records: &'a BTreeMap<String, &'a RecordModel>,
+    enums: &'a BTreeMap<String, &'a EnumModel>,
+    all_records: &'a BTreeMap<String, RecordModel>,
+    params: &'a str,
+    blob_setup: &'a str,
+    direct_args: &'a [String],
+    blob_args: &'a [String],
+    di_path: &'a str,
+}
+
+fn di_render_variable_output_forward(
+    output: &mut String,
+    function: &FunctionModel,
+    context: VariableOutputRenderContext<'_>,
+) -> bool {
+    if function.outputs.len() != 1 {
+        return false;
+    }
+    let field = &function.outputs[0];
+    let SemanticType::List { element } = &field.ty else {
+        return false;
+    };
+    let Some((element_bytes, _)) = di_fixed_wire_layout(element, context.all_records) else {
+        return false;
+    };
+    let return_type = rust_type(&field.ty, context.records, context.enums);
+    let element_type = rust_type(element, context.records, context.enums);
+    let all_args = context
+        .direct_args
+        .iter()
+        .chain(context.blob_args.iter())
+        .cloned()
+        .collect::<Vec<_>>()
+        .join(", ");
+    let decode_element = di_render_element_decode(element, context.all_records);
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
+    output.push_str(&format!(
+        r#"        #[inline]
+        {arity_lint}pub fn {name}({params}) -> Result<{return_type}> {{
+{blob_setup}            let mut __output = Vec::<u8>::new();
+            loop {{
+                match {di_path}({all_args}, &mut __output) {{
+                    Ok(required) => {{
+                        __output.truncate(required * {element_bytes});
+                        let mut __result = Vec::<{element_type}>::with_capacity(required);
+                        let mut __cursor = 0usize;
+                        for _ in 0..required {{
+{decode_element}                        }}
+                        return Ok(__result);
+                    }}
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {{
+                        __output.resize(error.required * {element_bytes}, 0);
+                    }}
+                    Err(error) => return Err(error.error),
+                }}
+            }}
+        }}
+
+"#,
+        name = rust_ident(&function.name),
+        params = context.params,
+        blob_setup = context.blob_setup,
+        di_path = context.di_path,
+        arity_lint = arity_lint,
+    ));
+    true
+}
+
+struct DynamicOutputRenderContext<'a> {
+    module_ident: &'a str,
+    records: &'a BTreeMap<String, &'a RecordModel>,
+    enums: &'a BTreeMap<String, &'a EnumModel>,
+    all_records: &'a BTreeMap<String, RecordModel>,
+    all_enums: &'a BTreeMap<String, EnumModel>,
+    plan: &'a FunctionPlan,
+}
+
+fn render_dynamic_output_forward(
+    output: &mut String,
+    function: &FunctionModel,
+    context: DynamicOutputRenderContext<'_>,
+) -> bool {
+    if !matches!(context.plan.input_strategy, InputStrategy::Direct)
+        || !crate::render_core_wasm_dynamic_output_host::eligible(
+            context.plan,
+            &function.inputs,
+            &function.outputs,
+            context.all_records,
+        )
+        || !function.outputs.iter().all(|field| {
+            dynamic_decode_supported(&field.ty, context.all_records, context.all_enums)
+        })
+    {
+        return false;
+    }
+
+    let params = function
+        .inputs
+        .iter()
+        .map(|field| {
+            format!(
+                "{}: {}",
+                rust_ident(&field.name),
+                rust_param_type(&field.ty, context.records, context.enums),
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+    let args = function
+        .inputs
+        .iter()
+        .map(|field| di_direct_arg(&field.ty, &rust_ident(&field.name)))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let return_type = if function.outputs.len() == 1 {
+        rust_type(&function.outputs[0].ty, context.records, context.enums)
+    } else {
+        format!("{}Value", function.name)
+    };
+    let decode = dynamic_decode_outputs(function, context.all_records, context.all_enums);
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
+    let call = if args.is_empty() {
+        format!(
+            "crate::generated::dynamic_output::{}::{}(&mut __output)",
+            context.module_ident,
+            rust_ident(&function.name)
+        )
+    } else {
+        format!(
+            "crate::generated::dynamic_output::{}::{}({args}, &mut __output)",
+            context.module_ident,
+            rust_ident(&function.name)
+        )
+    };
+    output.push_str(&format!(
+        r#"        #[inline]
+        {arity_lint}pub fn {name}({params}) -> Result<{return_type}> {{
+            let mut __output = Vec::<u8>::new();
+            loop {{
+                match {call} {{
+                    Ok(required) => {{
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+{decode}                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {{
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }}
+                        return Ok(__result);
+                    }}
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {{
+                        __output.resize(error.required, 0);
+                    }}
+                    Err(error) => return Err(error.error),
+                }}
+            }}
+        }}
+
+"#,
+        name = rust_ident(&function.name),
+        arity_lint = arity_lint,
+    ));
+    true
+}
+
+fn dynamic_decode_supported(
+    ty: &SemanticType,
+    records: &BTreeMap<String, RecordModel>,
+    enums: &BTreeMap<String, EnumModel>,
+) -> bool {
+    match ty {
+        SemanticType::Scalar { .. }
+        | SemanticType::Handle { .. }
+        | SemanticType::String
+        | SemanticType::Bytes => true,
+        // Enum decoding needs a generated value validation table. Keep those
+        // on the existing raw/handwritten path until that table is generated.
+        SemanticType::Enum { .. } => enums.contains_key(match ty {
+            SemanticType::Enum { name } => name,
+            _ => unreachable!(),
+        }),
+        SemanticType::Record { name } => records.get(name).is_some_and(|record| {
+            record.fields.iter().all(|field| {
+                if is_implicit_count_field(field, &record.fields) {
+                    return true;
+                }
+                dynamic_decode_supported(&field.ty, records, enums)
+            })
+        }),
+        SemanticType::List { element } | SemanticType::FixedArray { element, .. } => {
+            dynamic_decode_supported(element, records, enums)
+        }
+        SemanticType::Option { inner } => dynamic_decode_supported(inner, records, enums),
+        SemanticType::Result { .. }
+        | SemanticType::Callback { .. }
+        | SemanticType::Pointer { .. }
+        | SemanticType::Unknown { .. } => false,
+    }
+}
+
+fn dynamic_decode_outputs(
+    function: &FunctionModel,
+    records: &BTreeMap<String, RecordModel>,
+    enums: &BTreeMap<String, EnumModel>,
+) -> String {
+    if function.outputs.len() == 1 {
+        let field = &function.outputs[0];
+        return format!(
+            "                        let __result = {};\n",
+            dynamic_decode_field(&field.ty, Some(field), records, enums)
+        );
+    }
+    let fields = function
+        .outputs
+        .iter()
+        .map(|field| {
+            format!(
+                "                            {}: {},",
+                rust_ident(&field.name),
+                dynamic_decode_field(&field.ty, Some(field), records, enums)
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    format!(
+        "                        let __result = {}Value {{\n{fields}\n                        }};\n",
+        function.name
+    )
+}
+
+fn dynamic_decode_field(
+    ty: &SemanticType,
+    _field: Option<&crate::model::FieldModel>,
+    records: &BTreeMap<String, RecordModel>,
+    enums: &BTreeMap<String, EnumModel>,
+) -> String {
+    let wire = "crate::generated::__core_wire";
+    let error = "crate::ApiError::new(crate::ErrorCode::Internal as i32)";
+    match ty {
+        SemanticType::Scalar { name } => match name.as_str() {
+            "bool" => format!("{wire}::boolean(&__output, &mut __cursor).ok_or({error})?"),
+            "f32" => format!("{wire}::f32(&__output, &mut __cursor).ok_or({error})?"),
+            "f64" => format!("{wire}::f64(&__output, &mut __cursor).ok_or({error})?"),
+            "i64" | "isize" => format!("{wire}::i64(&__output, &mut __cursor).ok_or({error})?"),
+            "u64" | "usize" => format!("{wire}::u64(&__output, &mut __cursor).ok_or({error})?"),
+            "i32" => format!("{wire}::i32(&__output, &mut __cursor).ok_or({error})?"),
+            "i8" | "i16" => {
+                format!("{wire}::i32(&__output, &mut __cursor).ok_or({error})? as {name}")
+            }
+            "u32" => format!("{wire}::u32(&__output, &mut __cursor).ok_or({error})?"),
+            _ => format!("{wire}::u32(&__output, &mut __cursor).ok_or({error})? as {name}"),
+        },
+        SemanticType::Handle { .. } => {
+            format!("{wire}::u64(&__output, &mut __cursor).ok_or({error})?")
+        }
+        SemanticType::String => {
+            format!("{wire}::string(&__output, &mut __cursor).ok_or({error})?")
+        }
+        SemanticType::Bytes => {
+            format!("{wire}::bytes(&__output, &mut __cursor).ok_or({error})?")
+        }
+        SemanticType::Enum { name } => {
+            let enum_model = &enums[name];
+            let variants = enum_model
+                .variants
+                .iter()
+                .map(|(variant, value)| {
+                    format!(
+                        "                            {value} => {name}::{},",
+                        enum_variant_ident(name, variant)
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+            format!(
+                "{{ let __value = {wire}::i32(&__output, &mut __cursor).ok_or({error})?; match __value {{\n{variants}\n                            _ => return Err({error}),\n                        }} }}"
+            )
+        }
+        SemanticType::Record { name } => {
+            let record = &records[name];
+            let fields = record
+                .fields
+                .iter()
+                .filter(|record_field| !is_implicit_count_field(record_field, &record.fields))
+                .map(|record_field| {
+                    format!(
+                        "{}: {}",
+                        rust_ident(&record_field.name),
+                        dynamic_decode_field(&record_field.ty, Some(record_field), records, enums,)
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("{name} {{ {fields} }}")
+        }
+        SemanticType::List { element } => {
+            let element = dynamic_decode_field(element, None, records, enums);
+            format!(
+                "{{ let __count = {wire}::u32(&__output, &mut __cursor).ok_or({error})? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count {{ __items.push({element}); }} __items }}"
+            )
+        }
+        SemanticType::FixedArray { element, length } => {
+            let element = dynamic_decode_field(element, None, records, enums);
+            format!(
+                "{{ let mut __items = Vec::with_capacity({length}); for _ in 0..{length}usize {{ __items.push({element}); }} __items }}"
+            )
+        }
+        SemanticType::Option { inner } => {
+            let inner = dynamic_decode_field(inner, None, records, enums);
+            format!(
+                "{{ if {wire}::boolean(&__output, &mut __cursor).ok_or({error})? {{ Some({inner}) }} else {{ None }} }}"
+            )
+        }
+        _ => "Default::default()".to_owned(),
+    }
+}
+
+fn is_implicit_count_field(
+    field: &crate::model::FieldModel,
+    fields: &[crate::model::FieldModel],
+) -> bool {
+    fields.iter().any(|candidate| {
+        candidate
+            .metadata
+            .iter()
+            .any(|metadata| metadata.strip_prefix("count-field:") == Some(field.name.as_str()))
+    })
+}
+
+fn di_direct_type(ty: &SemanticType) -> bool {
+    matches!(
+        ty,
+        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. }
+    )
+}
+
+fn di_direct_arg(ty: &SemanticType, name: &str) -> String {
+    match ty {
+        SemanticType::Scalar { name: ty_name } => match ty_name.as_str() {
+            "bool" | "i8" | "u8" | "char" | "i16" | "u16" | "u32" => {
+                format!("{name} as i32")
+            }
+            "u64" | "usize" => format!("{name} as i64"),
+            _ => name.to_owned(),
+        },
+        SemanticType::Handle { .. } => format!("{name} as i64"),
+        SemanticType::Enum { .. } => format!("{name} as i32"),
+        _ => name.to_owned(),
+    }
+}
+
+fn di_render_blob_encode(
+    ty: &SemanticType,
+    expr: &str,
+    index: usize,
+    all_records: &BTreeMap<String, RecordModel>,
+    records: &BTreeMap<String, &RecordModel>,
+) -> String {
+    let var = format!("__blob{index}");
+    match ty {
+        SemanticType::String => {
+            format!(
+                "            let {var} = {{ let mut __b = Vec::with_capacity(4 + {expr}.len()); __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes()); __b.extend_from_slice({expr}.as_bytes()); __b }};\n"
+            )
+        }
+        SemanticType::Bytes => {
+            format!(
+                "            let {var} = {{ let mut __b = Vec::with_capacity(4 + {expr}.len()); __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes()); __b.extend_from_slice({expr}); __b }};\n"
+            )
+        }
+        SemanticType::Record { name } => {
+            let record = all_records
+                .get(name)
+                .or_else(|| records.get(name).copied())
+                .expect("record exists");
+            let mut encode = String::new();
+            for field in &record.fields {
+                di_render_field_encode(
+                    &field.ty,
+                    &format!("{expr}.{}", rust_ident(&field.name)),
+                    &mut encode,
+                    all_records,
+                    records,
+                );
+            }
+            let (_, alignment) = di_fixed_wire_layout(ty, all_records).unwrap_or((0, 4));
+            if alignment > 1 {
+                encode.push_str(&format!(
+                    " while !__b.len().is_multiple_of({alignment}) {{ __b.push(0); }}"
+                ));
+            }
+            format!("            let {var} = {{ let mut __b = Vec::new();{encode} __b }};\n")
+        }
+        SemanticType::List { element } => {
+            if matches!(element.as_ref(), SemanticType::String) {
+                format!(
+                    "            let {var} = {{ let mut __b = Vec::new(); __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes()); for __item in {expr}.iter() {{ __b.extend_from_slice(&(__item.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.as_bytes()); }} __b }};\n"
+                )
+            } else {
+                let mut item_encode = String::new();
+                di_render_field_encode(element, "__item", &mut item_encode, all_records, records);
+                let iter_method = if di_direct_type(element) {
+                    "iter().copied()"
+                } else {
+                    "iter()"
+                };
+                format!(
+                    "            let {var} = {{ let mut __b = Vec::new(); __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes()); for __item in {expr}.{iter_method} {{{item_encode}}} __b }};\n"
+                )
+            }
+        }
+        SemanticType::FixedArray { element, length } => {
+            let mut item_encode = String::new();
+            for i in 0..*length {
+                di_render_field_encode(
+                    element,
+                    &format!("{expr}[{i}]"),
+                    &mut item_encode,
+                    all_records,
+                    records,
+                );
+            }
+            format!("            let {var} = {{ let mut __b = Vec::new();{item_encode} __b }};\n")
+        }
+        _ => format!("            let {var} = Vec::new(); // unsupported blob type\n"),
+    }
+}
+
+fn di_render_field_encode(
+    ty: &SemanticType,
+    expr: &str,
+    output: &mut String,
+    all_records: &BTreeMap<String, RecordModel>,
+    records: &BTreeMap<String, &RecordModel>,
+) {
+    match ty {
+        SemanticType::Scalar { name } => match name.as_str() {
+            "bool" => output.push_str(&format!(
+                " __b.extend_from_slice(&(if {expr} {{ 1u32 }} else {{ 0u32 }}).to_le_bytes());"
+            )),
+            "f32" => output.push_str(&format!(
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&{expr}.to_bits().to_le_bytes());"
+            )),
+            "f64" => output.push_str(&format!(
+                " while !__b.len().is_multiple_of(8) {{ __b.push(0); }} __b.extend_from_slice(&{expr}.to_bits().to_le_bytes());"
+            )),
+            "i64" | "isize" => output.push_str(&format!(
+                " while !__b.len().is_multiple_of(8) {{ __b.push(0); }} __b.extend_from_slice(&({expr} as i64).to_le_bytes());"
+            )),
+            "u64" | "usize" => output.push_str(&format!(
+                " while !__b.len().is_multiple_of(8) {{ __b.push(0); }} __b.extend_from_slice(&({expr} as u64).to_le_bytes());"
+            )),
+            "u32" => output.push_str(&format!(
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&{expr}.to_le_bytes());"
+            )),
+            "i32" => output.push_str(&format!(
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&{expr}.to_le_bytes());"
+            )),
+            _ => output.push_str(&format!(
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&({expr} as u32).to_le_bytes());"
+            )),
+        },
+        SemanticType::Enum { .. } => {
+            output.push_str(&format!(
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&({expr} as i32).to_le_bytes());"
+            ));
+        }
+        SemanticType::Handle { .. } => {
+            output.push_str(&format!(
+                " while !__b.len().is_multiple_of(8) {{ __b.push(0); }} __b.extend_from_slice(&({expr} as u64).to_le_bytes());"
+            ));
+        }
+        SemanticType::String => {
+            output.push_str(&format!(
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes()); __b.extend_from_slice({expr}.as_bytes());"
+            ));
+        }
+        SemanticType::Bytes => {
+            output.push_str(&format!(
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes()); __b.extend_from_slice({expr});"
+            ));
+        }
+        SemanticType::Record { name } => {
+            let record = all_records
+                .get(name)
+                .or_else(|| records.get(name).copied())
+                .expect("record exists");
+            for field in &record.fields {
+                di_render_field_encode(
+                    &field.ty,
+                    &format!("{expr}.{}", rust_ident(&field.name)),
+                    output,
+                    all_records,
+                    records,
+                );
+            }
+            if let Some((_, alignment)) = di_fixed_wire_layout(ty, all_records) {
+                if alignment > 1 {
+                    output.push_str(&format!(
+                        " while !__b.len().is_multiple_of({alignment}) {{ __b.push(0); }}"
+                    ));
+                }
+            }
+        }
+        SemanticType::FixedArray { element, length } => {
+            let iter_var = format!("__i{}", output.len() % 1000);
+            output.push_str(&format!(" for {iter_var} in 0..{length}usize {{"));
+            di_render_field_encode(
+                element,
+                &format!("{expr}[{iter_var}]"),
+                output,
+                all_records,
+                records,
+            );
+            output.push_str(" }");
+        }
+        SemanticType::List { element } => {
+            output.push_str(&format!(
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes());"
+            ));
+            if matches!(element.as_ref(), SemanticType::String) {
+                output.push_str(&format!(
+                    " for __item in {expr}.iter() {{ __b.extend_from_slice(&(__item.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.as_bytes()); }}"
+                ));
+            } else {
+                let iter_method = if di_direct_type(element) { "iter().copied()" } else { "iter()" };
+                output.push_str(&format!(" for __item in {expr}.{iter_method} {{"));
+                di_render_field_encode(element, "__item", output, all_records, records);
+                output.push_str(" }");
+            }
+        }
+        _ => {}
+    }
+}
+
+fn di_render_output_decode(
+    function: &FunctionModel,
+    all_records: &BTreeMap<String, RecordModel>,
+) -> String {
+    let wire = "crate::generated::__core_wire";
+    let err = "crate::ApiError::new(crate::ErrorCode::Internal as i32)";
+    if function.outputs.len() == 1 {
+        let field = &function.outputs[0];
+        let decode = di_decode_field(&field.ty, all_records, wire, err);
+        format!("            Ok({decode})\n")
+    } else {
+        let fields = function
+            .outputs
+            .iter()
+            .map(|field| {
+                let decode = di_decode_field(&field.ty, all_records, wire, err);
+                format!("                {}: {decode}", rust_ident(&field.name))
+            })
+            .collect::<Vec<_>>()
+            .join(",\n");
+        format!(
+            "            Ok({}Value {{\n{fields}\n            }})\n",
+            function.name
+        )
+    }
+}
+
+fn di_decode_field(
+    ty: &SemanticType,
+    all_records: &BTreeMap<String, RecordModel>,
+    wire: &str,
+    err: &str,
+) -> String {
+    match ty {
+        SemanticType::Scalar { name } => match name.as_str() {
+            "bool" => format!("{wire}::boolean(&__output, &mut __cursor).ok_or({err})?"),
+            "f32" => format!("{wire}::f32(&__output, &mut __cursor).ok_or({err})?"),
+            "f64" => format!("{wire}::f64(&__output, &mut __cursor).ok_or({err})?"),
+            "i32" => format!("{wire}::i32(&__output, &mut __cursor).ok_or({err})?"),
+            "u32" => format!("{wire}::u32(&__output, &mut __cursor).ok_or({err})?"),
+            "i64" | "isize" => format!("{wire}::i64(&__output, &mut __cursor).ok_or({err})?"),
+            "u64" | "usize" => format!("{wire}::u64(&__output, &mut __cursor).ok_or({err})?"),
+            _ => format!("{wire}::u32(&__output, &mut __cursor).ok_or({err})? as {name}"),
+        },
+        SemanticType::Enum { .. } => {
+            format!("{wire}::i32(&__output, &mut __cursor).ok_or({err})?")
+        }
+        SemanticType::Handle { .. } => {
+            format!("{wire}::u64(&__output, &mut __cursor).ok_or({err})?")
+        }
+        SemanticType::Record { name } => {
+            let record = &all_records[name];
+            let fields = record
+                .fields
+                .iter()
+                .map(|field| {
+                    let decode = di_decode_field(&field.ty, all_records, wire, err);
+                    format!("{}: {decode}", rust_ident(&field.name))
+                })
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("{name} {{ {fields} }}")
+        }
+        SemanticType::FixedArray { element, length } => {
+            let decode = di_decode_field(element, all_records, wire, err);
+            format!(
+                "{{ let mut __arr = Vec::with_capacity({length}); for _ in 0..{length}usize {{ __arr.push({decode}); }} __arr }}"
+            )
+        }
+        _ => "Default::default()".to_owned(),
+    }
+}
+
+fn di_render_element_decode(
+    element: &SemanticType,
+    all_records: &BTreeMap<String, RecordModel>,
+) -> String {
+    let wire = "crate::generated::__core_wire";
+    let err = "crate::ApiError::new(crate::ErrorCode::Internal as i32)";
+    let decode = di_decode_field(element, all_records, wire, err);
+    format!("                            __result.push({decode});\n")
+}
+
+fn di_fixed_wire_layout(
+    ty: &SemanticType,
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<(u32, u32)> {
+    match ty {
+        SemanticType::Scalar { name } => match name.as_str() {
+            "i64" | "u64" | "isize" | "usize" | "f64" => Some((8, 8)),
+            _ => Some((4, 4)),
+        },
+        SemanticType::Enum { .. } => Some((4, 4)),
+        SemanticType::Handle { .. } => Some((8, 8)),
+        SemanticType::FixedArray { element, length } => {
+            let (bytes, alignment) = di_fixed_wire_layout(element, records)?;
+            Some((bytes.checked_mul(u32::try_from(*length).ok()?)?, alignment))
+        }
+        SemanticType::Record { name } => {
+            let mut bytes = 0u32;
+            let mut alignment = 1u32;
+            for field in &records.get(name)?.fields {
+                let (fb, fa) = di_fixed_wire_layout(&field.ty, records)?;
+                bytes = di_align_up(bytes, fa).checked_add(fb)?;
+                alignment = alignment.max(fa);
+            }
+            Some((di_align_up(bytes, alignment), alignment))
+        }
+        _ => None,
+    }
+}
+
+fn di_align_up(value: u32, alignment: u32) -> u32 {
+    (value + alignment - 1) & !(alignment - 1)
 }

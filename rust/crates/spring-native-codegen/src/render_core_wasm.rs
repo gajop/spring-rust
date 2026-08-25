@@ -484,6 +484,8 @@ fn environment_mask(environments: &BTreeSet<Environment>) -> u32 {
             Environment::GaiaSynced => 2,
             Environment::GaiaUnsynced => 3,
             Environment::Ui => 4,
+            Environment::Menu => 5,
+            Environment::Intro => 6,
         };
         mask | (1 << bit)
     })

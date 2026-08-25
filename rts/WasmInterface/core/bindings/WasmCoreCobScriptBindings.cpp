@@ -167,11 +167,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterCobScriptImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->syncedCtrl == nullptr || state->native->syncedCtrl->cobScript == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register COB-script Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->syncedCtrl == nullptr || state->native->syncedCtrl->cobScript == nullptr)
+		return true;
 	const wasm_valkind_t params[] = {
 		WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32,
 		WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32,

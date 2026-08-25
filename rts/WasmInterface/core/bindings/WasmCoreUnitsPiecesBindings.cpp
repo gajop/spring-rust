@@ -183,11 +183,12 @@ wasm_trap_t* GetUnitScriptNames(void* environment, wasmtime_caller_t* caller,
 bool RegisterUnitsPiecesImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->unitsPieces == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register UnitsPieces Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->unitsPieces == nullptr)
+		return true;
 
 	const wasm_valkind_t params[] = {
 		WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32,

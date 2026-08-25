@@ -81,7 +81,7 @@ fn render_rust_macro(
     };
 
     format!(
-        "/// Export `{native}` through the shared-scratch Core ABI.{result_doc}\n#[macro_export]\nmacro_rules! {macro_name} {{\n    ($handler:path) => {{\n        #[cfg(target_arch = \"wasm32\")]\n        #[export_name = \"{export_name}\"]\n        pub extern \"C\" fn {function_name}(used_bytes: i32){result_type} {{\n            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) {{ Some(value) => value, None => core::arch::wasm32::unreachable() }};\n            let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);\n{declarations}            if !reader.finish() {{ core::arch::wasm32::unreachable(); }}\n            {result_expr}\n        }}\n    }};\n}}\n",
+        "/// Export `{native}` through the shared-scratch Core ABI.{result_doc}\n#[macro_export]\nmacro_rules! {macro_name} {{\n    ($handler:path) => {{\n        #[cfg(target_arch = \"wasm32\")]\n        #[export_name = \"{export_name}\"]\n        pub extern \"C\" fn {function_name}(used_bytes: i32){result_type} {{\n            let bytes = match __spring_core_callin_scratch_view(used_bytes) {{ Some(value) => value, None => core::arch::wasm32::unreachable() }};\n            let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);\n{declarations}            if !reader.finish() {{ core::arch::wasm32::unreachable(); }}\n            {result_expr}\n        }}\n    }};\n}}\n",
         native = callin.entry.name,
         result_doc = result_doc,
         macro_name = macro_name,

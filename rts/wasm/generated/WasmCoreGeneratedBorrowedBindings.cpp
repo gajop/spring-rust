@@ -13553,45 +13553,10 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:units-info", "get-unit-build-params",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_units_info_get_unit_build_params, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:units-info", "get-unit-sensor-radius",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_units_info_get_unit_sensor_radius, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:units-weapons", "get-unit-weapon-state",
-                MakeFuncType(params, 4, results, 1), CoreBorrowed_units_weapons_get_unit_weapon_state, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:units-pieces", "get-model-root-piece",
                 MakeFuncType(params, 1, results, 1), CoreBorrowed_units_pieces_get_model_root_piece, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:teams", "get-team-resource-stats",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_teams_get_team_resource_stats, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:teams", "get-team-resources",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_teams_get_team_resources, state, error))
             return false;
     }
     {
@@ -13672,13 +13637,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_F32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:path-finder", "request-path",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_path_finder_request_path, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:input", "get-key-code",
@@ -13723,13 +13681,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
     {
         const wasm_valkind_t params[] = {WASM_F32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:sound", "play-sound-file",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_sound_play_sound_file, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_F32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:sound", "play-sound-stream",
                 MakeFuncType(params, 3, results, 1), CoreBorrowed_sound_play_sound_stream, state, error))
             return false;
@@ -13739,20 +13690,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:sound", "preload-sound-item",
                 MakeFuncType(params, 1, results, 1), CoreBorrowed_sound_preload_sound_item, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:config", "get-config-float",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_config_get_config_float, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:config", "get-config-int",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_config_get_config_int, state, error))
             return false;
     }
     {
@@ -13973,24 +13910,10 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "change-texture-params",
-                MakeFuncType(params, 1, results, 1), CoreBorrowed_gfx_change_texture_params, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedBorrowed(linker, "spring:gfx", "copy-to-texture",
                 MakeFuncType(params, 9, results, 1), CoreBorrowed_gfx_copy_to_texture, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "create-shader",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_gfx_create_shader, state, error))
             return false;
     }
     {
@@ -14022,13 +13945,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_F32, WASM_F32, WASM_F32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "font-get-text-height",
-                MakeFuncType(params, 6, results, 1), CoreBorrowed_gfx_font_get_text_height, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_F32, WASM_F32, WASM_F32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:gfx", "font-get-text-width",
@@ -14043,52 +13959,10 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_F32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "font-print-world",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_gfx_font_print_world, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedBorrowed(linker, "spring:gfx", "generate-mipmap",
                 MakeFuncType(params, 1, results, 1), CoreBorrowed_gfx_generate_mipmap, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "get-atlas-texture",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_gfx_get_atlas_texture, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "get-fixed-state",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_gfx_get_fixed_state, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "get-global-tex-coords",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_gfx_get_global_tex_coords, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "get-subroutine-index",
-                MakeFuncType(params, 4, results, 1), CoreBorrowed_gfx_get_subroutine_index, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "get-text-height",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_gfx_get_text_height, state, error))
             return false;
     }
     {
@@ -14169,13 +14043,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "save-image",
-                MakeFuncType(params, 6, results, 1), CoreBorrowed_gfx_save_image, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedBorrowed(linker, "spring:gfx", "set-fbo-attachment",
@@ -14208,13 +14075,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedBorrowed(linker, "spring:gfx", "text",
                 MakeFuncType(params, 4, results, 1), CoreBorrowed_gfx_text, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "texture-info",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_gfx_texture_info, state, error))
             return false;
     }
     {
@@ -14264,20 +14124,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:icons", "free-unit-icon",
                 MakeFuncType(params, 1, results, 1), CoreBorrowed_icons_free_unit_icon, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:markers", "add-world-text",
-                MakeFuncType(params, 1, results, 1), CoreBorrowed_markers_add_world_text, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:markers", "marker-add-point",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_markers_marker_add_point, state, error))
             return false;
     }
     {
@@ -14351,45 +14197,10 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "context-create-data-model",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_context_create_data_model, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "context-create-document",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_context_create_document, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "context-get-document",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_context_get_document, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I64, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "context-is-theme-active",
                 MakeFuncType(params, 2, results, 1), CoreBorrowed_rml_ui_context_is_theme_active, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "context-load-document",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_context_load_document, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "context-open-data-model",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_context_open_data_model, state, error))
             return false;
     }
     {
@@ -14414,62 +14225,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "create-context",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_rml_ui_create_context, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "data-model-bind-bool",
-                MakeFuncType(params, 4, results, 1), CoreBorrowed_rml_ui_data_model_bind_bool, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "data-model-bind-color",
-                MakeFuncType(params, 7, results, 1), CoreBorrowed_rml_ui_data_model_bind_color, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_F32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "data-model-bind-float",
-                MakeFuncType(params, 4, results, 1), CoreBorrowed_rml_ui_data_model_bind_float, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "data-model-bind-int",
-                MakeFuncType(params, 4, results, 1), CoreBorrowed_rml_ui_data_model_bind_int, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_F32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "data-model-bind-percent",
-                MakeFuncType(params, 4, results, 1), CoreBorrowed_rml_ui_data_model_bind_percent, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_F32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "data-model-bind-pixels",
-                MakeFuncType(params, 4, results, 1), CoreBorrowed_rml_ui_data_model_bind_pixels, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "data-model-bind-string",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_data_model_bind_string, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I64, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "data-model-set-string",
@@ -14481,20 +14236,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "document-append-to-style-sheet",
                 MakeFuncType(params, 2, results, 1), CoreBorrowed_rml_ui_document_append_to_style_sheet, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "document-create-element",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_document_create_element, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "document-create-text-node",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_document_create_text_node, state, error))
             return false;
     }
     {
@@ -14526,13 +14267,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "element-closest",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_element_closest, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I64, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "element-dispatch-event",
@@ -14544,13 +14278,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "element-form-submit",
                 MakeFuncType(params, 2, results, 1), CoreBorrowed_rml_ui_element_form_submit, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "element-get-element-by-id",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_element_get_element_by_id, state, error))
             return false;
     }
     {
@@ -14593,13 +14320,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "element-matches",
                 MakeFuncType(params, 2, results, 1), CoreBorrowed_rml_ui_element_matches, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "element-query-selector",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_element_query_selector, state, error))
             return false;
     }
     {
@@ -14677,62 +14397,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "element-tab-set-set-tab",
                 MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_element_tab_set_set_tab, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "event-get-parameter-bool",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_event_get_parameter_bool, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "event-get-parameter-float",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_event_get_parameter_float, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "event-get-parameter-int",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_event_get_parameter_int, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I64, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "event-get-parameter-type",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_event_get_parameter_type, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "get-context",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_rml_ui_get_context, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "load-font-face",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_rml_ui_load_font_face, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "regiser-event-type",
-                MakeFuncType(params, 1, results, 1), CoreBorrowed_rml_ui_regiser_event_type, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "register-event-type",
-                MakeFuncType(params, 1, results, 1), CoreBorrowed_rml_ui_register_event_type, state, error))
             return false;
     }
     {
@@ -14890,31 +14554,10 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_F32, WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "bugger-off",
-                MakeFuncType(params, 3, results, 1), CoreBorrowed_unit_control_bugger_off, state, error))
-            return false;
-    }
-    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "give-order-to-unit-array",
                 MakeFuncType(params, 4, results, 1), CoreBorrowed_unit_control_give_order_to_unit_array, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "set-unit-build-params",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_unit_control_set_unit_build_params, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "set-unit-flanking",
-                MakeFuncType(params, 2, results, 1), CoreBorrowed_unit_control_set_unit_flanking, state, error))
             return false;
     }
     {

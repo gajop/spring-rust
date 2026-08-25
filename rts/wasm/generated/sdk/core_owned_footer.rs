@@ -1,3 +1,3 @@
     #[doc(hidden)]
-    pub const __GENERATED_OWNED_CORE_MODULES: usize = 55;
+    pub const __GENERATED_OWNED_CORE_MODULES: usize = 56;
 }

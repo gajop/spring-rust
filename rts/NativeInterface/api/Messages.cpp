@@ -382,18 +382,23 @@ static void NativeSendToUnsynced(const SendToUnsyncedQuery* query, SendToUnsynce
 	if (query->message == nullptr) {
 		return;
 	}
+	bool delivered = false;
 	if (luaRules != nullptr) {
 		if (!luaRules->SendToUnsyncedMessage(query->message)) {
 			result->error = &NOT_READY_ERROR;
 			return;
 		}
-	} else if (NativeInterfaceSystem::s_instance != nullptr) {
+		delivered = true;
+	}
+	if (NativeInterfaceSystem::s_instance != nullptr) {
 		std::string error;
 		if (!NativeInterfaceSystem::s_instance->DispatchWasmSyncedMessage(query->message, error)) {
 			result->error = &NOT_READY_ERROR;
 			return;
 		}
-	} else {
+		delivered = true;
+	}
+	if (!delivered) {
 		result->error = &NOT_READY_ERROR;
 		return;
 	}

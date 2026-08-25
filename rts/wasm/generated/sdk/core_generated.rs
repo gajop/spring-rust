@@ -73,6 +73,20 @@ mod __core_wire {
     }
 
     #[inline]
+    pub fn bytes(bytes: &[u8], cursor: &mut usize) -> Option<alloc::vec::Vec<u8>> {
+        let length = u32(bytes, cursor)? as usize;
+        let end = cursor.checked_add(length)?;
+        let value = bytes.get(*cursor..end)?.to_vec();
+        *cursor = end;
+        Some(value)
+    }
+
+    #[inline]
+    pub fn string(input: &[u8], cursor: &mut usize) -> Option<alloc::string::String> {
+        alloc::string::String::from_utf8(bytes(input, cursor)?).ok()
+    }
+
+    #[inline]
     pub fn put_u32(bytes: &mut [u8], cursor: &mut usize, value: u32) -> Option<()> {
         align(bytes, cursor, 4)?;
         let end = cursor.checked_add(4)?;
@@ -233,12 +247,12 @@ pub mod units_query {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_closest_enemy_unit(range, ally_team_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_closest_enemy_unit(range, ally_team_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -252,12 +266,12 @@ pub mod units_query {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_team_unit_count(team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_team_unit_count(team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -271,12 +285,12 @@ pub mod units_query {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_team_unit_def_count(team_id as i32, unit_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_team_unit_def_count(team_id, unit_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -290,12 +304,12 @@ pub mod units_query {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_nearest_ally(unit_id as i32, range) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_nearest_ally(unit_id, range) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -321,12 +335,12 @@ pub mod units_query {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_nearest_enemy(unit_id as i32, range, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_nearest_enemy(unit_id, range, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -351,12 +365,12 @@ pub mod units_query {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_separation(unit_id1 as i32, unit_id2 as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_separation(unit_id1, unit_id2, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -370,16 +384,16 @@ pub mod units_query {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_unit_id(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_valid_unit_id(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -815,15 +829,15 @@ pub mod units_info {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_clear_units_previous_draw_flag(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -837,12 +851,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_ally_team(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_ally_team(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -861,7 +875,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_armored(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_armored(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -870,7 +884,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -889,7 +903,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_base_position(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_base_position(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -898,7 +912,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -917,7 +931,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_blocking(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_blocking(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -926,7 +940,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -940,12 +954,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_build_facing(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_build_facing(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -959,12 +973,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_buildee_radius(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_buildee_radius(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -983,16 +997,16 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_collision_volume_data(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_collision_volume_data(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = CollisionVolumeData { scale_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, test_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, disabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = CollisionVolumeData { scale_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, test_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, disabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1011,7 +1025,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_cost_table(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_cost_table(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1020,7 +1034,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1039,7 +1053,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_costs(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_costs(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1048,7 +1062,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1067,7 +1081,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_crashing(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_crashing(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1076,7 +1090,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1090,12 +1104,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_current_build_power(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_current_build_power(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1109,12 +1123,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_def_id(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_def_id(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1133,7 +1147,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_direction(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_direction(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1142,7 +1156,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1156,12 +1170,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_effective_build_range(unit_id as i32, buildee_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_effective_build_range(unit_id, buildee_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1175,12 +1189,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_experience(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_experience(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1199,16 +1213,16 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_flanking(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_flanking(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = UnitFlanking { flanking_mode: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, move_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, min_damage: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, max_damage: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, direction: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, mobility: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = UnitFlanking { flanking_mode: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, move_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, min_damage: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, max_damage: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, direction: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, mobility: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1227,7 +1241,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_harvest_storage(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_harvest_storage(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1236,7 +1250,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1250,12 +1264,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_heading(unit_id as i32, if convert_to_radians { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_heading(unit_id, if convert_to_radians { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1274,7 +1288,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_health(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_health(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1283,7 +1297,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1297,12 +1311,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_height(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_height(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1316,16 +1330,16 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_in_build_stance(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_in_build_stance(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1339,16 +1353,16 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_active(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_is_active(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1362,16 +1376,16 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_being_built(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_is_being_built(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1385,12 +1399,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_building(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_is_building(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1404,16 +1418,16 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_cloaked(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_is_cloaked(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1427,16 +1441,16 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_dead(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_is_dead(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1450,16 +1464,16 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_stunned(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_is_stunned(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1478,7 +1492,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_los_state(unit_id as i32, ally_team_id as i32, if raw { 1 } else { 0 }, output_pointer) };
+            let status = unsafe { raw::core_get_unit_los_state(unit_id, ally_team_id, if raw { 1 } else { 0 }, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1487,7 +1501,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1501,12 +1515,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_mass(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_mass(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1520,12 +1534,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_metal_extraction(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_metal_extraction(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1539,12 +1553,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_move_def_id(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_move_def_id(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1558,16 +1572,16 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_neutral(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_neutral(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1586,16 +1600,16 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_collision_volume_data(unit_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_piece_collision_volume_data(unit_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = CollisionVolumeData { scale_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, test_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, disabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = CollisionVolumeData { scale_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, test_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, disabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1614,16 +1628,16 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_pos_error_params(unit_id as i32, ally_team_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_pos_error_params(unit_id, ally_team_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = UnitPosErrorParams { pos_error_vector: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, pos_error_delta: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, next_pos_error_update: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, pos_error_bit: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = UnitPosErrorParams { pos_error_vector: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, pos_error_delta: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, next_pos_error_update: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, pos_error_bit: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1652,7 +1666,7 @@ pub mod units_info {
             debug_assert!(output_pointer_usize <= u32::MAX as usize);
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_get_unit_position(unit_id as i32, input_pointer, output_pointer) };
+            let status = unsafe { raw::core_get_unit_position(unit_id, input_pointer, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1662,7 +1676,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1676,12 +1690,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_radius(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_radius(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1700,7 +1714,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_resources(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_resources(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1709,7 +1723,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1728,7 +1742,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_rotation(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_rotation(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1737,7 +1751,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1751,12 +1765,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_seismic_signature(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_seismic_signature(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1770,12 +1784,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_self_d_time(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_self_d_time(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1805,17 +1819,17 @@ pub mod units_info {
             debug_assert!(output_pointer_usize <= u32::MAX as usize);
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_get_unit_states(unit_id as i32, input_pointer, output_pointer) };
+            let status = unsafe { raw::core_get_unit_states(unit_id, input_pointer, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let wire = output_wire;
             let mut cursor = 0usize;
-            let value = { let core_value = UnitStates { fire_state: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, move_state: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, auto_repair_level: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, repeat: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, cloak: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, active: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, trajectory: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, auto_land: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, loopback_attack: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = UnitStates { fire_state: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, move_state: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, auto_repair_level: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, repeat: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, cloak: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, active: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, trajectory: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, auto_land: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, loopback_attack: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1834,7 +1848,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_storage(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_storage(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1843,7 +1857,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1857,12 +1871,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_team(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_team(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1876,12 +1890,12 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_transporter(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_transporter(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1900,7 +1914,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_vectors(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_vectors(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1909,7 +1923,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1928,7 +1942,7 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_velocity(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_velocity(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1937,7 +1951,7 @@ pub mod units_info {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -1956,16 +1970,16 @@ pub mod units_info {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_worker_task(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_worker_task(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = UnitWorkerTask { cmd_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, target_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, has_task: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, has_target: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = UnitWorkerTask { cmd_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, target_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, has_task: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, has_target: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2070,12 +2084,12 @@ pub mod units_weapons {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_max_range(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_max_range(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2089,16 +2103,16 @@ pub mod units_weapons {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_weapon_can_fire(unit_id as i32, weapon_num as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_weapon_can_fire(unit_id, weapon_num) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2112,12 +2126,12 @@ pub mod units_weapons {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_weapon_count(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_weapon_count(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2149,16 +2163,16 @@ pub mod units_weapons {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_weapon_have_free_line_of_fire(unit_id as i32, weapon_num as i32, target_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_weapon_have_free_line_of_fire(unit_id, weapon_num, target_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2177,16 +2191,16 @@ pub mod units_weapons {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_weapon_target(unit_id as i32, weapon_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_weapon_target(unit_id, weapon_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = UnitWeaponTarget { target_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, target_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, target_pos: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value } }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = UnitWeaponTarget { target_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, target_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, target_pos: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value } }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2212,16 +2226,16 @@ pub mod units_weapons {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_weapon_test_range(unit_id as i32, weapon_num as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_weapon_test_range(unit_id, weapon_num, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2249,16 +2263,16 @@ pub mod units_weapons {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_weapon_test_target(unit_id as i32, weapon_num as i32, target_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_weapon_test_target(unit_id, weapon_num, target_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2287,16 +2301,16 @@ pub mod units_weapons {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_weapon_try_target(unit_id as i32, weapon_num as i32, target_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_weapon_try_target(unit_id, weapon_num, target_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2315,7 +2329,7 @@ pub mod units_weapons {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_weapon_vectors(unit_id as i32, weapon_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_weapon_vectors(unit_id, weapon_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2324,7 +2338,7 @@ pub mod units_weapons {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2382,16 +2396,16 @@ pub mod units_commands {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_find_unit_cmd_desc(unit_id as i32, cmd_id as i32, output_pointer) };
+            let status = unsafe { raw::core_find_unit_cmd_desc(unit_id, cmd_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2410,16 +2424,16 @@ pub mod units_commands {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_factory_bugger_off(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_factory_bugger_off(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2433,12 +2447,12 @@ pub mod units_commands {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_factory_command_count(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_factory_command_count(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2452,12 +2466,12 @@ pub mod units_commands {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_command_count(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_command_count(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2558,7 +2572,7 @@ pub mod units_pieces {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_direction(feature_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_piece_direction(feature_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2567,7 +2581,7 @@ pub mod units_pieces {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2586,7 +2600,7 @@ pub mod units_pieces {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_matrix(feature_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_piece_matrix(feature_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2595,7 +2609,7 @@ pub mod units_pieces {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2614,7 +2628,7 @@ pub mod units_pieces {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_pos_dir(feature_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_piece_pos_dir(feature_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2623,7 +2637,7 @@ pub mod units_pieces {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2642,7 +2656,7 @@ pub mod units_pieces {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_position(feature_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_piece_position(feature_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2651,7 +2665,7 @@ pub mod units_pieces {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2665,12 +2679,12 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_root_piece(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_root_piece(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2689,7 +2703,7 @@ pub mod units_pieces {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_direction(unit_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_piece_direction(unit_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2698,7 +2712,7 @@ pub mod units_pieces {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2717,7 +2731,7 @@ pub mod units_pieces {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_matrix(unit_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_piece_matrix(unit_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2726,7 +2740,7 @@ pub mod units_pieces {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2745,7 +2759,7 @@ pub mod units_pieces {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_pos_dir(unit_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_piece_pos_dir(unit_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2754,7 +2768,7 @@ pub mod units_pieces {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2773,7 +2787,7 @@ pub mod units_pieces {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_position(unit_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_piece_position(unit_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2782,7 +2796,7 @@ pub mod units_pieces {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2796,12 +2810,12 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_root_piece(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_root_piece(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2815,12 +2829,12 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_script_piece(unit_id as i32, script_num as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_script_piece(unit_id, script_num) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2918,16 +2932,16 @@ pub mod teams {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_are_players_allied(player_id1 as i32, player_id2 as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_are_players_allied(player_id1, player_id2) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2941,16 +2955,16 @@ pub mod teams {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_are_teams_allied(team_id1 as i32, team_id2 as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_are_teams_allied(team_id1, team_id2) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2969,16 +2983,16 @@ pub mod teams {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_player_controlled_unit(player_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_player_controlled_unit(player_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -2992,12 +3006,12 @@ pub mod teams {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_team_ally_team_id(team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_team_ally_team_id(team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3011,12 +3025,12 @@ pub mod teams {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_team_max_units(team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_team_max_units(team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3035,16 +3049,16 @@ pub mod teams {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_unit_stats(team_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_team_unit_stats(team_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = TeamUnitStats { killed: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, died: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, captured_by: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, captured_from: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, received: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, sent: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32 }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = TeamUnitStats { killed: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, died: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, captured_by: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, captured_from: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, received: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, sent: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3327,15 +3341,15 @@ pub mod features {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_clear_features_previous_draw_flag(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3349,12 +3363,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_ally_team(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_ally_team(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3368,16 +3382,16 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_always_update_matrix(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_always_update_matrix(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3396,7 +3410,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_blocking(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_blocking(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3405,7 +3419,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3424,16 +3438,16 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_collision_volume_data(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_collision_volume_data(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = CollisionVolumeData { scale_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, test_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, disabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = CollisionVolumeData { scale_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, test_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, disabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3447,12 +3461,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_def_id(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_def_id(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3471,7 +3485,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_direction(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_direction(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3480,7 +3494,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3494,12 +3508,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_draw_flag(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_draw_flag(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u8);
+            Ok(packed as u32 as u8)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3513,12 +3527,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_engine_draw_mask(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_engine_draw_mask(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3532,12 +3546,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_fire_time(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_fire_time(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3551,12 +3565,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_heading(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_heading(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3575,7 +3589,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_health(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_health(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3584,7 +3598,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3598,12 +3612,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_height(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_height(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3617,16 +3631,16 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_lua_draw(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_lua_draw(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3640,12 +3654,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_mass(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_mass(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3659,16 +3673,16 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_no_draw(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_no_draw(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3682,16 +3696,16 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_no_select(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_no_select(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3710,16 +3724,16 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_collision_volume_data(feature_id as i32, piece_num as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_piece_collision_volume_data(feature_id, piece_num, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = CollisionVolumeData { scale_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, test_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, disabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = CollisionVolumeData { scale_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, scale_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, offset_z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, test_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, disabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3738,7 +3752,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_position(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_position(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3747,7 +3761,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3766,7 +3780,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_position_ext(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_position_ext(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3775,7 +3789,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3789,12 +3803,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_radius(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_radius(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3813,7 +3827,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_resources(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_resources(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3822,7 +3836,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3841,7 +3855,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_rotation(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_rotation(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3850,7 +3864,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3869,16 +3883,16 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_selection_volume_data(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_selection_volume_data(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = FeatureSelectionVolumeData { scales: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, offsets: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, use_cont_hit_test: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, ignore_hits: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = FeatureSelectionVolumeData { scales: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, offsets: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, volume_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, primary_axis: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, use_cont_hit_test: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, ignore_hits: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3892,12 +3906,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_separation(feature_id1 as i32, feature_id2 as i32, if positional { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_separation(feature_id1, feature_id2, if positional { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3911,12 +3925,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_smoke_time(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_smoke_time(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3930,12 +3944,12 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_team(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_team(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3954,7 +3968,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_transform_matrix(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_transform_matrix(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3963,7 +3977,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -3982,7 +3996,7 @@ pub mod features {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_velocity(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_velocity(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3991,7 +4005,7 @@ pub mod features {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4005,16 +4019,16 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_feature_id(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_valid_feature_id(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4126,12 +4140,12 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_ally_team_id(projectile_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_projectile_ally_team_id(projectile_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4145,12 +4159,12 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_def_id(projectile_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_projectile_def_id(projectile_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4169,7 +4183,7 @@ pub mod projectiles {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_direction(projectile_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_projectile_direction(projectile_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4178,7 +4192,7 @@ pub mod projectiles {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4197,7 +4211,7 @@ pub mod projectiles {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_gravity(projectile_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_projectile_gravity(projectile_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4206,7 +4220,7 @@ pub mod projectiles {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4220,16 +4234,16 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_is_intercepted(projectile_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_projectile_is_intercepted(projectile_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4243,12 +4257,12 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_owner_id(projectile_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_projectile_owner_id(projectile_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4267,7 +4281,7 @@ pub mod projectiles {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_position(projectile_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_projectile_position(projectile_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4276,7 +4290,7 @@ pub mod projectiles {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4295,16 +4309,16 @@ pub mod projectiles {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_target(projectile_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_projectile_target(projectile_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = ProjectileTarget { target_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, target_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, target_pos: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value } }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = ProjectileTarget { target_type: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, target_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, target_pos: { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value } }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4318,12 +4332,12 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_team_id(projectile_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_projectile_team_id(projectile_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4337,12 +4351,12 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_time_to_live(projectile_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_projectile_time_to_live(projectile_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4361,7 +4375,7 @@ pub mod projectiles {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_type(projectile_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_projectile_type(projectile_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4370,7 +4384,7 @@ pub mod projectiles {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4389,7 +4403,7 @@ pub mod projectiles {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_velocity(projectile_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_projectile_velocity(projectile_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4398,7 +4412,7 @@ pub mod projectiles {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4498,7 +4512,7 @@ pub mod los {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_closest_valid_position(unit_def_id as i32, x, z, radius, output_pointer) };
+            let status = unsafe { raw::core_get_closest_valid_position(unit_def_id, x, z, radius, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4507,7 +4521,7 @@ pub mod los {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4537,7 +4551,7 @@ pub mod los {
             debug_assert!(output_pointer_usize <= u32::MAX as usize);
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_get_position_los_state(ally_team_id as i32, input_pointer, output_pointer) };
+            let status = unsafe { raw::core_get_position_los_state(ally_team_id, input_pointer, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4547,7 +4561,7 @@ pub mod los {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4566,7 +4580,7 @@ pub mod los {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_radar_error_params(ally_team_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_radar_error_params(ally_team_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4575,7 +4589,7 @@ pub mod los {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4601,16 +4615,16 @@ pub mod los {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_is_pos_in_air_los(ally_team_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_pos_in_air_los(ally_team_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4636,16 +4650,16 @@ pub mod los {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_is_pos_in_los(ally_team_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_pos_in_los(ally_team_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4671,16 +4685,16 @@ pub mod los {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_is_pos_in_radar(ally_team_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_pos_in_radar(ally_team_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4694,16 +4708,16 @@ pub mod los {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_air_los(unit_id as i32, ally_team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_in_air_los(unit_id, ally_team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4717,16 +4731,16 @@ pub mod los {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_jammer(unit_id as i32, ally_team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_in_jammer(unit_id, ally_team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4740,16 +4754,16 @@ pub mod los {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_los(unit_id as i32, ally_team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_in_los(unit_id, ally_team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4763,16 +4777,16 @@ pub mod los {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_radar(unit_id as i32, ally_team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_in_radar(unit_id, ally_team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4870,7 +4884,7 @@ pub mod unit_defs {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_def_classify(unit_def_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_def_classify(unit_def_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4879,7 +4893,7 @@ pub mod unit_defs {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4898,7 +4912,7 @@ pub mod unit_defs {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_def_costs(unit_def_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_def_costs(unit_def_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4907,7 +4921,7 @@ pub mod unit_defs {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4922,11 +4936,11 @@ pub mod unit_defs {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_unit_def_count(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4940,12 +4954,12 @@ pub mod unit_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_def_health(unit_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_def_health(unit_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4959,12 +4973,12 @@ pub mod unit_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_def_speed(unit_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_def_speed(unit_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -4978,16 +4992,16 @@ pub mod unit_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_unit_def_id(unit_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_valid_unit_def_id(unit_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5046,11 +5060,11 @@ pub mod feature_defs {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_feature_def_count(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5064,12 +5078,12 @@ pub mod feature_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_def_energy(feature_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_def_energy(feature_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5083,12 +5097,12 @@ pub mod feature_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_def_metal(feature_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_feature_def_metal(feature_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5102,16 +5116,16 @@ pub mod feature_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_feature_def_id(feature_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_valid_feature_def_id(feature_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5170,11 +5184,11 @@ pub mod weapon_defs {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_weapon_def_count(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5188,12 +5202,12 @@ pub mod weapon_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_weapon_def_damage(weapon_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_weapon_def_damage(weapon_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5207,12 +5221,12 @@ pub mod weapon_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_weapon_def_range(weapon_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_weapon_def_range(weapon_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5226,16 +5240,16 @@ pub mod weapon_defs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_weapon_def_id(weapon_def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_valid_weapon_def_id(weapon_def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5464,15 +5478,15 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_are_helper_a_is_enabled(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5487,15 +5501,15 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_fixed_allies(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5514,7 +5528,7 @@ pub mod game {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ally_team_start_box(ally_team_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_ally_team_start_box(ally_team_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5523,7 +5537,7 @@ pub mod game {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5537,12 +5551,12 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_facing_from_heading(heading as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_facing_from_heading(heading) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5557,11 +5571,11 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_gaia_team_id(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5585,11 +5599,11 @@ pub mod game {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32);
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5613,11 +5627,11 @@ pub mod game {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = GameRulesInfo { max_units: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, construction_decay: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, construction_decay_time: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, construction_decay_speed: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, multi_reclaim: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, reclaim_method: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, reclaim_unit_method: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, reclaim_unit_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_unit_efficiency: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_feature_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_unit_drain_health: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_allow_enemies: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_allow_allies: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, repair_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, resurrect_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, capture_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, transport_air: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, transport_ship: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, transport_hover: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, transport_ground: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, fire_at_killed: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, fire_at_crashing: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, require_sonar_under_water: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, paralyze_on_max_health: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, paralyze_decline_rate: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, allow_engine_playerlist: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, native_excess_sharing: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = GameRulesInfo { max_units: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, construction_decay: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, construction_decay_time: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, construction_decay_speed: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, multi_reclaim: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_method: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_unit_method: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_unit_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_unit_efficiency: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_feature_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_unit_drain_health: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_allow_enemies: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, reclaim_allow_allies: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, repair_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, resurrect_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, capture_energy_cost_factor: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, transport_air: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, transport_ship: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, transport_hover: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, transport_ground: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, fire_at_killed: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, fire_at_crashing: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, require_sonar_under_water: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, paralyze_on_max_health: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, paralyze_decline_rate: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, allow_engine_playerlist: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, native_excess_sharing: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5645,7 +5659,7 @@ pub mod game {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5660,11 +5674,11 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_game_seconds(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5678,12 +5692,12 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_global_los(ally_team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_global_los(ally_team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5697,12 +5711,12 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_heading_from_facing(facing as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_heading_from_facing(facing) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5717,11 +5731,11 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_heading_from_vector(x, z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5736,11 +5750,11 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_side_data_count(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5759,7 +5773,7 @@ pub mod game {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_start_position(team_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_team_start_position(team_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5768,7 +5782,7 @@ pub mod game {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5783,11 +5797,11 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_tidal(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5806,7 +5820,7 @@ pub mod game {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_vector_from_heading(heading as i32, output_pointer) };
+            let status = unsafe { raw::core_get_vector_from_heading(heading, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5815,7 +5829,7 @@ pub mod game {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5843,7 +5857,7 @@ pub mod game {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5858,15 +5872,15 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_cheating_enabled(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5881,15 +5895,15 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_dev_lua_enabled(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5904,15 +5918,15 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_edit_defs_enabled(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5927,15 +5941,15 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_game_over(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5950,15 +5964,15 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_god_mode_enabled(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -5973,15 +5987,15 @@ pub mod game {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_no_cost_enabled(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6077,11 +6091,11 @@ pub mod terrain {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_grass(x, z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6096,15 +6110,15 @@ pub mod terrain {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_ground_blocked(x1, z1, x2, z2) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6132,7 +6146,7 @@ pub mod terrain {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6147,11 +6161,11 @@ pub mod terrain {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_ground_height(x, z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6179,7 +6193,7 @@ pub mod terrain {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6194,11 +6208,11 @@ pub mod terrain {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_ground_orig_height(x, z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6222,11 +6236,11 @@ pub mod terrain {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6241,11 +6255,11 @@ pub mod terrain {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_smooth_mesh_height(x, z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6260,11 +6274,11 @@ pub mod terrain {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_water_level(x, z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6279,11 +6293,11 @@ pub mod terrain {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_water_plane_level(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6311,7 +6325,7 @@ pub mod terrain {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6374,11 +6388,11 @@ pub mod player {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_local_ally_team_id(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6393,11 +6407,11 @@ pub mod player {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_local_player_id(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6412,11 +6426,11 @@ pub mod player {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_local_team_id(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6435,16 +6449,16 @@ pub mod player {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_player_statistics(player_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_player_statistics(player_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = PlayerStats { mouse_pixels: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, mouse_clicks: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, key_presses: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, unit_commands: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, avg_command_size: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = PlayerStats { mouse_pixels: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, mouse_clicks: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, key_presses: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, unit_commands: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, avg_command_size: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6459,15 +6473,15 @@ pub mod player {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_spectating_state(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6546,11 +6560,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_bit_and(a as i32, b as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6565,11 +6579,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_bit_inv(a as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6584,11 +6598,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_bit_or(a as i32, b as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6603,11 +6617,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_bit_xor(a as i32, b as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6622,11 +6636,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_clamp(value, min, max) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6641,11 +6655,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_erf(value) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6660,11 +6674,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_hypot(x, y) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6679,11 +6693,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_mix(a, b, t) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6698,11 +6712,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_round(value) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6717,11 +6731,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_sgn(value) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6736,11 +6750,11 @@ pub mod math_extra {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_smooth_step(edge0, edge1, x) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6812,12 +6826,12 @@ pub mod metal_map {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_metal_amount(x as i32, z as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_metal_amount(x, z) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6831,12 +6845,12 @@ pub mod metal_map {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_metal_extraction(x as i32, z as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_metal_extraction(x, z) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6860,11 +6874,11 @@ pub mod metal_map {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6878,8 +6892,8 @@ pub mod metal_map {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_set_metal_amount(x as i32, z as i32, amount) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_set_metal_amount(x, z, amount) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6948,15 +6962,15 @@ pub mod path_finder {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_delete_path(path_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6971,15 +6985,15 @@ pub mod path_finder {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_free_path_node_costs_array(overlay_index as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6994,11 +7008,11 @@ pub mod path_finder {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_path_node_cost(x as i32, z as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7013,15 +7027,15 @@ pub mod path_finder {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_init_path_node_costs_array(overlay_index as i32, size_x as i32, size_z as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7036,15 +7050,15 @@ pub mod path_finder {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_path_node_cost(overlay_index as i32, cost_index as i32, cost) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7059,15 +7073,15 @@ pub mod path_finder {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_path_node_costs(overlay_index as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7101,15 +7115,15 @@ pub mod platform {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_headless(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7152,16 +7166,16 @@ pub mod move_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_move_ctrl_enabled(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_move_ctrl_enabled(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7175,16 +7189,16 @@ pub mod move_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_move_ctrl(unit_id as i32, if enable { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_move_ctrl(unit_id, if enable { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7198,16 +7212,16 @@ pub mod move_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_move_ctrl_gravity(unit_id as i32, gravity_factor) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_move_ctrl_gravity(unit_id, gravity_factor) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7295,7 +7309,7 @@ pub mod camera {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7310,11 +7324,11 @@ pub mod camera {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_camera_fov(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7342,7 +7356,7 @@ pub mod camera {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7370,7 +7384,7 @@ pub mod camera {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7408,11 +7422,11 @@ pub mod camera {
             }
             let wire = output_wire;
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7452,7 +7466,7 @@ pub mod camera {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7599,11 +7613,11 @@ pub mod input {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7618,15 +7632,15 @@ pub mod input {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_invert_queue_key(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7640,16 +7654,16 @@ pub mod input {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_key_state(key_code as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_key_state(key_code) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7677,7 +7691,7 @@ pub mod input {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7696,7 +7710,7 @@ pub mod input {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_mouse_start_position(button as i32, output_pointer) };
+            let status = unsafe { raw::core_get_mouse_start_position(button, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7705,7 +7719,7 @@ pub mod input {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7733,7 +7747,7 @@ pub mod input {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7761,7 +7775,7 @@ pub mod input {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7776,15 +7790,15 @@ pub mod input {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_above_mini_map(screen_x, screen_y) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7833,7 +7847,7 @@ pub mod debug_input {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_clear_emulated_input(if fire_releases { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7847,8 +7861,8 @@ pub mod debug_input {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_emulate_key(key_code as i32, if pressed { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_emulate_key(key_code, if pressed { 1 } else { 0 }) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7862,8 +7876,8 @@ pub mod debug_input {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_emulate_mouse_button(button as i32, if pressed { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_emulate_mouse_button(button, if pressed { 1 } else { 0 }) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7877,8 +7891,8 @@ pub mod debug_input {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_emulate_mouse_move(x as i32, y as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_emulate_mouse_move(x, y) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -7893,7 +7907,7 @@ pub mod debug_input {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_emulate_mouse_wheel(delta) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8079,11 +8093,11 @@ pub mod display {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32);
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8107,11 +8121,11 @@ pub mod display {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32 }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8126,11 +8140,11 @@ pub mod display {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_fps(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8145,11 +8159,11 @@ pub mod display {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_frame_time_offset(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8177,7 +8191,7 @@ pub mod display {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8192,11 +8206,11 @@ pub mod display {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_last_update_seconds(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8224,7 +8238,7 @@ pub mod display {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8248,11 +8262,11 @@ pub mod display {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = MinimapGeometry { size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, minimized: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, maximized: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = MinimapGeometry { size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, minimized: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, maximized: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8267,11 +8281,11 @@ pub mod display {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_mini_map_rotation(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8286,11 +8300,11 @@ pub mod display {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_num_displays(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8309,16 +8323,16 @@ pub mod display {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_screen_geometry(screen_num as i32, if query_usable { 1 } else { 0 }, output_pointer) };
+            let status = unsafe { raw::core_get_screen_geometry(screen_num, if query_usable { 1 } else { 0 }, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32 }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8337,7 +8351,7 @@ pub mod display {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_color(team_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_team_color(team_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8346,7 +8360,7 @@ pub mod display {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8365,7 +8379,7 @@ pub mod display {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_orig_color(team_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_team_orig_color(team_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8374,7 +8388,7 @@ pub mod display {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8398,11 +8412,11 @@ pub mod display {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32 }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8426,11 +8440,11 @@ pub mod display {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32 }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            let value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8445,15 +8459,15 @@ pub mod display {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_have_adv_shading(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8468,15 +8482,15 @@ pub mod display {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_have_shadows(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8507,15 +8521,15 @@ pub mod display {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_is_aabb_in_view(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8530,15 +8544,15 @@ pub mod display {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_gui_hidden(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8565,15 +8579,15 @@ pub mod display {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_is_sphere_in_view(radius, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8600,16 +8614,16 @@ pub mod display {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_team_color(team_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_team_color(team_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8687,16 +8701,16 @@ pub mod selection {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_deselect_unit(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_deselect_unit(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8710,12 +8724,12 @@ pub mod selection {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_group_units_count(group_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_group_units_count(group_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8730,11 +8744,11 @@ pub mod selection {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_selected_group(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8749,11 +8763,11 @@ pub mod selection {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_selected_units_count(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8767,12 +8781,12 @@ pub mod selection {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_group(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_group(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8786,16 +8800,16 @@ pub mod selection {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_select_unit(unit_id as i32, if append { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_select_unit(unit_id, if append { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8809,16 +8823,16 @@ pub mod selection {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_group(unit_id as i32, group_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_group(unit_id, group_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8867,15 +8881,15 @@ pub mod sound {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_sound_effect_params(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8890,11 +8904,11 @@ pub mod sound {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_sound_stream_time(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8909,15 +8923,15 @@ pub mod sound {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_pause_sound_stream(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8932,15 +8946,15 @@ pub mod sound {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_sound_stream_volume(volume) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8955,15 +8969,15 @@ pub mod sound {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_stop_sound_stream(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -8997,15 +9011,15 @@ pub mod messages {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_user_writing(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9103,8 +9117,8 @@ pub mod tracing {
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, ray.direction.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, ray.length).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, ray.flags as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, ray.ally_team_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, ray.flags).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, ray.ally_team_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
@@ -9123,11 +9137,11 @@ pub mod tracing {
             }
             let wire = output_wire;
             let mut cursor = 0usize;
-            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9151,8 +9165,8 @@ pub mod tracing {
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, ray.direction.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, ray.length).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, ray.flags as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, ray.ally_team_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, ray.flags).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, ray.ally_team_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
@@ -9171,11 +9185,11 @@ pub mod tracing {
             }
             let wire = output_wire;
             let mut cursor = 0usize;
-            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9199,8 +9213,8 @@ pub mod tracing {
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, ray.direction.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, ray.length).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, ray.flags as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, ray.ally_team_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, ray.flags).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, ray.ally_team_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
@@ -9219,11 +9233,11 @@ pub mod tracing {
             }
             let wire = output_wire;
             let mut cursor = 0usize;
-            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9321,7 +9335,7 @@ pub mod utils {
             debug_assert!(output_pointer_usize <= u32::MAX as usize);
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_closest_build_pos(team_id as i32, unit_def_id as i32, search_radius, min_dist as i32, facing as i32, input_pointer, output_pointer) };
+            let status = unsafe { raw::core_closest_build_pos(team_id, unit_def_id, search_radius, min_dist, facing, input_pointer, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9331,7 +9345,7 @@ pub mod utils {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9350,7 +9364,7 @@ pub mod utils {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_def_dimensions(feature_def_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_def_dimensions(feature_def_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9359,7 +9373,7 @@ pub mod utils {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9378,7 +9392,7 @@ pub mod utils {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_def_dimensions(unit_def_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_def_dimensions(unit_def_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9387,7 +9401,7 @@ pub mod utils {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9417,7 +9431,7 @@ pub mod utils {
             debug_assert!(output_pointer_usize <= u32::MAX as usize);
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_pos2_build_pos(unit_def_id as i32, facing as i32, input_pointer, output_pointer) };
+            let status = unsafe { raw::core_pos2_build_pos(unit_def_id, facing, input_pointer, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9427,7 +9441,7 @@ pub mod utils {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9457,17 +9471,17 @@ pub mod utils {
             debug_assert!(output_pointer_usize <= u32::MAX as usize);
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_test_build_order(unit_def_id as i32, facing as i32, input_pointer, output_pointer) };
+            let status = unsafe { raw::core_test_build_order(unit_def_id, facing, input_pointer, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let wire = output_wire;
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9501,16 +9515,16 @@ pub mod utils {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_test_move_order(unit_def_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_test_move_order(unit_def_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9869,15 +9883,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_force_layout_update(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9892,15 +9906,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_force_tesselation_update(if normal { 1 } else { 0 }, if shadow { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9915,15 +9929,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_pause_dolly_camera(percent) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9937,16 +9951,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_preload_feature_def_model(def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_preload_feature_def_model(def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9960,16 +9974,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_preload_unit_def_model(def_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_preload_unit_def_model(def_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9984,15 +9998,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_resume_dolly_camera(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10007,15 +10021,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_run_dolly_camera(runtime_ms) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10029,16 +10043,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_sdl_set_text_input_rect(x as i32, y as i32, w as i32, h as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_sdl_set_text_input_rect(x, y, w, h) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10053,15 +10067,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_sdl_start_text_input(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10076,15 +10090,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_sdl_stop_text_input(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10113,16 +10127,16 @@ pub mod unsynced_ctrl {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_active_command(cmd_index as i32, button as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_active_command(cmd_index, button, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10137,15 +10151,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_auto_show_metal(if enable { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10160,15 +10174,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_box_selection_by_engine(if state { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10182,16 +10196,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_build_facing(facing as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_build_facing(facing) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10205,16 +10219,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_build_spacing(spacing as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_build_spacing(spacing) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10245,15 +10259,15 @@ pub mod unsynced_ctrl {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_set_camera_offset(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10267,16 +10281,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_custom_palette_color(index as i32, r, g, b) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_custom_palette_color(index, r, g, b) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10303,15 +10317,15 @@ pub mod unsynced_ctrl {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_set_dolly_camera_look_position(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10325,16 +10339,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_dolly_camera_look_unit(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_dolly_camera_look_unit(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10348,16 +10362,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_dolly_camera_mode(mode as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_dolly_camera_mode(mode) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10384,15 +10398,15 @@ pub mod unsynced_ctrl {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_set_dolly_camera_position(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10406,16 +10420,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_dolly_camera_relative_mode(mode as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_dolly_camera_relative_mode(mode) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10430,15 +10444,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_draw_ground(if draw_ground { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10466,7 +10480,7 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10494,7 +10508,7 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10509,15 +10523,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_draw_selection_info(if draw { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10532,15 +10546,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_draw_sky(if draw_sky { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10555,15 +10569,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_draw_water(if draw_water { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10578,15 +10592,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_engine_build_square_rendering(if enabled { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10600,16 +10614,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_always_update_matrix(feature_id as i32, if enable { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_always_update_matrix(feature_id, if enable { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10623,16 +10637,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_engine_draw_mask(feature_id as i32, mask as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_engine_draw_mask(feature_id, mask as i32) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10646,16 +10660,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_fade(feature_id as i32, if allow { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_fade(feature_id, if allow { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10669,16 +10683,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_no_draw(feature_id as i32, if no_draw { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_no_draw(feature_id, if no_draw { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10692,16 +10706,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_palette_index(feature_id as i32, custom_index as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_palette_index(feature_id, custom_index) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10728,15 +10742,15 @@ pub mod unsynced_ctrl {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_set_last_message_position(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10779,15 +10793,15 @@ pub mod unsynced_ctrl {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_set_los_view_colors(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10801,16 +10815,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_map_shader(standard_shader_id as i32, deferred_shader_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_map_shader(standard_shader_id, deferred_shader_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10834,11 +10848,11 @@ pub mod unsynced_ctrl {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10853,15 +10867,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_nano_projectile_params(r, v, a, rand_r, rand_v, rand_a) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10888,15 +10902,15 @@ pub mod unsynced_ctrl {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_set_sun_direction(intensity, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10910,16 +10924,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_always_update_matrix(unit_id as i32, if always_update_matrix { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_always_update_matrix(unit_id, if always_update_matrix { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10933,16 +10947,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_engine_draw_mask(unit_id as i32, draw_mask as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_engine_draw_mask(unit_id, draw_mask as i32) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10956,16 +10970,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_icon_draw(unit_id as i32, if draw_icon { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_icon_draw(unit_id, if draw_icon { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -10979,16 +10993,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_leave_tracks(unit_id as i32, if leave_tracks { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_leave_tracks(unit_id, if leave_tracks { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11002,16 +11016,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_no_draw(unit_id as i32, if no_draw { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_no_draw(unit_id, if no_draw { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11025,16 +11039,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_no_group(unit_id as i32, if no_group { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_no_group(unit_id, if no_group { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11048,16 +11062,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_no_minimap(unit_id as i32, if no_minimap { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_no_minimap(unit_id, if no_minimap { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11071,16 +11085,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_no_select(unit_id as i32, if no_select { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_no_select(unit_id, if no_select { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11094,16 +11108,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_palette_index(unit_id as i32, custom_index as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_palette_index(unit_id, custom_index) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11118,15 +11132,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_video_capturing_mode(if allow_capture_mode { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11141,15 +11155,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_video_capturing_time_offset(time_offset) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11174,16 +11188,16 @@ pub mod unsynced_ctrl {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_window_geometry(display_index as i32, window_pos_x as i32, window_pos_y as i32, window_size_x as i32, window_size_y as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_window_geometry(display_index, window_pos_x, window_pos_y, window_size_x, window_size_y, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11198,15 +11212,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_window_maximized(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11221,15 +11235,15 @@ pub mod unsynced_ctrl {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_window_minimized(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -11243,16 +11257,16 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_warp_mouse(x as i32, y as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_warp_mouse(x, y) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12201,8 +12215,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_active_texture(tex_num as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_active_texture(tex_num) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12217,7 +12231,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_alpha_test(if enable { 1 } else { 0 }, func as i32, ref_) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12232,7 +12246,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_alpha_to_coverage(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12247,7 +12261,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_attach_index_buffer_vao(vao_id as i32, vbo_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12262,7 +12276,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_attach_instance_buffer_vao(vao_id as i32, vbo_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12277,7 +12291,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_attach_vertex_buffer_vao(vao_id as i32, vbo_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12292,7 +12306,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_begin_text(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12307,7 +12321,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_billboard(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12321,12 +12335,12 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_bind_buffer_range_vbo(vbo_id as i32, binding_index as i32, element_offset as i32, element_count as i32, target as i32, if bind { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_bind_buffer_range_vbo(vbo_id as i32, binding_index as i32, element_offset, element_count, target as i32, if bind { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12341,7 +12355,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_blend_equation(mode as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12356,7 +12370,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_blend_equation_separate(mode_rgb as i32, mode_alpha as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12371,7 +12385,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_blend_func(src as i32, dst as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12386,7 +12400,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_blend_func_separate(src_rgb as i32, dst_rgb as i32, src_alpha as i32, dst_alpha as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12401,7 +12415,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_blending(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12411,12 +12425,13 @@ pub mod gfx {
     }
 
     #[inline]
+    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn blit_fbo(src_fboid: u32, dst_fboid: u32, x0_src: i32, y0_src: i32, x1_src: i32, y1_src: i32, x0_dst: i32, y0_dst: i32, x1_dst: i32, y1_dst: i32, mask: u32, filter: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_blit_fbo(src_fboid as i32, dst_fboid as i32, x0_src as i32, y0_src as i32, x1_src as i32, y1_src as i32, x0_dst as i32, y0_dst as i32, x1_dst as i32, y1_dst as i32, mask as i32, filter as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_blit_fbo(src_fboid as i32, dst_fboid as i32, x0_src, y0_src, x1_src, y1_src, x0_dst, y0_dst, x1_dst, y1_dst, mask as i32, filter as i32) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12431,7 +12446,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_call_list(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12458,7 +12473,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_clear(bits as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12485,15 +12500,15 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_clear_attachment_fbo(target as i32, attachment as i32, count as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12508,7 +12523,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_clear_fallback_fonts(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12523,7 +12538,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_clear_submission_vao(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12538,7 +12553,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_clear_vbo(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12553,7 +12568,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_clip_distance(index as i32, if enable { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12580,7 +12595,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_clip_plane(plane as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12595,7 +12610,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_color(r, g, b, a) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12623,7 +12638,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_color_mask(input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12637,8 +12652,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_config_mini_map(px as i32, py as i32, sx as i32, sy as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_config_mini_map(px, py, sx, sy) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12652,16 +12667,16 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_copy_to_vbo(source_vboid as i32, destination_vboid as i32, copy_size_in_bytes as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_copy_to_vbo(source_vboid as i32, destination_vboid as i32, copy_size_in_bytes) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12676,11 +12691,11 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_create_query(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12694,12 +12709,12 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_create_rbo(xsize as i32, ysize as i32, target as i32, format as i32, samples as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_create_rbo(xsize, ysize, target as i32, format as i32, samples) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12714,7 +12729,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_culling(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12729,7 +12744,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_delete_fbo(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12744,7 +12759,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_delete_font(font_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12759,7 +12774,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_delete_list(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12774,7 +12789,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_delete_query(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12789,7 +12804,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_delete_rbo(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12804,15 +12819,15 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_delete_shader(shader_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12827,7 +12842,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_delete_vao(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12842,7 +12857,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_delete_vbo(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12857,7 +12872,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_depth_clamp(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12872,7 +12887,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_depth_mask(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12889,7 +12904,7 @@ pub mod gfx {
             let mut input_cursor = 0usize;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.enable).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.set_func).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, options.func as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, options.func).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
@@ -12899,7 +12914,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_depth_test(input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12914,7 +12929,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_dispatch_compute(num_group_x as i32, num_group_y as i32, num_group_z as i32, barriers as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12928,8 +12943,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_draw_arrays_vao(vao_id as i32, mode as i32, vertex_count as i32, vertex_first as i32, instance_count as i32, instance_first as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_draw_arrays_vao(vao_id as i32, mode as i32, vertex_count, vertex_first, instance_count, instance_first) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12943,8 +12958,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_draw_elements_vao(vao_id as i32, mode as i32, draw_count as i32, base_index as i32, instance_count as i32, base_vertex as i32, base_instance as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_draw_elements_vao(vao_id as i32, mode as i32, draw_count, base_index, instance_count, base_vertex, base_instance) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12970,8 +12985,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_draw_ground_circle(radius, resolution as i32, if ballistic { 1 } else { 0 }, slope, gravity, weapon_def_id as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_draw_ground_circle(radius, resolution, if ballistic { 1 } else { 0 }, slope, gravity, weapon_def_id, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -12981,12 +12996,13 @@ pub mod gfx {
     }
 
     #[inline]
+    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn draw_ground_quad(x0: f32, z0: f32, x1: f32, z1: f32, use_tex_coords: bool, tu0: f32, tv0: f32, tu1: f32, tv1: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_draw_ground_quad(x0, z0, x1, z1, if use_tex_coords { 1 } else { 0 }, tu0, tv0, tu1, tv1) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13016,8 +13032,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_draw_list_at_unit(unit_id as i32, list_id as i32, if use_mid_pos { 1 } else { 0 }, degrees, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_draw_list_at_unit(unit_id, list_id as i32, if use_mid_pos { 1 } else { 0 }, degrees, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13032,7 +13048,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_draw_mini_map(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13047,7 +13063,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_dump_definition_vbo(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13062,7 +13078,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_edge_flag(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13077,7 +13093,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_end_text(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13103,8 +13119,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_feature(feature_id as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature(feature_id, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13118,8 +13134,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_mult_matrix(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature_mult_matrix(value) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13133,8 +13149,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_piece(object_id as i32, piece_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature_piece(object_id, piece_id) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13148,8 +13164,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_piece_matrix(object_id as i32, piece_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature_piece_matrix(object_id, piece_id) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13163,8 +13179,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_piece_mult_matrix(object_id as i32, piece_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature_piece_mult_matrix(object_id, piece_id) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13190,8 +13206,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_feature_raw(feature_id as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature_raw(feature_id, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13217,8 +13233,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_feature_shape(def_id as i32, team_id as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature_shape(def_id, team_id, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13232,8 +13248,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_shape_textures(object_id as i32, if push { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature_shape_textures(object_id, if push { 1 } else { 0 }) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13247,8 +13263,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_textures(object_id as i32, if push { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_feature_textures(object_id, if push { 1 } else { 0 }) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13263,7 +13279,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_finish(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13278,7 +13294,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_flush(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13293,7 +13309,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_fog(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13308,7 +13324,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_fog_coord(value) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13323,7 +13339,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_font_begin(font_id as i32, if user_defined_blending { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13338,7 +13354,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_font_bind_texture(font_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13353,7 +13369,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_font_end(font_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13368,7 +13384,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_font_set_auto_outline_color(font_id as i32, if enable { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13383,7 +13399,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_font_set_outline_color(font_id as i32, r, g, b, a) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13398,7 +13414,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_font_set_text_color(font_id as i32, r, g, b, a) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13424,7 +13440,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_font_submit_buffered(font_id as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13439,7 +13455,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_frustum(left, right, bottom, top, near_val, far_val) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13463,11 +13479,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32);
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13482,11 +13498,11 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_idvbo(value as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13514,7 +13530,7 @@ pub mod gfx {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13538,11 +13554,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = ([super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?], super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32);
+            let value = ([super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?], super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13557,11 +13573,11 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_query(value as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13585,11 +13601,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13617,7 +13633,7 @@ pub mod gfx {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13645,7 +13661,7 @@ pub mod gfx {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13669,11 +13685,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32);
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13697,11 +13713,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32);
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13725,11 +13741,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32);
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13748,7 +13764,7 @@ pub mod gfx {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_view_range(camera_type as i32, output_pointer) };
+            let status = unsafe { raw::core_get_view_range(camera_type, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13757,7 +13773,7 @@ pub mod gfx {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13781,11 +13797,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13809,11 +13825,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32);
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13842,8 +13858,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_light(light as i32, pname as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_light(light, pname as i32, count as i32, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13858,7 +13874,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_lighting(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13872,8 +13888,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_line_stipple(factor as i32, pattern as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_line_stipple(factor, pattern as i32) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13888,7 +13904,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_line_width(value) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13903,7 +13919,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_load_identity(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13942,7 +13958,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_load_matrix(input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13957,7 +13973,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_logic_op(if enable { 1 } else { 0 }, opcode as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13984,7 +14000,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_material(pname as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -13999,7 +14015,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_matrix_mode(mode as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14014,7 +14030,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_memory_barrier(barriers as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14029,11 +14045,11 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_models_vbo(value as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14072,7 +14088,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_mult_matrix(input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14086,8 +14102,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_multi_tex_coord(tex_num as i32, s, t, r, q, count as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_multi_tex_coord(tex_num, s, t, r, q, count as i32) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14113,8 +14129,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_multi_tex_env(tex_num as i32, target as i32, pname as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_multi_tex_env(tex_num, target as i32, pname as i32, count as i32, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14143,8 +14159,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_multi_tex_gen(tex_num as i32, target as i32, pname as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_multi_tex_gen(tex_num, target as i32, pname as i32, count as i32, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14159,7 +14175,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_normal(x, y, z) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14174,7 +14190,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_ortho(left, right, bottom, top, near_val, far_val) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14201,7 +14217,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_point_parameter(pname as i32, value, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14216,7 +14232,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_point_size(value) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14231,7 +14247,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_point_sprite(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14246,7 +14262,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_polygon_mode(face as i32, mode as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14261,7 +14277,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_polygon_offset(factor, units) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14276,7 +14292,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_pop_attrib(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14291,7 +14307,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_pop_debug_group(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14306,7 +14322,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_pop_matrix(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14321,7 +14337,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_push_attrib(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14336,7 +14352,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_push_matrix(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14360,11 +14376,11 @@ pub mod gfx {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14379,7 +14395,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_rect(x1, y1, x2, y2) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14393,8 +14409,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_remove_from_submission_vao(vao_id as i32, index as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_remove_from_submission_vao(vao_id as i32, index) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14409,7 +14425,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_reset_matrices(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14424,7 +14440,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_reset_state(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14439,7 +14455,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_rotate(degrees, x, y, z) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14454,7 +14470,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_scale(x, y, z) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14468,8 +14484,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_scissor(x as i32, y as i32, width as i32, height as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_scissor(x, y, width, height) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14484,7 +14500,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_secondary_color(x, y, z) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14499,7 +14515,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_set_fbo_read_buffer(fbo_id as i32, buffer as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14513,8 +14529,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_set_geometry_shader_parameter(shader_id as i32, param as i32, value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_set_geometry_shader_parameter(shader_id as i32, param as i32, value) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14540,8 +14556,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_set_tesselation_shader_parameter(param as i32, value as i32, value_count as i32, if use_float_array { 1 } else { 0 }, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_set_tesselation_shader_parameter(param as i32, value, value_count as i32, if use_float_array { 1 } else { 0 }, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14556,7 +14572,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_shade_model(mode as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14571,7 +14587,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_slave_mini_map(if value { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14585,8 +14601,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_func(func as i32, ref_ as i32, mask as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_stencil_func(func as i32, ref_, mask as i32) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14600,8 +14616,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_func_separate(face as i32, func as i32, ref_ as i32, mask as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_stencil_func_separate(face as i32, func as i32, ref_, mask as i32) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14616,7 +14632,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_stencil_mask(mask as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14631,7 +14647,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_stencil_mask_separate(face as i32, mask as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14646,7 +14662,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_stencil_op(fail as i32, zfail as i32, zpass as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14661,7 +14677,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_stencil_op_separate(face as i32, fail as i32, zfail as i32, zpass as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14676,7 +14692,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_stencil_test(if enable { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14691,7 +14707,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_submit_vao(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14706,7 +14722,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_swap_buffers(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14721,7 +14737,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_tex_coord(x, y, z, w, count as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14748,7 +14764,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_tex_env(target as i32, pname as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14778,7 +14794,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_tex_gen(target as i32, pname as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14788,12 +14804,13 @@ pub mod gfx {
     }
 
     #[inline]
+    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn tex_rect(x1: f32, y1: f32, x2: f32, y2: f32, s1: f32, t1: f32, s2: f32, t2: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_tex_rect(x1, y1, x2, y2, s1, t1, s2, t2) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14820,7 +14837,7 @@ pub mod gfx {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let status = unsafe { raw::core_text_env(target as i32, pname as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14835,7 +14852,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_translate(x, y, z) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14849,12 +14866,12 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unbind_buffer_range_vbo(vbo_id as i32, binding_index as i32, element_offset as i32, element_count as i32, target as i32, if bind { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unbind_buffer_range_vbo(vbo_id as i32, binding_index as i32, element_offset, element_count, target as i32, if bind { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14880,8 +14897,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_uniform(location as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_uniform(location, count as i32, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14896,10 +14913,10 @@ pub mod gfx {
         {
             let mut input_wire = [0u8; 16];
             let mut input_cursor = 0usize;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, values[0] as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, values[1] as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, values[2] as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, values[3] as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, values[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, values[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, values[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, values[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
@@ -14907,8 +14924,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_uniform_int(location as i32, count as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_uniform_int(location, count as i32, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14923,7 +14940,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_uniform_subroutine(shader_type as i32, index as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14950,8 +14967,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_unit(unit_id as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit(unit_id, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14965,8 +14982,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_mult_matrix(value as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit_mult_matrix(value) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14980,8 +14997,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_piece(object_id as i32, piece_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit_piece(object_id, piece_id) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -14995,8 +15012,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_piece_matrix(object_id as i32, piece_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit_piece_matrix(object_id, piece_id) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15010,8 +15027,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_piece_mult_matrix(object_id as i32, piece_id as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit_piece_mult_matrix(object_id, piece_id) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15038,8 +15055,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_unit_raw(unit_id as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit_raw(unit_id, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15065,8 +15082,8 @@ pub mod gfx {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_unit_shape(def_id as i32, team_id as i32, input_pointer) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit_shape(def_id, team_id, input_pointer) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15080,8 +15097,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_shape_textures(object_id as i32, if push { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit_shape_textures(object_id, if push { 1 } else { 0 }) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15095,8 +15112,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_textures(object_id as i32, if push { 1 } else { 0 }) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_unit_textures(object_id, if push { 1 } else { 0 }) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15111,15 +15128,15 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_use_shader(shader_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15134,7 +15151,7 @@ pub mod gfx {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_vertex(x, y, z, w, count as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15148,8 +15165,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_viewport(x as i32, y as i32, width as i32, height as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            let status = unsafe { raw::core_viewport(x, y, width, height) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15228,16 +15245,16 @@ pub mod lights {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_light_tracking_target(light_handle as i32, object_id as i32, if track_unit { 1 } else { 0 }, if enable_tracking { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_light_tracking_target(light_handle as i32, object_id, if track_unit { 1 } else { 0 }, if enable_tracking { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15287,8 +15304,8 @@ pub mod lights {
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.decay_function_type[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.radius).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.fov).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.ttl as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.priority as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.ttl).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.priority).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ignore_los).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.local_space).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
@@ -15300,11 +15317,11 @@ pub mod lights {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_add_map_light(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15354,8 +15371,8 @@ pub mod lights {
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.decay_function_type[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.radius).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.fov).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.ttl as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.priority as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.ttl).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.priority).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ignore_los).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.local_space).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
@@ -15367,11 +15384,11 @@ pub mod lights {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_add_model_light(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15385,16 +15402,16 @@ pub mod lights {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_map_light_tracking_state(light_handle as i32, object_id as i32, if enable_tracking { 1 } else { 0 }, if track_unit { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_map_light_tracking_state(light_handle as i32, object_id, if enable_tracking { 1 } else { 0 }, if track_unit { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15408,16 +15425,16 @@ pub mod lights {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_model_light_tracking_state(light_handle as i32, object_id as i32, if enable_tracking { 1 } else { 0 }, if track_unit { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_model_light_tracking_state(light_handle as i32, object_id, if enable_tracking { 1 } else { 0 }, if track_unit { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15467,8 +15484,8 @@ pub mod lights {
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.decay_function_type[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.radius).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.fov).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.ttl as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.priority as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.ttl).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.priority).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ignore_los).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.local_space).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
@@ -15480,15 +15497,15 @@ pub mod lights {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_update_map_light(light_handle as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15538,8 +15555,8 @@ pub mod lights {
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.decay_function_type[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.radius).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, params.fov).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.ttl as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.priority as u32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.ttl).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, params.priority).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ignore_los).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.local_space).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
@@ -15551,15 +15568,15 @@ pub mod lights {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_update_model_light(light_handle as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15592,16 +15609,16 @@ pub mod icons {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_icon_get_draw(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unit_icon_get_draw(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15615,16 +15632,16 @@ pub mod icons {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_icon_set_draw(unit_id as i32, if draw_icon { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unit_icon_set_draw(unit_id, if draw_icon { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15692,16 +15709,16 @@ pub mod markers {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_world_icon(cmd_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_world_icon(cmd_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15727,16 +15744,16 @@ pub mod markers {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_world_unit(unit_def_id as i32, team_id as i32, facing as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_world_unit(unit_def_id, team_id, facing, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15766,16 +15783,16 @@ pub mod markers {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_marker_add_line(if local_only { 1 } else { 0 }, player_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_marker_add_line(if local_only { 1 } else { 0 }, player_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15804,16 +15821,16 @@ pub mod markers {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_marker_erase_position(unused, player_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_marker_erase_position(unused, player_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -15991,11 +16008,11 @@ pub mod ground_decals {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16010,15 +16027,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_destroy_ground_decal(decal_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16046,7 +16063,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16074,7 +16091,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16102,7 +16119,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16130,7 +16147,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16158,7 +16175,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16186,7 +16203,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16210,11 +16227,11 @@ pub mod ground_decals {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16242,7 +16259,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16270,7 +16287,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16298,7 +16315,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16326,7 +16343,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16354,7 +16371,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16382,7 +16399,7 @@ pub mod ground_decals {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16397,15 +16414,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_alpha(decal_id as i32, alpha, alpha_falloff) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16420,15 +16437,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_creation_frame(decal_id as i32, creation_frame_min, creation_frame_max) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16443,15 +16460,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_glow_params(decal_id as i32, glow, glow_falloff) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16466,15 +16483,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_misc(decal_id as i32, dot_elim_exp, ref_height, min_height, max_height, force_height_mode) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16489,15 +16506,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_normal(decal_id as i32, normal_x, normal_y, normal_z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16512,15 +16529,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_pos_and_dims(decal_id as i32, mid_pos_x, mid_pos_z, size_x, size_z, proj_cube_height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16530,20 +16547,21 @@ pub mod ground_decals {
     }
 
     #[inline]
+    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn set_ground_decal_quad_pos_and_height(decal_id: u32, pos_tlx: f32, pos_tly: f32, pos_trx: f32, pos_try: f32, pos_brx: f32, pos_bry: f32, pos_blx: f32, pos_bly: f32, proj_cube_height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_quad_pos_and_height(decal_id as i32, pos_tlx, pos_tly, pos_trx, pos_try, pos_brx, pos_bry, pos_blx, pos_bly, proj_cube_height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16558,15 +16576,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_rotation(decal_id as i32, rotation) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16581,15 +16599,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_texture_params(decal_id as i32, tex_wrap_distance, tex_traveled_distance) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16604,15 +16622,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_tint(decal_id as i32, tint_r, tint_g, tint_b, tint_a) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16627,15 +16645,15 @@ pub mod ground_decals {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_ground_decal_user_data(decal_id as i32, quad_index as i32, value_x, value_y, value_z, value_w) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16736,20 +16754,21 @@ pub mod system_control {
     }
 
     #[inline]
+    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn garbage_collect_ctrl(iters_per_batch: i32, num_steps_per_iter: i32, min_steps_per_iter: i32, max_steps_per_iter: i32, min_loop_run_time: f32, max_loop_run_time: f32, base_run_time_mult: f32, base_mem_load_mult: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_garbage_collect_ctrl(iters_per_batch as i32, num_steps_per_iter as i32, min_steps_per_iter as i32, max_steps_per_iter as i32, min_loop_run_time, max_loop_run_time, base_run_time_mult, base_mem_load_mult) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_garbage_collect_ctrl(iters_per_batch, num_steps_per_iter, min_steps_per_iter, max_steps_per_iter, min_loop_run_time, max_loop_run_time, base_run_time_mult, base_mem_load_mult) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16777,7 +16796,7 @@ pub mod system_control {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16792,11 +16811,11 @@ pub mod system_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_gather_mode(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16824,7 +16843,7 @@ pub mod system_control {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16839,15 +16858,15 @@ pub mod system_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_video_capturing_mode(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16862,15 +16881,15 @@ pub mod system_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_replay(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16885,15 +16904,15 @@ pub mod system_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_ping(tag as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16908,15 +16927,15 @@ pub mod system_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_quit(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16943,15 +16962,15 @@ pub mod system_control {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_request_start_position(if ready { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16966,15 +16985,15 @@ pub mod system_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_yield_(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -16994,6 +17013,7 @@ pub mod profiling {
         pub from_micro_secs: bool,
     }
 
+    pub type GetLuaMemUsageValue = (f32, f32, f32, f32, f32, f32, f32, f32);
     #[cfg(target_arch = "wasm32")]
     pub mod raw {
         #[link(wasm_import_module = "spring:profiling")]
@@ -17060,11 +17080,11 @@ pub mod profiling {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_diff_timers(end_timer as i64, start_timer as i64, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17079,11 +17099,11 @@ pub mod profiling {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_draw_seconds(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17107,11 +17127,11 @@ pub mod profiling {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64;
+            let value = super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17121,7 +17141,7 @@ pub mod profiling {
     }
 
     #[inline]
-    pub fn get_lua_mem_usage(unused: u8) -> Result<(f32, f32, f32, f32, f32, f32, f32, f32)> {
+    pub fn get_lua_mem_usage(unused: u8) -> Result<GetLuaMemUsageValue> {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 32];
@@ -17139,7 +17159,7 @@ pub mod profiling {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17154,11 +17174,11 @@ pub mod profiling {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_synced_gc_info(if collect { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17182,11 +17202,11 @@ pub mod profiling {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64;
+            let value = super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17210,11 +17230,11 @@ pub mod profiling {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64;
+            let value = super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17242,7 +17262,7 @@ pub mod profiling {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17801,15 +17821,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_clear_translations(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17824,15 +17844,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_enable_mouse_cursor(context_handle as i64, if value { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17847,11 +17867,11 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_get_density_independent_pixel_ratio(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17875,11 +17895,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17903,11 +17923,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17931,11 +17951,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17959,11 +17979,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -17987,11 +18007,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18006,15 +18026,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_is_mouse_interacting(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18028,16 +18048,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_key_down(context_handle as i64, key as i32, key_modifier_state as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_context_process_key_down(context_handle as i64, key, key_modifier_state) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18051,16 +18071,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_key_up(context_handle as i64, key as i32, key_modifier_state as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_context_process_key_up(context_handle as i64, key, key_modifier_state) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18074,16 +18094,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_button_down(context_handle as i64, button as i32, key_modifier_state as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_context_process_mouse_button_down(context_handle as i64, button, key_modifier_state) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18097,16 +18117,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_button_up(context_handle as i64, button as i32, key_modifier_state as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_context_process_mouse_button_up(context_handle as i64, button, key_modifier_state) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18121,15 +18141,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_process_mouse_leave(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18143,16 +18163,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_move(context_handle as i64, x, y, key_modifier_state as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_context_process_mouse_move(context_handle as i64, x, y, key_modifier_state) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18166,16 +18186,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_wheel(context_handle as i64, x, y, key_modifier_state as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_context_process_mouse_wheel(context_handle as i64, x, y, key_modifier_state) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18190,15 +18210,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_pull_document_to_front(context_handle as i64, document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18213,15 +18233,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_pull_to_front(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18236,15 +18256,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_push_document_to_back(context_handle as i64, document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18259,15 +18279,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_render(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18282,15 +18302,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_set_density_independent_pixel_ratio(context_handle as i64, value) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18304,16 +18324,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_set_dimensions(context_handle as i64, x as i32, y as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_context_set_dimensions(context_handle as i64, x, y) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18327,16 +18347,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_set_pointer_capture(context_handle as i64, anchor_x as i32, anchor_y as i32, if active { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_context_set_pointer_capture(context_handle as i64, anchor_x, anchor_y, if active { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18360,11 +18380,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18379,15 +18399,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_unload_all_documents(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18402,15 +18422,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_unload_document(context_handle as i64, document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18425,15 +18445,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_context_update(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18461,7 +18481,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18489,7 +18509,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18517,7 +18537,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18541,11 +18561,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18573,7 +18593,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18601,7 +18621,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18616,15 +18636,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_data_model_set_bool(variable_handle as i64, if value { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18639,15 +18659,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_data_model_set_color(variable_handle as i64, red as i32, green as i32, blue as i32, alpha as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18662,15 +18682,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_data_model_set_float(variable_handle as i64, value) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18684,16 +18704,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_data_model_set_int(variable_handle as i64, value as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_data_model_set_int(variable_handle as i64, value) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18708,15 +18728,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_data_model_set_percent(variable_handle as i64, value) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18731,15 +18751,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_data_model_set_pixels(variable_handle as i64, value) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18754,15 +18774,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_document_close(document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18786,11 +18806,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18805,15 +18825,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_document_hide(document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18828,15 +18848,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_document_is_modal(document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18851,15 +18871,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_document_pull_to_front(document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18874,15 +18894,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_document_push_to_back(document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18897,15 +18917,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_document_reload_style_sheet(document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18920,15 +18940,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_document_update_document(document_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18952,11 +18972,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18971,15 +18991,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_blur(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -18994,15 +19014,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_click(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19026,11 +19046,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19045,15 +19065,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_focus(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19068,15 +19088,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_form_control_input_select(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19090,16 +19110,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_input_set_selection(element_handle as i64, start as i32, end as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_element_form_control_input_set_selection(element_handle as i64, start, end) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19113,16 +19133,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_select_add(element_handle as i64, element_ptr_handle as i64, before as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_element_form_control_select_add(element_handle as i64, element_ptr_handle as i64, before) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19136,16 +19156,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_select_remove(element_handle as i64, index as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_element_form_control_select_remove(element_handle as i64, index) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19160,15 +19180,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_form_control_select_remove_all(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19183,15 +19203,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_form_control_text_area_select(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19205,16 +19225,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_text_area_set_selection(element_handle as i64, start as i32, end as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_element_form_control_text_area_set_selection(element_handle as i64, start, end) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19233,16 +19253,16 @@ pub mod rml_ui {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_element_get_child(element_handle as i64, index as i32, output_pointer) };
+            let status = unsafe { raw::core_element_get_child(element_handle as i64, index, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19270,7 +19290,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19285,11 +19305,11 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_get_scroll_left(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19304,11 +19324,11 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_get_scroll_top(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19323,15 +19343,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_has_child_nodes(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19355,11 +19375,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19374,15 +19394,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_is_point_within_element(element_handle as i64, x, y) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19397,15 +19417,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_is_visible(element_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19420,15 +19440,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_process_default_action(element_handle as i64, event_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19452,11 +19472,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19480,11 +19500,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19499,15 +19519,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_element_scroll_into_view(element_handle as i64, if align_with_top { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19521,16 +19541,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_set_scroll_left(element_handle as i64, value as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_element_set_scroll_left(element_handle as i64, value) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19544,16 +19564,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_set_scroll_top(element_handle as i64, value as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_element_set_scroll_top(element_handle as i64, value) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19567,16 +19587,16 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_tab_set_remove_tab(element_handle as i64, index as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_element_tab_set_remove_tab(element_handle as i64, index) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19600,11 +19620,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19628,11 +19648,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19656,11 +19676,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19684,11 +19704,11 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as u64, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 8) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19716,7 +19736,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19744,7 +19764,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19772,7 +19792,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19787,15 +19807,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_event_stop_immediate_propagation(event_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19810,15 +19830,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_event_stop_propagation(event_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19833,15 +19853,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_is_ready(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19856,15 +19876,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_remove_context(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19879,15 +19899,15 @@ pub mod rml_ui {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_debug_context(context_handle as i64) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19915,7 +19935,7 @@ pub mod rml_ui {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -19934,16 +19954,16 @@ pub mod rml_ui {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_vector2i_new(x as i32, y as i32, output_pointer) };
+            let status = unsafe { raw::core_vector2i_new(x, y, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20106,16 +20126,16 @@ pub mod vfs {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_abort_download(id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_abort_download(id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20139,11 +20159,11 @@ pub mod vfs {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20158,7 +20178,7 @@ pub mod vfs {
         {
             // SAFETY: generated scalar-only Core signature.
             let status = unsafe { raw::core_scan_all_dirs(unused as i32) };
-            return if status == 0 { Ok(()) } else { Err(ApiError::new(status)) };
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20272,15 +20292,15 @@ pub mod unsynced_read {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_box_selection_by_engine(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20295,11 +20315,11 @@ pub mod unsynced_read {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_build_facing(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20314,11 +20334,11 @@ pub mod unsynced_read {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_build_spacing(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20332,12 +20352,12 @@ pub mod unsynced_read {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_cmd_desc_index(cmd_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_cmd_desc_index(cmd_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20356,7 +20376,7 @@ pub mod unsynced_read {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_custom_palette_color(index as i32, output_pointer) };
+            let status = unsafe { raw::core_get_custom_palette_color(index, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20365,7 +20385,7 @@ pub mod unsynced_read {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20380,15 +20400,15 @@ pub mod unsynced_read {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_draw_selection_info(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20407,16 +20427,16 @@ pub mod unsynced_read {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_palette_index(feature_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_feature_palette_index(feature_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20431,11 +20451,11 @@ pub mod unsynced_read {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_get_game_seconds_interpolated(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20463,7 +20483,7 @@ pub mod unsynced_read {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20482,7 +20502,7 @@ pub mod unsynced_read {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_damage_stats(team_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_team_damage_stats(team_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20491,7 +20511,7 @@ pub mod unsynced_read {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20510,16 +20530,16 @@ pub mod unsynced_read {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_palette_index(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_palette_index(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20533,16 +20553,16 @@ pub mod unsynced_read {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_allied(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_allied(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20556,16 +20576,16 @@ pub mod unsynced_read {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_selected(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_selected(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20635,16 +20655,16 @@ pub mod team_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_assign_player_to_team(player_id as i32, team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_assign_player_to_team(player_id, team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20658,16 +20678,16 @@ pub mod team_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_kill_team(team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_kill_team(team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20681,16 +20701,16 @@ pub mod team_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ally(first_ally_team_id as i32, second_ally_team_id as i32, if allied { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_ally(first_ally_team_id, second_ally_team_id, if allied { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20704,16 +20724,16 @@ pub mod team_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ally_team_start_box(ally_team_id as i32, min_x, min_z, max_x, max_z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_ally_team_start_box(ally_team_id, min_x, min_z, max_x, max_z) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20727,16 +20747,16 @@ pub mod team_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_global_los(ally_team_id as i32, if enabled { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_global_los(ally_team_id, if enabled { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20750,16 +20770,16 @@ pub mod team_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_player_ready_state(player_id as i32, if ready { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_player_ready_state(player_id, if ready { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20785,16 +20805,16 @@ pub mod team_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_team_start_position(team_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_team_start_position(team_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20808,16 +20828,16 @@ pub mod team_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_transfer_team_max_units(from_team_id as i32, to_team_id as i32, amount as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_transfer_team_max_units(from_team_id, to_team_id, amount) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21269,16 +21289,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_object_decal(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_object_decal(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21304,16 +21324,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_unit_damage(unit_id as i32, damage, paralyze_time, weapon_def_id as i32, attacker_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_unit_damage(unit_id, damage, paralyze_time, weapon_def_id, attacker_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21327,16 +21347,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_unit_experience(unit_id as i32, experience) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_unit_experience(unit_id, experience) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21362,16 +21382,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_unit_impulse(unit_id as i32, decay_rate, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_unit_impulse(unit_id, decay_rate, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21385,16 +21405,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_unit_seismic_ping(unit_id as i32, ping_size) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_unit_seismic_ping(unit_id, ping_size) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21408,16 +21428,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_clear_unit_goal(unit_id as i32, if cancel_raw { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_clear_unit_goal(unit_id, if cancel_raw { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21434,7 +21454,7 @@ pub mod unit_control {
             let mut input_cursor = 0usize;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.selfd).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.reclaimed).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, options.attacker_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, options.attacker_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.recycle_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
@@ -21444,16 +21464,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_destroy_unit(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_destroy_unit(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21467,16 +21487,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_force_unit_collision_update(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_force_unit_collision_update(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21490,12 +21510,12 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_feature_separation(unit_id as i32, feature_id as i32, if ignore_y { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_feature_separation(unit_id, feature_id, if ignore_y { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok(f32::from_bits(packed as u32));
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21509,16 +21529,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_leaves_ghost(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_leaves_ghost(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21532,12 +21552,12 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_physical_state(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_physical_state(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21551,16 +21571,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_remove_object_decal(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_remove_object_decal(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21574,16 +21594,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_remove_unit_cmd_desc(unit_id as i32, cmd_desc_index as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_remove_unit_cmd_desc(unit_id, cmd_desc_index) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21601,7 +21621,7 @@ pub mod unit_control {
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.perform).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, options.offset).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, options.radius).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, options.rel_heading as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, options.rel_heading).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.spherical).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.forced).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
@@ -21612,16 +21632,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_factory_bugger_off(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_factory_bugger_off(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21635,16 +21655,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_always_visible(unit_id as i32, if always_visible { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_always_visible(unit_id, if always_visible { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21658,16 +21678,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_armored(unit_id as i32, if armored_state { 1 } else { 0 }, armored_multiple) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_armored(unit_id, if armored_state { 1 } else { 0 }, armored_multiple) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21697,16 +21717,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_blocking(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_blocking(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21720,16 +21740,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_build_speed(unit_id as i32, build_speed, repair_speed, reclaim_speed, resurrect_speed, capture_speed, terraform_speed) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_build_speed(unit_id, build_speed, repair_speed, reclaim_speed, resurrect_speed, capture_speed, terraform_speed) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21743,16 +21763,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_buildee_radius(unit_id as i32, radius) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_buildee_radius(unit_id, radius) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21782,16 +21802,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_cloak(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_cloak(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21821,16 +21841,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_collision_volume_data(unit_id as i32, volume_type as i32, test_type as i32, primary_axis as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_collision_volume_data(unit_id, volume_type, test_type, primary_axis, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21856,16 +21876,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_costs(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_costs(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21879,16 +21899,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_crashing(unit_id as i32, if want_crash { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_crashing(unit_id, if want_crash { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21918,16 +21938,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_direction(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_direction(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21941,16 +21961,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_experience(unit_id as i32, experience) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_experience(unit_id, experience) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21964,16 +21984,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_harvest_storage(unit_id as i32, stored_metal, max_stored_metal, stored_energy, max_stored_energy) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_harvest_storage(unit_id, stored_metal, max_stored_metal, stored_energy, max_stored_energy) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -21987,16 +22007,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_heading(unit_id as i32, heading as i32, if use_smoothing { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_heading(unit_id, heading, if use_smoothing { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22022,16 +22042,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_heading_and_up_dir(unit_id as i32, heading as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_heading_and_up_dir(unit_id, heading, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22059,16 +22079,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_health(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_health(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22094,16 +22114,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_land_goal(unit_id as i32, radius_sq, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_land_goal(unit_id, radius_sq, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22128,16 +22148,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_leaves_ghost(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_leaves_ghost(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22151,16 +22171,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_loading_transport(unit_id as i32, transport_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_loading_transport(unit_id, transport_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22174,16 +22194,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_los_mask(unit_id as i32, ally_team_id as i32, los_mask as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_los_mask(unit_id, ally_team_id, los_mask as i32) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22197,16 +22217,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_los_state(unit_id as i32, ally_team_id as i32, los_state as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_los_state(unit_id, ally_team_id, los_state as i32) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22220,16 +22240,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_mass(unit_id as i32, mass) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_mass(unit_id, mass) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22243,16 +22263,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_max_health(unit_id as i32, max_health) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_max_health(unit_id, max_health) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22266,16 +22286,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_max_range(unit_id as i32, max_range) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_max_range(unit_id, max_range) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22289,16 +22309,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_metal_extraction(unit_id as i32, depth, range) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_metal_extraction(unit_id, depth, range) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22328,16 +22348,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_mid_and_aim_pos(unit_id as i32, if set_relative { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_mid_and_aim_pos(unit_id, if set_relative { 1 } else { 0 }, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22363,16 +22383,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_move_goal(unit_id as i32, radius, speed, if raw { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_move_goal(unit_id, radius, speed, if raw { 1 } else { 0 }, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22386,16 +22406,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_neutral(unit_id as i32, if neutral { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_neutral(unit_id, if neutral { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22409,16 +22429,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_physical_state_bit(unit_id as i32, state_bit as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_physical_state_bit(unit_id, state_bit) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22456,16 +22476,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_physics(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_physics(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22495,16 +22515,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_piece_collision_volume_data(unit_id as i32, piece_index as i32, if enable { 1 } else { 0 }, volume_type as i32, primary_axis as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_piece_collision_volume_data(unit_id, piece_index, if enable { 1 } else { 0 }, volume_type, primary_axis, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22542,16 +22562,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_piece_matrix(unit_id as i32, piece_index as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_piece_matrix(unit_id, piece_index, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22565,16 +22585,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_piece_parent(unit_id as i32, child_piece_index as i32, parent_piece_index as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_piece_parent(unit_id, child_piece_index, parent_piece_index) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22588,16 +22608,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_piece_visible(unit_id as i32, piece_index as i32, if visible { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_piece_visible(unit_id, piece_index, if visible { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22627,16 +22647,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_pos_error_params(unit_id as i32, next_pos_error_update as i32, ally_team_id as i32, if set_pos_error_bit { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_pos_error_params(unit_id, next_pos_error_update, ally_team_id, if set_pos_error_bit { 1 } else { 0 }, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22662,16 +22682,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_position(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_position(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22685,16 +22705,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_radius_and_height(unit_id as i32, radius, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_radius_and_height(unit_id, radius, height) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22720,16 +22740,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_rotation(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_rotation(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22743,16 +22763,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_seismic_signature(unit_id as i32, seismic_signature) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_seismic_signature(unit_id, seismic_signature) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22782,16 +22802,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_selection_volume_data(unit_id as i32, volume_type as i32, test_type as i32, primary_axis as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_selection_volume_data(unit_id, volume_type, test_type, primary_axis, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22805,16 +22825,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_shield_recharge_delay(unit_id as i32, weapon_num as i32, recharge_delay) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_shield_recharge_delay(unit_id, weapon_num, recharge_delay) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22828,16 +22848,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_shield_state(unit_id as i32, weapon_num as i32, if enabled { 1 } else { 0 }, power) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_shield_state(unit_id, weapon_num, if enabled { 1 } else { 0 }, power) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22851,16 +22871,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_sonar_stealth(unit_id as i32, if sonar_stealth { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_sonar_stealth(unit_id, if sonar_stealth { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22874,16 +22894,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_stealth(unit_id as i32, if stealth { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_stealth(unit_id, if stealth { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22897,16 +22917,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_stockpile(unit_id as i32, stockpile as i32, build_percent) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_stockpile(unit_id, stockpile, build_percent) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22921,7 +22941,7 @@ pub mod unit_control {
         {
             let mut input_wire = [0u8; 28];
             let mut input_cursor = 0usize;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, target.target_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, target.target_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.pos.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.pos.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.pos.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
@@ -22938,16 +22958,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_target(unit_id as i32, weapon_num as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_target(unit_id, weapon_num, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22961,16 +22981,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_use_air_los(unit_id as i32, if use_air_los { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_use_air_los(unit_id, if use_air_los { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -22995,16 +23015,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_use_weapons(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_use_weapons(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23030,16 +23050,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_velocity(unit_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_unit_velocity(unit_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23053,16 +23073,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_transfer_unit(unit_id as i32, new_team_id as i32, if given { 1 } else { 0 }, if adjust_unit_limit { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_transfer_unit(unit_id, new_team_id, if given { 1 } else { 0 }, if adjust_unit_limit { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23076,16 +23096,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_attach(transporter_id as i32, transportee_id as i32, piece_num as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unit_attach(transporter_id, transportee_id, piece_num) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23099,16 +23119,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_detach(transportee_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unit_detach(transportee_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23134,16 +23154,16 @@ pub mod unit_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_unit_detach_from_air(transportee_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unit_detach_from_air(transportee_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23157,16 +23177,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_finish_command(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unit_finish_command(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23180,16 +23200,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_weapon_fire(unit_id as i32, weapon_num as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unit_weapon_fire(unit_id, weapon_num) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23203,16 +23223,16 @@ pub mod unit_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_weapon_hold_fire(unit_id as i32, weapon_num as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_unit_weapon_hold_fire(unit_id, weapon_num) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23415,16 +23435,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_feature_damage(feature_id as i32, damage, paralyze_time, weapon_def_id as i32, attacker_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_add_feature_damage(feature_id, damage, paralyze_time, weapon_def_id, attacker_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23438,12 +23458,12 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_create_feature_wreck(feature_id as i32, wreck_level as i32, if do_smoke { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_create_feature_wreck(feature_id, wreck_level, if do_smoke { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23457,12 +23477,12 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_create_unit_wreck(unit_id as i32, wreck_level as i32, if do_smoke { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_create_unit_wreck(unit_id, wreck_level, if do_smoke { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32 as i32) as i32);
+            Ok(packed as u32 as i32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23476,16 +23496,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_destroy_feature(feature_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_destroy_feature(feature_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23499,16 +23519,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_always_visible(feature_id as i32, if always_visible { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_always_visible(feature_id, if always_visible { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23538,16 +23558,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_blocking(feature_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_blocking(feature_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23577,16 +23597,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_collision_volume_data(feature_id as i32, volume_type as i32, test_type as i32, primary_axis as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_collision_volume_data(feature_id, volume_type, test_type, primary_axis, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23616,16 +23636,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_direction(feature_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_direction(feature_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23639,16 +23659,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_fire_time(feature_id as i32, fire_time) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_fire_time(feature_id, fire_time) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23674,16 +23694,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_heading_and_up_dir(feature_id as i32, heading as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_heading_and_up_dir(feature_id, heading, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23697,16 +23717,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_health(feature_id as i32, health, if check_destruction { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_health(feature_id, health, if check_destruction { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23720,16 +23740,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_mass(feature_id as i32, mass) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_mass(feature_id, mass) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23743,16 +23763,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_max_health(feature_id as i32, max_health) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_max_health(feature_id, max_health) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23782,16 +23802,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_mid_and_aim_pos(feature_id as i32, if set_relative { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_mid_and_aim_pos(feature_id, if set_relative { 1 } else { 0 }, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23825,16 +23845,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_move_ctrl(feature_id as i32, if enable { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_move_ctrl(feature_id, if enable { 1 } else { 0 }, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23848,16 +23868,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_no_select(feature_id as i32, if no_select { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_no_select(feature_id, if no_select { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23895,16 +23915,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_physics(feature_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_physics(feature_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23934,16 +23954,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_piece_collision_volume_data(feature_id as i32, piece_index as i32, if enable { 1 } else { 0 }, volume_type as i32, primary_axis as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_piece_collision_volume_data(feature_id, piece_index, if enable { 1 } else { 0 }, volume_type, primary_axis, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -23981,16 +24001,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_piece_matrix(feature_id as i32, piece_index as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_piece_matrix(feature_id, piece_index, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24004,16 +24024,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_piece_visible(feature_id as i32, piece_index as i32, if visible { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_piece_visible(feature_id, piece_index, if visible { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24039,16 +24059,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_position(feature_id as i32, if snap_to_ground { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_position(feature_id, if snap_to_ground { 1 } else { 0 }, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24062,16 +24082,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_radius_and_height(feature_id as i32, radius, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_radius_and_height(feature_id, radius, height) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24085,16 +24105,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_reclaim(feature_id as i32, reclaim_left) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_reclaim(feature_id, reclaim_left) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24108,16 +24128,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_resources(feature_id as i32, metal, energy, reclaim_time, reclaim_left, feature_def_metal, feature_def_energy) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_resources(feature_id, metal, energy, reclaim_time, reclaim_left, feature_def_metal, feature_def_energy) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24143,16 +24163,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_rotation(feature_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_rotation(feature_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24182,16 +24202,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_selection_volume_data(feature_id as i32, volume_type as i32, primary_axis as i32, if use_cont_hit_test { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_selection_volume_data(feature_id, volume_type, primary_axis, if use_cont_hit_test { 1 } else { 0 }, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24205,16 +24225,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_smoke_time(feature_id as i32, smoke_time) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_smoke_time(feature_id, smoke_time) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24228,16 +24248,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_use_air_los(feature_id as i32, if use_air_los { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_use_air_los(feature_id, if use_air_los { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24263,16 +24283,16 @@ pub mod feature_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_velocity(feature_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_feature_velocity(feature_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24286,16 +24306,16 @@ pub mod feature_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_transfer_feature(feature_id as i32, new_team_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_transfer_feature(feature_id, new_team_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24424,15 +24444,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_add_grass(x, z, grass_value as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24447,15 +24467,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_add_height_map(x, z, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24470,15 +24490,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_add_original_height_map(x, z, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24493,15 +24513,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_add_smooth_mesh(x, z, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24516,15 +24536,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_adjust_height_map(x1, z1, x2, z2, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24539,15 +24559,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_adjust_original_height_map(x1, z1, x2, z2, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24562,15 +24582,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_adjust_smooth_mesh(x1, z1, x2, z2, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24585,15 +24605,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_level_height_map(x1, z1, x2, z2, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24608,15 +24628,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_level_original_height_map(x1, z1, x2, z2, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24631,15 +24651,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_level_smooth_mesh(x1, z1, x2, z2, height) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24654,15 +24674,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_rebuild_smooth_mesh(unused as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24677,15 +24697,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_remove_grass(x, z) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24700,15 +24720,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_revert_height_map(x1, z1, x2, z2, orig_factor) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24723,15 +24743,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_revert_original_height_map(x1, z1, x2, z2, orig_factor) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24746,15 +24766,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_revert_smooth_mesh(x1, z1, x2, z2, orig_factor) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24769,15 +24789,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_height_map(x, z, height, terraform) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24791,16 +24811,16 @@ pub mod terrain_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_map_square_terrain_type(x as i32, z as i32, terrain_type as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_map_square_terrain_type(x, z, terrain_type) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24815,15 +24835,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_original_height_map(x, z, height, factor) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24838,15 +24858,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_smooth_mesh(x, z, height, terraform) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24861,15 +24881,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_tidal(tidal) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24884,15 +24904,15 @@ pub mod terrain_control {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_wind(min_wind, max_wind) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -24995,16 +25015,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_delete_projectile(projectile_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_delete_projectile(projectile_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25030,16 +25050,16 @@ pub mod projectile_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_piece_projectile_params(projectile_id as i32, expl_flags as i32, spin_angle, spin_speed, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_piece_projectile_params(projectile_id, expl_flags, spin_angle, spin_speed, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25053,16 +25073,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_always_visible(projectile_id as i32, if always_visible { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_always_visible(projectile_id, if always_visible { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25076,16 +25096,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_collision(projectile_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_collision(projectile_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25099,16 +25119,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_gravity(projectile_id as i32, gravity) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_gravity(projectile_id, gravity) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25122,16 +25142,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_ignore_tracking_error(projectile_id as i32, if ignore { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_ignore_tracking_error(projectile_id, if ignore { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25145,16 +25165,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_is_intercepted(projectile_id as i32, if intercepted { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_is_intercepted(projectile_id, if intercepted { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25168,16 +25188,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_move_control(projectile_id as i32, if enable { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_move_control(projectile_id, if enable { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25203,16 +25223,16 @@ pub mod projectile_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_projectile_position(projectile_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_position(projectile_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25227,8 +25247,8 @@ pub mod projectile_control {
         {
             let mut input_wire = [0u8; 24];
             let mut input_cursor = 0usize;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, target.target_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, target.target_type as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, target.target_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, target.target_type).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.pos.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.pos.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.pos.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
@@ -25242,16 +25262,16 @@ pub mod projectile_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_projectile_target(projectile_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_target(projectile_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25265,16 +25285,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_time_to_live(projectile_id as i32, time_to_live as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_time_to_live(projectile_id, time_to_live) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25288,16 +25308,16 @@ pub mod projectile_control {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_use_air_los(projectile_id as i32, if use_air_los { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_use_air_los(projectile_id, if use_air_los { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25323,16 +25343,16 @@ pub mod projectile_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_projectile_velocity(projectile_id as i32, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_projectile_velocity(projectile_id, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25400,10 +25420,10 @@ pub mod effects_control {
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, dir.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, explosion_params.damages).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.weapon_def_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.owner_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.hit_unit_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.hit_feature_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.weapon_def_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.owner_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.hit_unit_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.hit_feature_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, explosion_params.crater_area_of_effect).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, explosion_params.damage_area_of_effect).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, explosion_params.edge_effectiveness).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
@@ -25412,7 +25432,7 @@ pub mod effects_control {
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, explosion_params.impact_only).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, explosion_params.ignore_owner).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, explosion_params.damage_ground).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
-            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.projectile_id as i32).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, explosion_params.projectile_id).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
@@ -25422,15 +25442,15 @@ pub mod effects_control {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_spawn_explosion(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25460,16 +25480,16 @@ pub mod effects_control {
             debug_assert!(input_pointer_usize <= u32::MAX as usize);
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_spawn_sfx(unit_id as i32, sfx_id as i32, radius, damage, if absolute { 1 } else { 0 }, input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_spawn_sfx(unit_id, sfx_id, radius, damage, if absolute { 1 } else { 0 }, input_pointer) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25529,15 +25549,15 @@ pub mod game_config {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_cheating_enabled(if enabled { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25552,15 +25572,15 @@ pub mod game_config {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_experience_grade(exp_grade, exp_power_scale, exp_health_scale, exp_reload_scale) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25586,15 +25606,15 @@ pub mod game_config {
             let input_pointer = input_pointer_usize as u32 as i32;
             // SAFETY: fixed inputs are encoded into this live stack buffer.
             let packed = unsafe { raw::core_set_god_mode(input_pointer) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25609,15 +25629,15 @@ pub mod game_config {
         {
             // SAFETY: generated scalar-only Core signature.
             let packed = unsafe { raw::core_set_no_pause(if no_pause { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25631,16 +25651,16 @@ pub mod game_config {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_radar_error_params(ally_team_id as i32, ally_team_error_size, base_error_size, base_error_mult) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_radar_error_params(ally_team_id, ally_team_error_size, base_error_size, base_error_mult) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25654,21 +25674,35 @@ pub mod game_config {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_square_building_mask(x as i32, z as i32, mask as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_set_square_building_mask(x, z, mask as i32) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (x, z, mask);
             Err(unreachable!())
+        }
+    }
+
+}
+
+pub mod unit_script {
+    use crate::{ApiError, ErrorCode, Result};
+
+    #[cfg(target_arch = "wasm32")]
+    pub mod raw {
+        #[link(wasm_import_module = "spring:unit-script")]
+        extern "C" {
+            #[link_name = "call-unit-script"]
+            pub fn core_call_unit_script(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
     }
 
@@ -25827,7 +25861,7 @@ pub mod unit_rendering {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25855,7 +25889,7 @@ pub mod unit_rendering {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25883,7 +25917,7 @@ pub mod unit_rendering {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25897,16 +25931,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_always_update_matrix(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_always_update_matrix(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25920,12 +25954,12 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_draw_flag(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_draw_flag(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u8);
+            Ok(packed as u32 as u8)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25939,12 +25973,12 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_engine_draw_mask(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_engine_draw_mask(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return Ok((packed as u32) as u32);
+            Ok(packed as u32)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25958,16 +25992,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_lua_draw(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_lua_draw(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25981,16 +26015,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_no_draw(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_no_draw(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26004,16 +26038,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_no_group(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_no_group(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26027,16 +26061,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_no_minimap(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_no_minimap(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26050,16 +26084,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_no_select(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_get_unit_no_select(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26078,16 +26112,16 @@ pub mod unit_rendering {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_selection_volume_data(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_selection_volume_data(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
             let mut cursor = 0usize;
-            let value = ({ let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? as i32, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            let value = ({ let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26106,7 +26140,7 @@ pub mod unit_rendering {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_transform_matrix(unit_id as i32, output_pointer) };
+            let status = unsafe { raw::core_get_unit_transform_matrix(unit_id, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -26115,7 +26149,7 @@ pub mod unit_rendering {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26134,7 +26168,7 @@ pub mod unit_rendering {
             let output_pointer = output_pointer_usize as u32 as i32;
             // SAFETY: all semantic arguments are scalar and output_pointer
             // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_view_position(unit_id as i32, if use_mid_pos { 1 } else { 0 }, output_pointer) };
+            let status = unsafe { raw::core_get_unit_view_position(unit_id, if use_mid_pos { 1 } else { 0 }, output_pointer) };
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -26143,7 +26177,7 @@ pub mod unit_rendering {
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            return Ok(value);
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26157,16 +26191,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_icon(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_icon(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26180,16 +26214,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_view(unit_id as i32) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_in_view(unit_id) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -26203,16 +26237,16 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_visible(unit_id as i32, radius, if check_icon { 1 } else { 0 }) } as u64;
-            let status = (packed >> 32) as u32 as i32;
+            let packed = unsafe { raw::core_is_unit_visible(unit_id, radius, if check_icon { 1 } else { 0 }) } as u64;
+            let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            return match packed as u32 {
+            match packed as u32 {
                 0 => Ok(false),
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
-            };
+            }
         }
         #[cfg(not(target_arch = "wasm32"))]
         {

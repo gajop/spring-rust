@@ -1,19 +1,43 @@
 {
-  "total": 126,
-  "executable_total": 126,
+  "total": 132,
+  "executable_total": 132,
   "verified_total": 0,
   "by_class": {
-    "generated-direct": 26,
-    "generated-direct-ignored-result": 57,
-    "generated-first-non-empty-string": 2,
+    "generated-direct": 27,
+    "generated-direct-ignored-result": 59,
+    "generated-first-non-empty-string": 3,
     "generated-fixed-flattened": 5,
     "generated-fixed-flattened-ignored-result": 4,
     "generated-packed-result": 3,
     "generated-shared-scratch": 10,
-    "generated-shared-scratch-ignored-result": 11,
+    "generated-shared-scratch-ignored-result": 13,
     "specialized": 8
   },
   "executable": [
+    {
+      "name": "ActivateGame",
+      "query": "SimpleCallinQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "menu"
+      ],
+      "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "ActivateMenu",
+      "query": "ActivateMenuQuery",
+      "result": "ActivateMenuResult",
+      "aggregation": "ignore",
+      "environments": [
+        "menu"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
+      "verified": false,
+      "reason": null
+    },
     {
       "name": "ActiveCommandChanged",
       "query": "ActiveCommandChangedQuery",
@@ -40,7 +64,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "specialized",
       "verified": false,
@@ -80,6 +105,18 @@
       "environments": [
         "rules-synced",
         "gaia-synced"
+      ],
+      "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "AllowDraw",
+      "query": "SimpleCallinQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "menu"
       ],
       "class": "generated-direct",
       "verified": false,
@@ -318,7 +355,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -381,7 +419,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -397,7 +436,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -413,7 +453,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -429,7 +470,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-shared-scratch-ignored-result",
       "verified": false,
@@ -445,7 +487,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -495,6 +538,18 @@
         "gaia-unsynced"
       ],
       "class": "generated-direct",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "DrawLoadScreen",
+      "query": "SimpleCallinQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "intro"
+      ],
+      "class": "generated-direct-ignored-result",
       "verified": false,
       "reason": null
     },
@@ -554,7 +609,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -858,6 +914,18 @@
       "reason": null
     },
     {
+      "name": "GenerateDefs",
+      "query": "SimpleCallinQuery",
+      "result": "StringCallinResult",
+      "aggregation": "first-non-empty",
+      "environments": [
+        "rules-synced"
+      ],
+      "class": "generated-first-non-empty-string",
+      "verified": false,
+      "reason": null
+    },
+    {
       "name": "GroupChanged",
       "query": "GroupChangedQuery",
       "result": "BoolCallinResult",
@@ -928,7 +996,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct",
       "verified": false,
@@ -944,7 +1013,9 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu",
+        "intro"
       ],
       "class": "generated-shared-scratch",
       "verified": false,
@@ -960,7 +1031,9 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu",
+        "intro"
       ],
       "class": "generated-shared-scratch",
       "verified": false,
@@ -995,6 +1068,18 @@
         "ui"
       ],
       "class": "generated-direct-ignored-result",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "LoadProgress",
+      "query": "LoadProgressQuery",
+      "result": "LoadProgressResult",
+      "aggregation": "ignore",
+      "environments": [
+        "intro"
+      ],
+      "class": "generated-shared-scratch-ignored-result",
       "verified": false,
       "reason": null
     },
@@ -1088,7 +1173,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct",
       "verified": false,
@@ -1104,7 +1190,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct",
       "verified": false,
@@ -1120,7 +1207,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -1136,7 +1224,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct",
       "verified": false,
@@ -1321,7 +1410,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct",
       "verified": false,
@@ -1337,7 +1427,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-first-non-empty-string",
       "verified": false,
@@ -1368,7 +1459,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -1384,7 +1476,9 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu",
+        "intro"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,
@@ -1479,7 +1573,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-shared-scratch",
       "verified": false,
@@ -1495,7 +1590,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "generated-shared-scratch",
       "verified": false,
@@ -1908,7 +2004,8 @@
       "environments": [
         "rules-unsynced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "class": "specialized",
       "verified": false,
@@ -1924,7 +2021,9 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu",
+        "intro"
       ],
       "class": "generated-direct-ignored-result",
       "verified": false,

@@ -53,6 +53,8 @@ fn environment_mask(environment: &Environment) -> u32 {
         Environment::GaiaSynced => 4,
         Environment::GaiaUnsynced => 8,
         Environment::Ui => 16,
+        Environment::Menu => 32,
+        Environment::Intro => 64,
     }
 }
 
@@ -148,6 +150,7 @@ pub fn native_api_path(module: &str) -> Option<(&'static str, &'static str)> {
         "effects_control" => ("nativeInterface->syncedCtrl->effects", "EffectsControlApi"),
         "game_config" => ("nativeInterface->syncedCtrl->gameConfig", "GameConfigApi"),
         "cob_script" => ("nativeInterface->syncedCtrl->cobScript", "COBScriptApi"),
+        "unit_script" => ("nativeInterface->syncedCtrl->unitScript", "UnitScriptApi"),
         "unit_rendering" => (
             "nativeInterface->unsyncedRead->unitRendering",
             "UnitRenderingApi",

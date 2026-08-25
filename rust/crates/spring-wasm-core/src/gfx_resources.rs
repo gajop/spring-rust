@@ -114,7 +114,7 @@ fn checked_output(output: &mut [u8]) -> Result<(i32, i32)> {
 
 #[cfg(target_arch = "wasm32")]
 #[inline]
-fn finish_name<'a>(packed: i64, output: &'a [u8]) -> Result<&'a str> {
+fn finish_name(packed: i64, output: &[u8]) -> Result<&str> {
     let length = crate::unpack_i32(packed)?;
     if length < 0
         || length as usize > NATIVE_GFX_RESOURCE_NAME_MAX_BYTES
@@ -127,13 +127,13 @@ fn finish_name<'a>(packed: i64, output: &'a [u8]) -> Result<&'a str> {
 }
 
 #[inline]
-pub fn create_texture<'a>(
+pub fn create_texture(
     xsize: i32,
     ysize: i32,
     zsize: i32,
     params: GfxTextureParams,
-    output: &'a mut [u8],
-) -> Result<&'a str> {
+    output: &mut [u8],
+) -> Result<&str> {
     #[cfg(target_arch = "wasm32")]
     {
         let wire = encode_texture_params(params);
@@ -162,12 +162,12 @@ pub fn create_texture<'a>(
 }
 
 #[inline]
-pub fn create_texture_atlas<'a>(
+pub fn create_texture_atlas(
     xsize: i32,
     ysize: i32,
     alloc_type: i32,
-    output: &'a mut [u8],
-) -> Result<&'a str> {
+    output: &mut [u8],
+) -> Result<&str> {
     #[cfg(target_arch = "wasm32")]
     {
         let (output_pointer, output_capacity) = checked_output(output)?;

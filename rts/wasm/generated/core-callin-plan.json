@@ -1,6 +1,43 @@
 {
   "callins": [
     {
+      "name": "ActivateGame",
+      "query": "SimpleCallinQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "menu"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
+    },
+    {
+      "name": "ActivateMenu",
+      "query": "ActivateMenuQuery",
+      "result": "ActivateMenuResult",
+      "aggregation": "ignore",
+      "environments": [
+        "menu"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region",
+        "ignored aggregation elides the guest result ABI"
+      ]
+    },
+    {
       "name": "ActiveCommandChanged",
       "query": "ActiveCommandChangedQuery",
       "result": "ActiveCommandChangedResult",
@@ -32,7 +69,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
@@ -92,6 +130,22 @@
       "fixed_query_bytes": 16,
       "fixed_result_bytes": 4,
       "numeric_flat_query_values": 4,
+      "scratch_query_eligible": false,
+      "packed_result_values": 1
+    },
+    {
+      "name": "AllowDraw",
+      "query": "SimpleCallinQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "menu"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 1,
       "scratch_query_eligible": false,
       "packed_result_values": 1
     },
@@ -417,7 +471,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -504,7 +559,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -527,7 +583,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -550,7 +607,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -573,7 +631,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "empty",
@@ -595,7 +654,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -673,6 +733,25 @@
       "packed_result_values": 1
     },
     {
+      "name": "DrawLoadScreen",
+      "query": "SimpleCallinQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "intro"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "packed_result_values": 0,
+      "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
+    },
+    {
       "name": "DrawMaterial",
       "query": "DrawMaterialQuery",
       "result": "BoolCallinResult",
@@ -743,7 +822,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -1180,6 +1260,23 @@
       ]
     },
     {
+      "name": "GenerateDefs",
+      "query": "SimpleCallinQuery",
+      "result": "StringCallinResult",
+      "aggregation": "first-non-empty",
+      "environments": [
+        "rules-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "manual",
+      "fixed_query_bytes": 4,
+      "numeric_flat_query_values": 1,
+      "scratch_query_eligible": false,
+      "notes": [
+        "variable/manual result needs reviewed guest-to-host return lowering"
+      ]
+    },
+    {
       "name": "GroupChanged",
       "query": "GroupChangedQuery",
       "result": "BoolCallinResult",
@@ -1273,7 +1370,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "direct",
@@ -1293,7 +1391,9 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu",
+        "intro"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
@@ -1314,7 +1414,9 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu",
+        "intro"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
@@ -1369,6 +1471,24 @@
       "scratch_query_eligible": false,
       "packed_result_values": 0,
       "notes": [
+        "ignored aggregation elides the guest result ABI"
+      ]
+    },
+    {
+      "name": "LoadProgress",
+      "query": "LoadProgressQuery",
+      "result": "LoadProgressResult",
+      "aggregation": "ignore",
+      "environments": [
+        "intro"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "scratch_query_eligible": true,
+      "packed_result_values": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region",
         "ignored aggregation elides the guest result ABI"
       ]
     },
@@ -1495,7 +1615,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "direct",
@@ -1515,7 +1636,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "direct",
@@ -1535,7 +1657,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -1558,7 +1681,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "direct",
@@ -1818,7 +1942,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "direct",
@@ -1838,7 +1963,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "manual",
@@ -1881,7 +2007,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "empty",
       "result_strategy": "empty",
@@ -1904,7 +2031,9 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu",
+        "intro"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -2038,7 +2167,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
@@ -2059,7 +2189,8 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
@@ -2645,7 +2776,8 @@
       "environments": [
         "rules-unsynced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -2668,7 +2800,9 @@
         "rules-unsynced",
         "gaia-synced",
         "gaia-unsynced",
-        "ui"
+        "ui",
+        "menu",
+        "intro"
       ],
       "query_strategy": "direct",
       "result_strategy": "empty",
@@ -2703,15 +2837,15 @@
     }
   ],
   "by_query_strategy": {
-    "direct": 89,
+    "direct": 93,
     "empty": 3,
     "fixed-wire": 11,
-    "variable-scratch": 23
+    "variable-scratch": 25
   },
   "by_result_strategy": {
-    "direct": 43,
-    "empty": 76,
+    "direct": 44,
+    "empty": 80,
     "fixed-wire": 5,
-    "manual": 2
+    "manual": 3
   }
 }

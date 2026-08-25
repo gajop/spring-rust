@@ -35,6 +35,11 @@ fn main() {
     );
     append_generated(
         &mut contents,
+        &generated_dir.join("core_variable_io.rs"),
+        "reviewed variable-I/O Core callout SDK",
+    );
+    append_generated(
+        &mut contents,
         &generated_dir.join("core_dynamic_input.rs"),
         "nested dynamic-input Core callout SDK",
     );

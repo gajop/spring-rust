@@ -236,11 +236,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterUnitsQueryBorrowedImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->unitsQuery == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register borrowed UnitsQuery Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->unitsQuery == nullptr)
+		return true;
 	const wasm_valkind_t i64Result[] = {WASM_I64};
 	const wasm_valkind_t i32Result[] = {WASM_I32};
 	const wasm_valkind_t byDefs[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};

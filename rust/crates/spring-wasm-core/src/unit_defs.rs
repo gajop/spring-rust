@@ -58,9 +58,7 @@ pub fn get_unit_def_name_into(unit_def_id: i32, output: &mut [u8]) -> Result<Byt
         let (pointer, capacity) = output_parts(output);
         // SAFETY: the output slice remains live for the synchronous import;
         // host validates pointer/capacity and never writes a partial result.
-        return decode_fill(unsafe {
-            unit_defs_raw::get_unit_def_name(unit_def_id, pointer, capacity)
-        });
+        decode_fill(unsafe { unit_defs_raw::get_unit_def_name(unit_def_id, pointer, capacity) })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -75,9 +73,9 @@ pub fn get_unit_def_human_name_into(unit_def_id: i32, output: &mut [u8]) -> Resu
     {
         let (pointer, capacity) = output_parts(output);
         // SAFETY: same validated caller-owned byte-buffer convention as name.
-        return decode_fill(unsafe {
+        decode_fill(unsafe {
             unit_defs_raw::get_unit_def_human_name(unit_def_id, pointer, capacity)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -113,9 +111,9 @@ fn collect_bytes(mut call: impl FnMut(i32, i32) -> i64) -> Result<Vec<u8>> {
 pub fn get_unit_def_name_bytes(unit_def_id: i32) -> Result<Vec<u8>> {
     #[cfg(target_arch = "wasm32")]
     {
-        return collect_bytes(|pointer, capacity| unsafe {
+        collect_bytes(|pointer, capacity| unsafe {
             unit_defs_raw::get_unit_def_name(unit_def_id, pointer, capacity)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -128,9 +126,9 @@ pub fn get_unit_def_name_bytes(unit_def_id: i32) -> Result<Vec<u8>> {
 pub fn get_unit_def_human_name_bytes(unit_def_id: i32) -> Result<Vec<u8>> {
     #[cfg(target_arch = "wasm32")]
     {
-        return collect_bytes(|pointer, capacity| unsafe {
+        collect_bytes(|pointer, capacity| unsafe {
             unit_defs_raw::get_unit_def_human_name(unit_def_id, pointer, capacity)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

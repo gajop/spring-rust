@@ -68,6 +68,8 @@ impl LuaLoaderMatrix {
         let synced_source = read(&lua_dir.join("LuaHandleSynced.cpp"))?;
         let ui_source = read(&lua_dir.join("LuaUI.cpp"))?;
         let handle_source = read(&lua_dir.join("LuaHandle.cpp"))?;
+        let menu_source = read(&lua_dir.join("LuaMenu.cpp"))?;
+        let intro_source = read(&lua_dir.join("LuaIntro.cpp"))?;
 
         let synced = function_body(&synced_source, "CSyncedLuaHandle::Init")
             .context("could not locate the synced Lua loader")?;
@@ -75,6 +77,10 @@ impl LuaLoaderMatrix {
             .context("could not locate the unsynced Lua loader")?;
         let ui = function_body(&ui_source, "CLuaUI::CLuaUI")
             .context("could not locate the LuaUI loader")?;
+        let menu = function_body(&menu_source, "CLuaMenu::CLuaMenu")
+            .context("could not locate the LuaMenu loader")?;
+        let intro = function_body(&intro_source, "CLuaIntro::CLuaIntro")
+            .context("could not locate the LuaIntro loader")?;
 
         let common = function_body(&handle_source, "CLuaHandle::AddCommonModules")
             .context("could not locate the common Lua loader")?;
@@ -88,6 +94,8 @@ impl LuaLoaderMatrix {
             (synced, synced_gadgets()),
             (unsynced, unsynced_and_ui()),
             (ui, BTreeSet::from([Environment::Ui])),
+            (menu, BTreeSet::from([Environment::Menu])),
+            (intro, BTreeSet::from([Environment::Intro])),
             (common, Environment::ALL.into_iter().collect()),
         ] {
             for (provider, method) in providers_in_loader(body) {
@@ -141,6 +149,46 @@ impl LuaLoaderMatrix {
                     .entry(nested_method)
                     .or_default()
                     .extend(environments.iter().copied());
+            }
+        }
+
+        // CLuaMenu and CLuaIntro register subsets of LuaUnsyncedCtrl,
+        // LuaUnsyncedRead, and LuaSyncedRead through their own Load* methods
+        // rather than via Provider::PushEntries.  Parse those method bodies and
+        // register each function for the appropriate environment.
+        for (source, env, methods) in [
+            (
+                &menu_source,
+                Environment::Menu,
+                &[
+                    "CLuaMenu::LoadUnsyncedCtrlFunctions",
+                    "CLuaMenu::LoadUnsyncedReadFunctions",
+                ][..],
+            ),
+            (
+                &intro_source,
+                Environment::Intro,
+                &[
+                    "CLuaIntro::LoadUnsyncedCtrlFunctions",
+                    "CLuaIntro::LoadUnsyncedReadFunctions",
+                    "CLuaIntro::LoadSyncedReadFunctions",
+                ][..],
+            ),
+        ] {
+            for method in methods {
+                if let Some(body) = function_body(source, method) {
+                    let scoped = Regex::new(
+                        r"REGISTER_SCOPED_LUA_CFUNC\s*\(\s*[^,]+,\s*([A-Za-z0-9_]+)",
+                    )
+                    .expect("valid REGISTER_SCOPED_LUA_CFUNC pattern");
+                    for captures in scoped.captures_iter(body) {
+                        matrix
+                            .function_environments
+                            .entry(captures[1].to_string())
+                            .or_default()
+                            .insert(env);
+                    }
+                }
             }
         }
 
@@ -445,7 +493,13 @@ fn unsynced_and_ui() -> BTreeSet<Environment> {
 }
 
 fn gadget_and_ui() -> BTreeSet<Environment> {
-    Environment::ALL.into_iter().collect()
+    BTreeSet::from([
+        Environment::RulesSynced,
+        Environment::RulesUnsynced,
+        Environment::GaiaSynced,
+        Environment::GaiaUnsynced,
+        Environment::Ui,
+    ])
 }
 
 #[cfg(test)]
@@ -525,7 +579,9 @@ mod tests {
             BTreeSet::from([
                 Environment::RulesUnsynced,
                 Environment::GaiaUnsynced,
-                Environment::Ui
+                Environment::Ui,
+                Environment::Menu,
+                Environment::Intro,
             ])
         );
 

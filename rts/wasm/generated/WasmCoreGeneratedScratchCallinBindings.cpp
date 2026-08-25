@@ -68,149 +68,163 @@ bool GeneratedScratchCallinBindings::Bind(wasmtime_context_t* context,
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[1], context, instance, "spring:callin/active-command-changed", params, std::span<const wasm_valkind_t>(results, 0), error))
+        if (!ResolveOptional(exports[2], context, instance, "spring:callin/activate-menu", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
-        anyPresent = anyPresent || exports[1].Present();
+        anyPresent = anyPresent || exports[2].Present();
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t* results = nullptr;
+        if (!ResolveOptional(exports[3], context, instance, "spring:callin/active-command-changed", params, std::span<const wasm_valkind_t>(results, 0), error))
+            return false;
+        anyPresent = anyPresent || exports[3].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[4], context, instance, "spring:callin/allow-command", params, std::span<const wasm_valkind_t>(results, 1), error))
+        if (!ResolveOptional(exports[6], context, instance, "spring:callin/allow-command", params, std::span<const wasm_valkind_t>(results, 1), error))
             return false;
-        anyPresent = anyPresent || exports[4].Present();
+        anyPresent = anyPresent || exports[6].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[8], context, instance, "spring:callin/allow-resource-level", params, std::span<const wasm_valkind_t>(results, 1), error))
+        if (!ResolveOptional(exports[11], context, instance, "spring:callin/allow-resource-level", params, std::span<const wasm_valkind_t>(results, 1), error))
             return false;
-        anyPresent = anyPresent || exports[8].Present();
+        anyPresent = anyPresent || exports[11].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[9], context, instance, "spring:callin/allow-resource-transfer", params, std::span<const wasm_valkind_t>(results, 1), error))
+        if (!ResolveOptional(exports[12], context, instance, "spring:callin/allow-resource-transfer", params, std::span<const wasm_valkind_t>(results, 1), error))
             return false;
-        anyPresent = anyPresent || exports[9].Present();
+        anyPresent = anyPresent || exports[12].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[27], context, instance, "spring:callin/command-fallback", params, std::span<const wasm_valkind_t>(results, 1), error))
+        if (!ResolveOptional(exports[30], context, instance, "spring:callin/command-fallback", params, std::span<const wasm_valkind_t>(results, 1), error))
             return false;
-        anyPresent = anyPresent || exports[27].Present();
+        anyPresent = anyPresent || exports[30].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[33], context, instance, "spring:callin/download-queued", params, std::span<const wasm_valkind_t>(results, 0), error))
+        if (!ResolveOptional(exports[36], context, instance, "spring:callin/download-queued", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
-        anyPresent = anyPresent || exports[33].Present();
+        anyPresent = anyPresent || exports[36].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[38], context, instance, "spring:callin/draw-build-square", params, std::span<const wasm_valkind_t>(results, 0), error))
+        if (!ResolveOptional(exports[41], context, instance, "spring:callin/draw-build-square", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
-        anyPresent = anyPresent || exports[38].Present();
+        anyPresent = anyPresent || exports[41].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[63], context, instance, "spring:callin/game-id", params, std::span<const wasm_valkind_t>(results, 0), error))
+        if (!ResolveOptional(exports[67], context, instance, "spring:callin/game-id", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
-        anyPresent = anyPresent || exports[63].Present();
+        anyPresent = anyPresent || exports[67].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[64], context, instance, "spring:callin/game-over", params, std::span<const wasm_valkind_t>(results, 0), error))
-            return false;
-        anyPresent = anyPresent || exports[64].Present();
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[68], context, instance, "spring:callin/game-setup", params, std::span<const wasm_valkind_t>(results, 0), error))
+        if (!ResolveOptional(exports[68], context, instance, "spring:callin/game-over", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
         anyPresent = anyPresent || exports[68].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[71], context, instance, "spring:callin/handle-lua-call", params, std::span<const wasm_valkind_t>(results, 0), error))
-            return false;
-        anyPresent = anyPresent || exports[71].Present();
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[72], context, instance, "spring:callin/handle-lua-msg", params, std::span<const wasm_valkind_t>(results, 0), error))
+        if (!ResolveOptional(exports[72], context, instance, "spring:callin/game-setup", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
         anyPresent = anyPresent || exports[72].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[75], context, instance, "spring:callin/key-press", params, std::span<const wasm_valkind_t>(results, 1), error))
-            return false;
-        anyPresent = anyPresent || exports[75].Present();
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[76], context, instance, "spring:callin/key-release", params, std::span<const wasm_valkind_t>(results, 1), error))
+        const wasm_valkind_t* results = nullptr;
+        if (!ResolveOptional(exports[76], context, instance, "spring:callin/handle-lua-call", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
         anyPresent = anyPresent || exports[76].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[79], context, instance, "spring:callin/map-draw-cmd", params, std::span<const wasm_valkind_t>(results, 1), error))
+        const wasm_valkind_t* results = nullptr;
+        if (!ResolveOptional(exports[77], context, instance, "spring:callin/handle-lua-msg", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
-        anyPresent = anyPresent || exports[79].Present();
+        anyPresent = anyPresent || exports[77].Present();
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!ResolveOptional(exports[80], context, instance, "spring:callin/key-press", params, std::span<const wasm_valkind_t>(results, 1), error))
+            return false;
+        anyPresent = anyPresent || exports[80].Present();
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!ResolveOptional(exports[81], context, instance, "spring:callin/key-release", params, std::span<const wasm_valkind_t>(results, 1), error))
+            return false;
+        anyPresent = anyPresent || exports[81].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[100], context, instance, "spring:callin/recv-from-synced", params, std::span<const wasm_valkind_t>(results, 0), error))
+        if (!ResolveOptional(exports[84], context, instance, "spring:callin/load-progress", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
-        anyPresent = anyPresent || exports[100].Present();
+        anyPresent = anyPresent || exports[84].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[102], context, instance, "spring:callin/resource-excess", params, std::span<const wasm_valkind_t>(results, 1), error))
+        if (!ResolveOptional(exports[85], context, instance, "spring:callin/map-draw-cmd", params, std::span<const wasm_valkind_t>(results, 1), error))
             return false;
-        anyPresent = anyPresent || exports[102].Present();
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[135], context, instance, "spring:callin/text-editing", params, std::span<const wasm_valkind_t>(results, 1), error))
-            return false;
-        anyPresent = anyPresent || exports[135].Present();
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!ResolveOptional(exports[136], context, instance, "spring:callin/text-input", params, std::span<const wasm_valkind_t>(results, 1), error))
-            return false;
-        anyPresent = anyPresent || exports[136].Present();
+        anyPresent = anyPresent || exports[85].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[140], context, instance, "spring:callin/unit-cmd-done", params, std::span<const wasm_valkind_t>(results, 0), error))
+        if (!ResolveOptional(exports[106], context, instance, "spring:callin/recv-from-synced", params, std::span<const wasm_valkind_t>(results, 0), error))
             return false;
-        anyPresent = anyPresent || exports[140].Present();
+        anyPresent = anyPresent || exports[106].Present();
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t* results = nullptr;
-        if (!ResolveOptional(exports[141], context, instance, "spring:callin/unit-command", params, std::span<const wasm_valkind_t>(results, 0), error))
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!ResolveOptional(exports[108], context, instance, "spring:callin/resource-excess", params, std::span<const wasm_valkind_t>(results, 1), error))
+            return false;
+        anyPresent = anyPresent || exports[108].Present();
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!ResolveOptional(exports[141], context, instance, "spring:callin/text-editing", params, std::span<const wasm_valkind_t>(results, 1), error))
             return false;
         anyPresent = anyPresent || exports[141].Present();
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!ResolveOptional(exports[142], context, instance, "spring:callin/text-input", params, std::span<const wasm_valkind_t>(results, 1), error))
+            return false;
+        anyPresent = anyPresent || exports[142].Present();
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t* results = nullptr;
+        if (!ResolveOptional(exports[146], context, instance, "spring:callin/unit-cmd-done", params, std::span<const wasm_valkind_t>(results, 0), error))
+            return false;
+        anyPresent = anyPresent || exports[146].Present();
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t* results = nullptr;
+        if (!ResolveOptional(exports[147], context, instance, "spring:callin/unit-command", params, std::span<const wasm_valkind_t>(results, 0), error))
+            return false;
+        anyPresent = anyPresent || exports[147].Present();
     }
 
     if (!anyPresent)
@@ -260,7 +274,20 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
     WireWriter writer(scratch);
 
     switch (ordinal) {
-        case 1u: {
+        case 2u: {
+            const auto* typedQuery = static_cast<const ActivateMenuQuery*>(query);
+            if (typedQuery == nullptr) { error = "generated Core ActivateMenu query is null"; return false; }
+            if (!WriteString(writer, typedQuery->message)) { error = "generated Core string exceeds scratch capacity"; return false; }
+            if (!writer.U32(typedQuery->messageLength)) { error = "generated Core scratch overflow"; return false; }
+            const std::size_t used = writer.Offset();
+            if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
+            if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
+            wasmtime_val_raw_t slot{};
+            slot.i32 = static_cast<std::int32_t>(used);
+            if (!exports[2].Call(context, &slot, 1, error)) return false;
+            return true;
+        }
+        case 3u: {
             const auto* typedQuery = static_cast<const ActiveCommandChangedQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core ActiveCommandChanged query is null"; return false; }
             if (!writer.I32(typedQuery->cmdID)) { error = "generated Core scratch overflow"; return false; }
@@ -273,10 +300,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[1].Call(context, &slot, 1, error)) return false;
+            if (!exports[3].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 4u: {
+        case 6u: {
             const auto* typedQuery = static_cast<const UnitCommandQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core AllowCommand query is null"; return false; }
             if (!writer.I32(typedQuery->unitID)) { error = "generated Core scratch overflow"; return false; }
@@ -297,7 +324,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[4].Call(context, &slot, 1, error)) return false;
+            if (!exports[6].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -305,7 +332,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 8u: {
+        case 11u: {
             const auto* typedQuery = static_cast<const AllowResourceLevelQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core AllowResourceLevel query is null"; return false; }
             if (!writer.I32(typedQuery->teamID)) { error = "generated Core scratch overflow"; return false; }
@@ -316,7 +343,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[8].Call(context, &slot, 1, error)) return false;
+            if (!exports[11].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -324,7 +351,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 9u: {
+        case 12u: {
             const auto* typedQuery = static_cast<const AllowResourceTransferQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core AllowResourceTransfer query is null"; return false; }
             if (!writer.I32(typedQuery->oldTeam)) { error = "generated Core scratch overflow"; return false; }
@@ -336,7 +363,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[9].Call(context, &slot, 1, error)) return false;
+            if (!exports[12].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -344,7 +371,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 27u: {
+        case 30u: {
             const auto* typedQuery = static_cast<const CommandFallbackQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core CommandFallback query is null"; return false; }
             if (!writer.I32(typedQuery->unitID)) { error = "generated Core scratch overflow"; return false; }
@@ -362,7 +389,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[27].Call(context, &slot, 1, error)) return false;
+            if (!exports[30].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -370,7 +397,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 33u: {
+        case 36u: {
             const auto* typedQuery = static_cast<const DownloadQueuedQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core DownloadQueued query is null"; return false; }
             if (!writer.I32(typedQuery->downloadID)) { error = "generated Core scratch overflow"; return false; }
@@ -381,10 +408,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[33].Call(context, &slot, 1, error)) return false;
+            if (!exports[36].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 38u: {
+        case 41u: {
             const auto* typedQuery = static_cast<const DrawBuildSquareQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core DrawBuildSquare query is null"; return false; }
             if (!writer.I32(typedQuery->unitDefID)) { error = "generated Core scratch overflow"; return false; }
@@ -398,10 +425,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[38].Call(context, &slot, 1, error)) return false;
+            if (!exports[41].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 63u: {
+        case 67u: {
             const auto* typedQuery = static_cast<const GameIDQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core GameID query is null"; return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
@@ -411,10 +438,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[63].Call(context, &slot, 1, error)) return false;
+            if (!exports[67].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 64u: {
+        case 68u: {
             const auto* typedQuery = static_cast<const GameOverEventQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core GameOver query is null"; return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
@@ -424,10 +451,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[64].Call(context, &slot, 1, error)) return false;
+            if (!exports[68].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 68u: {
+        case 72u: {
             const auto* typedQuery = static_cast<const GameSetupQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core GameSetup query is null"; return false; }
             if (!WriteString(writer, typedQuery->state)) { error = "generated Core string exceeds scratch capacity"; return false; }
@@ -453,10 +480,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[68].Call(context, &slot, 1, error)) return false;
+            if (!exports[72].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 71u: {
+        case 76u: {
             const auto* typedQuery = static_cast<const HandleLuaCallQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core HandleLuaCall query is null"; return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
@@ -466,10 +493,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[71].Call(context, &slot, 1, error)) return false;
+            if (!exports[76].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 72u: {
+        case 77u: {
             const auto* typedQuery = static_cast<const HandleLuaMsgQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core HandleLuaMsg query is null"; return false; }
             if (!writer.I32(typedQuery->playerID)) { error = "generated Core scratch overflow"; return false; }
@@ -482,10 +509,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[72].Call(context, &slot, 1, error)) return false;
+            if (!exports[77].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 75u: {
+        case 80u: {
             const auto* typedQuery = static_cast<const KeyPressQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core KeyPress query is null"; return false; }
             if (!writer.I32(typedQuery->keyCode)) { error = "generated Core scratch overflow"; return false; }
@@ -519,7 +546,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[75].Call(context, &slot, 1, error)) return false;
+            if (!exports[80].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -527,7 +554,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 76u: {
+        case 81u: {
             const auto* typedQuery = static_cast<const KeyReleaseQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core KeyRelease query is null"; return false; }
             if (!writer.I32(typedQuery->keyCode)) { error = "generated Core scratch overflow"; return false; }
@@ -560,7 +587,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[76].Call(context, &slot, 1, error)) return false;
+            if (!exports[81].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -568,7 +595,21 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 79u: {
+        case 84u: {
+            const auto* typedQuery = static_cast<const LoadProgressQuery*>(query);
+            if (typedQuery == nullptr) { error = "generated Core LoadProgress query is null"; return false; }
+            if (!WriteString(writer, typedQuery->message)) { error = "generated Core string exceeds scratch capacity"; return false; }
+            if (!writer.U32(typedQuery->messageLength)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.U32(typedQuery->replaceLastLine)) { error = "generated Core scratch overflow"; return false; }
+            const std::size_t used = writer.Offset();
+            if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
+            if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
+            wasmtime_val_raw_t slot{};
+            slot.i32 = static_cast<std::int32_t>(used);
+            if (!exports[84].Call(context, &slot, 1, error)) return false;
+            return true;
+        }
+        case 85u: {
             const auto* typedQuery = static_cast<const MapDrawCmdQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core MapDrawCmd query is null"; return false; }
             if (!writer.I32(typedQuery->playerID)) { error = "generated Core scratch overflow"; return false; }
@@ -588,7 +629,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[79].Call(context, &slot, 1, error)) return false;
+            if (!exports[85].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -596,7 +637,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 100u: {
+        case 106u: {
             const auto* typedQuery = static_cast<const RecvFromSyncedQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core RecvFromSynced query is null"; return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
@@ -606,10 +647,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[100].Call(context, &slot, 1, error)) return false;
+            if (!exports[106].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 102u: {
+        case 108u: {
             const auto* typedQuery = static_cast<const ResourceExcessQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core ResourceExcess query is null"; return false; }
             if (typedQuery->count != 0 && typedQuery->entries == nullptr) { error = "generated Core record-list input is null"; return false; }
@@ -635,7 +676,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[102].Call(context, &slot, 1, error)) return false;
+            if (!exports[108].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -643,7 +684,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 135u: {
+        case 141u: {
             const auto* typedQuery = static_cast<const TextEditingQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core TextEditing query is null"; return false; }
             if (!WriteString(writer, typedQuery->utf8)) { error = "generated Core string exceeds scratch capacity"; return false; }
@@ -654,7 +695,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[135].Call(context, &slot, 1, error)) return false;
+            if (!exports[141].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -662,7 +703,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 136u: {
+        case 142u: {
             const auto* typedQuery = static_cast<const TextInputQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core TextInput query is null"; return false; }
             if (!WriteString(writer, typedQuery->utf8)) { error = "generated Core string exceeds scratch capacity"; return false; }
@@ -671,7 +712,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[136].Call(context, &slot, 1, error)) return false;
+            if (!exports[142].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
                 typedResult->error = nullptr;
@@ -679,7 +720,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 140u: {
+        case 146u: {
             const auto* typedQuery = static_cast<const UnitCmdDoneQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core UnitCmdDone query is null"; return false; }
             if (!writer.I32(typedQuery->unitID)) { error = "generated Core scratch overflow"; return false; }
@@ -697,10 +738,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[140].Call(context, &slot, 1, error)) return false;
+            if (!exports[146].Call(context, &slot, 1, error)) return false;
             return true;
         }
-        case 141u: {
+        case 147u: {
             const auto* typedQuery = static_cast<const UnitCommandQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core UnitCommand query is null"; return false; }
             if (!writer.I32(typedQuery->unitID)) { error = "generated Core scratch overflow"; return false; }
@@ -721,7 +762,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
-            if (!exports[141].Call(context, &slot, 1, error)) return false;
+            if (!exports[147].Call(context, &slot, 1, error)) return false;
             return true;
         }
         default:
@@ -730,9 +771,9 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
     }
 }
 
-static_assert(kGeneratedScratchCallinSlotCount == 180u,
+static_assert(kGeneratedScratchCallinSlotCount == 186u,
     "generated scratch Core callin slot count drifted");
-static_assert(21u <= kGeneratedScratchCallinSlotCount,
+static_assert(23u <= kGeneratedScratchCallinSlotCount,
     "generated scratch Core callin coverage count");
 
 } // namespace recoil::wasm::core::generated

@@ -319,11 +319,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterTerrainReadImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->terrain == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register Terrain Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->terrain == nullptr)
+		return true;
 	const wasm_valkind_t f32f32[] = {WASM_F32, WASM_F32};
 	const wasm_valkind_t f32x4[] = {WASM_F32, WASM_F32, WASM_F32, WASM_F32};
 	const wasm_valkind_t i32[] = {WASM_I32};

@@ -3,6 +3,20 @@
 // Fixed <=64-bit results are packed into one i64; first-non-empty
 // strings use a guest-owned caller-specified static output buffer.
 
+/// Export `ActivateGame` through the allocation-free numeric Core ABI.
+#[macro_export]
+macro_rules! export_activate_game {
+    ($handler:path) => {
+        #[cfg(target_arch = "wasm32")]
+        #[export_name = "spring:callin/activate-game"]
+        pub extern "C" fn __spring_wasm_core_callin_activate_game(
+            unused: i32
+        ) {
+            $handler(unused as u8);
+        }
+    };
+}
+
 /// Export `AllowBuilderHoldFire` through the allocation-free numeric Core ABI.
 #[macro_export]
 macro_rules! export_allow_builder_hold_fire {
@@ -32,6 +46,20 @@ macro_rules! export_allow_direct_unit_control {
             player_id: i32
         ) -> i32 {
             if $handler(unit_id, unit_def_id, unit_team, player_id) { 1 } else { 0 }
+        }
+    };
+}
+
+/// Export `AllowDraw` through the allocation-free numeric Core ABI.
+#[macro_export]
+macro_rules! export_allow_draw {
+    ($handler:path) => {
+        #[cfg(target_arch = "wasm32")]
+        #[export_name = "spring:callin/allow-draw"]
+        pub extern "C" fn __spring_wasm_core_callin_allow_draw(
+            unused: i32
+        ) -> i32 {
+            if $handler(unused as u8) { 1 } else { 0 }
         }
     };
 }
@@ -502,6 +530,20 @@ macro_rules! export_draw_feature {
     };
 }
 
+/// Export `DrawLoadScreen` through the allocation-free numeric Core ABI.
+#[macro_export]
+macro_rules! export_draw_load_screen {
+    ($handler:path) => {
+        #[cfg(target_arch = "wasm32")]
+        #[export_name = "spring:callin/draw-load-screen"]
+        pub extern "C" fn __spring_wasm_core_callin_draw_load_screen(
+            unused: i32
+        ) {
+            $handler(unused as u8);
+        }
+    };
+}
+
 /// Export `DrawMaterial` through the allocation-free numeric Core ABI.
 #[macro_export]
 macro_rules! export_draw_material {
@@ -896,6 +938,38 @@ macro_rules! export_game_start {
         #[export_name = "spring:callin/game-start"]
         pub extern "C" fn __spring_wasm_core_callin_game_start() {
             $handler();
+        }
+    };
+}
+
+/// Export `GenerateDefs` with a guest-owned string result buffer.
+/// The handler receives the flattened query arguments followed by `&mut [u8]`
+/// and returns the number of UTF-8 bytes written. The host copies those bytes
+/// immediately after the single guest call; no guest pointer is retained.
+#[macro_export]
+macro_rules! export_generate_defs {
+    ($handler:path, $bytes:expr) => {
+        #[repr(align(8))]
+        struct __SpringCoreStringResultBuffer_generate_defs([u8; $bytes]);
+        static mut __SPRING_CORE_STRING_RESULT_BUFFER_GENERATE_DEFS: __SpringCoreStringResultBuffer_generate_defs = __SpringCoreStringResultBuffer_generate_defs([0; $bytes]);
+
+        #[cfg(target_arch = "wasm32")]
+        #[export_name = "spring:callin/generate-defs"]
+        pub extern "C" fn __spring_wasm_core_callin_generate_defs(
+            unused: i32
+        ) -> i64 {
+            let pointer = core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_GENERATE_DEFS.0).cast::<u8>();
+            if $bytes > u32::MAX as usize || pointer as usize > u32::MAX as usize {
+                return ((u32::MAX as u64) << 32) as i64;
+            }
+            // SAFETY: the host rejects nested generated string-result callins,
+            // so this one export has exclusive use of its static result buffer.
+            let output = unsafe { core::slice::from_raw_parts_mut(pointer, $bytes) };
+            let used = $handler(unused as u8, output);
+            if used > $bytes || used > u32::MAX as usize {
+                return ((u32::MAX as u64) << 32) as i64;
+            }
+            (((used as u64) << 32) | pointer as u32 as u64) as i64
         }
     };
 }
@@ -2480,6 +2554,6 @@ macro_rules! export_world_tooltip {
 }
 
 #[doc(hidden)]
-pub const __GENERATED_CALLIN_COUNT: usize = 149;
+pub const __GENERATED_CALLIN_COUNT: usize = 153;
 #[doc(hidden)]
 pub const __GENERATED_NUMERIC_CALLIN_COUNT: usize = __GENERATED_CALLIN_COUNT;

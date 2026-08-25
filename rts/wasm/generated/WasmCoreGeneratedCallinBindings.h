@@ -13,7 +13,7 @@ namespace recoil::wasm::core::generated {
 
 // Slot zero is WasmCoreCallin::Invalid. All other slots use exactly the
 // generated WasmCallinRegistry.h ordering, aliases included.
-inline constexpr std::size_t kGeneratedCallinSlotCount = 180u;
+inline constexpr std::size_t kGeneratedCallinSlotCount = 186u;
 
 class GeneratedCallinBindings {
 public:

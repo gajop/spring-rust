@@ -28,6 +28,8 @@ mod gfx;
 mod math_extra;
 #[cfg(target_arch = "wasm32")]
 mod messages;
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub mod prelude;
 #[cfg(target_arch = "wasm32")]
 mod profiling;
 #[cfg(target_arch = "wasm32")]
@@ -40,7 +42,7 @@ mod system_control;
 mod terrain;
 #[cfg(target_arch = "wasm32")]
 mod terrain_control;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
 pub mod typed;
 #[cfg(target_arch = "wasm32")]
 mod unit_control;
@@ -82,7 +84,7 @@ pub use system_control::*;
 pub use terrain::*;
 #[cfg(target_arch = "wasm32")]
 pub use terrain_control::*;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
 pub use typed::*;
 #[cfg(target_arch = "wasm32")]
 pub use unit_control::*;
@@ -103,12 +105,13 @@ pub use vfs::*;
 /// namespaced so specialized hand-written hot APIs remain the normal surface.
 #[cfg(target_arch = "wasm32")]
 #[doc(hidden)]
+#[allow(unused_imports, dead_code, non_snake_case)]
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/core_generated.rs"));
 }
 
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]
-pub use generated::{gaia_synced, gaia_unsynced, rules_synced, rules_unsynced, ui};
+pub use generated::{gaia_synced, gaia_unsynced, intro, menu, rules_synced, rules_unsynced, ui};
 
 /// Export the selected guest environment as a small Core-Wasm ABI marker.
 /// Call this once from the crate that chooses one generated environment module.
@@ -199,10 +202,12 @@ impl AllowUnitCreationResult {
     };
 }
 
+#[cfg(any(target_arch = "wasm32", test))]
 const fn packed_value(value: u64) -> i32 {
     value as u32 as i32
 }
 
+#[cfg(any(target_arch = "wasm32", test))]
 const fn packed_status(value: u64) -> i32 {
     (value >> 32) as u32 as i32
 }

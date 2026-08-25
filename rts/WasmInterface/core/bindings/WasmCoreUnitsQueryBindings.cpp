@@ -389,11 +389,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterUnitsQueryImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->unitsQuery == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register UnitsQuery Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->unitsQuery == nullptr)
+		return true;
 
 	const wasm_valkind_t i32[] = {WASM_I32};
 	const wasm_valkind_t i64[] = {WASM_I64};

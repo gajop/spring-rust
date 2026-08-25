@@ -1,57 +1,53 @@
     pub mod metal_map {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Error {
-            pub code: i32,
-            pub message: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetMetalAmountQuery {
             pub x: i32,
             pub z: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetMetalAmountResult {
             pub amount: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetMetalExtractionQuery {
             pub x: i32,
             pub z: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetMetalExtractionResult {
             pub extraction: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetMetalMapSizeQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetMetalMapSizeResult {
             pub width: i32,
             pub height: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMetalAmountQuery {
             pub x: i32,
             pub z: i32,
             pub amount: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMetalAmountResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        pub use super::types::{Error};
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetMetalMapSizeValue {
             pub width: i32,
             pub height: i32,

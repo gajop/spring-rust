@@ -79,6 +79,11 @@ public:
 	// takes LUAFN_* constant as argument
 	bool HasFunction(int id) const { return scriptIndex[id] >= 0; }
 
+	// Numeric subset of Spring.UnitScript.CallAsUnit for native/WASM callers.
+	// The function name is resolved in this unit's Lua script environment.
+	bool CallFunctionByName(const char* functionName, const float* args, uint32_t argCount,
+		float* retValues, uint32_t retCapacity, uint32_t& retCount, bool& found);
+
 	bool HasBlockShot(int weaponNum) const override;
 	bool HasTargetWeight(int weaponNum) const override;
 

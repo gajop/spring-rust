@@ -1,20 +1,14 @@
     pub mod callins {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        pub enum CommonErrorCode {
-            ErrorAlreadyExists,
-            ErrorBufferOverflow,
-            ErrorInternal,
-            ErrorInvalidArgument,
-            ErrorInvalidId,
-            ErrorInvalidState,
-            ErrorNone,
-            ErrorNotAvailable,
-            ErrorNotFound,
-            ErrorOperationFailed,
-            ErrorOutOfBounds,
-            ErrorPermissionDenied,
+        #[derive(Debug, Clone, PartialEq)]
+        pub struct ActivateMenuQuery {
+            pub message: String,
+            pub message_length: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ActivateMenuResult {
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -26,7 +20,7 @@
             pub tooltip: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ActiveCommandChangedResult {
         }
 
@@ -37,14 +31,14 @@
             pub level: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowBuilderHoldFireQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub action: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowDirectUnitControlQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -52,7 +46,7 @@
             pub player_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowFeatureBuildStepQuery {
             pub builder_id: i32,
             pub builder_team: i32,
@@ -61,7 +55,7 @@
             pub part: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowFeatureCreationQuery {
             pub feature_def_id: i32,
             pub team_id: i32,
@@ -83,7 +77,7 @@
             pub amount: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowStartPositionQuery {
             pub player_id: i32,
             pub team_id: i32,
@@ -92,7 +86,7 @@
             pub raw_pick_pos: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitBuildStepQuery {
             pub builder_id: i32,
             pub builder_team: i32,
@@ -101,14 +95,14 @@
             pub part: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitCloakQuery {
             pub unit_id: i32,
             pub has_enemy: bool,
             pub enemy_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitCreationQuery {
             pub unit_def_id: i32,
             pub builder_id: i32,
@@ -118,13 +112,13 @@
             pub build_facing: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitCreationResult {
             pub allow: bool,
             pub drop_order: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitDecloakQuery {
             pub unit_id: i32,
             pub has_object: bool,
@@ -133,14 +127,14 @@
             pub weapon_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitKamikazeQuery {
             pub unit_id: i32,
             pub target_id: i32,
             pub allowed: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitTransferQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -149,14 +143,14 @@
             pub capture: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitTransportPositionQuery {
             pub units: AllowUnitTransportQuery,
             pub position: Float3,
             pub allowed: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowUnitTransportQuery {
             pub transporter_id: i32,
             pub transporter_def_id: i32,
@@ -166,21 +160,21 @@
             pub transportee_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowWeaponInterceptTargetQuery {
             pub interceptor_unit_id: i32,
             pub interceptor_weapon_id: i32,
             pub interceptor_target_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowWeaponTargetCheckQuery {
             pub attacker_id: i32,
             pub attacker_weapon_num: i32,
             pub attacker_weapon_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowWeaponTargetQuery {
             pub attacker_id: i32,
             pub target_id: i32,
@@ -190,7 +184,7 @@
             pub target_priority: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AllowWeaponTargetResult {
             pub allowed: bool,
             pub target_priority: f32,
@@ -201,52 +195,22 @@
             pub archive: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ArchiveCallinResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct AtmosphereParams {
-            pub fog_color: Option<Vec<f32>>,
-            pub sky_color: Option<Vec<f32>>,
-            pub sun_color: Option<Vec<f32>>,
-            pub cloud_color: Option<Vec<f32>>,
-            pub sky_axis_angle: Option<Vec<f32>>,
-            pub fog_start: Option<f32>,
-            pub fog_end: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct BoolCallinResult {
             pub value: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct BoolResult {
-            pub value: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct CollectGarbageQuery {
             pub forced: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct CollectGarbageResult {
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct CollisionVolumeData {
-            pub scale_x: f32,
-            pub scale_y: f32,
-            pub scale_z: f32,
-            pub offset_x: f32,
-            pub offset_y: f32,
-            pub offset_z: f32,
-            pub volume_type: i32,
-            pub test_type: i32,
-            pub primary_axis: i32,
-            pub disabled: bool,
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -262,58 +226,52 @@
             pub command: NativeCallinCommand,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DamageCallinResult {
             pub new_damage: f32,
             pub impulse_mult: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct DefRef {
-            pub name: String,
-            pub id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DefaultCommandQuery {
             pub unit_id: i32,
             pub feature_id: i32,
             pub current_command: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DefaultCommandResult {
             pub value: bool,
             pub command: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadFailedQuery {
             pub download_id: i32,
             pub error_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadFailedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadFinishedQuery {
             pub download_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadFinishedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadProgressQuery {
             pub download_id: i32,
             pub downloaded: i64,
             pub total: i64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadProgressResult {
         }
 
@@ -324,26 +282,26 @@
             pub archive_type: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadQueuedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadStartedQuery {
             pub download_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DownloadStartedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawAlphaObjectsLuaQuery {
             pub draw_reflection: bool,
             pub draw_refraction: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawAlphaObjectsLuaResult {
         }
 
@@ -356,63 +314,63 @@
             pub statuses: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawBuildSquareResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawFeatureQuery {
             pub feature_id: i32,
             pub draw_mode: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawMaterialQuery {
             pub uuid: i32,
             pub draw_mode: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawObjectsLuaQuery {
             pub deferred_pass: bool,
             pub draw_reflection: bool,
             pub draw_refraction: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawObjectsLuaResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawProjectileQuery {
             pub projectile_id: i32,
             pub draw_mode: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawScreenQuery {
             pub view_size_x: i32,
             pub view_size_y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawScreenResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawShieldQuery {
             pub unit_id: i32,
             pub weapon_id: i32,
             pub draw_mode: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawUnitQuery {
             pub unit_id: i32,
             pub draw_mode: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawWorldPreParticlesQuery {
             pub draw_above_water: bool,
             pub draw_below_water: bool,
@@ -420,17 +378,11 @@
             pub draw_refraction: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DrawWorldPreParticlesResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Error {
-            pub code: i32,
-            pub message: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ExplosionQuery {
             pub weapon_def_id: i32,
             pub pos: Float3,
@@ -438,17 +390,17 @@
             pub projectile_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FeatureCreatedQuery {
             pub feature_id: i32,
             pub ally_team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FeatureCreatedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FeatureDamagedQuery {
             pub feature_id: i32,
             pub feature_def_id: i32,
@@ -461,107 +413,54 @@
             pub attacker_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FeatureDamagedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FeatureDestroyedQuery {
             pub feature_id: i32,
             pub ally_team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FeatureDestroyedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FeatureMovedQuery {
             pub feature_id: i32,
             pub old_pos: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FeatureMovedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2 {
-            pub x: f32,
-            pub y: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2Result {
-            pub value: Float2,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct Float3CallinQuery {
             pub value: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct Float3CallinResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Result {
-            pub value: Float3,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-            pub w: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4Result {
-            pub value: Float4,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatResult {
-            pub value: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameFramePostQuery {
             pub game_frame: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameFramePostResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameFrameQuery {
             pub game_frame: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameFrameResult {
         }
 
@@ -570,7 +469,7 @@
             pub game_id: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameIDResult {
         }
 
@@ -579,34 +478,34 @@
             pub winning_ally_teams: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameOverEventResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GamePausedQuery {
             pub player_id: i32,
             pub paused: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GamePausedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GamePreloadQuery {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GamePreloadResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameProgressQuery {
             pub game_frame: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameProgressResult {
         }
 
@@ -623,21 +522,21 @@
             pub player_states: Vec<GameSetupPlayerState>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameSetupResult {
             pub handled: bool,
             pub ready: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameStartQuery {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GameStartResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GroupChangedQuery {
             pub group_id: i32,
         }
@@ -647,7 +546,7 @@
             pub message: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct HandleLuaCallResult {
         }
 
@@ -659,11 +558,11 @@
             pub data: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct HandleLuaMsgResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct InitializeNativeModuleQuery {
             pub host_version_major: u32,
             pub host_version_minor: u32,
@@ -678,31 +577,7 @@
             pub module_version_patch: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int2 {
-            pub x: i32,
-            pub y: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int3 {
-            pub x: i32,
-            pub y: i32,
-            pub z: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Result {
-            pub value: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct IntCallinResult {
             pub value: i32,
         }
@@ -741,13 +616,24 @@
             pub action_list: Vec<KeyAction>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct LastMessagePositionQuery {
             pub pos: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct LastMessagePositionResult {
+        }
+
+        #[derive(Debug, Clone, PartialEq)]
+        pub struct LoadProgressQuery {
+            pub message: String,
+            pub message_length: u32,
+            pub replace_last_line: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct LoadProgressResult {
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -762,22 +648,13 @@
             pub label: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct MapRenderingParams {
-            pub splat_tex_scales: Option<Vec<f32>>,
-            pub splat_tex_mults: Option<Vec<f32>>,
-            pub void_water: Option<bool>,
-            pub void_ground: Option<bool>,
-            pub splat_detail_normal_diffuse_alpha: Option<bool>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MiniMapDrawQuery {
             pub size_x: i32,
             pub size_y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MiniMapGeometryChangedQuery {
             pub new_pos_x: i32,
             pub new_pos_y: i32,
@@ -789,20 +666,20 @@
             pub old_dim_y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MiniMapRotationChangedQuery {
             pub new_rot: f32,
             pub old_rot: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MiniMapStateChangedQuery {
             pub is_minimized: bool,
             pub is_maximized: bool,
             pub is_slaved: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MouseMoveQuery {
             pub x: i32,
             pub y: i32,
@@ -811,31 +688,31 @@
             pub button: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MousePressQuery {
             pub x: i32,
             pub y: i32,
             pub button: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MouseReleaseQuery {
             pub x: i32,
             pub y: i32,
             pub button: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MouseReleaseResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MouseWheelQuery {
             pub up: bool,
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MoveCtrlNotifyQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -854,110 +731,57 @@
             pub params: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeExplosionParams {
-            pub damages: f32,
-            pub weapon_def_id: i32,
-            pub owner_id: i32,
-            pub hit_unit_id: i32,
-            pub hit_feature_id: i32,
-            pub crater_area_of_effect: f32,
-            pub damage_area_of_effect: f32,
-            pub edge_effectiveness: f32,
-            pub explosion_speed: f32,
-            pub gfx_mod: f32,
-            pub impact_only: bool,
-            pub ignore_owner: bool,
-            pub damage_ground: bool,
-            pub projectile_id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeProjectileParams {
-            pub pos: Float3,
-            pub speed: Float3,
-            pub spread: Float3,
-            pub end: Float3,
-            pub owner: i32,
-            pub team: i32,
-            pub weapon_num: i32,
-            pub ttl: f32,
-            pub gravity: f32,
-            pub tracking: f32,
-            pub max_range: f32,
-            pub up_time: f32,
-            pub start_alpha: f32,
-            pub end_alpha: f32,
-            pub model: String,
-            pub ceg_tag: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NumberOrBool {
-            pub number: f32,
-            pub boolean: bool,
-            pub use_boolean: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PlayerAddedQuery {
             pub player_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PlayerAddedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PlayerChangedQuery {
             pub player_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PlayerChangedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PlayerRemovedQuery {
             pub player_id: i32,
             pub reason: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PlayerRemovedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PongQuery {
             pub ping_tag: u8,
             pub packet_send_time_millis: i64,
             pub packet_recv_time_millis: i64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct PongResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ProjectileEventQuery {
             pub projectile_id: i32,
             pub owner_id: i32,
             pub weapon_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ProjectileEventResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ProjectileTargetRef {
-            pub target_id: i32,
-            pub target_type: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RectChangedQuery {
             pub x1: i32,
             pub z1: i32,
@@ -965,7 +789,7 @@
             pub z2: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RectChangedResult {
         }
 
@@ -974,18 +798,18 @@
             pub message: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RecvFromSyncedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RenderUnitDestroyedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RenderUnitDestroyedResult {
         }
 
@@ -1000,26 +824,13 @@
             pub entries: Vec<ResourceExcessEntry>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ResourcePack {
-            pub metal: f32,
-            pub energy: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct RgbColor {
-            pub r: f32,
-            pub g: f32,
-            pub b: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ScreenPositionQuery {
             pub x: i32,
             pub y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ShieldPreDamagedQuery {
             pub projectile_id: i32,
             pub projectile_owner_id: i32,
@@ -1032,29 +843,24 @@
             pub hit_pos: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ShutdownQuery {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ShutdownResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SimpleCallinQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SimpleCallinResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SoundEffectParams {
-            pub preset: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct StockpileChangedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1064,14 +870,8 @@
             pub new_count: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct StockpileChangedResult {
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringArray {
-            pub data: u32,
-            pub length: u32,
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -1079,52 +879,34 @@
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringResult {
-            pub value: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SunChangedQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SunChangedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SunLightingParams {
-            pub ground_ambient_color: Option<Vec<f32>>,
-            pub ground_diffuse_color: Option<Vec<f32>>,
-            pub ground_specular_color: Option<Vec<f32>>,
-            pub model_ambient_color: Option<Vec<f32>>,
-            pub model_diffuse_color: Option<Vec<f32>>,
-            pub model_specular_color: Option<Vec<f32>>,
-            pub specular_exponent: Option<f32>,
-            pub ground_shadow_density: Option<f32>,
-            pub model_shadow_density: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct TeamChangedQuery {
             pub team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct TeamChangedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct TeamDiedQuery {
             pub team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct TeamDiedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct TerraformCompleteQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1146,25 +928,14 @@
             pub utf8: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Result {
-            pub value: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitCloakEventQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitCloakEventResult {
         }
 
@@ -1176,7 +947,7 @@
             pub command: NativeCallinCommand,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitCmdDoneResult {
         }
 
@@ -1191,11 +962,11 @@
             pub from_lua: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitCommandResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitConstructionDecayedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1205,18 +976,11 @@
             pub part: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitConstructionDecayedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitCostOverrides {
-            pub build_time: f32,
-            pub metal_cost: f32,
-            pub energy_cost: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitCreatedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1224,11 +988,11 @@
             pub builder_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitCreatedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitDamagedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1242,11 +1006,11 @@
             pub attacker_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitDamagedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitDestroyedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1257,11 +1021,11 @@
             pub weapon_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitDestroyedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitExperienceQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1270,28 +1034,28 @@
             pub old_experience: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitExperienceResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitFeatureCollisionQuery {
             pub collider_id: i32,
             pub collidee_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitFinishedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitFinishedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitFromFactoryQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1301,11 +1065,11 @@
             pub user_orders: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitFromFactoryResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitGivenQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1313,42 +1077,33 @@
             pub new_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitGivenResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitHarvestStorageFullQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitHarvestStorageFullResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitHealthValue {
-            pub health: f32,
-            pub capture: f32,
-            pub paralyze: f32,
-            pub build: f32,
-            pub use_amounts: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitIdleQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitIdleResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitLoadedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1357,11 +1112,11 @@
             pub transport_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitLoadedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitLosEventQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1369,44 +1124,44 @@
             pub ally_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitLosEventResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitMoveEventQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitMoveEventResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitMovementClassEventQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitMovementClassEventResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitReverseBuiltQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
             pub unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitReverseBuiltResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitSeismicPingQuery {
             pub pos: Float3,
             pub strength: f32,
@@ -1415,11 +1170,11 @@
             pub unit_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitSeismicPingResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitStunnedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1427,11 +1182,11 @@
             pub stunned: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitStunnedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitTakenQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1439,24 +1194,17 @@
             pub new_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitTakenResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitTargetRef {
-            pub target_id: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitUnitCollisionQuery {
             pub collider_id: i32,
             pub collidee_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitUnloadedQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -1465,20 +1213,20 @@
             pub transport_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitUnloadedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UpdateQuery {
             pub delta_seconds: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UpdateResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ViewResizeQuery {
             pub screen_size_x: i32,
             pub screen_size_y: i32,
@@ -1498,55 +1246,19 @@
             pub view_pos_y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ViewResizeResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct WaterParams {
-            pub absorb: Option<Vec<f32>>,
-            pub base_color: Option<Vec<f32>>,
-            pub min_color: Option<Vec<f32>>,
-            pub surface_color: Option<Vec<f32>>,
-            pub diffuse_color: Option<Vec<f32>>,
-            pub specular_color: Option<Vec<f32>>,
-            pub plane_color: Option<Vec<f32>>,
-            pub repeat_x: Option<f32>,
-            pub repeat_y: Option<f32>,
-            pub surface_alpha: Option<f32>,
-            pub ambient_factor: Option<f32>,
-            pub diffuse_factor: Option<f32>,
-            pub specular_factor: Option<f32>,
-            pub specular_power: Option<f32>,
-            pub fresnel_min: Option<f32>,
-            pub fresnel_max: Option<f32>,
-            pub fresnel_power: Option<f32>,
-            pub reflection_distortion: Option<f32>,
-            pub blur_base: Option<f32>,
-            pub blur_exponent: Option<f32>,
-            pub perlin_start_freq: Option<f32>,
-            pub perlin_lacunarity: Option<f32>,
-            pub perlin_amplitude: Option<f32>,
-            pub wind_speed: Option<f32>,
-            pub wave_offset_factor: Option<f32>,
-            pub wave_length: Option<f32>,
-            pub wave_foam_distortion: Option<f32>,
-            pub wave_foam_intensity: Option<f32>,
-            pub caustics_resolution: Option<f32>,
-            pub caustics_strength: Option<f32>,
-            pub num_tiles: Option<f32>,
-            pub shore_waves: Option<bool>,
-            pub force_rendering: Option<bool>,
-            pub has_water_plane: Option<bool>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct WorldTooltipQuery {
             pub kind: i32,
             pub unit_id: i32,
             pub feature_id: i32,
             pub ground_pos: Float3,
         }
+
+        pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
     }
 

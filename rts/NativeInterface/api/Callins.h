@@ -1161,6 +1161,27 @@ struct CollectGarbageResult {
 	const Error* error;
 };
 
+// Menu-specific callins.
+struct ActivateMenuQuery {
+	const char* message;
+	uint32_t messageLength;
+};
+
+struct ActivateMenuResult {
+	const Error* error;
+};
+
+// Intro-specific callins (loading screen).
+struct LoadProgressQuery {
+	const char* message;
+	uint32_t messageLength;
+	uint8_t replaceLastLine;
+};
+
+struct LoadProgressResult {
+	const Error* error;
+};
+
 #ifdef __cplusplus
 }
 #endif

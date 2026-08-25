@@ -148,11 +148,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterTerrainControlImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->syncedCtrl == nullptr || state->native->syncedCtrl->terrain == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register TerrainControl Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->syncedCtrl == nullptr || state->native->syncedCtrl->terrain == nullptr)
+		return true;
 	const wasm_valkind_t i64Result[] = {WASM_I64};
 	const wasm_valkind_t setParams[] = {WASM_F32, WASM_F32, WASM_F32, WASM_F32};
 	if (!Define(linker, "set-height-map", MakeFuncType(setParams, 4, i64Result, 1),

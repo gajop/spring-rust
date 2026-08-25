@@ -78,7 +78,19 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 			descriptor.name.c_str(), error.c_str());
 		return false;
 	}
-	coreModules.push_back({std::move(descriptor), std::move(identity)});
+	WasmCoreHost* host = WasmCoreHost::ModuleHandle(descriptor.name);
+	CoreModuleRecord module{
+		.descriptor = std::move(descriptor),
+		.identity = std::move(identity),
+		.host = host,
+	};
+	if (module.host == nullptr) {
+		error = "Core Wasm host disappeared immediately after loading module " +
+			module.descriptor.name;
+		WasmCoreHost::Unload(module.descriptor.name);
+		return false;
+	}
+	coreModules.push_back(std::move(module));
 	std::stable_sort(coreModules.begin(), coreModules.end(),
 		[](const CoreModuleRecord& left, const CoreModuleRecord& right) {
 			return DescriptorLess(left.descriptor, right.descriptor);
@@ -179,9 +191,10 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 
 void WasmInterfaceSystem::UnloadAll()
 {
+	for (const CoreModuleRecord& module : coreModules)
+		WasmCoreHost::Unload(module.descriptor.name);
 	coreModules.clear();
 	InvalidateSubscribers();
-	WasmCoreHost::UnloadAll();
 }
 
 void WasmInterfaceSystem::Update()

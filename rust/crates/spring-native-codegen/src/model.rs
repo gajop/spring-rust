@@ -22,6 +22,8 @@ pub enum Environment {
     GaiaSynced,
     GaiaUnsynced,
     Ui,
+    Menu,
+    Intro,
 }
 
 impl Environment {
@@ -32,12 +34,14 @@ impl Environment {
         Self::GaiaUnsynced,
     ];
 
-    pub const ALL: [Self; 5] = [
+    pub const ALL: [Self; 7] = [
         Self::RulesSynced,
         Self::RulesUnsynced,
         Self::GaiaSynced,
         Self::GaiaUnsynced,
         Self::Ui,
+        Self::Menu,
+        Self::Intro,
     ];
 
     pub const fn is_synced(self) -> bool {
@@ -51,6 +55,8 @@ impl Environment {
             Self::GaiaSynced => "gaia-synced",
             Self::GaiaUnsynced => "gaia-unsynced",
             Self::Ui => "ui",
+            Self::Menu => "menu",
+            Self::Intro => "intro",
         }
     }
 
@@ -61,6 +67,8 @@ impl Environment {
             "gaia-synced" => Some(Self::GaiaSynced),
             "gaia-unsynced" => Some(Self::GaiaUnsynced),
             "ui" => Some(Self::Ui),
+            "menu" => Some(Self::Menu),
+            "intro" => Some(Self::Intro),
             _ => None,
         }
     }
@@ -320,11 +328,12 @@ impl ApiModel {
                         module.name, function.name
                     ));
                 }
-                let reviewed_variable_result = function.name == "CallCOBScript"
-                    || function
-                        .notes
-                        .iter()
-                        .any(|note| note.contains("reviewed mutating variable-size"));
+                let reviewed_variable_result =
+                    matches!(function.name.as_str(), "CallCOBScript" | "CallUnitScript")
+                        || function
+                            .notes
+                            .iter()
+                            .any(|note| note.contains("reviewed mutating variable-size"));
                 if function.mutating
                     && function
                         .outputs
@@ -433,7 +442,7 @@ pub(crate) fn from_legacy_spec(
                 status = LoweringStatus::Manual;
             }
         }
-        if function.name == "CallCOBScript" {
+        if matches!(function.name.as_str(), "CallCOBScript" | "CallUnitScript") {
             notes.push("reviewed mutating variable-size-result exception".to_string());
         }
 
@@ -809,10 +818,21 @@ fn normalize_record_fields(record: &crate::StructDef) -> Vec<FieldModel> {
         &record
             .fields
             .iter()
-            .filter(|field| field.name != "error")
+            .filter(|field| !is_transport_error_field(field))
             .cloned()
             .collect::<Vec<_>>(),
     )
+}
+
+fn is_transport_error_field(field: &crate::FieldDef) -> bool {
+    field.name == "error"
+        && matches!(
+            &field.ty,
+            CType::Pointer {
+                pointee,
+                is_const: true,
+            } if matches!(pointee.as_ref(), CType::Record(name) if name == "Error")
+        )
 }
 
 fn semantic_type(ty: &CType) -> SemanticType {
@@ -966,6 +986,7 @@ fn is_mutating(module: &str, function: &str) -> bool {
             | "effects_control"
             | "game_config"
             | "cob_script"
+            | "unit_script"
     );
     if synced_control_module {
         return !function.starts_with("Get")

@@ -22,14 +22,14 @@ pub fn use_archive(archive: &str, callback: SyncCallback) -> Result<bool> {
         if pointer > u32::MAX as usize || archive.len() > u32::MAX as usize {
             return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
         }
-        return super::unpack_bool(unsafe {
+        super::unpack_bool(unsafe {
             raw::use_archive(
                 pointer as u32 as i32,
                 archive.len() as u32 as i32,
                 callback.id as i32,
                 callback.user_data as i32,
             )
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

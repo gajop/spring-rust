@@ -52,6 +52,8 @@ mod render_core_wasm_registry;
 mod render_core_wasm_variable_guest;
 #[path = "../render_core_wasm_variable_host.rs"]
 mod render_core_wasm_variable_host;
+#[path = "../render_core_wasm_variable_io_guest.rs"]
+mod render_core_wasm_variable_io_guest;
 #[path = "../render_core_wasm_variable_io_host.rs"]
 mod render_core_wasm_variable_io_host;
 #[path = "../render_core_wasm_variable_output_host.rs"]
@@ -331,6 +333,10 @@ fn run() -> Result<()> {
     write(
         &sdk_dir.join("core_variable.rs"),
         &render_core_wasm_variable_guest::render(&model),
+    )?;
+    write(
+        &sdk_dir.join("core_variable_io.rs"),
+        &render_core_wasm_variable_io_guest::render(),
     )?;
     write(
         &sdk_dir.join("core_dynamic_input.rs"),

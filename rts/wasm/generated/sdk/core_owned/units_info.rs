@@ -1,173 +1,62 @@
     pub mod units_info {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        pub enum CommonErrorCode {
-            ErrorAlreadyExists,
-            ErrorBufferOverflow,
-            ErrorInternal,
-            ErrorInvalidArgument,
-            ErrorInvalidId,
-            ErrorInvalidState,
-            ErrorNone,
-            ErrorNotAvailable,
-            ErrorNotFound,
-            ErrorOperationFailed,
-            ErrorOutOfBounds,
-            ErrorPermissionDenied,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct AtmosphereParams {
-            pub fog_color: Option<Vec<f32>>,
-            pub sky_color: Option<Vec<f32>>,
-            pub sun_color: Option<Vec<f32>>,
-            pub cloud_color: Option<Vec<f32>>,
-            pub sky_axis_angle: Option<Vec<f32>>,
-            pub fog_start: Option<f32>,
-            pub fog_end: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct BoolResult {
-            pub value: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ClearUnitsPreviousDrawFlagQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ClearUnitsPreviousDrawFlagResult {
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct CollisionVolumeData {
-            pub scale_x: f32,
-            pub scale_y: f32,
-            pub scale_z: f32,
-            pub offset_x: f32,
-            pub offset_y: f32,
-            pub offset_z: f32,
-            pub volume_type: i32,
-            pub test_type: i32,
-            pub primary_axis: i32,
-            pub disabled: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct DefRef {
-            pub name: String,
-            pub id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Error {
-            pub code: i32,
-            pub message: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2 {
-            pub x: f32,
-            pub y: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2Result {
-            pub value: Float2,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Result {
-            pub value: Float3,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-            pub w: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4Result {
-            pub value: Float4,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatResult {
-            pub value: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitAllyTeamQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitAllyTeamResult {
             pub ally_team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitArmoredQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitArmoredResult {
             pub armored_state: UnitArmoredState,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitBasePositionQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitBasePositionResult {
             pub position: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitBlockingQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitBlockingResult {
             pub blocking_state: UnitBlockingState,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitBuildFacingQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitBuildFacingResult {
             pub facing: i32,
         }
@@ -183,230 +72,230 @@
             pub value: Option<NumberOrBool>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitBuildeeRadiusQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitBuildeeRadiusResult {
             pub radius: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCollisionVolumeDataQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCollisionVolumeDataResult {
             pub volume: CollisionVolumeData,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCostTableQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCostTableResult {
             pub costs: UnitCosts,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCostsQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCostsResult {
             pub costs: UnitCosts,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCrashingQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCrashingResult {
             pub is_aircraft: bool,
             pub crashing: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCurrentBuildPowerQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCurrentBuildPowerResult {
             pub build_power: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitDefIDQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitDefIDResult {
             pub unit_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitDirectionQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitDirectionResult {
             pub direction: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitEffectiveBuildRangeQuery {
             pub unit_id: i32,
             pub buildee_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitEffectiveBuildRangeResult {
             pub range: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitExperienceQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitExperienceResult {
             pub experience: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitFlankingQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitFlankingResult {
             pub flanking: UnitFlanking,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitHarvestStorageQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitHarvestStorageResult {
             pub storage: UnitHarvestStorage,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitHeadingQuery {
             pub unit_id: i32,
             pub convert_to_radians: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitHeadingResult {
             pub heading: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitHealthQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitHealthResult {
             pub health: UnitHealth,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitHeightQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitHeightResult {
             pub height: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitInBuildStanceQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitInBuildStanceResult {
             pub in_build_stance: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsActiveQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsActiveResult {
             pub is_active: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsBeingBuiltQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsBeingBuiltResult {
             pub is_being_built: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsBuildingQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsBuildingResult {
             pub buildee_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsCloakedQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsCloakedResult {
             pub is_cloaked: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsDeadQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsDeadResult {
             pub is_dead: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsStunnedQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsStunnedResult {
             pub is_stunned: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitIsTransportingQuery {
             pub unit_id: i32,
         }
@@ -417,7 +306,7 @@
             pub is_transporting: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitLastAttackedPieceQuery {
             pub unit_id: i32,
         }
@@ -427,7 +316,7 @@
             pub piece: LastHitPiece,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitLastAttackerQuery {
             pub unit_id: i32,
         }
@@ -437,49 +326,49 @@
             pub attacker: Option<UnitLastAttacker>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitLosStateQuery {
             pub unit_id: i32,
             pub ally_team_id: i32,
             pub raw: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitLosStateResult {
             pub los_state: UnitLosState,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitMassQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitMassResult {
             pub mass: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitMetalExtractionQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitMetalExtractionResult {
             pub metal_extraction: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitMoveDefIDQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitMoveDefIDResult {
             pub move_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitNanoPiecesQuery {
             pub unit_id: i32,
         }
@@ -489,28 +378,28 @@
             pub pieces: Vec<i32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitNeutralQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitNeutralResult {
             pub neutral: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitPieceCollisionVolumeDataQuery {
             pub unit_id: i32,
             pub piece_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitPieceCollisionVolumeDataResult {
             pub volume: CollisionVolumeData,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitPosErrorParamsQuery {
             pub unit_id: i32,
             pub ally_team_id: i32,
@@ -521,69 +410,69 @@
             pub params: UnitPosErrorParams,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitPositionOptions {
             pub mid_pos: bool,
             pub aim_pos: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitPositionQuery {
             pub unit_id: i32,
             pub options: GetUnitPositionOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitPositionResult {
             pub position: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitRadiusQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitRadiusResult {
             pub radius: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitResourcesQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitResourcesResult {
             pub resources: UnitResources,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitRotationQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitRotationResult {
             pub rotation: UnitRotation,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitSeismicSignatureQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitSeismicSignatureResult {
             pub seismic_signature: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitSelfDTimeQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitSelfDTimeResult {
             pub self_d_time: f32,
         }
@@ -594,12 +483,12 @@
             pub type_: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitSensorRadiusResult {
             pub radius: UnitSensorRadius,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitShieldStateQuery {
             pub unit_id: i32,
             pub weapon_num: i32,
@@ -610,18 +499,18 @@
             pub shield: Option<UnitShieldState>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitStatesQuery {
             pub unit_id: i32,
             pub options: UnitStatesOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitStatesResult {
             pub states: UnitStates,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitStockpileQuery {
             pub unit_id: i32,
         }
@@ -631,27 +520,27 @@
             pub stockpile: Option<UnitStockpile>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitStorageQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitStorageResult {
             pub storage: UnitStorage,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitTeamQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitTeamResult {
             pub team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitTooltipQuery {
             pub unit_id: i32,
         }
@@ -661,17 +550,17 @@
             pub tooltip: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitTransporterQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitTransporterResult {
             pub transporter_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitVectorsQuery {
             pub unit_id: i32,
         }
@@ -681,48 +570,24 @@
             pub vectors: UnitVectors,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitVelocityQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitVelocityResult {
             pub velocity: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitWorkerTaskQuery {
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitWorkerTaskResult {
             pub task: UnitWorkerTask,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int2 {
-            pub x: i32,
-            pub y: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int3 {
-            pub x: i32,
-            pub y: i32,
-            pub z: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Result {
-            pub value: i32,
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -733,122 +598,7 @@
             pub was_hit: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct MapRenderingParams {
-            pub splat_tex_scales: Option<Vec<f32>>,
-            pub splat_tex_mults: Option<Vec<f32>>,
-            pub void_water: Option<bool>,
-            pub void_ground: Option<bool>,
-            pub splat_detail_normal_diffuse_alpha: Option<bool>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeExplosionParams {
-            pub damages: f32,
-            pub weapon_def_id: i32,
-            pub owner_id: i32,
-            pub hit_unit_id: i32,
-            pub hit_feature_id: i32,
-            pub crater_area_of_effect: f32,
-            pub damage_area_of_effect: f32,
-            pub edge_effectiveness: f32,
-            pub explosion_speed: f32,
-            pub gfx_mod: f32,
-            pub impact_only: bool,
-            pub ignore_owner: bool,
-            pub damage_ground: bool,
-            pub projectile_id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeProjectileParams {
-            pub pos: Float3,
-            pub speed: Float3,
-            pub spread: Float3,
-            pub end: Float3,
-            pub owner: i32,
-            pub team: i32,
-            pub weapon_num: i32,
-            pub ttl: f32,
-            pub gravity: f32,
-            pub tracking: f32,
-            pub max_range: f32,
-            pub up_time: f32,
-            pub start_alpha: f32,
-            pub end_alpha: f32,
-            pub model: String,
-            pub ceg_tag: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NumberOrBool {
-            pub number: f32,
-            pub boolean: bool,
-            pub use_boolean: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ProjectileTargetRef {
-            pub target_id: i32,
-            pub target_type: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ResourcePack {
-            pub metal: f32,
-            pub energy: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct RgbColor {
-            pub r: f32,
-            pub g: f32,
-            pub b: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SoundEffectParams {
-            pub preset: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringResult {
-            pub value: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SunLightingParams {
-            pub ground_ambient_color: Option<Vec<f32>>,
-            pub ground_diffuse_color: Option<Vec<f32>>,
-            pub ground_specular_color: Option<Vec<f32>>,
-            pub model_ambient_color: Option<Vec<f32>>,
-            pub model_diffuse_color: Option<Vec<f32>>,
-            pub model_specular_color: Option<Vec<f32>>,
-            pub specular_exponent: Option<f32>,
-            pub ground_shadow_density: Option<f32>,
-            pub model_shadow_density: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Result {
-            pub value: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitArmoredState {
             pub armored: bool,
             pub armor_multiple: f32,
@@ -864,7 +614,7 @@
             pub tooltip: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitBlockingState {
             pub is_blocking: bool,
             pub is_solid_object_collidable: bool,
@@ -875,7 +625,7 @@
             pub block_height_changes: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitBuildParams {
             pub build_distance: f32,
             pub build_speed: f32,
@@ -886,21 +636,14 @@
             pub terraform_speed: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitCostOverrides {
-            pub build_time: f32,
-            pub metal_cost: f32,
-            pub energy_cost: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitCosts {
             pub metal_cost: f32,
             pub energy_cost: f32,
             pub build_time: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitFlanking {
             pub flanking_mode: u32,
             pub move_factor: f32,
@@ -910,7 +653,7 @@
             pub mobility: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitHarvestStorage {
             pub stored_metal: f32,
             pub max_stored_metal: f32,
@@ -918,7 +661,7 @@
             pub max_stored_energy: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitHealth {
             pub health: f32,
             pub max_health: f32,
@@ -927,23 +670,14 @@
             pub build_progress: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitHealthValue {
-            pub health: f32,
-            pub capture: f32,
-            pub paralyze: f32,
-            pub build: f32,
-            pub use_amounts: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitLastAttacker {
             pub attacker_id: i32,
             pub attacker_def_id: i32,
             pub attacker_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitLosState {
             pub raw_mask: u8,
             pub los: bool,
@@ -951,7 +685,7 @@
             pub typed: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitPosErrorParams {
             pub pos_error_vector: Float3,
             pub pos_error_delta: Float3,
@@ -959,7 +693,7 @@
             pub pos_error_bit: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitResources {
             pub metal_make: f32,
             pub metal_use: f32,
@@ -969,14 +703,14 @@
             pub energy_income: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitRotation {
             pub pitch: f32,
             pub yaw: f32,
             pub roll: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitSensorRadius {
             pub los: f32,
             pub air_los: f32,
@@ -987,14 +721,14 @@
             pub sonar_jammer: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitShieldState {
             pub shield_enabled: bool,
             pub shield_power: f32,
             pub shield_alpha: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitStates {
             pub fire_state: i32,
             pub move_state: i32,
@@ -1007,41 +741,34 @@
             pub loopback_attack: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitStatesOptions {
             pub ret_table: bool,
             pub bin_state: bool,
             pub amt_state: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitStockpile {
             pub stockpile: u32,
             pub stockpile_queue_size: u32,
             pub build_percent: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitStorage {
             pub metal_storage: f32,
             pub energy_storage: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitTargetRef {
-            pub target_id: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitVectors {
             pub front_dir: Float3,
             pub up_dir: Float3,
             pub right_dir: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitWorkerTask {
             pub cmd_id: i32,
             pub target_id: i32,
@@ -1049,43 +776,7 @@
             pub has_target: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct WaterParams {
-            pub absorb: Option<Vec<f32>>,
-            pub base_color: Option<Vec<f32>>,
-            pub min_color: Option<Vec<f32>>,
-            pub surface_color: Option<Vec<f32>>,
-            pub diffuse_color: Option<Vec<f32>>,
-            pub specular_color: Option<Vec<f32>>,
-            pub plane_color: Option<Vec<f32>>,
-            pub repeat_x: Option<f32>,
-            pub repeat_y: Option<f32>,
-            pub surface_alpha: Option<f32>,
-            pub ambient_factor: Option<f32>,
-            pub diffuse_factor: Option<f32>,
-            pub specular_factor: Option<f32>,
-            pub specular_power: Option<f32>,
-            pub fresnel_min: Option<f32>,
-            pub fresnel_max: Option<f32>,
-            pub fresnel_power: Option<f32>,
-            pub reflection_distortion: Option<f32>,
-            pub blur_base: Option<f32>,
-            pub blur_exponent: Option<f32>,
-            pub perlin_start_freq: Option<f32>,
-            pub perlin_lacunarity: Option<f32>,
-            pub perlin_amplitude: Option<f32>,
-            pub wind_speed: Option<f32>,
-            pub wave_offset_factor: Option<f32>,
-            pub wave_length: Option<f32>,
-            pub wave_foam_distortion: Option<f32>,
-            pub wave_foam_intensity: Option<f32>,
-            pub caustics_resolution: Option<f32>,
-            pub caustics_strength: Option<f32>,
-            pub num_tiles: Option<f32>,
-            pub shore_waves: Option<bool>,
-            pub force_rendering: Option<bool>,
-            pub has_water_plane: Option<bool>,
-        }
+        pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_unit_tooltip {
@@ -1096,7 +787,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitCrashingValue {
             pub is_aircraft: bool,
             pub crashing: bool,
@@ -1147,16 +838,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_unit_build_params {
             #[link(wasm_import_module = "spring:units-info")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-unit-build-params"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-build-params."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_unit_build_params(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_get_unit_build_params::call(p0, p1, p2) }
+        pub fn get_unit_build_params(p0: i32, p1: i32, p2: i32) -> i32 {
+            __core_owned_get_unit_build_params::call(p0, p1, p2)
         }
 
         #[inline]
@@ -1371,16 +1063,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_unit_last_attacker {
             #[link(wasm_import_module = "spring:units-info")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-unit-last-attacker"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-last-attacker."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_unit_last_attacker(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_unit_last_attacker::call(p0, p1) }
+        pub fn get_unit_last_attacker(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_unit_last_attacker::call(p0, p1)
         }
 
         #[inline]
@@ -1488,34 +1181,29 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_unit_sensor_radius {
-            #[link(wasm_import_module = "spring:units-info")]
-            extern "C" {
-                #[link_name = "get-unit-sensor-radius"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-sensor-radius."]
         #[inline]
-        pub unsafe fn get_unit_sensor_radius(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_get_unit_sensor_radius::call(p0, p1, p2) }
+        pub fn get_unit_sensor_radius(unit_id: i32, type_: &str) -> Result<UnitSensorRadius> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + type_.len()); __b.extend_from_slice(&(type_.len() as u32).to_le_bytes()); __b.extend_from_slice(type_.as_bytes()); __b };
+            let mut __output = [0u8; 28];
+            crate::generated::dynamic_input::units_info::get_unit_sensor_radius(unit_id, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(UnitSensorRadius { los: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, air_los: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, radar: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, sonar: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, seismic: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, radar_jammer: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, sonar_jammer: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_unit_shield_state {
             #[link(wasm_import_module = "spring:units-info")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-unit-shield-state"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-shield-state."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_unit_shield_state(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_get_unit_shield_state::call(p0, p1, p2) }
+        pub fn get_unit_shield_state(p0: i32, p1: i32, p2: i32) -> i32 {
+            __core_owned_get_unit_shield_state::call(p0, p1, p2)
         }
 
         #[inline]
@@ -1527,16 +1215,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_unit_stockpile {
             #[link(wasm_import_module = "spring:units-info")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-unit-stockpile"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-stockpile."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_unit_stockpile(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_unit_stockpile::call(p0, p1) }
+        pub fn get_unit_stockpile(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_unit_stockpile::call(p0, p1)
         }
 
         #[inline]
@@ -1558,7 +1247,7 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_unit_tooltip::call(unit_id as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let status = unsafe { __core_variable_output_get_unit_tooltip::call(unit_id, descriptor.as_mut_ptr() as usize as u32 as i32) };
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -1575,7 +1264,7 @@
             }
             #[cfg(not(target_arch = "wasm32"))]
             {
-                let _ = (unit_id as i32);
+                let _ = (unit_id);
                 Err(unreachable!())
             }
         }

@@ -102,11 +102,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterUnitControlImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unit == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register UnitControl Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unit == nullptr)
+		return true;
 	const wasm_valkind_t params[] = {
 		WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32,
 	};

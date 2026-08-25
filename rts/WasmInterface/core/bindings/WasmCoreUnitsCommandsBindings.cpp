@@ -270,11 +270,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterUnitsCommandsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->unitsCommands == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register UnitsCommands Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->unitsCommands == nullptr)
+		return true;
 	const wasm_valkind_t i64Result[] = {WASM_I64};
 	const wasm_valkind_t countParams[] = {WASM_I32};
 	if (!Define(linker, "get-unit-command-count",

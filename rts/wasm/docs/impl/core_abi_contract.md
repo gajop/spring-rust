@@ -158,6 +158,28 @@ Implemented examples:
 The Rust helper exposes byte buffers, not `String`; a guest may interpret them as
 UTF-8 only when its application contract permits that.
 
+## Reviewed variable-I/O calls
+
+Some Lua-parity operations accept a variable-size input and return a
+variable-size result. Their transport uses two descriptors:
+
+```
+(direct_args..., input_descriptor: i32, output_descriptor: i32) -> status: i32
+```
+
+The descriptor layout is generated from the NativeInterface schema. The host
+validates every pointer/count pair before calling native code, reports the
+complete required output count, and performs no partial output write on
+`BufferOverflow`. The ordinary Rust façade hides both descriptors and exposes
+Rust slices and owned values.
+
+`spring:unit-script/call-unit-script` is the first reviewed instance. It is a
+typed numeric subset of Lua `Spring.UnitScript.CallAsUnit`: the function name
+is a byte string, arguments are `&[f32]`, and results are `Vec<f32>`. Lua's
+arbitrary-value `CallAsUnit` remains available to Lua and is not silently
+changed into a numeric-only contract. The import is available only to synced
+rules/Gaia environments and caps the requested result capacity at 256 values.
+
 ## Currently executable imports
 
 ### `spring:units-info`

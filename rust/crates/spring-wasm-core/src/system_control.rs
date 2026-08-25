@@ -3,7 +3,7 @@
 //! Only `CallAsTeam` is exposed here. Process lifecycle/watchdog/restart
 //! functions remain outside the production Core capability set.
 
-use super::{ApiError, ErrorCode, Result, SyncCallback};
+use super::{Result, SyncCallback};
 
 #[cfg(target_arch = "wasm32")]
 mod raw {
@@ -18,9 +18,9 @@ mod raw {
 pub fn call_as_team(team_id: i32, callback: SyncCallback) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        return super::unpack_bool(unsafe {
+        super::unpack_bool(unsafe {
             raw::call_as_team(team_id, callback.id as i32, callback.user_data as i32)
-        });
+        })
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

@@ -158,9 +158,10 @@ fn render_wrapper(
         ResultStrategy::Status | ResultStrategy::Packed32 => {
             let ret_ty = scalar_return_type(function, plan);
             let result_expr = scalar_result_expr(function, plan, &ident, &direct_args);
+            let arity_lint = too_many_arguments_attribute(params.len(), 20);
             format!(
                 "        #[inline]\n\
-                 pub fn {ident}({params}) -> {ret_ty} {{\n\
+                 {arity_lint}pub fn {ident}({params}) -> {ret_ty} {{\n\
                      #[cfg(target_arch = \"wasm32\")]\n\
                      {{\n\
                          let mut descriptor = [0u32; {descriptor_words}];\n\
@@ -188,12 +189,13 @@ fn render_wrapper(
         }
         ResultStrategy::FixedOutputBuffer { bytes, .. } => {
             params.push("output: &mut [u8]".to_owned());
+            let arity_lint = too_many_arguments_attribute(params.len(), 20);
             let mut call_args = direct_args;
             call_args.push("descriptor_ptr as u32 as i32".to_owned());
             call_args.push("output_ptr as u32 as i32".to_owned());
             format!(
                 "        #[inline]\n\
-                 pub fn {ident}({params}) -> crate::Result<()> {{\n\
+                 {arity_lint}pub fn {ident}({params}) -> crate::Result<()> {{\n\
                      #[cfg(target_arch = \"wasm32\")]\n\
                      {{\n\
                          if output.len() != {bytes}usize {{ return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }}\n\
@@ -229,15 +231,16 @@ fn render_wrapper(
                 .expect("eligible variable result layout")
                 .0;
             params.push("output: &mut [u8]".to_owned());
+            let arity_lint = too_many_arguments_attribute(params.len(), 20);
             let mut call_args = direct_args;
             call_args.push("descriptor_ptr as u32 as i32".to_owned());
             call_args.push("output_descriptor_ptr as u32 as i32".to_owned());
             format!(
                 "        #[inline]\n\
-                 pub fn {ident}({params}) -> core::result::Result<usize, super::VariableResultError> {{\n\
+                 {arity_lint}pub fn {ident}({params}) -> core::result::Result<usize, super::VariableResultError> {{\n\
                      #[cfg(target_arch = \"wasm32\")]\n\
                      {{\n\
-                         if output.len() % {element_bytes}usize != 0 || output.len() / {element_bytes}usize > u32::MAX as usize {{\n\
+                         if !output.len().is_multiple_of({element_bytes}usize) || output.len() / {element_bytes}usize > u32::MAX as usize {{\n\
                              return Err(super::VariableResultError {{ error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 }});\n\
                          }}\n\
                          let mut descriptor = [0u32; {descriptor_words}];\n\
@@ -287,6 +290,17 @@ fn scalar_return_type(
             _ => "crate::Result<i32>",
         },
         _ => unreachable!(),
+    }
+}
+
+fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
+    if count > 7 {
+        format!(
+            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
+            " ".repeat(indent)
+        )
+    } else {
+        String::new()
     }
 }
 

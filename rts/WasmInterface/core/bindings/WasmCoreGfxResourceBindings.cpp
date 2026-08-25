@@ -194,11 +194,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterGfxResourceImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->gfx == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register Gfx resource Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->gfx == nullptr)
+		return true;
 
 	const wasm_valkind_t result[] = {WASM_I64};
 	const wasm_valkind_t createTextureParams[] = {

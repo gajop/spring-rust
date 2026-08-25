@@ -180,11 +180,16 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(WasmCoreCallin callin,
 		(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaUnsynced));
 	static constexpr std::uint32_t uiBit =
 		1u << static_cast<std::uint32_t>(WasmEnvironment::UI);
+	static constexpr std::uint32_t menuBit =
+		1u << static_cast<std::uint32_t>(WasmEnvironment::Menu);
+	static constexpr std::uint32_t introBit =
+		1u << static_cast<std::uint32_t>(WasmEnvironment::Intro);
+	static constexpr std::uint32_t standaloneBits = uiBit | menuBit | introBit;
 
 	const CoreSubscriberIndex& subscribers = system->Subscribers();
 	const CoreSubscriberIndex::CallinRoute& route = subscribers.Route(callin);
 	const std::uint32_t reachable =
-		route.environmentMask & ((synced ? syncedBits : unsyncedBits) | uiBit);
+		route.environmentMask & ((synced ? syncedBits : unsyncedBits) | standaloneBits);
 	if (reachable == 0) {
 		spring::benchmark_callins::End(selectionStage);
 		return true;
@@ -210,7 +215,7 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(WasmCoreCallin callin,
 		return success;
 	}
 
-	std::array<CoreCallinInvocation, 3> invocations{};
+	std::array<CoreCallinInvocation, 5> invocations{};
 	std::size_t invocationCount = 0;
 	const auto& primary = synced ? syncedEnvironments : unsyncedEnvironments;
 	for (const WasmEnvironment environment : primary) {
@@ -230,6 +235,11 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(WasmCoreCallin callin,
 				route.uiContributesResult};
 		}
 	}
+
+	if ((reachable & menuBit) != 0)
+		invocations[invocationCount++] = {WasmEnvironment::Menu, query, true};
+	if ((reachable & introBit) != 0)
+		invocations[invocationCount++] = {WasmEnvironment::Intro, query, true};
 
 	if (invocationCount == 0) {
 		spring::benchmark_callins::End(selectionStage);
@@ -274,22 +284,34 @@ bool WasmInterfaceSystem::DispatchIgnoredCallin(WasmCoreCallin callin,
 
 	static constexpr std::uint32_t uiBit =
 		1u << static_cast<std::uint32_t>(WasmEnvironment::UI);
-	if ((reachable & uiBit) == 0)
-		return true;
+	if ((reachable & uiBit) != 0) {
+		if (!route.uiNeedsFilter) {
+			if (!run(WasmEnvironment::UI, query))
+				return false;
+		} else {
+			recoil::wasm::core::UiCallinFilter uiFilter;
+			bool includeUi = true;
+			const void* uiQuery = query;
+			if (!uiFilter.Prepare(callin, query, includeUi, uiQuery, error))
+				return false;
+			if (includeUi && !run(WasmEnvironment::UI, uiQuery))
+				return false;
+		}
+	}
 
-	// Callins with no visibility-sensitive payload skip the filter entirely;
-	// the routing line already said so.
-	if (!route.uiNeedsFilter)
-		return run(WasmEnvironment::UI, query);
-
-	recoil::wasm::core::UiCallinFilter uiFilter;
-	bool includeUi = true;
-	const void* uiQuery = query;
-	if (!uiFilter.Prepare(callin, query, includeUi, uiQuery, error))
-		return false;
-	if (!includeUi)
-		return true;
-	return run(WasmEnvironment::UI, uiQuery);
+	static constexpr std::uint32_t menuBit =
+		1u << static_cast<std::uint32_t>(WasmEnvironment::Menu);
+	static constexpr std::uint32_t introBit =
+		1u << static_cast<std::uint32_t>(WasmEnvironment::Intro);
+	if ((reachable & menuBit) != 0) {
+		if (!run(WasmEnvironment::Menu, query))
+			return false;
+	}
+	if ((reachable & introBit) != 0) {
+		if (!run(WasmEnvironment::Intro, query))
+			return false;
+	}
+	return true;
 }
 
 bool WasmInterfaceSystem::ResetBudgetWindow(bool synced, std::string& error)

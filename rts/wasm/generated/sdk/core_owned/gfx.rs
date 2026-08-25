@@ -1,117 +1,6 @@
     pub mod gfx {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        pub enum CommonErrorCode {
-            ErrorAlreadyExists,
-            ErrorBufferOverflow,
-            ErrorInternal,
-            ErrorInvalidArgument,
-            ErrorInvalidId,
-            ErrorInvalidState,
-            ErrorNone,
-            ErrorNotAvailable,
-            ErrorNotFound,
-            ErrorOperationFailed,
-            ErrorOutOfBounds,
-            ErrorPermissionDenied,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct AtmosphereParams {
-            pub fog_color: Option<Vec<f32>>,
-            pub sky_color: Option<Vec<f32>>,
-            pub sun_color: Option<Vec<f32>>,
-            pub cloud_color: Option<Vec<f32>>,
-            pub sky_axis_angle: Option<Vec<f32>>,
-            pub fog_start: Option<f32>,
-            pub fog_end: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct BoolResult {
-            pub value: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct CollisionVolumeData {
-            pub scale_x: f32,
-            pub scale_y: f32,
-            pub scale_z: f32,
-            pub offset_x: f32,
-            pub offset_y: f32,
-            pub offset_z: f32,
-            pub volume_type: i32,
-            pub test_type: i32,
-            pub primary_axis: i32,
-            pub disabled: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct DefRef {
-            pub name: String,
-            pub id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Error {
-            pub code: i32,
-            pub message: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2 {
-            pub x: f32,
-            pub y: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float2Result {
-            pub value: Float2,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float3Result {
-            pub value: Float3,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-            pub w: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Float4Result {
-            pub value: Float4,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct FloatResult {
-            pub value: f32,
-        }
-
         #[derive(Debug, Clone, PartialEq)]
         pub struct GfxActiveFBOQuery {
             pub fbo_id: u32,
@@ -128,7 +17,7 @@
             pub user_data: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxActiveTextureQuery {
             pub tex_num: i32,
         }
@@ -148,7 +37,7 @@
             pub entries: Vec<GfxActiveUniformEntry>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxAlphaTestQuery {
             pub enable: bool,
             pub func: u32,
@@ -171,7 +60,7 @@
             pub texture_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxAtlasTextureResult {
             pub x1: f32,
             pub x2: f32,
@@ -203,24 +92,24 @@
             pub format: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxBlendEquationQuery {
             pub mode: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxBlendEquationSeparateQuery {
             pub mode_rgb: u32,
             pub mode_alpha: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxBlendFuncQuery {
             pub src: u32,
             pub dst: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxBlendFuncSeparateQuery {
             pub src_rgb: u32,
             pub dst_rgb: u32,
@@ -228,7 +117,7 @@
             pub dst_alpha: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxBlitFBOQuery {
             pub src_fboid: u32,
             pub dst_fboid: u32,
@@ -244,12 +133,12 @@
             pub filter: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxBoolQuery {
             pub value: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxBoolResult {
             pub value: bool,
         }
@@ -281,7 +170,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxClipDistanceQuery {
             pub index: u32,
             pub enable: bool,
@@ -293,7 +182,7 @@
             pub equation: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxColorMaskOptions {
             pub red: bool,
             pub green: bool,
@@ -301,12 +190,12 @@
             pub alpha: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxColorMaskQuery {
             pub options: GfxColorMaskOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxColorQuery {
             pub r: f32,
             pub g: f32,
@@ -340,7 +229,7 @@
             pub level: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxCreateShaderOptions {
             pub has_geo_input_type: bool,
             pub geo_input_type: u32,
@@ -362,20 +251,20 @@
             pub options: GfxCreateShaderOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxCreateShaderResult {
             pub shader_id: u32,
             pub gl_program_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxCreateTextureAtlasQuery {
             pub xsize: i32,
             pub ysize: i32,
             pub alloc_type: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxCreateTextureQuery {
             pub xsize: i32,
             pub ysize: i32,
@@ -383,19 +272,19 @@
             pub params: GfxTextureParams,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxDepthTestOptions {
             pub enable: bool,
             pub set_func: bool,
             pub func: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxDepthTestQuery {
             pub options: GfxDepthTestOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxDispatchComputeQuery {
             pub num_group_x: u32,
             pub num_group_y: u32,
@@ -411,7 +300,7 @@
             pub user_data: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxDrawListAtUnitQuery {
             pub unit_id: i32,
             pub list_id: u32,
@@ -421,16 +310,16 @@
             pub rot: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxEmptyQuery {
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxEmptyResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxEngineModelUniformDataSizeResult {
             pub size_in_elements: u32,
             pub size_in_bytes_on_cpu: u32,
@@ -441,7 +330,7 @@
             pub names: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxEngineUniformBufferDefQuery {
             pub index: i32,
         }
@@ -481,38 +370,38 @@
             pub buffers: Vec<u32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFBOQuery {
             pub fbo_id: u32,
             pub target: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFBOReadBufferQuery {
             pub fbo_id: u32,
             pub buffer: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFBOResult {
             pub fbo_id: u32,
             pub raw_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFBOStatusResult {
             pub valid: bool,
             pub status: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFeatureDrawOptions {
             pub apply_transform: bool,
             pub do_raw_draw: bool,
             pub no_lua_call: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFeatureDrawQuery {
             pub feature_id: i32,
             pub options: GfxFeatureDrawOptions,
@@ -533,29 +422,29 @@
             pub float_count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFloatQuery {
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFloatResult {
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFontAutoOutlineColorQuery {
             pub font_id: u32,
             pub enable: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFontBeginQuery {
             pub font_id: u32,
             pub user_defined_blending: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFontColorQuery {
             pub font_id: u32,
             pub r: f32,
@@ -578,23 +467,23 @@
             pub texture_height: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFontQuery {
             pub font_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFontResult {
             pub font_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFontSubmitBufferedOptions {
             pub no_billboarding: bool,
             pub user_defined_blending: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFontSubmitBufferedQuery {
             pub font_id: u32,
             pub options: GfxFontSubmitBufferedOptions,
@@ -634,7 +523,7 @@
             pub lines: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxFrustumQuery {
             pub left: f32,
             pub right: f32,
@@ -644,14 +533,14 @@
             pub far_val: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxGeometryShaderParameterQuery {
             pub shader_id: u32,
             pub param: u32,
             pub value: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxGetMatrixDataQuery {
             pub mode: u32,
         }
@@ -661,7 +550,7 @@
             pub values: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxGetNumberQuery {
             pub pname: u32,
             pub max_values: u32,
@@ -673,12 +562,12 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxGetStringQuery {
             pub pname: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxGroundCircleQuery {
             pub pos: Float3,
             pub radius: f32,
@@ -689,7 +578,7 @@
             pub weapon_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxGroundQuadQuery {
             pub x0: f32,
             pub z0: f32,
@@ -702,17 +591,17 @@
             pub tv1: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxIntQuery {
             pub value: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxIntResult {
             pub value: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxLightOptions {
             pub set_state: bool,
             pub state: bool,
@@ -727,7 +616,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxLineStippleQuery {
             pub factor: i32,
             pub pattern: u16,
@@ -741,7 +630,7 @@
             pub outline_weight: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxLogicOpQuery {
             pub enable: bool,
             pub opcode: u32,
@@ -754,7 +643,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxMatrixModeQuery {
             pub mode: u32,
         }
@@ -764,12 +653,12 @@
             pub values: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxMemoryBarrierQuery {
             pub barriers: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxMiniMapConfigQuery {
             pub px: i32,
             pub py: i32,
@@ -777,7 +666,7 @@
             pub sy: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxMultiTexCoordQuery {
             pub tex_num: i32,
             pub s: f32,
@@ -796,7 +685,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxMultiTexGenOptions {
             pub set_state: bool,
             pub state: bool,
@@ -819,7 +708,7 @@
             pub offset: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxObjectBufferUniformsResult {
             pub count: u32,
         }
@@ -831,33 +720,33 @@
             pub label: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxObjectPieceQuery {
             pub object_id: i32,
             pub piece_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxObjectShapeOptions {
             pub raw_state: bool,
             pub to_screen: bool,
             pub opaque: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxObjectShapeQuery {
             pub def_id: i32,
             pub team_id: i32,
             pub options: GfxObjectShapeOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxObjectTextureStateQuery {
             pub object_id: i32,
             pub push: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxOrthoQuery {
             pub left: f32,
             pub right: f32,
@@ -875,13 +764,13 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxPolygonModeQuery {
             pub face: u32,
             pub mode: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxPolygonOffsetQuery {
             pub factor: f32,
             pub units: f32,
@@ -894,7 +783,7 @@
             pub source_is_third_party: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxRBOCreateQuery {
             pub xsize: i32,
             pub ysize: i32,
@@ -903,12 +792,12 @@
             pub samples: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxRBOInfoQuery {
             pub rbo_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxRBOInfoResult {
             pub valid: bool,
             pub target: u32,
@@ -918,7 +807,7 @@
             pub samples: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxRawBindFBOQuery {
             pub bind_default: bool,
             pub fbo_id: u32,
@@ -926,13 +815,13 @@
             pub raw_fbo_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxRawBindFBOResult {
             pub previously_bound_raw_fbo_id: u32,
             pub has_previous: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxReadPixelsQuery {
             pub x: i32,
             pub y: i32,
@@ -947,7 +836,7 @@
             pub components: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxRectQuery {
             pub x1: f32,
             pub y1: f32,
@@ -962,7 +851,7 @@
             pub user_data: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxRotateQuery {
             pub degrees: f32,
             pub x: f32,
@@ -977,7 +866,7 @@
             pub user_data: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxSaveImageOptions {
             pub alpha: bool,
             pub yflip: bool,
@@ -995,14 +884,14 @@
             pub read_buffer: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxScaleQuery {
             pub x: f32,
             pub y: f32,
             pub z: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxScissorQuery {
             pub x: i32,
             pub y: i32,
@@ -1010,17 +899,17 @@
             pub height: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxShadeModelQuery {
             pub mode: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxShaderQuery {
             pub shader_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxShadowMapParamsResult {
             pub params: Float4,
         }
@@ -1031,14 +920,14 @@
             pub vertices: Vec<GfxVertexData>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxStencilFuncQuery {
             pub func: u32,
             pub ref_: i32,
             pub mask: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxStencilFuncSeparateQuery {
             pub face: u32,
             pub func: u32,
@@ -1046,25 +935,25 @@
             pub mask: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxStencilMaskQuery {
             pub mask: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxStencilMaskSeparateQuery {
             pub face: u32,
             pub mask: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxStencilOpQuery {
             pub fail: u32,
             pub zfail: u32,
             pub zpass: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxStencilOpSeparateQuery {
             pub face: u32,
             pub fail: u32,
@@ -1072,7 +961,7 @@
             pub zpass: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxStencilTestQuery {
             pub enable: bool,
         }
@@ -1094,7 +983,7 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxSubroutineIndexResult {
             pub index: i32,
             pub success: bool,
@@ -1117,7 +1006,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxTexGenOptions {
             pub set_state: bool,
             pub state: bool,
@@ -1132,7 +1021,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxTexRectQuery {
             pub x1: f32,
             pub y1: f32,
@@ -1144,7 +1033,7 @@
             pub t2: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxTextHeightResult {
             pub height: f32,
             pub descender: f32,
@@ -1167,7 +1056,7 @@
             pub enable: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxTextureInfoResult {
             pub xsize: i32,
             pub ysize: i32,
@@ -1182,7 +1071,7 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxTextureParams {
             pub target: u32,
             pub format: u32,
@@ -1200,26 +1089,26 @@
             pub fbo_depth: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxTranslateQuery {
             pub x: f32,
             pub y: f32,
             pub z: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxTranslateResult {
             pub x: f32,
             pub y: f32,
             pub z: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxUIntQuery {
             pub value: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxUIntResult {
             pub value: u32,
         }
@@ -1256,7 +1145,7 @@
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxUniformLocationResult {
             pub location: i32,
         }
@@ -1268,13 +1157,13 @@
             pub transpose: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxUniformSubroutineQuery {
             pub shader_type: u32,
             pub index: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxUnitDrawOptions {
             pub apply_transform: bool,
             pub do_raw_draw: bool,
@@ -1282,7 +1171,7 @@
             pub full_model: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxUnitDrawQuery {
             pub unit_id: i32,
             pub options: GfxUnitDrawOptions,
@@ -1312,18 +1201,18 @@
             pub data: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxUseShaderResult {
             pub linked: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVAOBufferQuery {
             pub vao_id: u32,
             pub vbo_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVAODrawArraysQuery {
             pub vao_id: u32,
             pub mode: u32,
@@ -1333,7 +1222,7 @@
             pub instance_first: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVAODrawElementsQuery {
             pub vao_id: u32,
             pub mode: u32,
@@ -1344,13 +1233,13 @@
             pub base_instance: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVAORemoveSubmissionQuery {
             pub vao_id: u32,
             pub index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVAOResult {
             pub vao_id: u32,
             pub raw_id: u32,
@@ -1362,7 +1251,7 @@
             pub ids: Vec<u32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBOAttributeOptions {
             pub id: i32,
             pub type_: u32,
@@ -1370,7 +1259,7 @@
             pub normalized: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBOBindRangeQuery {
             pub vbo_id: u32,
             pub binding_index: u32,
@@ -1380,7 +1269,7 @@
             pub bind: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBOCopyQuery {
             pub source_vboid: u32,
             pub destination_vboid: u32,
@@ -1398,7 +1287,7 @@
             pub attributes: Vec<GfxVBOAttributeOptions>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBODownloadQuery {
             pub vbo_id: u32,
             pub attribute_index: i32,
@@ -1412,12 +1301,12 @@
             pub values: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBOInfoQuery {
             pub vbo_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBOInfoResult {
             pub elements_count: u32,
             pub buffer_size_in_bytes: u32,
@@ -1436,13 +1325,13 @@
             pub element_offset: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBOQuery {
             pub target: u32,
             pub freq_updated: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBOResult {
             pub vbo_id: u32,
             pub raw_id: u32,
@@ -1459,7 +1348,7 @@
             pub data_finish_index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVBOUploadResult {
             pub bytes_written: u32,
         }
@@ -1490,7 +1379,7 @@
             pub has_color: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxVertexQuery {
             pub x: f32,
             pub y: f32,
@@ -1499,12 +1388,12 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxViewRangeQuery {
             pub camera_type: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxViewRangeResult {
             pub near_plane_dist: f32,
             pub far_plane_dist: f32,
@@ -1512,13 +1401,13 @@
             pub max_view_range: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxViewSizesResult {
             pub view_size_x: i32,
             pub view_size_y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxViewportQuery {
             pub x: i32,
             pub y: i32,
@@ -1526,205 +1415,7 @@
             pub height: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int2 {
-            pub x: i32,
-            pub y: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int3 {
-            pub x: i32,
-            pub y: i32,
-            pub z: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct Int32Result {
-            pub value: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct MapRenderingParams {
-            pub splat_tex_scales: Option<Vec<f32>>,
-            pub splat_tex_mults: Option<Vec<f32>>,
-            pub void_water: Option<bool>,
-            pub void_ground: Option<bool>,
-            pub splat_detail_normal_diffuse_alpha: Option<bool>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeExplosionParams {
-            pub damages: f32,
-            pub weapon_def_id: i32,
-            pub owner_id: i32,
-            pub hit_unit_id: i32,
-            pub hit_feature_id: i32,
-            pub crater_area_of_effect: f32,
-            pub damage_area_of_effect: f32,
-            pub edge_effectiveness: f32,
-            pub explosion_speed: f32,
-            pub gfx_mod: f32,
-            pub impact_only: bool,
-            pub ignore_owner: bool,
-            pub damage_ground: bool,
-            pub projectile_id: i32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NativeProjectileParams {
-            pub pos: Float3,
-            pub speed: Float3,
-            pub spread: Float3,
-            pub end: Float3,
-            pub owner: i32,
-            pub team: i32,
-            pub weapon_num: i32,
-            pub ttl: f32,
-            pub gravity: f32,
-            pub tracking: f32,
-            pub max_range: f32,
-            pub up_time: f32,
-            pub start_alpha: f32,
-            pub end_alpha: f32,
-            pub model: String,
-            pub ceg_tag: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct NumberOrBool {
-            pub number: f32,
-            pub boolean: bool,
-            pub use_boolean: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ProjectileTargetRef {
-            pub target_id: i32,
-            pub target_type: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct ResourcePack {
-            pub metal: f32,
-            pub energy: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct RgbColor {
-            pub r: f32,
-            pub g: f32,
-            pub b: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SoundEffectParams {
-            pub preset: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringArray {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct StringResult {
-            pub value: String,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct SunLightingParams {
-            pub ground_ambient_color: Option<Vec<f32>>,
-            pub ground_diffuse_color: Option<Vec<f32>>,
-            pub ground_specular_color: Option<Vec<f32>>,
-            pub model_ambient_color: Option<Vec<f32>>,
-            pub model_diffuse_color: Option<Vec<f32>>,
-            pub model_specular_color: Option<Vec<f32>>,
-            pub specular_exponent: Option<f32>,
-            pub ground_shadow_density: Option<f32>,
-            pub model_shadow_density: Option<f32>,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Array {
-            pub data: u32,
-            pub length: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UInt32Result {
-            pub value: u32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitCostOverrides {
-            pub build_time: f32,
-            pub metal_cost: f32,
-            pub energy_cost: f32,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitHealthValue {
-            pub health: f32,
-            pub capture: f32,
-            pub paralyze: f32,
-            pub build: f32,
-            pub use_amounts: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct UnitTargetRef {
-            pub target_id: i32,
-            pub pos: Float3,
-            pub is_ground_target: bool,
-        }
-
-        #[derive(Debug, Clone, PartialEq)]
-        pub struct WaterParams {
-            pub absorb: Option<Vec<f32>>,
-            pub base_color: Option<Vec<f32>>,
-            pub min_color: Option<Vec<f32>>,
-            pub surface_color: Option<Vec<f32>>,
-            pub diffuse_color: Option<Vec<f32>>,
-            pub specular_color: Option<Vec<f32>>,
-            pub plane_color: Option<Vec<f32>>,
-            pub repeat_x: Option<f32>,
-            pub repeat_y: Option<f32>,
-            pub surface_alpha: Option<f32>,
-            pub ambient_factor: Option<f32>,
-            pub diffuse_factor: Option<f32>,
-            pub specular_factor: Option<f32>,
-            pub specular_power: Option<f32>,
-            pub fresnel_min: Option<f32>,
-            pub fresnel_max: Option<f32>,
-            pub fresnel_power: Option<f32>,
-            pub reflection_distortion: Option<f32>,
-            pub blur_base: Option<f32>,
-            pub blur_exponent: Option<f32>,
-            pub perlin_start_freq: Option<f32>,
-            pub perlin_lacunarity: Option<f32>,
-            pub perlin_amplitude: Option<f32>,
-            pub wind_speed: Option<f32>,
-            pub wave_offset_factor: Option<f32>,
-            pub wave_length: Option<f32>,
-            pub wave_foam_distortion: Option<f32>,
-            pub wave_foam_intensity: Option<f32>,
-            pub caustics_resolution: Option<f32>,
-            pub caustics_strength: Option<f32>,
-            pub num_tiles: Option<f32>,
-            pub shore_waves: Option<bool>,
-            pub force_rendering: Option<bool>,
-            pub has_water_plane: Option<bool>,
-        }
+        pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_download_vbo {
@@ -1771,19 +1462,19 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct CreateFBOValue {
             pub fbo_id: u32,
             pub raw_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct CreateShaderValue {
             pub shader_id: u32,
             pub gl_program_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FontGetTextHeightValue {
             pub height: f32,
             pub descender: f32,
@@ -1796,7 +1487,7 @@
             pub lines: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetAtlasTextureValue {
             pub x1: f32,
             pub x2: f32,
@@ -1813,7 +1504,7 @@
             pub string_value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetEngineModelUniformDataSizeValue {
             pub size_in_elements: u32,
             pub size_in_bytes_on_cpu: u32,
@@ -1843,7 +1534,7 @@
             pub texture_height: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetGlobalTexCoordsValue {
             pub x1: f32,
             pub x2: f32,
@@ -1866,7 +1557,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetRBOInfoValue {
             pub valid: bool,
             pub target: u32,
@@ -1876,14 +1567,14 @@
             pub samples: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetScreenViewTransValue {
             pub x: f32,
             pub y: f32,
             pub z: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetSubroutineIndexValue {
             pub index: i32,
             pub success: bool,
@@ -1897,27 +1588,27 @@
             pub string_value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetTextHeightValue {
             pub height: f32,
             pub descender: f32,
             pub lines: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetVAOValue {
             pub vao_id: u32,
             pub raw_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetVBOValue {
             pub vbo_id: u32,
             pub raw_id: u32,
             pub target: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetVBOInfoValue {
             pub elements_count: u32,
             pub buffer_size_in_bytes: u32,
@@ -1927,7 +1618,7 @@
             pub primitive_restart_index: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetViewRangeValue {
             pub near_plane_dist: f32,
             pub far_plane_dist: f32,
@@ -1935,7 +1626,7 @@
             pub max_view_range: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetViewSizesValue {
             pub view_size_x: i32,
             pub view_size_y: i32,
@@ -1949,13 +1640,13 @@
             pub string_value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct IsValidFBOValue {
             pub valid: bool,
             pub status: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct RawBindFBOValue {
             pub previously_bound_raw_fbo_id: u32,
             pub has_previous: bool,
@@ -1967,7 +1658,7 @@
             pub components: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct TextureInfoValue {
             pub xsize: i32,
             pub ysize: i32,
@@ -1980,31 +1671,33 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_active_fbo {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "active-fbo"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.active-fbo."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn active_fbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32 {
-            unsafe { __core_owned_active_fbo::call(p0, p1, p2, p3, p4) }
+        pub fn active_fbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32 {
+            __core_owned_active_fbo::call(p0, p1, p2, p3, p4)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_active_shader {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "active-shader"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.active-shader."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn active_shader(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_active_shader::call(p0, p1, p2) }
+        pub fn active_shader(p0: i32, p1: i32, p2: i32) -> i32 {
+            __core_owned_active_shader::call(p0, p1, p2)
         }
 
         #[inline]
@@ -2013,19 +1706,17 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_add_atlas_texture {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "add-atlas-texture"]
-                pub fn call(p0: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.add-atlas-texture."]
         #[inline]
-        pub unsafe fn add_atlas_texture(p0: i32) -> i32 {
-            unsafe { __core_owned_add_atlas_texture::call(p0) }
+        pub fn add_atlas_texture(atlas_name: &str, texture_name: &str) -> Result<()> {
+            let mut atlas_name_bytes = atlas_name.as_bytes().to_vec();
+            if atlas_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            atlas_name_bytes.push(0);
+            let atlas_name_cstr = core::ffi::CStr::from_bytes_with_nul(&atlas_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
+            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            texture_name_bytes.push(0);
+            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::add_atlas_texture(atlas_name_cstr, texture_name_cstr)
         }
 
         #[inline]
@@ -2034,27 +1725,27 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::add_fallback_font(&value_cstr)
+            crate::generated::borrowed::gfx::add_fallback_font(value_cstr)
         }
 
         #[inline]
-        pub fn add_feature_defs_to_submission_vao(vao_id: u32, ids: &Vec<u32>) -> Result<u32> {
-            crate::generated::borrowed::gfx::add_feature_defs_to_submission_vao(vao_id, ids.as_slice())
+        pub fn add_feature_defs_to_submission_vao(vao_id: u32, ids: &[u32]) -> Result<u32> {
+            crate::generated::borrowed::gfx::add_feature_defs_to_submission_vao(vao_id, ids)
         }
 
         #[inline]
-        pub fn add_features_to_submission_vao(vao_id: u32, ids: &Vec<u32>) -> Result<u32> {
-            crate::generated::borrowed::gfx::add_features_to_submission_vao(vao_id, ids.as_slice())
+        pub fn add_features_to_submission_vao(vao_id: u32, ids: &[u32]) -> Result<u32> {
+            crate::generated::borrowed::gfx::add_features_to_submission_vao(vao_id, ids)
         }
 
         #[inline]
-        pub fn add_unit_defs_to_submission_vao(vao_id: u32, ids: &Vec<u32>) -> Result<u32> {
-            crate::generated::borrowed::gfx::add_unit_defs_to_submission_vao(vao_id, ids.as_slice())
+        pub fn add_unit_defs_to_submission_vao(vao_id: u32, ids: &[u32]) -> Result<u32> {
+            crate::generated::borrowed::gfx::add_unit_defs_to_submission_vao(vao_id, ids)
         }
 
         #[inline]
-        pub fn add_units_to_submission_vao(vao_id: u32, ids: &Vec<u32>) -> Result<u32> {
-            crate::generated::borrowed::gfx::add_units_to_submission_vao(vao_id, ids.as_slice())
+        pub fn add_units_to_submission_vao(vao_id: u32, ids: &[u32]) -> Result<u32> {
+            crate::generated::borrowed::gfx::add_units_to_submission_vao(vao_id, ids)
         }
 
         #[inline]
@@ -2090,16 +1781,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_begin_end {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "begin-end"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.begin-end."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn begin_end(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_begin_end::call(p0, p1, p2) }
+        pub fn begin_end(p0: i32, p1: i32, p2: i32) -> i32 {
+            __core_owned_begin_end::call(p0, p1, p2)
         }
 
         #[inline]
@@ -2120,19 +1812,13 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_bind_image_texture {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "bind-image-texture"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.bind-image-texture."]
         #[inline]
-        pub unsafe fn bind_image_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32 {
-            unsafe { __core_owned_bind_image_texture::call(p0, p1, p2, p3, p4, p5, p6) }
+        pub fn bind_image_texture(unit: u32, name: &str, level: i32, layer: i32, layered: bool, access: u32, format: u32) -> Result<()> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::bind_image_texture(unit, name_cstr, level, layer, layered, access, format)
         }
 
         #[inline]
@@ -2141,7 +1827,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::bind_texture(&name_cstr, tex_num, enable)
+            crate::generated::borrowed::gfx::bind_texture(name_cstr, tex_num, enable)
         }
 
         #[inline]
@@ -2175,6 +1861,7 @@
         }
 
         #[inline]
+        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn blit_fbo(src_fboid: u32, dst_fboid: u32, x0_src: i32, y0_src: i32, x1_src: i32, y1_src: i32, x0_dst: i32, y0_dst: i32, x1_dst: i32, y1_dst: i32, mask: u32, filter: u32) -> Result<()> {
             crate::generated::gfx::blit_fbo(src_fboid, dst_fboid, x0_src, y0_src, x1_src, y1_src, x0_dst, y0_dst, x1_dst, y1_dst, mask, filter)?;
             Ok(())
@@ -2186,30 +1873,22 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_change_texture_params {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "change-texture-params"]
-                pub fn call(p0: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.change-texture-params."]
         #[inline]
-        pub unsafe fn change_texture_params(p0: i32) -> i32 {
-            unsafe { __core_owned_change_texture_params::call(p0) }
+        pub fn change_texture_params(name: &str, params: GfxTextureParams) -> Result<()> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.target.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.format.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.border.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.min_filter.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.mag_filter.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_s.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_t.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_r.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.compare_func.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.lod_bias.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.aniso.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.samples.to_le_bytes()); __b.extend_from_slice(&(if params.fbo { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if params.fbo_depth { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            crate::generated::dynamic_input::gfx::change_texture_params(&__blob0, &__blob1)
         }
 
         #[inline]
-        pub fn clear(bits: u32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::clear(bits, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn clear(bits: u32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::clear(bits, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
         #[inline]
-        pub fn clear_attachment_fbo(target: u32, attachment: u32, values: &Vec<f32>, count: u32) -> Result<bool> {
-            let value = crate::generated::gfx::clear_attachment_fbo(target, attachment, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn clear_attachment_fbo(target: u32, attachment: u32, values: &[f32], count: u32) -> Result<bool> {
+            let value = crate::generated::gfx::clear_attachment_fbo(target, attachment, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(value)
         }
 
@@ -2238,8 +1917,8 @@
         }
 
         #[inline]
-        pub fn clip_plane(plane: u32, equation: &Vec<f32>) -> Result<()> {
-            crate::generated::gfx::clip_plane(plane, equation.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
+        pub fn clip_plane(plane: u32, equation: &[f32]) -> Result<()> {
+            crate::generated::gfx::clip_plane(plane, equation.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
             Ok(())
         }
 
@@ -2261,19 +1940,14 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_copy_to_texture {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "copy-to-texture"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.copy-to-texture."]
         #[inline]
-        pub unsafe fn copy_to_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32) -> i32 {
-            unsafe { __core_owned_copy_to_texture::call(p0, p1, p2, p3, p4, p5, p6, p7, p8) }
+        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
+        pub fn copy_to_texture(name: &str, xoff: i32, yoff: i32, x: i32, y: i32, width: i32, height: i32, target: u32, level: u32) -> Result<()> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::copy_to_texture(name_cstr, xoff, yoff, x, y, width, height, target, level)
         }
 
         #[inline]
@@ -2282,34 +1956,33 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_create_fbo {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "create-fbo"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-fbo."]
         #[inline]
-        pub unsafe fn create_fbo(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_create_fbo::call(p0, p1, p2, p3) }
+        pub fn create_fbo(target: u32, attachments: &[GfxFBOAttachment], draw_buffers: &[u32], read_buffer: u32) -> Result<CreateFBOValue> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(attachments.len() as u32).to_le_bytes()); for __item in attachments.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.attachment.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.texture_name.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.texture_name.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.texture_target.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.mip_level.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.rbo_id.to_le_bytes()); __b.extend_from_slice(&(if __item.use_rbo { 1u32 } else { 0u32 }).to_le_bytes());} __b };
+            let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(draw_buffers.len() as u32).to_le_bytes()); for __item in draw_buffers.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_le_bytes());} __b };
+            let mut __output = [0u8; 8];
+            crate::generated::dynamic_input::gfx::create_fbo(target as i32, read_buffer as i32, &__blob0, &__blob1, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(CreateFBOValue {
+                fbo_id: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                raw_id: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_create_list {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "create-list"]
-                pub fn call(p0: i32, p1: i32) -> i64;
+                pub safe fn call(p0: i32, p1: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-list."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn create_list(p0: i32, p1: i32) -> i64 {
-            unsafe { __core_owned_create_list::call(p0, p1) }
+        pub fn create_list(p0: i32, p1: i32) -> i64 {
+            __core_owned_create_list::call(p0, p1)
         }
 
         #[inline]
@@ -2324,49 +1997,56 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_create_shader {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "create-shader"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-shader."]
         #[inline]
-        pub unsafe fn create_shader(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_create_shader::call(p0, p1) }
+        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
+        pub fn create_shader(definitions: &str, vertex: &str, tcs: &str, tes: &str, geometry: &str, fragment: &str, compute: &str, options: GfxCreateShaderOptions) -> Result<CreateShaderValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + definitions.len()); __b.extend_from_slice(&(definitions.len() as u32).to_le_bytes()); __b.extend_from_slice(definitions.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + vertex.len()); __b.extend_from_slice(&(vertex.len() as u32).to_le_bytes()); __b.extend_from_slice(vertex.as_bytes()); __b };
+            let __blob2 = { let mut __b = Vec::with_capacity(4 + tcs.len()); __b.extend_from_slice(&(tcs.len() as u32).to_le_bytes()); __b.extend_from_slice(tcs.as_bytes()); __b };
+            let __blob3 = { let mut __b = Vec::with_capacity(4 + tes.len()); __b.extend_from_slice(&(tes.len() as u32).to_le_bytes()); __b.extend_from_slice(tes.as_bytes()); __b };
+            let __blob4 = { let mut __b = Vec::with_capacity(4 + geometry.len()); __b.extend_from_slice(&(geometry.len() as u32).to_le_bytes()); __b.extend_from_slice(geometry.as_bytes()); __b };
+            let __blob5 = { let mut __b = Vec::with_capacity(4 + fragment.len()); __b.extend_from_slice(&(fragment.len() as u32).to_le_bytes()); __b.extend_from_slice(fragment.as_bytes()); __b };
+            let __blob6 = { let mut __b = Vec::with_capacity(4 + compute.len()); __b.extend_from_slice(&(compute.len() as u32).to_le_bytes()); __b.extend_from_slice(compute.as_bytes()); __b };
+            let __blob7 = { let mut __b = Vec::new(); __b.extend_from_slice(&(if options.has_geo_input_type { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_input_type.to_le_bytes()); __b.extend_from_slice(&(if options.has_geo_output_type { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_output_type.to_le_bytes()); __b.extend_from_slice(&(if options.has_geo_output_verts { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_output_verts.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let mut __output = [0u8; 8];
+            crate::generated::dynamic_input::gfx::create_shader(&__blob0, &__blob1, &__blob2, &__blob3, &__blob4, &__blob5, &__blob6, &__blob7, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(CreateShaderValue {
+                shader_id: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                gl_program_id: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_create_texture {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "create-texture"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+                pub safe fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-texture."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn create_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64 {
-            unsafe { __core_owned_create_texture::call(p0, p1, p2, p3, p4, p5) }
+        pub fn create_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64 {
+            __core_owned_create_texture::call(p0, p1, p2, p3, p4, p5)
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_create_texture_atlas {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "create-texture-atlas"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+                pub safe fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.create-texture-atlas."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn create_texture_atlas(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64 {
-            unsafe { __core_owned_create_texture_atlas::call(p0, p1, p2, p3, p4) }
+        pub fn create_texture_atlas(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64 {
+            __core_owned_create_texture_atlas::call(p0, p1, p2, p3, p4)
         }
 
         #[inline]
@@ -2375,19 +2055,10 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_define_vbo {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "define-vbo"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.define-vbo."]
         #[inline]
-        pub unsafe fn define_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32 {
-            unsafe { __core_owned_define_vbo::call(p0, p1, p2, p3, p4, p5, p6) }
+        pub fn define_vbo(vbo_id: u32, elements_count: i32, element_array: bool, index_type: u32, use_default_attributes: bool, default_attribute_count: u32, attributes: &[GfxVBOAttributeOptions]) -> Result<()> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(attributes.len() as u32).to_le_bytes()); for __item in attributes.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.type_.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.size.to_le_bytes()); __b.extend_from_slice(&(if __item.normalized { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); }} __b };
+            crate::generated::dynamic_input::gfx::define_vbo(vbo_id as i32, elements_count, element_array as i32, index_type as i32, use_default_attributes as i32, default_attribute_count as i32, &__blob0)
         }
 
         #[inline]
@@ -2432,7 +2103,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::delete_texture(&name_cstr)
+            crate::generated::borrowed::gfx::delete_texture(name_cstr)
         }
 
         #[inline]
@@ -2441,7 +2112,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::delete_texture_atlas(&name_cstr)
+            crate::generated::borrowed::gfx::delete_texture_atlas(name_cstr)
         }
 
         #[inline]
@@ -2450,7 +2121,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::delete_texture_fbo(&name_cstr)
+            crate::generated::borrowed::gfx::delete_texture_fbo(name_cstr)
         }
 
         #[inline]
@@ -2496,7 +2167,7 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<f32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_download_vbo::call(vbo_id as i32, attribute_index as i32, element_offset as i32, element_count as i32, u32::from(force_gpu_read) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let status = unsafe { __core_variable_output_download_vbo::call(vbo_id as i32, attribute_index, element_offset, element_count, u32::from(force_gpu_read) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2513,7 +2184,7 @@
             }
             #[cfg(not(target_arch = "wasm32"))]
             {
-                let _ = (vbo_id as i32, attribute_index as i32, element_offset as i32, element_count as i32, u32::from(force_gpu_read) as i32);
+                let _ = (vbo_id as i32, attribute_index, element_offset, element_count, u32::from(force_gpu_read) as i32);
                 Err(unreachable!())
             }
         }
@@ -2533,16 +2204,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_draw_func_at_unit {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "draw-func-at-unit"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.draw-func-at-unit."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn draw_func_at_unit(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_draw_func_at_unit::call(p0, p1, p2, p3) }
+        pub fn draw_func_at_unit(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            __core_owned_draw_func_at_unit::call(p0, p1, p2, p3)
         }
 
         #[inline]
@@ -2552,6 +2224,7 @@
         }
 
         #[inline]
+        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn draw_ground_quad(x0: f32, z0: f32, x1: f32, z1: f32, use_tex_coords: bool, tu0: f32, tv0: f32, tu1: f32, tv1: f32) -> Result<()> {
             crate::generated::gfx::draw_ground_quad(x0, z0, x1, z1, use_tex_coords, tu0, tv0, tu1, tv1)?;
             Ok(())
@@ -2647,7 +2320,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::finalize_texture_atlas(&name_cstr)
+            crate::generated::borrowed::gfx::finalize_texture_atlas(name_cstr)
         }
 
         #[inline]
@@ -2692,19 +2365,18 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_font_get_text_height {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "font-get-text-height"]
-                pub fn call(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.font-get-text-height."]
         #[inline]
-        pub unsafe fn font_get_text_height(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32 {
-            unsafe { __core_owned_font_get_text_height::call(p0, p1, p2, p3, p4, p5) }
+        pub fn font_get_text_height(font_id: u32, text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<FontGetTextHeightValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + text.len()); __b.extend_from_slice(&(text.len() as u32).to_le_bytes()); __b.extend_from_slice(text.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + options.len()); __b.extend_from_slice(&(options.len() as u32).to_le_bytes()); __b.extend_from_slice(options.as_bytes()); __b };
+            let mut __output = [0u8; 12];
+            crate::generated::dynamic_input::gfx::font_get_text_height(font_id as i32, x, y, size, &__blob0, &__blob1, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(FontGetTextHeightValue {
+                height: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                descender: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                lines: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -2717,37 +2389,28 @@
             if options_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             options_bytes.push(0);
             let options_cstr = core::ffi::CStr::from_bytes_with_nul(&options_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::font_get_text_width(font_id, &text_cstr, x, y, size, &options_cstr)
+            crate::generated::borrowed::gfx::font_get_text_width(font_id, text_cstr, x, y, size, options_cstr)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_font_print {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "font-print"]
-                pub fn call(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.font-print."]
         #[inline]
-        pub unsafe fn font_print(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32 {
-            unsafe { __core_owned_font_print::call(p0, p1, p2, p3, p4) }
+        pub fn font_print(font_id: u32, text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<()> {
+            let mut text_bytes = text.as_bytes().to_vec();
+            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            text_bytes.push(0);
+            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut options_bytes = options.as_bytes().to_vec();
+            if options_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            options_bytes.push(0);
+            let options_cstr = core::ffi::CStr::from_bytes_with_nul(&options_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::font_print(font_id, text_cstr, x, y, size, options_cstr)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_font_print_world {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "font-print-world"]
-                pub fn call(p0: i32, p1: f32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.font-print-world."]
         #[inline]
-        pub unsafe fn font_print_world(p0: i32, p1: f32, p2: i32) -> i32 {
-            unsafe { __core_owned_font_print_world::call(p0, p1, p2) }
+        pub fn font_print_world(font_id: u32, text: &str, pos: Float3, size: f32, options: &str) -> Result<()> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + text.len()); __b.extend_from_slice(&(text.len() as u32).to_le_bytes()); __b.extend_from_slice(text.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&pos.x.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&pos.y.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&pos.z.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob2 = { let mut __b = Vec::with_capacity(4 + options.len()); __b.extend_from_slice(&(options.len() as u32).to_le_bytes()); __b.extend_from_slice(options.as_bytes()); __b };
+            crate::generated::dynamic_input::gfx::font_print_world(font_id as i32, size, &__blob0, &__blob1, &__blob2)
         }
 
         #[inline]
@@ -2777,16 +2440,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_font_wrap_text {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "font-wrap-text"]
-                pub fn call(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+                pub safe fn call(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.font-wrap-text."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn font_wrap_text(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32 {
-            unsafe { __core_owned_font_wrap_text::call(p0, p1, p2, p3, p4, p5) }
+        pub fn font_wrap_text(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32 {
+            __core_owned_font_wrap_text::call(p0, p1, p2, p3, p4, p5)
         }
 
         #[inline]
@@ -2795,94 +2459,105 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_generate_mipmap {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "generate-mipmap"]
-                pub fn call(p0: i32) -> i32;
+        #[inline]
+        pub fn generate_mipmap(name: &str) -> Result<()> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::generate_mipmap(name_cstr)
+        }
+
+        #[inline]
+        pub fn get_active_uniforms(shader_id: u32) -> Result<Vec<GfxActiveUniformEntry>> {
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_output::gfx::get_active_uniforms(shader_id as i32, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(GfxActiveUniformEntry { name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, type_: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, gl_type: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, length: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, size: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, location: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? }); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
             }
         }
 
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.generate-mipmap."]
         #[inline]
-        pub unsafe fn generate_mipmap(p0: i32) -> i32 {
-            unsafe { __core_owned_generate_mipmap::call(p0) }
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_active_uniforms {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-active-uniforms"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-active-uniforms."]
-        #[inline]
-        pub unsafe fn get_active_uniforms(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_active_uniforms::call(p0, p1) }
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_atlas_texture {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-atlas-texture"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-atlas-texture."]
-        #[inline]
-        pub unsafe fn get_atlas_texture(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_atlas_texture::call(p0, p1) }
+        pub fn get_atlas_texture(atlas_name: &str, texture_name: &str) -> Result<GetAtlasTextureValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + atlas_name.len()); __b.extend_from_slice(&(atlas_name.len() as u32).to_le_bytes()); __b.extend_from_slice(atlas_name.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + texture_name.len()); __b.extend_from_slice(&(texture_name.len() as u32).to_le_bytes()); __b.extend_from_slice(texture_name.as_bytes()); __b };
+            let mut __output = [0u8; 20];
+            crate::generated::dynamic_input::gfx::get_atlas_texture(&__blob0, &__blob1, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(GetAtlasTextureValue {
+                x1: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                x2: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                y1: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                y2: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                page_num: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_atmosphere {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-atmosphere"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-atmosphere."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_atmosphere(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_atmosphere::call(p0, p1) }
+        pub fn get_atmosphere(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_atmosphere::call(p0, p1)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_console_commands {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-console-commands"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+        #[inline]
+        pub fn get_console_commands(unused: u8) -> Result<Vec<GfxConsoleCommandEntry>> {
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_output::gfx::get_console_commands(unused as i32, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(GfxConsoleCommandEntry { command: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, description: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, synced: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, cheat: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? }); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
             }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-console-commands."]
-        #[inline]
-        pub unsafe fn get_console_commands(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_console_commands::call(p0, p1) }
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_engine_atlas_textures {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-engine-atlas-textures"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-engine-atlas-textures."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_engine_atlas_textures(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_engine_atlas_textures::call(p0, p1) }
+        pub fn get_engine_atlas_textures(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_engine_atlas_textures::call(p0, p1)
         }
 
         #[inline]
@@ -2923,19 +2598,26 @@
             })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_engine_texture_names {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-engine-texture-names"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-engine-texture-names."]
         #[inline]
-        pub unsafe fn get_engine_texture_names(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_engine_texture_names::call(p0, p1) }
+        pub fn get_engine_texture_names(unused: u8) -> Result<Vec<String>> {
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_output::gfx::get_engine_texture_names(unused as i32, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -2945,7 +2627,7 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_engine_uniform_buffer_def::call(index as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let status = unsafe { __core_variable_output_get_engine_uniform_buffer_def::call(index, descriptor.as_mut_ptr() as usize as u32 as i32) };
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2962,69 +2644,78 @@
             }
             #[cfg(not(target_arch = "wasm32"))]
             {
-                let _ = (index as i32);
+                let _ = (index);
                 Err(unreachable!())
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_fixed_state {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-fixed-state"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-fixed-state."]
         #[inline]
-        pub unsafe fn get_fixed_state(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_fixed_state::call(p0, p1) }
+        pub fn get_fixed_state(param: &str) -> Result<GetFixedStateValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + param.len()); __b.extend_from_slice(&(param.len() as u32).to_le_bytes()); __b.extend_from_slice(param.as_bytes()); __b };
+            let mut __output = [0u8; 172];
+            crate::generated::dynamic_input::gfx::get_fixed_state(&__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(GetFixedStateValue {
+                bools: { let mut __arr = Vec::with_capacity(8); for _ in 0..8usize { __arr.push(crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __arr },
+                bool_count: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                ints: { let mut __arr = Vec::with_capacity(16); for _ in 0..16usize { __arr.push(crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __arr },
+                int_count: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                floats: { let mut __arr = Vec::with_capacity(16); for _ in 0..16usize { __arr.push(crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __arr },
+                float_count: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_font_info {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-font-info"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-font-info."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_font_info(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_font_info::call(p0, p1) }
+        pub fn get_font_info(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_font_info::call(p0, p1)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_global_tex_coords {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-global-tex-coords"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+        #[inline]
+        pub fn get_global_tex_coords(value: &str) -> Result<GetGlobalTexCoordsValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = [0u8; 20];
+            crate::generated::dynamic_input::gfx::get_global_tex_coords(&__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(GetGlobalTexCoordsValue {
+                x1: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                x2: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                y1: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                y2: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                page_num: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
+        }
+
+        #[inline]
+        pub fn get_global_tex_names(unused: u8) -> Result<Vec<GfxAtlasTextureEntry>> {
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_output::gfx::get_global_tex_names(unused as i32, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(GfxAtlasTextureEntry { name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, x1: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, x2: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, y1: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, y2: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, page_num: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? }); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
             }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-global-tex-coords."]
-        #[inline]
-        pub unsafe fn get_global_tex_coords(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_global_tex_coords::call(p0, p1) }
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_global_tex_names {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-global-tex-names"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-global-tex-names."]
-        #[inline]
-        pub unsafe fn get_global_tex_names(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_global_tex_names::call(p0, p1) }
         }
 
         #[inline]
@@ -3036,29 +2727,30 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_map_rendering {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-map-rendering"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-map-rendering."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_map_rendering(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_map_rendering::call(p0, p1) }
+        pub fn get_map_rendering(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_map_rendering::call(p0, p1)
         }
 
         #[inline]
         pub fn get_matrix_data(mode: u32) -> Result<Vec<f32>> {
             let value = crate::generated::gfx::get_matrix_data(mode)?;
-            Ok(value.into_iter().map(|value| Ok(value)).collect::<crate::Result<Vec<_>>>()?)
+            Ok(value.into_iter().collect::<Vec<_>>())
         }
 
         #[inline]
         pub fn get_number(pname: u32, max_values: u32) -> Result<GetNumberValue> {
             let value = crate::generated::gfx::get_number(pname, max_values)?;
             Ok(GetNumberValue {
-                values: value.0.into_iter().map(|value| Ok(value)).collect::<crate::Result<Vec<_>>>()?,
+                values: value.0.into_iter().collect::<Vec<_>>(),
                 count: value.1
             })
         }
@@ -3156,49 +2848,45 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_subroutine_index {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-subroutine-index"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-subroutine-index."]
         #[inline]
-        pub unsafe fn get_subroutine_index(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_get_subroutine_index::call(p0, p1, p2, p3) }
+        pub fn get_subroutine_index(shader_id: u32, shader_type: u32, name: &str) -> Result<GetSubroutineIndexValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 8];
+            crate::generated::dynamic_input::gfx::get_subroutine_index(shader_id as i32, shader_type as i32, &__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(GetSubroutineIndexValue {
+                index: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                success: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_sun {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-sun"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-sun."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_sun(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_sun::call(p0, p1) }
+        pub fn get_sun(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_sun::call(p0, p1)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_text_height {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "get-text-height"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-text-height."]
         #[inline]
-        pub unsafe fn get_text_height(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_text_height::call(p0, p1) }
+        pub fn get_text_height(value: &str) -> Result<GetTextHeightValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            let mut __output = [0u8; 12];
+            crate::generated::dynamic_input::gfx::get_text_height(&__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(GetTextHeightValue {
+                height: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                descender: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                lines: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -3207,7 +2895,7 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::get_text_width(&value_cstr)
+            crate::generated::borrowed::gfx::get_text_width(value_cstr)
         }
 
         #[inline]
@@ -3216,7 +2904,7 @@
             if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             name_bytes.push(0);
             let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::get_uniform_location(shader_id, &name_cstr)
+            crate::generated::borrowed::gfx::get_uniform_location(shader_id, name_cstr)
         }
 
         #[inline]
@@ -3274,16 +2962,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_get_water_rendering {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-water-rendering"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.get-water-rendering."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn get_water_rendering(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_get_water_rendering::call(p0, p1) }
+        pub fn get_water_rendering(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_water_rendering::call(p0, p1)
         }
 
         #[inline]
@@ -3292,27 +2981,27 @@
             if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             value_bytes.push(0);
             let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::has_extension(&value_cstr)
+            crate::generated::borrowed::gfx::has_extension(value_cstr)
         }
 
         #[inline]
-        pub fn instance_data_from_feature_defs_vbo(vbo_id: u32, ids: &Vec<u32>, attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
-            crate::generated::borrowed::gfx::instance_data_from_feature_defs_vbo(vbo_id, ids.as_slice(), attribute_index, team_id, element_offset)
+        pub fn instance_data_from_feature_defs_vbo(vbo_id: u32, ids: &[u32], attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
+            crate::generated::borrowed::gfx::instance_data_from_feature_defs_vbo(vbo_id, ids, attribute_index, team_id, element_offset)
         }
 
         #[inline]
-        pub fn instance_data_from_features_vbo(vbo_id: u32, ids: &Vec<u32>, attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
-            crate::generated::borrowed::gfx::instance_data_from_features_vbo(vbo_id, ids.as_slice(), attribute_index, team_id, element_offset)
+        pub fn instance_data_from_features_vbo(vbo_id: u32, ids: &[u32], attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
+            crate::generated::borrowed::gfx::instance_data_from_features_vbo(vbo_id, ids, attribute_index, team_id, element_offset)
         }
 
         #[inline]
-        pub fn instance_data_from_unit_defs_vbo(vbo_id: u32, ids: &Vec<u32>, attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
-            crate::generated::borrowed::gfx::instance_data_from_unit_defs_vbo(vbo_id, ids.as_slice(), attribute_index, team_id, element_offset)
+        pub fn instance_data_from_unit_defs_vbo(vbo_id: u32, ids: &[u32], attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
+            crate::generated::borrowed::gfx::instance_data_from_unit_defs_vbo(vbo_id, ids, attribute_index, team_id, element_offset)
         }
 
         #[inline]
-        pub fn instance_data_from_units_vbo(vbo_id: u32, ids: &Vec<u32>, attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
-            crate::generated::borrowed::gfx::instance_data_from_units_vbo(vbo_id, ids.as_slice(), attribute_index, team_id, element_offset)
+        pub fn instance_data_from_units_vbo(vbo_id: u32, ids: &[u32], attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
+            crate::generated::borrowed::gfx::instance_data_from_units_vbo(vbo_id, ids, attribute_index, team_id, element_offset)
         }
 
         #[inline]
@@ -3325,8 +3014,8 @@
         }
 
         #[inline]
-        pub fn light(light: i32, options: GfxLightOptions, pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::light(light, crate::generated::gfx::GfxLightOptions { set_state: options.set_state, state: options.state }, pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn light(light: i32, options: GfxLightOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::light(light, crate::generated::gfx::GfxLightOptions { set_state: options.set_state, state: options.state }, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
@@ -3354,7 +3043,7 @@
             if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
             path_bytes.push(0);
             let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::load_font(&path_cstr, size, outline_width, outline_weight)
+            crate::generated::borrowed::gfx::load_font(path_cstr, size, outline_width, outline_weight)
         }
 
         #[inline]
@@ -3364,8 +3053,8 @@
         }
 
         #[inline]
-        pub fn load_matrix(values: &Vec<f32>) -> Result<()> {
-            crate::generated::gfx::load_matrix(values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
+        pub fn load_matrix(values: &[f32]) -> Result<()> {
+            crate::generated::gfx::load_matrix(values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
             Ok(())
         }
 
@@ -3376,14 +3065,14 @@
         }
 
         #[inline]
-        pub fn material(pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::material(pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn material(pname: u32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::material(pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
         #[inline]
-        pub fn matrix_data_from_projectiles_vbo(vbo_id: u32, ids: &Vec<u32>, attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
-            crate::generated::borrowed::gfx::matrix_data_from_projectiles_vbo(vbo_id, ids.as_slice(), attribute_index, team_id, element_offset)
+        pub fn matrix_data_from_projectiles_vbo(vbo_id: u32, ids: &[u32], attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
+            crate::generated::borrowed::gfx::matrix_data_from_projectiles_vbo(vbo_id, ids, attribute_index, team_id, element_offset)
         }
 
         #[inline]
@@ -3405,8 +3094,8 @@
         }
 
         #[inline]
-        pub fn mult_matrix(values: &Vec<f32>) -> Result<()> {
-            crate::generated::gfx::mult_matrix(values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
+        pub fn mult_matrix(values: &[f32]) -> Result<()> {
+            crate::generated::gfx::mult_matrix(values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
             Ok(())
         }
 
@@ -3417,14 +3106,14 @@
         }
 
         #[inline]
-        pub fn multi_tex_env(tex_num: i32, target: u32, pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::multi_tex_env(tex_num, target, pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn multi_tex_env(tex_num: i32, target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::multi_tex_env(tex_num, target, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
         #[inline]
-        pub fn multi_tex_gen(tex_num: i32, target: u32, options: GfxMultiTexGenOptions, pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::multi_tex_gen(tex_num, target, crate::generated::gfx::GfxMultiTexGenOptions { set_state: options.set_state, state: options.state }, pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn multi_tex_gen(tex_num: i32, target: u32, options: GfxMultiTexGenOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::multi_tex_gen(tex_num, target, crate::generated::gfx::GfxMultiTexGenOptions { set_state: options.set_state, state: options.state }, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
@@ -3434,19 +3123,13 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_object_label {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "object-label"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.object-label."]
         #[inline]
-        pub unsafe fn object_label(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_object_label::call(p0, p1, p2) }
+        pub fn object_label(identifier: u32, object_id: u32, label: &str) -> Result<()> {
+            let mut label_bytes = label.as_bytes().to_vec();
+            if label_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            label_bytes.push(0);
+            let label_cstr = core::ffi::CStr::from_bytes_with_nul(&label_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::object_label(identifier, object_id, label_cstr)
         }
 
         #[inline]
@@ -3456,8 +3139,8 @@
         }
 
         #[inline]
-        pub fn point_parameter(pname: u32, value: f32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::point_parameter(pname, value, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn point_parameter(pname: u32, value: f32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::point_parameter(pname, value, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
@@ -3509,19 +3192,13 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_push_debug_group {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "push-debug-group"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.push-debug-group."]
         #[inline]
-        pub unsafe fn push_debug_group(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_push_debug_group::call(p0, p1, p2) }
+        pub fn push_debug_group(id: u32, message: &str, source_is_third_party: bool) -> Result<()> {
+            let mut message_bytes = message.as_bytes().to_vec();
+            if message_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            message_bytes.push(0);
+            let message_cstr = core::ffi::CStr::from_bytes_with_nul(&message_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::push_debug_group(id, message_cstr, source_is_third_party)
         }
 
         #[inline]
@@ -3533,16 +3210,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_push_pop_matrix {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "push-pop-matrix"]
-                pub fn call(p0: i32, p1: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.push-pop-matrix."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn push_pop_matrix(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_push_pop_matrix::call(p0, p1) }
+        pub fn push_pop_matrix(p0: i32, p1: i32) -> i32 {
+            __core_owned_push_pop_matrix::call(p0, p1)
         }
 
         #[inline]
@@ -3557,16 +3235,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_read_pixels {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "read-pixels"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.read-pixels."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn read_pixels(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32 {
-            unsafe { __core_owned_read_pixels::call(p0, p1, p2, p3, p4, p5) }
+        pub fn read_pixels(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32 {
+            __core_owned_read_pixels::call(p0, p1, p2, p3, p4, p5)
         }
 
         #[inline]
@@ -3584,16 +3263,17 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_render_to_texture {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "render-to-texture"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.render-to-texture."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn render_to_texture(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_render_to_texture::call(p0, p1, p2, p3) }
+        pub fn render_to_texture(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            __core_owned_render_to_texture::call(p0, p1, p2, p3)
         }
 
         #[inline]
@@ -3617,31 +3297,24 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_run_query {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "run-query"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.run-query."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn run_query(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_run_query::call(p0, p1, p2) }
+        pub fn run_query(p0: i32, p1: i32, p2: i32) -> i32 {
+            __core_owned_run_query::call(p0, p1, p2)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_save_image {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "save-image"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.save-image."]
         #[inline]
-        pub unsafe fn save_image(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64 {
-            unsafe { __core_owned_save_image::call(p0, p1, p2, p3, p4, p5) }
+        pub fn save_image(x: i32, y: i32, width: i32, height: i32, filename: &str, options: GfxSaveImageOptions, read_buffer: u32) -> Result<bool> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + filename.len()); __b.extend_from_slice(&(filename.len() as u32).to_le_bytes()); __b.extend_from_slice(filename.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(if options.alpha { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if options.yflip { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if options.grayscale16bit { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            crate::generated::dynamic_input::gfx::save_image(x, y, width, height, read_buffer as i32, &__blob0, &__blob1)
         }
 
         #[inline]
@@ -3662,34 +3335,18 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_fbo_attachment {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "set-fbo-attachment"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.set-fbo-attachment."]
         #[inline]
-        pub unsafe fn set_fbo_attachment(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32 {
-            unsafe { __core_owned_set_fbo_attachment::call(p0, p1, p2, p3, p4, p5, p6) }
+        pub fn set_fbo_attachment(fbo_id: u32, attachment: u32, texture_name: &str, texture_target: u32, mip_level: i32, rbo_id: u32, use_rbo: bool) -> Result<()> {
+            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
+            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            texture_name_bytes.push(0);
+            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::set_fbo_attachment(fbo_id, attachment, texture_name_cstr, texture_target, mip_level, rbo_id, use_rbo)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_fbo_draw_buffers {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "set-fbo-draw-buffers"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.set-fbo-draw-buffers."]
         #[inline]
-        pub unsafe fn set_fbo_draw_buffers(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_set_fbo_draw_buffers::call(p0, p1) }
+        pub fn set_fbo_draw_buffers(fbo_id: u32, buffers: &[u32]) -> Result<()> {
+            crate::generated::borrowed::gfx::set_fbo_draw_buffers(fbo_id, buffers)
         }
 
         #[inline]
@@ -3699,8 +3356,8 @@
         }
 
         #[inline]
-        pub fn set_feature_buffer_uniforms(object_id: i32, values: &Vec<f32>, offset: u32) -> Result<u32> {
-            crate::generated::borrowed::gfx::set_feature_buffer_uniforms(object_id, values.as_slice(), offset)
+        pub fn set_feature_buffer_uniforms(object_id: i32, values: &[f32], offset: u32) -> Result<u32> {
+            crate::generated::borrowed::gfx::set_feature_buffer_uniforms(object_id, values, offset)
         }
 
         #[inline]
@@ -3710,14 +3367,14 @@
         }
 
         #[inline]
-        pub fn set_tesselation_shader_parameter(param: u32, value: i32, values: &Vec<f32>, value_count: u32, use_float_array: bool) -> Result<()> {
-            crate::generated::gfx::set_tesselation_shader_parameter(param, value, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, value_count, use_float_array)?;
+        pub fn set_tesselation_shader_parameter(param: u32, value: i32, values: &[f32], value_count: u32, use_float_array: bool) -> Result<()> {
+            crate::generated::gfx::set_tesselation_shader_parameter(param, value, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, value_count, use_float_array)?;
             Ok(())
         }
 
         #[inline]
-        pub fn set_unit_buffer_uniforms(object_id: i32, values: &Vec<f32>, offset: u32) -> Result<u32> {
-            crate::generated::borrowed::gfx::set_unit_buffer_uniforms(object_id, values.as_slice(), offset)
+        pub fn set_unit_buffer_uniforms(object_id: i32, values: &[f32], offset: u32) -> Result<u32> {
+            crate::generated::borrowed::gfx::set_unit_buffer_uniforms(object_id, values, offset)
         }
 
         #[inline]
@@ -3726,19 +3383,10 @@
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_shape {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "shape"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.shape."]
         #[inline]
-        pub unsafe fn shape(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_shape::call(p0, p1) }
+        pub fn shape(primitive: u32, vertices: &[GfxVertexData]) -> Result<()> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(vertices.len() as u32).to_le_bytes()); for __item in vertices.iter() { for __i0 in 0..3usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.vertex[__i0].to_bits().to_le_bytes()); } for __i147 in 0..3usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.normal[__i147].to_bits().to_le_bytes()); } for __i298 in 0..2usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.tex_coord[__i298].to_bits().to_le_bytes()); } for __i452 in 0..4usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.color[__i452].to_bits().to_le_bytes()); } __b.extend_from_slice(&(if __item.has_vertex { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if __item.has_normal { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if __item.has_tex_coord { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if __item.has_color { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); }} __b };
+            crate::generated::dynamic_input::gfx::shape(primitive as i32, &__blob0)
         }
 
         #[inline]
@@ -3808,57 +3456,57 @@
         }
 
         #[inline]
-        pub fn tex_env(target: u32, pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::tex_env(target, pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn tex_env(target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::tex_env(target, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
         #[inline]
-        pub fn tex_gen(target: u32, options: GfxTexGenOptions, pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::tex_gen(target, crate::generated::gfx::GfxTexGenOptions { set_state: options.set_state, state: options.state }, pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn tex_gen(target: u32, options: GfxTexGenOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::tex_gen(target, crate::generated::gfx::GfxTexGenOptions { set_state: options.set_state, state: options.state }, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
         #[inline]
+        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn tex_rect(x1: f32, y1: f32, x2: f32, y2: f32, s1: f32, t1: f32, s2: f32, t2: f32) -> Result<()> {
             crate::generated::gfx::tex_rect(x1, y1, x2, y2, s1, t1, s2, t2)?;
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_text {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "text"]
-                pub fn call(p0: f32, p1: f32, p2: f32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.text."]
         #[inline]
-        pub unsafe fn text(p0: f32, p1: f32, p2: f32, p3: i32) -> i32 {
-            unsafe { __core_owned_text::call(p0, p1, p2, p3) }
+        pub fn text(text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<()> {
+            let mut text_bytes = text.as_bytes().to_vec();
+            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            text_bytes.push(0);
+            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut options_bytes = options.as_bytes().to_vec();
+            if options_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            options_bytes.push(0);
+            let options_cstr = core::ffi::CStr::from_bytes_with_nul(&options_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::text(text_cstr, x, y, size, options_cstr)
         }
 
         #[inline]
-        pub fn text_env(target: u32, pname: u32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::text_env(target, pname, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn text_env(target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::text_env(target, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_texture_info {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "texture-info"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.texture-info."]
         #[inline]
-        pub unsafe fn texture_info(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_texture_info::call(p0, p1) }
+        pub fn texture_info(name: &str) -> Result<TextureInfoValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 24];
+            crate::generated::dynamic_input::gfx::texture_info(&__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(TextureInfoValue {
+                xsize: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                ysize: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                zsize: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                id: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                target: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                fbo: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
         }
 
         #[inline]
@@ -3874,60 +3522,30 @@
         }
 
         #[inline]
-        pub fn uniform(location: i32, values: &Vec<f32>, count: u32) -> Result<()> {
-            crate::generated::gfx::uniform(location, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn uniform(location: i32, values: &[f32], count: u32) -> Result<()> {
+            crate::generated::gfx::uniform(location, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_uniform_array_float {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "uniform-array-float"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.uniform-array-float."]
         #[inline]
-        pub unsafe fn uniform_array_float(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_uniform_array_float::call(p0, p1) }
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_uniform_array_int {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "uniform-array-int"]
-                pub fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.uniform-array-int."]
-        #[inline]
-        pub unsafe fn uniform_array_int(p0: i32, p1: i32) -> i32 {
-            unsafe { __core_owned_uniform_array_int::call(p0, p1) }
+        pub fn uniform_array_float(location: i32, values: &[f32]) -> Result<()> {
+            crate::generated::borrowed::gfx::uniform_array_float(location, values)
         }
 
         #[inline]
-        pub fn uniform_int(location: i32, values: &Vec<i32>, count: u32) -> Result<()> {
-            crate::generated::gfx::uniform_int(location, values.clone().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+        pub fn uniform_array_int(location: i32, values: &[i32]) -> Result<()> {
+            crate::generated::borrowed::gfx::uniform_array_int(location, values)
+        }
+
+        #[inline]
+        pub fn uniform_int(location: i32, values: &[i32], count: u32) -> Result<()> {
+            crate::generated::gfx::uniform_int(location, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
             Ok(())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_uniform_matrix {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "uniform-matrix"]
-                pub fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.uniform-matrix."]
         #[inline]
-        pub unsafe fn uniform_matrix(p0: i32, p1: i32, p2: i32) -> i32 {
-            unsafe { __core_owned_uniform_matrix::call(p0, p1, p2) }
+        pub fn uniform_matrix(location: i32, values: &[f32], transpose: bool) -> Result<()> {
+            crate::generated::borrowed::gfx::uniform_matrix(location, values, transpose)
         }
 
         #[inline]
@@ -3993,36 +3611,32 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_unsafe_state {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "unsafe-state"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+                pub safe fn call(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
             }
         }
 
         #[doc = "Exact Core ABI forwarding entry for spring:gfx.unsafe-state."]
+        #[doc(hidden)]
         #[inline]
-        pub unsafe fn unsafe_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
-            unsafe { __core_owned_unsafe_state::call(p0, p1, p2, p3) }
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_upload_texture {
-            #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
-                #[link_name = "upload-texture"]
-                pub fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.upload-texture."]
-        #[inline]
-        pub unsafe fn upload_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32) -> i32 {
-            unsafe { __core_owned_upload_texture::call(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10) }
+        pub fn unsafe_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32 {
+            __core_owned_unsafe_state::call(p0, p1, p2, p3)
         }
 
         #[inline]
-        pub fn upload_vbo(vbo_id: u32, data: &Vec<f32>, attribute_index: i32, element_offset: i32, data_start_index: i32, data_finish_index: i32) -> Result<u32> {
-            crate::generated::borrowed::gfx::upload_vbo(vbo_id, data.as_slice(), attribute_index, element_offset, data_start_index, data_finish_index)
+        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
+        pub fn upload_texture(name: &str, target: u32, level: i32, xoff: i32, yoff: i32, zoff: i32, width: i32, height: i32, depth: i32, format: u32, pixel_type: u32, data: &[u8]) -> Result<()> {
+            let mut name_bytes = name.as_bytes().to_vec();
+            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+            name_bytes.push(0);
+            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            crate::generated::borrowed::gfx::upload_texture(name_cstr, target, level, xoff, yoff, zoff, width, height, depth, format, pixel_type, data)
+        }
+
+        #[inline]
+        pub fn upload_vbo(vbo_id: u32, data: &[f32], attribute_index: i32, element_offset: i32, data_start_index: i32, data_finish_index: i32) -> Result<u32> {
+            crate::generated::borrowed::gfx::upload_vbo(vbo_id, data, attribute_index, element_offset, data_start_index, data_finish_index)
         }
 
         #[inline]

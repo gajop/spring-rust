@@ -22,1045 +22,1073 @@ bool GeneratedCallinBindings::Bind(wasmtime_context_t* context,
         return false;
     }
     {
+        const std::array<wasm_valkind_t, 1> params{WASM_I32};
+        const std::array<wasm_valkind_t, 0> results{};
+        if (!exports[1].Resolve(context, instance, "spring:callin/activate-game", 27u,
+                params, results, true, error))
+            return false;
+    }
+    {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[3].Resolve(context, instance, "spring:callin/allow-builder-hold-fire", 37u,
+        if (!exports[5].Resolve(context, instance, "spring:callin/allow-builder-hold-fire", 37u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[5].Resolve(context, instance, "spring:callin/allow-direct-unit-control", 39u,
+        if (!exports[7].Resolve(context, instance, "spring:callin/allow-direct-unit-control", 39u,
+                params, results, true, error))
+            return false;
+    }
+    {
+        const std::array<wasm_valkind_t, 1> params{WASM_I32};
+        const std::array<wasm_valkind_t, 1> results{WASM_I32};
+        if (!exports[8].Resolve(context, instance, "spring:callin/allow-draw", 24u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[6].Resolve(context, instance, "spring:callin/allow-feature-build-step", 38u,
+        if (!exports[9].Resolve(context, instance, "spring:callin/allow-feature-build-step", 38u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[7].Resolve(context, instance, "spring:callin/allow-feature-creation", 36u,
+        if (!exports[10].Resolve(context, instance, "spring:callin/allow-feature-creation", 36u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 9> params{WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32, WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[10].Resolve(context, instance, "spring:callin/allow-start-position", 34u,
+        if (!exports[13].Resolve(context, instance, "spring:callin/allow-start-position", 34u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[11].Resolve(context, instance, "spring:callin/allow-unit-build-step", 35u,
+        if (!exports[14].Resolve(context, instance, "spring:callin/allow-unit-build-step", 35u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[12].Resolve(context, instance, "spring:callin/allow-unit-capture-step", 37u,
+        if (!exports[15].Resolve(context, instance, "spring:callin/allow-unit-capture-step", 37u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[13].Resolve(context, instance, "spring:callin/allow-unit-cloak", 30u,
+        if (!exports[16].Resolve(context, instance, "spring:callin/allow-unit-cloak", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[15].Resolve(context, instance, "spring:callin/allow-unit-decloak", 32u,
+        if (!exports[18].Resolve(context, instance, "spring:callin/allow-unit-decloak", 32u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[16].Resolve(context, instance, "spring:callin/allow-unit-kamikaze", 33u,
+        if (!exports[19].Resolve(context, instance, "spring:callin/allow-unit-kamikaze", 33u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[17].Resolve(context, instance, "spring:callin/allow-unit-transfer", 33u,
+        if (!exports[20].Resolve(context, instance, "spring:callin/allow-unit-transfer", 33u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 6> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[18].Resolve(context, instance, "spring:callin/allow-unit-transport", 34u,
+        if (!exports[21].Resolve(context, instance, "spring:callin/allow-unit-transport", 34u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 10> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[19].Resolve(context, instance, "spring:callin/allow-unit-transport-position", 43u,
+        if (!exports[22].Resolve(context, instance, "spring:callin/allow-unit-transport-position", 43u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 10> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[20].Resolve(context, instance, "spring:callin/allow-unit-transport-load", 39u,
+        if (!exports[23].Resolve(context, instance, "spring:callin/allow-unit-transport-load", 39u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 10> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[21].Resolve(context, instance, "spring:callin/allow-unit-transport-unload", 41u,
+        if (!exports[24].Resolve(context, instance, "spring:callin/allow-unit-transport-unload", 41u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[22].Resolve(context, instance, "spring:callin/allow-weapon-intercept-target", 43u,
+        if (!exports[25].Resolve(context, instance, "spring:callin/allow-weapon-intercept-target", 43u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 6> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I64};
-        if (!exports[23].Resolve(context, instance, "spring:callin/allow-weapon-target", 33u,
+        if (!exports[26].Resolve(context, instance, "spring:callin/allow-weapon-target", 33u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[24].Resolve(context, instance, "spring:callin/allow-weapon-target-check", 39u,
+        if (!exports[27].Resolve(context, instance, "spring:callin/allow-weapon-target-check", 39u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[25].Resolve(context, instance, "spring:callin/archive-callin", 28u,
+        if (!exports[28].Resolve(context, instance, "spring:callin/archive-callin", 28u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[26].Resolve(context, instance, "spring:callin/collect-garbage", 29u,
+        if (!exports[29].Resolve(context, instance, "spring:callin/collect-garbage", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I64};
-        if (!exports[29].Resolve(context, instance, "spring:callin/default-command", 29u,
+        if (!exports[32].Resolve(context, instance, "spring:callin/default-command", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[30].Resolve(context, instance, "spring:callin/download-failed", 29u,
+        if (!exports[33].Resolve(context, instance, "spring:callin/download-failed", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[31].Resolve(context, instance, "spring:callin/download-finished", 31u,
+        if (!exports[34].Resolve(context, instance, "spring:callin/download-finished", 31u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I64, WASM_I64};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[32].Resolve(context, instance, "spring:callin/download-progress", 31u,
+        if (!exports[35].Resolve(context, instance, "spring:callin/download-progress", 31u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[34].Resolve(context, instance, "spring:callin/download-started", 30u,
+        if (!exports[37].Resolve(context, instance, "spring:callin/download-started", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[35].Resolve(context, instance, "spring:callin/draw-alpha-objects-lua", 36u,
+        if (!exports[38].Resolve(context, instance, "spring:callin/draw-alpha-objects-lua", 36u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[36].Resolve(context, instance, "spring:callin/draw-alpha-features-lua", 37u,
+        if (!exports[39].Resolve(context, instance, "spring:callin/draw-alpha-features-lua", 37u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[37].Resolve(context, instance, "spring:callin/draw-alpha-units-lua", 34u,
+        if (!exports[40].Resolve(context, instance, "spring:callin/draw-alpha-units-lua", 34u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[39].Resolve(context, instance, "spring:callin/draw-feature", 26u,
+        if (!exports[42].Resolve(context, instance, "spring:callin/draw-feature", 26u,
+                params, results, true, error))
+            return false;
+    }
+    {
+        const std::array<wasm_valkind_t, 1> params{WASM_I32};
+        const std::array<wasm_valkind_t, 0> results{};
+        if (!exports[43].Resolve(context, instance, "spring:callin/draw-load-screen", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[40].Resolve(context, instance, "spring:callin/draw-material", 27u,
+        if (!exports[44].Resolve(context, instance, "spring:callin/draw-material", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[41].Resolve(context, instance, "spring:callin/draw-objects-lua", 30u,
+        if (!exports[45].Resolve(context, instance, "spring:callin/draw-objects-lua", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[42].Resolve(context, instance, "spring:callin/draw-opaque-features-lua", 38u,
+        if (!exports[46].Resolve(context, instance, "spring:callin/draw-opaque-features-lua", 38u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[43].Resolve(context, instance, "spring:callin/draw-opaque-units-lua", 35u,
+        if (!exports[47].Resolve(context, instance, "spring:callin/draw-opaque-units-lua", 35u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[44].Resolve(context, instance, "spring:callin/draw-projectile", 29u,
+        if (!exports[48].Resolve(context, instance, "spring:callin/draw-projectile", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[45].Resolve(context, instance, "spring:callin/draw-screen", 25u,
+        if (!exports[49].Resolve(context, instance, "spring:callin/draw-screen", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[46].Resolve(context, instance, "spring:callin/draw-screen-effects", 33u,
+        if (!exports[50].Resolve(context, instance, "spring:callin/draw-screen-effects", 33u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[47].Resolve(context, instance, "spring:callin/draw-screen-post", 30u,
+        if (!exports[51].Resolve(context, instance, "spring:callin/draw-screen-post", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[48].Resolve(context, instance, "spring:callin/screen-callin", 27u,
+        if (!exports[52].Resolve(context, instance, "spring:callin/screen-callin", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[49].Resolve(context, instance, "spring:callin/draw-shield", 25u,
+        if (!exports[53].Resolve(context, instance, "spring:callin/draw-shield", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[50].Resolve(context, instance, "spring:callin/draw-unit", 23u,
+        if (!exports[54].Resolve(context, instance, "spring:callin/draw-unit", 23u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[51].Resolve(context, instance, "spring:callin/draw-world-pre-particles", 38u,
+        if (!exports[55].Resolve(context, instance, "spring:callin/draw-world-pre-particles", 38u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 6> params{WASM_I32, WASM_F32, WASM_F32, WASM_F32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[52].Resolve(context, instance, "spring:callin/explosion", 23u,
+        if (!exports[56].Resolve(context, instance, "spring:callin/explosion", 23u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[53].Resolve(context, instance, "spring:callin/feature-created", 29u,
+        if (!exports[57].Resolve(context, instance, "spring:callin/feature-created", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 9> params{WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[54].Resolve(context, instance, "spring:callin/feature-damaged", 29u,
+        if (!exports[58].Resolve(context, instance, "spring:callin/feature-damaged", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[55].Resolve(context, instance, "spring:callin/feature-destroyed", 31u,
+        if (!exports[59].Resolve(context, instance, "spring:callin/feature-destroyed", 31u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[56].Resolve(context, instance, "spring:callin/feature-moved", 27u,
+        if (!exports[60].Resolve(context, instance, "spring:callin/feature-moved", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 9> params{WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I64};
-        if (!exports[57].Resolve(context, instance, "spring:callin/feature-pre-damaged", 33u,
+        if (!exports[61].Resolve(context, instance, "spring:callin/feature-pre-damaged", 33u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[58].Resolve(context, instance, "spring:callin/float3-callin", 27u,
+        if (!exports[62].Resolve(context, instance, "spring:callin/float3-callin", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[59].Resolve(context, instance, "spring:callin/camera-position-changed", 37u,
+        if (!exports[63].Resolve(context, instance, "spring:callin/camera-position-changed", 37u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[60].Resolve(context, instance, "spring:callin/camera-rotation-changed", 37u,
+        if (!exports[64].Resolve(context, instance, "spring:callin/camera-rotation-changed", 37u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[65].Resolve(context, instance, "spring:callin/game-paused", 25u,
+        if (!exports[69].Resolve(context, instance, "spring:callin/game-paused", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 0> params{};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[66].Resolve(context, instance, "spring:callin/game-preload", 26u,
+        if (!exports[70].Resolve(context, instance, "spring:callin/game-preload", 26u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[67].Resolve(context, instance, "spring:callin/game-progress", 27u,
+        if (!exports[71].Resolve(context, instance, "spring:callin/game-progress", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 0> params{};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[69].Resolve(context, instance, "spring:callin/game-start", 24u,
+        if (!exports[73].Resolve(context, instance, "spring:callin/game-start", 24u,
+                params, results, true, error))
+            return false;
+    }
+    {
+        const std::array<wasm_valkind_t, 1> params{WASM_I32};
+        const std::array<wasm_valkind_t, 1> results{WASM_I64};
+        if (!exports[74].Resolve(context, instance, "spring:callin/generate-defs", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[70].Resolve(context, instance, "spring:callin/group-changed", 27u,
+        if (!exports[75].Resolve(context, instance, "spring:callin/group-changed", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[73].Resolve(context, instance, "spring:callin/initialize-native-module", 38u,
+        if (!exports[78].Resolve(context, instance, "spring:callin/initialize-native-module", 38u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[74].Resolve(context, instance, "spring:callin/key-map-changed", 29u,
+        if (!exports[79].Resolve(context, instance, "spring:callin/key-map-changed", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[77].Resolve(context, instance, "spring:callin/last-message-position", 35u,
+        if (!exports[82].Resolve(context, instance, "spring:callin/last-message-position", 35u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[78].Resolve(context, instance, "spring:callin/load", 18u,
+        if (!exports[83].Resolve(context, instance, "spring:callin/load", 18u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[80].Resolve(context, instance, "spring:callin/mini-map-draw", 27u,
+        if (!exports[86].Resolve(context, instance, "spring:callin/mini-map-draw", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[81].Resolve(context, instance, "spring:callin/draw-in-mini-map", 30u,
+        if (!exports[87].Resolve(context, instance, "spring:callin/draw-in-mini-map", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[82].Resolve(context, instance, "spring:callin/draw-in-mini-map-background", 41u,
+        if (!exports[88].Resolve(context, instance, "spring:callin/draw-in-mini-map-background", 41u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 8> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[83].Resolve(context, instance, "spring:callin/mini-map-geometry-changed", 39u,
+        if (!exports[89].Resolve(context, instance, "spring:callin/mini-map-geometry-changed", 39u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[84].Resolve(context, instance, "spring:callin/mini-map-rotation-changed", 39u,
+        if (!exports[90].Resolve(context, instance, "spring:callin/mini-map-rotation-changed", 39u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[85].Resolve(context, instance, "spring:callin/mini-map-state-changed", 36u,
+        if (!exports[91].Resolve(context, instance, "spring:callin/mini-map-state-changed", 36u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[86].Resolve(context, instance, "spring:callin/mouse-move", 24u,
+        if (!exports[92].Resolve(context, instance, "spring:callin/mouse-move", 24u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[87].Resolve(context, instance, "spring:callin/mouse-press", 25u,
+        if (!exports[93].Resolve(context, instance, "spring:callin/mouse-press", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[88].Resolve(context, instance, "spring:callin/mouse-release", 27u,
+        if (!exports[94].Resolve(context, instance, "spring:callin/mouse-release", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[89].Resolve(context, instance, "spring:callin/mouse-wheel", 25u,
+        if (!exports[95].Resolve(context, instance, "spring:callin/mouse-wheel", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[90].Resolve(context, instance, "spring:callin/move-ctrl-notify", 30u,
+        if (!exports[96].Resolve(context, instance, "spring:callin/move-ctrl-notify", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[91].Resolve(context, instance, "spring:callin/player-added", 26u,
+        if (!exports[97].Resolve(context, instance, "spring:callin/player-added", 26u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[92].Resolve(context, instance, "spring:callin/player-changed", 28u,
+        if (!exports[98].Resolve(context, instance, "spring:callin/player-changed", 28u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[93].Resolve(context, instance, "spring:callin/player-removed", 28u,
+        if (!exports[99].Resolve(context, instance, "spring:callin/player-removed", 28u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I64, WASM_I64};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[94].Resolve(context, instance, "spring:callin/pong", 18u,
+        if (!exports[100].Resolve(context, instance, "spring:callin/pong", 18u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[95].Resolve(context, instance, "spring:callin/projectile-event", 30u,
+        if (!exports[101].Resolve(context, instance, "spring:callin/projectile-event", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[96].Resolve(context, instance, "spring:callin/projectile-created", 32u,
+        if (!exports[102].Resolve(context, instance, "spring:callin/projectile-created", 32u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[97].Resolve(context, instance, "spring:callin/projectile-destroyed", 34u,
+        if (!exports[103].Resolve(context, instance, "spring:callin/projectile-destroyed", 34u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[98].Resolve(context, instance, "spring:callin/rect-changed", 26u,
+        if (!exports[104].Resolve(context, instance, "spring:callin/rect-changed", 26u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[99].Resolve(context, instance, "spring:callin/unsynced-height-map-update", 40u,
+        if (!exports[105].Resolve(context, instance, "spring:callin/unsynced-height-map-update", 40u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[101].Resolve(context, instance, "spring:callin/render-unit-destroyed", 35u,
+        if (!exports[107].Resolve(context, instance, "spring:callin/render-unit-destroyed", 35u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[103].Resolve(context, instance, "spring:callin/save", 18u,
+        if (!exports[109].Resolve(context, instance, "spring:callin/save", 18u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[104].Resolve(context, instance, "spring:callin/screen-position", 29u,
+        if (!exports[110].Resolve(context, instance, "spring:callin/screen-position", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[105].Resolve(context, instance, "spring:callin/is-above", 22u,
+        if (!exports[111].Resolve(context, instance, "spring:callin/is-above", 22u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I64};
-        if (!exports[106].Resolve(context, instance, "spring:callin/screen-tooltip", 28u,
+        if (!exports[112].Resolve(context, instance, "spring:callin/screen-tooltip", 28u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I64};
-        if (!exports[107].Resolve(context, instance, "spring:callin/get-tooltip", 25u,
+        if (!exports[113].Resolve(context, instance, "spring:callin/get-tooltip", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 13> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32, WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[108].Resolve(context, instance, "spring:callin/shield-pre-damaged", 32u,
+        if (!exports[114].Resolve(context, instance, "spring:callin/shield-pre-damaged", 32u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 0> params{};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[109].Resolve(context, instance, "spring:callin/shutdown", 22u,
+        if (!exports[115].Resolve(context, instance, "spring:callin/shutdown", 22u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[110].Resolve(context, instance, "spring:callin/simple-callin", 27u,
+        if (!exports[116].Resolve(context, instance, "spring:callin/simple-callin", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[111].Resolve(context, instance, "spring:callin/draw-features-post-deferred", 41u,
+        if (!exports[117].Resolve(context, instance, "spring:callin/draw-features-post-deferred", 41u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[112].Resolve(context, instance, "spring:callin/draw-genesis", 26u,
+        if (!exports[118].Resolve(context, instance, "spring:callin/draw-genesis", 26u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[113].Resolve(context, instance, "spring:callin/draw-ground-deferred", 34u,
+        if (!exports[119].Resolve(context, instance, "spring:callin/draw-ground-deferred", 34u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[114].Resolve(context, instance, "spring:callin/draw-ground-post-deferred", 39u,
+        if (!exports[120].Resolve(context, instance, "spring:callin/draw-ground-post-deferred", 39u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[115].Resolve(context, instance, "spring:callin/draw-ground-post-forward", 38u,
+        if (!exports[121].Resolve(context, instance, "spring:callin/draw-ground-post-forward", 38u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[116].Resolve(context, instance, "spring:callin/draw-ground-pre-deferred", 38u,
+        if (!exports[122].Resolve(context, instance, "spring:callin/draw-ground-pre-deferred", 38u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[117].Resolve(context, instance, "spring:callin/draw-ground-pre-forward", 37u,
+        if (!exports[123].Resolve(context, instance, "spring:callin/draw-ground-pre-forward", 37u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[118].Resolve(context, instance, "spring:callin/draw-pre-decals", 29u,
+        if (!exports[124].Resolve(context, instance, "spring:callin/draw-pre-decals", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[119].Resolve(context, instance, "spring:callin/draw-shadow-features-lua", 38u,
+        if (!exports[125].Resolve(context, instance, "spring:callin/draw-shadow-features-lua", 38u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[120].Resolve(context, instance, "spring:callin/draw-shadow-pass-transparent", 42u,
+        if (!exports[126].Resolve(context, instance, "spring:callin/draw-shadow-pass-transparent", 42u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[121].Resolve(context, instance, "spring:callin/draw-shadow-units-lua", 35u,
+        if (!exports[127].Resolve(context, instance, "spring:callin/draw-shadow-units-lua", 35u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[122].Resolve(context, instance, "spring:callin/draw-units-post-deferred", 38u,
+        if (!exports[128].Resolve(context, instance, "spring:callin/draw-units-post-deferred", 38u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[123].Resolve(context, instance, "spring:callin/draw-water-post", 29u,
+        if (!exports[129].Resolve(context, instance, "spring:callin/draw-water-post", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[125].Resolve(context, instance, "spring:callin/draw-world-pre-unit", 33u,
+        if (!exports[131].Resolve(context, instance, "spring:callin/draw-world-pre-unit", 33u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[126].Resolve(context, instance, "spring:callin/draw-world-reflection", 35u,
+        if (!exports[132].Resolve(context, instance, "spring:callin/draw-world-reflection", 35u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[127].Resolve(context, instance, "spring:callin/draw-world-refraction", 35u,
+        if (!exports[133].Resolve(context, instance, "spring:callin/draw-world-refraction", 35u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[128].Resolve(context, instance, "spring:callin/draw-world-shadow", 31u,
+        if (!exports[134].Resolve(context, instance, "spring:callin/draw-world-shadow", 31u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[129].Resolve(context, instance, "spring:callin/fonts-changed", 27u,
+        if (!exports[135].Resolve(context, instance, "spring:callin/fonts-changed", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 6> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[130].Resolve(context, instance, "spring:callin/stockpile-changed", 31u,
+        if (!exports[136].Resolve(context, instance, "spring:callin/stockpile-changed", 31u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[131].Resolve(context, instance, "spring:callin/sun-changed", 25u,
+        if (!exports[137].Resolve(context, instance, "spring:callin/sun-changed", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[132].Resolve(context, instance, "spring:callin/team-changed", 26u,
+        if (!exports[138].Resolve(context, instance, "spring:callin/team-changed", 26u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 1> params{WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[133].Resolve(context, instance, "spring:callin/team-died", 23u,
+        if (!exports[139].Resolve(context, instance, "spring:callin/team-died", 23u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 6> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[134].Resolve(context, instance, "spring:callin/terraform-complete", 32u,
+        if (!exports[140].Resolve(context, instance, "spring:callin/terraform-complete", 32u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[137].Resolve(context, instance, "spring:callin/unit-cloak-event", 30u,
+        if (!exports[143].Resolve(context, instance, "spring:callin/unit-cloak-event", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[138].Resolve(context, instance, "spring:callin/unit-cloaked", 26u,
+        if (!exports[144].Resolve(context, instance, "spring:callin/unit-cloaked", 26u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[139].Resolve(context, instance, "spring:callin/unit-decloaked", 28u,
+        if (!exports[145].Resolve(context, instance, "spring:callin/unit-decloaked", 28u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 6> params{WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[142].Resolve(context, instance, "spring:callin/unit-construction-decayed", 39u,
+        if (!exports[148].Resolve(context, instance, "spring:callin/unit-construction-decayed", 39u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 10> params{WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[144].Resolve(context, instance, "spring:callin/unit-damaged", 26u,
+        if (!exports[150].Resolve(context, instance, "spring:callin/unit-damaged", 26u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 7> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[145].Resolve(context, instance, "spring:callin/unit-destroyed", 28u,
+        if (!exports[151].Resolve(context, instance, "spring:callin/unit-destroyed", 28u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[146].Resolve(context, instance, "spring:callin/unit-experience", 29u,
+        if (!exports[152].Resolve(context, instance, "spring:callin/unit-experience", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[147].Resolve(context, instance, "spring:callin/unit-feature-collision", 36u,
+        if (!exports[153].Resolve(context, instance, "spring:callin/unit-feature-collision", 36u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[148].Resolve(context, instance, "spring:callin/unit-finished", 27u,
+        if (!exports[154].Resolve(context, instance, "spring:callin/unit-finished", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 6> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[149].Resolve(context, instance, "spring:callin/unit-from-factory", 31u,
+        if (!exports[155].Resolve(context, instance, "spring:callin/unit-from-factory", 31u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[150].Resolve(context, instance, "spring:callin/unit-given", 24u,
+        if (!exports[156].Resolve(context, instance, "spring:callin/unit-given", 24u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[151].Resolve(context, instance, "spring:callin/unit-harvest-storage-full", 39u,
+        if (!exports[157].Resolve(context, instance, "spring:callin/unit-harvest-storage-full", 39u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[152].Resolve(context, instance, "spring:callin/unit-idle", 23u,
+        if (!exports[158].Resolve(context, instance, "spring:callin/unit-idle", 23u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[153].Resolve(context, instance, "spring:callin/unit-loaded", 25u,
+        if (!exports[159].Resolve(context, instance, "spring:callin/unit-loaded", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[154].Resolve(context, instance, "spring:callin/unit-los-event", 28u,
+        if (!exports[160].Resolve(context, instance, "spring:callin/unit-los-event", 28u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[155].Resolve(context, instance, "spring:callin/unit-entered-los", 30u,
+        if (!exports[161].Resolve(context, instance, "spring:callin/unit-entered-los", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[156].Resolve(context, instance, "spring:callin/unit-entered-radar", 32u,
+        if (!exports[162].Resolve(context, instance, "spring:callin/unit-entered-radar", 32u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[157].Resolve(context, instance, "spring:callin/unit-left-los", 27u,
+        if (!exports[163].Resolve(context, instance, "spring:callin/unit-left-los", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[158].Resolve(context, instance, "spring:callin/unit-left-radar", 29u,
+        if (!exports[164].Resolve(context, instance, "spring:callin/unit-left-radar", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[159].Resolve(context, instance, "spring:callin/unit-move-event", 29u,
+        if (!exports[165].Resolve(context, instance, "spring:callin/unit-move-event", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[160].Resolve(context, instance, "spring:callin/unit-arrived-at-goal", 34u,
+        if (!exports[166].Resolve(context, instance, "spring:callin/unit-arrived-at-goal", 34u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[161].Resolve(context, instance, "spring:callin/unit-move-failed", 30u,
+        if (!exports[167].Resolve(context, instance, "spring:callin/unit-move-failed", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[162].Resolve(context, instance, "spring:callin/unit-moved", 24u,
+        if (!exports[168].Resolve(context, instance, "spring:callin/unit-moved", 24u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[163].Resolve(context, instance, "spring:callin/unit-movement-class-event", 39u,
+        if (!exports[169].Resolve(context, instance, "spring:callin/unit-movement-class-event", 39u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[164].Resolve(context, instance, "spring:callin/unit-entered-air", 30u,
+        if (!exports[170].Resolve(context, instance, "spring:callin/unit-entered-air", 30u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[165].Resolve(context, instance, "spring:callin/unit-entered-underwater", 37u,
+        if (!exports[171].Resolve(context, instance, "spring:callin/unit-entered-underwater", 37u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[166].Resolve(context, instance, "spring:callin/unit-entered-water", 32u,
+        if (!exports[172].Resolve(context, instance, "spring:callin/unit-entered-water", 32u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[167].Resolve(context, instance, "spring:callin/unit-left-air", 27u,
+        if (!exports[173].Resolve(context, instance, "spring:callin/unit-left-air", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[168].Resolve(context, instance, "spring:callin/unit-left-underwater", 34u,
+        if (!exports[174].Resolve(context, instance, "spring:callin/unit-left-underwater", 34u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[169].Resolve(context, instance, "spring:callin/unit-left-water", 29u,
+        if (!exports[175].Resolve(context, instance, "spring:callin/unit-left-water", 29u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 3> params{WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[171].Resolve(context, instance, "spring:callin/unit-reverse-built", 32u,
+        if (!exports[177].Resolve(context, instance, "spring:callin/unit-reverse-built", 32u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 7> params{WASM_F32, WASM_F32, WASM_F32, WASM_F32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[172].Resolve(context, instance, "spring:callin/unit-seismic-ping", 31u,
+        if (!exports[178].Resolve(context, instance, "spring:callin/unit-seismic-ping", 31u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[173].Resolve(context, instance, "spring:callin/unit-stunned", 26u,
+        if (!exports[179].Resolve(context, instance, "spring:callin/unit-stunned", 26u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 4> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[174].Resolve(context, instance, "spring:callin/unit-taken", 24u,
+        if (!exports[180].Resolve(context, instance, "spring:callin/unit-taken", 24u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 2> params{WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 1> results{WASM_I32};
-        if (!exports[175].Resolve(context, instance, "spring:callin/unit-unit-collision", 33u,
+        if (!exports[181].Resolve(context, instance, "spring:callin/unit-unit-collision", 33u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 5> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[176].Resolve(context, instance, "spring:callin/unit-unloaded", 27u,
+        if (!exports[182].Resolve(context, instance, "spring:callin/unit-unloaded", 27u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 16> params{WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const std::array<wasm_valkind_t, 0> results{};
-        if (!exports[178].Resolve(context, instance, "spring:callin/view-resize", 25u,
+        if (!exports[184].Resolve(context, instance, "spring:callin/view-resize", 25u,
                 params, results, true, error))
             return false;
     }
     {
         const std::array<wasm_valkind_t, 6> params{WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32};
         const std::array<wasm_valkind_t, 1> results{WASM_I64};
-        if (!exports[179].Resolve(context, instance, "spring:callin/world-tooltip", 27u,
+        if (!exports[185].Resolve(context, instance, "spring:callin/world-tooltip", 27u,
                 params, results, true, error))
             return false;
     }
@@ -1082,7 +1110,19 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         return true;
 
     switch (ordinal) {
-        case 3u: {
+        case 1u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core ActivateGame query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[1].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
+        case 5u: {
             const auto* typedQuery = static_cast<const AllowBuilderHoldFireQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowBuilderHoldFire query is null";
@@ -1092,7 +1132,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->action);
-            if (!exports[3].Call(context, slots.data(), 3u, error))
+            if (!exports[5].Call(context, slots.data(), 3u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1101,7 +1141,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 5u: {
+        case 7u: {
             const auto* typedQuery = static_cast<const AllowDirectUnitControlQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowDirectUnitControl query is null";
@@ -1112,7 +1152,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->playerID);
-            if (!exports[5].Call(context, slots.data(), 4u, error))
+            if (!exports[7].Call(context, slots.data(), 4u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1121,7 +1161,24 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 6u: {
+        case 8u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core AllowDraw query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[8].Call(context, slots.data(), 1u, error))
+                return false;
+            if (result != nullptr) {
+                auto* typedResult = static_cast<BoolCallinResult*>(result);
+                typedResult->error = nullptr;
+                typedResult->value = slots[0].i32 != 0;
+            }
+            return true;
+        }
+        case 9u: {
             const auto* typedQuery = static_cast<const AllowFeatureBuildStepQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowFeatureBuildStep query is null";
@@ -1133,7 +1190,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->featureID);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->featureDefID);
             slots[4].f32 = typedQuery->part;
-            if (!exports[6].Call(context, slots.data(), 5u, error))
+            if (!exports[9].Call(context, slots.data(), 5u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1142,7 +1199,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 7u: {
+        case 10u: {
             const auto* typedQuery = static_cast<const AllowFeatureCreationQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowFeatureCreation query is null";
@@ -1154,7 +1211,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].f32 = typedQuery->position.x;
             slots[3].f32 = typedQuery->position.y;
             slots[4].f32 = typedQuery->position.z;
-            if (!exports[7].Call(context, slots.data(), 5u, error))
+            if (!exports[10].Call(context, slots.data(), 5u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1163,7 +1220,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 10u: {
+        case 13u: {
             const auto* typedQuery = static_cast<const AllowStartPositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowStartPosition query is null";
@@ -1179,7 +1236,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[6].f32 = typedQuery->rawPickPos.x;
             slots[7].f32 = typedQuery->rawPickPos.y;
             slots[8].f32 = typedQuery->rawPickPos.z;
-            if (!exports[10].Call(context, slots.data(), 9u, error))
+            if (!exports[13].Call(context, slots.data(), 9u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1188,7 +1245,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 11u: {
+        case 14u: {
             const auto* typedQuery = static_cast<const AllowUnitBuildStepQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitBuildStep query is null";
@@ -1200,7 +1257,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[4].f32 = typedQuery->part;
-            if (!exports[11].Call(context, slots.data(), 5u, error))
+            if (!exports[14].Call(context, slots.data(), 5u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1209,7 +1266,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 12u: {
+        case 15u: {
             const auto* typedQuery = static_cast<const AllowUnitBuildStepQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitCaptureStep query is null";
@@ -1221,7 +1278,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[4].f32 = typedQuery->part;
-            if (!exports[12].Call(context, slots.data(), 5u, error))
+            if (!exports[15].Call(context, slots.data(), 5u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1230,7 +1287,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 13u: {
+        case 16u: {
             const auto* typedQuery = static_cast<const AllowUnitCloakQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitCloak query is null";
@@ -1240,7 +1297,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = typedQuery->hasEnemy ? 1 : 0;
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->enemyID);
-            if (!exports[13].Call(context, slots.data(), 3u, error))
+            if (!exports[16].Call(context, slots.data(), 3u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1249,7 +1306,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 15u: {
+        case 18u: {
             const auto* typedQuery = static_cast<const AllowUnitDecloakQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitDecloak query is null";
@@ -1261,7 +1318,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->objectID);
             slots[3].i32 = typedQuery->hasWeapon ? 1 : 0;
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->weaponNum);
-            if (!exports[15].Call(context, slots.data(), 5u, error))
+            if (!exports[18].Call(context, slots.data(), 5u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1270,7 +1327,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 16u: {
+        case 19u: {
             const auto* typedQuery = static_cast<const AllowUnitKamikazeQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitKamikaze query is null";
@@ -1280,7 +1337,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->targetID);
             slots[2].i32 = typedQuery->allowed ? 1 : 0;
-            if (!exports[16].Call(context, slots.data(), 3u, error))
+            if (!exports[19].Call(context, slots.data(), 3u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1289,7 +1346,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 17u: {
+        case 20u: {
             const auto* typedQuery = static_cast<const AllowUnitTransferQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitTransfer query is null";
@@ -1301,7 +1358,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->oldTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->newTeam);
             slots[4].i32 = typedQuery->capture ? 1 : 0;
-            if (!exports[17].Call(context, slots.data(), 5u, error))
+            if (!exports[20].Call(context, slots.data(), 5u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1310,7 +1367,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 18u: {
+        case 21u: {
             const auto* typedQuery = static_cast<const AllowUnitTransportQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitTransport query is null";
@@ -1323,7 +1380,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->transporteeID);
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->transporteeDefID);
             slots[5].i32 = static_cast<std::int32_t>(typedQuery->transporteeTeam);
-            if (!exports[18].Call(context, slots.data(), 6u, error))
+            if (!exports[21].Call(context, slots.data(), 6u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1332,7 +1389,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 19u: {
+        case 22u: {
             const auto* typedQuery = static_cast<const AllowUnitTransportPositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitTransportPosition query is null";
@@ -1349,7 +1406,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[7].f32 = typedQuery->position.y;
             slots[8].f32 = typedQuery->position.z;
             slots[9].i32 = typedQuery->allowed ? 1 : 0;
-            if (!exports[19].Call(context, slots.data(), 10u, error))
+            if (!exports[22].Call(context, slots.data(), 10u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1358,7 +1415,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 20u: {
+        case 23u: {
             const auto* typedQuery = static_cast<const AllowUnitTransportPositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitTransportLoad query is null";
@@ -1375,7 +1432,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[7].f32 = typedQuery->position.y;
             slots[8].f32 = typedQuery->position.z;
             slots[9].i32 = typedQuery->allowed ? 1 : 0;
-            if (!exports[20].Call(context, slots.data(), 10u, error))
+            if (!exports[23].Call(context, slots.data(), 10u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1384,7 +1441,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 21u: {
+        case 24u: {
             const auto* typedQuery = static_cast<const AllowUnitTransportPositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowUnitTransportUnload query is null";
@@ -1401,7 +1458,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[7].f32 = typedQuery->position.y;
             slots[8].f32 = typedQuery->position.z;
             slots[9].i32 = typedQuery->allowed ? 1 : 0;
-            if (!exports[21].Call(context, slots.data(), 10u, error))
+            if (!exports[24].Call(context, slots.data(), 10u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1410,7 +1467,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 22u: {
+        case 25u: {
             const auto* typedQuery = static_cast<const AllowWeaponInterceptTargetQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowWeaponInterceptTarget query is null";
@@ -1420,7 +1477,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->interceptorUnitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->interceptorWeaponID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->interceptorTargetID);
-            if (!exports[22].Call(context, slots.data(), 3u, error))
+            if (!exports[25].Call(context, slots.data(), 3u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1429,7 +1486,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 23u: {
+        case 26u: {
             const auto* typedQuery = static_cast<const AllowWeaponTargetQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowWeaponTarget query is null";
@@ -1442,7 +1499,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->attackerWeaponDefID);
             slots[4].i32 = typedQuery->hasTargetPriority ? 1 : 0;
             slots[5].f32 = typedQuery->targetPriority;
-            if (!exports[23].Call(context, slots.data(), 6u, error))
+            if (!exports[26].Call(context, slots.data(), 6u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<AllowWeaponTargetResult*>(result);
@@ -1455,7 +1512,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 24u: {
+        case 27u: {
             const auto* typedQuery = static_cast<const AllowWeaponTargetCheckQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core AllowWeaponTargetCheck query is null";
@@ -1465,7 +1522,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->attackerID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->attackerWeaponNum);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->attackerWeaponDefID);
-            if (!exports[24].Call(context, slots.data(), 3u, error))
+            if (!exports[27].Call(context, slots.data(), 3u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<IntCallinResult*>(result);
@@ -1474,7 +1531,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 25u: {
+        case 28u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ArchiveCallin query is null";
@@ -1482,11 +1539,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[25].Call(context, slots.data(), 1u, error))
+            if (!exports[28].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 26u: {
+        case 29u: {
             const auto* typedQuery = static_cast<const CollectGarbageQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core CollectGarbage query is null";
@@ -1494,11 +1551,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = typedQuery->forced ? 1 : 0;
-            if (!exports[26].Call(context, slots.data(), 1u, error))
+            if (!exports[29].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 29u: {
+        case 32u: {
             const auto* typedQuery = static_cast<const DefaultCommandQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DefaultCommand query is null";
@@ -1508,7 +1565,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->featureID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->currentCommand);
-            if (!exports[29].Call(context, slots.data(), 3u, error))
+            if (!exports[32].Call(context, slots.data(), 3u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<DefaultCommandResult*>(result);
@@ -1521,7 +1578,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 30u: {
+        case 33u: {
             const auto* typedQuery = static_cast<const DownloadFailedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DownloadFailed query is null";
@@ -1530,40 +1587,14 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->downloadID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->errorID);
-            if (!exports[30].Call(context, slots.data(), 2u, error))
-                return false;
-            return true;
-        }
-        case 31u: {
-            const auto* typedQuery = static_cast<const DownloadFinishedQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DownloadFinished query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 1> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->downloadID);
-            if (!exports[31].Call(context, slots.data(), 1u, error))
-                return false;
-            return true;
-        }
-        case 32u: {
-            const auto* typedQuery = static_cast<const DownloadProgressQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DownloadProgress query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->downloadID);
-            slots[1].i64 = static_cast<std::int64_t>(typedQuery->downloaded);
-            slots[2].i64 = static_cast<std::int64_t>(typedQuery->total);
-            if (!exports[32].Call(context, slots.data(), 3u, error))
+            if (!exports[33].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
         case 34u: {
-            const auto* typedQuery = static_cast<const DownloadStartedQuery*>(query);
+            const auto* typedQuery = static_cast<const DownloadFinishedQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DownloadStarted query is null";
+                error = "generated Core DownloadFinished query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -1573,6 +1604,32 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             return true;
         }
         case 35u: {
+            const auto* typedQuery = static_cast<const DownloadProgressQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DownloadProgress query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->downloadID);
+            slots[1].i64 = static_cast<std::int64_t>(typedQuery->downloaded);
+            slots[2].i64 = static_cast<std::int64_t>(typedQuery->total);
+            if (!exports[35].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 37u: {
+            const auto* typedQuery = static_cast<const DownloadStartedQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DownloadStarted query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->downloadID);
+            if (!exports[37].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
+        case 38u: {
             const auto* typedQuery = static_cast<const DrawAlphaObjectsLuaQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawAlphaObjectsLua query is null";
@@ -1581,11 +1638,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = typedQuery->drawReflection ? 1 : 0;
             slots[1].i32 = typedQuery->drawRefraction ? 1 : 0;
-            if (!exports[35].Call(context, slots.data(), 2u, error))
+            if (!exports[38].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 36u: {
+        case 39u: {
             const auto* typedQuery = static_cast<const DrawAlphaObjectsLuaQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawAlphaFeaturesLua query is null";
@@ -1594,11 +1651,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = typedQuery->drawReflection ? 1 : 0;
             slots[1].i32 = typedQuery->drawRefraction ? 1 : 0;
-            if (!exports[36].Call(context, slots.data(), 2u, error))
+            if (!exports[39].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 37u: {
+        case 40u: {
             const auto* typedQuery = static_cast<const DrawAlphaObjectsLuaQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawAlphaUnitsLua query is null";
@@ -1607,11 +1664,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = typedQuery->drawReflection ? 1 : 0;
             slots[1].i32 = typedQuery->drawRefraction ? 1 : 0;
-            if (!exports[37].Call(context, slots.data(), 2u, error))
+            if (!exports[40].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 39u: {
+        case 42u: {
             const auto* typedQuery = static_cast<const DrawFeatureQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawFeature query is null";
@@ -1620,7 +1677,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->featureID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->drawMode);
-            if (!exports[39].Call(context, slots.data(), 2u, error))
+            if (!exports[42].Call(context, slots.data(), 2u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1629,7 +1686,19 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 40u: {
+        case 43u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawLoadScreen query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[43].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
+        case 44u: {
             const auto* typedQuery = static_cast<const DrawMaterialQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawMaterial query is null";
@@ -1637,66 +1706,6 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->uuid);
-            slots[1].i32 = static_cast<std::int32_t>(typedQuery->drawMode);
-            if (!exports[40].Call(context, slots.data(), 2u, error))
-                return false;
-            if (result != nullptr) {
-                auto* typedResult = static_cast<BoolCallinResult*>(result);
-                typedResult->error = nullptr;
-                typedResult->value = slots[0].i32 != 0;
-            }
-            return true;
-        }
-        case 41u: {
-            const auto* typedQuery = static_cast<const DrawObjectsLuaQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawObjectsLua query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = typedQuery->deferredPass ? 1 : 0;
-            slots[1].i32 = typedQuery->drawReflection ? 1 : 0;
-            slots[2].i32 = typedQuery->drawRefraction ? 1 : 0;
-            if (!exports[41].Call(context, slots.data(), 3u, error))
-                return false;
-            return true;
-        }
-        case 42u: {
-            const auto* typedQuery = static_cast<const DrawObjectsLuaQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawOpaqueFeaturesLua query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = typedQuery->deferredPass ? 1 : 0;
-            slots[1].i32 = typedQuery->drawReflection ? 1 : 0;
-            slots[2].i32 = typedQuery->drawRefraction ? 1 : 0;
-            if (!exports[42].Call(context, slots.data(), 3u, error))
-                return false;
-            return true;
-        }
-        case 43u: {
-            const auto* typedQuery = static_cast<const DrawObjectsLuaQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawOpaqueUnitsLua query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = typedQuery->deferredPass ? 1 : 0;
-            slots[1].i32 = typedQuery->drawReflection ? 1 : 0;
-            slots[2].i32 = typedQuery->drawRefraction ? 1 : 0;
-            if (!exports[43].Call(context, slots.data(), 3u, error))
-                return false;
-            return true;
-        }
-        case 44u: {
-            const auto* typedQuery = static_cast<const DrawProjectileQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawProjectile query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 2> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->projectileID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->drawMode);
             if (!exports[44].Call(context, slots.data(), 2u, error))
                 return false;
@@ -1708,6 +1717,66 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             return true;
         }
         case 45u: {
+            const auto* typedQuery = static_cast<const DrawObjectsLuaQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawObjectsLua query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = typedQuery->deferredPass ? 1 : 0;
+            slots[1].i32 = typedQuery->drawReflection ? 1 : 0;
+            slots[2].i32 = typedQuery->drawRefraction ? 1 : 0;
+            if (!exports[45].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 46u: {
+            const auto* typedQuery = static_cast<const DrawObjectsLuaQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawOpaqueFeaturesLua query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = typedQuery->deferredPass ? 1 : 0;
+            slots[1].i32 = typedQuery->drawReflection ? 1 : 0;
+            slots[2].i32 = typedQuery->drawRefraction ? 1 : 0;
+            if (!exports[46].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 47u: {
+            const auto* typedQuery = static_cast<const DrawObjectsLuaQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawOpaqueUnitsLua query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = typedQuery->deferredPass ? 1 : 0;
+            slots[1].i32 = typedQuery->drawReflection ? 1 : 0;
+            slots[2].i32 = typedQuery->drawRefraction ? 1 : 0;
+            if (!exports[47].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 48u: {
+            const auto* typedQuery = static_cast<const DrawProjectileQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawProjectile query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 2> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->projectileID);
+            slots[1].i32 = static_cast<std::int32_t>(typedQuery->drawMode);
+            if (!exports[48].Call(context, slots.data(), 2u, error))
+                return false;
+            if (result != nullptr) {
+                auto* typedResult = static_cast<BoolCallinResult*>(result);
+                typedResult->error = nullptr;
+                typedResult->value = slots[0].i32 != 0;
+            }
+            return true;
+        }
+        case 49u: {
             const auto* typedQuery = static_cast<const DrawScreenQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawScreen query is null";
@@ -1716,11 +1785,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->viewSizeX);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->viewSizeY);
-            if (!exports[45].Call(context, slots.data(), 2u, error))
+            if (!exports[49].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 46u: {
+        case 50u: {
             const auto* typedQuery = static_cast<const DrawScreenQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawScreenEffects query is null";
@@ -1729,11 +1798,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->viewSizeX);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->viewSizeY);
-            if (!exports[46].Call(context, slots.data(), 2u, error))
+            if (!exports[50].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 47u: {
+        case 51u: {
             const auto* typedQuery = static_cast<const DrawScreenQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawScreenPost query is null";
@@ -1742,11 +1811,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->viewSizeX);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->viewSizeY);
-            if (!exports[47].Call(context, slots.data(), 2u, error))
+            if (!exports[51].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 48u: {
+        case 52u: {
             const auto* typedQuery = static_cast<const DrawScreenQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ScreenCallin query is null";
@@ -1755,11 +1824,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->viewSizeX);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->viewSizeY);
-            if (!exports[48].Call(context, slots.data(), 2u, error))
+            if (!exports[52].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 49u: {
+        case 53u: {
             const auto* typedQuery = static_cast<const DrawShieldQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawShield query is null";
@@ -1769,7 +1838,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->weaponID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->drawMode);
-            if (!exports[49].Call(context, slots.data(), 3u, error))
+            if (!exports[53].Call(context, slots.data(), 3u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1778,7 +1847,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 50u: {
+        case 54u: {
             const auto* typedQuery = static_cast<const DrawUnitQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawUnit query is null";
@@ -1787,7 +1856,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->drawMode);
-            if (!exports[50].Call(context, slots.data(), 2u, error))
+            if (!exports[54].Call(context, slots.data(), 2u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1796,7 +1865,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 51u: {
+        case 55u: {
             const auto* typedQuery = static_cast<const DrawWorldPreParticlesQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawWorldPreParticles query is null";
@@ -1807,11 +1876,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = typedQuery->drawBelowWater ? 1 : 0;
             slots[2].i32 = typedQuery->drawReflection ? 1 : 0;
             slots[3].i32 = typedQuery->drawRefraction ? 1 : 0;
-            if (!exports[51].Call(context, slots.data(), 4u, error))
+            if (!exports[55].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 52u: {
+        case 56u: {
             const auto* typedQuery = static_cast<const ExplosionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core Explosion query is null";
@@ -1824,7 +1893,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[3].f32 = typedQuery->pos.z;
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->ownerID);
             slots[5].i32 = static_cast<std::int32_t>(typedQuery->projectileID);
-            if (!exports[52].Call(context, slots.data(), 6u, error))
+            if (!exports[56].Call(context, slots.data(), 6u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -1833,7 +1902,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 53u: {
+        case 57u: {
             const auto* typedQuery = static_cast<const FeatureCreatedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core FeatureCreated query is null";
@@ -1842,11 +1911,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->featureID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->allyTeamID);
-            if (!exports[53].Call(context, slots.data(), 2u, error))
+            if (!exports[57].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 54u: {
+        case 58u: {
             const auto* typedQuery = static_cast<const FeatureDamagedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core FeatureDamaged query is null";
@@ -1862,11 +1931,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[6].i32 = static_cast<std::int32_t>(typedQuery->attackerID);
             slots[7].i32 = static_cast<std::int32_t>(typedQuery->attackerDefID);
             slots[8].i32 = static_cast<std::int32_t>(typedQuery->attackerTeam);
-            if (!exports[54].Call(context, slots.data(), 9u, error))
+            if (!exports[58].Call(context, slots.data(), 9u, error))
                 return false;
             return true;
         }
-        case 55u: {
+        case 59u: {
             const auto* typedQuery = static_cast<const FeatureDestroyedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core FeatureDestroyed query is null";
@@ -1875,11 +1944,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->featureID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->allyTeamID);
-            if (!exports[55].Call(context, slots.data(), 2u, error))
+            if (!exports[59].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 56u: {
+        case 60u: {
             const auto* typedQuery = static_cast<const FeatureMovedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core FeatureMoved query is null";
@@ -1890,11 +1959,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].f32 = typedQuery->oldPos.x;
             slots[2].f32 = typedQuery->oldPos.y;
             slots[3].f32 = typedQuery->oldPos.z;
-            if (!exports[56].Call(context, slots.data(), 4u, error))
+            if (!exports[60].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 57u: {
+        case 61u: {
             const auto* typedQuery = static_cast<const FeatureDamagedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core FeaturePreDamaged query is null";
@@ -1910,7 +1979,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[6].i32 = static_cast<std::int32_t>(typedQuery->attackerID);
             slots[7].i32 = static_cast<std::int32_t>(typedQuery->attackerDefID);
             slots[8].i32 = static_cast<std::int32_t>(typedQuery->attackerTeam);
-            if (!exports[57].Call(context, slots.data(), 9u, error))
+            if (!exports[61].Call(context, slots.data(), 9u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<DamageCallinResult*>(result);
@@ -1923,7 +1992,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 58u: {
+        case 62u: {
             const auto* typedQuery = static_cast<const Float3CallinQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core Float3Callin query is null";
@@ -1933,11 +2002,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].f32 = typedQuery->value.x;
             slots[1].f32 = typedQuery->value.y;
             slots[2].f32 = typedQuery->value.z;
-            if (!exports[58].Call(context, slots.data(), 3u, error))
+            if (!exports[62].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 59u: {
+        case 63u: {
             const auto* typedQuery = static_cast<const Float3CallinQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core CameraPositionChanged query is null";
@@ -1947,11 +2016,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].f32 = typedQuery->value.x;
             slots[1].f32 = typedQuery->value.y;
             slots[2].f32 = typedQuery->value.z;
-            if (!exports[59].Call(context, slots.data(), 3u, error))
+            if (!exports[63].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 60u: {
+        case 64u: {
             const auto* typedQuery = static_cast<const Float3CallinQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core CameraRotationChanged query is null";
@@ -1961,11 +2030,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].f32 = typedQuery->value.x;
             slots[1].f32 = typedQuery->value.y;
             slots[2].f32 = typedQuery->value.z;
-            if (!exports[60].Call(context, slots.data(), 3u, error))
+            if (!exports[64].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 65u: {
+        case 69u: {
             const auto* typedQuery = static_cast<const GamePausedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core GamePaused query is null";
@@ -1974,17 +2043,17 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->playerID);
             slots[1].i32 = typedQuery->paused ? 1 : 0;
-            if (!exports[65].Call(context, slots.data(), 2u, error))
+            if (!exports[69].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 66u: {
+        case 70u: {
             std::array<wasmtime_val_raw_t, 1> slots{};
-            if (!exports[66].Call(context, nullptr, 0u, error))
+            if (!exports[70].Call(context, nullptr, 0u, error))
                 return false;
             return true;
         }
-        case 67u: {
+        case 71u: {
             const auto* typedQuery = static_cast<const GameProgressQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core GameProgress query is null";
@@ -1992,17 +2061,62 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->gameFrame);
-            if (!exports[67].Call(context, slots.data(), 1u, error))
+            if (!exports[71].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 69u: {
+        case 73u: {
             std::array<wasmtime_val_raw_t, 1> slots{};
-            if (!exports[69].Call(context, nullptr, 0u, error))
+            if (!exports[73].Call(context, nullptr, 0u, error))
                 return false;
             return true;
         }
-        case 70u: {
+        case 74u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core GenerateDefs query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (stringResultInUse) {
+                error = "nested generated Core string-result callin would overwrite guest result storage";
+                return false;
+            }
+            stringResultInUse = true;
+            const bool callSucceeded = exports[74].Call(context, slots.data(), 1u, error);
+            stringResultInUse = false;
+            if (!callSucceeded)
+                return false;
+            if (result != nullptr) {
+                auto* typedResult = static_cast<StringCallinResult*>(result);
+                typedResult->error = nullptr;
+                const std::uint64_t packed = static_cast<std::uint64_t>(slots[0].i64);
+                const std::uint32_t pointer = static_cast<std::uint32_t>(packed);
+                const std::uint32_t length = static_cast<std::uint32_t>(packed >> 32);
+                if (length == std::numeric_limits<std::uint32_t>::max()) {
+                    error = "generated Core string-result handler reported an invalid output length";
+                    return false;
+                }
+                if (!budget.CheckResultSize(length)) {
+                    error = "generated Core string result exceeds the configured result-byte limit";
+                    return false;
+                }
+                if (length == 0) {
+                    stringStorage.clear();
+                } else {
+                    std::span<const std::uint8_t> bytes;
+                    if (!memory.View(pointer, length, bytes)) {
+                        error = "generated Core string-result range is outside guest memory";
+                        return false;
+                    }
+                    stringStorage.assign(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+                }
+                typedResult->value = stringStorage.c_str();
+            }
+            return true;
+        }
+        case 75u: {
             const auto* typedQuery = static_cast<const GroupChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core GroupChanged query is null";
@@ -2010,7 +2124,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->groupID);
-            if (!exports[70].Call(context, slots.data(), 1u, error))
+            if (!exports[75].Call(context, slots.data(), 1u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2019,7 +2133,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 73u: {
+        case 78u: {
             const auto* typedQuery = static_cast<const InitializeNativeModuleQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core InitializeNativeModule query is null";
@@ -2029,11 +2143,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->hostVersionMajor);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->hostVersionMinor);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->hostVersionPatch);
-            if (!exports[73].Call(context, slots.data(), 3u, error))
+            if (!exports[78].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 74u: {
+        case 79u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core KeyMapChanged query is null";
@@ -2041,7 +2155,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[74].Call(context, slots.data(), 1u, error))
+            if (!exports[79].Call(context, slots.data(), 1u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2050,7 +2164,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 77u: {
+        case 82u: {
             const auto* typedQuery = static_cast<const LastMessagePositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core LastMessagePosition query is null";
@@ -2060,11 +2174,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].f32 = typedQuery->pos.x;
             slots[1].f32 = typedQuery->pos.y;
             slots[2].f32 = typedQuery->pos.z;
-            if (!exports[77].Call(context, slots.data(), 3u, error))
+            if (!exports[82].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 78u: {
+        case 83u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core Load query is null";
@@ -2072,11 +2186,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[78].Call(context, slots.data(), 1u, error))
+            if (!exports[83].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 80u: {
+        case 86u: {
             const auto* typedQuery = static_cast<const MiniMapDrawQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MiniMapDraw query is null";
@@ -2085,11 +2199,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->sizeX);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->sizeY);
-            if (!exports[80].Call(context, slots.data(), 2u, error))
+            if (!exports[86].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 81u: {
+        case 87u: {
             const auto* typedQuery = static_cast<const MiniMapDrawQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawInMiniMap query is null";
@@ -2098,11 +2212,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->sizeX);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->sizeY);
-            if (!exports[81].Call(context, slots.data(), 2u, error))
+            if (!exports[87].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 82u: {
+        case 88u: {
             const auto* typedQuery = static_cast<const MiniMapDrawQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core DrawInMiniMapBackground query is null";
@@ -2111,11 +2225,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->sizeX);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->sizeY);
-            if (!exports[82].Call(context, slots.data(), 2u, error))
+            if (!exports[88].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 83u: {
+        case 89u: {
             const auto* typedQuery = static_cast<const MiniMapGeometryChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MiniMapGeometryChanged query is null";
@@ -2130,11 +2244,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[5].i32 = static_cast<std::int32_t>(typedQuery->oldPosY);
             slots[6].i32 = static_cast<std::int32_t>(typedQuery->oldDimX);
             slots[7].i32 = static_cast<std::int32_t>(typedQuery->oldDimY);
-            if (!exports[83].Call(context, slots.data(), 8u, error))
+            if (!exports[89].Call(context, slots.data(), 8u, error))
                 return false;
             return true;
         }
-        case 84u: {
+        case 90u: {
             const auto* typedQuery = static_cast<const MiniMapRotationChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MiniMapRotationChanged query is null";
@@ -2143,11 +2257,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].f32 = typedQuery->newRot;
             slots[1].f32 = typedQuery->oldRot;
-            if (!exports[84].Call(context, slots.data(), 2u, error))
+            if (!exports[90].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 85u: {
+        case 91u: {
             const auto* typedQuery = static_cast<const MiniMapStateChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MiniMapStateChanged query is null";
@@ -2157,11 +2271,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = typedQuery->isMinimized ? 1 : 0;
             slots[1].i32 = typedQuery->isMaximized ? 1 : 0;
             slots[2].i32 = typedQuery->isSlaved ? 1 : 0;
-            if (!exports[85].Call(context, slots.data(), 3u, error))
+            if (!exports[91].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 86u: {
+        case 92u: {
             const auto* typedQuery = static_cast<const MouseMoveQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MouseMove query is null";
@@ -2173,7 +2287,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->dx);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->dy);
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->button);
-            if (!exports[86].Call(context, slots.data(), 5u, error))
+            if (!exports[92].Call(context, slots.data(), 5u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2182,7 +2296,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 87u: {
+        case 93u: {
             const auto* typedQuery = static_cast<const MousePressQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MousePress query is null";
@@ -2192,7 +2306,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->x);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->y);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->button);
-            if (!exports[87].Call(context, slots.data(), 3u, error))
+            if (!exports[93].Call(context, slots.data(), 3u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2201,7 +2315,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 88u: {
+        case 94u: {
             const auto* typedQuery = static_cast<const MouseReleaseQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MouseRelease query is null";
@@ -2211,11 +2325,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->x);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->y);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->button);
-            if (!exports[88].Call(context, slots.data(), 3u, error))
+            if (!exports[94].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 89u: {
+        case 95u: {
             const auto* typedQuery = static_cast<const MouseWheelQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MouseWheel query is null";
@@ -2224,7 +2338,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = typedQuery->up ? 1 : 0;
             slots[1].f32 = typedQuery->value;
-            if (!exports[89].Call(context, slots.data(), 2u, error))
+            if (!exports[95].Call(context, slots.data(), 2u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2233,7 +2347,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 90u: {
+        case 96u: {
             const auto* typedQuery = static_cast<const MoveCtrlNotifyQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core MoveCtrlNotify query is null";
@@ -2244,7 +2358,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->data);
-            if (!exports[90].Call(context, slots.data(), 4u, error))
+            if (!exports[96].Call(context, slots.data(), 4u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2253,7 +2367,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 91u: {
+        case 97u: {
             const auto* typedQuery = static_cast<const PlayerAddedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core PlayerAdded query is null";
@@ -2261,11 +2375,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->playerID);
-            if (!exports[91].Call(context, slots.data(), 1u, error))
+            if (!exports[97].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 92u: {
+        case 98u: {
             const auto* typedQuery = static_cast<const PlayerChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core PlayerChanged query is null";
@@ -2273,11 +2387,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->playerID);
-            if (!exports[92].Call(context, slots.data(), 1u, error))
+            if (!exports[98].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 93u: {
+        case 99u: {
             const auto* typedQuery = static_cast<const PlayerRemovedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core PlayerRemoved query is null";
@@ -2286,11 +2400,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->playerID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->reason);
-            if (!exports[93].Call(context, slots.data(), 2u, error))
+            if (!exports[99].Call(context, slots.data(), 2u, error))
                 return false;
             return true;
         }
-        case 94u: {
+        case 100u: {
             const auto* typedQuery = static_cast<const PongQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core Pong query is null";
@@ -2300,11 +2414,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->pingTag);
             slots[1].i64 = static_cast<std::int64_t>(typedQuery->packetSendTimeMillis);
             slots[2].i64 = static_cast<std::int64_t>(typedQuery->packetRecvTimeMillis);
-            if (!exports[94].Call(context, slots.data(), 3u, error))
+            if (!exports[100].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 95u: {
+        case 101u: {
             const auto* typedQuery = static_cast<const ProjectileEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ProjectileEvent query is null";
@@ -2314,11 +2428,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->projectileID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->ownerID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->weaponDefID);
-            if (!exports[95].Call(context, slots.data(), 3u, error))
+            if (!exports[101].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 96u: {
+        case 102u: {
             const auto* typedQuery = static_cast<const ProjectileEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ProjectileCreated query is null";
@@ -2328,11 +2442,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->projectileID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->ownerID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->weaponDefID);
-            if (!exports[96].Call(context, slots.data(), 3u, error))
+            if (!exports[102].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 97u: {
+        case 103u: {
             const auto* typedQuery = static_cast<const ProjectileEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ProjectileDestroyed query is null";
@@ -2342,11 +2456,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->projectileID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->ownerID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->weaponDefID);
-            if (!exports[97].Call(context, slots.data(), 3u, error))
+            if (!exports[103].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 98u: {
+        case 104u: {
             const auto* typedQuery = static_cast<const RectChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core RectChanged query is null";
@@ -2357,11 +2471,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->z1);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->x2);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->z2);
-            if (!exports[98].Call(context, slots.data(), 4u, error))
+            if (!exports[104].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 99u: {
+        case 105u: {
             const auto* typedQuery = static_cast<const RectChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnsyncedHeightMapUpdate query is null";
@@ -2372,11 +2486,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->z1);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->x2);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->z2);
-            if (!exports[99].Call(context, slots.data(), 4u, error))
+            if (!exports[105].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 101u: {
+        case 107u: {
             const auto* typedQuery = static_cast<const RenderUnitDestroyedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core RenderUnitDestroyed query is null";
@@ -2386,11 +2500,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[101].Call(context, slots.data(), 3u, error))
+            if (!exports[107].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 103u: {
+        case 109u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core Save query is null";
@@ -2398,11 +2512,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[103].Call(context, slots.data(), 1u, error))
+            if (!exports[109].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 104u: {
+        case 110u: {
             const auto* typedQuery = static_cast<const ScreenPositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ScreenPosition query is null";
@@ -2411,7 +2525,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->x);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->y);
-            if (!exports[104].Call(context, slots.data(), 2u, error))
+            if (!exports[110].Call(context, slots.data(), 2u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2420,7 +2534,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 105u: {
+        case 111u: {
             const auto* typedQuery = static_cast<const ScreenPositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core IsAbove query is null";
@@ -2429,7 +2543,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->x);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->y);
-            if (!exports[105].Call(context, slots.data(), 2u, error))
+            if (!exports[111].Call(context, slots.data(), 2u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2438,7 +2552,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 106u: {
+        case 112u: {
             const auto* typedQuery = static_cast<const ScreenPositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ScreenTooltip query is null";
@@ -2452,7 +2566,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
                 return false;
             }
             stringResultInUse = true;
-            const bool callSucceeded = exports[106].Call(context, slots.data(), 2u, error);
+            const bool callSucceeded = exports[112].Call(context, slots.data(), 2u, error);
             stringResultInUse = false;
             if (!callSucceeded)
                 return false;
@@ -2484,7 +2598,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 107u: {
+        case 113u: {
             const auto* typedQuery = static_cast<const ScreenPositionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core GetTooltip query is null";
@@ -2498,7 +2612,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
                 return false;
             }
             stringResultInUse = true;
-            const bool callSucceeded = exports[107].Call(context, slots.data(), 2u, error);
+            const bool callSucceeded = exports[113].Call(context, slots.data(), 2u, error);
             stringResultInUse = false;
             if (!callSucceeded)
                 return false;
@@ -2530,7 +2644,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 108u: {
+        case 114u: {
             const auto* typedQuery = static_cast<const ShieldPreDamagedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ShieldPreDamaged query is null";
@@ -2550,7 +2664,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[10].f32 = typedQuery->hitPos.x;
             slots[11].f32 = typedQuery->hitPos.y;
             slots[12].f32 = typedQuery->hitPos.z;
-            if (!exports[108].Call(context, slots.data(), 13u, error))
+            if (!exports[114].Call(context, slots.data(), 13u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2559,88 +2673,16 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 109u: {
-            std::array<wasmtime_val_raw_t, 1> slots{};
-            if (!exports[109].Call(context, nullptr, 0u, error))
-                return false;
-            return true;
-        }
-        case 110u: {
-            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core SimpleCallin query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 1> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[110].Call(context, slots.data(), 1u, error))
-                return false;
-            return true;
-        }
-        case 111u: {
-            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawFeaturesPostDeferred query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 1> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[111].Call(context, slots.data(), 1u, error))
-                return false;
-            return true;
-        }
-        case 112u: {
-            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawGenesis query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 1> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[112].Call(context, slots.data(), 1u, error))
-                return false;
-            return true;
-        }
-        case 113u: {
-            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawGroundDeferred query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 1> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[113].Call(context, slots.data(), 1u, error))
-                return false;
-            return true;
-        }
-        case 114u: {
-            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawGroundPostDeferred query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 1> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[114].Call(context, slots.data(), 1u, error))
-                return false;
-            return true;
-        }
         case 115u: {
-            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core DrawGroundPostForward query is null";
-                return false;
-            }
             std::array<wasmtime_val_raw_t, 1> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[115].Call(context, slots.data(), 1u, error))
+            if (!exports[115].Call(context, nullptr, 0u, error))
                 return false;
             return true;
         }
         case 116u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawGroundPreDeferred query is null";
+                error = "generated Core SimpleCallin query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2652,7 +2694,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 117u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawGroundPreForward query is null";
+                error = "generated Core DrawFeaturesPostDeferred query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2664,7 +2706,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 118u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawPreDecals query is null";
+                error = "generated Core DrawGenesis query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2676,7 +2718,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 119u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawShadowFeaturesLua query is null";
+                error = "generated Core DrawGroundDeferred query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2688,7 +2730,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 120u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawShadowPassTransparent query is null";
+                error = "generated Core DrawGroundPostDeferred query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2700,7 +2742,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 121u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawShadowUnitsLua query is null";
+                error = "generated Core DrawGroundPostForward query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2712,7 +2754,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 122u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawUnitsPostDeferred query is null";
+                error = "generated Core DrawGroundPreDeferred query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2724,7 +2766,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 123u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawWaterPost query is null";
+                error = "generated Core DrawGroundPreForward query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2733,10 +2775,22 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
                 return false;
             return true;
         }
+        case 124u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawPreDecals query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[124].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
         case 125u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawWorldPreUnit query is null";
+                error = "generated Core DrawShadowFeaturesLua query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2748,7 +2802,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 126u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawWorldReflection query is null";
+                error = "generated Core DrawShadowPassTransparent query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2760,7 +2814,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 127u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawWorldRefraction query is null";
+                error = "generated Core DrawShadowUnitsLua query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2772,7 +2826,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 128u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core DrawWorldShadow query is null";
+                error = "generated Core DrawUnitsPostDeferred query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2784,7 +2838,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 129u: {
             const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core FontsChanged query is null";
+                error = "generated Core DrawWaterPost query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
@@ -2793,7 +2847,67 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
                 return false;
             return true;
         }
-        case 130u: {
+        case 131u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawWorldPreUnit query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[131].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
+        case 132u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawWorldReflection query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[132].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
+        case 133u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawWorldRefraction query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[133].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
+        case 134u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core DrawWorldShadow query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[134].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
+        case 135u: {
+            const auto* typedQuery = static_cast<const SimpleCallinQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core FontsChanged query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 1> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
+            if (!exports[135].Call(context, slots.data(), 1u, error))
+                return false;
+            return true;
+        }
+        case 136u: {
             const auto* typedQuery = static_cast<const StockpileChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core StockpileChanged query is null";
@@ -2806,11 +2920,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->weaponNum);
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->oldCount);
             slots[5].i32 = static_cast<std::int32_t>(typedQuery->newCount);
-            if (!exports[130].Call(context, slots.data(), 6u, error))
+            if (!exports[136].Call(context, slots.data(), 6u, error))
                 return false;
             return true;
         }
-        case 131u: {
+        case 137u: {
             const auto* typedQuery = static_cast<const SunChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core SunChanged query is null";
@@ -2818,11 +2932,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->_unused);
-            if (!exports[131].Call(context, slots.data(), 1u, error))
+            if (!exports[137].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 132u: {
+        case 138u: {
             const auto* typedQuery = static_cast<const TeamChangedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core TeamChanged query is null";
@@ -2830,11 +2944,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->teamID);
-            if (!exports[132].Call(context, slots.data(), 1u, error))
+            if (!exports[138].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 133u: {
+        case 139u: {
             const auto* typedQuery = static_cast<const TeamDiedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core TeamDied query is null";
@@ -2842,11 +2956,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             std::array<wasmtime_val_raw_t, 1> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->teamID);
-            if (!exports[133].Call(context, slots.data(), 1u, error))
+            if (!exports[139].Call(context, slots.data(), 1u, error))
                 return false;
             return true;
         }
-        case 134u: {
+        case 140u: {
             const auto* typedQuery = static_cast<const TerraformCompleteQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core TerraformComplete query is null";
@@ -2859,7 +2973,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->buildUnitID);
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->buildUnitDefID);
             slots[5].i32 = static_cast<std::int32_t>(typedQuery->buildUnitTeam);
-            if (!exports[134].Call(context, slots.data(), 6u, error))
+            if (!exports[140].Call(context, slots.data(), 6u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -2868,7 +2982,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 137u: {
+        case 143u: {
             const auto* typedQuery = static_cast<const UnitCloakEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitCloakEvent query is null";
@@ -2878,11 +2992,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[137].Call(context, slots.data(), 3u, error))
+            if (!exports[143].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 138u: {
+        case 144u: {
             const auto* typedQuery = static_cast<const UnitCloakEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitCloaked query is null";
@@ -2892,11 +3006,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[138].Call(context, slots.data(), 3u, error))
+            if (!exports[144].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 139u: {
+        case 145u: {
             const auto* typedQuery = static_cast<const UnitCloakEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitDecloaked query is null";
@@ -2906,11 +3020,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[139].Call(context, slots.data(), 3u, error))
+            if (!exports[145].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 142u: {
+        case 148u: {
             const auto* typedQuery = static_cast<const UnitConstructionDecayedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitConstructionDecayed query is null";
@@ -2923,11 +3037,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[3].f32 = typedQuery->timeSinceLastBuild;
             slots[4].f32 = typedQuery->iterationPeriod;
             slots[5].f32 = typedQuery->part;
-            if (!exports[142].Call(context, slots.data(), 6u, error))
+            if (!exports[148].Call(context, slots.data(), 6u, error))
                 return false;
             return true;
         }
-        case 144u: {
+        case 150u: {
             const auto* typedQuery = static_cast<const UnitDamagedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitDamaged query is null";
@@ -2944,11 +3058,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[7].i32 = static_cast<std::int32_t>(typedQuery->attackerID);
             slots[8].i32 = static_cast<std::int32_t>(typedQuery->attackerDefID);
             slots[9].i32 = static_cast<std::int32_t>(typedQuery->attackerTeam);
-            if (!exports[144].Call(context, slots.data(), 10u, error))
+            if (!exports[150].Call(context, slots.data(), 10u, error))
                 return false;
             return true;
         }
-        case 145u: {
+        case 151u: {
             const auto* typedQuery = static_cast<const UnitDestroyedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitDestroyed query is null";
@@ -2962,11 +3076,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->attackerDefID);
             slots[5].i32 = static_cast<std::int32_t>(typedQuery->attackerTeam);
             slots[6].i32 = static_cast<std::int32_t>(typedQuery->weaponDefID);
-            if (!exports[145].Call(context, slots.data(), 7u, error))
+            if (!exports[151].Call(context, slots.data(), 7u, error))
                 return false;
             return true;
         }
-        case 146u: {
+        case 152u: {
             const auto* typedQuery = static_cast<const UnitExperienceQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitExperience query is null";
@@ -2978,11 +3092,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].f32 = typedQuery->experience;
             slots[4].f32 = typedQuery->oldExperience;
-            if (!exports[146].Call(context, slots.data(), 5u, error))
+            if (!exports[152].Call(context, slots.data(), 5u, error))
                 return false;
             return true;
         }
-        case 147u: {
+        case 153u: {
             const auto* typedQuery = static_cast<const UnitFeatureCollisionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitFeatureCollision query is null";
@@ -2991,7 +3105,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->colliderID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->collideeID);
-            if (!exports[147].Call(context, slots.data(), 2u, error))
+            if (!exports[153].Call(context, slots.data(), 2u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -3000,7 +3114,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 148u: {
+        case 154u: {
             const auto* typedQuery = static_cast<const UnitFinishedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitFinished query is null";
@@ -3010,11 +3124,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[148].Call(context, slots.data(), 3u, error))
+            if (!exports[154].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 149u: {
+        case 155u: {
             const auto* typedQuery = static_cast<const UnitFromFactoryQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitFromFactory query is null";
@@ -3027,11 +3141,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->factoryID);
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->factoryDefID);
             slots[5].i32 = typedQuery->userOrders ? 1 : 0;
-            if (!exports[149].Call(context, slots.data(), 6u, error))
+            if (!exports[155].Call(context, slots.data(), 6u, error))
                 return false;
             return true;
         }
-        case 150u: {
+        case 156u: {
             const auto* typedQuery = static_cast<const UnitGivenQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitGiven query is null";
@@ -3042,11 +3156,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->oldTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->newTeam);
-            if (!exports[150].Call(context, slots.data(), 4u, error))
+            if (!exports[156].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 151u: {
+        case 157u: {
             const auto* typedQuery = static_cast<const UnitHarvestStorageFullQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitHarvestStorageFull query is null";
@@ -3056,11 +3170,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[151].Call(context, slots.data(), 3u, error))
+            if (!exports[157].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 152u: {
+        case 158u: {
             const auto* typedQuery = static_cast<const UnitIdleQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitIdle query is null";
@@ -3070,11 +3184,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[152].Call(context, slots.data(), 3u, error))
+            if (!exports[158].Call(context, slots.data(), 3u, error))
                 return false;
             return true;
         }
-        case 153u: {
+        case 159u: {
             const auto* typedQuery = static_cast<const UnitLoadedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitLoaded query is null";
@@ -3086,11 +3200,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->transportID);
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->transportTeam);
-            if (!exports[153].Call(context, slots.data(), 5u, error))
+            if (!exports[159].Call(context, slots.data(), 5u, error))
                 return false;
             return true;
         }
-        case 154u: {
+        case 160u: {
             const auto* typedQuery = static_cast<const UnitLosEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitLosEvent query is null";
@@ -3101,11 +3215,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->allyTeam);
-            if (!exports[154].Call(context, slots.data(), 4u, error))
+            if (!exports[160].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 155u: {
+        case 161u: {
             const auto* typedQuery = static_cast<const UnitLosEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitEnteredLos query is null";
@@ -3116,11 +3230,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->allyTeam);
-            if (!exports[155].Call(context, slots.data(), 4u, error))
+            if (!exports[161].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 156u: {
+        case 162u: {
             const auto* typedQuery = static_cast<const UnitLosEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitEnteredRadar query is null";
@@ -3131,11 +3245,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->allyTeam);
-            if (!exports[156].Call(context, slots.data(), 4u, error))
+            if (!exports[162].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 157u: {
+        case 163u: {
             const auto* typedQuery = static_cast<const UnitLosEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitLeftLos query is null";
@@ -3146,11 +3260,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->allyTeam);
-            if (!exports[157].Call(context, slots.data(), 4u, error))
+            if (!exports[163].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 158u: {
+        case 164u: {
             const auto* typedQuery = static_cast<const UnitLosEventQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitLeftRadar query is null";
@@ -3161,98 +3275,14 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->allyTeam);
-            if (!exports[158].Call(context, slots.data(), 4u, error))
-                return false;
-            return true;
-        }
-        case 159u: {
-            const auto* typedQuery = static_cast<const UnitMoveEventQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core UnitMoveEvent query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
-            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
-            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[159].Call(context, slots.data(), 3u, error))
-                return false;
-            return true;
-        }
-        case 160u: {
-            const auto* typedQuery = static_cast<const UnitMoveEventQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core UnitArrivedAtGoal query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
-            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
-            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[160].Call(context, slots.data(), 3u, error))
-                return false;
-            return true;
-        }
-        case 161u: {
-            const auto* typedQuery = static_cast<const UnitMoveEventQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core UnitMoveFailed query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
-            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
-            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[161].Call(context, slots.data(), 3u, error))
-                return false;
-            return true;
-        }
-        case 162u: {
-            const auto* typedQuery = static_cast<const UnitMoveEventQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core UnitMoved query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
-            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
-            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[162].Call(context, slots.data(), 3u, error))
-                return false;
-            return true;
-        }
-        case 163u: {
-            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core UnitMovementClassEvent query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
-            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
-            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[163].Call(context, slots.data(), 3u, error))
-                return false;
-            return true;
-        }
-        case 164u: {
-            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
-            if (typedQuery == nullptr) {
-                error = "generated Core UnitEnteredAir query is null";
-                return false;
-            }
-            std::array<wasmtime_val_raw_t, 3> slots{};
-            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
-            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
-            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
-            if (!exports[164].Call(context, slots.data(), 3u, error))
+            if (!exports[164].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
         case 165u: {
-            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            const auto* typedQuery = static_cast<const UnitMoveEventQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core UnitEnteredUnderwater query is null";
+                error = "generated Core UnitMoveEvent query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 3> slots{};
@@ -3264,9 +3294,9 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             return true;
         }
         case 166u: {
-            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            const auto* typedQuery = static_cast<const UnitMoveEventQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core UnitEnteredWater query is null";
+                error = "generated Core UnitArrivedAtGoal query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 3> slots{};
@@ -3278,9 +3308,9 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             return true;
         }
         case 167u: {
-            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            const auto* typedQuery = static_cast<const UnitMoveEventQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core UnitLeftAir query is null";
+                error = "generated Core UnitMoveFailed query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 3> slots{};
@@ -3292,9 +3322,9 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             return true;
         }
         case 168u: {
-            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            const auto* typedQuery = static_cast<const UnitMoveEventQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core UnitLeftUnderwater query is null";
+                error = "generated Core UnitMoved query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 3> slots{};
@@ -3308,7 +3338,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
         case 169u: {
             const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core UnitLeftWater query is null";
+                error = "generated Core UnitMovementClassEvent query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 3> slots{};
@@ -3319,10 +3349,24 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
                 return false;
             return true;
         }
-        case 171u: {
-            const auto* typedQuery = static_cast<const UnitReverseBuiltQuery*>(query);
+        case 170u: {
+            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
             if (typedQuery == nullptr) {
-                error = "generated Core UnitReverseBuilt query is null";
+                error = "generated Core UnitEnteredAir query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
+            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
+            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
+            if (!exports[170].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 171u: {
+            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core UnitEnteredUnderwater query is null";
                 return false;
             }
             std::array<wasmtime_val_raw_t, 3> slots{};
@@ -3334,6 +3378,76 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             return true;
         }
         case 172u: {
+            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core UnitEnteredWater query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
+            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
+            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
+            if (!exports[172].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 173u: {
+            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core UnitLeftAir query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
+            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
+            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
+            if (!exports[173].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 174u: {
+            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core UnitLeftUnderwater query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
+            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
+            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
+            if (!exports[174].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 175u: {
+            const auto* typedQuery = static_cast<const UnitMovementClassEventQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core UnitLeftWater query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
+            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
+            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
+            if (!exports[175].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 177u: {
+            const auto* typedQuery = static_cast<const UnitReverseBuiltQuery*>(query);
+            if (typedQuery == nullptr) {
+                error = "generated Core UnitReverseBuilt query is null";
+                return false;
+            }
+            std::array<wasmtime_val_raw_t, 3> slots{};
+            slots[0].i32 = static_cast<std::int32_t>(typedQuery->unitID);
+            slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
+            slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
+            if (!exports[177].Call(context, slots.data(), 3u, error))
+                return false;
+            return true;
+        }
+        case 178u: {
             const auto* typedQuery = static_cast<const UnitSeismicPingQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitSeismicPing query is null";
@@ -3347,11 +3461,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->allyTeam);
             slots[5].i32 = static_cast<std::int32_t>(typedQuery->unitID);
             slots[6].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
-            if (!exports[172].Call(context, slots.data(), 7u, error))
+            if (!exports[178].Call(context, slots.data(), 7u, error))
                 return false;
             return true;
         }
-        case 173u: {
+        case 179u: {
             const auto* typedQuery = static_cast<const UnitStunnedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitStunned query is null";
@@ -3362,11 +3476,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = typedQuery->stunned ? 1 : 0;
-            if (!exports[173].Call(context, slots.data(), 4u, error))
+            if (!exports[179].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 174u: {
+        case 180u: {
             const auto* typedQuery = static_cast<const UnitTakenQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitTaken query is null";
@@ -3377,11 +3491,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->unitDefID);
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->oldTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->newTeam);
-            if (!exports[174].Call(context, slots.data(), 4u, error))
+            if (!exports[180].Call(context, slots.data(), 4u, error))
                 return false;
             return true;
         }
-        case 175u: {
+        case 181u: {
             const auto* typedQuery = static_cast<const UnitUnitCollisionQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitUnitCollision query is null";
@@ -3390,7 +3504,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             std::array<wasmtime_val_raw_t, 2> slots{};
             slots[0].i32 = static_cast<std::int32_t>(typedQuery->colliderID);
             slots[1].i32 = static_cast<std::int32_t>(typedQuery->collideeID);
-            if (!exports[175].Call(context, slots.data(), 2u, error))
+            if (!exports[181].Call(context, slots.data(), 2u, error))
                 return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -3399,7 +3513,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             }
             return true;
         }
-        case 176u: {
+        case 182u: {
             const auto* typedQuery = static_cast<const UnitUnloadedQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core UnitUnloaded query is null";
@@ -3411,11 +3525,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[2].i32 = static_cast<std::int32_t>(typedQuery->unitTeam);
             slots[3].i32 = static_cast<std::int32_t>(typedQuery->transportID);
             slots[4].i32 = static_cast<std::int32_t>(typedQuery->transportTeam);
-            if (!exports[176].Call(context, slots.data(), 5u, error))
+            if (!exports[182].Call(context, slots.data(), 5u, error))
                 return false;
             return true;
         }
-        case 178u: {
+        case 184u: {
             const auto* typedQuery = static_cast<const ViewResizeQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core ViewResize query is null";
@@ -3438,11 +3552,11 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
             slots[13].i32 = static_cast<std::int32_t>(typedQuery->viewSizeY);
             slots[14].i32 = static_cast<std::int32_t>(typedQuery->viewPosX);
             slots[15].i32 = static_cast<std::int32_t>(typedQuery->viewPosY);
-            if (!exports[178].Call(context, slots.data(), 16u, error))
+            if (!exports[184].Call(context, slots.data(), 16u, error))
                 return false;
             return true;
         }
-        case 179u: {
+        case 185u: {
             const auto* typedQuery = static_cast<const WorldTooltipQuery*>(query);
             if (typedQuery == nullptr) {
                 error = "generated Core WorldTooltip query is null";
@@ -3460,7 +3574,7 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
                 return false;
             }
             stringResultInUse = true;
-            const bool callSucceeded = exports[179].Call(context, slots.data(), 6u, error);
+            const bool callSucceeded = exports[185].Call(context, slots.data(), 6u, error);
             stringResultInUse = false;
             if (!callSucceeded)
                 return false;
@@ -3498,9 +3612,9 @@ bool GeneratedCallinBindings::Invoke(std::uint16_t ordinal,
     }
 }
 
-static_assert(kGeneratedCallinSlotCount == 180u,
+static_assert(kGeneratedCallinSlotCount == 186u,
     "generated Core callin slot count drifted");
-static_assert(149u <= kGeneratedCallinSlotCount,
+static_assert(153u <= kGeneratedCallinSlotCount,
     "generated Core callin coverage count");
 
 } // namespace recoil::wasm::core::generated

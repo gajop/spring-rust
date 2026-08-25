@@ -156,11 +156,12 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 bool RegisterUnitsInfoVariableImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)
 {
-	if (linker == nullptr || state == nullptr || state->native == nullptr ||
-		state->native->unitsInfo == nullptr) {
+	if (linker == nullptr || state == nullptr || state->native == nullptr) {
 		error = "cannot register variable UnitsInfo Core imports without linker/host/API";
 		return false;
 	}
+	if (state->native->unitsInfo == nullptr)
+		return true;
 	const wasm_valkind_t nanoParams[] = {WASM_I32, WASM_I32, WASM_I32};
 	const wasm_valkind_t transportParams[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
 	const wasm_valkind_t result[] = {WASM_I64};

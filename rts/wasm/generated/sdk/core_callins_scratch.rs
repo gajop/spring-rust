@@ -133,6 +133,23 @@ macro_rules! export_callin_scratch {
     };
 }
 
+/// Export `ActivateMenu` through the shared-scratch Core ABI.
+#[macro_export]
+macro_rules! export_activate_menu {
+    ($handler:path) => {
+        #[cfg(target_arch = "wasm32")]
+        #[export_name = "spring:callin/activate-menu"]
+        pub extern "C" fn __spring_wasm_core_callin_activate_menu(used_bytes: i32) {
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
+            let message = match reader.bytes() { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let message_length = match reader.u32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            if !reader.finish() { core::arch::wasm32::unreachable(); }
+            $handler(message, message_length as u32);
+        }
+    };
+}
+
 /// Export `ActiveCommandChanged` through the shared-scratch Core ABI.
 #[macro_export]
 macro_rules! export_active_command_changed {
@@ -140,7 +157,7 @@ macro_rules! export_active_command_changed {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/active-command-changed"]
         pub extern "C" fn __spring_wasm_core_callin_active_command_changed(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let cmd_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let cmd_type = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -160,7 +177,7 @@ macro_rules! export_allow_command {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/allow-command"]
         pub extern "C" fn __spring_wasm_core_callin_allow_command(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let unit_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let unit_def_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -187,7 +204,7 @@ macro_rules! export_allow_resource_level {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/allow-resource-level"]
         pub extern "C" fn __spring_wasm_core_callin_allow_resource_level(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let team_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let type = match reader.bytes() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -205,7 +222,7 @@ macro_rules! export_allow_resource_transfer {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/allow-resource-transfer"]
         pub extern "C" fn __spring_wasm_core_callin_allow_resource_transfer(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let old_team = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let new_team = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -224,7 +241,7 @@ macro_rules! export_command_fallback {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/command-fallback"]
         pub extern "C" fn __spring_wasm_core_callin_command_fallback(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let unit_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let unit_def_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -248,7 +265,7 @@ macro_rules! export_download_queued {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/download-queued"]
         pub extern "C" fn __spring_wasm_core_callin_download_queued(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let download_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let archive_name = match reader.bytes() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -266,7 +283,7 @@ macro_rules! export_draw_build_square {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/draw-build-square"]
         pub extern "C" fn __spring_wasm_core_callin_draw_build_square(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let unit_def_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let x = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -286,7 +303,7 @@ macro_rules! export_game_id {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/game-id"]
         pub extern "C" fn __spring_wasm_core_callin_game_id(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let game_id: &[u8] = match reader.slice::<u8>() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             if !reader.finish() { core::arch::wasm32::unreachable(); }
@@ -302,7 +319,7 @@ macro_rules! export_game_over {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/game-over"]
         pub extern "C" fn __spring_wasm_core_callin_game_over(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let winning_ally_teams: &[u8] = match reader.slice::<u8>() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             if !reader.finish() { core::arch::wasm32::unreachable(); }
@@ -318,7 +335,7 @@ macro_rules! export_game_setup {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/game-setup"]
         pub extern "C" fn __spring_wasm_core_callin_game_setup(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let state = match reader.bytes() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let ready = match reader.boolean() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -345,7 +362,7 @@ macro_rules! export_handle_lua_call {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/handle-lua-call"]
         pub extern "C" fn __spring_wasm_core_callin_handle_lua_call(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let message: &[u8] = match reader.slice::<u8>() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             if !reader.finish() { core::arch::wasm32::unreachable(); }
@@ -361,7 +378,7 @@ macro_rules! export_handle_lua_msg {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/handle-lua-msg"]
         pub extern "C" fn __spring_wasm_core_callin_handle_lua_msg(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let player_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let script = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -380,7 +397,7 @@ macro_rules! export_key_press {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/key-press"]
         pub extern "C" fn __spring_wasm_core_callin_key_press(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let key_code = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let alt = match reader.boolean() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -415,7 +432,7 @@ macro_rules! export_key_release {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/key-release"]
         pub extern "C" fn __spring_wasm_core_callin_key_release(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let key_code = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let alt = match reader.boolean() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -442,6 +459,24 @@ macro_rules! export_key_release {
     };
 }
 
+/// Export `LoadProgress` through the shared-scratch Core ABI.
+#[macro_export]
+macro_rules! export_load_progress {
+    ($handler:path) => {
+        #[cfg(target_arch = "wasm32")]
+        #[export_name = "spring:callin/load-progress"]
+        pub extern "C" fn __spring_wasm_core_callin_load_progress(used_bytes: i32) {
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
+            let message = match reader.bytes() { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let message_length = match reader.u32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let replace_last_line = match reader.u32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            if !reader.finish() { core::arch::wasm32::unreachable(); }
+            $handler(message, message_length as u32, replace_last_line as u8);
+        }
+    };
+}
+
 /// Export `MapDrawCmd` through the shared-scratch Core ABI.
 #[macro_export]
 macro_rules! export_map_draw_cmd {
@@ -449,7 +484,7 @@ macro_rules! export_map_draw_cmd {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/map-draw-cmd"]
         pub extern "C" fn __spring_wasm_core_callin_map_draw_cmd(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let player_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let type = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -476,7 +511,7 @@ macro_rules! export_recv_from_synced {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/recv-from-synced"]
         pub extern "C" fn __spring_wasm_core_callin_recv_from_synced(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let message: &[u8] = match reader.slice::<u8>() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             if !reader.finish() { core::arch::wasm32::unreachable(); }
@@ -492,7 +527,7 @@ macro_rules! export_resource_excess {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/resource-excess"]
         pub extern "C" fn __spring_wasm_core_callin_resource_excess(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let mut entries_frames = match reader.framed_list() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let entries = core::iter::from_fn(move || {
@@ -518,7 +553,7 @@ macro_rules! export_text_editing {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/text-editing"]
         pub extern "C" fn __spring_wasm_core_callin_text_editing(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let utf8 = match reader.bytes() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let start = match reader.u32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -536,7 +571,7 @@ macro_rules! export_text_input {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/text-input"]
         pub extern "C" fn __spring_wasm_core_callin_text_input(used_bytes: i32) -> i32 {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let utf8 = match reader.bytes() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             if !reader.finish() { core::arch::wasm32::unreachable(); }
@@ -552,7 +587,7 @@ macro_rules! export_unit_cmd_done {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/unit-cmd-done"]
         pub extern "C" fn __spring_wasm_core_callin_unit_cmd_done(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let unit_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let unit_def_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -576,7 +611,7 @@ macro_rules! export_unit_command {
         #[cfg(target_arch = "wasm32")]
         #[export_name = "spring:callin/unit-command"]
         pub extern "C" fn __spring_wasm_core_callin_unit_command(used_bytes: i32) {
-            let bytes = match crate::__spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
             let unit_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
             let unit_def_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
@@ -598,4 +633,4 @@ macro_rules! export_unit_command {
 
 
 #[doc(hidden)]
-pub const __GENERATED_SCRATCH_CALLIN_COUNT: usize = 21;
+pub const __GENERATED_SCRATCH_CALLIN_COUNT: usize = 23;

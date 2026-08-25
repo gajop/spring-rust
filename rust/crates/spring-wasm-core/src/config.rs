@@ -248,7 +248,7 @@ pub fn get_log_sections_into<'a>(
                 meta_ptr,
             )
         };
-        return decode_string_list_result(status, meta, ranges, bytes);
+        decode_string_list_result(status, meta, ranges, bytes)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

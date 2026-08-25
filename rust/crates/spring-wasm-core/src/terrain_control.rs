@@ -1,6 +1,6 @@
 //! Reviewed synchronous terrain-control callback imports.
 
-use super::{ApiError, ErrorCode, Result, SyncCallback};
+use super::{Result, SyncCallback};
 
 #[cfg(target_arch = "wasm32")]
 mod raw {

@@ -3,6 +3,7 @@
 #ifndef _LOAD_SCREEN_H
 #define _LOAD_SCREEN_H
 
+#include <memory>
 #include <string>
 
 #include "GameController.h"
@@ -12,6 +13,7 @@
 #include "System/Threading/SpringThreading.h"
 
 class CglFont;
+class WasmStandaloneEnvironment;
 
 class CLoadScreen : public CGameController
 {
@@ -59,6 +61,13 @@ private:
 	bool mtLoading;
 
 	spring_time lastDrawTime;
+
+	std::unique_ptr<WasmStandaloneEnvironment> m_wasmEnv;
+
+	void InitWasmIntro();
+	bool HasWasmIntro() const;
+	void DispatchWasmDrawLoadScreen();
+	void DispatchWasmLoadProgress(const std::string& msg, bool replaceLastLine);
 };
 
 
