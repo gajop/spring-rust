@@ -1,7 +1,7 @@
 #![allow(static_mut_refs)]
 
 use core::ptr;
-use spring_wasm_core as spring;
+use spring as spring;
 
 // Volatile observables keep the compiler from deleting imported calls while
 // remaining independent of any allocator/WASI implementation.

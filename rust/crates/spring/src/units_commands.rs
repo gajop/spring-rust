@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::units_commands::{find_unit_cmd_desc, get_command_params, get_command_queue, get_factory_bugger_off, get_factory_command_count, get_factory_commands, get_factory_counts, get_full_build_queue, get_real_build_queue, get_unit_cmd_descs, get_unit_current_command, give_order_array_to_unit_map};
+
 // UnitsCommands portion of the Spring Core-Wasm guest SDK.
 
 use super::{ApiError, ErrorCode, Result};

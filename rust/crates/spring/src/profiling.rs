@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::profiling::{get_profiler_record_names, get_profiler_time_record};
+
 // Unsynced profiling helpers for the Spring Core-Wasm guest SDK.
 
 use crate::{ApiError, ErrorCode, Result};

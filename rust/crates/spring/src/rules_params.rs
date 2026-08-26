@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::rules_params::{get_feature_rules_param, get_feature_rules_params, get_game_rules_param, get_game_rules_params, get_player_rules_param, get_player_rules_params, get_team_rules_param, get_team_rules_params, get_unit_rules_param, get_unit_rules_params, set_feature_rules_param, set_game_rules_param, set_player_rules_param, set_team_rules_param, set_unit_rules_param};
+
 // RulesParams portion of the Spring Core-Wasm guest SDK.
 
 use super::{ApiError, ErrorCode, Result, unpack_bool, unpack_f32};

@@ -1,7 +1,7 @@
 use std::hint::black_box;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use spring_wasm_core as spring;
+use spring as spring;
 
 #[cfg(benchmark_context_unsynced)]
 spring::export_environment_mask!(spring::rules_unsynced::ENVIRONMENT_MASK);

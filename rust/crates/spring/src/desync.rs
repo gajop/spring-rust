@@ -7,7 +7,7 @@
 // keeps the same timers unsynced-only.
 //
 // This module is deliberately NOT re-exported from the crate root, so reaching
-// it always means writing `spring_wasm_core::desync::` at the call site.
+// it always means writing `spring::desync::` at the call site.
 
 use super::{ApiError, Result};
 

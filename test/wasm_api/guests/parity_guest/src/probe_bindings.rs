@@ -4,88 +4,88 @@ pub(crate) mod bindings {
     pub(crate) mod recoil {
         pub(crate) mod spring_api {
         pub(crate) mod messages {
-            pub(crate) use spring_wasm_core::owned::messages::{is_user_writing, send_lua_rules_msg, send_to_unsynced};
+            pub(crate) use spring::owned::messages::{is_user_writing, send_lua_rules_msg, send_to_unsynced};
         }
         pub(crate) mod cob_script {
-            pub(crate) use spring_wasm_core::owned::cob_script::{get_cob_script_id};
+            pub(crate) use spring::owned::cob_script::{get_cob_script_id};
         }
         pub(crate) mod effects_control {
-            pub(crate) use spring_wasm_core::owned::effects_control::{Float3, NativeExplosionParams, spawn_explosion, spawn_sfx};
+            pub(crate) use spring::owned::effects_control::{Float3, NativeExplosionParams, spawn_explosion, spawn_sfx};
         }
         pub(crate) mod encoding {
-            pub(crate) use spring_wasm_core::owned::encoding::{is_valid_base64, is_valid_base64_url};
+            pub(crate) use spring::owned::encoding::{is_valid_base64, is_valid_base64_url};
         }
         pub(crate) mod feature_control {
-            pub(crate) use spring_wasm_core::owned::feature_control::{Float3, SetFeatureBlockingOptions, add_feature_damage, create_feature_wreck, create_unit_wreck, destroy_feature, set_feature_always_visible, set_feature_blocking, set_feature_collision_volume_data, set_feature_direction, set_feature_fire_time, set_feature_heading_and_up_dir, set_feature_health, set_feature_mass, set_feature_max_health, set_feature_mid_and_aim_pos, set_feature_move_ctrl, set_feature_no_select, set_feature_physics, set_feature_piece_collision_volume_data, set_feature_piece_matrix, set_feature_piece_visible, set_feature_position, set_feature_radius_and_height, set_feature_reclaim, set_feature_resources, set_feature_rotation, set_feature_selection_volume_data, set_feature_smoke_time, set_feature_use_air_los, set_feature_velocity};
+            pub(crate) use spring::owned::feature_control::{Float3, SetFeatureBlockingOptions, add_feature_damage, create_feature_wreck, create_unit_wreck, destroy_feature, set_feature_always_visible, set_feature_blocking, set_feature_collision_volume_data, set_feature_direction, set_feature_fire_time, set_feature_heading_and_up_dir, set_feature_health, set_feature_mass, set_feature_max_health, set_feature_mid_and_aim_pos, set_feature_move_ctrl, set_feature_no_select, set_feature_physics, set_feature_piece_collision_volume_data, set_feature_piece_matrix, set_feature_piece_visible, set_feature_position, set_feature_radius_and_height, set_feature_reclaim, set_feature_resources, set_feature_rotation, set_feature_selection_volume_data, set_feature_smoke_time, set_feature_use_air_los, set_feature_velocity};
         }
         pub(crate) mod feature_defs {
-            pub(crate) use spring_wasm_core::owned::feature_defs::{get_feature_def_count, get_feature_def_energy, get_feature_def_i_ds, get_feature_def_id_by_name, get_feature_def_metal, get_feature_def_name, valid_feature_def_id};
+            pub(crate) use spring::owned::feature_defs::{get_feature_def_count, get_feature_def_energy, get_feature_def_i_ds, get_feature_def_id_by_name, get_feature_def_metal, get_feature_def_name, valid_feature_def_id};
         }
         pub(crate) mod features {
-            pub(crate) use spring_wasm_core::owned::features::{get_all_features, get_feature_ally_team, get_feature_blocking, get_feature_collision_volume_data, get_feature_def_id, get_feature_direction, get_feature_fire_time, get_feature_heading, get_feature_health, get_feature_height, get_feature_mass, get_feature_no_select, get_feature_piece_collision_volume_data, get_feature_position, get_feature_radius, get_feature_resources, get_feature_rotation, get_feature_separation, get_feature_smoke_time, get_feature_team, get_feature_velocity, get_features_in_cylinder, get_features_in_rectangle, valid_feature_id};
+            pub(crate) use spring::owned::features::{get_all_features, get_feature_ally_team, get_feature_blocking, get_feature_collision_volume_data, get_feature_def_id, get_feature_direction, get_feature_fire_time, get_feature_heading, get_feature_health, get_feature_height, get_feature_mass, get_feature_no_select, get_feature_piece_collision_volume_data, get_feature_position, get_feature_radius, get_feature_resources, get_feature_rotation, get_feature_separation, get_feature_smoke_time, get_feature_team, get_feature_velocity, get_features_in_cylinder, get_features_in_rectangle, valid_feature_id};
         }
         pub(crate) mod game {
-            pub(crate) use spring_wasm_core::owned::game::{are_helper_a_is_enabled, fixed_allies, get_ally_team_start_box, get_facing_from_heading, get_gaia_team_id, get_game_frame, get_game_rules_info, get_game_seconds, get_global_los, get_heading_from_facing, get_heading_from_vector, get_side_data_count, get_team_start_position, get_tidal, get_vector_from_heading, get_wind, is_cheating_enabled, is_dev_lua_enabled, is_edit_defs_enabled, is_game_over, is_god_mode_enabled, is_no_cost_enabled};
+            pub(crate) use spring::owned::game::{are_helper_a_is_enabled, fixed_allies, get_ally_team_start_box, get_facing_from_heading, get_gaia_team_id, get_game_frame, get_game_rules_info, get_game_seconds, get_global_los, get_heading_from_facing, get_heading_from_vector, get_side_data_count, get_team_start_position, get_tidal, get_vector_from_heading, get_wind, is_cheating_enabled, is_dev_lua_enabled, is_edit_defs_enabled, is_game_over, is_god_mode_enabled, is_no_cost_enabled};
         }
         pub(crate) mod game_config {
-            pub(crate) use spring_wasm_core::owned::game_config::{SetGodModeOptions, set_cheating_enabled, set_experience_grade, set_god_mode, set_no_pause, set_radar_error_params, set_square_building_mask};
+            pub(crate) use spring::owned::game_config::{SetGodModeOptions, set_cheating_enabled, set_experience_grade, set_god_mode, set_no_pause, set_radar_error_params, set_square_building_mask};
         }
         pub(crate) mod los {
-            pub(crate) use spring_wasm_core::owned::los::{Float3, get_closest_valid_position, get_position_los_state, get_radar_error_params, is_pos_in_air_los, is_pos_in_los, is_pos_in_radar, is_unit_in_air_los, is_unit_in_jammer, is_unit_in_los, is_unit_in_radar};
+            pub(crate) use spring::owned::los::{Float3, get_closest_valid_position, get_position_los_state, get_radar_error_params, is_pos_in_air_los, is_pos_in_los, is_pos_in_radar, is_unit_in_air_los, is_unit_in_jammer, is_unit_in_los, is_unit_in_radar};
         }
         pub(crate) mod math_extra {
-            pub(crate) use spring_wasm_core::owned::math_extra::{Float3, bit_and, bit_bits, bit_inv, bit_or, bit_xor, clamp, diag, erf, hypot, mix, normalize, round, sgn, smooth_step};
+            pub(crate) use spring::owned::math_extra::{Float3, bit_and, bit_bits, bit_inv, bit_or, bit_xor, clamp, diag, erf, hypot, mix, normalize, round, sgn, smooth_step};
         }
         pub(crate) mod metal_map {
-            pub(crate) use spring_wasm_core::owned::metal_map::{get_metal_amount, get_metal_extraction, get_metal_map_size, set_metal_amount};
+            pub(crate) use spring::owned::metal_map::{get_metal_amount, get_metal_extraction, get_metal_map_size, set_metal_amount};
         }
         pub(crate) mod path_finder {
-            pub(crate) use spring_wasm_core::owned::path_finder::{free_path_node_costs_array, get_path_node_cost, get_path_node_costs, init_path_node_costs_array, set_path_node_cost, set_path_node_costs};
+            pub(crate) use spring::owned::path_finder::{free_path_node_costs_array, get_path_node_cost, get_path_node_costs, init_path_node_costs_array, set_path_node_cost, set_path_node_costs};
         }
         pub(crate) mod projectile_control {
-            pub(crate) use spring_wasm_core::owned::projectile_control::{Float3, ProjectileTargetRef, delete_projectile, set_projectile_always_visible, set_projectile_ceg, set_projectile_collision, set_projectile_gravity, set_projectile_ignore_tracking_error, set_projectile_is_intercepted, set_projectile_move_control, set_projectile_position, set_projectile_target, set_projectile_time_to_live, set_projectile_use_air_los, set_projectile_velocity};
+            pub(crate) use spring::owned::projectile_control::{Float3, ProjectileTargetRef, delete_projectile, set_projectile_always_visible, set_projectile_ceg, set_projectile_collision, set_projectile_gravity, set_projectile_ignore_tracking_error, set_projectile_is_intercepted, set_projectile_move_control, set_projectile_position, set_projectile_target, set_projectile_time_to_live, set_projectile_use_air_los, set_projectile_velocity};
         }
         pub(crate) mod projectiles {
-            pub(crate) use spring_wasm_core::owned::projectiles::{GetAllProjectilesOptions, get_all_projectiles, get_projectile_ally_team_id, get_projectile_def_id, get_projectile_direction, get_projectile_gravity, get_projectile_is_intercepted, get_projectile_owner_id, get_projectile_position, get_projectile_target, get_projectile_team_id, get_projectile_time_to_live, get_projectile_type, get_projectile_velocity};
+            pub(crate) use spring::owned::projectiles::{GetAllProjectilesOptions, get_all_projectiles, get_projectile_ally_team_id, get_projectile_def_id, get_projectile_direction, get_projectile_gravity, get_projectile_is_intercepted, get_projectile_owner_id, get_projectile_position, get_projectile_target, get_projectile_team_id, get_projectile_time_to_live, get_projectile_type, get_projectile_velocity};
         }
         pub(crate) mod team_control {
-            pub(crate) use spring_wasm_core::owned::team_control::{Float3, game_over, set_ally, set_ally_team_start_box, set_global_los, set_player_ready_state, set_team_start_position, transfer_team_max_units};
+            pub(crate) use spring::owned::team_control::{Float3, game_over, set_ally, set_ally_team_start_box, set_global_los, set_player_ready_state, set_team_start_position, transfer_team_max_units};
         }
         pub(crate) mod teams {
-            pub(crate) use spring_wasm_core::owned::teams::{are_players_allied, are_teams_allied, get_ally_team_list, get_player_controlled_unit, get_player_list, get_player_list_in_ally_team, get_player_list_in_team, get_team_ally_team_id, get_team_list, get_team_lua_ai, get_team_max_units, get_team_unit_stats};
+            pub(crate) use spring::owned::teams::{are_players_allied, are_teams_allied, get_ally_team_list, get_player_controlled_unit, get_player_list, get_player_list_in_ally_team, get_player_list_in_team, get_team_ally_team_id, get_team_list, get_team_lua_ai, get_team_max_units, get_team_unit_stats};
         }
         pub(crate) mod terrain {
-            pub(crate) use spring_wasm_core::owned::terrain::{get_grass, get_ground_blocked, get_ground_extremes, get_ground_height, get_ground_normal, get_ground_orig_height, get_smooth_mesh_height, get_water_level, get_water_plane_level, is_pos_in_map};
+            pub(crate) use spring::owned::terrain::{get_grass, get_ground_blocked, get_ground_extremes, get_ground_height, get_ground_normal, get_ground_orig_height, get_smooth_mesh_height, get_water_level, get_water_plane_level, is_pos_in_map};
         }
         pub(crate) mod terrain_control {
-            pub(crate) use spring_wasm_core::owned::terrain_control::{add_grass, adjust_height_map, adjust_original_height_map, adjust_smooth_mesh, level_height_map, level_original_height_map, level_smooth_mesh, rebuild_smooth_mesh, remove_grass, revert_height_map, revert_original_height_map, revert_smooth_mesh, set_tidal, set_wind};
+            pub(crate) use spring::owned::terrain_control::{add_grass, adjust_height_map, adjust_original_height_map, adjust_smooth_mesh, level_height_map, level_original_height_map, level_smooth_mesh, rebuild_smooth_mesh, remove_grass, revert_height_map, revert_original_height_map, revert_smooth_mesh, set_tidal, set_wind};
         }
         pub(crate) mod unit_control {
-            pub(crate) use spring_wasm_core::owned::unit_control::{Float3, NumberOrBool, SetUnitBlockingOptions, SetUnitLeavesGhostOptions, SetUnitTargetOptions, SetUnitUseWeaponsOptions, UnitCostOverrides, UnitHealthValue, UnitTargetRef, add_unit_damage, add_unit_experience, add_unit_impulse, add_unit_resource, add_unit_seismic_ping, clear_unit_goal, force_unit_collision_update, get_unit_feature_separation, get_unit_leaves_ghost, get_unit_physical_state, set_unit_always_visible, set_unit_armored, set_unit_blocking, set_unit_build_speed, set_unit_buildee_radius, set_unit_cloak, set_unit_collision_volume_data, set_unit_costs, set_unit_crashing, set_unit_direction, set_unit_experience, set_unit_harvest_storage, set_unit_heading_and_up_dir, set_unit_health, set_unit_land_goal, set_unit_leaves_ghost, set_unit_loading_transport, set_unit_los_mask, set_unit_los_state, set_unit_mass, set_unit_max_health, set_unit_max_range, set_unit_metal_extraction, set_unit_mid_and_aim_pos, set_unit_move_goal, set_unit_nano_pieces, set_unit_neutral, set_unit_physical_state_bit, set_unit_physics, set_unit_piece_collision_volume_data, set_unit_piece_matrix, set_unit_piece_parent, set_unit_piece_visible, set_unit_pos_error_params, set_unit_position, set_unit_radius_and_height, set_unit_resourcing, set_unit_rotation, set_unit_seismic_signature, set_unit_shield_recharge_delay, set_unit_shield_state, set_unit_sonar_stealth, set_unit_stealth, set_unit_stockpile, set_unit_storage, set_unit_target, set_unit_tooltip, set_unit_use_air_los, set_unit_use_weapons, set_unit_velocity, set_unit_weapon_damages, set_unit_weapon_state, unit_finish_command, unit_weapon_fire, unit_weapon_hold_fire, use_unit_resource};
+            pub(crate) use spring::owned::unit_control::{Float3, NumberOrBool, SetUnitBlockingOptions, SetUnitLeavesGhostOptions, SetUnitTargetOptions, SetUnitUseWeaponsOptions, UnitCostOverrides, UnitHealthValue, UnitTargetRef, add_unit_damage, add_unit_experience, add_unit_impulse, add_unit_resource, add_unit_seismic_ping, clear_unit_goal, force_unit_collision_update, get_unit_feature_separation, get_unit_leaves_ghost, get_unit_physical_state, set_unit_always_visible, set_unit_armored, set_unit_blocking, set_unit_build_speed, set_unit_buildee_radius, set_unit_cloak, set_unit_collision_volume_data, set_unit_costs, set_unit_crashing, set_unit_direction, set_unit_experience, set_unit_harvest_storage, set_unit_heading_and_up_dir, set_unit_health, set_unit_land_goal, set_unit_leaves_ghost, set_unit_loading_transport, set_unit_los_mask, set_unit_los_state, set_unit_mass, set_unit_max_health, set_unit_max_range, set_unit_metal_extraction, set_unit_mid_and_aim_pos, set_unit_move_goal, set_unit_nano_pieces, set_unit_neutral, set_unit_physical_state_bit, set_unit_physics, set_unit_piece_collision_volume_data, set_unit_piece_matrix, set_unit_piece_parent, set_unit_piece_visible, set_unit_pos_error_params, set_unit_position, set_unit_radius_and_height, set_unit_resourcing, set_unit_rotation, set_unit_seismic_signature, set_unit_shield_recharge_delay, set_unit_shield_state, set_unit_sonar_stealth, set_unit_stealth, set_unit_stockpile, set_unit_storage, set_unit_target, set_unit_tooltip, set_unit_use_air_los, set_unit_use_weapons, set_unit_velocity, set_unit_weapon_damages, set_unit_weapon_state, unit_finish_command, unit_weapon_fire, unit_weapon_hold_fire, use_unit_resource};
         }
         pub(crate) mod unit_defs {
-            pub(crate) use spring_wasm_core::owned::unit_defs::{get_unit_def_costs, get_unit_def_count, get_unit_def_health, get_unit_def_i_ds, get_unit_def_id_by_name, get_unit_def_speed, valid_unit_def_id};
+            pub(crate) use spring::owned::unit_defs::{get_unit_def_costs, get_unit_def_count, get_unit_def_health, get_unit_def_i_ds, get_unit_def_id_by_name, get_unit_def_speed, valid_unit_def_id};
         }
         pub(crate) mod units_commands {
-            pub(crate) use spring_wasm_core::owned::units_commands::{find_unit_cmd_desc, get_factory_command_count, get_real_build_queue, get_unit_command_count};
+            pub(crate) use spring::owned::units_commands::{find_unit_cmd_desc, get_factory_command_count, get_real_build_queue, get_unit_command_count};
         }
         pub(crate) mod units_info {
-            pub(crate) use spring_wasm_core::owned::units_info::{GetUnitPositionOptions, UnitStatesOptions, get_unit_ally_team, get_unit_armored, get_unit_base_position, get_unit_blocking, get_unit_build_facing, get_unit_buildee_radius, get_unit_collision_volume_data, get_unit_cost_table, get_unit_costs, get_unit_current_build_power, get_unit_def_id, get_unit_direction, get_unit_effective_build_range, get_unit_experience, get_unit_flanking, get_unit_harvest_storage, get_unit_heading, get_unit_health, get_unit_height, get_unit_in_build_stance, get_unit_is_active, get_unit_is_being_built, get_unit_is_building, get_unit_is_cloaked, get_unit_is_dead, get_unit_is_stunned, get_unit_is_transporting, get_unit_last_attacked_piece, get_unit_los_state, get_unit_mass, get_unit_metal_extraction, get_unit_move_def_id, get_unit_nano_pieces, get_unit_neutral, get_unit_piece_collision_volume_data, get_unit_pos_error_params, get_unit_position, get_unit_radius, get_unit_resources, get_unit_rotation, get_unit_seismic_signature, get_unit_self_d_time, get_unit_states, get_unit_storage, get_unit_team, get_unit_tooltip, get_unit_transporter, get_unit_vectors, get_unit_velocity, get_unit_worker_task};
+            pub(crate) use spring::owned::units_info::{GetUnitPositionOptions, UnitStatesOptions, get_unit_ally_team, get_unit_armored, get_unit_base_position, get_unit_blocking, get_unit_build_facing, get_unit_buildee_radius, get_unit_collision_volume_data, get_unit_cost_table, get_unit_costs, get_unit_current_build_power, get_unit_def_id, get_unit_direction, get_unit_effective_build_range, get_unit_experience, get_unit_flanking, get_unit_harvest_storage, get_unit_heading, get_unit_health, get_unit_height, get_unit_in_build_stance, get_unit_is_active, get_unit_is_being_built, get_unit_is_building, get_unit_is_cloaked, get_unit_is_dead, get_unit_is_stunned, get_unit_is_transporting, get_unit_last_attacked_piece, get_unit_los_state, get_unit_mass, get_unit_metal_extraction, get_unit_move_def_id, get_unit_nano_pieces, get_unit_neutral, get_unit_piece_collision_volume_data, get_unit_pos_error_params, get_unit_position, get_unit_radius, get_unit_resources, get_unit_rotation, get_unit_seismic_signature, get_unit_self_d_time, get_unit_states, get_unit_storage, get_unit_team, get_unit_tooltip, get_unit_transporter, get_unit_vectors, get_unit_velocity, get_unit_worker_task};
         }
         pub(crate) mod units_pieces {
-            pub(crate) use spring_wasm_core::owned::units_pieces::{get_feature_piece_direction, get_feature_piece_matrix, get_feature_piece_pos_dir, get_feature_piece_position, get_feature_root_piece, get_model_root_piece, get_unit_piece_direction, get_unit_piece_matrix, get_unit_piece_pos_dir, get_unit_piece_position, get_unit_root_piece, get_unit_script_piece};
+            pub(crate) use spring::owned::units_pieces::{get_feature_piece_direction, get_feature_piece_matrix, get_feature_piece_pos_dir, get_feature_piece_position, get_feature_root_piece, get_model_root_piece, get_unit_piece_direction, get_unit_piece_matrix, get_unit_piece_pos_dir, get_unit_piece_position, get_unit_root_piece, get_unit_script_piece};
         }
         pub(crate) mod units_query {
-            pub(crate) use spring_wasm_core::owned::units_query::{Float3, GetClosestEnemyUnitOptions, GetUnitNearestEnemyOptions, GetUnitSeparationOptions, get_all_units, get_closest_enemy_unit, get_team_unit_count, get_team_unit_def_count, get_team_units, get_unit_nearest_ally, get_unit_nearest_enemy, get_unit_separation, valid_unit_id};
+            pub(crate) use spring::owned::units_query::{Float3, GetClosestEnemyUnitOptions, GetUnitNearestEnemyOptions, GetUnitSeparationOptions, get_all_units, get_closest_enemy_unit, get_team_unit_count, get_team_unit_def_count, get_team_units, get_unit_nearest_ally, get_unit_nearest_enemy, get_unit_separation, valid_unit_id};
         }
         pub(crate) mod units_weapons {
-            pub(crate) use spring_wasm_core::owned::units_weapons::{Float3, GetUnitWeaponHaveFreeLineOfFireOptions, GetUnitWeaponTestTargetOptions, GetUnitWeaponTryTargetOptions, get_unit_max_range, get_unit_weapon_can_fire, get_unit_weapon_have_free_line_of_fire, get_unit_weapon_target, get_unit_weapon_test_range, get_unit_weapon_test_target, get_unit_weapon_try_target, get_unit_weapon_vectors};
+            pub(crate) use spring::owned::units_weapons::{Float3, GetUnitWeaponHaveFreeLineOfFireOptions, GetUnitWeaponTestTargetOptions, GetUnitWeaponTryTargetOptions, get_unit_max_range, get_unit_weapon_can_fire, get_unit_weapon_have_free_line_of_fire, get_unit_weapon_target, get_unit_weapon_test_range, get_unit_weapon_test_target, get_unit_weapon_try_target, get_unit_weapon_vectors};
         }
         pub(crate) mod utils {
-            pub(crate) use spring_wasm_core::owned::utils::{Float3, TestMoveOrderOptions, closest_build_pos, get_cegid, get_unit_def_dimensions, pos2_build_pos, test_build_order, test_move_order};
+            pub(crate) use spring::owned::utils::{Float3, TestMoveOrderOptions, closest_build_pos, get_cegid, get_unit_def_dimensions, pos2_build_pos, test_build_order, test_move_order};
         }
         pub(crate) mod weapon_defs {
-            pub(crate) use spring_wasm_core::owned::weapon_defs::{get_weapon_def_count, get_weapon_def_damage, get_weapon_def_i_ds, get_weapon_def_id, get_weapon_def_name, get_weapon_def_range, valid_weapon_def_id};
+            pub(crate) use spring::owned::weapon_defs::{get_weapon_def_count, get_weapon_def_damage, get_weapon_def_i_ds, get_weapon_def_id, get_weapon_def_name, get_weapon_def_range, valid_weapon_def_id};
         }
         }
     }

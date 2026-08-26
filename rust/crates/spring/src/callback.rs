@@ -42,7 +42,7 @@ macro_rules! export_callback_dispatch {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
         #[unsafe(export_name = "spring:callback/dispatch")]
-        pub extern "C" fn __spring_wasm_core_callback_dispatch(callback_id: i32, user_data: i32) {
+        pub extern "C" fn __spring_callback_dispatch(callback_id: i32, user_data: i32) {
             $handler(callback_id as u32, user_data as u32)
         }
     };

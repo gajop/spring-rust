@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use spring_wasm_core as spring;
+use spring as spring;
 
 static BRUSH_SIZE: AtomicUsize = AtomicUsize::new(0);
 

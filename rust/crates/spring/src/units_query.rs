@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::units_query::{get_closest_enemy_unit, get_render_units, get_render_units_draw_flag_changed, get_team_units_by_defs, get_team_units_counts, get_team_units_sorted, get_units_in_planes};
+
 // UnitsQuery portion of the Spring Core-Wasm guest SDK.
 
 use super::{ApiError, ErrorCode, Result};

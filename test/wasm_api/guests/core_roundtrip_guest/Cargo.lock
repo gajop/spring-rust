@@ -6,9 +6,9 @@ version = 4
 name = "recoil-wasm-core-roundtrip-guest"
 version = "0.1.0"
 dependencies = [
- "spring-wasm-core",
+ "spring",
 ]
 
 [[package]]
-name = "spring-wasm-core"
+name = "spring"
 version = "0.1.0"

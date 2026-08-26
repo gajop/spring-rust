@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::config::{get_config_float, get_config_int, get_config_params, get_config_string, get_log_sections, set_config_float, set_config_int, set_config_string, set_log_section_filter_level};
+
 // Config portion of the Spring Core-Wasm guest SDK.
 //
 // `list<string>` is represented as one descriptor table plus one packed byte

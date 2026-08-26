@@ -1,4 +1,4 @@
-use spring_wasm_core as spring;
+use spring as spring;
 
 pub fn scale() -> f64 {
     option_env!("SPRING_BENCHMARK_SCALE")

@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::math_extra::{bit_and, bit_bits, bit_inv, bit_or, bit_xor, clamp, diag, erf, hypot, mix, round, sgn, smooth_step};
+
 use super::{ApiError, ErrorCode, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq)]

@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::unit_defs::{get_unit_def_by_id, get_unit_def_classify, get_unit_def_costs, get_unit_def_count, get_unit_def_custom_param, get_unit_def_custom_param_keys, get_unit_def_health, get_unit_def_id_by_name, get_unit_def_i_ds, get_unit_def_param_bool, get_unit_def_param_float, get_unit_def_param_int, get_unit_def_param_keys, get_unit_def_param_string, get_unit_def_param_type, get_unit_def_speed, valid_unit_def_id};
+
 // UnitDefs byte-string portion of the Spring Core-Wasm guest SDK.
 
 use super::{ApiError, ErrorCode, Result};

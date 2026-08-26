@@ -3,6 +3,11 @@
 //! Return storage is supplied up front so a mutating COB call is never retried
 //! merely to discover output capacity.
 
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::cob_script::{get_cob_script_id};
+
 use super::{ApiError, ErrorCode, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

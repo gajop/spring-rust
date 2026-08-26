@@ -440,19 +440,19 @@ fn core_update(delta_seconds: f32) {
 }
 
 #[cfg(feature = "core")]
-spring_wasm_core::export_game_frame!(core_game_frame);
+spring::export_game_frame!(core_game_frame);
 #[cfg(feature = "core")]
-spring_wasm_core::export_game_frame_post!(core_game_frame_post);
+spring::export_game_frame_post!(core_game_frame_post);
 #[cfg(feature = "core")]
-spring_wasm_core::export_update!(core_update);
+spring::export_update!(core_update);
 
 #[cfg(all(feature = "core", feature = "core_rules_synced"))]
-spring_wasm_core::export_environment_mask!(spring_wasm_core::rules_synced::ENVIRONMENT_MASK);
+spring::export_environment_mask!(spring::rules_synced::ENVIRONMENT_MASK);
 #[cfg(all(feature = "core", feature = "core_rules_unsynced"))]
-spring_wasm_core::export_environment_mask!(spring_wasm_core::rules_unsynced::ENVIRONMENT_MASK);
+spring::export_environment_mask!(spring::rules_unsynced::ENVIRONMENT_MASK);
 #[cfg(all(feature = "core", feature = "core_gaia_synced"))]
-spring_wasm_core::export_environment_mask!(spring_wasm_core::gaia_synced::ENVIRONMENT_MASK);
+spring::export_environment_mask!(spring::gaia_synced::ENVIRONMENT_MASK);
 #[cfg(all(feature = "core", feature = "core_gaia_unsynced"))]
-spring_wasm_core::export_environment_mask!(spring_wasm_core::gaia_unsynced::ENVIRONMENT_MASK);
+spring::export_environment_mask!(spring::gaia_unsynced::ENVIRONMENT_MASK);
 #[cfg(all(feature = "core", feature = "core_ui"))]
-spring_wasm_core::export_environment_mask!(spring_wasm_core::ui::ENVIRONMENT_MASK);
+spring::export_environment_mask!(spring::ui::ENVIRONMENT_MASK);

@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::messages::{get_console_buffer, get_current_tooltip, is_user_writing};
+
 // Messages portion of the Spring Core-Wasm guest SDK.
 
 use super::{ApiError, ErrorCode, Result, unpack_bool};

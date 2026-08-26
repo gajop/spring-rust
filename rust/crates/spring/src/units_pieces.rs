@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::units_pieces::{get_feature_piece_direction, get_feature_piece_info, get_feature_piece_list, get_feature_piece_map, get_feature_piece_matrix, get_feature_piece_pos_dir, get_feature_piece_position, get_feature_root_piece, get_model_piece_list, get_model_piece_map, get_model_root_piece, get_unit_piece_direction, get_unit_piece_info, get_unit_piece_list, get_unit_piece_map, get_unit_piece_matrix, get_unit_piece_pos_dir, get_unit_piece_position, get_unit_root_piece, get_unit_script_names, get_unit_script_piece};
+
 // UnitsPieces portion of the Spring Core-Wasm guest SDK.
 //
 // Script names use the reviewed flat list<string> ABI: one descriptor table

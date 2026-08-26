@@ -1,3 +1,8 @@
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::terrain::{get_ground_info, get_terrain_type_data};
+
 // Fixed-width Terrain reads for the Spring Core-Wasm guest SDK.
 
 use super::{ApiError, ErrorCode, Result};

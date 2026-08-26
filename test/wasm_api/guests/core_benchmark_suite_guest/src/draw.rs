@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use spring_wasm_core as spring;
+use spring as spring;
 
 use crate::common;
 

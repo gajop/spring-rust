@@ -6,4 +6,4 @@ members = [
     "crates/spring-native",
 ]
 resolver = "2"
-exclude = ["crates/spring-wasm-core"]
+exclude = ["crates/spring"]

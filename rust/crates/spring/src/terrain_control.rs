@@ -1,5 +1,10 @@
 //! Reviewed synchronous terrain-control callback imports.
 
+
+
+#[cfg(feature = "alloc")]
+pub use crate::owned::terrain_control::{add_grass, add_height_map, add_original_height_map, add_smooth_mesh, adjust_height_map, adjust_original_height_map, adjust_smooth_mesh, level_original_height_map, level_smooth_mesh, rebuild_smooth_mesh, remove_grass, revert_height_map, revert_original_height_map, revert_smooth_mesh, set_map_square_terrain_type, set_original_height_map, set_smooth_mesh, set_terrain_type_data, set_tidal, set_wind};
+
 use super::{Result, SyncCallback};
 
 #[cfg(target_arch = "wasm32")]
