@@ -1,5 +1,5 @@
     pub mod callins {
-        use super::{Result, String, Vec};
+        use super::{String, Vec};
 
         #[derive(Debug, Clone, PartialEq)]
         pub struct ActivateMenuQuery {

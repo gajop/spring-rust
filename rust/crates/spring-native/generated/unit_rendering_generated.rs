@@ -30,6 +30,15 @@ impl From<GetVisibleProjectilesOptions> for sys::GetVisibleProjectilesOptions {
     }
 }
 
+/// The complete result tuple returned by [`get_unit_selection_volume_data`].
+pub type GetUnitSelectionVolumeDataValue = (sys::Float3, sys::Float3, i32, bool, i32, bool);
+
+/// The complete result tuple returned by [`get_unit_icon_data`].
+pub type GetUnitIconDataValue = (Option<String>, [f32; 4], f32, f32, bool);
+
+/// The complete result tuple returned by [`get_unit_icon`].
+pub type GetUnitIconValue = (Option<String>, [f32; 4], f32, f32, bool);
+
 impl<'a> UnitRendering<'a> {
     pub fn get_unit_no_draw(&self, unit_id: i32) -> Result<bool, Error> {
         unsafe {
@@ -182,7 +191,7 @@ impl<'a> UnitRendering<'a> {
         }
     }
 
-    pub fn get_unit_selection_volume_data(&self, unit_id: i32) -> Result<(sys::Float3, sys::Float3, i32, bool, i32, bool), Error> {
+    pub fn get_unit_selection_volume_data(&self, unit_id: i32) -> Result<GetUnitSelectionVolumeDataValue, Error> {
         unsafe {
             let query = sys::GetUnitSelectionVolumeDataQuery {
                 unitID: unit_id,
@@ -203,7 +212,7 @@ impl<'a> UnitRendering<'a> {
         }
     }
 
-    pub fn get_unit_icon_data(&self, unit_id: i32, full_data: bool) -> Result<(Option<String>, [f32; 4], f32, f32, bool), Error> {
+    pub fn get_unit_icon_data(&self, unit_id: i32, full_data: bool) -> Result<GetUnitIconDataValue, Error> {
         unsafe {
             let query = sys::GetUnitIconDataQuery {
                 unitID: unit_id,
@@ -230,7 +239,7 @@ impl<'a> UnitRendering<'a> {
         }
     }
 
-    pub fn get_unit_icon(&self, unit_id: i32) -> Result<(Option<String>, [f32; 4], f32, f32, bool), Error> {
+    pub fn get_unit_icon(&self, unit_id: i32) -> Result<GetUnitIconValue, Error> {
         unsafe {
             let query = sys::GetUnitIconQuery {
                 unitID: unit_id,
@@ -311,7 +320,7 @@ impl<'a> UnitRendering<'a> {
         unsafe {
             let query = sys::GetVisibleUnitsQuery {
                 teamID: team_id,
-                radius: radius,
+                radius,
                 includeIcons: include_icons,
             };
             let mut result = MaybeUninit::<sys::GetVisibleUnitsResult>::zeroed();
@@ -335,7 +344,7 @@ impl<'a> UnitRendering<'a> {
         unsafe {
             let query = sys::GetVisibleFeaturesQuery {
                 allyTeamID: ally_team_id,
-                radius: radius,
+                radius,
                 options: options.into(),
             };
             let mut result = MaybeUninit::<sys::GetVisibleFeaturesResult>::zeroed();
@@ -381,11 +390,11 @@ impl<'a> UnitRendering<'a> {
     pub fn get_units_in_screen_rectangle(&self, left: f32, top: f32, right: f32, bottom: f32, allegiance: i32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetUnitsInScreenRectangleQuery {
-                left: left,
-                top: top,
-                right: right,
-                bottom: bottom,
-                allegiance: allegiance,
+                left,
+                top,
+                right,
+                bottom,
+                allegiance,
             };
             let mut result = MaybeUninit::<sys::GetUnitsInScreenRectangleResult>::zeroed();
             let func = self.api.GetUnitsInScreenRectangle.expect("GetUnitsInScreenRectangle function pointer must be initialized");
@@ -407,10 +416,10 @@ impl<'a> UnitRendering<'a> {
     pub fn get_features_in_screen_rectangle(&self, left: f32, top: f32, right: f32, bottom: f32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetFeaturesInScreenRectangleQuery {
-                left: left,
-                top: top,
-                right: right,
-                bottom: bottom,
+                left,
+                top,
+                right,
+                bottom,
             };
             let mut result = MaybeUninit::<sys::GetFeaturesInScreenRectangleResult>::zeroed();
             let func = self.api.GetFeaturesInScreenRectangle.expect("GetFeaturesInScreenRectangle function pointer must be initialized");
@@ -433,7 +442,7 @@ impl<'a> UnitRendering<'a> {
         unsafe {
             let query = sys::IsUnitVisibleQuery {
                 unitID: unit_id,
-                radius: radius,
+                radius,
                 checkIcon: check_icon,
             };
             let mut result = MaybeUninit::<sys::IsUnitVisibleResult>::zeroed();

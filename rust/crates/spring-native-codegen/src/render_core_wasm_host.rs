@@ -615,12 +615,8 @@ fn render_wire_write(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
-            let nested = render_wire_write(
-                element,
-                &format!("{value}[{index}]"),
-                records,
-                indent + 1,
-            );
+            let nested =
+                render_wire_write(element, &format!("{value}[{index}]"), records, indent + 1);
             format!(
                 "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
             )

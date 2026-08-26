@@ -19,11 +19,11 @@ use std::collections::BTreeMap;
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
 use crate::render_core_wasm::{self, CoreType, FunctionPlan, InputStrategy, ResultStrategy};
 use crate::render_core_wasm_wire::{
-    align_up, borrowed_element_bytes, borrowed_list_element, count_field, direct_type,
-    fixed_wire_field, fixed_wire_layout, fixed_wire_type, input_descriptor_layout,
+    OutputLayout, align_up, borrowed_element_bytes, borrowed_list_element, count_field,
+    direct_type, fixed_wire_field, fixed_wire_layout, fixed_wire_type, input_descriptor_layout,
     input_field_supported, layout_fields, native_cast, native_cpp_type, optional_string,
     presence_field, render_input_variable, render_wire_read_field, render_wire_write,
-    render_wire_write_field, sanitize, variable_type, OutputLayout,
+    render_wire_write_field, sanitize, variable_type,
 };
 
 pub fn render_header() -> String {
@@ -402,7 +402,8 @@ fn render_capacity_validation(
             "    if (!state->memory.Contains({stem}Pointer, {stem}Capacity)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
         ),
         SemanticType::List { element } => {
-            let (bytes, _) = fixed_wire_layout(element, records).expect("eligible output list element");
+            let (bytes, _) =
+                fixed_wire_layout(element, records).expect("eligible output list element");
             format!(
                 "    const std::uint64_t {stem}CapacityBytes = static_cast<std::uint64_t>({stem}Capacity) * {bytes}u;\n    if ({stem}CapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains({stem}Pointer, static_cast<std::size_t>({stem}CapacityBytes))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
             )
@@ -452,8 +453,15 @@ fn render_output_copy(field: &FieldModel, records: &BTreeMap<String, RecordModel
             )
         }
         SemanticType::List { element } => {
-            let (element_bytes, element_alignment) = fixed_wire_layout(element, records).expect("eligible output list element");
-            let item_write = render_wire_write(element, &format!("result.{}[coreIndex]", field.name), records, &format!("{stem}Writer"), 2);
+            let (element_bytes, element_alignment) =
+                fixed_wire_layout(element, records).expect("eligible output list element");
+            let item_write = render_wire_write(
+                element,
+                &format!("result.{}[coreIndex]", field.name),
+                records,
+                &format!("{stem}Writer"),
+                2,
+            );
             format!(
                 "    if ({stem}Required != 0) {{\n        const std::size_t {stem}Bytes = static_cast<std::size_t>({stem}Required) * {element_bytes}u;\n        std::span<std::uint8_t> {stem}Wire;\n        if (!state->memory.MutableView({stem}Pointer, {stem}Bytes, {stem}Wire)) return Trap(\"generated Core variable output range changed unexpectedly\");\n        WireWriter {stem}Writer({stem}Wire);\n        for (std::uint32_t coreIndex = 0; coreIndex < {stem}Required; ++coreIndex) {{\n{item_write}        }}\n        if (!{stem}Writer.Finish({element_alignment}u)) return Trap(\"generated Core list output layout mismatch\");\n    }}\n"
             )
@@ -485,8 +493,16 @@ fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
 fn render_registration(plan: &FunctionPlan, callback: &str) -> String {
     let params = kind_array("params", &plan.direct_params);
     let results = kind_array("results", &plan.direct_results);
-    format!("    {{\n{params}{results}        if (!DefineGeneratedVariableIo(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
-        params=params, results=results, module=plan.import_module, name=plan.import_name, pc=plan.direct_params.len(), rc=plan.direct_results.len(), callback=callback)
+    format!(
+        "    {{\n{params}{results}        if (!DefineGeneratedVariableIo(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
+        params = params,
+        results = results,
+        module = plan.import_module,
+        name = plan.import_name,
+        pc = plan.direct_params.len(),
+        rc = plan.direct_results.len(),
+        callback = callback
+    )
 }
 
 fn kind_array(name: &str, kinds: &[CoreType]) -> String {

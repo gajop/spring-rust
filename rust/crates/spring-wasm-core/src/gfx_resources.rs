@@ -50,7 +50,7 @@ impl Default for GfxTextureParams {
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:gfx")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "create-texture"]
         pub fn create_texture(
             xsize: i32,

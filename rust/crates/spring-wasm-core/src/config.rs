@@ -211,7 +211,7 @@ pub(crate) fn decode_string_list_result<'a>(
 #[cfg(target_arch = "wasm32")]
 mod config_raw {
     #[link(wasm_import_module = "spring:config")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "get-log-sections-flat"]
         pub fn get_log_sections_flat(
             descriptor_ptr: i32,

@@ -151,8 +151,8 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::CreateUnitQuery {
                 unitDef: unit_def,
-                pos: pos,
-                facing: facing,
+                pos,
+                facing,
                 teamID: team_id,
                 options: options.into(),
             };
@@ -187,7 +187,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::TransferUnitQuery {
                 unitID: unit_id,
                 newTeamID: new_team_id,
-                given: given,
+                given,
                 adjustUnitLimit: adjust_unit_limit,
             };
             let mut result = MaybeUninit::<sys::TransferUnitResult>::zeroed();
@@ -205,10 +205,10 @@ impl<'a> UnitControl<'a> {
             let query = sys::GiveOrderToUnitQuery {
                 unitID: unit_id,
                 cmdID: cmd_id,
-                params: params.as_ptr() as *mut _,
+                params: params.as_ptr(),
                 paramCount: params.len() as u32,
-                options: options,
-                timeout: timeout,
+                options,
+                timeout,
             };
             let mut result = MaybeUninit::<sys::GiveOrderToUnitResult>::zeroed();
             let func = self.api.GiveOrderToUnit.expect("GiveOrderToUnit function pointer must be initialized");
@@ -226,10 +226,10 @@ impl<'a> UnitControl<'a> {
                 unitIDs: unit_ids.as_ptr(),
                 count: unit_ids.len() as u32,
                 cmdID: cmd_id,
-                params: params.as_ptr() as *mut _,
+                params: params.as_ptr(),
                 paramCount: params.len() as u32,
-                options: options,
-                timeout: timeout,
+                options,
+                timeout,
             };
             let mut result = MaybeUninit::<sys::GiveOrderToUnitArrayResult>::zeroed();
             let func = self.api.GiveOrderToUnitArray.expect("GiveOrderToUnitArray function pointer must be initialized");
@@ -265,7 +265,7 @@ impl<'a> UnitControl<'a> {
                 unitCount: unit_ids.len() as u32,
                 commands: commands.as_ptr(),
                 commandCount: commands.len() as u32,
-                pairwise: pairwise,
+                pairwise,
             };
             let mut result = MaybeUninit::<sys::GiveOrderArrayToUnitArrayResult>::zeroed();
             let func = self.api.GiveOrderArrayToUnitArray.expect("GiveOrderArrayToUnitArray function pointer must be initialized");
@@ -296,7 +296,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitHealthQuery {
                 unitID: unit_id,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::SetUnitHealthResult>::zeroed();
             let func = self.api.SetUnitHealth.expect("SetUnitHealth function pointer must be initialized");
@@ -328,7 +328,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitExperienceQuery {
                 unitID: unit_id,
-                experience: experience,
+                experience,
             };
             let mut result = MaybeUninit::<sys::SetUnitExperienceResult>::zeroed();
             let func = self.api.SetUnitExperience.expect("SetUnitExperience function pointer must be initialized");
@@ -344,7 +344,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::AddUnitExperienceQuery {
                 unitID: unit_id,
-                experience: experience,
+                experience,
             };
             let mut result = MaybeUninit::<sys::AddUnitExperienceResult>::zeroed();
             let func = self.api.AddUnitExperience.expect("AddUnitExperience function pointer must be initialized");
@@ -360,7 +360,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitNeutralQuery {
                 unitID: unit_id,
-                neutral: neutral,
+                neutral,
             };
             let mut result = MaybeUninit::<sys::SetUnitNeutralResult>::zeroed();
             let func = self.api.SetUnitNeutral.expect("SetUnitNeutral function pointer must be initialized");
@@ -378,7 +378,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::SetUnitResourcingQuery {
                 unitID: unit_id,
                 type_: r#type_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::SetUnitResourcingResult>::zeroed();
             let func = self.api.SetUnitResourcing.expect("SetUnitResourcing function pointer must be initialized");
@@ -394,8 +394,8 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitMetalExtractionQuery {
                 unitID: unit_id,
-                depth: depth,
-                range: range,
+                depth,
+                range,
             };
             let mut result = MaybeUninit::<sys::SetUnitMetalExtractionResult>::zeroed();
             let func = self.api.SetUnitMetalExtraction.expect("SetUnitMetalExtraction function pointer must be initialized");
@@ -411,7 +411,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitPositionQuery {
                 unitID: unit_id,
-                pos: pos,
+                pos,
             };
             let mut result = MaybeUninit::<sys::SetUnitPositionResult>::zeroed();
             let func = self.api.SetUnitPosition.expect("SetUnitPosition function pointer must be initialized");
@@ -427,7 +427,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitVelocityQuery {
                 unitID: unit_id,
-                velocity: velocity,
+                velocity,
             };
             let mut result = MaybeUninit::<sys::SetUnitVelocityResult>::zeroed();
             let func = self.api.SetUnitVelocity.expect("SetUnitVelocity function pointer must be initialized");
@@ -443,7 +443,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitRotationQuery {
                 unitID: unit_id,
-                rotation: rotation,
+                rotation,
             };
             let mut result = MaybeUninit::<sys::SetUnitRotationResult>::zeroed();
             let func = self.api.SetUnitRotation.expect("SetUnitRotation function pointer must be initialized");
@@ -459,10 +459,10 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitPhysicsQuery {
                 unitID: unit_id,
-                pos: pos,
-                velocity: velocity,
-                rotation: rotation,
-                drag: drag,
+                pos,
+                velocity,
+                rotation,
+                drag,
             };
             let mut result = MaybeUninit::<sys::SetUnitPhysicsResult>::zeroed();
             let func = self.api.SetUnitPhysics.expect("SetUnitPhysics function pointer must be initialized");
@@ -478,11 +478,11 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::AddUnitDamageQuery {
                 unitID: unit_id,
-                damage: damage,
+                damage,
                 paralyzeTime: paralyze_time,
                 weaponDefID: weapon_def_id,
                 attackerID: attacker_id,
-                impulse: impulse,
+                impulse,
             };
             let mut result = MaybeUninit::<sys::AddUnitDamageResult>::zeroed();
             let func = self.api.AddUnitDamage.expect("AddUnitDamage function pointer must be initialized");
@@ -498,7 +498,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::AddUnitImpulseQuery {
                 unitID: unit_id,
-                impulse: impulse,
+                impulse,
                 decayRate: decay_rate,
             };
             let mut result = MaybeUninit::<sys::AddUnitImpulseResult>::zeroed();
@@ -515,7 +515,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitCloakQuery {
                 unitID: unit_id,
-                cloak: cloak,
+                cloak,
                 cloakArg: cloak_arg,
             };
             let mut result = MaybeUninit::<sys::SetUnitCloakResult>::zeroed();
@@ -532,7 +532,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitStealthQuery {
                 unitID: unit_id,
-                stealth: stealth,
+                stealth,
             };
             let mut result = MaybeUninit::<sys::SetUnitStealthResult>::zeroed();
             let func = self.api.SetUnitStealth.expect("SetUnitStealth function pointer must be initialized");
@@ -613,7 +613,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitMassQuery {
                 unitID: unit_id,
-                mass: mass,
+                mass,
             };
             let mut result = MaybeUninit::<sys::SetUnitMassResult>::zeroed();
             let func = self.api.SetUnitMass.expect("SetUnitMass function pointer must be initialized");
@@ -774,7 +774,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitCostsQuery {
                 unitID: unit_id,
-                costs: costs,
+                costs,
             };
             let mut result = MaybeUninit::<sys::SetUnitCostsResult>::zeroed();
             let func = self.api.SetUnitCosts.expect("SetUnitCosts function pointer must be initialized");
@@ -786,6 +786,7 @@ impl<'a> UnitControl<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_unit_build_speed(&self, unit_id: i32, build_speed: f32, repair_speed: f32, reclaim_speed: f32, resurrect_speed: f32, capture_speed: f32, terraform_speed: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetUnitBuildSpeedQuery {
@@ -811,8 +812,8 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitCollisionVolumeDataQuery {
                 unitID: unit_id,
-                scales: scales,
-                offsets: offsets,
+                scales,
+                offsets,
                 volumeType: volume_type,
                 testType: test_type,
                 primaryAxis: primary_axis,
@@ -831,8 +832,8 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitSelectionVolumeDataQuery {
                 unitID: unit_id,
-                scales: scales,
-                offsets: offsets,
+                scales,
+                offsets,
                 volumeType: volume_type,
                 testType: test_type,
                 primaryAxis: primary_axis,
@@ -847,14 +848,15 @@ impl<'a> UnitControl<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_unit_piece_collision_volume_data(&self, unit_id: i32, piece_index: i32, enable: bool, scales: sys::Float3, offsets: sys::Float3, volume_type: i32, primary_axis: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetUnitPieceCollisionVolumeDataQuery {
                 unitID: unit_id,
                 pieceIndex: piece_index,
-                enable: enable,
-                scales: scales,
-                offsets: offsets,
+                enable,
+                scales,
+                offsets,
                 volumeType: volume_type,
                 primaryAxis: primary_axis,
             };
@@ -872,7 +874,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitTargetQuery {
                 unitID: unit_id,
-                target: target,
+                target,
                 options: options.into(),
                 weaponNum: weapon_num,
             };
@@ -891,8 +893,8 @@ impl<'a> UnitControl<'a> {
             let query = sys::SetUnitShieldStateQuery {
                 unitID: unit_id,
                 weaponNum: weapon_num,
-                enabled: enabled,
-                power: power,
+                enabled,
+                power,
             };
             let mut result = MaybeUninit::<sys::SetUnitShieldStateResult>::zeroed();
             let func = self.api.SetUnitShieldState.expect("SetUnitShieldState function pointer must be initialized");
@@ -927,7 +929,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::SetUnitFlankingQuery {
                 unitID: unit_id,
                 type_: r#type_cstr.as_ptr(),
-                args: args,
+                args,
             };
             let mut result = MaybeUninit::<sys::SetUnitFlankingResult>::zeroed();
             let func = self.api.SetUnitFlanking.expect("SetUnitFlanking function pointer must be initialized");
@@ -961,8 +963,8 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitRadiusAndHeightQuery {
                 unitID: unit_id,
-                radius: radius,
-                height: height,
+                radius,
+                height,
             };
             let mut result = MaybeUninit::<sys::SetUnitRadiusAndHeightResult>::zeroed();
             let func = self.api.SetUnitRadiusAndHeight.expect("SetUnitRadiusAndHeight function pointer must be initialized");
@@ -978,10 +980,10 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitMoveGoalQuery {
                 unitID: unit_id,
-                pos: pos,
-                radius: radius,
-                speed: speed,
-                raw: raw,
+                pos,
+                radius,
+                speed,
+                raw,
             };
             let mut result = MaybeUninit::<sys::SetUnitMoveGoalResult>::zeroed();
             let func = self.api.SetUnitMoveGoal.expect("SetUnitMoveGoal function pointer must be initialized");
@@ -997,7 +999,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitLandGoalQuery {
                 unitID: unit_id,
-                pos: pos,
+                pos,
                 radiusSq: radius_sq,
             };
             let mut result = MaybeUninit::<sys::SetUnitLandGoalResult>::zeroed();
@@ -1030,7 +1032,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitStockpileQuery {
                 unitID: unit_id,
-                stockpile: stockpile,
+                stockpile,
                 buildPercent: build_percent,
             };
             let mut result = MaybeUninit::<sys::SetUnitStockpileResult>::zeroed();
@@ -1096,7 +1098,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::UnitDetachFromAirQuery {
                 transporteeID: transportee_id,
-                pos: pos,
+                pos,
             };
             let mut result = MaybeUninit::<sys::UnitDetachFromAirResult>::zeroed();
             let func = self.api.UnitDetachFromAir.expect("UnitDetachFromAir function pointer must be initialized");
@@ -1147,7 +1149,7 @@ impl<'a> UnitControl<'a> {
                 unitID: unit_id,
                 weaponNum: weapon_num,
                 key: key_cstr.as_ptr(),
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::SetUnitWeaponStateResult>::zeroed();
             let func = self.api.SetUnitWeaponState.expect("SetUnitWeaponState function pointer must be initialized");
@@ -1297,7 +1299,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitHeadingQuery {
                 unitID: unit_id,
-                heading: heading,
+                heading,
                 useSmoothing: use_smoothing,
             };
             let mut result = MaybeUninit::<sys::SetUnitHeadingResult>::zeroed();
@@ -1314,7 +1316,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitHeadingAndUpDirQuery {
                 unitID: unit_id,
-                heading: heading,
+                heading,
                 upDir: up_dir,
             };
             let mut result = MaybeUninit::<sys::SetUnitHeadingAndUpDirResult>::zeroed();
@@ -1361,7 +1363,7 @@ impl<'a> UnitControl<'a> {
         unsafe {
             let query = sys::SetUnitBuildeeRadiusQuery {
                 unitID: unit_id,
-                radius: radius,
+                radius,
             };
             let mut result = MaybeUninit::<sys::SetUnitBuildeeRadiusResult>::zeroed();
             let func = self.api.SetUnitBuildeeRadius.expect("SetUnitBuildeeRadius function pointer must be initialized");
@@ -1379,7 +1381,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::SetUnitSensorRadiusQuery {
                 unitID: unit_id,
                 sensorType: sensor_type_cstr.as_ptr(),
-                radius: radius,
+                radius,
             };
             let mut result = MaybeUninit::<sys::SetUnitSensorRadiusResult>::zeroed();
             let func = self.api.SetUnitSensorRadius.expect("SetUnitSensorRadius function pointer must be initialized");
@@ -1416,7 +1418,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::SetUnitBuildParamsQuery {
                 unitID: unit_id,
                 paramName: param_name_cstr.as_ptr(),
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::SetUnitBuildParamsResult>::zeroed();
             let func = self.api.SetUnitBuildParams.expect("SetUnitBuildParams function pointer must be initialized");
@@ -1468,7 +1470,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::SetUnitStorageQuery {
                 unitID: unit_id,
                 resource: resource_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::SetUnitStorageResult>::zeroed();
             let func = self.api.SetUnitStorage.expect("SetUnitStorage function pointer must be initialized");
@@ -1516,8 +1518,8 @@ impl<'a> UnitControl<'a> {
     pub fn bugger_off(&self, pos: sys::Float3, radius: f32, team_id: i32, options: BuggerOffOptions, exclude_unit_def_ids: &[i32]) -> Result<bool, Error> {
         unsafe {
             let query = sys::BuggerOffQuery {
-                pos: pos,
-                radius: radius,
+                pos,
+                radius,
                 teamID: team_id,
                 options: options.into(),
                 excludeUnitDefIDs: exclude_unit_def_ids.as_ptr(),
@@ -1555,7 +1557,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::AddUnitResourceQuery {
                 unitID: unit_id,
                 resourceType: resource_type_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::AddUnitResourceResult>::zeroed();
             let func = self.api.AddUnitResource.expect("AddUnitResource function pointer must be initialized");
@@ -1573,7 +1575,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::UseUnitResourceQuery {
                 unitID: unit_id,
                 resourceType: resource_type_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::UseUnitResourceResult>::zeroed();
             let func = self.api.UseUnitResource.expect("UseUnitResource function pointer must be initialized");
@@ -1590,7 +1592,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::SetUnitPieceVisibleQuery {
                 unitID: unit_id,
                 pieceIndex: piece_index,
-                visible: visible,
+                visible,
             };
             let mut result = MaybeUninit::<sys::SetUnitPieceVisibleResult>::zeroed();
             let func = self.api.SetUnitPieceVisible.expect("SetUnitPieceVisible function pointer must be initialized");
@@ -1624,7 +1626,7 @@ impl<'a> UnitControl<'a> {
             let query = sys::SetUnitPieceMatrixQuery {
                 unitID: unit_id,
                 pieceIndex: piece_index,
-                matrix: matrix,
+                matrix,
             };
             let mut result = MaybeUninit::<sys::SetUnitPieceMatrixResult>::zeroed();
             let func = self.api.SetUnitPieceMatrix.expect("SetUnitPieceMatrix function pointer must be initialized");

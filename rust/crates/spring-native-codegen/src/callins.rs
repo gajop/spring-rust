@@ -1,6 +1,6 @@
 //! Parser for the canonical `NativeInterface/api/Callins.def` inventory.
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::Path,

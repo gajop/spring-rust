@@ -13,13 +13,13 @@ use super::{ApiError, ErrorCode, Result};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:profiling")]
-    extern "C" {}
+    unsafe extern "C" {}
 
     #[link(wasm_import_module = "spring:messages")]
-    extern "C" {}
+    unsafe extern "C" {}
 
     #[link(wasm_import_module = "spring:benchmark")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "consume-string"]
         pub fn consume_string(pointer: i32, length: i32) -> i64;
         #[link_name = "consume-f32-list"]
@@ -27,13 +27,13 @@ mod raw {
     }
 
     #[link(wasm_import_module = "spring:rules-params")]
-    extern "C" {}
+    unsafe extern "C" {}
 
     #[link(wasm_import_module = "spring:terrain")]
-    extern "C" {}
+    unsafe extern "C" {}
 
     #[link(wasm_import_module = "spring:terrain-control")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "set-height-map"]
         pub fn set_height_map(x: f32, z: f32, height: f32, terraform: f32) -> i64;
         #[link_name = "level-height-map"]
@@ -41,7 +41,7 @@ mod raw {
     }
 
     #[link(wasm_import_module = "spring:gfx")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "vertex"]
         pub fn gfx_vertex(x: f32, y: f32, z: f32, w: f32, count: i32) -> i32;
         #[link_name = "begin-end"]

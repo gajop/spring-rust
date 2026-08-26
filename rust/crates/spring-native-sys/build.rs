@@ -64,7 +64,16 @@ fn main() {
         .generate()
         .expect("Unable to generate bindings");
 
+    let bindings_path = out_path.join("bindings.rs");
     bindings
-        .write_to_file(out_path.join("bindings.rs"))
+        .write_to_file(&bindings_path)
         .expect("Couldn't write bindings");
+
+    // bindgen 0.69 predates Rust 2024's explicit `unsafe extern` syntax.
+    // Keep the generated FFI source private to this crate, but make the
+    // generated declarations valid in the edition used by every Rust crate
+    // in this workspace.
+    let bindings_source = fs::read_to_string(&bindings_path).expect("read generated bindings");
+    let bindings_source = bindings_source.replace("extern \"C\" {", "unsafe extern \"C\" {");
+    fs::write(bindings_path, bindings_source).expect("rewrite generated bindings");
 }

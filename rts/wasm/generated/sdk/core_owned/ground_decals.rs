@@ -384,7 +384,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_all_ground_decals {
             #[link(wasm_import_module = "spring:ground-decals")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-all-ground-decals"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -393,7 +393,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_ground_decal_texture {
             #[link(wasm_import_module = "spring:ground-decals")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-ground-decal-texture"]
                 pub fn call(pdecal_id: i32, pmain_tex: i32, output: i32) -> i32;
             }
@@ -402,7 +402,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_ground_decal_type {
             #[link(wasm_import_module = "spring:ground-decals")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-ground-decal-type"]
                 pub fn call(pdecal_id: i32, output: i32) -> i32;
             }
@@ -776,11 +776,12 @@
 
         #[inline]
         pub fn set_ground_decal_texture(decal_id: u32, texture_name: &str, main_tex: bool) -> Result<bool> {
-            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
-            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            texture_name_bytes.push(0);
-            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::ground_decals::set_ground_decal_texture(decal_id, texture_name_cstr, main_tex)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(texture_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(texture_name)?),
+            };
+            crate::generated::borrowed::ground_decals::set_ground_decal_texture(decal_id, __core_string_1_buf.as_cstr(), main_tex)
         }
 
         #[inline]

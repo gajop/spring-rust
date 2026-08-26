@@ -1,3 +1,6 @@
+/// The complete result tuple returned by [`get_los_view_colors`].
+pub type GetLosViewColorsValue = (sys::Float3, sys::Float3, sys::Float3, sys::Float3, sys::Float3);
+
 impl<'a> Display<'a> {
     pub fn get_num_displays(&self) -> Result<u32, Error> {
         unsafe {
@@ -234,7 +237,7 @@ impl<'a> Display<'a> {
         }
     }
 
-    pub fn get_los_view_colors(&self) -> Result<(sys::Float3, sys::Float3, sys::Float3, sys::Float3, sys::Float3), Error> {
+    pub fn get_los_view_colors(&self) -> Result<GetLosViewColorsValue, Error> {
         unsafe {
             let query = sys::GetLosViewColorsQuery {
                 _unused: 0,
@@ -305,8 +308,8 @@ impl<'a> Display<'a> {
     pub fn is_aabbin_view(&self, mins: sys::Float3, maxs: sys::Float3) -> Result<bool, Error> {
         unsafe {
             let query = sys::IsAABBInViewQuery {
-                mins: mins,
-                maxs: maxs,
+                mins,
+                maxs,
             };
             let mut result = MaybeUninit::<sys::IsAABBInViewResult>::zeroed();
             let func = self.api.IsAABBInView.expect("IsAABBInView function pointer must be initialized");
@@ -321,8 +324,8 @@ impl<'a> Display<'a> {
     pub fn is_sphere_in_view(&self, center: sys::Float3, radius: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::IsSphereInViewQuery {
-                center: center,
-                radius: radius,
+                center,
+                radius,
             };
             let mut result = MaybeUninit::<sys::IsSphereInViewResult>::zeroed();
             let func = self.api.IsSphereInView.expect("IsSphereInView function pointer must be initialized");
@@ -383,7 +386,7 @@ impl<'a> Display<'a> {
         unsafe {
             let query = sys::SetTeamColorQuery {
                 teamID: team_id,
-                color: color,
+                color,
             };
             let mut result = MaybeUninit::<sys::SetTeamColorResult>::zeroed();
             let func = self.api.SetTeamColor.expect("SetTeamColor function pointer must be initialized");

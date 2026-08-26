@@ -18,7 +18,7 @@ pub enum ByteBufferFill {
 #[cfg(target_arch = "wasm32")]
 mod unit_defs_raw {
     #[link(wasm_import_module = "spring:unit-defs")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "get-unit-def-name"]
         pub fn get_unit_def_name(unit_def_id: i32, output: i32, capacity: i32) -> i64;
         #[link_name = "get-unit-def-human-name"]

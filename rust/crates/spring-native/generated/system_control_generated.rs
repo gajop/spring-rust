@@ -1,8 +1,14 @@
+/// The complete result tuple returned by [`get_game_state`].
+pub type GetGameStateValue = (bool, bool, bool, bool);
+
+/// The complete result tuple returned by [`get_window_display_mode`].
+pub type GetWindowDisplayModeValue = (i32, i32, i32, i32, Option<String>, bool);
+
 impl<'a> SystemControl<'a> {
     pub fn call_as_team<F: FnMut()>(&self, team_id: i32, mut callback: F) -> Result<bool, Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::CallAsTeamQuery {
@@ -20,6 +26,7 @@ impl<'a> SystemControl<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn garbage_collect_ctrl(&self, iters_per_batch: i32, num_steps_per_iter: i32, min_steps_per_iter: i32, max_steps_per_iter: i32, min_loop_run_time: f32, max_loop_run_time: f32, base_run_time_mult: f32, base_mem_load_mult: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::GarbageCollectCtrlQuery {
@@ -144,8 +151,8 @@ impl<'a> SystemControl<'a> {
     pub fn request_start_position(&self, pos: sys::Float3, ready: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::RequestStartPositionQuery {
-                pos: pos,
-                ready: ready,
+                pos,
+                ready,
             };
             let mut result = MaybeUninit::<sys::RequestStartPositionResult>::zeroed();
             let func = self.api.RequestStartPosition.expect("RequestStartPosition function pointer must be initialized");
@@ -160,7 +167,7 @@ impl<'a> SystemControl<'a> {
     pub fn ping(&self, tag: u32) -> Result<bool, Error> {
         unsafe {
             let query = sys::PingQuery {
-                tag: tag,
+                tag,
             };
             let mut result = MaybeUninit::<sys::PingResult>::zeroed();
             let func = self.api.Ping.expect("Ping function pointer must be initialized");
@@ -172,7 +179,7 @@ impl<'a> SystemControl<'a> {
         }
     }
 
-    pub fn get_game_state(&self, max_latency: f32) -> Result<(bool, bool, bool, bool), Error> {
+    pub fn get_game_state(&self, max_latency: f32) -> Result<GetGameStateValue, Error> {
         unsafe {
             let query = sys::GetGameStateQuery {
                 maxLatency: max_latency,
@@ -326,7 +333,7 @@ impl<'a> SystemControl<'a> {
         }
     }
 
-    pub fn get_window_display_mode(&self) -> Result<(i32, i32, i32, i32, Option<String>, bool), Error> {
+    pub fn get_window_display_mode(&self) -> Result<GetWindowDisplayModeValue, Error> {
         unsafe {
             let query = sys::GetWindowDisplayModeQuery {
                 _unused: 0,
@@ -373,7 +380,7 @@ impl<'a> SystemControl<'a> {
             let resource_cstr = std::ffi::CString::new(resource).map_err(|_| Error::invalid_argument("resource"))?;
             let query = sys::SetShareLevelQuery {
                 resource: resource_cstr.as_ptr(),
-                level: level,
+                level,
             };
             let mut result = MaybeUninit::<sys::SetShareLevelResult>::zeroed();
             let func = self.api.SetShareLevel.expect("SetShareLevel function pointer must be initialized");
@@ -391,7 +398,7 @@ impl<'a> SystemControl<'a> {
             let query = sys::ShareResourcesQuery {
                 teamID: team_id,
                 resource: resource_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::ShareResourcesResult>::zeroed();
             let func = self.api.ShareResources.expect("ShareResources function pointer must be initialized");

@@ -250,7 +250,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_mouse_cursor {
             #[link(wasm_import_module = "spring:input")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-mouse-cursor"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -259,7 +259,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_pressed_keys {
             #[link(wasm_import_module = "spring:input")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-pressed-keys"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -268,7 +268,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_pressed_scans {
             #[link(wasm_import_module = "spring:input")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-pressed-scans"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -404,11 +404,12 @@
 
         #[inline]
         pub fn get_key_code(key_sym: &str) -> Result<i32> {
-            let mut key_sym_bytes = key_sym.as_bytes().to_vec();
-            if key_sym_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_sym_bytes.push(0);
-            let key_sym_cstr = core::ffi::CStr::from_bytes_with_nul(&key_sym_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::input::get_key_code(key_sym_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(key_sym, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key_sym)?),
+            };
+            crate::generated::borrowed::input::get_key_code(__core_string_0_buf.as_cstr())
         }
 
         #[cfg(target_arch = "wasm32")]

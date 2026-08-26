@@ -308,7 +308,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_unit_def_i_ds {
             #[link(wasm_import_module = "spring:unit-defs")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-unit-def-i-ds"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -439,11 +439,12 @@
 
         #[inline]
         pub fn get_unit_def_id_by_name(unit_def_name: &str) -> Result<i32> {
-            let mut unit_def_name_bytes = unit_def_name.as_bytes().to_vec();
-            if unit_def_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            unit_def_name_bytes.push(0);
-            let unit_def_name_cstr = core::ffi::CStr::from_bytes_with_nul(&unit_def_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unit_defs::get_unit_def_id_by_name(unit_def_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(unit_def_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(unit_def_name)?),
+            };
+            crate::generated::borrowed::unit_defs::get_unit_def_id_by_name(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -493,29 +494,32 @@
 
         #[inline]
         pub fn get_unit_def_param_bool(unit_def_id: i32, key: &str) -> Result<bool> {
-            let mut key_bytes = key.as_bytes().to_vec();
-            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_bytes.push(0);
-            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unit_defs::get_unit_def_param_bool(unit_def_id, key_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(key, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key)?),
+            };
+            crate::generated::borrowed::unit_defs::get_unit_def_param_bool(unit_def_id, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn get_unit_def_param_float(unit_def_id: i32, key: &str) -> Result<f32> {
-            let mut key_bytes = key.as_bytes().to_vec();
-            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_bytes.push(0);
-            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unit_defs::get_unit_def_param_float(unit_def_id, key_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(key, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key)?),
+            };
+            crate::generated::borrowed::unit_defs::get_unit_def_param_float(unit_def_id, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn get_unit_def_param_int(unit_def_id: i32, key: &str) -> Result<i32> {
-            let mut key_bytes = key.as_bytes().to_vec();
-            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_bytes.push(0);
-            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unit_defs::get_unit_def_param_int(unit_def_id, key_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(key, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key)?),
+            };
+            crate::generated::borrowed::unit_defs::get_unit_def_param_int(unit_def_id, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -558,11 +562,12 @@
 
         #[inline]
         pub fn get_unit_def_param_type(key: &str) -> Result<i32> {
-            let mut key_bytes = key.as_bytes().to_vec();
-            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_bytes.push(0);
-            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unit_defs::get_unit_def_param_type(key_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(key, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key)?),
+            };
+            crate::generated::borrowed::unit_defs::get_unit_def_param_type(__core_string_0_buf.as_cstr())
         }
 
         #[inline]

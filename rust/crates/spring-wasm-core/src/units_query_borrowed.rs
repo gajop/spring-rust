@@ -5,7 +5,7 @@ use super::{ApiError, BufferFill, ErrorCode, Result};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:units-query")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "get-team-units-by-defs"]
         pub fn get_team_units_by_defs(
             team_id: i32,

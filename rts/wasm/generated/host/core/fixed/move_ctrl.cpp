@@ -86,6 +86,33 @@ wasm_trap_t* Core_move_ctrl_move_ctrl(void* environment, wasmtime_caller_t* call
     return nullptr;
 }
 
+wasm_trap_t* Core_move_ctrl_set_ground_move_type_max_speed(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetGroundMoveTypeMaxSpeed == nullptr)
+        return Trap("SetGroundMoveTypeMaxSpeed generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetGroundMoveTypeMaxSpeed generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetGroundMoveTypeMaxSpeed generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    SetGroundMoveTypeMaxSpeedQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.maxSpeed = slots[1].f32;
+    SetGroundMoveTypeMaxSpeedResult result{};
+    state->native->moveCtrl->SetGroundMoveTypeMaxSpeed(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_move_ctrl_set_move_ctrl_gravity(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -108,6 +135,62 @@ wasm_trap_t* Core_move_ctrl_set_move_ctrl_gravity(void* environment, wasmtime_ca
     query.gravityFactor = slots[1].f32;
     SetMoveCtrlGravityResult result{};
     state->native->moveCtrl->SetMoveCtrlGravity(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_move_type_boolean(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetMoveTypeBoolean == nullptr)
+        return Trap("SetMoveTypeBoolean generated Core binding is unavailable");
+    if (3 != 0 && (slots == nullptr || slotCount != 3))
+        return Trap("SetMoveTypeBoolean generated Core ABI signature mismatch");
+    if (3 == 0 && slotCount != 0)
+        return Trap("SetMoveTypeBoolean generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    SetMoveTypeBooleanQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.field = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.field)>>>(slots[1].i32);
+    query.value = slots[2].i32 != 0;
+    SetMoveTypeBooleanResult result{};
+    state->native->moveCtrl->SetMoveTypeBoolean(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_move_type_numeric(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetMoveTypeNumeric == nullptr)
+        return Trap("SetMoveTypeNumeric generated Core binding is unavailable");
+    if (3 != 0 && (slots == nullptr || slotCount != 3))
+        return Trap("SetMoveTypeNumeric generated Core ABI signature mismatch");
+    if (3 == 0 && slotCount != 0)
+        return Trap("SetMoveTypeNumeric generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    SetMoveTypeNumericQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.field = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.field)>>>(slots[1].i32);
+    query.value = slots[2].f32;
+    SetMoveTypeNumericResult result{};
+    state->native->moveCtrl->SetMoveTypeNumeric(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
     return nullptr;
@@ -139,14 +222,35 @@ bool RegisterGeneratedImports_move_ctrl(wasmtime_linker_t* linker, HostState* st
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_F32};
         const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-ground-move-type-max-speed",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_ground_move_type_max_speed, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_F32};
+        const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:move-ctrl", "set-move-ctrl-gravity",
                 MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_move_ctrl_gravity, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-move-type-boolean",
+                MakeFuncType(params, 3, results, 1), Core_move_ctrl_set_move_type_boolean, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_F32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-move-type-numeric",
+                MakeFuncType(params, 3, results, 1), Core_move_ctrl_set_move_type_numeric, state, error))
             return false;
     }
 
     return true;
 }
 
-static_assert(3 >= 0, "generated Core Wasm callback count");
+static_assert(6 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

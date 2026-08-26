@@ -214,7 +214,9 @@ fn main() {
     println!();
     println!("The module demonstrates:");
     println!("  - Receiving callbacks from Spring (unit_created, game_start, etc.)");
-    println!("  - Calling Spring APIs from callbacks (game.get_game_frame, units_info.get_unit_position)");
+    println!(
+        "  - Calling Spring APIs from callbacks (game.get_game_frame, units_info.get_unit_position)"
+    );
     println!("  - Storing the interface reference for easy access");
     println!();
     println!("All the complexity is hidden by the export_module! macro.");

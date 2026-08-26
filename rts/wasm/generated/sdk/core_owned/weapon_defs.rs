@@ -124,7 +124,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_weapon_def_i_ds {
             #[link(wasm_import_module = "spring:weapon-defs")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-weapon-def-i-ds"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -133,7 +133,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_weapon_def_name {
             #[link(wasm_import_module = "spring:weapon-defs")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-weapon-def-name"]
                 pub fn call(pweapon_def_id: i32, output: i32) -> i32;
             }
@@ -222,11 +222,12 @@
 
         #[inline]
         pub fn get_weapon_def_id(weapon_def_name: &str) -> Result<i32> {
-            let mut weapon_def_name_bytes = weapon_def_name.as_bytes().to_vec();
-            if weapon_def_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            weapon_def_name_bytes.push(0);
-            let weapon_def_name_cstr = core::ffi::CStr::from_bytes_with_nul(&weapon_def_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::weapon_defs::get_weapon_def_id(weapon_def_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(weapon_def_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(weapon_def_name)?),
+            };
+            crate::generated::borrowed::weapon_defs::get_weapon_def_id(__core_string_0_buf.as_cstr())
         }
 
         #[inline]

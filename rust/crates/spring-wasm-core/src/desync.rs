@@ -14,7 +14,7 @@ use super::{ApiError, Result};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:desync")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "get-timer"]
         pub fn get_timer() -> i64;
         #[link_name = "get-timer-micros"]

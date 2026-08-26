@@ -19,7 +19,7 @@ mod scratch_model;
 
 // Guest generation is a descendant module and uses these shared model helpers
 // through the parent namespace. Keep the public renderer surface itself tiny.
-use scratch_model::{executable, implicit_count_fields, record_index, ScratchCallin};
+use scratch_model::{ScratchCallin, executable, implicit_count_fields, record_index};
 
 pub fn render_header(model: &ApiModel) -> String {
     host::render_header(model)

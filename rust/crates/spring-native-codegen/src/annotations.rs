@@ -1,6 +1,6 @@
 //! Explicit semantic lowering exceptions.
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use std::{collections::BTreeSet, path::Path};
 
 use crate::model::{ApiModel, LoweringStatus};
@@ -62,7 +62,7 @@ pub fn parse(path: &Path) -> Result<Vec<Annotation>> {
                     "{}:{}: unknown annotation {kind}",
                     path.display(),
                     line_number + 1
-                ))
+                ));
             }
         };
         result.push(Annotation {

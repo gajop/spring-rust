@@ -49,7 +49,7 @@ impl<'a> MoveCtrl<'a> {
         unsafe {
             let query = sys::MoveCtrlQuery {
                 unitID: unit_id,
-                enable: enable,
+                enable,
             };
             let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
             let func = self.api.MoveCtrl.expect("MoveCtrl function pointer must be initialized");
@@ -84,6 +84,22 @@ impl<'a> MoveCtrl<'a> {
             };
             let mut result = MaybeUninit::<sys::SetMoveCtrlGravityResult>::zeroed();
             let func = self.api.SetMoveCtrlGravity.expect("SetMoveCtrlGravity function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_ground_move_type_max_speed(&self, unit_id: i32, max_speed: f32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetGroundMoveTypeMaxSpeedQuery {
+                unitID: unit_id,
+                maxSpeed: max_speed,
+            };
+            let mut result = MaybeUninit::<sys::SetGroundMoveTypeMaxSpeedResult>::zeroed();
+            let func = self.api.SetGroundMoveTypeMaxSpeed.expect("SetGroundMoveTypeMaxSpeed function pointer must be initialized");
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();
             Error::result_or(result.error, {

@@ -1,5 +1,5 @@
     pub mod selection {
-        use super::{Result, String, Vec};
+        use super::{Result, Vec};
 
         #[derive(Debug, Clone, PartialEq)]
         pub struct DeselectUnitArrayQuery {
@@ -200,7 +200,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_group_list {
             #[link(wasm_import_module = "spring:selection")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-group-list"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -209,7 +209,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_group_units {
             #[link(wasm_import_module = "spring:selection")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-group-units"]
                 pub fn call(pgroup_id: i32, output: i32) -> i32;
             }
@@ -218,7 +218,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_selected_units {
             #[link(wasm_import_module = "spring:selection")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-selected-units"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -227,7 +227,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_selected_units_sorted {
             #[link(wasm_import_module = "spring:selection")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-selected-units-sorted"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }

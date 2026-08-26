@@ -5,7 +5,7 @@ use heck::{ToKebabCase, ToSnakeCase};
 use crate::model::{ApiModel, SemanticType};
 
 use super::exec_model::{
-    executable_callin, expanded_callins, record_index, ExecutableCallin, ResultAbi,
+    ExecutableCallin, ResultAbi, executable_callin, expanded_callins, record_index,
 };
 
 pub(super) fn render_rust(model: &ApiModel) -> String {
@@ -30,6 +30,24 @@ pub(super) fn render_rust(model: &ApiModel) -> String {
          #[doc(hidden)]\npub const __GENERATED_NUMERIC_CALLIN_COUNT: usize = __GENERATED_CALLIN_COUNT;\n",
         executable.len()
     ));
+    unsafe_export_attributes(output)
+}
+
+fn unsafe_export_attributes(source: String) -> String {
+    let mut output = String::with_capacity(source.len());
+    for line in source.split_inclusive('\n') {
+        let Some(start) = line.find("#[export_name = ") else {
+            output.push_str(line);
+            continue;
+        };
+        let mut line = line.to_owned();
+        let attribute = "#[export_name = ";
+        line.replace_range(start..start + attribute.len(), "#[unsafe(export_name = ");
+        if let Some(close) = line.rfind(']') {
+            line.insert(close, ')');
+        }
+        output.push_str(&line);
+    }
     output
 }
 

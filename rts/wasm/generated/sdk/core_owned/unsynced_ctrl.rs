@@ -946,15 +946,17 @@
 
         #[inline]
         pub fn assign_mouse_cursor(command_name: &str, cursor_file_name: &str, overwrite: bool, hot_spot_top_left: bool) -> Result<bool> {
-            let mut command_name_bytes = command_name.as_bytes().to_vec();
-            if command_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            command_name_bytes.push(0);
-            let command_name_cstr = core::ffi::CStr::from_bytes_with_nul(&command_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut cursor_file_name_bytes = cursor_file_name.as_bytes().to_vec();
-            if cursor_file_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            cursor_file_name_bytes.push(0);
-            let cursor_file_name_cstr = core::ffi::CStr::from_bytes_with_nul(&cursor_file_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::assign_mouse_cursor(command_name_cstr, cursor_file_name_cstr, overwrite, hot_spot_top_left)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(command_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(command_name)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(cursor_file_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(cursor_file_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::assign_mouse_cursor(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr(), overwrite, hot_spot_top_left)
         }
 
         #[inline]
@@ -997,29 +999,32 @@
 
         #[inline]
         pub fn load_cmd_colors_config(filename: &str) -> Result<bool> {
-            let mut filename_bytes = filename.as_bytes().to_vec();
-            if filename_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            filename_bytes.push(0);
-            let filename_cstr = core::ffi::CStr::from_bytes_with_nul(&filename_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::load_cmd_colors_config(filename_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(filename, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(filename)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::load_cmd_colors_config(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn load_ctrl_panel_config(filename: &str) -> Result<bool> {
-            let mut filename_bytes = filename.as_bytes().to_vec();
-            if filename_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            filename_bytes.push(0);
-            let filename_cstr = core::ffi::CStr::from_bytes_with_nul(&filename_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::load_ctrl_panel_config(filename_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(filename, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(filename)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::load_ctrl_panel_config(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn load_model_textures(model_name: &str) -> Result<bool> {
-            let mut model_name_bytes = model_name.as_bytes().to_vec();
-            if model_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            model_name_bytes.push(0);
-            let model_name_cstr = core::ffi::CStr::from_bytes_with_nul(&model_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::load_model_textures(model_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(model_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(model_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::load_model_textures(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -1042,15 +1047,17 @@
 
         #[inline]
         pub fn replace_mouse_cursor(old_cursor_file_name: &str, new_cursor_file_name: &str, hot_spot_top_left: bool) -> Result<bool> {
-            let mut old_cursor_file_name_bytes = old_cursor_file_name.as_bytes().to_vec();
-            if old_cursor_file_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            old_cursor_file_name_bytes.push(0);
-            let old_cursor_file_name_cstr = core::ffi::CStr::from_bytes_with_nul(&old_cursor_file_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut new_cursor_file_name_bytes = new_cursor_file_name.as_bytes().to_vec();
-            if new_cursor_file_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            new_cursor_file_name_bytes.push(0);
-            let new_cursor_file_name_cstr = core::ffi::CStr::from_bytes_with_nul(&new_cursor_file_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::replace_mouse_cursor(old_cursor_file_name_cstr, new_cursor_file_name_cstr, hot_spot_top_left)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(old_cursor_file_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(old_cursor_file_name)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(new_cursor_file_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(new_cursor_file_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::replace_mouse_cursor(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr(), hot_spot_top_left)
         }
 
         #[inline]
@@ -1142,11 +1149,12 @@
 
         #[inline]
         pub fn set_clipboard(text: &str) -> Result<bool> {
-            let mut text_bytes = text.as_bytes().to_vec();
-            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            text_bytes.push(0);
-            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_clipboard(text_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(text, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(text)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_clipboard(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -1324,15 +1332,17 @@
 
         #[inline]
         pub fn set_map_shading_texture(tex_type: &str, tex_name: &str, num: i32) -> Result<bool> {
-            let mut tex_type_bytes = tex_type.as_bytes().to_vec();
-            if tex_type_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            tex_type_bytes.push(0);
-            let tex_type_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_type_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut tex_name_bytes = tex_name.as_bytes().to_vec();
-            if tex_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            tex_name_bytes.push(0);
-            let tex_name_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_map_shading_texture(tex_type_cstr, tex_name_cstr, num)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(tex_type, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(tex_type)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(tex_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(tex_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_map_shading_texture(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr(), num)
         }
 
         #[inline]
@@ -1346,11 +1356,12 @@
 
         #[inline]
         pub fn set_mouse_cursor(cursor_name: &str, scale: f32) -> Result<bool> {
-            let mut cursor_name_bytes = cursor_name.as_bytes().to_vec();
-            if cursor_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            cursor_name_bytes.push(0);
-            let cursor_name_cstr = core::ffi::CStr::from_bytes_with_nul(&cursor_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_mouse_cursor(cursor_name_cstr, scale)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(cursor_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(cursor_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_mouse_cursor(__core_string_0_buf.as_cstr(), scale)
         }
 
         #[inline]
@@ -1377,11 +1388,12 @@
 
         #[inline]
         pub fn set_sky_box_texture(tex_name: &str) -> Result<bool> {
-            let mut tex_name_bytes = tex_name.as_bytes().to_vec();
-            if tex_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            tex_name_bytes.push(0);
-            let tex_name_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_sky_box_texture(tex_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(tex_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(tex_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_sky_box_texture(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -1414,20 +1426,22 @@
 
         #[inline]
         pub fn set_unit_def_icon(unit_def_id: i32, icon_name: &str) -> Result<bool> {
-            let mut icon_name_bytes = icon_name.as_bytes().to_vec();
-            if icon_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            icon_name_bytes.push(0);
-            let icon_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_unit_def_icon(unit_def_id, icon_name_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(icon_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(icon_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_unit_def_icon(unit_def_id, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn set_unit_def_image(unit_def_id: i32, image: &str) -> Result<bool> {
-            let mut image_bytes = image.as_bytes().to_vec();
-            if image_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            image_bytes.push(0);
-            let image_cstr = core::ffi::CStr::from_bytes_with_nul(&image_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_unit_def_image(unit_def_id, image_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(image, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(image)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_unit_def_image(unit_def_id, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -1438,11 +1452,12 @@
 
         #[inline]
         pub fn set_unit_icon(unit_id: i32, icon_name: &str) -> Result<bool> {
-            let mut icon_name_bytes = icon_name.as_bytes().to_vec();
-            if icon_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            icon_name_bytes.push(0);
-            let icon_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_unit_icon(unit_id, icon_name_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(icon_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(icon_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_unit_icon(unit_id, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -1501,24 +1516,27 @@
 
         #[inline]
         pub fn set_wm_caption(title: &str, title_short: &str) -> Result<bool> {
-            let mut title_bytes = title.as_bytes().to_vec();
-            if title_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            title_bytes.push(0);
-            let title_cstr = core::ffi::CStr::from_bytes_with_nul(&title_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut title_short_bytes = title_short.as_bytes().to_vec();
-            if title_short_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            title_short_bytes.push(0);
-            let title_short_cstr = core::ffi::CStr::from_bytes_with_nul(&title_short_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_wm_caption(title_cstr, title_short_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(title, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(title)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(title_short, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(title_short)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_wm_caption(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn set_wm_icon(icon_file_name: &str, force_resolution: bool) -> Result<bool> {
-            let mut icon_file_name_bytes = icon_file_name.as_bytes().to_vec();
-            if icon_file_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            icon_file_name_bytes.push(0);
-            let icon_file_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_file_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_wm_icon(icon_file_name_cstr, force_resolution)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(icon_file_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(icon_file_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_wm_icon(__core_string_0_buf.as_cstr(), force_resolution)
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -1539,15 +1557,17 @@
 
         #[inline]
         pub fn set_water_texture(tex_type: &str, tex_name: &str) -> Result<bool> {
-            let mut tex_type_bytes = tex_type.as_bytes().to_vec();
-            if tex_type_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            tex_type_bytes.push(0);
-            let tex_type_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_type_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut tex_name_bytes = tex_name.as_bytes().to_vec();
-            if tex_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            tex_name_bytes.push(0);
-            let tex_name_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::unsynced_ctrl::set_water_texture(tex_type_cstr, tex_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(tex_type, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(tex_type)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(tex_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(tex_name)?),
+            };
+            crate::generated::borrowed::unsynced_ctrl::set_water_texture(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr())
         }
 
         #[inline]

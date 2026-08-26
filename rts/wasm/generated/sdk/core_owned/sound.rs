@@ -155,11 +155,12 @@
 
         #[inline]
         pub fn load_sound_def(sound_name: &str) -> Result<bool> {
-            let mut sound_name_bytes = sound_name.as_bytes().to_vec();
-            if sound_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            sound_name_bytes.push(0);
-            let sound_name_cstr = core::ffi::CStr::from_bytes_with_nul(&sound_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::sound::load_sound_def(sound_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(sound_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(sound_name)?),
+            };
+            crate::generated::borrowed::sound::load_sound_def(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -178,20 +179,22 @@
 
         #[inline]
         pub fn play_sound_stream(ogg_file: &str, volume: f32, enqueue: bool) -> Result<bool> {
-            let mut ogg_file_bytes = ogg_file.as_bytes().to_vec();
-            if ogg_file_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            ogg_file_bytes.push(0);
-            let ogg_file_cstr = core::ffi::CStr::from_bytes_with_nul(&ogg_file_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::sound::play_sound_stream(ogg_file_cstr, volume, enqueue)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(ogg_file, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(ogg_file)?),
+            };
+            crate::generated::borrowed::sound::play_sound_stream(__core_string_0_buf.as_cstr(), volume, enqueue)
         }
 
         #[inline]
         pub fn preload_sound_item(sound_name: &str) -> Result<bool> {
-            let mut sound_name_bytes = sound_name.as_bytes().to_vec();
-            if sound_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            sound_name_bytes.push(0);
-            let sound_name_cstr = core::ffi::CStr::from_bytes_with_nul(&sound_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::sound::preload_sound_item(sound_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(sound_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(sound_name)?),
+            };
+            crate::generated::borrowed::sound::preload_sound_item(__core_string_0_buf.as_cstr())
         }
 
         #[inline]

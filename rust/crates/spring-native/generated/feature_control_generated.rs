@@ -28,8 +28,8 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::CreateFeatureQuery {
                 featureDef: feature_def,
-                pos: pos,
-                facing: facing,
+                pos,
+                facing,
                 teamID: team_id,
                 featureID: feature_id,
             };
@@ -78,7 +78,7 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureHealthQuery {
                 featureID: feature_id,
-                health: health,
+                health,
                 checkDestruction: check_destruction,
             };
             let mut result = MaybeUninit::<sys::SetFeatureHealthResult>::zeroed();
@@ -95,7 +95,7 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeaturePositionQuery {
                 featureID: feature_id,
-                pos: pos,
+                pos,
                 snapToGround: snap_to_ground,
             };
             let mut result = MaybeUninit::<sys::SetFeaturePositionResult>::zeroed();
@@ -129,7 +129,7 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureVelocityQuery {
                 featureID: feature_id,
-                velocity: velocity,
+                velocity,
             };
             let mut result = MaybeUninit::<sys::SetFeatureVelocityResult>::zeroed();
             let func = self.api.SetFeatureVelocity.expect("SetFeatureVelocity function pointer must be initialized");
@@ -141,12 +141,13 @@ impl<'a> FeatureControl<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_feature_resources(&self, feature_id: i32, metal: f32, energy: f32, reclaim_time: f32, reclaim_left: f32, feature_def_metal: f32, feature_def_energy: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetFeatureResourcesQuery {
                 featureID: feature_id,
-                metal: metal,
-                energy: energy,
+                metal,
+                energy,
                 reclaimTime: reclaim_time,
                 reclaimLeft: reclaim_left,
                 featureDefMetal: feature_def_metal,
@@ -166,11 +167,11 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::AddFeatureDamageQuery {
                 featureID: feature_id,
-                damage: damage,
+                damage,
                 paralyzeTime: paralyze_time,
                 weaponDefID: weapon_def_id,
                 attackerID: attacker_id,
-                impulse: impulse,
+                impulse,
             };
             let mut result = MaybeUninit::<sys::AddFeatureDamageResult>::zeroed();
             let func = self.api.AddFeatureDamage.expect("AddFeatureDamage function pointer must be initialized");
@@ -202,7 +203,7 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureMassQuery {
                 featureID: feature_id,
-                mass: mass,
+                mass,
             };
             let mut result = MaybeUninit::<sys::SetFeatureMassResult>::zeroed();
             let func = self.api.SetFeatureMass.expect("SetFeatureMass function pointer must be initialized");
@@ -251,8 +252,8 @@ impl<'a> FeatureControl<'a> {
             let query = sys::SetFeatureResurrectQuery {
                 featureID: feature_id,
                 unitDef: unit_def,
-                facing: facing,
-                progress: progress,
+                facing,
+                progress,
             };
             let mut result = MaybeUninit::<sys::SetFeatureResurrectResult>::zeroed();
             let func = self.api.SetFeatureResurrect.expect("SetFeatureResurrect function pointer must be initialized");
@@ -268,10 +269,10 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeaturePhysicsQuery {
                 featureID: feature_id,
-                pos: pos,
-                velocity: velocity,
-                rotation: rotation,
-                drag: drag,
+                pos,
+                velocity,
+                rotation,
+                drag,
             };
             let mut result = MaybeUninit::<sys::SetFeaturePhysicsResult>::zeroed();
             let func = self.api.SetFeaturePhysics.expect("SetFeaturePhysics function pointer must be initialized");
@@ -287,7 +288,7 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureMoveCtrlQuery {
                 featureID: feature_id,
-                enable: enable,
+                enable,
                 velocityOrMask: velocity_or_mask,
                 accelerationOrImpulseMask: acceleration_or_impulse_mask,
                 movementMask: movement_mask,
@@ -306,7 +307,7 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureHeadingAndUpDirQuery {
                 featureID: feature_id,
-                heading: heading,
+                heading,
                 upDir: up_dir,
             };
             let mut result = MaybeUninit::<sys::SetFeatureHeadingAndUpDirResult>::zeroed();
@@ -323,7 +324,7 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureRotationQuery {
                 featureID: feature_id,
-                rotation: rotation,
+                rotation,
             };
             let mut result = MaybeUninit::<sys::SetFeatureRotationResult>::zeroed();
             let func = self.api.SetFeatureRotation.expect("SetFeatureRotation function pointer must be initialized");
@@ -405,8 +406,8 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureRadiusAndHeightQuery {
                 featureID: feature_id,
-                radius: radius,
-                height: height,
+                radius,
+                height,
             };
             let mut result = MaybeUninit::<sys::SetFeatureRadiusAndHeightResult>::zeroed();
             let func = self.api.SetFeatureRadiusAndHeight.expect("SetFeatureRadiusAndHeight function pointer must be initialized");
@@ -422,8 +423,8 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureCollisionVolumeDataQuery {
                 featureID: feature_id,
-                scales: scales,
-                offsets: offsets,
+                scales,
+                offsets,
                 volumeType: volume_type,
                 testType: test_type,
                 primaryAxis: primary_axis,
@@ -442,8 +443,8 @@ impl<'a> FeatureControl<'a> {
         unsafe {
             let query = sys::SetFeatureSelectionVolumeDataQuery {
                 featureID: feature_id,
-                scales: scales,
-                offsets: offsets,
+                scales,
+                offsets,
                 volumeType: volume_type,
                 primaryAxis: primary_axis,
                 useContHitTest: use_cont_hit_test,
@@ -529,7 +530,7 @@ impl<'a> FeatureControl<'a> {
             let query = sys::SetFeaturePieceVisibleQuery {
                 featureID: feature_id,
                 pieceIndex: piece_index,
-                visible: visible,
+                visible,
             };
             let mut result = MaybeUninit::<sys::SetFeaturePieceVisibleResult>::zeroed();
             let func = self.api.SetFeaturePieceVisible.expect("SetFeaturePieceVisible function pointer must be initialized");
@@ -546,7 +547,7 @@ impl<'a> FeatureControl<'a> {
             let query = sys::SetFeaturePieceMatrixQuery {
                 featureID: feature_id,
                 pieceIndex: piece_index,
-                matrix: matrix,
+                matrix,
             };
             let mut result = MaybeUninit::<sys::SetFeaturePieceMatrixResult>::zeroed();
             let func = self.api.SetFeaturePieceMatrix.expect("SetFeaturePieceMatrix function pointer must be initialized");
@@ -558,14 +559,15 @@ impl<'a> FeatureControl<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_feature_piece_collision_volume_data(&self, feature_id: i32, piece_index: i32, enable: bool, scales: sys::Float3, offsets: sys::Float3, volume_type: i32, primary_axis: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetFeaturePieceCollisionVolumeDataQuery {
                 featureID: feature_id,
                 pieceIndex: piece_index,
-                enable: enable,
-                scales: scales,
-                offsets: offsets,
+                enable,
+                scales,
+                offsets,
                 volumeType: volume_type,
                 primaryAxis: primary_axis,
             };

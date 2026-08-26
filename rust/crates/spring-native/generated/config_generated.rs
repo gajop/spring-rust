@@ -93,7 +93,7 @@ impl<'a> Config<'a> {
             let key_cstr = std::ffi::CString::new(key).map_err(|_| Error::invalid_argument("key"))?;
             let query = sys::SetConfigIntQuery {
                 key: key_cstr.as_ptr(),
-                value: value,
+                value,
                 useOverlay: use_overlay,
             };
             let mut result = MaybeUninit::<sys::SetConfigIntResult>::zeroed();
@@ -111,7 +111,7 @@ impl<'a> Config<'a> {
             let key_cstr = std::ffi::CString::new(key).map_err(|_| Error::invalid_argument("key"))?;
             let query = sys::SetConfigFloatQuery {
                 key: key_cstr.as_ptr(),
-                value: value,
+                value,
                 useOverlay: use_overlay,
             };
             let mut result = MaybeUninit::<sys::SetConfigFloatResult>::zeroed();
@@ -176,7 +176,7 @@ impl<'a> Config<'a> {
             let section_cstr = std::ffi::CString::new(section).map_err(|_| Error::invalid_argument("section"))?;
             let query = sys::SetLogSectionFilterLevelQuery {
                 section: section_cstr.as_ptr(),
-                level: level,
+                level,
             };
             let mut result = MaybeUninit::<sys::SetLogSectionFilterLevelResult>::zeroed();
             let func = self.api.SetLogSectionFilterLevel.expect("SetLogSectionFilterLevel function pointer must be initialized");

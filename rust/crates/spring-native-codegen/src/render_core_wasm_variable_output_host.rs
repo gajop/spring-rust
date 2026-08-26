@@ -483,7 +483,8 @@ fn render_capacity_validation(
             "    if (!state->memory.Contains({stem}Pointer, {stem}Capacity)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
         ),
         SemanticType::List { element } => {
-            let (bytes, _) = fixed_wire_layout(element, records).expect("eligible output list element layout");
+            let (bytes, _) =
+                fixed_wire_layout(element, records).expect("eligible output list element layout");
             format!(
                 "    const std::uint64_t {stem}CapacityBytes = static_cast<std::uint64_t>({stem}Capacity) * {bytes}u;\n    if ({stem}CapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains({stem}Pointer, static_cast<std::size_t>({stem}CapacityBytes))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
             )
@@ -517,8 +518,15 @@ fn render_variable_copy(field: &FieldModel, records: &BTreeMap<String, RecordMod
             field_name = field.name,
         ),
         SemanticType::List { element } => {
-            let (element_bytes, element_alignment) = fixed_wire_layout(element, records).expect("eligible output list element layout");
-            let item_write = render_wire_write(element, &format!("result.{}[coreIndex]", field.name), records, &format!("{stem}Writer"), 2);
+            let (element_bytes, element_alignment) =
+                fixed_wire_layout(element, records).expect("eligible output list element layout");
+            let item_write = render_wire_write(
+                element,
+                &format!("result.{}[coreIndex]", field.name),
+                records,
+                &format!("{stem}Writer"),
+                2,
+            );
             format!(
                 "    if ({stem}Required != 0) {{\n        const std::size_t {stem}Bytes = static_cast<std::size_t>({stem}Required) * {element_bytes}u;\n        std::span<std::uint8_t> {stem}Wire;\n        if (!state->memory.MutableView({stem}Pointer, {stem}Bytes, {stem}Wire)) return Trap(\"generated Core variable output range changed unexpectedly\");\n        WireWriter {stem}Writer({stem}Wire);\n        for (std::uint32_t coreIndex = 0; coreIndex < {stem}Required; ++coreIndex) {{\n{item_write}        }}\n        if (!{stem}Writer.Finish({element_alignment}u)) return Trap(\"generated Core list output layout mismatch\");\n    }}\n"
             )
@@ -559,9 +567,15 @@ fn render_wire_read(
     let pad = "    ".repeat(indent);
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
-            "bool" => format!("{pad}if (!reader.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "f32" => format!("{pad}if (!reader.F32({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "f64" => format!("{pad}if (!reader.F64({destination})) return Trap(\"generated Core wire underflow\");\n"),
+            "bool" => format!(
+                "{pad}if (!reader.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
+            "f32" => format!(
+                "{pad}if (!reader.F32({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
+            "f64" => format!(
+                "{pad}if (!reader.F64({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
             "i64" | "isize" => scalar_read("I64", "std::int64_t", destination, &pad),
             "u64" | "usize" => scalar_read("U64", "std::uint64_t", destination, &pad),
             "i8" | "i16" | "i32" => scalar_read("I32", "std::int32_t", destination, &pad),
@@ -573,7 +587,14 @@ fn render_wire_read(
             let mut output = records[name]
                 .fields
                 .iter()
-                .map(|field| render_wire_read(&field.ty, &format!("{destination}.{}", field.name), records, indent))
+                .map(|field| {
+                    render_wire_read(
+                        &field.ty,
+                        &format!("{destination}.{}", field.name),
+                        records,
+                        indent,
+                    )
+                })
                 .collect::<String>();
             let (_, alignment) = fixed_wire_layout(ty, records)
                 .expect("eligible variable-output record must have a fixed layout");
@@ -584,15 +605,25 @@ fn render_wire_read(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreReadIndex{indent}");
-            let nested = render_wire_read(element, &format!("{destination}[{index}]"), records, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_wire_read(
+                element,
+                &format!("{destination}[{index}]"),
+                records,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
 }
 
 fn scalar_read(method: &str, raw: &str, destination: &str, pad: &str) -> String {
-    format!("{pad}{{ {raw} coreRaw = 0; if (!reader.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw"))
+    format!(
+        "{pad}{{ {raw} coreRaw = 0; if (!reader.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+        cast = native_cast(destination, "coreRaw")
+    )
 }
 
 fn render_wire_write(
@@ -605,16 +636,38 @@ fn render_wire_write(
     let pad = "    ".repeat(indent);
     match ty {
         SemanticType::Scalar { name } => {
-            let method = match name.as_str() { "bool"=>"Bool", "f32"=>"F32", "f64"=>"F64", "i64"|"isize"=>"I64", "u64"|"usize"=>"U64", "i8"|"i16"|"i32"=>"I32", _=>"U32" };
-            format!("{pad}if (!{writer}.{method}({value})) return Trap(\"generated Core wire overflow\");\n")
+            let method = match name.as_str() {
+                "bool" => "Bool",
+                "f32" => "F32",
+                "f64" => "F64",
+                "i64" | "isize" => "I64",
+                "u64" | "usize" => "U64",
+                "i8" | "i16" | "i32" => "I32",
+                _ => "U32",
+            };
+            format!(
+                "{pad}if (!{writer}.{method}({value})) return Trap(\"generated Core wire overflow\");\n"
+            )
         }
-        SemanticType::Enum { .. } => format!("{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
-        SemanticType::Handle { .. } => format!("{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
+        SemanticType::Enum { .. } => format!(
+            "{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"
+        ),
+        SemanticType::Handle { .. } => format!(
+            "{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"
+        ),
         SemanticType::Record { name } => {
             let mut output = records[name]
                 .fields
                 .iter()
-                .map(|field| render_wire_write(&field.ty, &format!("{value}.{}", field.name), records, writer, indent))
+                .map(|field| {
+                    render_wire_write(
+                        &field.ty,
+                        &format!("{value}.{}", field.name),
+                        records,
+                        writer,
+                        indent,
+                    )
+                })
                 .collect::<String>();
             let (_, alignment) = fixed_wire_layout(ty, records)
                 .expect("eligible variable-output record must have a fixed layout");
@@ -625,8 +678,16 @@ fn render_wire_write(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
-            let nested = render_wire_write(element, &format!("{value}[{index}]"), records, writer, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_wire_write(
+                element,
+                &format!("{value}[{index}]"),
+                records,
+                writer,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
@@ -643,8 +704,16 @@ fn count_field(field: &FieldModel) -> Option<String> {
 fn render_registration(plan: &FunctionPlan, callback: &str) -> String {
     let params = kind_array("params", &plan.direct_params);
     let results = kind_array("results", &plan.direct_results);
-    format!("    {{\n{params}{results}        if (!DefineGeneratedVariableOutput(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
-        params=params, results=results, module=plan.import_module, name=plan.import_name, pc=plan.direct_params.len(), rc=plan.direct_results.len(), callback=callback)
+    format!(
+        "    {{\n{params}{results}        if (!DefineGeneratedVariableOutput(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
+        params = params,
+        results = results,
+        module = plan.import_module,
+        name = plan.import_name,
+        pc = plan.direct_params.len(),
+        rc = plan.direct_results.len(),
+        callback = callback
+    )
 }
 
 fn kind_array(name: &str, kinds: &[CoreType]) -> String {

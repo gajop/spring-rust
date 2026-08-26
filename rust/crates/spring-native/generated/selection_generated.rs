@@ -77,7 +77,7 @@ impl<'a> Selection<'a> {
         unsafe {
             let query = sys::SelectUnitQuery {
                 unitID: unit_id,
-                append: append,
+                append,
             };
             let mut result = MaybeUninit::<sys::SelectUnitResult>::zeroed();
             let func = self.api.SelectUnit.expect("SelectUnit function pointer must be initialized");
@@ -94,7 +94,7 @@ impl<'a> Selection<'a> {
             let query = sys::SelectUnitArrayQuery {
                 unitIDs: unit_ids.as_ptr(),
                 count: unit_ids.len() as u32,
-                append: append,
+                append,
             };
             let mut result = MaybeUninit::<sys::SelectUnitArrayResult>::zeroed();
             let func = self.api.SelectUnitArray.expect("SelectUnitArray function pointer must be initialized");

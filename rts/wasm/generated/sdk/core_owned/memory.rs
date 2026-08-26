@@ -1,6 +1,4 @@
     pub mod memory {
-        use super::{Result, String, Vec};
-
         #[derive(Debug, Clone, PartialEq)]
         pub struct FreeFloat2ArrayQuery {
             pub data: u32,

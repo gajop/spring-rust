@@ -2,8 +2,8 @@ impl<'a> Memory<'a> {
     pub fn free_string_array(&self, data: *mut *const i8, length: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::FreeStringArrayQuery {
-                data: data,
-                length: length,
+                data,
+                length,
             };
             let mut result = MaybeUninit::<sys::FreeStringArrayResult>::zeroed();
             let func = self.api.FreeStringArray.expect("FreeStringArray function pointer must be initialized");
@@ -114,7 +114,7 @@ impl<'a> Memory<'a> {
     pub fn free(&self, ptr: *mut std::ffi::c_void) -> Result<(), Error> {
         unsafe {
             let query = sys::FreeQuery {
-                ptr: ptr,
+                ptr,
             };
             let mut result = MaybeUninit::<sys::FreeResult>::zeroed();
             let func = self.api.Free.expect("Free function pointer must be initialized");

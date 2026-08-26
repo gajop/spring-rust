@@ -1,7 +1,7 @@
 //! Semantic overrides for callin records whose C spelling is intentionally
 //! more ambiguous than their engine contract.
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 use crate::model::{ApiModel, LoweringStatus, SemanticType};
 
@@ -142,9 +142,11 @@ mod tests {
                 }),
             }
         );
-        assert!(fields[0]
-            .metadata
-            .iter()
-            .any(|metadata| metadata == "count-field:messageLength"));
+        assert!(
+            fields[0]
+                .metadata
+                .iter()
+                .any(|metadata| metadata == "count-field:messageLength")
+        );
     }
 }

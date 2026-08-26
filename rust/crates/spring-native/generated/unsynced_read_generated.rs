@@ -1,3 +1,9 @@
+/// The complete result tuple returned by [`get_nano_projectile_params`].
+pub type GetNanoProjectileParamsValue = (f32, f32, f32, f32, f32, f32);
+
+/// The complete result tuple returned by [`get_custom_palette_color`].
+pub type GetCustomPaletteColorValue = (f32, f32, f32, bool);
+
 impl<'a> UnsyncedRead<'a> {
     pub fn get_clipboard(&self) -> Result<Option<String>, Error> {
         unsafe {
@@ -155,7 +161,7 @@ impl<'a> UnsyncedRead<'a> {
         }
     }
 
-    pub fn get_nano_projectile_params(&self) -> Result<(f32, f32, f32, f32, f32, f32), Error> {
+    pub fn get_nano_projectile_params(&self) -> Result<GetNanoProjectileParamsValue, Error> {
         unsafe {
             let query = sys::GetNanoProjectileParamsQuery {
                 _unused: 0,
@@ -240,12 +246,12 @@ impl<'a> UnsyncedRead<'a> {
     pub fn solve_nurbscurve(&self, degree: i32, points: &[sys::Float4], knots: &[f32], segments: i32) -> Result<(Vec<sys::Float3>, bool), Error> {
         unsafe {
             let query = sys::SolveNURBSCurveQuery {
-                degree: degree,
+                degree,
                 points: points.as_ptr(),
                 pointCount: points.len() as u32,
                 knots: knots.as_ptr(),
                 knotCount: knots.len() as u32,
-                segments: segments,
+                segments,
             };
             let mut result = MaybeUninit::<sys::SolveNURBSCurveResult>::zeroed();
             let func = self.api.SolveNURBSCurve.expect("SolveNURBSCurve function pointer must be initialized");
@@ -296,10 +302,10 @@ impl<'a> UnsyncedRead<'a> {
         }
     }
 
-    pub fn get_custom_palette_color(&self, index: i32) -> Result<(f32, f32, f32, bool), Error> {
+    pub fn get_custom_palette_color(&self, index: i32) -> Result<GetCustomPaletteColorValue, Error> {
         unsafe {
             let query = sys::GetCustomPaletteColorQuery {
-                index: index,
+                index,
             };
             let mut result = MaybeUninit::<sys::GetCustomPaletteColorResult>::zeroed();
             let func = self.api.GetCustomPaletteColor.expect("GetCustomPaletteColor function pointer must be initialized");

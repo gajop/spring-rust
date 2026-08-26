@@ -87,7 +87,7 @@ fn render_raw(plan: &render_core_wasm::FunctionPlan) -> String {
         .unwrap_or_default();
     format!(
         "            #[link(wasm_import_module = \"{module}\")]\n\
-                     extern \"C\" {{\n\
+                     unsafe extern \"C\" {{\n\
                          #[link_name = \"{name}\"]\n\
                          pub fn {ident}({params}){result};\n\
                      }}\n",
@@ -318,7 +318,9 @@ fn scalar_result_expr(
             "let status = {call}; if status == 0 {{ Ok(()) }} else {{ Err(crate::ApiError::new(status)) }}"
         ),
         ResultStrategy::Packed32 => match &function.outputs[0].ty {
-            SemanticType::Scalar { name } if name == "bool" => format!("crate::unpack_bool({call})"),
+            SemanticType::Scalar { name } if name == "bool" => {
+                format!("crate::unpack_bool({call})")
+            }
             SemanticType::Scalar { name } if name == "f32" => format!("crate::unpack_f32({call})"),
             _ => format!("crate::unpack_i32({call})"),
         },

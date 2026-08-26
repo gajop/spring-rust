@@ -5,7 +5,7 @@ use super::{Result, SyncCallback};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:terrain-control")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "set-height-map-func"]
         pub fn set_height_map_func(callback_id: i32, user_data: i32) -> i64;
         #[link_name = "set-original-height-map-func"]

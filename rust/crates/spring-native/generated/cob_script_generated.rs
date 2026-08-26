@@ -3,7 +3,7 @@ impl<'a> CobScript<'a> {
         unsafe {
             let query = sys::CallCOBScriptQuery {
                 unitID: unit_id,
-                func: func,
+                func,
                 retArgs: ret_args,
                 args: args.as_ptr(),
                 argCount: args.len() as u32,

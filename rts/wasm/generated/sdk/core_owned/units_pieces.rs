@@ -401,11 +401,12 @@
 
         #[inline]
         pub fn get_model_root_piece(model_name: &str) -> Result<i32> {
-            let mut model_name_bytes = model_name.as_bytes().to_vec();
-            if model_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            model_name_bytes.push(0);
-            let model_name_cstr = core::ffi::CStr::from_bytes_with_nul(&model_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::units_pieces::get_model_root_piece(model_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(model_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(model_name)?),
+            };
+            crate::generated::borrowed::units_pieces::get_model_root_piece(__core_string_0_buf.as_cstr())
         }
 
         #[inline]

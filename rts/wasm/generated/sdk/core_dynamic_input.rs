@@ -10,7 +10,7 @@ pub required: usize,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-info")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-sensor-radius"]
 pub fn get_unit_sensor_radius(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -47,7 +47,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-weapons")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-weapon-state"]
 pub fn get_unit_weapon_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
@@ -84,12 +84,12 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-commands")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-command-params"]
 pub fn get_command_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "give-order-array-to-unit-map"]
 pub fn give_order_array_to_unit_map(p0: i32) -> i64;
 }
@@ -164,7 +164,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-model-root-piece"]
 pub fn get_model_root_piece(p0: i32) -> i64;
 }
@@ -198,12 +198,12 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:teams")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-team-resource-stats"]
 pub fn get_team_resource_stats(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:teams")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-team-resources"]
 pub fn get_team_resources(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -265,27 +265,27 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-def-id-by-name"]
 pub fn get_unit_def_id_by_name(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-def-param-bool"]
 pub fn get_unit_def_param_bool(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-def-param-float"]
 pub fn get_unit_def_param_float(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-def-param-int"]
 pub fn get_unit_def_param_int(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-def-param-type"]
 pub fn get_unit_def_param_type(p0: i32) -> i64;
 }
@@ -407,7 +407,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:feature-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-def-id-by-name"]
 pub fn get_feature_def_id_by_name(p0: i32) -> i64;
 }
@@ -441,7 +441,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:weapon-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-weapon-def-id"]
 pub fn get_weapon_def_id(p0: i32) -> i64;
 }
@@ -475,12 +475,12 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:math-extra")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "bit-bits"]
 pub fn bit_bits(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:math-extra")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "diag"]
 pub fn diag(p0: i32) -> i64;
 }
@@ -536,22 +536,22 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:encoding")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "decode-base64"]
 pub fn decode_base64(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:encoding")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "decode-base64-url"]
 pub fn decode_base64_url(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:encoding")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "is-valid-base64"]
 pub fn is_valid_base64(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:encoding")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "is-valid-base64-url"]
 pub fn is_valid_base64_url(p0: i32) -> i64;
 }
@@ -677,27 +677,27 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-feature-rules-param"]
 pub fn set_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-game-rules-param"]
 pub fn set_game_rules_param(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-player-rules-param"]
 pub fn set_player_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-team-rules-param"]
 pub fn set_team_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-rules-param"]
 pub fn set_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
 }
@@ -849,7 +849,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:camera")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-camera-state"]
 pub fn set_camera_state(p0: f32, p1: f32, p2: f32, p3: i32) -> i64;
 }
@@ -883,12 +883,12 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:input")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-key-code"]
 pub fn get_key_code(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:input")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-mouse-buttons-pressed"]
 pub fn get_mouse_buttons_pressed(p0: i32, p1: i32) -> i32;
 }
@@ -957,12 +957,12 @@ Err(super::VariableResultError { error: unreachable!(), required: 0 })
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:debug-input")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "emulate-text-editing"]
 pub fn emulate_text_editing(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:debug-input")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "emulate-text-input"]
 pub fn emulate_text_input(p0: i32) -> i64;
 }
@@ -1018,12 +1018,12 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:selection")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "deselect-unit-array"]
 pub fn deselect_unit_array(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:selection")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "select-unit-array"]
 pub fn select_unit_array(p0: i32, p1: i32) -> i64;
 }
@@ -1079,27 +1079,27 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:sound")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "load-sound-def"]
 pub fn load_sound_def(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:sound")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "play-sound-file"]
 pub fn play_sound_file(p0: f32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:sound")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "play-sound-stream"]
 pub fn play_sound_stream(p0: f32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:sound")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "preload-sound-item"]
 pub fn preload_sound_item(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:sound")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-sound-effect-params"]
 pub fn set_sound_effect_params(p0: i32) -> i64;
 }
@@ -1233,22 +1233,22 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:config")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-config-float"]
 pub fn set_config_float(p0: f32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:config")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-config-int"]
 pub fn set_config_int(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:config")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-config-string"]
 pub fn set_config_string(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:config")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-log-section-filter-level"]
 pub fn set_log_section_filter_level(p0: i32, p1: i32) -> i64;
 }
@@ -1354,7 +1354,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:tracing")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "trace-ray-between-positions"]
 pub fn trace_ray_between_positions(p0: i32, p1: i32) -> i32;
 }
@@ -1413,7 +1413,7 @@ Err(super::VariableResultError { error: unreachable!(), required: 0 })
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:utils")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-cegid"]
 pub fn get_cegid(p0: i32) -> i64;
 }
@@ -1447,107 +1447,107 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "assign-mouse-cursor"]
 pub fn assign_mouse_cursor(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "deselect-unit-map"]
 pub fn deselect_unit_map(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "draw-unit-commands"]
 pub fn draw_unit_commands(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "load-cmd-colors-config"]
 pub fn load_cmd_colors_config(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "load-ctrl-panel-config"]
 pub fn load_ctrl_panel_config(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "load-model-textures"]
 pub fn load_model_textures(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "replace-mouse-cursor"]
 pub fn replace_mouse_cursor(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "select-unit-map"]
 pub fn select_unit_map(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-clipboard"]
 pub fn set_clipboard(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-custom-command-draw-data"]
 pub fn set_custom_command_draw_data(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-dolly-camera-curve"]
 pub fn set_dolly_camera_curve(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-dolly-camera-look-curve"]
 pub fn set_dolly_camera_look_curve(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-map-shading-texture"]
 pub fn set_map_shading_texture(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-mouse-cursor"]
 pub fn set_mouse_cursor(p0: f32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-sky-box-texture"]
 pub fn set_sky_box_texture(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-def-icon"]
 pub fn set_unit_def_icon(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-def-image"]
 pub fn set_unit_def_image(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-icon"]
 pub fn set_unit_icon(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-wm-caption"]
 pub fn set_wm_caption(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-wm-icon"]
 pub fn set_wm_icon(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-water-texture"]
 pub fn set_water_texture(p0: i32) -> i64;
 }
@@ -2069,257 +2069,257 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-atlas-texture"]
 pub fn add_atlas_texture(p0: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-fallback-font"]
 pub fn add_fallback_font(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-feature-defs-to-submission-vao"]
 pub fn add_feature_defs_to_submission_vao(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-features-to-submission-vao"]
 pub fn add_features_to_submission_vao(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-unit-defs-to-submission-vao"]
 pub fn add_unit_defs_to_submission_vao(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-units-to-submission-vao"]
 pub fn add_units_to_submission_vao(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "bind-image-texture"]
 pub fn bind_image_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "bind-texture"]
 pub fn bind_texture(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "change-texture-params"]
 pub fn change_texture_params(p0: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "copy-to-texture"]
 pub fn copy_to_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "create-fbo"]
 pub fn create_fbo(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "create-shader"]
 pub fn create_shader(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "define-vbo"]
 pub fn define_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "delete-texture"]
 pub fn delete_texture(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "delete-texture-atlas"]
 pub fn delete_texture_atlas(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "delete-texture-fbo"]
 pub fn delete_texture_fbo(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "finalize-texture-atlas"]
 pub fn finalize_texture_atlas(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "font-get-text-height"]
 pub fn font_get_text_height(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "font-get-text-width"]
 pub fn font_get_text_width(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "font-print"]
 pub fn font_print(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "font-print-world"]
 pub fn font_print_world(p0: i32, p1: f32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "generate-mipmap"]
 pub fn generate_mipmap(p0: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-atlas-texture"]
 pub fn get_atlas_texture(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-fixed-state"]
 pub fn get_fixed_state(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-global-tex-coords"]
 pub fn get_global_tex_coords(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-subroutine-index"]
 pub fn get_subroutine_index(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-text-height"]
 pub fn get_text_height(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-text-width"]
 pub fn get_text_width(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-uniform-location"]
 pub fn get_uniform_location(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "has-extension"]
 pub fn has_extension(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "instance-data-from-feature-defs-vbo"]
 pub fn instance_data_from_feature_defs_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "instance-data-from-features-vbo"]
 pub fn instance_data_from_features_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "instance-data-from-unit-defs-vbo"]
 pub fn instance_data_from_unit_defs_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "instance-data-from-units-vbo"]
 pub fn instance_data_from_units_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "load-font"]
 pub fn load_font(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "matrix-data-from-projectiles-vbo"]
 pub fn matrix_data_from_projectiles_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "object-label"]
 pub fn object_label(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "push-debug-group"]
 pub fn push_debug_group(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "save-image"]
 pub fn save_image(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-fbo-attachment"]
 pub fn set_fbo_attachment(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-fbo-draw-buffers"]
 pub fn set_fbo_draw_buffers(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-feature-buffer-uniforms"]
 pub fn set_feature_buffer_uniforms(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-buffer-uniforms"]
 pub fn set_unit_buffer_uniforms(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "shape"]
 pub fn shape(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "text"]
 pub fn text(p0: f32, p1: f32, p2: f32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "texture-info"]
 pub fn texture_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "uniform-array-float"]
 pub fn uniform_array_float(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "uniform-array-int"]
 pub fn uniform_array_int(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "uniform-matrix"]
 pub fn uniform_matrix(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "upload-texture"]
 pub fn upload_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "upload-vbo"]
 pub fn upload_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
 }
@@ -3597,12 +3597,12 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:icons")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-unit-icon"]
 pub fn add_unit_icon(p0: f32, p1: f32, p2: i32, p3: f32, p4: f32, p5: f32, p6: f32, p7: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:icons")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "free-unit-icon"]
 pub fn free_unit_icon(p0: i32) -> i64;
 }
@@ -3665,12 +3665,12 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:markers")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-world-text"]
 pub fn add_world_text(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:markers")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "marker-add-point"]
 pub fn marker_add_point(p0: i32, p1: i32, p2: i32) -> i64;
 }
@@ -3738,7 +3738,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:ground-decals")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-ground-decal-texture"]
 pub fn set_ground_decal_texture(p0: i32, p1: i32, p2: i32) -> i64;
 }
@@ -3772,32 +3772,32 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:system-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "clear-watch-dog-timer"]
 pub fn clear_watch_dog_timer(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "reload"]
 pub fn reload(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "restart"]
 pub fn restart(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-share-level"]
 pub fn set_share_level(p0: f32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "share-resources"]
 pub fn share_resources(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "start"]
 pub fn start(p0: i32) -> i64;
 }
@@ -3953,322 +3953,322 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-translation-string"]
 pub fn add_translation_string(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "clear-document-path-requests"]
 pub fn clear_document_path_requests(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-activate-theme"]
 pub fn context_activate_theme(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-create-data-model"]
 pub fn context_create_data_model(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-create-document"]
 pub fn context_create_document(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-get-document"]
 pub fn context_get_document(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-is-theme-active"]
 pub fn context_is_theme_active(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-load-document"]
 pub fn context_load_document(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-open-data-model"]
 pub fn context_open_data_model(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-process-text-input"]
 pub fn context_process_text_input(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-remove-data-model"]
 pub fn context_remove_data_model(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "context-remove-event-listener"]
 pub fn context_remove_event_listener(p0: i64, p1: i64, p2: i32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "create-context"]
 pub fn create_context(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-bind-bool"]
 pub fn data_model_bind_bool(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-bind-color"]
 pub fn data_model_bind_color(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-bind-float"]
 pub fn data_model_bind_float(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-bind-int"]
 pub fn data_model_bind_int(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-bind-percent"]
 pub fn data_model_bind_percent(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-bind-pixels"]
 pub fn data_model_bind_pixels(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-bind-rows"]
 pub fn data_model_bind_rows(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-bind-string"]
 pub fn data_model_bind_string(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-set-rows"]
 pub fn data_model_set_rows(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "data-model-set-string"]
 pub fn data_model_set_string(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "document-append-to-style-sheet"]
 pub fn document_append_to_style_sheet(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "document-create-element"]
 pub fn document_create_element(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "document-create-text-node"]
 pub fn document_create_text_node(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "document-load-external-script"]
 pub fn document_load_external_script(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "document-load-inline-script"]
 pub fn document_load_inline_script(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "document-set-title"]
 pub fn document_set_title(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-are-pseudo-classes-set"]
 pub fn element_are_pseudo_classes_set(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-closest"]
 pub fn element_closest(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-dispatch-event"]
 pub fn element_dispatch_event(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-form-submit"]
 pub fn element_form_submit(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-get-element-by-id"]
 pub fn element_get_element_by_id(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-get-elements-by-class-name"]
 pub fn element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-get-elements-by-class-name-count"]
 pub fn element_get_elements_by_class_name_count(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-get-elements-by-tag-name"]
 pub fn element_get_elements_by_tag_name(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-get-elements-by-tag-name-count"]
 pub fn element_get_elements_by_tag_name_count(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-has-attribute"]
 pub fn element_has_attribute(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-is-class-set"]
 pub fn element_is_class_set(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-is-pseudo-class-set"]
 pub fn element_is_pseudo_class_set(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-matches"]
 pub fn element_matches(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-query-selector"]
 pub fn element_query_selector(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-query-selector-all"]
 pub fn element_query_selector_all(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-query-selector-all-count"]
 pub fn element_query_selector_all_count(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-remove-attribute"]
 pub fn element_remove_attribute(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-remove-event-listener"]
 pub fn element_remove_event_listener(p0: i64, p1: i64, p2: i32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-set-attribute"]
 pub fn element_set_attribute(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-set-class"]
 pub fn element_set_class(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-set-class-name"]
 pub fn element_set_class_name(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-set-id"]
 pub fn element_set_id(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-set-inner-rml"]
 pub fn element_set_inner_rml(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-set-pseudo-class"]
 pub fn element_set_pseudo_class(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-tab-set-set-panel"]
 pub fn element_tab_set_set_panel(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-tab-set-set-tab"]
 pub fn element_tab_set_set_tab(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "event-get-parameter-bool"]
 pub fn event_get_parameter_bool(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "event-get-parameter-float"]
 pub fn event_get_parameter_float(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "event-get-parameter-int"]
 pub fn event_get_parameter_int(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "event-get-parameter-type"]
 pub fn event_get_parameter_type(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-context"]
 pub fn get_context(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "remove-context-by-name"]
 pub fn remove_context_by_name(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-debug-context-by-name"]
 pub fn set_debug_context_by_name(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-mouse-cursor-alias"]
 pub fn set_mouse_cursor_alias(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "sol-lua-data-model-set-dirty"]
 pub fn sol_lua_data_model_set_dirty(p0: i64, p1: i32) -> i64;
 }
@@ -5841,142 +5841,142 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "compress-folder"]
 pub fn compress_folder(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "create-dir"]
 pub fn create_dir(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "download-archive"]
 pub fn download_archive(p0: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "extract-mod-archive-file"]
 pub fn extract_mod_archive_file(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "file-exists"]
 pub fn file_exists(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-file-size"]
 pub fn get_file_size(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-map-square-texture"]
 pub fn get_map_square_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "has-archive"]
 pub fn has_archive(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "is-directory"]
 pub fn is_directory(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "load-file"]
 pub fn load_file(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "pack-f32"]
 pub fn pack_f32(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "pack-s16"]
 pub fn pack_s16(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "pack-s32"]
 pub fn pack_s32(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "pack-s8"]
 pub fn pack_s8(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "pack-u16"]
 pub fn pack_u16(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "pack-u32"]
 pub fn pack_u32(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "pack-u8"]
 pub fn pack_u8(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "read-file"]
 pub fn read_file(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-map-square-texture"]
 pub fn set_map_square_texture(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "unpack-f32"]
 pub fn unpack_f32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "unpack-s16"]
 pub fn unpack_s16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "unpack-s32"]
 pub fn unpack_s32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "unpack-s8"]
 pub fn unpack_s8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "unpack-u16"]
 pub fn unpack_u16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "unpack-u32"]
 pub fn unpack_u32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "unpack-u8"]
 pub fn unpack_u8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "zlib-compress"]
 pub fn zlib_compress(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "zlib-decompress"]
 pub fn zlib_decompress(p0: i32, p1: i32) -> i32;
 }
@@ -6868,37 +6868,37 @@ Err(super::VariableResultError { error: unreachable!(), required: 0 })
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:team-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-team-resource"]
 pub fn add_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-team-resource-excess-stats"]
 pub fn add_team_resource_excess_stats(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "game-over"]
 pub fn game_over(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-team-resource"]
 pub fn set_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-team-share-level"]
 pub fn set_team_share_level(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "share-team-resource"]
 pub fn share_team_resource(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "use-team-resource"]
 pub fn use_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
@@ -7064,92 +7064,92 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "add-unit-resource"]
 pub fn add_unit_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "bugger-off"]
 pub fn bugger_off(p0: f32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "create-unit"]
 pub fn create_unit(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "edit-unit-cmd-desc"]
 pub fn edit_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "give-order-array-to-unit"]
 pub fn give_order_array_to_unit(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "give-order-array-to-unit-array"]
 pub fn give_order_array_to_unit_array(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "give-order-to-unit-array"]
 pub fn give_order_to_unit_array(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "insert-unit-cmd-desc"]
 pub fn insert_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-build-params"]
 pub fn set_unit_build_params(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-flanking"]
 pub fn set_unit_flanking(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-nano-pieces"]
 pub fn set_unit_nano_pieces(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-resourcing"]
 pub fn set_unit_resourcing(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-sensor-radius"]
 pub fn set_unit_sensor_radius(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-storage"]
 pub fn set_unit_storage(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-tooltip"]
 pub fn set_unit_tooltip(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-weapon-damages"]
 pub fn set_unit_weapon_damages(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-unit-weapon-state"]
 pub fn set_unit_weapon_state(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "use-unit-resource"]
 pub fn use_unit_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
@@ -7605,12 +7605,12 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:feature-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "create-feature"]
 pub fn create_feature(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:feature-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-feature-resurrect"]
 pub fn set_feature_resurrect(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
@@ -7672,7 +7672,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:terrain-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-terrain-type-data"]
 pub fn set_terrain_type_data(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, p7: i32) -> i64;
 }
@@ -7707,17 +7707,17 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:projectile-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-projectile-ceg"]
 pub fn set_projectile_ceg(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:projectile-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-projectile-damages"]
 pub fn set_projectile_damages(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:projectile-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "spawn-projectile"]
 pub fn spawn_projectile(p0: i32, p1: i32) -> i64;
 }
@@ -7795,7 +7795,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:effects-control")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "spawn-ceg"]
 pub fn spawn_ceg(p0: f32, p1: f32, p2: f32, p3: i32, p4: i32) -> i32;
 }
@@ -7844,7 +7844,7 @@ Err(unreachable!())
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:cob-script")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-cob-script-id"]
 pub fn get_cob_script_id(p0: i32, p1: i32) -> i64;
 }

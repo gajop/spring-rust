@@ -85,24 +85,27 @@
         #[inline]
         #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn add_unit_icon(icon_name: &str, tex_file: &str, size: f32, distance: f32, radius_adjust: bool, u0: f32, v0: f32, u1: f32, v1: f32) -> Result<bool> {
-            let mut icon_name_bytes = icon_name.as_bytes().to_vec();
-            if icon_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            icon_name_bytes.push(0);
-            let icon_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut tex_file_bytes = tex_file.as_bytes().to_vec();
-            if tex_file_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            tex_file_bytes.push(0);
-            let tex_file_cstr = core::ffi::CStr::from_bytes_with_nul(&tex_file_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::icons::add_unit_icon(icon_name_cstr, tex_file_cstr, size, distance, radius_adjust, u0, v0, u1, v1)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(icon_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(icon_name)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(tex_file, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(tex_file)?),
+            };
+            crate::generated::borrowed::icons::add_unit_icon(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr(), size, distance, radius_adjust, u0, v0, u1, v1)
         }
 
         #[inline]
         pub fn free_unit_icon(icon_name: &str) -> Result<bool> {
-            let mut icon_name_bytes = icon_name.as_bytes().to_vec();
-            if icon_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            icon_name_bytes.push(0);
-            let icon_name_cstr = core::ffi::CStr::from_bytes_with_nul(&icon_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::icons::free_unit_icon(icon_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(icon_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(icon_name)?),
+            };
+            crate::generated::borrowed::icons::free_unit_icon(__core_string_0_buf.as_cstr())
         }
 
         #[inline]

@@ -209,11 +209,11 @@ impl<'a> UnitsQuery<'a> {
     pub fn get_units_in_rectangle(&self, xmin: f32, zmin: f32, xmax: f32, zmax: f32, allegiance: i32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetUnitsInRectangleQuery {
-                xmin: xmin,
-                zmin: zmin,
-                xmax: xmax,
-                zmax: zmax,
-                allegiance: allegiance,
+                xmin,
+                zmin,
+                xmax,
+                zmax,
+                allegiance,
             };
             let mut result = MaybeUninit::<sys::GetUnitsInRectangleResult>::zeroed();
             let func = self.api.GetUnitsInRectangle.expect("GetUnitsInRectangle function pointer must be initialized");
@@ -232,16 +232,17 @@ impl<'a> UnitsQuery<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn get_units_in_box(&self, xmin: f32, ymin: f32, zmin: f32, xmax: f32, ymax: f32, zmax: f32, allegiance: i32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetUnitsInBoxQuery {
-                xmin: xmin,
-                ymin: ymin,
-                zmin: zmin,
-                xmax: xmax,
-                ymax: ymax,
-                zmax: zmax,
-                allegiance: allegiance,
+                xmin,
+                ymin,
+                zmin,
+                xmax,
+                ymax,
+                zmax,
+                allegiance,
             };
             let mut result = MaybeUninit::<sys::GetUnitsInBoxResult>::zeroed();
             let func = self.api.GetUnitsInBox.expect("GetUnitsInBox function pointer must be initialized");
@@ -263,8 +264,8 @@ impl<'a> UnitsQuery<'a> {
     pub fn get_units_in_planes(&self, planes: sys::PlanesQuery, allegiance: i32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetUnitsInPlanesQuery {
-                planes: planes,
-                allegiance: allegiance,
+                planes,
+                allegiance,
             };
             let mut result = MaybeUninit::<sys::GetUnitsInPlanesResult>::zeroed();
             let func = self.api.GetUnitsInPlanes.expect("GetUnitsInPlanes function pointer must be initialized");
@@ -286,11 +287,11 @@ impl<'a> UnitsQuery<'a> {
     pub fn get_units_in_sphere(&self, x: f32, y: f32, z: f32, radius: f32, allegiance: i32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetUnitsInSphereQuery {
-                x: x,
-                y: y,
-                z: z,
-                radius: radius,
-                allegiance: allegiance,
+                x,
+                y,
+                z,
+                radius,
+                allegiance,
             };
             let mut result = MaybeUninit::<sys::GetUnitsInSphereResult>::zeroed();
             let func = self.api.GetUnitsInSphere.expect("GetUnitsInSphere function pointer must be initialized");
@@ -312,10 +313,10 @@ impl<'a> UnitsQuery<'a> {
     pub fn get_units_in_cylinder(&self, x: f32, z: f32, radius: f32, allegiance: i32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetUnitsInCylinderQuery {
-                x: x,
-                z: z,
-                radius: radius,
-                allegiance: allegiance,
+                x,
+                z,
+                radius,
+                allegiance,
             };
             let mut result = MaybeUninit::<sys::GetUnitsInCylinderResult>::zeroed();
             let func = self.api.GetUnitsInCylinder.expect("GetUnitsInCylinder function pointer must be initialized");
@@ -370,7 +371,7 @@ impl<'a> UnitsQuery<'a> {
         unsafe {
             let query = sys::GetUnitNearestAllyQuery {
                 unitID: unit_id,
-                range: range,
+                range,
             };
             let mut result = MaybeUninit::<sys::GetUnitNearestAllyResult>::zeroed();
             let func = self.api.GetUnitNearestAlly.expect("GetUnitNearestAlly function pointer must be initialized");
@@ -386,7 +387,7 @@ impl<'a> UnitsQuery<'a> {
         unsafe {
             let query = sys::GetUnitNearestEnemyQuery {
                 unitID: unit_id,
-                range: range,
+                range,
                 options: options.into(),
             };
             let mut result = MaybeUninit::<sys::GetUnitNearestEnemyResult>::zeroed();
@@ -402,8 +403,8 @@ impl<'a> UnitsQuery<'a> {
     pub fn get_closest_enemy_unit(&self, pos: sys::Float3, range: f32, ally_team_id: i32, options: GetClosestEnemyUnitOptions) -> Result<i32, Error> {
         unsafe {
             let query = sys::GetClosestEnemyUnitQuery {
-                pos: pos,
-                range: range,
+                pos,
+                range,
                 allyTeamID: ally_team_id,
                 options: options.into(),
             };

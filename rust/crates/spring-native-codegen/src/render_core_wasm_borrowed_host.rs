@@ -201,16 +201,18 @@ pub fn render_rust(model: &ApiModel) -> String {
         total += functions.len();
         let module_ident = rust_ident(&module.name.to_snake_case());
         modules.push_str(&format!("    pub mod {module_ident} {{\n"));
-        modules.push_str("        use crate::{ApiError, ErrorCode, Result};\n\n");
-        modules.push_str("        #[cfg(target_arch = \"wasm32\")]\n        mod raw {\n");
+        let mut module_source = String::new();
+        module_source.push_str("        #[cfg(target_arch = \"wasm32\")]\n        mod raw {\n");
         for (function, plan) in &functions {
-            modules.push_str(&render_rust_raw(function, plan, 12));
+            module_source.push_str(&render_rust_raw(function, plan, 12));
         }
-        modules.push_str("        }\n\n");
+        module_source.push_str("        }\n\n");
         for (function, plan) in &functions {
-            modules.push_str(&render_rust_wrapper(function, plan, &records, 8));
-            modules.push('\n');
+            module_source.push_str(&render_rust_wrapper(function, plan, &records, 8));
+            module_source.push('\n');
         }
+        modules.push_str(&render_imports(&module_source, 8));
+        modules.push_str(&module_source);
         modules.push_str("    }\n\n");
     }
 
@@ -226,6 +228,27 @@ pub fn render_rust(model: &ApiModel) -> String {
         modules = modules,
         total = total,
     )
+}
+
+fn render_imports(source: &str, indent: usize) -> String {
+    let names = ["ApiError", "ErrorCode", "Result"]
+        .into_iter()
+        .filter(|name| contains_identifier(source, name))
+        .collect::<Vec<_>>();
+    if names.is_empty() {
+        return String::new();
+    }
+    format!(
+        "{}use crate::{{{}}};\n\n",
+        " ".repeat(indent),
+        names.join(", ")
+    )
+}
+
+fn contains_identifier(source: &str, name: &str) -> bool {
+    source
+        .split(|character: char| !(character == '_' || character.is_ascii_alphanumeric()))
+        .any(|identifier| identifier == name)
 }
 
 const RUST_DESCRIPTOR_HELPERS: &str = r#"#[doc(hidden)]
@@ -743,13 +766,15 @@ fn render_wire_read(
             let mut output = record
                 .fields
                 .iter()
-                .map(|field| render_wire_read_field(
-                    field,
-                    &format!("{destination}.{}", field.name),
-                    destination,
-                    records,
-                    indent,
-                ))
+                .map(|field| {
+                    render_wire_read_field(
+                        field,
+                        &format!("{destination}.{}", field.name),
+                        destination,
+                        records,
+                        indent,
+                    )
+                })
                 .collect::<String>();
             let (_, alignment) = fixed_wire_layout(ty, records)
                 .expect("eligible borrowed record must have a wire layout");
@@ -760,8 +785,15 @@ fn render_wire_read(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("borrowedReadIndex{indent}");
-            let nested = render_wire_read(element, &format!("{destination}[{index}]"), records, indent + 1);
-            format!("{pad}for (std::size_t {index}=0; {index}<{length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_wire_read(
+                element,
+                &format!("{destination}[{index}]"),
+                records,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index}=0; {index}<{length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
@@ -806,26 +838,38 @@ fn render_wire_write(
     match ty {
         SemanticType::Scalar { name } => {
             let method = match name.as_str() {
-                "bool" => "Bool", "f32" => "F32", "f64" => "F64",
-                "i64" | "isize" => "I64", "u64" | "usize" => "U64",
-                "i8" | "i16" | "i32" => "I32", _ => "U32",
+                "bool" => "Bool",
+                "f32" => "F32",
+                "f64" => "F64",
+                "i64" | "isize" => "I64",
+                "u64" | "usize" => "U64",
+                "i8" | "i16" | "i32" => "I32",
+                _ => "U32",
             };
-            format!("{pad}if (!writer.{method}({value})) return Trap(\"borrowed Core wire overflow\");\n")
+            format!(
+                "{pad}if (!writer.{method}({value})) return Trap(\"borrowed Core wire overflow\");\n"
+            )
         }
-        SemanticType::Enum { .. } => format!("{pad}if (!writer.I32(static_cast<std::int32_t>({value}))) return Trap(\"borrowed Core wire overflow\");\n"),
-        SemanticType::Handle { .. } => format!("{pad}if (!writer.U64(static_cast<std::uint64_t>({value}))) return Trap(\"borrowed Core wire overflow\");\n"),
+        SemanticType::Enum { .. } => format!(
+            "{pad}if (!writer.I32(static_cast<std::int32_t>({value}))) return Trap(\"borrowed Core wire overflow\");\n"
+        ),
+        SemanticType::Handle { .. } => format!(
+            "{pad}if (!writer.U64(static_cast<std::uint64_t>({value}))) return Trap(\"borrowed Core wire overflow\");\n"
+        ),
         SemanticType::Record { name } => {
             let record = &records[name];
             let mut output = record
                 .fields
                 .iter()
-                .map(|field| render_wire_write_field(
-                    field,
-                    &format!("{value}.{}", field.name),
-                    value,
-                    records,
-                    indent,
-                ))
+                .map(|field| {
+                    render_wire_write_field(
+                        field,
+                        &format!("{value}.{}", field.name),
+                        value,
+                        records,
+                        indent,
+                    )
+                })
                 .collect::<String>();
             let (_, alignment) = fixed_wire_layout(ty, records)
                 .expect("eligible borrowed record must have a wire layout");
@@ -836,8 +880,11 @@ fn render_wire_write(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("borrowedWriteIndex{indent}");
-            let nested = render_wire_write(element, &format!("{value}[{index}]"), records, indent + 1);
-            format!("{pad}for (std::size_t {index}=0; {index}<{length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested =
+                render_wire_write(element, &format!("{value}[{index}]"), records, indent + 1);
+            format!(
+                "{pad}for (std::size_t {index}=0; {index}<{length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
@@ -873,7 +920,7 @@ fn render_rust_raw(function: &FunctionModel, plan: &FunctionPlan, indent: usize)
         .map(|kind| format!(" -> {}", rust_core_type(*kind)))
         .unwrap_or_default();
     format!(
-        "{pad}#[link(wasm_import_module = \"{module}\")]\n{pad}extern \"C\" {{\n{pad}    #[link_name = \"{name}\"]\n{pad}    pub fn {rust_name}({params}){result};\n{pad}}}\n",
+        "{pad}#[link(wasm_import_module = \"{module}\")]\n{pad}unsafe extern \"C\" {{\n{pad}    #[link_name = \"{name}\"]\n{pad}    pub fn {rust_name}({params}){result};\n{pad}}}\n",
         module = plan.import_module,
         name = plan.import_name,
         rust_name = rust_ident(&function.name.to_snake_case()),
@@ -1220,7 +1267,9 @@ fn count_field(field: &FieldModel) -> Option<String> {
 fn error_return(plan: &FunctionPlan, status: &str, indent: usize) -> String {
     let pad = "    ".repeat(indent);
     if matches!(plan.result_strategy, ResultStrategy::Packed32) {
-        format!("{pad}slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>({status})));\n{pad}return nullptr;\n")
+        format!(
+            "{pad}slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>({status})));\n{pad}return nullptr;\n"
+        )
     } else {
         format!("{pad}slots[0].i32 = static_cast<std::int32_t>({status});\n{pad}return nullptr;\n")
     }

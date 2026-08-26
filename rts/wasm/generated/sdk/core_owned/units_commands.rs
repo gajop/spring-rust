@@ -228,7 +228,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_real_build_queue {
             #[link(wasm_import_module = "spring:units-commands")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-real-build-queue"]
                 pub fn call(punit_id: i32, output: i32) -> i32;
             }

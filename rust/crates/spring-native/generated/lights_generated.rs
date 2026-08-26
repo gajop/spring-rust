@@ -2,7 +2,7 @@ impl<'a> Lights<'a> {
     pub fn add_map_light(&self, params: sys::LightParams) -> Result<u32, Error> {
         unsafe {
             let query = sys::AddMapLightQuery {
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::AddMapLightResult>::zeroed();
             let func = self.api.AddMapLight.expect("AddMapLight function pointer must be initialized");
@@ -17,7 +17,7 @@ impl<'a> Lights<'a> {
     pub fn add_model_light(&self, params: sys::LightParams) -> Result<u32, Error> {
         unsafe {
             let query = sys::AddModelLightQuery {
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::AddModelLightResult>::zeroed();
             let func = self.api.AddModelLight.expect("AddModelLight function pointer must be initialized");
@@ -33,7 +33,7 @@ impl<'a> Lights<'a> {
         unsafe {
             let query = sys::UpdateMapLightQuery {
                 lightHandle: light_handle,
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::UpdateMapLightResult>::zeroed();
             let func = self.api.UpdateMapLight.expect("UpdateMapLight function pointer must be initialized");
@@ -49,7 +49,7 @@ impl<'a> Lights<'a> {
         unsafe {
             let query = sys::UpdateModelLightQuery {
                 lightHandle: light_handle,
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::UpdateModelLightResult>::zeroed();
             let func = self.api.UpdateModelLight.expect("UpdateModelLight function pointer must be initialized");

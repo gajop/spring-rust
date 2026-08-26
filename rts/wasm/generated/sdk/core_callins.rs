@@ -8,7 +8,7 @@
 macro_rules! export_activate_game {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/activate-game"]
+        #[unsafe(export_name = "spring:callin/activate-game")]
         pub extern "C" fn __spring_wasm_core_callin_activate_game(
             unused: i32
         ) {
@@ -22,7 +22,7 @@ macro_rules! export_activate_game {
 macro_rules! export_allow_builder_hold_fire {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-builder-hold-fire"]
+        #[unsafe(export_name = "spring:callin/allow-builder-hold-fire")]
         pub extern "C" fn __spring_wasm_core_callin_allow_builder_hold_fire(
             unit_id: i32,
             unit_def_id: i32,
@@ -38,7 +38,7 @@ macro_rules! export_allow_builder_hold_fire {
 macro_rules! export_allow_direct_unit_control {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-direct-unit-control"]
+        #[unsafe(export_name = "spring:callin/allow-direct-unit-control")]
         pub extern "C" fn __spring_wasm_core_callin_allow_direct_unit_control(
             unit_id: i32,
             unit_def_id: i32,
@@ -55,7 +55,7 @@ macro_rules! export_allow_direct_unit_control {
 macro_rules! export_allow_draw {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-draw"]
+        #[unsafe(export_name = "spring:callin/allow-draw")]
         pub extern "C" fn __spring_wasm_core_callin_allow_draw(
             unused: i32
         ) -> i32 {
@@ -69,7 +69,7 @@ macro_rules! export_allow_draw {
 macro_rules! export_allow_feature_build_step {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-feature-build-step"]
+        #[unsafe(export_name = "spring:callin/allow-feature-build-step")]
         pub extern "C" fn __spring_wasm_core_callin_allow_feature_build_step(
             builder_id: i32,
             builder_team: i32,
@@ -87,7 +87,7 @@ macro_rules! export_allow_feature_build_step {
 macro_rules! export_allow_feature_creation {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-feature-creation"]
+        #[unsafe(export_name = "spring:callin/allow-feature-creation")]
         pub extern "C" fn __spring_wasm_core_callin_allow_feature_creation(
             feature_def_id: i32,
             team_id: i32,
@@ -105,7 +105,7 @@ macro_rules! export_allow_feature_creation {
 macro_rules! export_allow_start_position {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-start-position"]
+        #[unsafe(export_name = "spring:callin/allow-start-position")]
         pub extern "C" fn __spring_wasm_core_callin_allow_start_position(
             player_id: i32,
             team_id: i32,
@@ -127,7 +127,7 @@ macro_rules! export_allow_start_position {
 macro_rules! export_allow_unit_build_step {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-build-step"]
+        #[unsafe(export_name = "spring:callin/allow-unit-build-step")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_build_step(
             builder_id: i32,
             builder_team: i32,
@@ -145,7 +145,7 @@ macro_rules! export_allow_unit_build_step {
 macro_rules! export_allow_unit_capture_step {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-capture-step"]
+        #[unsafe(export_name = "spring:callin/allow-unit-capture-step")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_capture_step(
             builder_id: i32,
             builder_team: i32,
@@ -163,7 +163,7 @@ macro_rules! export_allow_unit_capture_step {
 macro_rules! export_allow_unit_cloak {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-cloak"]
+        #[unsafe(export_name = "spring:callin/allow-unit-cloak")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_cloak(
             unit_id: i32,
             has_enemy: i32,
@@ -179,7 +179,7 @@ macro_rules! export_allow_unit_cloak {
 macro_rules! export_allow_unit_decloak {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-decloak"]
+        #[unsafe(export_name = "spring:callin/allow-unit-decloak")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_decloak(
             unit_id: i32,
             has_object: i32,
@@ -197,7 +197,7 @@ macro_rules! export_allow_unit_decloak {
 macro_rules! export_allow_unit_kamikaze {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-kamikaze"]
+        #[unsafe(export_name = "spring:callin/allow-unit-kamikaze")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_kamikaze(
             unit_id: i32,
             target_id: i32,
@@ -213,7 +213,7 @@ macro_rules! export_allow_unit_kamikaze {
 macro_rules! export_allow_unit_transfer {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-transfer"]
+        #[unsafe(export_name = "spring:callin/allow-unit-transfer")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_transfer(
             unit_id: i32,
             unit_def_id: i32,
@@ -231,7 +231,7 @@ macro_rules! export_allow_unit_transfer {
 macro_rules! export_allow_unit_transport {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-transport"]
+        #[unsafe(export_name = "spring:callin/allow-unit-transport")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_transport(
             transporter_id: i32,
             transporter_def_id: i32,
@@ -250,7 +250,7 @@ macro_rules! export_allow_unit_transport {
 macro_rules! export_allow_unit_transport_position {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-transport-position"]
+        #[unsafe(export_name = "spring:callin/allow-unit-transport-position")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_transport_position(
             units_transporter_id: i32,
             units_transporter_def_id: i32,
@@ -273,7 +273,7 @@ macro_rules! export_allow_unit_transport_position {
 macro_rules! export_allow_unit_transport_load {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-transport-load"]
+        #[unsafe(export_name = "spring:callin/allow-unit-transport-load")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_transport_load(
             units_transporter_id: i32,
             units_transporter_def_id: i32,
@@ -296,7 +296,7 @@ macro_rules! export_allow_unit_transport_load {
 macro_rules! export_allow_unit_transport_unload {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-transport-unload"]
+        #[unsafe(export_name = "spring:callin/allow-unit-transport-unload")]
         pub extern "C" fn __spring_wasm_core_callin_allow_unit_transport_unload(
             units_transporter_id: i32,
             units_transporter_def_id: i32,
@@ -319,7 +319,7 @@ macro_rules! export_allow_unit_transport_unload {
 macro_rules! export_allow_weapon_intercept_target {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-weapon-intercept-target"]
+        #[unsafe(export_name = "spring:callin/allow-weapon-intercept-target")]
         pub extern "C" fn __spring_wasm_core_callin_allow_weapon_intercept_target(
             interceptor_unit_id: i32,
             interceptor_weapon_id: i32,
@@ -335,7 +335,7 @@ macro_rules! export_allow_weapon_intercept_target {
 macro_rules! export_allow_weapon_target {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-weapon-target"]
+        #[unsafe(export_name = "spring:callin/allow-weapon-target")]
         pub extern "C" fn __spring_wasm_core_callin_allow_weapon_target(
             attacker_id: i32,
             target_id: i32,
@@ -355,7 +355,7 @@ macro_rules! export_allow_weapon_target {
 macro_rules! export_allow_weapon_target_check {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-weapon-target-check"]
+        #[unsafe(export_name = "spring:callin/allow-weapon-target-check")]
         pub extern "C" fn __spring_wasm_core_callin_allow_weapon_target_check(
             attacker_id: i32,
             attacker_weapon_num: i32,
@@ -371,7 +371,7 @@ macro_rules! export_allow_weapon_target_check {
 macro_rules! export_archive_callin {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/archive-callin"]
+        #[unsafe(export_name = "spring:callin/archive-callin")]
         pub extern "C" fn __spring_wasm_core_callin_archive_callin(
             unused: i32
         ) {
@@ -385,7 +385,7 @@ macro_rules! export_archive_callin {
 macro_rules! export_collect_garbage {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/collect-garbage"]
+        #[unsafe(export_name = "spring:callin/collect-garbage")]
         pub extern "C" fn __spring_wasm_core_callin_collect_garbage(
             forced: i32
         ) {
@@ -399,7 +399,7 @@ macro_rules! export_collect_garbage {
 macro_rules! export_default_command {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/default-command"]
+        #[unsafe(export_name = "spring:callin/default-command")]
         pub extern "C" fn __spring_wasm_core_callin_default_command(
             unit_id: i32,
             feature_id: i32,
@@ -416,7 +416,7 @@ macro_rules! export_default_command {
 macro_rules! export_download_failed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/download-failed"]
+        #[unsafe(export_name = "spring:callin/download-failed")]
         pub extern "C" fn __spring_wasm_core_callin_download_failed(
             download_id: i32,
             error_id: i32
@@ -431,7 +431,7 @@ macro_rules! export_download_failed {
 macro_rules! export_download_finished {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/download-finished"]
+        #[unsafe(export_name = "spring:callin/download-finished")]
         pub extern "C" fn __spring_wasm_core_callin_download_finished(
             download_id: i32
         ) {
@@ -445,7 +445,7 @@ macro_rules! export_download_finished {
 macro_rules! export_download_progress {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/download-progress"]
+        #[unsafe(export_name = "spring:callin/download-progress")]
         pub extern "C" fn __spring_wasm_core_callin_download_progress(
             download_id: i32,
             downloaded: i64,
@@ -461,7 +461,7 @@ macro_rules! export_download_progress {
 macro_rules! export_download_started {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/download-started"]
+        #[unsafe(export_name = "spring:callin/download-started")]
         pub extern "C" fn __spring_wasm_core_callin_download_started(
             download_id: i32
         ) {
@@ -475,7 +475,7 @@ macro_rules! export_download_started {
 macro_rules! export_draw_alpha_objects_lua {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-alpha-objects-lua"]
+        #[unsafe(export_name = "spring:callin/draw-alpha-objects-lua")]
         pub extern "C" fn __spring_wasm_core_callin_draw_alpha_objects_lua(
             draw_reflection: i32,
             draw_refraction: i32
@@ -490,7 +490,7 @@ macro_rules! export_draw_alpha_objects_lua {
 macro_rules! export_draw_alpha_features_lua {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-alpha-features-lua"]
+        #[unsafe(export_name = "spring:callin/draw-alpha-features-lua")]
         pub extern "C" fn __spring_wasm_core_callin_draw_alpha_features_lua(
             draw_reflection: i32,
             draw_refraction: i32
@@ -505,7 +505,7 @@ macro_rules! export_draw_alpha_features_lua {
 macro_rules! export_draw_alpha_units_lua {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-alpha-units-lua"]
+        #[unsafe(export_name = "spring:callin/draw-alpha-units-lua")]
         pub extern "C" fn __spring_wasm_core_callin_draw_alpha_units_lua(
             draw_reflection: i32,
             draw_refraction: i32
@@ -520,7 +520,7 @@ macro_rules! export_draw_alpha_units_lua {
 macro_rules! export_draw_feature {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-feature"]
+        #[unsafe(export_name = "spring:callin/draw-feature")]
         pub extern "C" fn __spring_wasm_core_callin_draw_feature(
             feature_id: i32,
             draw_mode: i32
@@ -535,7 +535,7 @@ macro_rules! export_draw_feature {
 macro_rules! export_draw_load_screen {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-load-screen"]
+        #[unsafe(export_name = "spring:callin/draw-load-screen")]
         pub extern "C" fn __spring_wasm_core_callin_draw_load_screen(
             unused: i32
         ) {
@@ -549,7 +549,7 @@ macro_rules! export_draw_load_screen {
 macro_rules! export_draw_material {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-material"]
+        #[unsafe(export_name = "spring:callin/draw-material")]
         pub extern "C" fn __spring_wasm_core_callin_draw_material(
             uuid: i32,
             draw_mode: i32
@@ -564,7 +564,7 @@ macro_rules! export_draw_material {
 macro_rules! export_draw_objects_lua {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-objects-lua"]
+        #[unsafe(export_name = "spring:callin/draw-objects-lua")]
         pub extern "C" fn __spring_wasm_core_callin_draw_objects_lua(
             deferred_pass: i32,
             draw_reflection: i32,
@@ -580,7 +580,7 @@ macro_rules! export_draw_objects_lua {
 macro_rules! export_draw_opaque_features_lua {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-opaque-features-lua"]
+        #[unsafe(export_name = "spring:callin/draw-opaque-features-lua")]
         pub extern "C" fn __spring_wasm_core_callin_draw_opaque_features_lua(
             deferred_pass: i32,
             draw_reflection: i32,
@@ -596,7 +596,7 @@ macro_rules! export_draw_opaque_features_lua {
 macro_rules! export_draw_opaque_units_lua {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-opaque-units-lua"]
+        #[unsafe(export_name = "spring:callin/draw-opaque-units-lua")]
         pub extern "C" fn __spring_wasm_core_callin_draw_opaque_units_lua(
             deferred_pass: i32,
             draw_reflection: i32,
@@ -612,7 +612,7 @@ macro_rules! export_draw_opaque_units_lua {
 macro_rules! export_draw_projectile {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-projectile"]
+        #[unsafe(export_name = "spring:callin/draw-projectile")]
         pub extern "C" fn __spring_wasm_core_callin_draw_projectile(
             projectile_id: i32,
             draw_mode: i32
@@ -627,7 +627,7 @@ macro_rules! export_draw_projectile {
 macro_rules! export_draw_screen {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-screen"]
+        #[unsafe(export_name = "spring:callin/draw-screen")]
         pub extern "C" fn __spring_wasm_core_callin_draw_screen(
             view_size_x: i32,
             view_size_y: i32
@@ -642,7 +642,7 @@ macro_rules! export_draw_screen {
 macro_rules! export_draw_screen_effects {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-screen-effects"]
+        #[unsafe(export_name = "spring:callin/draw-screen-effects")]
         pub extern "C" fn __spring_wasm_core_callin_draw_screen_effects(
             view_size_x: i32,
             view_size_y: i32
@@ -657,7 +657,7 @@ macro_rules! export_draw_screen_effects {
 macro_rules! export_draw_screen_post {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-screen-post"]
+        #[unsafe(export_name = "spring:callin/draw-screen-post")]
         pub extern "C" fn __spring_wasm_core_callin_draw_screen_post(
             view_size_x: i32,
             view_size_y: i32
@@ -672,7 +672,7 @@ macro_rules! export_draw_screen_post {
 macro_rules! export_screen_callin {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/screen-callin"]
+        #[unsafe(export_name = "spring:callin/screen-callin")]
         pub extern "C" fn __spring_wasm_core_callin_screen_callin(
             view_size_x: i32,
             view_size_y: i32
@@ -687,7 +687,7 @@ macro_rules! export_screen_callin {
 macro_rules! export_draw_shield {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-shield"]
+        #[unsafe(export_name = "spring:callin/draw-shield")]
         pub extern "C" fn __spring_wasm_core_callin_draw_shield(
             unit_id: i32,
             weapon_id: i32,
@@ -703,7 +703,7 @@ macro_rules! export_draw_shield {
 macro_rules! export_draw_unit {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-unit"]
+        #[unsafe(export_name = "spring:callin/draw-unit")]
         pub extern "C" fn __spring_wasm_core_callin_draw_unit(
             unit_id: i32,
             draw_mode: i32
@@ -718,7 +718,7 @@ macro_rules! export_draw_unit {
 macro_rules! export_draw_world_pre_particles {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-world-pre-particles"]
+        #[unsafe(export_name = "spring:callin/draw-world-pre-particles")]
         pub extern "C" fn __spring_wasm_core_callin_draw_world_pre_particles(
             draw_above_water: i32,
             draw_below_water: i32,
@@ -735,7 +735,7 @@ macro_rules! export_draw_world_pre_particles {
 macro_rules! export_explosion {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/explosion"]
+        #[unsafe(export_name = "spring:callin/explosion")]
         pub extern "C" fn __spring_wasm_core_callin_explosion(
             weapon_def_id: i32,
             pos_x: f32,
@@ -754,7 +754,7 @@ macro_rules! export_explosion {
 macro_rules! export_feature_created {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/feature-created"]
+        #[unsafe(export_name = "spring:callin/feature-created")]
         pub extern "C" fn __spring_wasm_core_callin_feature_created(
             feature_id: i32,
             ally_team_id: i32
@@ -769,7 +769,7 @@ macro_rules! export_feature_created {
 macro_rules! export_feature_damaged {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/feature-damaged"]
+        #[unsafe(export_name = "spring:callin/feature-damaged")]
         pub extern "C" fn __spring_wasm_core_callin_feature_damaged(
             feature_id: i32,
             feature_def_id: i32,
@@ -791,7 +791,7 @@ macro_rules! export_feature_damaged {
 macro_rules! export_feature_destroyed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/feature-destroyed"]
+        #[unsafe(export_name = "spring:callin/feature-destroyed")]
         pub extern "C" fn __spring_wasm_core_callin_feature_destroyed(
             feature_id: i32,
             ally_team_id: i32
@@ -806,7 +806,7 @@ macro_rules! export_feature_destroyed {
 macro_rules! export_feature_moved {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/feature-moved"]
+        #[unsafe(export_name = "spring:callin/feature-moved")]
         pub extern "C" fn __spring_wasm_core_callin_feature_moved(
             feature_id: i32,
             old_pos_x: f32,
@@ -823,7 +823,7 @@ macro_rules! export_feature_moved {
 macro_rules! export_feature_pre_damaged {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/feature-pre-damaged"]
+        #[unsafe(export_name = "spring:callin/feature-pre-damaged")]
         pub extern "C" fn __spring_wasm_core_callin_feature_pre_damaged(
             feature_id: i32,
             feature_def_id: i32,
@@ -846,7 +846,7 @@ macro_rules! export_feature_pre_damaged {
 macro_rules! export_float3_callin {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/float3-callin"]
+        #[unsafe(export_name = "spring:callin/float3-callin")]
         pub extern "C" fn __spring_wasm_core_callin_float3_callin(
             value_x: f32,
             value_y: f32,
@@ -862,7 +862,7 @@ macro_rules! export_float3_callin {
 macro_rules! export_camera_position_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/camera-position-changed"]
+        #[unsafe(export_name = "spring:callin/camera-position-changed")]
         pub extern "C" fn __spring_wasm_core_callin_camera_position_changed(
             value_x: f32,
             value_y: f32,
@@ -878,7 +878,7 @@ macro_rules! export_camera_position_changed {
 macro_rules! export_camera_rotation_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/camera-rotation-changed"]
+        #[unsafe(export_name = "spring:callin/camera-rotation-changed")]
         pub extern "C" fn __spring_wasm_core_callin_camera_rotation_changed(
             value_x: f32,
             value_y: f32,
@@ -894,7 +894,7 @@ macro_rules! export_camera_rotation_changed {
 macro_rules! export_game_paused {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/game-paused"]
+        #[unsafe(export_name = "spring:callin/game-paused")]
         pub extern "C" fn __spring_wasm_core_callin_game_paused(
             player_id: i32,
             paused: i32
@@ -909,7 +909,7 @@ macro_rules! export_game_paused {
 macro_rules! export_game_preload {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/game-preload"]
+        #[unsafe(export_name = "spring:callin/game-preload")]
         pub extern "C" fn __spring_wasm_core_callin_game_preload() {
             $handler();
         }
@@ -921,7 +921,7 @@ macro_rules! export_game_preload {
 macro_rules! export_game_progress {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/game-progress"]
+        #[unsafe(export_name = "spring:callin/game-progress")]
         pub extern "C" fn __spring_wasm_core_callin_game_progress(
             game_frame: i32
         ) {
@@ -935,7 +935,7 @@ macro_rules! export_game_progress {
 macro_rules! export_game_start {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/game-start"]
+        #[unsafe(export_name = "spring:callin/game-start")]
         pub extern "C" fn __spring_wasm_core_callin_game_start() {
             $handler();
         }
@@ -954,7 +954,7 @@ macro_rules! export_generate_defs {
         static mut __SPRING_CORE_STRING_RESULT_BUFFER_GENERATE_DEFS: __SpringCoreStringResultBuffer_generate_defs = __SpringCoreStringResultBuffer_generate_defs([0; $bytes]);
 
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/generate-defs"]
+        #[unsafe(export_name = "spring:callin/generate-defs")]
         pub extern "C" fn __spring_wasm_core_callin_generate_defs(
             unused: i32
         ) -> i64 {
@@ -979,7 +979,7 @@ macro_rules! export_generate_defs {
 macro_rules! export_group_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/group-changed"]
+        #[unsafe(export_name = "spring:callin/group-changed")]
         pub extern "C" fn __spring_wasm_core_callin_group_changed(
             group_id: i32
         ) -> i32 {
@@ -993,7 +993,7 @@ macro_rules! export_group_changed {
 macro_rules! export_initialize_native_module {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/initialize-native-module"]
+        #[unsafe(export_name = "spring:callin/initialize-native-module")]
         pub extern "C" fn __spring_wasm_core_callin_initialize_native_module(
             host_version_major: i32,
             host_version_minor: i32,
@@ -1009,7 +1009,7 @@ macro_rules! export_initialize_native_module {
 macro_rules! export_key_map_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/key-map-changed"]
+        #[unsafe(export_name = "spring:callin/key-map-changed")]
         pub extern "C" fn __spring_wasm_core_callin_key_map_changed(
             unused: i32
         ) -> i32 {
@@ -1023,7 +1023,7 @@ macro_rules! export_key_map_changed {
 macro_rules! export_last_message_position {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/last-message-position"]
+        #[unsafe(export_name = "spring:callin/last-message-position")]
         pub extern "C" fn __spring_wasm_core_callin_last_message_position(
             pos_x: f32,
             pos_y: f32,
@@ -1039,7 +1039,7 @@ macro_rules! export_last_message_position {
 macro_rules! export_load {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/load"]
+        #[unsafe(export_name = "spring:callin/load")]
         pub extern "C" fn __spring_wasm_core_callin_load(
             unused: i32
         ) {
@@ -1053,7 +1053,7 @@ macro_rules! export_load {
 macro_rules! export_mini_map_draw {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/mini-map-draw"]
+        #[unsafe(export_name = "spring:callin/mini-map-draw")]
         pub extern "C" fn __spring_wasm_core_callin_mini_map_draw(
             size_x: i32,
             size_y: i32
@@ -1068,7 +1068,7 @@ macro_rules! export_mini_map_draw {
 macro_rules! export_draw_in_mini_map {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-in-mini-map"]
+        #[unsafe(export_name = "spring:callin/draw-in-mini-map")]
         pub extern "C" fn __spring_wasm_core_callin_draw_in_mini_map(
             size_x: i32,
             size_y: i32
@@ -1083,7 +1083,7 @@ macro_rules! export_draw_in_mini_map {
 macro_rules! export_draw_in_mini_map_background {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-in-mini-map-background"]
+        #[unsafe(export_name = "spring:callin/draw-in-mini-map-background")]
         pub extern "C" fn __spring_wasm_core_callin_draw_in_mini_map_background(
             size_x: i32,
             size_y: i32
@@ -1098,7 +1098,7 @@ macro_rules! export_draw_in_mini_map_background {
 macro_rules! export_mini_map_geometry_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/mini-map-geometry-changed"]
+        #[unsafe(export_name = "spring:callin/mini-map-geometry-changed")]
         pub extern "C" fn __spring_wasm_core_callin_mini_map_geometry_changed(
             new_pos_x: i32,
             new_pos_y: i32,
@@ -1119,7 +1119,7 @@ macro_rules! export_mini_map_geometry_changed {
 macro_rules! export_mini_map_rotation_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/mini-map-rotation-changed"]
+        #[unsafe(export_name = "spring:callin/mini-map-rotation-changed")]
         pub extern "C" fn __spring_wasm_core_callin_mini_map_rotation_changed(
             new_rot: f32,
             old_rot: f32
@@ -1134,7 +1134,7 @@ macro_rules! export_mini_map_rotation_changed {
 macro_rules! export_mini_map_state_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/mini-map-state-changed"]
+        #[unsafe(export_name = "spring:callin/mini-map-state-changed")]
         pub extern "C" fn __spring_wasm_core_callin_mini_map_state_changed(
             is_minimized: i32,
             is_maximized: i32,
@@ -1150,7 +1150,7 @@ macro_rules! export_mini_map_state_changed {
 macro_rules! export_mouse_move {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/mouse-move"]
+        #[unsafe(export_name = "spring:callin/mouse-move")]
         pub extern "C" fn __spring_wasm_core_callin_mouse_move(
             x: i32,
             y: i32,
@@ -1168,7 +1168,7 @@ macro_rules! export_mouse_move {
 macro_rules! export_mouse_press {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/mouse-press"]
+        #[unsafe(export_name = "spring:callin/mouse-press")]
         pub extern "C" fn __spring_wasm_core_callin_mouse_press(
             x: i32,
             y: i32,
@@ -1184,7 +1184,7 @@ macro_rules! export_mouse_press {
 macro_rules! export_mouse_release {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/mouse-release"]
+        #[unsafe(export_name = "spring:callin/mouse-release")]
         pub extern "C" fn __spring_wasm_core_callin_mouse_release(
             x: i32,
             y: i32,
@@ -1200,7 +1200,7 @@ macro_rules! export_mouse_release {
 macro_rules! export_mouse_wheel {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/mouse-wheel"]
+        #[unsafe(export_name = "spring:callin/mouse-wheel")]
         pub extern "C" fn __spring_wasm_core_callin_mouse_wheel(
             up: i32,
             value: f32
@@ -1215,7 +1215,7 @@ macro_rules! export_mouse_wheel {
 macro_rules! export_move_ctrl_notify {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/move-ctrl-notify"]
+        #[unsafe(export_name = "spring:callin/move-ctrl-notify")]
         pub extern "C" fn __spring_wasm_core_callin_move_ctrl_notify(
             unit_id: i32,
             unit_def_id: i32,
@@ -1232,7 +1232,7 @@ macro_rules! export_move_ctrl_notify {
 macro_rules! export_player_added {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/player-added"]
+        #[unsafe(export_name = "spring:callin/player-added")]
         pub extern "C" fn __spring_wasm_core_callin_player_added(
             player_id: i32
         ) {
@@ -1246,7 +1246,7 @@ macro_rules! export_player_added {
 macro_rules! export_player_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/player-changed"]
+        #[unsafe(export_name = "spring:callin/player-changed")]
         pub extern "C" fn __spring_wasm_core_callin_player_changed(
             player_id: i32
         ) {
@@ -1260,7 +1260,7 @@ macro_rules! export_player_changed {
 macro_rules! export_player_removed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/player-removed"]
+        #[unsafe(export_name = "spring:callin/player-removed")]
         pub extern "C" fn __spring_wasm_core_callin_player_removed(
             player_id: i32,
             reason: i32
@@ -1275,7 +1275,7 @@ macro_rules! export_player_removed {
 macro_rules! export_pong {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/pong"]
+        #[unsafe(export_name = "spring:callin/pong")]
         pub extern "C" fn __spring_wasm_core_callin_pong(
             ping_tag: i32,
             packet_send_time_millis: i64,
@@ -1291,7 +1291,7 @@ macro_rules! export_pong {
 macro_rules! export_projectile_event {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/projectile-event"]
+        #[unsafe(export_name = "spring:callin/projectile-event")]
         pub extern "C" fn __spring_wasm_core_callin_projectile_event(
             projectile_id: i32,
             owner_id: i32,
@@ -1307,7 +1307,7 @@ macro_rules! export_projectile_event {
 macro_rules! export_projectile_created {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/projectile-created"]
+        #[unsafe(export_name = "spring:callin/projectile-created")]
         pub extern "C" fn __spring_wasm_core_callin_projectile_created(
             projectile_id: i32,
             owner_id: i32,
@@ -1323,7 +1323,7 @@ macro_rules! export_projectile_created {
 macro_rules! export_projectile_destroyed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/projectile-destroyed"]
+        #[unsafe(export_name = "spring:callin/projectile-destroyed")]
         pub extern "C" fn __spring_wasm_core_callin_projectile_destroyed(
             projectile_id: i32,
             owner_id: i32,
@@ -1339,7 +1339,7 @@ macro_rules! export_projectile_destroyed {
 macro_rules! export_rect_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/rect-changed"]
+        #[unsafe(export_name = "spring:callin/rect-changed")]
         pub extern "C" fn __spring_wasm_core_callin_rect_changed(
             x1: i32,
             z1: i32,
@@ -1356,7 +1356,7 @@ macro_rules! export_rect_changed {
 macro_rules! export_unsynced_height_map_update {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unsynced-height-map-update"]
+        #[unsafe(export_name = "spring:callin/unsynced-height-map-update")]
         pub extern "C" fn __spring_wasm_core_callin_unsynced_height_map_update(
             x1: i32,
             z1: i32,
@@ -1373,7 +1373,7 @@ macro_rules! export_unsynced_height_map_update {
 macro_rules! export_render_unit_destroyed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/render-unit-destroyed"]
+        #[unsafe(export_name = "spring:callin/render-unit-destroyed")]
         pub extern "C" fn __spring_wasm_core_callin_render_unit_destroyed(
             unit_id: i32,
             unit_def_id: i32,
@@ -1389,7 +1389,7 @@ macro_rules! export_render_unit_destroyed {
 macro_rules! export_save {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/save"]
+        #[unsafe(export_name = "spring:callin/save")]
         pub extern "C" fn __spring_wasm_core_callin_save(
             unused: i32
         ) {
@@ -1403,7 +1403,7 @@ macro_rules! export_save {
 macro_rules! export_screen_position {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/screen-position"]
+        #[unsafe(export_name = "spring:callin/screen-position")]
         pub extern "C" fn __spring_wasm_core_callin_screen_position(
             x: i32,
             y: i32
@@ -1418,7 +1418,7 @@ macro_rules! export_screen_position {
 macro_rules! export_is_above {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/is-above"]
+        #[unsafe(export_name = "spring:callin/is-above")]
         pub extern "C" fn __spring_wasm_core_callin_is_above(
             x: i32,
             y: i32
@@ -1440,7 +1440,7 @@ macro_rules! export_screen_tooltip {
         static mut __SPRING_CORE_STRING_RESULT_BUFFER_SCREEN_TOOLTIP: __SpringCoreStringResultBuffer_screen_tooltip = __SpringCoreStringResultBuffer_screen_tooltip([0; $bytes]);
 
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/screen-tooltip"]
+        #[unsafe(export_name = "spring:callin/screen-tooltip")]
         pub extern "C" fn __spring_wasm_core_callin_screen_tooltip(
             x: i32,
             y: i32
@@ -1473,7 +1473,7 @@ macro_rules! export_get_tooltip {
         static mut __SPRING_CORE_STRING_RESULT_BUFFER_GET_TOOLTIP: __SpringCoreStringResultBuffer_get_tooltip = __SpringCoreStringResultBuffer_get_tooltip([0; $bytes]);
 
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/get-tooltip"]
+        #[unsafe(export_name = "spring:callin/get-tooltip")]
         pub extern "C" fn __spring_wasm_core_callin_get_tooltip(
             x: i32,
             y: i32
@@ -1499,7 +1499,7 @@ macro_rules! export_get_tooltip {
 macro_rules! export_shield_pre_damaged {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/shield-pre-damaged"]
+        #[unsafe(export_name = "spring:callin/shield-pre-damaged")]
         pub extern "C" fn __spring_wasm_core_callin_shield_pre_damaged(
             projectile_id: i32,
             projectile_owner_id: i32,
@@ -1525,7 +1525,7 @@ macro_rules! export_shield_pre_damaged {
 macro_rules! export_shutdown {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/shutdown"]
+        #[unsafe(export_name = "spring:callin/shutdown")]
         pub extern "C" fn __spring_wasm_core_callin_shutdown() {
             $handler();
         }
@@ -1537,7 +1537,7 @@ macro_rules! export_shutdown {
 macro_rules! export_simple_callin {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/simple-callin"]
+        #[unsafe(export_name = "spring:callin/simple-callin")]
         pub extern "C" fn __spring_wasm_core_callin_simple_callin(
             unused: i32
         ) {
@@ -1551,7 +1551,7 @@ macro_rules! export_simple_callin {
 macro_rules! export_draw_features_post_deferred {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-features-post-deferred"]
+        #[unsafe(export_name = "spring:callin/draw-features-post-deferred")]
         pub extern "C" fn __spring_wasm_core_callin_draw_features_post_deferred(
             unused: i32
         ) {
@@ -1565,7 +1565,7 @@ macro_rules! export_draw_features_post_deferred {
 macro_rules! export_draw_genesis {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-genesis"]
+        #[unsafe(export_name = "spring:callin/draw-genesis")]
         pub extern "C" fn __spring_wasm_core_callin_draw_genesis(
             unused: i32
         ) {
@@ -1579,7 +1579,7 @@ macro_rules! export_draw_genesis {
 macro_rules! export_draw_ground_deferred {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-ground-deferred"]
+        #[unsafe(export_name = "spring:callin/draw-ground-deferred")]
         pub extern "C" fn __spring_wasm_core_callin_draw_ground_deferred(
             unused: i32
         ) {
@@ -1593,7 +1593,7 @@ macro_rules! export_draw_ground_deferred {
 macro_rules! export_draw_ground_post_deferred {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-ground-post-deferred"]
+        #[unsafe(export_name = "spring:callin/draw-ground-post-deferred")]
         pub extern "C" fn __spring_wasm_core_callin_draw_ground_post_deferred(
             unused: i32
         ) {
@@ -1607,7 +1607,7 @@ macro_rules! export_draw_ground_post_deferred {
 macro_rules! export_draw_ground_post_forward {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-ground-post-forward"]
+        #[unsafe(export_name = "spring:callin/draw-ground-post-forward")]
         pub extern "C" fn __spring_wasm_core_callin_draw_ground_post_forward(
             unused: i32
         ) {
@@ -1621,7 +1621,7 @@ macro_rules! export_draw_ground_post_forward {
 macro_rules! export_draw_ground_pre_deferred {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-ground-pre-deferred"]
+        #[unsafe(export_name = "spring:callin/draw-ground-pre-deferred")]
         pub extern "C" fn __spring_wasm_core_callin_draw_ground_pre_deferred(
             unused: i32
         ) {
@@ -1635,7 +1635,7 @@ macro_rules! export_draw_ground_pre_deferred {
 macro_rules! export_draw_ground_pre_forward {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-ground-pre-forward"]
+        #[unsafe(export_name = "spring:callin/draw-ground-pre-forward")]
         pub extern "C" fn __spring_wasm_core_callin_draw_ground_pre_forward(
             unused: i32
         ) {
@@ -1649,7 +1649,7 @@ macro_rules! export_draw_ground_pre_forward {
 macro_rules! export_draw_pre_decals {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-pre-decals"]
+        #[unsafe(export_name = "spring:callin/draw-pre-decals")]
         pub extern "C" fn __spring_wasm_core_callin_draw_pre_decals(
             unused: i32
         ) {
@@ -1663,7 +1663,7 @@ macro_rules! export_draw_pre_decals {
 macro_rules! export_draw_shadow_features_lua {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-shadow-features-lua"]
+        #[unsafe(export_name = "spring:callin/draw-shadow-features-lua")]
         pub extern "C" fn __spring_wasm_core_callin_draw_shadow_features_lua(
             unused: i32
         ) {
@@ -1677,7 +1677,7 @@ macro_rules! export_draw_shadow_features_lua {
 macro_rules! export_draw_shadow_pass_transparent {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-shadow-pass-transparent"]
+        #[unsafe(export_name = "spring:callin/draw-shadow-pass-transparent")]
         pub extern "C" fn __spring_wasm_core_callin_draw_shadow_pass_transparent(
             unused: i32
         ) {
@@ -1691,7 +1691,7 @@ macro_rules! export_draw_shadow_pass_transparent {
 macro_rules! export_draw_shadow_units_lua {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-shadow-units-lua"]
+        #[unsafe(export_name = "spring:callin/draw-shadow-units-lua")]
         pub extern "C" fn __spring_wasm_core_callin_draw_shadow_units_lua(
             unused: i32
         ) {
@@ -1705,7 +1705,7 @@ macro_rules! export_draw_shadow_units_lua {
 macro_rules! export_draw_units_post_deferred {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-units-post-deferred"]
+        #[unsafe(export_name = "spring:callin/draw-units-post-deferred")]
         pub extern "C" fn __spring_wasm_core_callin_draw_units_post_deferred(
             unused: i32
         ) {
@@ -1719,7 +1719,7 @@ macro_rules! export_draw_units_post_deferred {
 macro_rules! export_draw_water_post {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-water-post"]
+        #[unsafe(export_name = "spring:callin/draw-water-post")]
         pub extern "C" fn __spring_wasm_core_callin_draw_water_post(
             unused: i32
         ) {
@@ -1733,7 +1733,7 @@ macro_rules! export_draw_water_post {
 macro_rules! export_draw_world_pre_unit {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-world-pre-unit"]
+        #[unsafe(export_name = "spring:callin/draw-world-pre-unit")]
         pub extern "C" fn __spring_wasm_core_callin_draw_world_pre_unit(
             unused: i32
         ) {
@@ -1747,7 +1747,7 @@ macro_rules! export_draw_world_pre_unit {
 macro_rules! export_draw_world_reflection {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-world-reflection"]
+        #[unsafe(export_name = "spring:callin/draw-world-reflection")]
         pub extern "C" fn __spring_wasm_core_callin_draw_world_reflection(
             unused: i32
         ) {
@@ -1761,7 +1761,7 @@ macro_rules! export_draw_world_reflection {
 macro_rules! export_draw_world_refraction {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-world-refraction"]
+        #[unsafe(export_name = "spring:callin/draw-world-refraction")]
         pub extern "C" fn __spring_wasm_core_callin_draw_world_refraction(
             unused: i32
         ) {
@@ -1775,7 +1775,7 @@ macro_rules! export_draw_world_refraction {
 macro_rules! export_draw_world_shadow {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-world-shadow"]
+        #[unsafe(export_name = "spring:callin/draw-world-shadow")]
         pub extern "C" fn __spring_wasm_core_callin_draw_world_shadow(
             unused: i32
         ) {
@@ -1789,7 +1789,7 @@ macro_rules! export_draw_world_shadow {
 macro_rules! export_fonts_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/fonts-changed"]
+        #[unsafe(export_name = "spring:callin/fonts-changed")]
         pub extern "C" fn __spring_wasm_core_callin_fonts_changed(
             unused: i32
         ) {
@@ -1803,7 +1803,7 @@ macro_rules! export_fonts_changed {
 macro_rules! export_stockpile_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/stockpile-changed"]
+        #[unsafe(export_name = "spring:callin/stockpile-changed")]
         pub extern "C" fn __spring_wasm_core_callin_stockpile_changed(
             unit_id: i32,
             unit_def_id: i32,
@@ -1822,7 +1822,7 @@ macro_rules! export_stockpile_changed {
 macro_rules! export_sun_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/sun-changed"]
+        #[unsafe(export_name = "spring:callin/sun-changed")]
         pub extern "C" fn __spring_wasm_core_callin_sun_changed(
             unused: i32
         ) {
@@ -1836,7 +1836,7 @@ macro_rules! export_sun_changed {
 macro_rules! export_team_changed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/team-changed"]
+        #[unsafe(export_name = "spring:callin/team-changed")]
         pub extern "C" fn __spring_wasm_core_callin_team_changed(
             team_id: i32
         ) {
@@ -1850,7 +1850,7 @@ macro_rules! export_team_changed {
 macro_rules! export_team_died {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/team-died"]
+        #[unsafe(export_name = "spring:callin/team-died")]
         pub extern "C" fn __spring_wasm_core_callin_team_died(
             team_id: i32
         ) {
@@ -1864,7 +1864,7 @@ macro_rules! export_team_died {
 macro_rules! export_terraform_complete {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/terraform-complete"]
+        #[unsafe(export_name = "spring:callin/terraform-complete")]
         pub extern "C" fn __spring_wasm_core_callin_terraform_complete(
             unit_id: i32,
             unit_def_id: i32,
@@ -1883,7 +1883,7 @@ macro_rules! export_terraform_complete {
 macro_rules! export_unit_cloak_event {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-cloak-event"]
+        #[unsafe(export_name = "spring:callin/unit-cloak-event")]
         pub extern "C" fn __spring_wasm_core_callin_unit_cloak_event(
             unit_id: i32,
             unit_def_id: i32,
@@ -1899,7 +1899,7 @@ macro_rules! export_unit_cloak_event {
 macro_rules! export_unit_cloaked {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-cloaked"]
+        #[unsafe(export_name = "spring:callin/unit-cloaked")]
         pub extern "C" fn __spring_wasm_core_callin_unit_cloaked(
             unit_id: i32,
             unit_def_id: i32,
@@ -1915,7 +1915,7 @@ macro_rules! export_unit_cloaked {
 macro_rules! export_unit_decloaked {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-decloaked"]
+        #[unsafe(export_name = "spring:callin/unit-decloaked")]
         pub extern "C" fn __spring_wasm_core_callin_unit_decloaked(
             unit_id: i32,
             unit_def_id: i32,
@@ -1931,7 +1931,7 @@ macro_rules! export_unit_decloaked {
 macro_rules! export_unit_construction_decayed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-construction-decayed"]
+        #[unsafe(export_name = "spring:callin/unit-construction-decayed")]
         pub extern "C" fn __spring_wasm_core_callin_unit_construction_decayed(
             unit_id: i32,
             unit_def_id: i32,
@@ -1950,7 +1950,7 @@ macro_rules! export_unit_construction_decayed {
 macro_rules! export_unit_damaged {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-damaged"]
+        #[unsafe(export_name = "spring:callin/unit-damaged")]
         pub extern "C" fn __spring_wasm_core_callin_unit_damaged(
             unit_id: i32,
             unit_def_id: i32,
@@ -1973,7 +1973,7 @@ macro_rules! export_unit_damaged {
 macro_rules! export_unit_destroyed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-destroyed"]
+        #[unsafe(export_name = "spring:callin/unit-destroyed")]
         pub extern "C" fn __spring_wasm_core_callin_unit_destroyed(
             unit_id: i32,
             unit_def_id: i32,
@@ -1993,7 +1993,7 @@ macro_rules! export_unit_destroyed {
 macro_rules! export_unit_experience {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-experience"]
+        #[unsafe(export_name = "spring:callin/unit-experience")]
         pub extern "C" fn __spring_wasm_core_callin_unit_experience(
             unit_id: i32,
             unit_def_id: i32,
@@ -2011,7 +2011,7 @@ macro_rules! export_unit_experience {
 macro_rules! export_unit_feature_collision {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-feature-collision"]
+        #[unsafe(export_name = "spring:callin/unit-feature-collision")]
         pub extern "C" fn __spring_wasm_core_callin_unit_feature_collision(
             collider_id: i32,
             collidee_id: i32
@@ -2026,7 +2026,7 @@ macro_rules! export_unit_feature_collision {
 macro_rules! export_unit_finished {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-finished"]
+        #[unsafe(export_name = "spring:callin/unit-finished")]
         pub extern "C" fn __spring_wasm_core_callin_unit_finished(
             unit_id: i32,
             unit_def_id: i32,
@@ -2042,7 +2042,7 @@ macro_rules! export_unit_finished {
 macro_rules! export_unit_from_factory {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-from-factory"]
+        #[unsafe(export_name = "spring:callin/unit-from-factory")]
         pub extern "C" fn __spring_wasm_core_callin_unit_from_factory(
             unit_id: i32,
             unit_def_id: i32,
@@ -2061,7 +2061,7 @@ macro_rules! export_unit_from_factory {
 macro_rules! export_unit_given {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-given"]
+        #[unsafe(export_name = "spring:callin/unit-given")]
         pub extern "C" fn __spring_wasm_core_callin_unit_given(
             unit_id: i32,
             unit_def_id: i32,
@@ -2078,7 +2078,7 @@ macro_rules! export_unit_given {
 macro_rules! export_unit_harvest_storage_full {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-harvest-storage-full"]
+        #[unsafe(export_name = "spring:callin/unit-harvest-storage-full")]
         pub extern "C" fn __spring_wasm_core_callin_unit_harvest_storage_full(
             unit_id: i32,
             unit_def_id: i32,
@@ -2094,7 +2094,7 @@ macro_rules! export_unit_harvest_storage_full {
 macro_rules! export_unit_idle {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-idle"]
+        #[unsafe(export_name = "spring:callin/unit-idle")]
         pub extern "C" fn __spring_wasm_core_callin_unit_idle(
             unit_id: i32,
             unit_def_id: i32,
@@ -2110,7 +2110,7 @@ macro_rules! export_unit_idle {
 macro_rules! export_unit_loaded {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-loaded"]
+        #[unsafe(export_name = "spring:callin/unit-loaded")]
         pub extern "C" fn __spring_wasm_core_callin_unit_loaded(
             unit_id: i32,
             unit_def_id: i32,
@@ -2128,7 +2128,7 @@ macro_rules! export_unit_loaded {
 macro_rules! export_unit_los_event {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-los-event"]
+        #[unsafe(export_name = "spring:callin/unit-los-event")]
         pub extern "C" fn __spring_wasm_core_callin_unit_los_event(
             unit_id: i32,
             unit_def_id: i32,
@@ -2145,7 +2145,7 @@ macro_rules! export_unit_los_event {
 macro_rules! export_unit_entered_los {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-entered-los"]
+        #[unsafe(export_name = "spring:callin/unit-entered-los")]
         pub extern "C" fn __spring_wasm_core_callin_unit_entered_los(
             unit_id: i32,
             unit_def_id: i32,
@@ -2162,7 +2162,7 @@ macro_rules! export_unit_entered_los {
 macro_rules! export_unit_entered_radar {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-entered-radar"]
+        #[unsafe(export_name = "spring:callin/unit-entered-radar")]
         pub extern "C" fn __spring_wasm_core_callin_unit_entered_radar(
             unit_id: i32,
             unit_def_id: i32,
@@ -2179,7 +2179,7 @@ macro_rules! export_unit_entered_radar {
 macro_rules! export_unit_left_los {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-left-los"]
+        #[unsafe(export_name = "spring:callin/unit-left-los")]
         pub extern "C" fn __spring_wasm_core_callin_unit_left_los(
             unit_id: i32,
             unit_def_id: i32,
@@ -2196,7 +2196,7 @@ macro_rules! export_unit_left_los {
 macro_rules! export_unit_left_radar {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-left-radar"]
+        #[unsafe(export_name = "spring:callin/unit-left-radar")]
         pub extern "C" fn __spring_wasm_core_callin_unit_left_radar(
             unit_id: i32,
             unit_def_id: i32,
@@ -2213,7 +2213,7 @@ macro_rules! export_unit_left_radar {
 macro_rules! export_unit_move_event {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-move-event"]
+        #[unsafe(export_name = "spring:callin/unit-move-event")]
         pub extern "C" fn __spring_wasm_core_callin_unit_move_event(
             unit_id: i32,
             unit_def_id: i32,
@@ -2229,7 +2229,7 @@ macro_rules! export_unit_move_event {
 macro_rules! export_unit_arrived_at_goal {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-arrived-at-goal"]
+        #[unsafe(export_name = "spring:callin/unit-arrived-at-goal")]
         pub extern "C" fn __spring_wasm_core_callin_unit_arrived_at_goal(
             unit_id: i32,
             unit_def_id: i32,
@@ -2245,7 +2245,7 @@ macro_rules! export_unit_arrived_at_goal {
 macro_rules! export_unit_move_failed {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-move-failed"]
+        #[unsafe(export_name = "spring:callin/unit-move-failed")]
         pub extern "C" fn __spring_wasm_core_callin_unit_move_failed(
             unit_id: i32,
             unit_def_id: i32,
@@ -2261,7 +2261,7 @@ macro_rules! export_unit_move_failed {
 macro_rules! export_unit_moved {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-moved"]
+        #[unsafe(export_name = "spring:callin/unit-moved")]
         pub extern "C" fn __spring_wasm_core_callin_unit_moved(
             unit_id: i32,
             unit_def_id: i32,
@@ -2277,7 +2277,7 @@ macro_rules! export_unit_moved {
 macro_rules! export_unit_movement_class_event {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-movement-class-event"]
+        #[unsafe(export_name = "spring:callin/unit-movement-class-event")]
         pub extern "C" fn __spring_wasm_core_callin_unit_movement_class_event(
             unit_id: i32,
             unit_def_id: i32,
@@ -2293,7 +2293,7 @@ macro_rules! export_unit_movement_class_event {
 macro_rules! export_unit_entered_air {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-entered-air"]
+        #[unsafe(export_name = "spring:callin/unit-entered-air")]
         pub extern "C" fn __spring_wasm_core_callin_unit_entered_air(
             unit_id: i32,
             unit_def_id: i32,
@@ -2309,7 +2309,7 @@ macro_rules! export_unit_entered_air {
 macro_rules! export_unit_entered_underwater {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-entered-underwater"]
+        #[unsafe(export_name = "spring:callin/unit-entered-underwater")]
         pub extern "C" fn __spring_wasm_core_callin_unit_entered_underwater(
             unit_id: i32,
             unit_def_id: i32,
@@ -2325,7 +2325,7 @@ macro_rules! export_unit_entered_underwater {
 macro_rules! export_unit_entered_water {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-entered-water"]
+        #[unsafe(export_name = "spring:callin/unit-entered-water")]
         pub extern "C" fn __spring_wasm_core_callin_unit_entered_water(
             unit_id: i32,
             unit_def_id: i32,
@@ -2341,7 +2341,7 @@ macro_rules! export_unit_entered_water {
 macro_rules! export_unit_left_air {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-left-air"]
+        #[unsafe(export_name = "spring:callin/unit-left-air")]
         pub extern "C" fn __spring_wasm_core_callin_unit_left_air(
             unit_id: i32,
             unit_def_id: i32,
@@ -2357,7 +2357,7 @@ macro_rules! export_unit_left_air {
 macro_rules! export_unit_left_underwater {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-left-underwater"]
+        #[unsafe(export_name = "spring:callin/unit-left-underwater")]
         pub extern "C" fn __spring_wasm_core_callin_unit_left_underwater(
             unit_id: i32,
             unit_def_id: i32,
@@ -2373,7 +2373,7 @@ macro_rules! export_unit_left_underwater {
 macro_rules! export_unit_left_water {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-left-water"]
+        #[unsafe(export_name = "spring:callin/unit-left-water")]
         pub extern "C" fn __spring_wasm_core_callin_unit_left_water(
             unit_id: i32,
             unit_def_id: i32,
@@ -2389,7 +2389,7 @@ macro_rules! export_unit_left_water {
 macro_rules! export_unit_reverse_built {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-reverse-built"]
+        #[unsafe(export_name = "spring:callin/unit-reverse-built")]
         pub extern "C" fn __spring_wasm_core_callin_unit_reverse_built(
             unit_id: i32,
             unit_def_id: i32,
@@ -2405,7 +2405,7 @@ macro_rules! export_unit_reverse_built {
 macro_rules! export_unit_seismic_ping {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-seismic-ping"]
+        #[unsafe(export_name = "spring:callin/unit-seismic-ping")]
         pub extern "C" fn __spring_wasm_core_callin_unit_seismic_ping(
             pos_x: f32,
             pos_y: f32,
@@ -2425,7 +2425,7 @@ macro_rules! export_unit_seismic_ping {
 macro_rules! export_unit_stunned {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-stunned"]
+        #[unsafe(export_name = "spring:callin/unit-stunned")]
         pub extern "C" fn __spring_wasm_core_callin_unit_stunned(
             unit_id: i32,
             unit_def_id: i32,
@@ -2442,7 +2442,7 @@ macro_rules! export_unit_stunned {
 macro_rules! export_unit_taken {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-taken"]
+        #[unsafe(export_name = "spring:callin/unit-taken")]
         pub extern "C" fn __spring_wasm_core_callin_unit_taken(
             unit_id: i32,
             unit_def_id: i32,
@@ -2459,7 +2459,7 @@ macro_rules! export_unit_taken {
 macro_rules! export_unit_unit_collision {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-unit-collision"]
+        #[unsafe(export_name = "spring:callin/unit-unit-collision")]
         pub extern "C" fn __spring_wasm_core_callin_unit_unit_collision(
             collider_id: i32,
             collidee_id: i32
@@ -2474,7 +2474,7 @@ macro_rules! export_unit_unit_collision {
 macro_rules! export_unit_unloaded {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-unloaded"]
+        #[unsafe(export_name = "spring:callin/unit-unloaded")]
         pub extern "C" fn __spring_wasm_core_callin_unit_unloaded(
             unit_id: i32,
             unit_def_id: i32,
@@ -2492,7 +2492,7 @@ macro_rules! export_unit_unloaded {
 macro_rules! export_view_resize {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/view-resize"]
+        #[unsafe(export_name = "spring:callin/view-resize")]
         pub extern "C" fn __spring_wasm_core_callin_view_resize(
             screen_size_x: i32,
             screen_size_y: i32,
@@ -2528,7 +2528,7 @@ macro_rules! export_world_tooltip {
         static mut __SPRING_CORE_STRING_RESULT_BUFFER_WORLD_TOOLTIP: __SpringCoreStringResultBuffer_world_tooltip = __SpringCoreStringResultBuffer_world_tooltip([0; $bytes]);
 
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/world-tooltip"]
+        #[unsafe(export_name = "spring:callin/world-tooltip")]
         pub extern "C" fn __spring_wasm_core_callin_world_tooltip(
             kind: i32,
             unit_id: i32,

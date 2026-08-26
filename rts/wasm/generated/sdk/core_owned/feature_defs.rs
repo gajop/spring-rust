@@ -129,7 +129,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_feature_def_i_ds {
             #[link(wasm_import_module = "spring:feature-defs")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-feature-def-i-ds"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -138,7 +138,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_feature_def_name {
             #[link(wasm_import_module = "spring:feature-defs")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-feature-def-name"]
                 pub fn call(pfeature_def_id: i32, output: i32) -> i32;
             }
@@ -227,11 +227,12 @@
 
         #[inline]
         pub fn get_feature_def_id_by_name(feature_def_name: &str) -> Result<i32> {
-            let mut feature_def_name_bytes = feature_def_name.as_bytes().to_vec();
-            if feature_def_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            feature_def_name_bytes.push(0);
-            let feature_def_name_cstr = core::ffi::CStr::from_bytes_with_nul(&feature_def_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::feature_defs::get_feature_def_id_by_name(feature_def_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(feature_def_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(feature_def_name)?),
+            };
+            crate::generated::borrowed::feature_defs::get_feature_def_id_by_name(__core_string_0_buf.as_cstr())
         }
 
         #[inline]

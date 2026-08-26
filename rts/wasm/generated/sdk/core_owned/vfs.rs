@@ -628,32 +628,37 @@
 
         #[inline]
         pub fn compress_folder(folder_path: &str, archive_type: &str, compressed_file_path: &str, include_folder: bool, mode: &str) -> Result<bool> {
-            let mut folder_path_bytes = folder_path.as_bytes().to_vec();
-            if folder_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            folder_path_bytes.push(0);
-            let folder_path_cstr = core::ffi::CStr::from_bytes_with_nul(&folder_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut archive_type_bytes = archive_type.as_bytes().to_vec();
-            if archive_type_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            archive_type_bytes.push(0);
-            let archive_type_cstr = core::ffi::CStr::from_bytes_with_nul(&archive_type_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut compressed_file_path_bytes = compressed_file_path.as_bytes().to_vec();
-            if compressed_file_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            compressed_file_path_bytes.push(0);
-            let compressed_file_path_cstr = core::ffi::CStr::from_bytes_with_nul(&compressed_file_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut mode_bytes = mode.as_bytes().to_vec();
-            if mode_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            mode_bytes.push(0);
-            let mode_cstr = core::ffi::CStr::from_bytes_with_nul(&mode_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::compress_folder(folder_path_cstr, archive_type_cstr, compressed_file_path_cstr, include_folder, mode_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(folder_path, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(folder_path)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(archive_type, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(archive_type)?),
+            };
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(compressed_file_path, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(compressed_file_path)?),
+            };
+            let mut __core_string_4_scratch = [0u8; 256];
+            let __core_string_4_buf = match super::write_cstr(mode, &mut __core_string_4_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(mode)?),
+            };
+            crate::generated::borrowed::vfs::compress_folder(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr(), __core_string_2_buf.as_cstr(), include_folder, __core_string_4_buf.as_cstr())
         }
 
         #[inline]
         pub fn create_dir(path: &str) -> Result<bool> {
-            let mut path_bytes = path.as_bytes().to_vec();
-            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            path_bytes.push(0);
-            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::create_dir(path_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(path, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(path)?),
+            };
+            crate::generated::borrowed::vfs::create_dir(__core_string_0_buf.as_cstr())
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -674,33 +679,37 @@
 
         #[inline]
         pub fn download_archive(filename: &str, category: &str) -> Result<()> {
-            let mut filename_bytes = filename.as_bytes().to_vec();
-            if filename_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            filename_bytes.push(0);
-            let filename_cstr = core::ffi::CStr::from_bytes_with_nul(&filename_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut category_bytes = category.as_bytes().to_vec();
-            if category_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            category_bytes.push(0);
-            let category_cstr = core::ffi::CStr::from_bytes_with_nul(&category_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::download_archive(filename_cstr, category_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(filename, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(filename)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(category, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(category)?),
+            };
+            crate::generated::borrowed::vfs::download_archive(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn extract_mod_archive_file(path: &str) -> Result<bool> {
-            let mut path_bytes = path.as_bytes().to_vec();
-            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            path_bytes.push(0);
-            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::extract_mod_archive_file(path_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(path, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(path)?),
+            };
+            crate::generated::borrowed::vfs::extract_mod_archive_file(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn file_exists(path: &str) -> Result<bool> {
-            let mut path_bytes = path.as_bytes().to_vec();
-            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            path_bytes.push(0);
-            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::file_exists(path_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(path, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(path)?),
+            };
+            crate::generated::borrowed::vfs::file_exists(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -893,11 +902,12 @@
 
         #[inline]
         pub fn get_file_size(path: &str) -> Result<u32> {
-            let mut path_bytes = path.as_bytes().to_vec();
-            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            path_bytes.push(0);
-            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::get_file_size(path_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(path, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(path)?),
+            };
+            crate::generated::borrowed::vfs::get_file_size(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -946,11 +956,12 @@
 
         #[inline]
         pub fn get_map_square_texture(tex_square_x: i32, tex_square_y: i32, lod_min: i32, texture_name: &str, lod_max: i32) -> Result<bool> {
-            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
-            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            texture_name_bytes.push(0);
-            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::get_map_square_texture(tex_square_x, tex_square_y, lod_min, texture_name_cstr, lod_max)
+            let mut __core_string_3_scratch = [0u8; 256];
+            let __core_string_3_buf = match super::write_cstr(texture_name, &mut __core_string_3_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(texture_name)?),
+            };
+            crate::generated::borrowed::vfs::get_map_square_texture(tex_square_x, tex_square_y, lod_min, __core_string_3_buf.as_cstr(), lod_max)
         }
 
         #[inline]
@@ -1003,20 +1014,22 @@
 
         #[inline]
         pub fn has_archive(archive_name: &str) -> Result<bool> {
-            let mut archive_name_bytes = archive_name.as_bytes().to_vec();
-            if archive_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            archive_name_bytes.push(0);
-            let archive_name_cstr = core::ffi::CStr::from_bytes_with_nul(&archive_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::has_archive(archive_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(archive_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(archive_name)?),
+            };
+            crate::generated::borrowed::vfs::has_archive(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn is_directory(path: &str) -> Result<bool> {
-            let mut path_bytes = path.as_bytes().to_vec();
-            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            path_bytes.push(0);
-            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::is_directory(path_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(path, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(path)?),
+            };
+            crate::generated::borrowed::vfs::is_directory(__core_string_0_buf.as_cstr())
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -1267,11 +1280,12 @@
 
         #[inline]
         pub fn set_map_square_texture(tex_square_x: i32, tex_square_y: i32, texture_name: &str) -> Result<bool> {
-            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
-            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            texture_name_bytes.push(0);
-            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::vfs::set_map_square_texture(tex_square_x, tex_square_y, texture_name_cstr)
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(texture_name, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(texture_name)?),
+            };
+            crate::generated::borrowed::vfs::set_map_square_texture(tex_square_x, tex_square_y, __core_string_2_buf.as_cstr())
         }
 
         #[cfg(target_arch = "wasm32")]

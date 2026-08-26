@@ -8,6 +8,7 @@ use alloc::string::String;
 
 use crate::generated;
 
+pub use generated::owned::move_ctrl::{MoveTypeBooleanField, MoveTypeNumericField};
 pub use generated::owned::types::Float3;
 
 #[derive(Clone, Copy, Debug)]
@@ -86,6 +87,27 @@ pub fn call_unit_script(
         success: result.success,
         ret_values: result.ret_values,
     })
+}
+
+/// Set one of the numeric properties accepted by Lua's
+/// `MoveCtrl.Set*MoveTypeData` family. The enum keeps the property set typed;
+/// the engine still applies the move-type-specific validation and conversion.
+pub fn set_move_type_numeric(
+    unit_id: i32,
+    field: MoveTypeNumericField,
+    value: f32,
+) -> crate::Result<bool> {
+    generated::owned::move_ctrl::set_move_type_numeric(unit_id, field, value)
+}
+
+/// Set one of the boolean properties accepted by Lua's
+/// `MoveCtrl.Set*MoveTypeData` family.
+pub fn set_move_type_boolean(
+    unit_id: i32,
+    field: MoveTypeBooleanField,
+    value: bool,
+) -> crate::Result<bool> {
+    generated::owned::move_ctrl::set_move_type_boolean(unit_id, field, value)
 }
 
 pub fn create_unit(

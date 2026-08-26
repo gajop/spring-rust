@@ -19,8 +19,8 @@ impl<'a> MetalMap<'a> {
     pub fn get_metal_amount(&self, x: i32, z: i32) -> Result<f32, Error> {
         unsafe {
             let query = sys::GetMetalAmountQuery {
-                x: x,
-                z: z,
+                x,
+                z,
             };
             let mut result = MaybeUninit::<sys::GetMetalAmountResult>::zeroed();
             let func = self.api.GetMetalAmount.expect("GetMetalAmount function pointer must be initialized");
@@ -35,8 +35,8 @@ impl<'a> MetalMap<'a> {
     pub fn get_metal_extraction(&self, x: i32, z: i32) -> Result<f32, Error> {
         unsafe {
             let query = sys::GetMetalExtractionQuery {
-                x: x,
-                z: z,
+                x,
+                z,
             };
             let mut result = MaybeUninit::<sys::GetMetalExtractionResult>::zeroed();
             let func = self.api.GetMetalExtraction.expect("GetMetalExtraction function pointer must be initialized");
@@ -51,9 +51,9 @@ impl<'a> MetalMap<'a> {
     pub fn set_metal_amount(&self, x: i32, z: i32, amount: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::SetMetalAmountQuery {
-                x: x,
-                z: z,
-                amount: amount,
+                x,
+                z,
+                amount,
             };
             let mut result = MaybeUninit::<sys::SetMetalAmountResult>::zeroed();
             let func = self.api.SetMetalAmount.expect("SetMetalAmount function pointer must be initialized");

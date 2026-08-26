@@ -5,7 +5,7 @@ use heck::ToKebabCase;
 use crate::model::{ApiModel, SemanticType};
 
 use super::exec_model::{
-    executable_callin, expanded_callins, record_index, ExecutableCallin, ResultAbi,
+    ExecutableCallin, ResultAbi, executable_callin, expanded_callins, record_index,
 };
 
 pub(super) fn render_header(model: &ApiModel) -> String {
@@ -293,10 +293,10 @@ fn cpp_result_write(ty: &SemanticType, destination: &str) -> String {
 
 fn cpp_unpack_packed32(ty: &SemanticType, destination: &str, raw: &str) -> String {
     match ty {
-        SemanticType::Scalar { name } if name == "bool" =>
-            format!("{destination} = {raw} != 0u;"),
-        SemanticType::Scalar { name } if name == "f32" =>
-            format!("{destination} = std::bit_cast<float>({raw});"),
+        SemanticType::Scalar { name } if name == "bool" => format!("{destination} = {raw} != 0u;"),
+        SemanticType::Scalar { name } if name == "f32" => {
+            format!("{destination} = std::bit_cast<float>({raw});")
+        }
         SemanticType::Scalar { name } if matches!(name.as_str(), "i8" | "i16" | "i32") => {
             let signed = match name.as_str() {
                 "i8" => "std::int8_t",

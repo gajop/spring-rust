@@ -1,6 +1,6 @@
 //! Internal conversions for values owned by the engine.
 
-use std::ffi::{c_char, CStr};
+use std::ffi::{CStr, c_char};
 
 /// Copy an engine-owned NUL-terminated string.
 ///

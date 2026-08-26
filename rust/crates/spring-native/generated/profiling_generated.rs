@@ -13,6 +13,12 @@ impl From<DiffTimersOptions> for sys::DiffTimersOptions {
     }
 }
 
+/// The complete result tuple returned by [`get_profiler_time_record`].
+pub type GetProfilerTimeRecordValue = (f32, f32, f32, f32, f32, Vec<f32>);
+
+/// The complete result tuple returned by [`get_lua_mem_usage`].
+pub type GetLuaMemUsageValue = (f32, f32, f32, f32, f32, f32, f32, f32);
+
 impl<'a> Profiling<'a> {
     pub fn get_timer(&self) -> Result<u64, Error> {
         unsafe {
@@ -91,7 +97,7 @@ impl<'a> Profiling<'a> {
         }
     }
 
-    pub fn get_profiler_time_record(&self, name: &str, include_frame_data: bool) -> Result<(f32, f32, f32, f32, f32, Vec<f32>), Error> {
+    pub fn get_profiler_time_record(&self, name: &str, include_frame_data: bool) -> Result<GetProfilerTimeRecordValue, Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
             let query = sys::GetProfilerTimeRecordQuery {
@@ -149,7 +155,7 @@ impl<'a> Profiling<'a> {
         }
     }
 
-    pub fn get_lua_mem_usage(&self) -> Result<(f32, f32, f32, f32, f32, f32, f32, f32), Error> {
+    pub fn get_lua_mem_usage(&self) -> Result<GetLuaMemUsageValue, Error> {
         unsafe {
             let query = sys::GetLuaMemUsageQuery {
                 _unused: 0,
@@ -192,7 +198,7 @@ impl<'a> Profiling<'a> {
     pub fn get_synced_gcinfo(&self, collect: bool) -> Result<f32, Error> {
         unsafe {
             let query = sys::GetSyncedGCInfoQuery {
-                collect: collect,
+                collect,
             };
             let mut result = MaybeUninit::<sys::GetSyncedGCInfoResult>::zeroed();
             let func = self.api.GetSyncedGCInfo.expect("GetSyncedGCInfo function pointer must be initialized");

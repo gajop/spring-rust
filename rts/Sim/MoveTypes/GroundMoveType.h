@@ -66,7 +66,7 @@ public:
 
 	void StartMovingRaw(const float3 moveGoalPos, float moveGoalRadius, float speed) override;
 	void StartMoving(float3 pos, float moveGoalRadius) override;
-	void StartMoving(float3 pos, float moveGoalRadius, float speed) override { StartMoving(pos, moveGoalRadius); }
+	void StartMoving(float3 pos, float moveGoalRadius, float speed) override;
 	void StopMoving(bool callScript = false, bool hardStop = false, bool cancelRaw = false) override;
 	bool IsMovingTowards(const float3& pos, float radius, bool checkProgress) const override {
 		return (goalPos == pos * XZVector && goalRadius == radius && (!checkProgress || progressState == Active));

@@ -83,7 +83,7 @@ impl<'a> Vfs<'a> {
                 path: path_cstr.as_ptr(),
                 pattern: pattern_cstr.as_ptr(),
                 mode: mode_cstr.as_ptr(),
-                recursive: recursive,
+                recursive,
             };
             let mut result = MaybeUninit::<sys::ListDirResult>::zeroed();
             let func = self.api.ListDir.expect("ListDir function pointer must be initialized");
@@ -111,7 +111,7 @@ impl<'a> Vfs<'a> {
                 path: path_cstr.as_ptr(),
                 pattern: pattern_cstr.as_ptr(),
                 mode: mode_cstr.as_ptr(),
-                recursive: recursive,
+                recursive,
             };
             let mut result = MaybeUninit::<sys::ListDirResult>::zeroed();
             let func = self.api.DirList.expect("DirList function pointer must be initialized");
@@ -139,7 +139,7 @@ impl<'a> Vfs<'a> {
                 path: path_cstr.as_ptr(),
                 pattern: pattern_cstr.as_ptr(),
                 mode: mode_cstr.as_ptr(),
-                recursive: recursive,
+                recursive,
             };
             let mut result = MaybeUninit::<sys::SubDirsResult>::zeroed();
             let func = self.api.SubDirs.expect("SubDirs function pointer must be initialized");
@@ -618,7 +618,7 @@ impl<'a> Vfs<'a> {
         unsafe {
             let archive_name_cstr = std::ffi::CString::new(archive_name).map_err(|_| Error::invalid_argument("archive_name"))?;
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::UseArchiveQuery {
@@ -927,7 +927,7 @@ impl<'a> Vfs<'a> {
                 data: data.as_ptr(),
                 dataSize: data.len() as u32,
                 byteOffset: byte_offset,
-                count: count,
+                count,
             };
             let mut result = MaybeUninit::<sys::UnpackU8Result>::zeroed();
             let func = self.api.UnpackU8.expect("UnpackU8 function pointer must be initialized");
@@ -952,7 +952,7 @@ impl<'a> Vfs<'a> {
                 data: data.as_ptr(),
                 dataSize: data.len() as u32,
                 byteOffset: byte_offset,
-                count: count,
+                count,
             };
             let mut result = MaybeUninit::<sys::UnpackU16Result>::zeroed();
             let func = self.api.UnpackU16.expect("UnpackU16 function pointer must be initialized");
@@ -977,7 +977,7 @@ impl<'a> Vfs<'a> {
                 data: data.as_ptr(),
                 dataSize: data.len() as u32,
                 byteOffset: byte_offset,
-                count: count,
+                count,
             };
             let mut result = MaybeUninit::<sys::UnpackU32Result>::zeroed();
             let func = self.api.UnpackU32.expect("UnpackU32 function pointer must be initialized");
@@ -1002,7 +1002,7 @@ impl<'a> Vfs<'a> {
                 data: data.as_ptr(),
                 dataSize: data.len() as u32,
                 byteOffset: byte_offset,
-                count: count,
+                count,
             };
             let mut result = MaybeUninit::<sys::UnpackS8Result>::zeroed();
             let func = self.api.UnpackS8.expect("UnpackS8 function pointer must be initialized");
@@ -1027,7 +1027,7 @@ impl<'a> Vfs<'a> {
                 data: data.as_ptr(),
                 dataSize: data.len() as u32,
                 byteOffset: byte_offset,
-                count: count,
+                count,
             };
             let mut result = MaybeUninit::<sys::UnpackS16Result>::zeroed();
             let func = self.api.UnpackS16.expect("UnpackS16 function pointer must be initialized");
@@ -1052,7 +1052,7 @@ impl<'a> Vfs<'a> {
                 data: data.as_ptr(),
                 dataSize: data.len() as u32,
                 byteOffset: byte_offset,
-                count: count,
+                count,
             };
             let mut result = MaybeUninit::<sys::UnpackS32Result>::zeroed();
             let func = self.api.UnpackS32.expect("UnpackS32 function pointer must be initialized");
@@ -1077,7 +1077,7 @@ impl<'a> Vfs<'a> {
                 data: data.as_ptr(),
                 dataSize: data.len() as u32,
                 byteOffset: byte_offset,
-                count: count,
+                count,
             };
             let mut result = MaybeUninit::<sys::UnpackF32Result>::zeroed();
             let func = self.api.UnpackF32.expect("UnpackF32 function pointer must be initialized");
@@ -1184,7 +1184,7 @@ impl<'a> Vfs<'a> {
     pub fn abort_download(&self, id: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::AbortDownloadQuery {
-                id: id,
+                id,
             };
             let mut result = MaybeUninit::<sys::AbortDownloadResult>::zeroed();
             let func = self.api.AbortDownload.expect("AbortDownload function pointer must be initialized");

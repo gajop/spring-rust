@@ -5,7 +5,7 @@ use super::{ApiError, ErrorCode, Result};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:unit-control")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "give-order-to-unit"]
         pub fn give_order_to_unit(
             unit_id: i32,

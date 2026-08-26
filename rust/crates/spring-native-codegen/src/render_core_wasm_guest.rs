@@ -25,8 +25,7 @@ pub fn render(model: &ApiModel) -> String {
          // for advanced use; ordinary guest code should use safe generated or\n\
          // specialized crate APIs. Only production-fast imports appear here.\n\n",
     );
-    output.push_str("extern crate alloc;\nuse alloc::{string::String, vec::Vec};\n\n");
-    output.push_str(WIRE_HELPERS);
+    let mut modules = String::new();
 
     for module in &model.modules {
         let executable = module
@@ -43,42 +42,81 @@ pub fn render(model: &ApiModel) -> String {
         }
 
         let module_ident = rust_ident(&module.name.to_snake_case());
-        output.push_str(&format!("pub mod {module_ident} {{\n"));
-        output.push_str("    use crate::{ApiError, ErrorCode, Result};\n\n");
-        output.push_str(&render_fixed_record_types(&executable, &records, 4));
-        output.push_str(&render_output_type_aliases(&executable, &records, 4));
-        output.push_str("    #[cfg(target_arch = \"wasm32\")]\n    pub mod raw {\n");
+        let mut module_source = String::new();
+        module_source.push_str(&render_fixed_record_types(&executable, &records, 4));
+        module_source.push_str(&render_output_type_aliases(&executable, &records, 4));
+        module_source.push_str("    #[cfg(target_arch = \"wasm32\")]\n    pub mod raw {\n");
         for (function, plan) in &executable {
-            output.push_str(&render_raw_import(function, plan, 8));
+            module_source.push_str(&render_raw_import(function, plan, 8));
         }
-        output.push_str("    }\n\n");
+        module_source.push_str("    }\n\n");
 
         for (function, plan) in &executable {
             if direct_wrapper_eligible(plan, &function.inputs, &function.outputs) {
-                output.push_str(&render_direct_wrapper(function, plan, 4));
-                output.push('\n');
+                module_source.push_str(&render_direct_wrapper(function, plan, 4));
+                module_source.push('\n');
             } else if fixed_output_wrapper_eligible(
                 plan,
                 &function.inputs,
                 &function.outputs,
                 &records,
             ) {
-                output.push_str(&render_fixed_output_wrapper(function, plan, &records, 4));
-                output.push('\n');
+                module_source.push_str(&render_fixed_output_wrapper(function, plan, &records, 4));
+                module_source.push('\n');
             } else if fixed_input_wrapper_eligible(
                 plan,
                 &function.inputs,
                 &function.outputs,
                 &records,
             ) {
-                output.push_str(&render_fixed_input_wrapper(function, plan, &records, 4));
-                output.push('\n');
+                module_source.push_str(&render_fixed_input_wrapper(function, plan, &records, 4));
+                module_source.push('\n');
             }
         }
-        output.push_str("}\n\n");
+        modules.push_str(&format!("pub mod {module_ident} {{\n"));
+        modules.push_str(&render_imports(&module_source, 4));
+        modules.push_str(&module_source);
+        modules.push_str("}\n\n");
     }
 
+    output.push_str(&render_wire_helpers(&modules));
+    output.push_str(&modules);
     output
+}
+
+fn render_imports(source: &str, indent: usize) -> String {
+    let names = ["ApiError", "ErrorCode", "Result"]
+        .into_iter()
+        .filter(|name| contains_identifier(source, name))
+        .collect::<Vec<_>>();
+    if names.is_empty() {
+        return String::new();
+    }
+    format!(
+        "{}use crate::{{{}}};\n\n",
+        " ".repeat(indent),
+        names.join(", ")
+    )
+}
+
+fn contains_identifier(source: &str, name: &str) -> bool {
+    source
+        .split(|character: char| !(character == '_' || character.is_ascii_alphanumeric()))
+        .any(|identifier| identifier == name)
+}
+
+fn render_wire_helpers(modules: &str) -> String {
+    let mut helpers = WIRE_HELPERS.to_owned();
+    for helper in ["i64", "f64", "put_u64", "put_i64", "put_f64"] {
+        if !modules.contains(&format!("__core_wire::{helper}")) {
+            let marker = format!("    pub fn {helper}");
+            let replacement = format!(
+                "    #[expect(dead_code, reason = \"generated wire helper is unused by this API model\")]\n    pub fn {helper}"
+            );
+            helpers = helpers.replace(&marker, &replacement);
+        }
+    }
+    helpers
 }
 
 const WIRE_HELPERS: &str = r#"#[doc(hidden)]
@@ -357,7 +395,7 @@ fn render_raw_import(
     };
     format!(
         "{pad}#[link(wasm_import_module = \"{module}\")]\n\
-         {pad}extern \"C\" {{\n\
+         {pad}unsafe extern \"C\" {{\n\
          {pad}    #[link_name = \"{import_name}\"]\n\
          {pad}    pub fn {fn_ident}({params}){result};\n\
          {pad}}}\n",
@@ -976,11 +1014,11 @@ fn collect_record_types(
 ) {
     match ty {
         SemanticType::Record { name } => {
-            if names.insert(name.clone()) {
-                if let Some(record) = records.get(name) {
-                    for field in &record.fields {
-                        collect_record_types(&field.ty, records, names);
-                    }
+            if names.insert(name.clone())
+                && let Some(record) = records.get(name)
+            {
+                for field in &record.fields {
+                    collect_record_types(&field.ty, records, names);
                 }
             }
         }
@@ -1004,7 +1042,8 @@ fn lower_direct_arg(ty: &SemanticType, name: &str) -> String {
             format!("{name} as i64")
         }
         SemanticType::Scalar { name: scalar } if scalar == "i32" => name.to_owned(),
-        SemanticType::Scalar { .. } | SemanticType::Enum { .. } => format!("{name} as i32"),
+        SemanticType::Scalar { .. } => format!("{name} as i32"),
+        SemanticType::Enum { .. } => name.to_owned(),
         SemanticType::Handle { .. } => format!("{name} as i64"),
         _ => unreachable!(),
     }

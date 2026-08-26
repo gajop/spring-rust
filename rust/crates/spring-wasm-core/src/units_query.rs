@@ -24,7 +24,7 @@ const SEPARATION_CHECK_MAP: u32 = 1 << 1;
 #[cfg(target_arch = "wasm32")]
 mod units_query_raw {
     #[link(wasm_import_module = "spring:units-query")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "valid-unit-id"]
         pub fn valid_unit_id(unit_id: i32) -> i64;
         #[link_name = "get-all-units"]

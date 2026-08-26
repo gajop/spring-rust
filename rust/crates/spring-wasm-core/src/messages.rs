@@ -1,11 +1,11 @@
 // Messages portion of the Spring Core-Wasm guest SDK.
 
-use super::{unpack_bool, ApiError, ErrorCode, Result};
+use super::{ApiError, ErrorCode, Result, unpack_bool};
 
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:messages")]
-    extern "C" {
+    unsafe extern "C" {
         pub fn echo(message: i32, message_len: i32, rest: i32, rest_len: i32) -> i64;
         pub fn log(
             section: i32,

@@ -144,7 +144,7 @@ mod tests {
 
     use crate::model::{CallinModel, FieldModel, LoweringStatus, RecordModel, SemanticType};
 
-    use super::{classify, for_callin, ResultShape};
+    use super::{ResultShape, classify, for_callin};
 
     fn opaque_result() -> RecordModel {
         RecordModel {

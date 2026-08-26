@@ -7,12 +7,12 @@ pub mod adapted {
         #[cfg(target_arch = "wasm32")]
         pub mod raw {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-dolly-camera-curve"]
 pub fn set_dolly_camera_curve(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "set-dolly-camera-look-curve"]
 pub fn set_dolly_camera_look_curve(p0: i32, p1: i32) -> i64;
 }
@@ -23,12 +23,12 @@ pub fn set_dolly_camera_look_curve(p0: i32, p1: i32) -> i64;
         #[cfg(target_arch = "wasm32")]
         pub mod raw {
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "define-vbo"]
 pub fn define_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "shape"]
 pub fn shape(p0: i32, p1: i32) -> i32;
 }

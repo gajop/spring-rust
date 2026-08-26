@@ -471,7 +471,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_all_features {
             #[link(wasm_import_module = "spring:features")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-all-features"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -480,7 +480,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_features_in_cylinder {
             #[link(wasm_import_module = "spring:features")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-features-in-cylinder"]
                 pub fn call(px: f32, pz: f32, pradius: f32, pheight: f32, output: i32) -> i32;
             }
@@ -489,7 +489,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_features_in_rectangle {
             #[link(wasm_import_module = "spring:features")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-features-in-rectangle"]
                 pub fn call(pmin_x: f32, pmin_z: f32, pmax_x: f32, pmax_z: f32, output: i32) -> i32;
             }
@@ -498,7 +498,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_render_features {
             #[link(wasm_import_module = "spring:features")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-render-features"]
                 pub fn call(pdraw_mask: i32, psend_mask: i32, output: i32) -> i32;
             }
@@ -507,7 +507,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_render_features_draw_flag_changed {
             #[link(wasm_import_module = "spring:features")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-render-features-draw-flag-changed"]
                 pub fn call(psend_mask: i32, output: i32) -> i32;
             }

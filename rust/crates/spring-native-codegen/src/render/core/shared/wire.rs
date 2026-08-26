@@ -327,16 +327,24 @@ pub(crate) fn render_wire_read(
     let pad = "    ".repeat(indent);
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
-            "bool" => format!("{pad}if (!{reader}.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "f32" => format!("{pad}if (!{reader}.F32({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "f64" => format!("{pad}if (!{reader}.F64({destination})) return Trap(\"generated Core wire underflow\");\n"),
+            "bool" => format!(
+                "{pad}if (!{reader}.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
+            "f32" => format!(
+                "{pad}if (!{reader}.F32({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
+            "f64" => format!(
+                "{pad}if (!{reader}.F64({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
             "i64" | "isize" => scalar_read(reader, "I64", "std::int64_t", destination, &pad),
             "u64" | "usize" => scalar_read(reader, "U64", "std::uint64_t", destination, &pad),
             "i8" | "i16" | "i32" => scalar_read(reader, "I32", "std::int32_t", destination, &pad),
             _ => scalar_read(reader, "U32", "std::uint32_t", destination, &pad),
         },
         SemanticType::Enum { .. } => scalar_read(reader, "I32", "std::int32_t", destination, &pad),
-        SemanticType::Handle { .. } => scalar_read(reader, "U64", "std::uint64_t", destination, &pad),
+        SemanticType::Handle { .. } => {
+            scalar_read(reader, "U64", "std::uint64_t", destination, &pad)
+        }
         SemanticType::Record { name } => {
             let mut output = records[name]
                 .fields
@@ -363,15 +371,26 @@ pub(crate) fn render_wire_read(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreReadIndex{indent}");
-            let nested = render_wire_read(element, &format!("{destination}[{index}]"), records, reader, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_wire_read(
+                element,
+                &format!("{destination}[{index}]"),
+                records,
+                reader,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
 }
 
 fn scalar_read(reader: &str, method: &str, raw: &str, destination: &str, pad: &str) -> String {
-    format!("{pad}{{ {raw} coreRaw = 0; if (!{reader}.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw"))
+    format!(
+        "{pad}{{ {raw} coreRaw = 0; if (!{reader}.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+        cast = native_cast(destination, "coreRaw")
+    )
 }
 
 pub(crate) fn render_wire_write_field(
@@ -426,11 +445,25 @@ pub(crate) fn render_wire_write(
     let pad = "    ".repeat(indent);
     match ty {
         SemanticType::Scalar { name } => {
-            let method = match name.as_str() { "bool"=>"Bool", "f32"=>"F32", "f64"=>"F64", "i64"|"isize"=>"I64", "u64"|"usize"=>"U64", "i8"|"i16"|"i32"=>"I32", _=>"U32" };
-            format!("{pad}if (!{writer}.{method}({value})) return Trap(\"generated Core wire overflow\");\n")
+            let method = match name.as_str() {
+                "bool" => "Bool",
+                "f32" => "F32",
+                "f64" => "F64",
+                "i64" | "isize" => "I64",
+                "u64" | "usize" => "U64",
+                "i8" | "i16" | "i32" => "I32",
+                _ => "U32",
+            };
+            format!(
+                "{pad}if (!{writer}.{method}({value})) return Trap(\"generated Core wire overflow\");\n"
+            )
         }
-        SemanticType::Enum { .. } => format!("{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
-        SemanticType::Handle { .. } => format!("{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
+        SemanticType::Enum { .. } => format!(
+            "{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"
+        ),
+        SemanticType::Handle { .. } => format!(
+            "{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"
+        ),
         SemanticType::Record { name } => {
             let mut output = records[name]
                 .fields
@@ -457,8 +490,16 @@ pub(crate) fn render_wire_write(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
-            let nested = render_wire_write(element, &format!("{value}[{index}]"), records, writer, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_wire_write(
+                element,
+                &format!("{value}[{index}]"),
+                records,
+                writer,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }

@@ -5,33 +5,33 @@
   "files": [
     {
       "name": "camera_generated.rs",
-      "sha256": "c8227372580d939e7408a4236c2cf66c013f98407d6734125cdf463ad7815d55",
-      "bytes": 8598
+      "sha256": "3cd6fd4bced985938de0f7a2741bcbba4ca7bc60572ae1e14bb6bb4559c8f3a4",
+      "bytes": 8583
     },
     {
       "name": "cob_script_generated.rs",
-      "sha256": "046fead7961a98355dca9b94b69c4ac0ab340e6a3443f2abe5bc41773bb8eb37",
-      "bytes": 1960
+      "sha256": "074c8a04b3a64a7f66cb3fb9ab1e83a15fa2658ac83f089ab6859edab00025cb",
+      "bytes": 1954
     },
     {
       "name": "config_generated.rs",
-      "sha256": "49a8f804e2a0755174bdd2e2e8127f0dac7de5d4f38eda6b2eefc385087c46d4",
-      "bytes": 8520
+      "sha256": "46980b22e2bf4b923fbca3af116eb2af802fadc36ddedc8f3f626fd8aca31614",
+      "bytes": 8499
     },
     {
       "name": "debug_input_generated.rs",
-      "sha256": "07791f0c2e25fc7d0eed0bcc7b08cfc888318dc53d84b99f3202c2b97aee8418",
-      "bytes": 4448
+      "sha256": "17a12502edfa9dd854cf5b6f2330274580e11b81f361eabb810fb4e4492da121",
+      "bytes": 4394
     },
     {
       "name": "display_generated.rs",
-      "sha256": "2c7c72340bd0dbf90532aff3135b49db5e1cb78a3529350874e8284089598552",
-      "bytes": 15285
+      "sha256": "9b253ac1bf490c57f56953cb1fb7184d52bf49e6f52bea33b45706c116c70afd",
+      "bytes": 15374
     },
     {
       "name": "effects_control_generated.rs",
-      "sha256": "e9b87118f483a08d147766f5a446d59e228740c95c477e9682e72f3378e0fa0c",
-      "bytes": 2421
+      "sha256": "12069d0a9427ef27ee7f07d09fbe8c641444fc3650ca15e0f5c2351f07953484",
+      "bytes": 2456
     },
     {
       "name": "encoding_generated.rs",
@@ -40,8 +40,8 @@
     },
     {
       "name": "feature_control_generated.rs",
-      "sha256": "7d216617b1103791e6e8b1046452fb8faa27a5f01ecef72139308039a56342eb",
-      "bytes": 25031
+      "sha256": "648a108e5f5c368a5fa819254f363c038d9481c01feda9c49f2a136740c05086",
+      "bytes": 25013
     },
     {
       "name": "feature_defs_generated.rs",
@@ -50,83 +50,83 @@
     },
     {
       "name": "features_generated.rs",
-      "sha256": "19afc08c256ca4042e43113462106f61f1eb67234baddb4b04c09406c056086d",
-      "bytes": 26279
+      "sha256": "4164b57adddb7f9ae9de93ed572f87912378f82236a25b5055d4d9dd53eefe0e",
+      "bytes": 26229
     },
     {
       "name": "game_config_generated.rs",
-      "sha256": "be93e7ab295555cfebb712fdf1643435e3ed97016c82288f83943ec3b2cb1bf5",
-      "bytes": 4526
+      "sha256": "428e42ae2c23df26ff12cee0a9e14a20db72be84f18d97764c1255e0edbe9084",
+      "bytes": 4505
     },
     {
       "name": "game_generated.rs",
-      "sha256": "b5f0673a1aa200b6dafce90826c7a288f9c611d330e27a382be17602da443f29",
-      "bytes": 21892
+      "sha256": "9c69dc52e6eba75fc9bf58bdb3a71c9e6c6209118f1b8d25d64c74c1ebfcb758",
+      "bytes": 21860
     },
     {
       "name": "gfx_generated.rs",
-      "sha256": "09b5f3f8a5578e77b6ecee9bbfca7969e75f0bc896bcb5970127c1158dab144c",
-      "bytes": 170674
+      "sha256": "0ed78dc3b0420201e89c90088de13a3f0d39d5007fb45b97edbbae8be14e5b3f",
+      "bytes": 171495
     },
     {
       "name": "ground_decals_generated.rs",
-      "sha256": "dbd7e13f5af26a0c01daf788699199c7fa190fe3054eecceca895f04ed5b722f",
-      "bytes": 25653
+      "sha256": "a7d16cfb27e71520364fc43529512160ae78961bcdbe5be811508423ede8aea7",
+      "bytes": 26031
     },
     {
       "name": "icons_generated.rs",
-      "sha256": "f75177ad51bee58b662d04441061d4dbb0d686e94e8fcbcf3d36eed8c25afb4e",
-      "bytes": 4872
+      "sha256": "267eea2139239af35b04955e0fe26b7479556e2889b2074d296db21777ea5c87",
+      "bytes": 4952
     },
     {
       "name": "input_generated.rs",
-      "sha256": "a860b647dca6e8123d14430a68f1862db0ae01ac420551331c692cd1aedd9ec7",
-      "bytes": 17075
+      "sha256": "2892c91756184e8ea376882b0fbe1dac87dfa89392887e5c8485eb14d1843bf0",
+      "bytes": 17434
     },
     {
       "name": "lights_generated.rs",
-      "sha256": "746dd4351d01dc5316b73c345e0accaab8d4a73c7355a0bcaff5d01c13fad4c8",
-      "bytes": 5015
+      "sha256": "39247b08bd826e7be48e35d6d38a71a8dfc959531d96c94cfaa260d308633dd1",
+      "bytes": 4983
     },
     {
       "name": "los_generated.rs",
-      "sha256": "97cfe1aa8d71fef16c9f52e5eac458d200475fc13877a76c193c78be3c814cb9",
-      "bytes": 6547
+      "sha256": "79dc52f2a1a35caf4a1265c83d008f697d744eb3dc8d7b5ad35fab59d295255d",
+      "bytes": 6513
     },
     {
       "name": "markers_generated.rs",
-      "sha256": "d2b8b5c12da6f88eb894ec252c2fba584d058dc1cd230664476b667babb9bb21",
-      "bytes": 4867
+      "sha256": "724b14d7870a8151e36bca473e51b6c3c432095d2317c663984db53e5b3bb12f",
+      "bytes": 4816
     },
     {
       "name": "math_extra_generated.rs",
-      "sha256": "9a35cb75ffdea99834fede4106cade827706c044cdf57cd4b04ee3783d81e46f",
-      "bytes": 7844
+      "sha256": "95c17e13867220292cdb1adebc0905a9793e6326ab2801c4f1939fffa0559257",
+      "bytes": 7753
     },
     {
       "name": "memory_generated.rs",
-      "sha256": "6cb97f684a354e063448e54789419c431d3e4411ff69e7a7fee1333af9f2e3b2",
-      "bytes": 5309
+      "sha256": "d42c5f84d3cd5f9b87cf30409b620de8e3431436abba989c17a45bb64dcf2ed5",
+      "bytes": 5290
     },
     {
       "name": "messages_generated.rs",
-      "sha256": "6c1876c2e20b664c4ced456e4c48d17198e93d0d3421ab5e0a801e25e340f7f6",
-      "bytes": 16111
+      "sha256": "69a0ce7edeab58a199fd328ea7adffb664146be4c03045985dae2dbf6fe7f77c",
+      "bytes": 16104
     },
     {
       "name": "metal_map_generated.rs",
-      "sha256": "e9e4cccd63f1d7d670897374f730d4ccbe4d4e2d92d3acfb2c6039dd64959d6f",
-      "bytes": 2470
+      "sha256": "502aff6dc463115b0df02a73ccd041c1200761d05c76f08ab377eeb88b5167c6",
+      "bytes": 2444
     },
     {
       "name": "move_ctrl_generated.rs",
-      "sha256": "79be3e46198beeefff906039069053a2efbf5fc11a24e6dbd99e7de793c5fa2b",
-      "bytes": 3853
+      "sha256": "3b529b77e49992082c93c3538dbfaac7f96868c288db67a9a6ff7cf96069340b",
+      "bytes": 4539
     },
     {
       "name": "path_finder_generated.rs",
-      "sha256": "8201364bea5b78a3245504b7878125281aff7f3fc4eb35c501cbfc8665e3811c",
-      "bytes": 7989
+      "sha256": "e97e6300dd0938d0e5f277a3d6ca03f82741831ec81b962d78e639ecd61ac08e",
+      "bytes": 7969
     },
     {
       "name": "platform_generated.rs",
@@ -140,38 +140,38 @@
     },
     {
       "name": "profiling_generated.rs",
-      "sha256": "b917e51b3eecf386840bf5a510332d75ba2ed48ec5794ed40dfa9c52f444252e",
-      "bytes": 8031
+      "sha256": "83d3380558f54518904139f5dc91a100cb3ce459d68b0e70a10bf812dfea551d",
+      "bytes": 8279
     },
     {
       "name": "projectile_control_generated.rs",
-      "sha256": "da6aaa0d01bdc773125740f55083c14faf30eb969ba2469dc1eee7f7bba951c5",
-      "bytes": 11641
+      "sha256": "1b94b68f93e8aee56a248f3b44a2a41018229152eda6bb4ee83a00d992edafc5",
+      "bytes": 11572
     },
     {
       "name": "projectiles_generated.rs",
-      "sha256": "27963baa149c4f3b4602d758acb76ef9a915bfac38fec14c23f8865321666565",
-      "bytes": 14045
+      "sha256": "12c7b64bf77a2d5c05960fcc0cc3bf25ed270bea5fefb302c69b971998115e9b",
+      "bytes": 14029
     },
     {
       "name": "rml_ui_generated.rs",
-      "sha256": "15d71268ff191145707071f832f27437e0cfc6a105a947ebf39c4b67e1949c64",
-      "bytes": 142838
+      "sha256": "9f91411c376c216583cc6caf4e2c35b6aa43be95745da7807b3d40a314bcd0c0",
+      "bytes": 143335
     },
     {
       "name": "rules_params_generated.rs",
-      "sha256": "7530ca5eeb4f2ade6176c8917c545492e1243d879702601bc2a0d8c75a225381",
-      "bytes": 15366
+      "sha256": "be5a7f7e63f5e24de38ed4784c3d52e498bbe112f42f8cafcf8d501513ddd774",
+      "bytes": 15341
     },
     {
       "name": "selection_generated.rs",
-      "sha256": "11d61873379981ae66d02ebab035a83deef9a90d5bb76552c7870fc33e1e0443",
-      "bytes": 11249
+      "sha256": "58c6e5769a5c1dc5a26ca75b9d335978e6af06cb3bdf44a4721f9dcf2866aed3",
+      "bytes": 11233
     },
     {
       "name": "sound_generated.rs",
-      "sha256": "ecbea0620c376c1dad8cb8083018943006bfbb984ea1799326b42d212a94f67c",
-      "bytes": 7945
+      "sha256": "80fc39571eb31be5f517cb41dd32b6f442cbfdb3f38f5773d5fb51e403db1389",
+      "bytes": 7880
     },
     {
       "name": "synced_ctrl_generated.rs",
@@ -180,58 +180,58 @@
     },
     {
       "name": "system_control_generated.rs",
-      "sha256": "be487b49e7bbec45a434025e2282754ac5cfc8bfc1d625ef24d9fdba24a1f7f9",
-      "bytes": 16654
+      "sha256": "b54841cbc4a6f325b0e013a964a8d3e54531ae8e48e2ad642bed3ac0aadfdf82",
+      "bytes": 16992
     },
     {
       "name": "team_control_generated.rs",
-      "sha256": "930a5bff860cd33c8aa1c3cb2718adaf8ff5321b42437f5c27e70a61307c7439",
-      "bytes": 11286
+      "sha256": "9697082e4d3824c33c47a1934182330318922235d491fec68e9eb5779094df98",
+      "bytes": 11209
     },
     {
       "name": "teams_generated.rs",
-      "sha256": "a0500982bd8416a7068514f7afc366c5ae87a2a38ba5c8f98dc7ee6e4ff18d34",
-      "bytes": 14406
+      "sha256": "c8a4093c37a6ecf455b819d6b4f986f11ce8a294188f38f4f29e452e92a59970",
+      "bytes": 14398
     },
     {
       "name": "terrain_control_generated.rs",
-      "sha256": "812bc85152f1bfd5225c4e696f84e11e0d3d1b0dedfa4b1f070bdd8f41c1ee10",
-      "bytes": 18131
+      "sha256": "f556d85482173f9f8186188c73c90bccd33f8cf0a9e553bad04c473dc1bd3141",
+      "bytes": 17935
     },
     {
       "name": "terrain_generated.rs",
-      "sha256": "a47d882076374ac622d50d235559e6f3d10a0ef2c755e04efc82b1ba44ce0951",
-      "bytes": 9432
+      "sha256": "1c95e5ec0af56e941bdeed03afca5caa9971eceb5650122ff268c7aca04e4092",
+      "bytes": 9728
     },
     {
       "name": "tracing_generated.rs",
-      "sha256": "724700c1193e2d9f18ef0810bc89da3f6c4fcd03e6688b00e6bc7998648a1d9b",
-      "bytes": 8095
+      "sha256": "9515fd4228e129d01df31f6346fa960aa983fdfd02b010a7532fbd76fbd06493",
+      "bytes": 8688
     },
     {
       "name": "unit_control_generated.rs",
-      "sha256": "42a432b901a204ee07ce717c57841d06eb682ac2ea19b8baa064e209396c4613",
-      "bytes": 68514
+      "sha256": "2f4f6659010919dca2027aabb7c301872e211c088b3b240b290def7cd0faa8ec",
+      "bytes": 68226
     },
     {
       "name": "unit_defs_generated.rs",
-      "sha256": "590d8937d6a01cde68285fa93240b49abc127bb46c4dff548e1f722509c795a0",
-      "bytes": 15219
+      "sha256": "6af35722b6a57daf976c58db58b387d08471cb1a35280de54ebfa97abb8ecfd4",
+      "bytes": 15338
     },
     {
       "name": "unit_rendering_generated.rs",
-      "sha256": "094c92d0b70a93056f4d964fc856c8fead5bf385f43400f96e3665a3028df3f3",
-      "bytes": 19227
+      "sha256": "c877a58e4d980765826636935ae6abd8f6c59b82e9069602ecf4e58f1b95d62d",
+      "bytes": 19523
     },
     {
       "name": "units_commands_generated.rs",
-      "sha256": "c054f89006c55d9a0ea0c5ba9a57a738979c9fc122da2d3362be1ac9629c5692",
-      "bytes": 13442
+      "sha256": "67bde249f0bb7f968a6561df6c229f3b87192f42e472f4590a9dd38f6111ec25",
+      "bytes": 13512
     },
     {
       "name": "units_info_generated.rs",
-      "sha256": "67286c3a799f6105e931f06bd978ec4eb12bcf18330b52e91ea3dda2de24a87a",
-      "bytes": 37617
+      "sha256": "32e180116bc978aedfd28ce7e0d38068ffc109194ef50a1e5bc7819824618ba6",
+      "bytes": 37612
     },
     {
       "name": "units_pieces_generated.rs",
@@ -240,8 +240,8 @@
     },
     {
       "name": "units_query_generated.rs",
-      "sha256": "214d25cc8d08d98daa78b2b5b9e35accfd9c438f2aa240ed4cda1ae235a68bfd",
-      "bytes": 19293
+      "sha256": "e2946c3fe6bf0c0dd9cbc9ce19f510b409695b9cf524e13ae85cc095bdd5b815",
+      "bytes": 19220
     },
     {
       "name": "units_weapons_generated.rs",
@@ -250,18 +250,18 @@
     },
     {
       "name": "unsynced_ctrl_generated.rs",
-      "sha256": "dc9a4110067cba098a60318cbae87e27243fb891b645eabcd02dfd6476a18907",
-      "bytes": 59185
+      "sha256": "3c80a3bfc995a86f7265ceffdfa7b7de151befb622e9dd3b8bc6615bfa1aeb02",
+      "bytes": 58999
     },
     {
       "name": "unsynced_read_generated.rs",
-      "sha256": "a8a3ae43254fd580ae794b74c1945a7c3f779813a5f019d7a66a100ee12b6f01",
-      "bytes": 14735
+      "sha256": "644e0aeb1389be4df869e550f024e250de76be3f9984218c613ee5b66e10e746",
+      "bytes": 14994
     },
     {
       "name": "utils_generated.rs",
-      "sha256": "e07429410c53dabf24c4b6893d8c748c40efb3459956b3e00ce00302c6bf5169",
-      "bytes": 5571
+      "sha256": "ae670b8852f99892a53ce3d8c999fb8800a4de2946426b4685809c2b20fad9e9",
+      "bytes": 5522
     },
     {
       "name": "version.rs",
@@ -270,8 +270,8 @@
     },
     {
       "name": "vfs_generated.rs",
-      "sha256": "f2064420121e2c876074d2c76bac8e6abf45399e932f353d1c65bc3c79983986",
-      "bytes": 51858
+      "sha256": "9c87762080eb74994387081b878eb5aec267cc9c73b345fb3365b48934f1147a",
+      "bytes": 51783
     },
     {
       "name": "weapon_defs_generated.rs",

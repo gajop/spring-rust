@@ -2,7 +2,7 @@ impl<'a> Los<'a> {
     pub fn get_position_los_state(&self, pos: sys::Float3, ally_team_id: i32) -> Result<sys::PositionLosState, Error> {
         unsafe {
             let query = sys::GetPositionLosStateQuery {
-                pos: pos,
+                pos,
                 allyTeamID: ally_team_id,
             };
             let mut result = MaybeUninit::<sys::GetPositionLosStateResult>::zeroed();
@@ -18,7 +18,7 @@ impl<'a> Los<'a> {
     pub fn is_pos_in_los(&self, pos: sys::Float3, ally_team_id: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::IsPosInLosQuery {
-                pos: pos,
+                pos,
                 allyTeamID: ally_team_id,
             };
             let mut result = MaybeUninit::<sys::IsPosInLosResult>::zeroed();
@@ -34,7 +34,7 @@ impl<'a> Los<'a> {
     pub fn is_pos_in_radar(&self, pos: sys::Float3, ally_team_id: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::IsPosInRadarQuery {
-                pos: pos,
+                pos,
                 allyTeamID: ally_team_id,
             };
             let mut result = MaybeUninit::<sys::IsPosInRadarResult>::zeroed();
@@ -50,7 +50,7 @@ impl<'a> Los<'a> {
     pub fn is_pos_in_air_los(&self, pos: sys::Float3, ally_team_id: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::IsPosInAirLosQuery {
-                pos: pos,
+                pos,
                 allyTeamID: ally_team_id,
             };
             let mut result = MaybeUninit::<sys::IsPosInAirLosResult>::zeroed();
@@ -146,9 +146,9 @@ impl<'a> Los<'a> {
         unsafe {
             let query = sys::GetClosestValidPositionQuery {
                 unitDefID: unit_def_id,
-                x: x,
-                z: z,
-                radius: radius,
+                x,
+                z,
+                radius,
             };
             let mut result = MaybeUninit::<sys::GetClosestValidPositionResult>::zeroed();
             let func = self.api.GetClosestValidPosition.expect("GetClosestValidPosition function pointer must be initialized");

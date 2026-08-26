@@ -1,6 +1,13 @@
     pub mod gfx {
         use super::{Result, String, Vec};
 
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        pub enum GfxCullFace {
+            GfxCullFaceBack,
+            GfxCullFaceFront,
+            GfxCullFaceFrontAndBack,
+        }
+
         #[derive(Debug, Clone, PartialEq)]
         pub struct GfxActiveFBOQuery {
             pub fbo_id: u32,
@@ -270,6 +277,11 @@
             pub ysize: i32,
             pub zsize: i32,
             pub params: GfxTextureParams,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        pub struct GfxCullFaceQuery {
+            pub face: GfxCullFace,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -1420,7 +1432,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_download_vbo {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "download-vbo"]
                 pub fn call(pvbo_id: i32, pattribute_index: i32, pelement_offset: i32, pelement_count: i32, pforce_gpu_read: i32, output: i32) -> i32;
             }
@@ -1429,7 +1441,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_engine_model_uniform_data_def {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-engine-model-uniform-data-def"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -1438,7 +1450,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_engine_uniform_buffer_def {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-engine-uniform-buffer-def"]
                 pub fn call(pindex: i32, output: i32) -> i32;
             }
@@ -1447,7 +1459,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_shader_log {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-shader-log"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -1456,7 +1468,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_string {
             #[link(wasm_import_module = "spring:gfx")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-string"]
                 pub fn call(ppname: i32, output: i32) -> i32;
             }
@@ -1708,24 +1720,27 @@
 
         #[inline]
         pub fn add_atlas_texture(atlas_name: &str, texture_name: &str) -> Result<()> {
-            let mut atlas_name_bytes = atlas_name.as_bytes().to_vec();
-            if atlas_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            atlas_name_bytes.push(0);
-            let atlas_name_cstr = core::ffi::CStr::from_bytes_with_nul(&atlas_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
-            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            texture_name_bytes.push(0);
-            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::add_atlas_texture(atlas_name_cstr, texture_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(atlas_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(atlas_name)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(texture_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(texture_name)?),
+            };
+            crate::generated::borrowed::gfx::add_atlas_texture(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn add_fallback_font(value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::add_fallback_font(value_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(value, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::gfx::add_fallback_font(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -1814,20 +1829,22 @@
 
         #[inline]
         pub fn bind_image_texture(unit: u32, name: &str, level: i32, layer: i32, layered: bool, access: u32, format: u32) -> Result<()> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::bind_image_texture(unit, name_cstr, level, layer, layered, access, format)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::bind_image_texture(unit, __core_string_1_buf.as_cstr(), level, layer, layered, access, format)
         }
 
         #[inline]
         pub fn bind_texture(name: &str, tex_num: i32, enable: bool) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::bind_texture(name_cstr, tex_num, enable)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::bind_texture(__core_string_0_buf.as_cstr(), tex_num, enable)
         }
 
         #[inline]
@@ -1943,11 +1960,12 @@
         #[inline]
         #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn copy_to_texture(name: &str, xoff: i32, yoff: i32, x: i32, y: i32, width: i32, height: i32, target: u32, level: u32) -> Result<()> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::copy_to_texture(name_cstr, xoff, yoff, x, y, width, height, target, level)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::copy_to_texture(__core_string_0_buf.as_cstr(), xoff, yoff, x, y, width, height, target, level)
         }
 
         #[inline]
@@ -2050,6 +2068,12 @@
         }
 
         #[inline]
+        pub fn cull_face(face: GfxCullFace) -> Result<()> {
+            crate::generated::gfx::cull_face(match face { GfxCullFace::GfxCullFaceBack => 1029i32, GfxCullFace::GfxCullFaceFront => 1028i32, GfxCullFace::GfxCullFaceFrontAndBack => 1032i32 })?;
+            Ok(())
+        }
+
+        #[inline]
         pub fn culling(value: bool) -> Result<()> {
             crate::generated::gfx::culling(value)?;
             Ok(())
@@ -2099,29 +2123,32 @@
 
         #[inline]
         pub fn delete_texture(name: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::delete_texture(name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::delete_texture(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn delete_texture_atlas(name: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::delete_texture_atlas(name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::delete_texture_atlas(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn delete_texture_fbo(name: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::delete_texture_fbo(name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::delete_texture_fbo(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -2316,11 +2343,12 @@
 
         #[inline]
         pub fn finalize_texture_atlas(name: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::finalize_texture_atlas(name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::finalize_texture_atlas(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -2381,28 +2409,32 @@
 
         #[inline]
         pub fn font_get_text_width(font_id: u32, text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<f32> {
-            let mut text_bytes = text.as_bytes().to_vec();
-            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            text_bytes.push(0);
-            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut options_bytes = options.as_bytes().to_vec();
-            if options_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            options_bytes.push(0);
-            let options_cstr = core::ffi::CStr::from_bytes_with_nul(&options_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::font_get_text_width(font_id, text_cstr, x, y, size, options_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(text, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(text)?),
+            };
+            let mut __core_string_5_scratch = [0u8; 256];
+            let __core_string_5_buf = match super::write_cstr(options, &mut __core_string_5_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(options)?),
+            };
+            crate::generated::borrowed::gfx::font_get_text_width(font_id, __core_string_1_buf.as_cstr(), x, y, size, __core_string_5_buf.as_cstr())
         }
 
         #[inline]
         pub fn font_print(font_id: u32, text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<()> {
-            let mut text_bytes = text.as_bytes().to_vec();
-            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            text_bytes.push(0);
-            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut options_bytes = options.as_bytes().to_vec();
-            if options_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            options_bytes.push(0);
-            let options_cstr = core::ffi::CStr::from_bytes_with_nul(&options_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::font_print(font_id, text_cstr, x, y, size, options_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(text, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(text)?),
+            };
+            let mut __core_string_5_scratch = [0u8; 256];
+            let __core_string_5_buf = match super::write_cstr(options, &mut __core_string_5_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(options)?),
+            };
+            crate::generated::borrowed::gfx::font_print(font_id, __core_string_1_buf.as_cstr(), x, y, size, __core_string_5_buf.as_cstr())
         }
 
         #[inline]
@@ -2461,11 +2493,12 @@
 
         #[inline]
         pub fn generate_mipmap(name: &str) -> Result<()> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::generate_mipmap(name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::generate_mipmap(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -2891,20 +2924,22 @@
 
         #[inline]
         pub fn get_text_width(value: &str) -> Result<f32> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::get_text_width(value_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(value, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::gfx::get_text_width(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn get_uniform_location(shader_id: u32, name: &str) -> Result<i32> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::get_uniform_location(shader_id, name_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::get_uniform_location(shader_id, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2977,11 +3012,12 @@
 
         #[inline]
         pub fn has_extension(value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::has_extension(value_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(value, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::gfx::has_extension(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -3039,11 +3075,12 @@
 
         #[inline]
         pub fn load_font(path: &str, size: i32, outline_width: i32, outline_weight: f32) -> Result<u32> {
-            let mut path_bytes = path.as_bytes().to_vec();
-            if path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            path_bytes.push(0);
-            let path_cstr = core::ffi::CStr::from_bytes_with_nul(&path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::load_font(path_cstr, size, outline_width, outline_weight)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(path, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(path)?),
+            };
+            crate::generated::borrowed::gfx::load_font(__core_string_0_buf.as_cstr(), size, outline_width, outline_weight)
         }
 
         #[inline]
@@ -3125,11 +3162,12 @@
 
         #[inline]
         pub fn object_label(identifier: u32, object_id: u32, label: &str) -> Result<()> {
-            let mut label_bytes = label.as_bytes().to_vec();
-            if label_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            label_bytes.push(0);
-            let label_cstr = core::ffi::CStr::from_bytes_with_nul(&label_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::object_label(identifier, object_id, label_cstr)
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(label, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(label)?),
+            };
+            crate::generated::borrowed::gfx::object_label(identifier, object_id, __core_string_2_buf.as_cstr())
         }
 
         #[inline]
@@ -3194,11 +3232,12 @@
 
         #[inline]
         pub fn push_debug_group(id: u32, message: &str, source_is_third_party: bool) -> Result<()> {
-            let mut message_bytes = message.as_bytes().to_vec();
-            if message_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            message_bytes.push(0);
-            let message_cstr = core::ffi::CStr::from_bytes_with_nul(&message_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::push_debug_group(id, message_cstr, source_is_third_party)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(message, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(message)?),
+            };
+            crate::generated::borrowed::gfx::push_debug_group(id, __core_string_1_buf.as_cstr(), source_is_third_party)
         }
 
         #[inline]
@@ -3337,11 +3376,12 @@
 
         #[inline]
         pub fn set_fbo_attachment(fbo_id: u32, attachment: u32, texture_name: &str, texture_target: u32, mip_level: i32, rbo_id: u32, use_rbo: bool) -> Result<()> {
-            let mut texture_name_bytes = texture_name.as_bytes().to_vec();
-            if texture_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            texture_name_bytes.push(0);
-            let texture_name_cstr = core::ffi::CStr::from_bytes_with_nul(&texture_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::set_fbo_attachment(fbo_id, attachment, texture_name_cstr, texture_target, mip_level, rbo_id, use_rbo)
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(texture_name, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(texture_name)?),
+            };
+            crate::generated::borrowed::gfx::set_fbo_attachment(fbo_id, attachment, __core_string_2_buf.as_cstr(), texture_target, mip_level, rbo_id, use_rbo)
         }
 
         #[inline]
@@ -3476,15 +3516,17 @@
 
         #[inline]
         pub fn text(text: &str, x: f32, y: f32, size: f32, options: &str) -> Result<()> {
-            let mut text_bytes = text.as_bytes().to_vec();
-            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            text_bytes.push(0);
-            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut options_bytes = options.as_bytes().to_vec();
-            if options_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            options_bytes.push(0);
-            let options_cstr = core::ffi::CStr::from_bytes_with_nul(&options_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::text(text_cstr, x, y, size, options_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(text, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(text)?),
+            };
+            let mut __core_string_4_scratch = [0u8; 256];
+            let __core_string_4_buf = match super::write_cstr(options, &mut __core_string_4_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(options)?),
+            };
+            crate::generated::borrowed::gfx::text(__core_string_0_buf.as_cstr(), x, y, size, __core_string_4_buf.as_cstr())
         }
 
         #[inline]
@@ -3627,11 +3669,12 @@
         #[inline]
         #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn upload_texture(name: &str, target: u32, level: i32, xoff: i32, yoff: i32, zoff: i32, width: i32, height: i32, depth: i32, format: u32, pixel_type: u32, data: &[u8]) -> Result<()> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::gfx::upload_texture(name_cstr, target, level, xoff, yoff, zoff, width, height, depth, format, pixel_type, data)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::upload_texture(__core_string_0_buf.as_cstr(), target, level, xoff, yoff, zoff, width, height, depth, format, pixel_type, data)
         }
 
         #[inline]

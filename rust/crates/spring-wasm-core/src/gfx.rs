@@ -7,7 +7,7 @@ use super::{ApiError, ErrorCode, Result, SyncCallback};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:gfx")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "begin-end"]
         pub fn begin_end(primitive: i32, callback_id: i32, user_data: i32) -> i32;
         #[link_name = "active-fbo"]

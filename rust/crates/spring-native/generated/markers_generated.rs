@@ -18,7 +18,7 @@ impl<'a> Markers<'a> {
         unsafe {
             let query = sys::AddWorldIconQuery {
                 cmdID: cmd_id,
-                pos: pos,
+                pos,
             };
             let mut result = MaybeUninit::<sys::AddWorldIconResult>::zeroed();
             let func = self.api.AddWorldIcon.expect("AddWorldIcon function pointer must be initialized");
@@ -35,7 +35,7 @@ impl<'a> Markers<'a> {
             let text_cstr = std::ffi::CString::new(text).map_err(|_| Error::invalid_argument("text"))?;
             let query = sys::AddWorldTextQuery {
                 text: text_cstr.as_ptr(),
-                pos: pos,
+                pos,
             };
             let mut result = MaybeUninit::<sys::AddWorldTextResult>::zeroed();
             let func = self.api.AddWorldText.expect("AddWorldText function pointer must be initialized");
@@ -51,9 +51,9 @@ impl<'a> Markers<'a> {
         unsafe {
             let query = sys::AddWorldUnitQuery {
                 unitDefID: unit_def_id,
-                pos: pos,
+                pos,
                 teamID: team_id,
-                facing: facing,
+                facing,
             };
             let mut result = MaybeUninit::<sys::AddWorldUnitResult>::zeroed();
             let func = self.api.AddWorldUnit.expect("AddWorldUnit function pointer must be initialized");
@@ -69,7 +69,7 @@ impl<'a> Markers<'a> {
         unsafe {
             let text_cstr = std::ffi::CString::new(text).map_err(|_| Error::invalid_argument("text"))?;
             let query = sys::MarkerAddPointQuery {
-                pos: pos,
+                pos,
                 text: text_cstr.as_ptr(),
                 localOnly: local_only,
                 playerID: player_id,
@@ -87,8 +87,8 @@ impl<'a> Markers<'a> {
     pub fn marker_add_line(&self, from: sys::Float3, to: sys::Float3, local_only: bool, player_id: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::MarkerAddLineQuery {
-                from: from,
-                to: to,
+                from,
+                to,
                 localOnly: local_only,
                 playerID: player_id,
             };
@@ -105,8 +105,8 @@ impl<'a> Markers<'a> {
     pub fn marker_erase_position(&self, pos: sys::Float3, unused: f32, options: MarkerErasePositionOptions, player_id: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::MarkerErasePositionQuery {
-                pos: pos,
-                unused: unused,
+                pos,
+                unused,
                 options: options.into(),
                 playerID: player_id,
             };

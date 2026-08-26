@@ -245,7 +245,7 @@ impl<'a> RulesParams<'a> {
             let query = sys::SetGameRulesParamQuery {
                 paramName: param_name_cstr.as_ptr(),
                 value: value_sys.value,
-                los: los,
+                los,
             };
             let mut result = MaybeUninit::<sys::SetGameRulesParamResult>::zeroed();
             let func = self.api.SetGameRulesParam.expect("SetGameRulesParam function pointer must be initialized");
@@ -265,7 +265,7 @@ impl<'a> RulesParams<'a> {
                 teamID: team_id,
                 paramName: param_name_cstr.as_ptr(),
                 value: value_sys.value,
-                los: los,
+                los,
             };
             let mut result = MaybeUninit::<sys::SetTeamRulesParamResult>::zeroed();
             let func = self.api.SetTeamRulesParam.expect("SetTeamRulesParam function pointer must be initialized");
@@ -285,7 +285,7 @@ impl<'a> RulesParams<'a> {
                 playerID: player_id,
                 paramName: param_name_cstr.as_ptr(),
                 value: value_sys.value,
-                los: los,
+                los,
             };
             let mut result = MaybeUninit::<sys::SetPlayerRulesParamResult>::zeroed();
             let func = self.api.SetPlayerRulesParam.expect("SetPlayerRulesParam function pointer must be initialized");
@@ -305,7 +305,7 @@ impl<'a> RulesParams<'a> {
                 unitID: unit_id,
                 paramName: param_name_cstr.as_ptr(),
                 value: value_sys.value,
-                los: los,
+                los,
             };
             let mut result = MaybeUninit::<sys::SetUnitRulesParamResult>::zeroed();
             let func = self.api.SetUnitRulesParam.expect("SetUnitRulesParam function pointer must be initialized");
@@ -325,7 +325,7 @@ impl<'a> RulesParams<'a> {
                 featureID: feature_id,
                 paramName: param_name_cstr.as_ptr(),
                 value: value_sys.value,
-                los: los,
+                los,
             };
             let mut result = MaybeUninit::<sys::SetFeatureRulesParamResult>::zeroed();
             let func = self.api.SetFeatureRulesParam.expect("SetFeatureRulesParam function pointer must be initialized");

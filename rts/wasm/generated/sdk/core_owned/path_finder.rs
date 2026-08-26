@@ -118,7 +118,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_path_node_costs {
             #[link(wasm_import_module = "spring:path-finder")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-path-node-costs"]
                 pub fn call(poverlay_index: i32, output: i32) -> i32;
             }

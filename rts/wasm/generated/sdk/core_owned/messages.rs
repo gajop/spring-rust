@@ -232,7 +232,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_current_tooltip {
             #[link(wasm_import_module = "spring:messages")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-current-tooltip"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }

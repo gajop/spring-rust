@@ -1023,6 +1023,15 @@ void CGroundMoveType::StartMoving(float3 moveGoalPos, float moveGoalRadius) {
 		Channels::General->PlayRandomSample(owner->unitDef->sounds.activate, owner);
 }
 
+void CGroundMoveType::StartMoving(float3 moveGoalPos, float moveGoalRadius, float speed) {
+	// Spring.SetUnitMoveGoal's optional speed applies to both pathfinding and
+	// raw movement.  Keep it as the wanted speed before installing the normal
+	// pathfinding goal; the two-argument overload is still used by ordinary
+	// command processing and keeps its existing max-speed behavior.
+	wantedSpeed = (speed > 0.0f) ? speed : maxSpeed;
+	StartMoving(moveGoalPos, moveGoalRadius);
+}
+
 void CGroundMoveType::StopMoving(bool callScript, bool hardStop, bool cancelRaw) {
 	RECOIL_DETAILED_TRACY_ZONE;
 	LOG_L(L_DEBUG, "[%s] stopping engine for unit %i", __func__, owner->id);

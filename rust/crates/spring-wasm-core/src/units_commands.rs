@@ -29,7 +29,7 @@ pub struct UnitCommand {
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:units-commands")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "get-unit-command-count"]
         pub fn get_unit_command_count(unit_id: i32) -> i64;
         #[link_name = "get-unit-commands"]

@@ -60,6 +60,10 @@
 		"GLConstant GLC_" #name " does not match GL_" #name);
 SPRING_GL_CONSTANTS(SPRING_GL_VERIFY_ENTRY)
 #undef SPRING_GL_VERIFY_ENTRY
+
+static_assert(static_cast<unsigned>(GFX_CULL_FACE_FRONT) == static_cast<unsigned>(GL_FRONT));
+static_assert(static_cast<unsigned>(GFX_CULL_FACE_BACK) == static_cast<unsigned>(GL_BACK));
+static_assert(static_cast<unsigned>(GFX_CULL_FACE_FRONT_AND_BACK) == static_cast<unsigned>(GL_FRONT_AND_BACK));
 #include "System/Config/ConfigHandler.h"
 #include "System/StringHash.h"
 #include "Sim/Features/Feature.h"
@@ -898,6 +902,23 @@ static void DepthTest(const GfxDepthTestQuery* query, GfxEmptyResult* result)
 
 static void DepthMask(const GfxBoolQuery* query, GfxEmptyResult* result) { result->error = nullptr; glDepthMask(query->value ? GL_TRUE : GL_FALSE); }
 static void Culling(const GfxBoolQuery* query, GfxEmptyResult* result) { result->error = nullptr; query->value ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE); }
+static void CullFace(const GfxCullFaceQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+
+	GLenum face = 0;
+	switch (query->face) {
+		case GFX_CULL_FACE_FRONT: face = GL_FRONT; break;
+		case GFX_CULL_FACE_BACK: face = GL_BACK; break;
+		case GFX_CULL_FACE_FRONT_AND_BACK: face = GL_FRONT_AND_BACK; break;
+		default:
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+	}
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(face);
+}
 static void Blending(const GfxBoolQuery* query, GfxEmptyResult* result) { result->error = nullptr; query->value ? glEnable(GL_BLEND) : glDisable(GL_BLEND); }
 static void BlendFunc(const GfxBlendFuncQuery* query, GfxEmptyResult* result) { result->error = nullptr; glBlendFunc(query->src, query->dst); }
 static void BlendFuncSeparate(const GfxBlendFuncSeparateQuery* query, GfxEmptyResult* result) { result->error = nullptr; glBlendFuncSeparate(query->srcRGB, query->dstRGB, query->srcAlpha, query->dstAlpha); }
@@ -5262,6 +5283,7 @@ const GfxApi GFX_API = {
 	.DepthTest = DepthTest,
 	.DepthMask = DepthMask,
 	.Culling = Culling,
+	.CullFace = CullFace,
 	.Blending = Blending,
 	.BlendFunc = BlendFunc,
 	.BlendFuncSeparate = BlendFuncSeparate,

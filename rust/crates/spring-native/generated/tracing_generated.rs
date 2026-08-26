@@ -43,11 +43,26 @@ impl From<TraceRayInDirectionOptions> for sys::TraceRayInDirectionOptions {
     }
 }
 
+/// The complete result tuple returned by [`trace_ray`].
+pub type TraceRayValue = (bool, i32, i32, sys::Float3, sys::Float3);
+
+/// The complete result tuple returned by [`trace_ray_units`].
+pub type TraceRayUnitsValue = (bool, i32, i32, sys::Float3, sys::Float3);
+
+/// The complete result tuple returned by [`trace_ray_features`].
+pub type TraceRayFeaturesValue = (bool, i32, i32, sys::Float3, sys::Float3);
+
+/// The complete result tuple returned by [`trace_ray_ground_between_positions`].
+pub type TraceRayGroundBetweenPositionsValue = (bool, f32, sys::Float3, sys::Float3);
+
+/// The complete result tuple returned by [`trace_ray_ground_in_direction`].
+pub type TraceRayGroundInDirectionValue = (bool, f32, sys::Float3, sys::Float3);
+
 impl<'a> Tracing<'a> {
-    pub fn trace_ray(&self, ray: sys::Ray) -> Result<(bool, i32, i32, sys::Float3, sys::Float3), Error> {
+    pub fn trace_ray(&self, ray: sys::Ray) -> Result<TraceRayValue, Error> {
         unsafe {
             let query = sys::TraceRayQuery {
-                ray: ray,
+                ray,
             };
             let mut result = MaybeUninit::<sys::TraceRayResult>::zeroed();
             let func = self.api.TraceRay.expect("TraceRay function pointer must be initialized");
@@ -64,10 +79,10 @@ impl<'a> Tracing<'a> {
         }
     }
 
-    pub fn trace_ray_units(&self, ray: sys::Ray) -> Result<(bool, i32, i32, sys::Float3, sys::Float3), Error> {
+    pub fn trace_ray_units(&self, ray: sys::Ray) -> Result<TraceRayUnitsValue, Error> {
         unsafe {
             let query = sys::TraceRayUnitsQuery {
-                ray: ray,
+                ray,
             };
             let mut result = MaybeUninit::<sys::TraceRayUnitsResult>::zeroed();
             let func = self.api.TraceRayUnits.expect("TraceRayUnits function pointer must be initialized");
@@ -84,10 +99,10 @@ impl<'a> Tracing<'a> {
         }
     }
 
-    pub fn trace_ray_features(&self, ray: sys::Ray) -> Result<(bool, i32, i32, sys::Float3, sys::Float3), Error> {
+    pub fn trace_ray_features(&self, ray: sys::Ray) -> Result<TraceRayFeaturesValue, Error> {
         unsafe {
             let query = sys::TraceRayFeaturesQuery {
-                ray: ray,
+                ray,
             };
             let mut result = MaybeUninit::<sys::TraceRayFeaturesResult>::zeroed();
             let func = self.api.TraceRayFeatures.expect("TraceRayFeatures function pointer must be initialized");
@@ -108,8 +123,8 @@ impl<'a> Tracing<'a> {
         unsafe {
             let r#type_cstr = std::ffi::CString::new(r#type).map_err(|_| Error::invalid_argument("r#type"))?;
             let query = sys::TraceRayInDirectionQuery {
-                pos: pos,
-                dir: dir,
+                pos,
+                dir,
                 options: options.into(),
                 type_: r#type_cstr.as_ptr(),
             };
@@ -134,8 +149,8 @@ impl<'a> Tracing<'a> {
         unsafe {
             let r#type_cstr = std::ffi::CString::new(r#type).map_err(|_| Error::invalid_argument("r#type"))?;
             let query = sys::TraceRayBetweenPositionsQuery {
-                start: start,
-                end: end,
+                start,
+                end,
                 type_: r#type_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::TraceRayBetweenPositionsResult>::zeroed();
@@ -155,11 +170,11 @@ impl<'a> Tracing<'a> {
         }
     }
 
-    pub fn trace_ray_ground_between_positions(&self, start: sys::Float3, end: sys::Float3, options: TraceRayGroundBetweenPositionsOptions) -> Result<(bool, f32, sys::Float3, sys::Float3), Error> {
+    pub fn trace_ray_ground_between_positions(&self, start: sys::Float3, end: sys::Float3, options: TraceRayGroundBetweenPositionsOptions) -> Result<TraceRayGroundBetweenPositionsValue, Error> {
         unsafe {
             let query = sys::TraceRayGroundBetweenPositionsQuery {
-                start: start,
-                end: end,
+                start,
+                end,
                 options: options.into(),
             };
             let mut result = MaybeUninit::<sys::TraceRayGroundBetweenPositionsResult>::zeroed();
@@ -176,11 +191,11 @@ impl<'a> Tracing<'a> {
         }
     }
 
-    pub fn trace_ray_ground_in_direction(&self, start: sys::Float3, dir: sys::Float3, options: TraceRayGroundInDirectionOptions) -> Result<(bool, f32, sys::Float3, sys::Float3), Error> {
+    pub fn trace_ray_ground_in_direction(&self, start: sys::Float3, dir: sys::Float3, options: TraceRayGroundInDirectionOptions) -> Result<TraceRayGroundInDirectionValue, Error> {
         unsafe {
             let query = sys::TraceRayGroundInDirectionQuery {
-                start: start,
-                dir: dir,
+                start,
+                dir,
                 options: options.into(),
             };
             let mut result = MaybeUninit::<sys::TraceRayGroundInDirectionResult>::zeroed();

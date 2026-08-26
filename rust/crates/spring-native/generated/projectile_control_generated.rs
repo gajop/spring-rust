@@ -34,7 +34,7 @@ impl<'a> ProjectileControl<'a> {
         unsafe {
             let query = sys::SetProjectilePositionQuery {
                 projectileID: projectile_id,
-                pos: pos,
+                pos,
             };
             let mut result = MaybeUninit::<sys::SetProjectilePositionResult>::zeroed();
             let func = self.api.SetProjectilePosition.expect("SetProjectilePosition function pointer must be initialized");
@@ -50,7 +50,7 @@ impl<'a> ProjectileControl<'a> {
         unsafe {
             let query = sys::SetProjectileVelocityQuery {
                 projectileID: projectile_id,
-                velocity: velocity,
+                velocity,
             };
             let mut result = MaybeUninit::<sys::SetProjectileVelocityResult>::zeroed();
             let func = self.api.SetProjectileVelocity.expect("SetProjectileVelocity function pointer must be initialized");
@@ -66,7 +66,7 @@ impl<'a> ProjectileControl<'a> {
         unsafe {
             let query = sys::SetProjectileGravityQuery {
                 projectileID: projectile_id,
-                gravity: gravity,
+                gravity,
             };
             let mut result = MaybeUninit::<sys::SetProjectileGravityResult>::zeroed();
             let func = self.api.SetProjectileGravity.expect("SetProjectileGravity function pointer must be initialized");
@@ -82,7 +82,7 @@ impl<'a> ProjectileControl<'a> {
         unsafe {
             let query = sys::SetProjectileTargetQuery {
                 projectileID: projectile_id,
-                target: target,
+                target,
             };
             let mut result = MaybeUninit::<sys::SetProjectileTargetResult>::zeroed();
             let func = self.api.SetProjectileTarget.expect("SetProjectileTarget function pointer must be initialized");
@@ -99,7 +99,7 @@ impl<'a> ProjectileControl<'a> {
             let damage_key_cstr = std::ffi::CString::new(damage_key).map_err(|_| Error::invalid_argument("damage_key"))?;
             let query = sys::SetProjectileDamagesQuery {
                 projectileID: projectile_id,
-                unused: unused,
+                unused,
                 damageKey: damage_key_cstr.as_ptr(),
                 damageValue: damage_value,
             };
@@ -133,7 +133,7 @@ impl<'a> ProjectileControl<'a> {
         unsafe {
             let query = sys::SetProjectileIsInterceptedQuery {
                 projectileID: projectile_id,
-                intercepted: intercepted,
+                intercepted,
             };
             let mut result = MaybeUninit::<sys::SetProjectileIsInterceptedResult>::zeroed();
             let func = self.api.SetProjectileIsIntercepted.expect("SetProjectileIsIntercepted function pointer must be initialized");
@@ -213,7 +213,7 @@ impl<'a> ProjectileControl<'a> {
         unsafe {
             let query = sys::SetProjectileMoveControlQuery {
                 projectileID: projectile_id,
-                enable: enable,
+                enable,
             };
             let mut result = MaybeUninit::<sys::SetProjectileMoveControlResult>::zeroed();
             let func = self.api.SetProjectileMoveControl.expect("SetProjectileMoveControl function pointer must be initialized");
@@ -229,7 +229,7 @@ impl<'a> ProjectileControl<'a> {
         unsafe {
             let query = sys::SetProjectileIgnoreTrackingErrorQuery {
                 projectileID: projectile_id,
-                ignore: ignore,
+                ignore,
             };
             let mut result = MaybeUninit::<sys::SetProjectileIgnoreTrackingErrorResult>::zeroed();
             let func = self.api.SetProjectileIgnoreTrackingError.expect("SetProjectileIgnoreTrackingError function pointer must be initialized");

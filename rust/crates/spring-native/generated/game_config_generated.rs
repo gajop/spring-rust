@@ -32,7 +32,7 @@ impl<'a> GameConfig<'a> {
     pub fn set_cheating_enabled(&self, enabled: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetCheatingEnabledQuery {
-                enabled: enabled,
+                enabled,
             };
             let mut result = MaybeUninit::<sys::SetCheatingEnabledResult>::zeroed();
             let func = self.api.SetCheatingEnabled.expect("SetCheatingEnabled function pointer must be initialized");
@@ -98,9 +98,9 @@ impl<'a> GameConfig<'a> {
     pub fn set_square_building_mask(&self, x: i32, z: i32, mask: u16) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetSquareBuildingMaskQuery {
-                x: x,
-                z: z,
-                mask: mask,
+                x,
+                z,
+                mask,
             };
             let mut result = MaybeUninit::<sys::SetSquareBuildingMaskResult>::zeroed();
             let func = self.api.SetSquareBuildingMask.expect("SetSquareBuildingMask function pointer must be initialized");

@@ -313,7 +313,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_ally_team_list {
             #[link(wasm_import_module = "spring:teams")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-ally-team-list"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -322,7 +322,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_player_list {
             #[link(wasm_import_module = "spring:teams")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-player-list"]
                 pub fn call(pteam_id: i32, pactive: i32, output: i32) -> i32;
             }
@@ -331,7 +331,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_player_list_in_ally_team {
             #[link(wasm_import_module = "spring:teams")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-player-list-in-ally-team"]
                 pub fn call(pally_team_id: i32, output: i32) -> i32;
             }
@@ -340,7 +340,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_player_list_in_team {
             #[link(wasm_import_module = "spring:teams")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-player-list-in-team"]
                 pub fn call(pteam_id: i32, output: i32) -> i32;
             }
@@ -349,7 +349,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_team_list {
             #[link(wasm_import_module = "spring:teams")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-team-list"]
                 pub fn call(pally_team_id: i32, output: i32) -> i32;
             }
@@ -358,7 +358,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_team_lua_ai {
             #[link(wasm_import_module = "spring:teams")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-team-lua-ai"]
                 pub fn call(pteam_id: i32, output: i32) -> i32;
             }

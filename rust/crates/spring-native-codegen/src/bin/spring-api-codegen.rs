@@ -1,12 +1,12 @@
 //! Maintainer/CI entry point for normalized Spring API generation.
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use heck::ToSnakeCase;
 use spring_native_codegen::{
-    annotations, callins, extract_api_version,
+    CodeGenerator, annotations, callins, extract_api_version,
     manifest::API_DEFINITIONS,
     model::{ApiModel, ValidationMode},
-    render_core_native, CodeGenerator,
+    render_core_native,
 };
 use std::{
     env, fs,
@@ -83,10 +83,10 @@ fn run() -> Result<()> {
 
     let mut modules = Vec::new();
     for definition in API_DEFINITIONS {
-        if let Some(only) = &arguments.only {
-            if only != definition.module {
-                continue;
-            }
+        if let Some(only) = &arguments.only
+            && only != definition.module
+        {
+            continue;
         }
         let header = api_dir.join(definition.header);
         let module = codegen
@@ -431,7 +431,9 @@ impl Arguments {
                 }
                 "--strict" => strict = true,
                 "--help" | "-h" => {
-                    println!("Usage: spring-api-codegen [--root PATH] [--output DIR] [--only MODULE] [--strict]");
+                    println!(
+                        "Usage: spring-api-codegen [--root PATH] [--output DIR] [--only MODULE] [--strict]"
+                    );
                     std::process::exit(0);
                 }
                 value => return Err(anyhow!("unknown argument {value}")),

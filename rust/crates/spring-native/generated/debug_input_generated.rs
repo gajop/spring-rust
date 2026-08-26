@@ -3,7 +3,7 @@ impl<'a> DebugInput<'a> {
         unsafe {
             let query = sys::EmulateKeyQuery {
                 keyCode: key_code,
-                pressed: pressed,
+                pressed,
             };
             let mut result = MaybeUninit::<sys::EmulateKeyResult>::zeroed();
             let func = self.api.EmulateKey.expect("EmulateKey function pointer must be initialized");
@@ -16,8 +16,8 @@ impl<'a> DebugInput<'a> {
     pub fn emulate_mouse_button(&self, button: i32, pressed: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::EmulateMouseButtonQuery {
-                button: button,
-                pressed: pressed,
+                button,
+                pressed,
             };
             let mut result = MaybeUninit::<sys::EmulateMouseButtonResult>::zeroed();
             let func = self.api.EmulateMouseButton.expect("EmulateMouseButton function pointer must be initialized");
@@ -30,8 +30,8 @@ impl<'a> DebugInput<'a> {
     pub fn emulate_mouse_move(&self, x: i32, y: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::EmulateMouseMoveQuery {
-                x: x,
-                y: y,
+                x,
+                y,
             };
             let mut result = MaybeUninit::<sys::EmulateMouseMoveResult>::zeroed();
             let func = self.api.EmulateMouseMove.expect("EmulateMouseMove function pointer must be initialized");
@@ -44,7 +44,7 @@ impl<'a> DebugInput<'a> {
     pub fn emulate_mouse_wheel(&self, delta: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::EmulateMouseWheelQuery {
-                delta: delta,
+                delta,
             };
             let mut result = MaybeUninit::<sys::EmulateMouseWheelResult>::zeroed();
             let func = self.api.EmulateMouseWheel.expect("EmulateMouseWheel function pointer must be initialized");
@@ -75,8 +75,8 @@ impl<'a> DebugInput<'a> {
             let utf8_text_cstr = std::ffi::CString::new(utf8_text).map_err(|_| Error::invalid_argument("utf8_text"))?;
             let query = sys::EmulateTextEditingQuery {
                 utf8Text: utf8_text_cstr.as_ptr(),
-                start: start,
-                length: length,
+                start,
+                length,
             };
             let mut result = MaybeUninit::<sys::EmulateTextEditingResult>::zeroed();
             let func = self.api.EmulateTextEditing.expect("EmulateTextEditing function pointer must be initialized");

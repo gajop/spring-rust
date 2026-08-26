@@ -7,7 +7,7 @@ use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
 
 use super::result;
 use super::scratch_model::{
-    count_field, executable, expanded, implicit_count_fields, record_index, ScratchCallin,
+    ScratchCallin, count_field, executable, expanded, implicit_count_fields, record_index,
 };
 
 pub(super) fn render_header(model: &ApiModel) -> String {
@@ -317,7 +317,9 @@ fn render_cpp_type(
     match ty {
         SemanticType::Scalar { name } => {
             let method = writer_method(name);
-            format!("{pad}if (!writer.{method}({expr})) {{ error = \"generated Core scratch overflow\"; return false; }}\n")
+            format!(
+                "{pad}if (!writer.{method}({expr})) {{ error = \"generated Core scratch overflow\"; return false; }}\n"
+            )
         }
         SemanticType::Enum { .. } => format!(
             "{pad}if (!writer.I32(static_cast<std::int32_t>({expr}))) {{ error = \"generated Core scratch overflow\"; return false; }}\n"
@@ -350,7 +352,8 @@ fn render_cpp_type(
                     let payload_bytes = format!("coreScratchRecordPayloadBytes{indent}");
                     let item_expr = format!("{expr}[{index}]");
                     let item_prefix = format!("{item_expr}.");
-                    let nested = render_cpp_fields(&record.fields, &item_prefix, records, indent + 1);
+                    let nested =
+                        render_cpp_fields(&record.fields, &item_prefix, records, indent + 1);
                     format!(
                         "{pad}if ({count_expr} != 0 && {expr} == nullptr) {{ error = \"generated Core record-list input is null\"; return false; }}\n{pad}if (!writer.U32(static_cast<std::uint32_t>({count_expr}))) {{ error = \"generated Core record-list header exceeds scratch capacity\"; return false; }}\n{pad}const std::size_t {total_offset} = writer.Offset();\n{pad}if (!writer.U32(0) || !writer.Align(8)) {{ error = \"generated Core record-list header exceeds scratch capacity\"; return false; }}\n{pad}const std::size_t {frames_start} = writer.Offset();\n{pad}for (std::size_t {index} = 0; {index} < static_cast<std::size_t>({count_expr}); ++{index}) {{\n{pad}    const std::size_t {length_offset} = writer.Offset();\n{pad}    if (!writer.U32(0) || !writer.Align(8)) {{ error = \"generated Core record-list frame exceeds scratch capacity\"; return false; }}\n{pad}    const std::size_t {payload_start} = writer.Offset();\n{nested}{pad}    const std::size_t {payload_bytes} = writer.Offset() - {payload_start};\n{pad}    if ({payload_bytes} > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32({length_offset}, static_cast<std::uint32_t>({payload_bytes}))) {{ error = \"generated Core record-list frame exceeds u32\"; return false; }}\n{pad}}}\n{pad}const std::size_t {frames_bytes} = writer.Offset() - {frames_start};\n{pad}if ({frames_bytes} > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32({total_offset}, static_cast<std::uint32_t>({frames_bytes}))) {{ error = \"generated Core record-list payload exceeds u32\"; return false; }}\n"
                     )
@@ -379,7 +382,9 @@ fn render_cpp_type(
                 records,
                 indent + 1,
             );
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
@@ -437,10 +442,10 @@ fn cpp_result_assign(ty: &SemanticType, destination: &str) -> String {
 
 fn cpp_unpack_packed32(ty: &SemanticType, destination: &str, raw: &str) -> String {
     match ty {
-        SemanticType::Scalar { name } if name == "bool" =>
-            format!("{destination} = {raw} != 0u;"),
-        SemanticType::Scalar { name } if name == "f32" =>
-            format!("{destination} = std::bit_cast<float>({raw});"),
+        SemanticType::Scalar { name } if name == "bool" => format!("{destination} = {raw} != 0u;"),
+        SemanticType::Scalar { name } if name == "f32" => {
+            format!("{destination} = std::bit_cast<float>({raw});")
+        }
         SemanticType::Scalar { name } if matches!(name.as_str(), "i8" | "i16" | "i32") => {
             let signed = match name.as_str() {
                 "i8" => "std::int8_t",

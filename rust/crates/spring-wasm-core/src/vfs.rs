@@ -3,7 +3,7 @@ use super::{ApiError, ErrorCode, Result, SyncCallback};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:vfs")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "use-archive"]
         pub fn use_archive(
             archive_ptr: i32,

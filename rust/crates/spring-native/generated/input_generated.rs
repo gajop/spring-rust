@@ -1,3 +1,12 @@
+/// The complete result tuple returned by [`get_mod_key_state`].
+pub type GetModKeyStateValue = (bool, bool, bool, bool);
+
+/// The complete result tuple returned by [`get_active_command`].
+pub type GetActiveCommandValue = (i32, i32, i32, Option<String>);
+
+/// The complete result tuple returned by [`get_default_command`].
+pub type GetDefaultCommandValue = (i32, i32, i32, Option<String>);
+
 impl<'a> Input<'a> {
     pub fn get_mouse_state(&self) -> Result<sys::MouseState, Error> {
         unsafe {
@@ -61,7 +70,7 @@ impl<'a> Input<'a> {
     pub fn get_mouse_start_position(&self, button: i32) -> Result<(sys::Float2, sys::Float3, sys::Float3), Error> {
         unsafe {
             let query = sys::GetMouseStartPositionQuery {
-                button: button,
+                button,
             };
             let mut result = MaybeUninit::<sys::GetMouseStartPositionResult>::zeroed();
             let func = self.api.GetMouseStartPosition.expect("GetMouseStartPosition function pointer must be initialized");
@@ -135,7 +144,7 @@ impl<'a> Input<'a> {
         }
     }
 
-    pub fn get_mod_key_state(&self) -> Result<(bool, bool, bool, bool), Error> {
+    pub fn get_mod_key_state(&self) -> Result<GetModKeyStateValue, Error> {
         unsafe {
             let query = sys::GetModKeyStateQuery {
                 _unused: 0,
@@ -200,7 +209,7 @@ impl<'a> Input<'a> {
         }
     }
 
-    pub fn get_active_command(&self) -> Result<(i32, i32, i32, Option<String>), Error> {
+    pub fn get_active_command(&self) -> Result<GetActiveCommandValue, Error> {
         unsafe {
             let query = sys::GetActiveCommandQuery {
                 _unused: 0,
@@ -392,7 +401,7 @@ impl<'a> Input<'a> {
         }
     }
 
-    pub fn get_default_command(&self) -> Result<(i32, i32, i32, Option<String>), Error> {
+    pub fn get_default_command(&self) -> Result<GetDefaultCommandValue, Error> {
         unsafe {
             let query = sys::GetDefaultCommandQuery {
                 _unused: 0,

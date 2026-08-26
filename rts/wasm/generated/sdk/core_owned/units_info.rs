@@ -781,7 +781,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_unit_tooltip {
             #[link(wasm_import_module = "spring:units-info")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-unit-tooltip"]
                 pub fn call(punit_id: i32, output: i32) -> i32;
             }
@@ -1011,7 +1011,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_units_info_is_transporting {
             #[link(wasm_import_module = "spring:units-info")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-unit-is-transporting"]
                 pub fn call(unit_id: i32, output: i32, capacity: i32, state: i32) -> i64;
             }
@@ -1121,7 +1121,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_units_info_nano_pieces {
             #[link(wasm_import_module = "spring:units-info")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-unit-nano-pieces"]
                 pub fn call(unit_id: i32, output: i32, capacity: i32) -> i64;
             }

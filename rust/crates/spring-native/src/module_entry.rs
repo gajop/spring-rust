@@ -1,7 +1,7 @@
-/// Helper utilities for module initialization and callback exports.
-///
-/// This module provides macros and functions to reduce boilerplate when
-/// creating native Spring modules.
+//! Helper utilities for module initialization and callback exports.
+//!
+//! This module provides macros and functions to reduce boilerplate when
+//! creating native Spring modules.
 
 /// Setup panic handler to notify Spring when Rust code panics.
 ///
@@ -130,7 +130,8 @@ pub unsafe fn lua_call_message_to_str<'a>(
     if message.is_null() {
         Err(crate::Error::new(1, "Null message pointer".to_string()))
     } else {
-        let bytes = std::slice::from_raw_parts(message as *const u8, message_length as usize);
+        let bytes =
+            unsafe { std::slice::from_raw_parts(message as *const u8, message_length as usize) };
         std::str::from_utf8(bytes)
             .map_err(|e| crate::Error::new(1, format!("Invalid UTF-8: {}", e)))
     }
@@ -138,7 +139,7 @@ pub unsafe fn lua_call_message_to_str<'a>(
 
 /// Macro to generate callback export boilerplate.
 ///
-/// This macro generates the `#[no_mangle] extern "C"` function that Spring
+/// This macro generates the `#[unsafe(no_mangle)] extern "C"` function that Spring
 /// will call, handling all the FFI conversions and calling your safe Rust
 /// implementation.
 ///
@@ -166,7 +167,7 @@ macro_rules! impl_callback {
             result: *mut $result:ty,
         ) -> |$module:ident: &mut $module_type:ty| $body:block
     ) => {
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn $name(
             _interface: *const $iface,
             module_data: *mut std::ffi::c_void,
@@ -224,7 +225,7 @@ macro_rules! export_module {
         ///
         /// This symbol is read by the host BEFORE calling InitializeNativeModule
         /// to check for major version compatibility.
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub static NativeModuleApiVersion: [u32; 3] = [
             $crate::NATIVE_API_VERSION_MAJOR,
             $crate::NATIVE_API_VERSION_MINOR,
@@ -232,7 +233,7 @@ macro_rules! export_module {
         ];
 
         /// Module entry point - Spring calls this when loading the module
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn InitializeNativeModule(
             interface: *const $crate::sys::NativeInterface,
             query: *const $crate::sys::InitializeNativeModuleQuery,
@@ -283,7 +284,7 @@ macro_rules! export_module {
         // Helper macro for callbacks with no parameters
         macro_rules! export_simple_callback {
             ($name:ident, $method:ident, $query:ty, $result:ty) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -305,7 +306,7 @@ macro_rules! export_module {
 
         macro_rules! export_update_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -327,7 +328,7 @@ macro_rules! export_module {
 
         macro_rules! export_screen_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -350,7 +351,7 @@ macro_rules! export_module {
 
         macro_rules! export_minimap_draw_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -373,7 +374,7 @@ macro_rules! export_module {
 
         macro_rules! export_view_resize_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -413,7 +414,7 @@ macro_rules! export_module {
 
         macro_rules! export_unit_id_callback {
             ($name:ident, $method:ident, $query:ty, $result:ty) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -435,7 +436,7 @@ macro_rules! export_module {
 
         macro_rules! export_unit_context_callback {
             ($name:ident, $method:ident, $query:ty, $result:ty) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -458,7 +459,7 @@ macro_rules! export_module {
 
         macro_rules! export_unit_los_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -481,7 +482,7 @@ macro_rules! export_module {
 
         macro_rules! export_projectile_id_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -518,7 +519,7 @@ macro_rules! export_module {
 
         macro_rules! export_simple_bool_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -544,7 +545,7 @@ macro_rules! export_module {
 
         macro_rules! export_bool_3_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -571,7 +572,7 @@ macro_rules! export_module {
 
         macro_rules! export_bool_4_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident, $field4:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -598,7 +599,7 @@ macro_rules! export_module {
 
         macro_rules! export_bool_5_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident, $field4:ident, $field5:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -625,7 +626,7 @@ macro_rules! export_module {
 
         macro_rules! export_bool_6_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident, $field4:ident, $field5:ident, $field6:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -652,7 +653,7 @@ macro_rules! export_module {
 
         macro_rules! export_bool_7_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident, $field4:ident, $field5:ident, $field6:ident, $field7:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -699,7 +700,7 @@ macro_rules! export_module {
         }
 
         // Game events
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn Load(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -734,7 +735,7 @@ macro_rules! export_module {
         // forwarding NativeModule::shutdown is insufficient: Drop must run
         // while module code is still loaded to release host resources such as
         // RmlUi contexts.
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn Shutdown(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -784,7 +785,7 @@ macro_rules! export_module {
             $crate::sys::SimpleCallinResult
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn DrawWorldPreParticles(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -887,7 +888,7 @@ macro_rules! export_module {
 
         macro_rules! export_minimap_2_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -910,7 +911,7 @@ macro_rules! export_module {
 
         macro_rules! export_minimap_3_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -945,7 +946,7 @@ macro_rules! export_module {
                 $field7:ident,
                 $field8:ident
             ) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -1006,7 +1007,7 @@ macro_rules! export_module {
 
         macro_rules! export_draw_bool_2_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -1033,7 +1034,7 @@ macro_rules! export_module {
 
         macro_rules! export_draw_bool_3_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -1095,7 +1096,7 @@ macro_rules! export_module {
             drawMode
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn DrawBuildSquare(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1122,7 +1123,7 @@ macro_rules! export_module {
 
         macro_rules! export_draw_objects_lua_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -1149,7 +1150,7 @@ macro_rules! export_module {
 
         macro_rules! export_draw_alpha_objects_lua_callback {
             ($name:ident, $method:ident) => {
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
@@ -1187,7 +1188,7 @@ macro_rules! export_module {
             $crate::sys::SimpleCallinResult
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GameOver(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1211,7 +1212,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GameFrame(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1229,7 +1230,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GameFramePost(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1248,7 +1249,7 @@ macro_rules! export_module {
         }
 
         // Download events
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn DownloadFailed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1267,7 +1268,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn DownloadFinished(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1285,7 +1286,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn DownloadProgress(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1305,7 +1306,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn DownloadQueued(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1338,7 +1339,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn DownloadStarted(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1356,7 +1357,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn Save(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1375,7 +1376,7 @@ macro_rules! export_module {
         }
 
         // Feature events
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn FeatureCreated(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1394,7 +1395,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn FeatureDestroyed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1414,7 +1415,7 @@ macro_rules! export_module {
         }
 
         // Game events
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GameID(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1438,7 +1439,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GamePaused(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1458,7 +1459,7 @@ macro_rules! export_module {
         }
 
         // Player events
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn PlayerAdded(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1476,7 +1477,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn PlayerChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1494,7 +1495,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn PlayerRemoved(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1514,7 +1515,7 @@ macro_rules! export_module {
         }
 
         // Team events
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn TeamChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1532,7 +1533,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn TeamDied(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1551,7 +1552,7 @@ macro_rules! export_module {
         }
 
         // Unit events
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitCreated(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1571,7 +1572,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitDestroyed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1601,7 +1602,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitExperience(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1626,7 +1627,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitFinished(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1655,7 +1656,7 @@ macro_rules! export_module {
             $crate::sys::UnitReverseBuiltResult
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitConstructionDecayed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1681,7 +1682,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitFromFactory(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1708,7 +1709,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitGiven(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1735,7 +1736,7 @@ macro_rules! export_module {
             $crate::sys::UnitIdleResult
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitCommand(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1784,7 +1785,7 @@ macro_rules! export_module {
             fromLua
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowUnitCreation(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1864,7 +1865,7 @@ macro_rules! export_module {
             transporteeTeam
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowUnitTransportLoad(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1894,7 +1895,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowUnitTransportUnload(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1924,7 +1925,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowUnitCloak(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1946,7 +1947,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowUnitDecloak(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -1980,7 +1981,7 @@ macro_rules! export_module {
             allowed
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitCmdDone(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2000,7 +2001,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitDamaged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2040,7 +2041,7 @@ macro_rules! export_module {
             $crate::sys::UnitHarvestStorageFullResult
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitSeismicPing(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2105,7 +2106,7 @@ macro_rules! export_module {
             $crate::sys::UnitMovementClassEventResult
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitLoaded(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2130,7 +2131,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitStunned(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2154,7 +2155,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitTaken(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2173,7 +2174,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitUnloaded(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2229,7 +2230,7 @@ macro_rules! export_module {
             $crate::sys::UnitMoveEventResult
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitUnitCollision(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2252,7 +2253,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitFeatureCollision(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2275,7 +2276,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn RenderUnitDestroyed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2317,7 +2318,7 @@ macro_rules! export_module {
             part
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowResourceLevel(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2340,7 +2341,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowResourceTransfer(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2363,7 +2364,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn ResourceExcess(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2407,7 +2408,7 @@ macro_rules! export_module {
             action
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowStartPosition(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2455,7 +2456,7 @@ macro_rules! export_module {
             data
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn FeatureMoved(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2474,7 +2475,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn FeatureDamaged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2509,7 +2510,7 @@ macro_rules! export_module {
         export_projectile_id_callback!(ProjectileCreated, projectile_created);
         export_projectile_id_callback!(ProjectileDestroyed, projectile_destroyed);
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn Explosion(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2536,7 +2537,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowWeaponTargetCheck(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2570,7 +2571,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AllowWeaponTarget(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2616,7 +2617,7 @@ macro_rules! export_module {
             interceptorTargetID
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnitPreDamaged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2663,7 +2664,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn FeaturePreDamaged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2709,7 +2710,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn ShieldPreDamaged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2740,7 +2741,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn LastMessagePosition(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2758,7 +2759,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn UnsyncedHeightMapUpdate(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2778,7 +2779,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn CameraRotationChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2796,7 +2797,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn CameraPositionChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2816,7 +2817,7 @@ macro_rules! export_module {
 
         export_simple_bool_callback!(KeyMapChanged, key_map_changed);
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn KeyPress(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2866,7 +2867,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn KeyRelease(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2915,7 +2916,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn TextInput(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2938,7 +2939,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn TextEditing(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2961,7 +2962,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn MouseMove(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -2983,7 +2984,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn MousePress(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3005,7 +3006,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn MouseRelease(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3024,7 +3025,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn MouseWheel(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3046,7 +3047,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn IsAbove(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3068,7 +3069,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GetTooltip(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3090,7 +3091,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn DefaultCommand(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3128,7 +3129,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn ActiveCommandChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3153,7 +3154,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn CommandNotify(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3174,7 +3175,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn AddConsoleLine(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3200,7 +3201,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GroupChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3221,7 +3222,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GameSetup(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3283,7 +3284,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn WorldTooltip(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3306,7 +3307,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn MapDrawCmd(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3353,7 +3354,7 @@ macro_rules! export_module {
             $crate::sys::SimpleCallinResult
         );
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn GameProgress(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3371,7 +3372,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn StockpileChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3397,7 +3398,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn CollectGarbage(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3415,7 +3416,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn Pong(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3436,7 +3437,7 @@ macro_rules! export_module {
         }
 
         // Special events
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn HandleLuaMsg(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
@@ -3462,7 +3463,7 @@ macro_rules! export_module {
             }
         }
 
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub unsafe extern "C" fn HandleLuaCall(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,

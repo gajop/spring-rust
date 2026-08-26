@@ -243,42 +243,47 @@
 
         #[inline]
         pub fn set_config_float(key: &str, value: f32, use_overlay: bool) -> Result<bool> {
-            let mut key_bytes = key.as_bytes().to_vec();
-            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_bytes.push(0);
-            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::config::set_config_float(key_cstr, value, use_overlay)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(key, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key)?),
+            };
+            crate::generated::borrowed::config::set_config_float(__core_string_0_buf.as_cstr(), value, use_overlay)
         }
 
         #[inline]
         pub fn set_config_int(key: &str, value: i32, use_overlay: bool) -> Result<bool> {
-            let mut key_bytes = key.as_bytes().to_vec();
-            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_bytes.push(0);
-            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::config::set_config_int(key_cstr, value, use_overlay)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(key, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key)?),
+            };
+            crate::generated::borrowed::config::set_config_int(__core_string_0_buf.as_cstr(), value, use_overlay)
         }
 
         #[inline]
         pub fn set_config_string(key: &str, value: &str, use_overlay: bool) -> Result<bool> {
-            let mut key_bytes = key.as_bytes().to_vec();
-            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_bytes.push(0);
-            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::config::set_config_string(key_cstr, value_cstr, use_overlay)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(key, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::config::set_config_string(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr(), use_overlay)
         }
 
         #[inline]
         pub fn set_log_section_filter_level(section: &str, level: i32) -> Result<bool> {
-            let mut section_bytes = section.as_bytes().to_vec();
-            if section_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            section_bytes.push(0);
-            let section_cstr = core::ffi::CStr::from_bytes_with_nul(&section_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::config::set_log_section_filter_level(section_cstr, level)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(section, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(section)?),
+            };
+            crate::generated::borrowed::config::set_log_section_filter_level(__core_string_0_buf.as_cstr(), level)
         }
 
     }

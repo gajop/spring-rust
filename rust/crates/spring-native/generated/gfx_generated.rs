@@ -187,6 +187,42 @@ impl From<GfxUnitDrawOptions> for sys::GfxUnitDrawOptions {
     }
 }
 
+/// The complete result tuple returned by [`get_view_range`].
+pub type GetViewRangeValue = (f32, f32, f32, f32);
+
+/// The complete result tuple returned by [`get_atmosphere`].
+pub type GetAtmosphereValue = ([f32; 4], u32, bool, bool, Option<String>);
+
+/// The complete result tuple returned by [`get_sun`].
+pub type GetSunValue = ([f32; 4], u32, bool, bool, Option<String>);
+
+/// The complete result tuple returned by [`get_water_rendering`].
+pub type GetWaterRenderingValue = ([f32; 4], u32, bool, bool, Option<String>);
+
+/// The complete result tuple returned by [`get_map_rendering`].
+pub type GetMapRenderingValue = ([f32; 4], u32, bool, bool, Option<String>);
+
+/// The complete result tuple returned by [`texture_info`].
+pub type TextureInfoValue = (i32, i32, i32, u32, u32, u32);
+
+/// The complete result tuple returned by [`get_rboinfo`].
+pub type GetRBOInfoValue = (bool, u32, u32, i32, i32, i32);
+
+/// The complete result tuple returned by [`get_vboinfo`].
+pub type GetVBOInfoValue = (u32, u32, u32, u32, u32, u32);
+
+/// The complete result tuple returned by [`get_atlas_texture`].
+pub type GetAtlasTextureValue = (f32, f32, f32, f32, i32);
+
+/// The complete result tuple returned by [`get_global_tex_coords`].
+pub type GetGlobalTexCoordsValue = (f32, f32, f32, f32, i32);
+
+/// The complete result tuple returned by [`get_font_info`].
+pub type GetFontInfoValue = (Option<String>, Option<String>, Option<String>, f32, f32, f32, f32, f32, i32, i32);
+
+/// The complete result tuple returned by [`get_fixed_state`].
+pub type GetFixedStateValue = ([bool; 8], u32, [i32; 16], u32, [f32; 16], u32);
+
 impl<'a> Gfx<'a> {
     pub fn has_extension(&self, value: &str) -> Result<bool, Error> {
         unsafe {
@@ -207,7 +243,7 @@ impl<'a> Gfx<'a> {
     pub fn get_number(&self, pname: u32, max_values: u32) -> Result<([f32; 16], u32), Error> {
         unsafe {
             let query = sys::GfxGetNumberQuery {
-                pname: pname,
+                pname,
                 maxValues: max_values,
             };
             let mut result = MaybeUninit::<sys::GfxGetNumberResult>::zeroed();
@@ -225,7 +261,7 @@ impl<'a> Gfx<'a> {
     pub fn get_string(&self, pname: u32) -> Result<Option<String>, Error> {
         unsafe {
             let query = sys::GfxGetStringQuery {
-                pname: pname,
+                pname,
             };
             let mut result = MaybeUninit::<sys::GfxStringResult>::zeroed();
             let func = self.api.GetString.expect("GetString function pointer must be initialized");
@@ -260,7 +296,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_view_range(&self, camera_type: i32) -> Result<(f32, f32, f32, f32), Error> {
+    pub fn get_view_range(&self, camera_type: i32) -> Result<GetViewRangeValue, Error> {
         unsafe {
             let query = sys::GfxViewRangeQuery {
                 cameraType: camera_type,
@@ -294,7 +330,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_atmosphere(&self, key: &str, mode: &str) -> Result<([f32; 4], u32, bool, bool, Option<String>), Error> {
+    pub fn get_atmosphere(&self, key: &str, mode: &str) -> Result<GetAtmosphereValue, Error> {
         unsafe {
             let key_cstr = std::ffi::CString::new(key).map_err(|_| Error::invalid_argument("key"))?;
             let mode_cstr = std::ffi::CString::new(mode).map_err(|_| Error::invalid_argument("mode"))?;
@@ -323,7 +359,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_sun(&self, key: &str, mode: &str) -> Result<([f32; 4], u32, bool, bool, Option<String>), Error> {
+    pub fn get_sun(&self, key: &str, mode: &str) -> Result<GetSunValue, Error> {
         unsafe {
             let key_cstr = std::ffi::CString::new(key).map_err(|_| Error::invalid_argument("key"))?;
             let mode_cstr = std::ffi::CString::new(mode).map_err(|_| Error::invalid_argument("mode"))?;
@@ -352,7 +388,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_water_rendering(&self, key: &str, mode: &str) -> Result<([f32; 4], u32, bool, bool, Option<String>), Error> {
+    pub fn get_water_rendering(&self, key: &str, mode: &str) -> Result<GetWaterRenderingValue, Error> {
         unsafe {
             let key_cstr = std::ffi::CString::new(key).map_err(|_| Error::invalid_argument("key"))?;
             let mode_cstr = std::ffi::CString::new(mode).map_err(|_| Error::invalid_argument("mode"))?;
@@ -381,7 +417,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_map_rendering(&self, key: &str, mode: &str) -> Result<([f32; 4], u32, bool, bool, Option<String>), Error> {
+    pub fn get_map_rendering(&self, key: &str, mode: &str) -> Result<GetMapRenderingValue, Error> {
         unsafe {
             let key_cstr = std::ffi::CString::new(key).map_err(|_| Error::invalid_argument("key"))?;
             let mode_cstr = std::ffi::CString::new(mode).map_err(|_| Error::invalid_argument("mode"))?;
@@ -426,9 +462,9 @@ impl<'a> Gfx<'a> {
     pub fn clear(&self, bits: u32, values: [f32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxClearQuery {
-                bits: bits,
-                values: values,
-                count: count,
+                bits,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Clear.expect("Clear function pointer must be initialized");
@@ -506,7 +542,7 @@ impl<'a> Gfx<'a> {
     pub fn depth_mask(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DepthMask.expect("DepthMask function pointer must be initialized");
@@ -519,7 +555,7 @@ impl<'a> Gfx<'a> {
     pub fn culling(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Culling.expect("Culling function pointer must be initialized");
@@ -532,7 +568,7 @@ impl<'a> Gfx<'a> {
     pub fn blending(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Blending.expect("Blending function pointer must be initialized");
@@ -545,8 +581,8 @@ impl<'a> Gfx<'a> {
     pub fn blend_func(&self, src: u32, dst: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBlendFuncQuery {
-                src: src,
-                dst: dst,
+                src,
+                dst,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.BlendFunc.expect("BlendFunc function pointer must be initialized");
@@ -575,7 +611,7 @@ impl<'a> Gfx<'a> {
     pub fn blend_equation(&self, mode: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBlendEquationQuery {
-                mode: mode,
+                mode,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.BlendEquation.expect("BlendEquation function pointer must be initialized");
@@ -615,8 +651,8 @@ impl<'a> Gfx<'a> {
     pub fn alpha_test(&self, enable: bool, func: u32, r#ref: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxAlphaTestQuery {
-                enable: enable,
-                func: func,
+                enable,
+                func,
                 ref_: r#ref,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
@@ -630,7 +666,7 @@ impl<'a> Gfx<'a> {
     pub fn alpha_to_coverage(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.AlphaToCoverage.expect("AlphaToCoverage function pointer must be initialized");
@@ -643,7 +679,7 @@ impl<'a> Gfx<'a> {
     pub fn stencil_test(&self, enable: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxStencilTestQuery {
-                enable: enable,
+                enable,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.StencilTest.expect("StencilTest function pointer must be initialized");
@@ -656,9 +692,9 @@ impl<'a> Gfx<'a> {
     pub fn stencil_func(&self, func: u32, r#ref: i32, mask: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxStencilFuncQuery {
-                func: func,
+                func,
                 ref_: r#ref,
-                mask: mask,
+                mask,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.StencilFunc.expect("StencilFunc function pointer must be initialized");
@@ -671,10 +707,10 @@ impl<'a> Gfx<'a> {
     pub fn stencil_func_separate(&self, face: u32, func: u32, r#ref: i32, mask: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxStencilFuncSeparateQuery {
-                face: face,
-                func: func,
+                face,
+                func,
                 ref_: r#ref,
-                mask: mask,
+                mask,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.StencilFuncSeparate.expect("StencilFuncSeparate function pointer must be initialized");
@@ -687,7 +723,7 @@ impl<'a> Gfx<'a> {
     pub fn stencil_mask(&self, mask: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxStencilMaskQuery {
-                mask: mask,
+                mask,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.StencilMask.expect("StencilMask function pointer must be initialized");
@@ -700,8 +736,8 @@ impl<'a> Gfx<'a> {
     pub fn stencil_mask_separate(&self, face: u32, mask: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxStencilMaskSeparateQuery {
-                face: face,
-                mask: mask,
+                face,
+                mask,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.StencilMaskSeparate.expect("StencilMaskSeparate function pointer must be initialized");
@@ -714,9 +750,9 @@ impl<'a> Gfx<'a> {
     pub fn stencil_op(&self, fail: u32, zfail: u32, zpass: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxStencilOpQuery {
-                fail: fail,
-                zfail: zfail,
-                zpass: zpass,
+                fail,
+                zfail,
+                zpass,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.StencilOp.expect("StencilOp function pointer must be initialized");
@@ -729,10 +765,10 @@ impl<'a> Gfx<'a> {
     pub fn stencil_op_separate(&self, face: u32, fail: u32, zfail: u32, zpass: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxStencilOpSeparateQuery {
-                face: face,
-                fail: fail,
-                zfail: zfail,
-                zpass: zpass,
+                face,
+                fail,
+                zfail,
+                zpass,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.StencilOpSeparate.expect("StencilOpSeparate function pointer must be initialized");
@@ -745,8 +781,8 @@ impl<'a> Gfx<'a> {
     pub fn polygon_mode(&self, face: u32, mode: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxPolygonModeQuery {
-                face: face,
-                mode: mode,
+                face,
+                mode,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.PolygonMode.expect("PolygonMode function pointer must be initialized");
@@ -759,8 +795,8 @@ impl<'a> Gfx<'a> {
     pub fn polygon_offset(&self, factor: f32, units: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxPolygonOffsetQuery {
-                factor: factor,
-                units: units,
+                factor,
+                units,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.PolygonOffset.expect("PolygonOffset function pointer must be initialized");
@@ -773,8 +809,8 @@ impl<'a> Gfx<'a> {
     pub fn logic_op(&self, enable: bool, opcode: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxLogicOpQuery {
-                enable: enable,
-                opcode: opcode,
+                enable,
+                opcode,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.LogicOp.expect("LogicOp function pointer must be initialized");
@@ -787,7 +823,7 @@ impl<'a> Gfx<'a> {
     pub fn shade_model(&self, mode: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxShadeModelQuery {
-                mode: mode,
+                mode,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.ShadeModel.expect("ShadeModel function pointer must be initialized");
@@ -800,10 +836,10 @@ impl<'a> Gfx<'a> {
     pub fn scissor(&self, x: i32, y: i32, width: i32, height: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxScissorQuery {
-                x: x,
-                y: y,
-                width: width,
-                height: height,
+                x,
+                y,
+                width,
+                height,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Scissor.expect("Scissor function pointer must be initialized");
@@ -816,10 +852,10 @@ impl<'a> Gfx<'a> {
     pub fn viewport(&self, x: i32, y: i32, width: i32, height: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxViewportQuery {
-                x: x,
-                y: y,
-                width: width,
-                height: height,
+                x,
+                y,
+                width,
+                height,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Viewport.expect("Viewport function pointer must be initialized");
@@ -832,7 +868,7 @@ impl<'a> Gfx<'a> {
     pub fn line_width(&self, value: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxFloatQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.LineWidth.expect("LineWidth function pointer must be initialized");
@@ -845,8 +881,8 @@ impl<'a> Gfx<'a> {
     pub fn line_stipple(&self, factor: i32, pattern: u16) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxLineStippleQuery {
-                factor: factor,
-                pattern: pattern,
+                factor,
+                pattern,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.LineStipple.expect("LineStipple function pointer must be initialized");
@@ -859,7 +895,7 @@ impl<'a> Gfx<'a> {
     pub fn point_size(&self, value: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxFloatQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.PointSize.expect("PointSize function pointer must be initialized");
@@ -872,7 +908,7 @@ impl<'a> Gfx<'a> {
     pub fn point_sprite(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.PointSprite.expect("PointSprite function pointer must be initialized");
@@ -885,10 +921,10 @@ impl<'a> Gfx<'a> {
     pub fn point_parameter(&self, pname: u32, value: f32, values: [f32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxPointParameterQuery {
-                pname: pname,
-                value: value,
-                values: values,
-                count: count,
+                pname,
+                value,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.PointParameter.expect("PointParameter function pointer must be initialized");
@@ -901,8 +937,8 @@ impl<'a> Gfx<'a> {
     pub fn clip_plane(&self, plane: u32, equation: [f32; 4]) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxClipPlaneQuery {
-                plane: plane,
-                equation: equation,
+                plane,
+                equation,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.ClipPlane.expect("ClipPlane function pointer must be initialized");
@@ -915,8 +951,8 @@ impl<'a> Gfx<'a> {
     pub fn clip_distance(&self, index: u32, enable: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxClipDistanceQuery {
-                index: index,
-                enable: enable,
+                index,
+                enable,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.ClipDistance.expect("ClipDistance function pointer must be initialized");
@@ -929,7 +965,7 @@ impl<'a> Gfx<'a> {
     pub fn push_attrib(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.PushAttrib.expect("PushAttrib function pointer must be initialized");
@@ -955,7 +991,7 @@ impl<'a> Gfx<'a> {
     pub fn depth_clamp(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DepthClamp.expect("DepthClamp function pointer must be initialized");
@@ -968,7 +1004,7 @@ impl<'a> Gfx<'a> {
     pub fn fog(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Fog.expect("Fog function pointer must be initialized");
@@ -981,7 +1017,7 @@ impl<'a> Gfx<'a> {
     pub fn lighting(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Lighting.expect("Lighting function pointer must be initialized");
@@ -994,11 +1030,11 @@ impl<'a> Gfx<'a> {
     pub fn light(&self, light: i32, options: GfxLightOptions, pname: u32, values: [f32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxLightQuery {
-                light: light,
+                light,
                 options: options.into(),
-                pname: pname,
-                values: values,
-                count: count,
+                pname,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Light.expect("Light function pointer must be initialized");
@@ -1011,9 +1047,9 @@ impl<'a> Gfx<'a> {
     pub fn material(&self, pname: u32, values: [f32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxMaterialQuery {
-                pname: pname,
-                values: values,
-                count: count,
+                pname,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Material.expect("Material function pointer must be initialized");
@@ -1026,10 +1062,10 @@ impl<'a> Gfx<'a> {
     pub fn tex_env(&self, target: u32, pname: u32, values: [f32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTexEnvQuery {
-                target: target,
-                pname: pname,
-                values: values,
-                count: count,
+                target,
+                pname,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.TexEnv.expect("TexEnv function pointer must be initialized");
@@ -1042,10 +1078,10 @@ impl<'a> Gfx<'a> {
     pub fn text_env(&self, target: u32, pname: u32, values: [f32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTexEnvQuery {
-                target: target,
-                pname: pname,
-                values: values,
-                count: count,
+                target,
+                pname,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.TextEnv.expect("TextEnv function pointer must be initialized");
@@ -1059,10 +1095,10 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxMultiTexEnvQuery {
                 texNum: tex_num,
-                target: target,
-                pname: pname,
-                values: values,
-                count: count,
+                target,
+                pname,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.MultiTexEnv.expect("MultiTexEnv function pointer must be initialized");
@@ -1075,11 +1111,11 @@ impl<'a> Gfx<'a> {
     pub fn tex_gen(&self, target: u32, options: GfxTexGenOptions, pname: u32, values: [f32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTexGenQuery {
-                target: target,
+                target,
                 options: options.into(),
-                pname: pname,
-                values: values,
-                count: count,
+                pname,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.TexGen.expect("TexGen function pointer must be initialized");
@@ -1093,11 +1129,11 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxMultiTexGenQuery {
                 texNum: tex_num,
-                target: target,
+                target,
                 options: options.into(),
-                pname: pname,
-                values: values,
-                count: count,
+                pname,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.MultiTexGen.expect("MultiTexGen function pointer must be initialized");
@@ -1113,7 +1149,7 @@ impl<'a> Gfx<'a> {
                 numGroupX: num_group_x,
                 numGroupY: num_group_y,
                 numGroupZ: num_group_z,
-                barriers: barriers,
+                barriers,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DispatchCompute.expect("DispatchCompute function pointer must be initialized");
@@ -1126,7 +1162,7 @@ impl<'a> Gfx<'a> {
     pub fn memory_barrier(&self, barriers: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxMemoryBarrierQuery {
-                barriers: barriers,
+                barriers,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.MemoryBarrier.expect("MemoryBarrier function pointer must be initialized");
@@ -1153,7 +1189,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let label_cstr = std::ffi::CString::new(label).map_err(|_| Error::invalid_argument("label"))?;
             let query = sys::GfxObjectLabelQuery {
-                identifier: identifier,
+                identifier,
                 objectID: object_id,
                 label: label_cstr.as_ptr(),
             };
@@ -1169,7 +1205,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let message_cstr = std::ffi::CString::new(message).map_err(|_| Error::invalid_argument("message"))?;
             let query = sys::GfxPushDebugGroupQuery {
-                id: id,
+                id,
                 message: message_cstr.as_ptr(),
                 sourceIsThirdParty: source_is_third_party,
             };
@@ -1194,6 +1230,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn create_shader(&self, definitions: &str, vertex: &str, tcs: &str, tes: &str, geometry: &str, fragment: &str, compute: &str, options: GfxCreateShaderOptions) -> Result<(u32, u32), Error> {
         unsafe {
             let definitions_cstr = std::ffi::CString::new(definitions).map_err(|_| Error::invalid_argument("definitions"))?;
@@ -1258,7 +1295,7 @@ impl<'a> Gfx<'a> {
     pub fn active_shader<F: FnMut()>(&self, shader_id: u32, mut callback: F) -> Result<(), Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxActiveShaderQuery {
@@ -1337,9 +1374,9 @@ impl<'a> Gfx<'a> {
     pub fn uniform(&self, location: i32, values: [f32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUniformFloatQuery {
-                location: location,
-                values: values,
-                count: count,
+                location,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Uniform.expect("Uniform function pointer must be initialized");
@@ -1352,9 +1389,9 @@ impl<'a> Gfx<'a> {
     pub fn uniform_int(&self, location: i32, values: [i32; 4], count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUniformIntQuery {
-                location: location,
-                values: values,
-                count: count,
+                location,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.UniformInt.expect("UniformInt function pointer must be initialized");
@@ -1367,7 +1404,7 @@ impl<'a> Gfx<'a> {
     pub fn uniform_array_float(&self, location: i32, values: &[f32]) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUniformArrayFloatQuery {
-                location: location,
+                location,
                 values: values.as_ptr(),
                 count: values.len() as u32,
             };
@@ -1382,7 +1419,7 @@ impl<'a> Gfx<'a> {
     pub fn uniform_array_int(&self, location: i32, values: &[i32]) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUniformArrayIntQuery {
-                location: location,
+                location,
                 values: values.as_ptr(),
                 count: values.len() as u32,
             };
@@ -1397,10 +1434,10 @@ impl<'a> Gfx<'a> {
     pub fn uniform_matrix(&self, location: i32, values: &[f32], transpose: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUniformMatrixQuery {
-                location: location,
+                location,
                 values: values.as_ptr(),
                 count: values.len() as u32,
-                transpose: transpose,
+                transpose,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.UniformMatrix.expect("UniformMatrix function pointer must be initialized");
@@ -1434,7 +1471,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxUniformSubroutineQuery {
                 shaderType: shader_type,
-                index: index,
+                index,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.UniformSubroutine.expect("UniformSubroutine function pointer must be initialized");
@@ -1448,8 +1485,8 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxGeometryShaderParameterQuery {
                 shaderID: shader_id,
-                param: param,
-                value: value,
+                param,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.SetGeometryShaderParameter.expect("SetGeometryShaderParameter function pointer must be initialized");
@@ -1462,9 +1499,9 @@ impl<'a> Gfx<'a> {
     pub fn set_tesselation_shader_parameter(&self, param: u32, value: i32, values: [f32; 4], value_count: u32, use_float_array: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTesselationShaderParameterQuery {
-                param: param,
-                value: value,
-                values: values,
+                param,
+                value,
+                values,
                 valueCount: value_count,
                 useFloatArray: use_float_array,
             };
@@ -1479,7 +1516,7 @@ impl<'a> Gfx<'a> {
     pub fn get_engine_uniform_buffer_def(&self, index: i32) -> Result<Option<String>, Error> {
         unsafe {
             let query = sys::GfxEngineUniformBufferDefQuery {
-                index: index,
+                index,
             };
             let mut result = MaybeUninit::<sys::GfxStringResult>::zeroed();
             let func = self.api.GetEngineUniformBufferDef.expect("GetEngineUniformBufferDef function pointer must be initialized");
@@ -1541,7 +1578,7 @@ impl<'a> Gfx<'a> {
                 objectID: object_id,
                 values: values.as_ptr(),
                 count: values.len() as u32,
-                offset: offset,
+                offset,
             };
             let mut result = MaybeUninit::<sys::GfxObjectBufferUniformsResult>::zeroed();
             let func = self.api.SetUnitBufferUniforms.expect("SetUnitBufferUniforms function pointer must be initialized");
@@ -1559,7 +1596,7 @@ impl<'a> Gfx<'a> {
                 objectID: object_id,
                 values: values.as_ptr(),
                 count: values.len() as u32,
-                offset: offset,
+                offset,
             };
             let mut result = MaybeUninit::<sys::GfxObjectBufferUniformsResult>::zeroed();
             let func = self.api.SetFeatureBufferUniforms.expect("SetFeatureBufferUniforms function pointer must be initialized");
@@ -1574,10 +1611,10 @@ impl<'a> Gfx<'a> {
     pub fn create_texture(&self, xsize: i32, ysize: i32, zsize: i32, params: sys::GfxTextureParams) -> Result<Option<String>, Error> {
         unsafe {
             let query = sys::GfxCreateTextureQuery {
-                xsize: xsize,
-                ysize: ysize,
-                zsize: zsize,
-                params: params,
+                xsize,
+                ysize,
+                zsize,
+                params,
             };
             let mut result = MaybeUninit::<sys::GfxStringResult>::zeroed();
             let func = self.api.CreateTexture.expect("CreateTexture function pointer must be initialized");
@@ -1633,7 +1670,7 @@ impl<'a> Gfx<'a> {
             let query = sys::GfxTextureBindQuery {
                 name: name_cstr.as_ptr(),
                 texNum: tex_num,
-                enable: enable,
+                enable,
             };
             let mut result = MaybeUninit::<sys::GfxBoolResult>::zeroed();
             let func = self.api.BindTexture.expect("BindTexture function pointer must be initialized");
@@ -1645,7 +1682,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn texture_info(&self, name: &str) -> Result<(i32, i32, i32, u32, u32, u32), Error> {
+    pub fn texture_info(&self, name: &str) -> Result<TextureInfoValue, Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
             let query = sys::GfxTextureNameQuery {
@@ -1722,7 +1759,7 @@ impl<'a> Gfx<'a> {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
             let query = sys::GfxChangeTextureParamsQuery {
                 name: name_cstr.as_ptr(),
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.ChangeTextureParams.expect("ChangeTextureParams function pointer must be initialized");
@@ -1732,19 +1769,20 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn copy_to_texture(&self, name: &str, xoff: i32, yoff: i32, x: i32, y: i32, width: i32, height: i32, target: u32, level: u32) -> Result<(), Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
             let query = sys::GfxCopyToTextureQuery {
                 name: name_cstr.as_ptr(),
-                xoff: xoff,
-                yoff: yoff,
-                x: x,
-                y: y,
-                width: width,
-                height: height,
-                target: target,
-                level: level,
+                xoff,
+                yoff,
+                x,
+                y,
+                width,
+                height,
+                target,
+                level,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.CopyToTexture.expect("CopyToTexture function pointer must be initialized");
@@ -1754,20 +1792,21 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn upload_texture(&self, name: &str, target: u32, level: i32, xoff: i32, yoff: i32, zoff: i32, width: i32, height: i32, depth: i32, format: u32, pixel_type: u32, data: &[u8]) -> Result<(), Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
             let query = sys::GfxUploadTextureQuery {
                 name: name_cstr.as_ptr(),
-                target: target,
-                level: level,
-                xoff: xoff,
-                yoff: yoff,
-                zoff: zoff,
-                width: width,
-                height: height,
-                depth: depth,
-                format: format,
+                target,
+                level,
+                xoff,
+                yoff,
+                zoff,
+                width,
+                height,
+                depth,
+                format,
                 pixelType: pixel_type,
                 data: data.as_ptr(),
                 dataSize: data.len() as u32,
@@ -1794,17 +1833,18 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn bind_image_texture(&self, unit: u32, name: &str, level: i32, layer: i32, layered: bool, access: u32, format: u32) -> Result<(), Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
             let query = sys::GfxBindImageTextureQuery {
-                unit: unit,
+                unit,
                 name: name_cstr.as_ptr(),
-                level: level,
-                layer: layer,
-                layered: layered,
-                access: access,
-                format: format,
+                level,
+                layer,
+                layered,
+                access,
+                format,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.BindImageTexture.expect("BindImageTexture function pointer must be initialized");
@@ -1817,11 +1857,11 @@ impl<'a> Gfx<'a> {
     pub fn read_pixels(&self, x: i32, y: i32, width: i32, height: i32, format: u32) -> Result<(Vec<f32>, u32), Error> {
         unsafe {
             let query = sys::GfxReadPixelsQuery {
-                x: x,
-                y: y,
-                width: width,
-                height: height,
-                format: format,
+                x,
+                y,
+                width,
+                height,
+                format,
             };
             let mut result = MaybeUninit::<sys::GfxReadPixelsResult>::zeroed();
             let func = self.api.ReadPixels.expect("ReadPixels function pointer must be initialized");
@@ -1845,11 +1885,11 @@ impl<'a> Gfx<'a> {
     pub fn create_rbo(&self, xsize: i32, ysize: i32, target: u32, format: u32, samples: i32) -> Result<u32, Error> {
         unsafe {
             let query = sys::GfxRBOCreateQuery {
-                xsize: xsize,
-                ysize: ysize,
-                target: target,
-                format: format,
-                samples: samples,
+                xsize,
+                ysize,
+                target,
+                format,
+                samples,
             };
             let mut result = MaybeUninit::<sys::GfxUIntResult>::zeroed();
             let func = self.api.CreateRBO.expect("CreateRBO function pointer must be initialized");
@@ -1864,7 +1904,7 @@ impl<'a> Gfx<'a> {
     pub fn delete_rbo(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DeleteRBO.expect("DeleteRBO function pointer must be initialized");
@@ -1874,7 +1914,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_rboinfo(&self, rbo_id: u32) -> Result<(bool, u32, u32, i32, i32, i32), Error> {
+    pub fn get_rboinfo(&self, rbo_id: u32) -> Result<GetRBOInfoValue, Error> {
         unsafe {
             let query = sys::GfxRBOInfoQuery {
                 rboID: rbo_id,
@@ -1898,7 +1938,7 @@ impl<'a> Gfx<'a> {
     pub fn create_fbo(&self, target: u32, attachments: &[sys::GfxFBOAttachment], draw_buffers: &[u32], read_buffer: u32) -> Result<(u32, u32), Error> {
         unsafe {
             let query = sys::GfxFBOCreateQuery {
-                target: target,
+                target,
                 attachments: attachments.as_ptr(),
                 attachmentCount: attachments.len() as u32,
                 drawBuffers: draw_buffers.as_ptr(),
@@ -1917,12 +1957,13 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_fboattachment(&self, fbo_id: u32, attachment: u32, texture_name: &str, texture_target: u32, mip_level: i32, rbo_id: u32, use_rbo: bool) -> Result<(), Error> {
         unsafe {
             let texture_name_cstr = std::ffi::CString::new(texture_name).map_err(|_| Error::invalid_argument("texture_name"))?;
             let query = sys::GfxFBOAttachmentQuery {
                 fboID: fbo_id,
-                attachment: attachment,
+                attachment,
                 textureName: texture_name_cstr.as_ptr(),
                 textureTarget: texture_target,
                 mipLevel: mip_level,
@@ -1956,7 +1997,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxFBOReadBufferQuery {
                 fboID: fbo_id,
-                buffer: buffer,
+                buffer,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.SetFBOReadBuffer.expect("SetFBOReadBuffer function pointer must be initialized");
@@ -1969,7 +2010,7 @@ impl<'a> Gfx<'a> {
     pub fn delete_fbo(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DeleteFBO.expect("DeleteFBO function pointer must be initialized");
@@ -1983,7 +2024,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxFBOQuery {
                 fboID: fbo_id,
-                target: target,
+                target,
             };
             let mut result = MaybeUninit::<sys::GfxFBOStatusResult>::zeroed();
             let func = self.api.IsValidFBO.expect("IsValidFBO function pointer must be initialized");
@@ -2000,13 +2041,13 @@ impl<'a> Gfx<'a> {
     pub fn active_fbo<F: FnMut()>(&self, fbo_id: u32, target: u32, identities: bool, mut callback: F) -> Result<(), Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxActiveFBOQuery {
                 fboID: fbo_id,
-                target: target,
-                identities: identities,
+                target,
+                identities,
                 callback: Some(trampoline::<F>),
                 userData: &mut callback as *mut F as *mut std::ffi::c_void,
             };
@@ -2023,7 +2064,7 @@ impl<'a> Gfx<'a> {
             let query = sys::GfxRawBindFBOQuery {
                 bindDefault: bind_default,
                 fboID: fbo_id,
-                target: target,
+                target,
                 rawFboID: raw_fbo_id,
             };
             let mut result = MaybeUninit::<sys::GfxRawBindFBOResult>::zeroed();
@@ -2038,6 +2079,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn blit_fbo(&self, src_fboid: u32, dst_fboid: u32, x0_src: i32, y0_src: i32, x1_src: i32, y1_src: i32, x0_dst: i32, y0_dst: i32, x1_dst: i32, y1_dst: i32, mask: u32, filter: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBlitFBOQuery {
@@ -2051,8 +2093,8 @@ impl<'a> Gfx<'a> {
                 y0Dst: y0_dst,
                 x1Dst: x1_dst,
                 y1Dst: y1_dst,
-                mask: mask,
-                filter: filter,
+                mask,
+                filter,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.BlitFBO.expect("BlitFBO function pointer must be initialized");
@@ -2065,10 +2107,10 @@ impl<'a> Gfx<'a> {
     pub fn clear_attachment_fbo(&self, target: u32, attachment: u32, values: [f32; 4], count: u32) -> Result<bool, Error> {
         unsafe {
             let query = sys::GfxClearAttachmentFBOQuery {
-                target: target,
-                attachment: attachment,
-                values: values,
-                count: count,
+                target,
+                attachment,
+                values,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxBoolResult>::zeroed();
             let func = self.api.ClearAttachmentFBO.expect("ClearAttachmentFBO function pointer must be initialized");
@@ -2100,7 +2142,7 @@ impl<'a> Gfx<'a> {
     pub fn delete_vao(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DeleteVAO.expect("DeleteVAO function pointer must be initialized");
@@ -2156,7 +2198,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxVAODrawArraysQuery {
                 vaoID: vao_id,
-                mode: mode,
+                mode,
                 vertexCount: vertex_count,
                 vertexFirst: vertex_first,
                 instanceCount: instance_count,
@@ -2170,11 +2212,12 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn draw_elements_vao(&self, vao_id: u32, mode: u32, draw_count: i32, base_index: i32, instance_count: i32, base_vertex: i32, base_instance: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxVAODrawElementsQuery {
                 vaoID: vao_id,
-                mode: mode,
+                mode,
                 drawCount: draw_count,
                 baseIndex: base_index,
                 instanceCount: instance_count,
@@ -2192,7 +2235,7 @@ impl<'a> Gfx<'a> {
     pub fn clear_submission_vao(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.ClearSubmissionVAO.expect("ClearSubmissionVAO function pointer must be initialized");
@@ -2274,7 +2317,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxVAORemoveSubmissionQuery {
                 vaoID: vao_id,
-                index: index,
+                index,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.RemoveFromSubmissionVAO.expect("RemoveFromSubmissionVAO function pointer must be initialized");
@@ -2287,7 +2330,7 @@ impl<'a> Gfx<'a> {
     pub fn submit_vao(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.SubmitVAO.expect("SubmitVAO function pointer must be initialized");
@@ -2300,7 +2343,7 @@ impl<'a> Gfx<'a> {
     pub fn get_vbo(&self, target: u32, freq_updated: bool) -> Result<(u32, u32, u32), Error> {
         unsafe {
             let query = sys::GfxVBOQuery {
-                target: target,
+                target,
                 freqUpdated: freq_updated,
             };
             let mut result = MaybeUninit::<sys::GfxVBOResult>::zeroed();
@@ -2319,7 +2362,7 @@ impl<'a> Gfx<'a> {
     pub fn delete_vbo(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DeleteVBO.expect("DeleteVBO function pointer must be initialized");
@@ -2329,6 +2372,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn define_vbo(&self, vbo_id: u32, elements_count: i32, element_array: bool, index_type: u32, use_default_attributes: bool, default_attribute_count: u32, attributes: &[sys::GfxVBOAttributeOptions]) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxVBODefineQuery {
@@ -2349,7 +2393,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_vboinfo(&self, vbo_id: u32) -> Result<(u32, u32, u32, u32, u32, u32), Error> {
+    pub fn get_vboinfo(&self, vbo_id: u32) -> Result<GetVBOInfoValue, Error> {
         unsafe {
             let query = sys::GfxVBOInfoQuery {
                 vboID: vbo_id,
@@ -2420,7 +2464,7 @@ impl<'a> Gfx<'a> {
     pub fn clear_vbo(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.ClearVBO.expect("ClearVBO function pointer must be initialized");
@@ -2433,7 +2477,7 @@ impl<'a> Gfx<'a> {
     pub fn models_vbo(&self, value: u32) -> Result<u32, Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxUIntResult>::zeroed();
             let func = self.api.ModelsVBO.expect("ModelsVBO function pointer must be initialized");
@@ -2552,8 +2596,8 @@ impl<'a> Gfx<'a> {
                 bindingIndex: binding_index,
                 elementOffset: element_offset,
                 elementCount: element_count,
-                target: target,
-                bind: bind,
+                target,
+                bind,
             };
             let mut result = MaybeUninit::<sys::GfxIntResult>::zeroed();
             let func = self.api.BindBufferRangeVBO.expect("BindBufferRangeVBO function pointer must be initialized");
@@ -2572,8 +2616,8 @@ impl<'a> Gfx<'a> {
                 bindingIndex: binding_index,
                 elementOffset: element_offset,
                 elementCount: element_count,
-                target: target,
-                bind: bind,
+                target,
+                bind,
             };
             let mut result = MaybeUninit::<sys::GfxIntResult>::zeroed();
             let func = self.api.UnbindBufferRangeVBO.expect("UnbindBufferRangeVBO function pointer must be initialized");
@@ -2588,7 +2632,7 @@ impl<'a> Gfx<'a> {
     pub fn dump_definition_vbo(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DumpDefinitionVBO.expect("DumpDefinitionVBO function pointer must be initialized");
@@ -2618,7 +2662,7 @@ impl<'a> Gfx<'a> {
     pub fn get_idvbo(&self, value: u32) -> Result<u32, Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxUIntResult>::zeroed();
             let func = self.api.GetIDVBO.expect("GetIDVBO function pointer must be initialized");
@@ -2634,7 +2678,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxRenderToTextureQuery {
@@ -2653,8 +2697,8 @@ impl<'a> Gfx<'a> {
     pub fn create_texture_atlas(&self, xsize: i32, ysize: i32, alloc_type: i32) -> Result<Option<String>, Error> {
         unsafe {
             let query = sys::GfxCreateTextureAtlasQuery {
-                xsize: xsize,
-                ysize: ysize,
+                xsize,
+                ysize,
                 allocType: alloc_type,
             };
             let mut result = MaybeUninit::<sys::GfxStringResult>::zeroed();
@@ -2721,7 +2765,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_atlas_texture(&self, atlas_name: &str, texture_name: &str) -> Result<(f32, f32, f32, f32, i32), Error> {
+    pub fn get_atlas_texture(&self, atlas_name: &str, texture_name: &str) -> Result<GetAtlasTextureValue, Error> {
         unsafe {
             let atlas_name_cstr = std::ffi::CString::new(atlas_name).map_err(|_| Error::invalid_argument("atlas_name"))?;
             let texture_name_cstr = std::ffi::CString::new(texture_name).map_err(|_| Error::invalid_argument("texture_name"))?;
@@ -2767,14 +2811,15 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn save_image(&self, x: i32, y: i32, width: i32, height: i32, filename: &str, options: GfxSaveImageOptions, read_buffer: u32) -> Result<bool, Error> {
         unsafe {
             let filename_cstr = std::ffi::CString::new(filename).map_err(|_| Error::invalid_argument("filename"))?;
             let query = sys::GfxSaveImageQuery {
-                x: x,
-                y: y,
-                width: width,
-                height: height,
+                x,
+                y,
+                width,
+                height,
                 filename: filename_cstr.as_ptr(),
                 options: options.into(),
                 readBuffer: read_buffer,
@@ -2792,7 +2837,7 @@ impl<'a> Gfx<'a> {
     pub fn create_list<F: FnMut()>(&self, mut callback: F) -> Result<u32, Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxCallbackQuery {
@@ -2812,7 +2857,7 @@ impl<'a> Gfx<'a> {
     pub fn call_list(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.CallList.expect("CallList function pointer must be initialized");
@@ -2825,7 +2870,7 @@ impl<'a> Gfx<'a> {
     pub fn delete_list(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DeleteList.expect("DeleteList function pointer must be initialized");
@@ -2853,7 +2898,7 @@ impl<'a> Gfx<'a> {
     pub fn delete_query(&self, value: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DeleteQuery.expect("DeleteQuery function pointer must be initialized");
@@ -2866,11 +2911,11 @@ impl<'a> Gfx<'a> {
     pub fn run_query<F: FnMut()>(&self, id: u32, mut callback: F) -> Result<(), Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxRunQueryQuery {
-                id: id,
+                id,
                 callback: Some(trampoline::<F>),
                 userData: &mut callback as *mut F as *mut std::ffi::c_void,
             };
@@ -2885,7 +2930,7 @@ impl<'a> Gfx<'a> {
     pub fn get_query(&self, value: u32) -> Result<u32, Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxUIntResult>::zeroed();
             let func = self.api.GetQuery.expect("GetQuery function pointer must be initialized");
@@ -2919,7 +2964,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_global_tex_coords(&self, value: &str) -> Result<(f32, f32, f32, f32, i32), Error> {
+    pub fn get_global_tex_coords(&self, value: &str) -> Result<GetGlobalTexCoordsValue, Error> {
         unsafe {
             let value_cstr = std::ffi::CString::new(value).map_err(|_| Error::invalid_argument("value"))?;
             let query = sys::GfxStringQuery {
@@ -2943,7 +2988,7 @@ impl<'a> Gfx<'a> {
     pub fn begin_text(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.BeginText.expect("BeginText function pointer must be initialized");
@@ -2959,9 +3004,9 @@ impl<'a> Gfx<'a> {
             let options_cstr = std::ffi::CString::new(options).map_err(|_| Error::invalid_argument("options"))?;
             let query = sys::GfxTextQuery {
                 text: text_cstr.as_ptr(),
-                x: x,
-                y: y,
-                size: size,
+                x,
+                y,
+                size,
                 options: options_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
@@ -3054,7 +3099,7 @@ impl<'a> Gfx<'a> {
             let path_cstr = std::ffi::CString::new(path).map_err(|_| Error::invalid_argument("path"))?;
             let query = sys::GfxLoadFontQuery {
                 path: path_cstr.as_ptr(),
-                size: size,
+                size,
                 outlineWidth: outline_width,
                 outlineWeight: outline_weight,
             };
@@ -3081,7 +3126,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_font_info(&self, font_id: u32) -> Result<(Option<String>, Option<String>, Option<String>, f32, f32, f32, f32, f32, i32, i32), Error> {
+    pub fn get_font_info(&self, font_id: u32) -> Result<GetFontInfoValue, Error> {
         unsafe {
             let query = sys::GfxFontQuery {
                 fontID: font_id,
@@ -3158,9 +3203,9 @@ impl<'a> Gfx<'a> {
             let query = sys::GfxFontTextQuery {
                 fontID: font_id,
                 text: text_cstr.as_ptr(),
-                x: x,
-                y: y,
-                size: size,
+                x,
+                y,
+                size,
                 options: options_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
@@ -3178,8 +3223,8 @@ impl<'a> Gfx<'a> {
             let query = sys::GfxFontWorldTextQuery {
                 fontID: font_id,
                 text: text_cstr.as_ptr(),
-                pos: pos,
-                size: size,
+                pos,
+                size,
                 options: options_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
@@ -3212,7 +3257,7 @@ impl<'a> Gfx<'a> {
                 text: text_cstr.as_ptr(),
                 maxWidth: max_width,
                 maxHeight: max_height,
-                size: size,
+                size,
             };
             let mut result = MaybeUninit::<sys::GfxFontWrapTextResult>::zeroed();
             let func = self.api.FontWrapText.expect("FontWrapText function pointer must be initialized");
@@ -3239,9 +3284,9 @@ impl<'a> Gfx<'a> {
             let query = sys::GfxFontTextQuery {
                 fontID: font_id,
                 text: text_cstr.as_ptr(),
-                x: x,
-                y: y,
-                size: size,
+                x,
+                y,
+                size,
                 options: options_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::GfxFloatResult>::zeroed();
@@ -3261,9 +3306,9 @@ impl<'a> Gfx<'a> {
             let query = sys::GfxFontTextQuery {
                 fontID: font_id,
                 text: text_cstr.as_ptr(),
-                x: x,
-                y: y,
-                size: size,
+                x,
+                y,
+                size,
                 options: options_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::GfxTextHeightResult>::zeroed();
@@ -3283,10 +3328,10 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxFontColorQuery {
                 fontID: font_id,
-                r: r,
-                g: g,
-                b: b,
-                a: a,
+                r,
+                g,
+                b,
+                a,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.FontSetTextColor.expect("FontSetTextColor function pointer must be initialized");
@@ -3300,10 +3345,10 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxFontColorQuery {
                 fontID: font_id,
-                r: r,
-                g: g,
-                b: b,
-                a: a,
+                r,
+                g,
+                b,
+                a,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.FontSetOutlineColor.expect("FontSetOutlineColor function pointer must be initialized");
@@ -3317,7 +3362,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxFontAutoOutlineColorQuery {
                 fontID: font_id,
-                enable: enable,
+                enable,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.FontSetAutoOutlineColor.expect("FontSetAutoOutlineColor function pointer must be initialized");
@@ -3343,11 +3388,11 @@ impl<'a> Gfx<'a> {
     pub fn begin_end<F: FnMut()>(&self, primitive: u32, mut callback: F) -> Result<(), Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxBeginEndQuery {
-                primitive: primitive,
+                primitive,
                 callback: Some(trampoline::<F>),
                 userData: &mut callback as *mut F as *mut std::ffi::c_void,
             };
@@ -3362,7 +3407,7 @@ impl<'a> Gfx<'a> {
     pub fn push_pop_matrix<F: FnMut()>(&self, mut callback: F) -> Result<(), Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxCallbackQuery {
@@ -3380,12 +3425,12 @@ impl<'a> Gfx<'a> {
     pub fn unsafe_state<F: FnMut()>(&self, state: u32, reverse: bool, mut callback: F) -> Result<(), Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxUnsafeStateQuery {
-                state: state,
-                reverse: reverse,
+                state,
+                reverse,
                 callback: Some(trampoline::<F>),
                 userData: &mut callback as *mut F as *mut std::ffi::c_void,
             };
@@ -3397,15 +3442,16 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn draw_ground_circle(&self, pos: sys::Float3, radius: f32, resolution: i32, ballistic: bool, slope: f32, gravity: f32, weapon_def_id: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxGroundCircleQuery {
-                pos: pos,
-                radius: radius,
-                resolution: resolution,
-                ballistic: ballistic,
-                slope: slope,
-                gravity: gravity,
+                pos,
+                radius,
+                resolution,
+                ballistic,
+                slope,
+                gravity,
                 weaponDefID: weapon_def_id,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
@@ -3416,18 +3462,19 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn draw_ground_quad(&self, x0: f32, z0: f32, x1: f32, z1: f32, use_tex_coords: bool, tu0: f32, tv0: f32, tu1: f32, tv1: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxGroundQuadQuery {
-                x0: x0,
-                z0: z0,
-                x1: x1,
-                z1: z1,
+                x0,
+                z0,
+                x1,
+                z1,
                 useTexCoords: use_tex_coords,
-                tu0: tu0,
-                tv0: tv0,
-                tu1: tu1,
-                tv1: tv1,
+                tu0,
+                tv0,
+                tu1,
+                tv1,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DrawGroundQuad.expect("DrawGroundQuad function pointer must be initialized");
@@ -3437,7 +3484,7 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_fixed_state(&self, param: &str) -> Result<([bool; 8], u32, [i32; 16], u32, [f32; 16], u32), Error> {
+    pub fn get_fixed_state(&self, param: &str) -> Result<GetFixedStateValue, Error> {
         unsafe {
             let param_cstr = std::ffi::CString::new(param).map_err(|_| Error::invalid_argument("param"))?;
             let query = sys::GfxFixedStateQuery {
@@ -3480,7 +3527,7 @@ impl<'a> Gfx<'a> {
     pub fn slave_mini_map(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.SlaveMiniMap.expect("SlaveMiniMap function pointer must be initialized");
@@ -3493,10 +3540,10 @@ impl<'a> Gfx<'a> {
     pub fn config_mini_map(&self, px: i32, py: i32, sx: i32, sy: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxMiniMapConfigQuery {
-                px: px,
-                py: py,
-                sx: sx,
-                sy: sy,
+                px,
+                py,
+                sx,
+                sy,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.ConfigMiniMap.expect("ConfigMiniMap function pointer must be initialized");
@@ -3509,7 +3556,7 @@ impl<'a> Gfx<'a> {
     pub fn draw_mini_map(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DrawMiniMap.expect("DrawMiniMap function pointer must be initialized");
@@ -3551,7 +3598,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxObjectTextureStateQuery {
                 objectID: object_id,
-                push: push,
+                push,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.UnitTextures.expect("UnitTextures function pointer must be initialized");
@@ -3580,7 +3627,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxObjectTextureStateQuery {
                 objectID: object_id,
-                push: push,
+                push,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.UnitShapeTextures.expect("UnitShapeTextures function pointer must be initialized");
@@ -3593,7 +3640,7 @@ impl<'a> Gfx<'a> {
     pub fn unit_mult_matrix(&self, value: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.UnitMultMatrix.expect("UnitMultMatrix function pointer must be initialized");
@@ -3677,7 +3724,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxObjectTextureStateQuery {
                 objectID: object_id,
-                push: push,
+                push,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.FeatureTextures.expect("FeatureTextures function pointer must be initialized");
@@ -3706,7 +3753,7 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxObjectTextureStateQuery {
                 objectID: object_id,
-                push: push,
+                push,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.FeatureShapeTextures.expect("FeatureShapeTextures function pointer must be initialized");
@@ -3719,7 +3766,7 @@ impl<'a> Gfx<'a> {
     pub fn feature_mult_matrix(&self, value: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxIntQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.FeatureMultMatrix.expect("FeatureMultMatrix function pointer must be initialized");
@@ -3777,9 +3824,9 @@ impl<'a> Gfx<'a> {
                 unitID: unit_id,
                 listID: list_id,
                 useMidPos: use_mid_pos,
-                scale: scale,
-                degrees: degrees,
-                rot: rot,
+                scale,
+                degrees,
+                rot,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.DrawListAtUnit.expect("DrawListAtUnit function pointer must be initialized");
@@ -3792,7 +3839,7 @@ impl<'a> Gfx<'a> {
     pub fn draw_func_at_unit<F: FnMut()>(&self, unit_id: i32, use_mid_pos: bool, mut callback: F) -> Result<(), Error> {
         unsafe {
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             let query = sys::GfxDrawFuncAtUnitQuery {
@@ -3812,7 +3859,7 @@ impl<'a> Gfx<'a> {
     pub fn matrix_mode(&self, mode: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxMatrixModeQuery {
-                mode: mode,
+                mode,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.MatrixMode.expect("MatrixMode function pointer must be initialized");
@@ -3838,7 +3885,7 @@ impl<'a> Gfx<'a> {
     pub fn load_matrix(&self, values: [f32; 16]) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxMatrixQuery {
-                values: values,
+                values,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.LoadMatrix.expect("LoadMatrix function pointer must be initialized");
@@ -3851,7 +3898,7 @@ impl<'a> Gfx<'a> {
     pub fn mult_matrix(&self, values: [f32; 16]) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxMatrixQuery {
-                values: values,
+                values,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.MultMatrix.expect("MultMatrix function pointer must be initialized");
@@ -3890,9 +3937,9 @@ impl<'a> Gfx<'a> {
     pub fn translate(&self, x: f32, y: f32, z: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTranslateQuery {
-                x: x,
-                y: y,
-                z: z,
+                x,
+                y,
+                z,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Translate.expect("Translate function pointer must be initialized");
@@ -3905,9 +3952,9 @@ impl<'a> Gfx<'a> {
     pub fn scale(&self, x: f32, y: f32, z: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxScaleQuery {
-                x: x,
-                y: y,
-                z: z,
+                x,
+                y,
+                z,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Scale.expect("Scale function pointer must be initialized");
@@ -3920,10 +3967,10 @@ impl<'a> Gfx<'a> {
     pub fn rotate(&self, degrees: f32, x: f32, y: f32, z: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxRotateQuery {
-                degrees: degrees,
-                x: x,
-                y: y,
-                z: z,
+                degrees,
+                x,
+                y,
+                z,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Rotate.expect("Rotate function pointer must be initialized");
@@ -3936,10 +3983,10 @@ impl<'a> Gfx<'a> {
     pub fn ortho(&self, left: f32, right: f32, bottom: f32, top: f32, near_val: f32, far_val: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxOrthoQuery {
-                left: left,
-                right: right,
-                bottom: bottom,
-                top: top,
+                left,
+                right,
+                bottom,
+                top,
                 nearVal: near_val,
                 farVal: far_val,
             };
@@ -3954,10 +4001,10 @@ impl<'a> Gfx<'a> {
     pub fn frustum(&self, left: f32, right: f32, bottom: f32, top: f32, near_val: f32, far_val: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxFrustumQuery {
-                left: left,
-                right: right,
-                bottom: bottom,
-                top: top,
+                left,
+                right,
+                bottom,
+                top,
                 nearVal: near_val,
                 farVal: far_val,
             };
@@ -3972,7 +4019,7 @@ impl<'a> Gfx<'a> {
     pub fn get_matrix_data(&self, mode: u32) -> Result<[f32; 16], Error> {
         unsafe {
             let query = sys::GfxGetMatrixDataQuery {
-                mode: mode,
+                mode,
             };
             let mut result = MaybeUninit::<sys::GfxGetMatrixDataResult>::zeroed();
             let func = self.api.GetMatrixData.expect("GetMatrixData function pointer must be initialized");
@@ -3987,11 +4034,11 @@ impl<'a> Gfx<'a> {
     pub fn vertex(&self, x: f32, y: f32, z: f32, w: f32, count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxVertexQuery {
-                x: x,
-                y: y,
-                z: z,
-                w: w,
-                count: count,
+                x,
+                y,
+                z,
+                w,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Vertex.expect("Vertex function pointer must be initialized");
@@ -4004,9 +4051,9 @@ impl<'a> Gfx<'a> {
     pub fn normal(&self, x: f32, y: f32, z: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTranslateQuery {
-                x: x,
-                y: y,
-                z: z,
+                x,
+                y,
+                z,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Normal.expect("Normal function pointer must be initialized");
@@ -4019,11 +4066,11 @@ impl<'a> Gfx<'a> {
     pub fn tex_coord(&self, x: f32, y: f32, z: f32, w: f32, count: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxVertexQuery {
-                x: x,
-                y: y,
-                z: z,
-                w: w,
-                count: count,
+                x,
+                y,
+                z,
+                w,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.TexCoord.expect("TexCoord function pointer must be initialized");
@@ -4037,11 +4084,11 @@ impl<'a> Gfx<'a> {
         unsafe {
             let query = sys::GfxMultiTexCoordQuery {
                 texNum: tex_num,
-                s: s,
-                t: t,
-                r: r,
-                q: q,
-                count: count,
+                s,
+                t,
+                r,
+                q,
+                count,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.MultiTexCoord.expect("MultiTexCoord function pointer must be initialized");
@@ -4054,10 +4101,10 @@ impl<'a> Gfx<'a> {
     pub fn color(&self, r: f32, g: f32, b: f32, a: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxColorQuery {
-                r: r,
-                g: g,
-                b: b,
-                a: a,
+                r,
+                g,
+                b,
+                a,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Color.expect("Color function pointer must be initialized");
@@ -4070,9 +4117,9 @@ impl<'a> Gfx<'a> {
     pub fn secondary_color(&self, x: f32, y: f32, z: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTranslateQuery {
-                x: x,
-                y: y,
-                z: z,
+                x,
+                y,
+                z,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.SecondaryColor.expect("SecondaryColor function pointer must be initialized");
@@ -4085,7 +4132,7 @@ impl<'a> Gfx<'a> {
     pub fn fog_coord(&self, value: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxFloatQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.FogCoord.expect("FogCoord function pointer must be initialized");
@@ -4098,7 +4145,7 @@ impl<'a> Gfx<'a> {
     pub fn edge_flag(&self, value: bool) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBoolQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.EdgeFlag.expect("EdgeFlag function pointer must be initialized");
@@ -4111,10 +4158,10 @@ impl<'a> Gfx<'a> {
     pub fn rect(&self, x1: f32, y1: f32, x2: f32, y2: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxRectQuery {
-                x1: x1,
-                y1: y1,
-                x2: x2,
-                y2: y2,
+                x1,
+                y1,
+                x2,
+                y2,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Rect.expect("Rect function pointer must be initialized");
@@ -4124,17 +4171,18 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn tex_rect(&self, x1: f32, y1: f32, x2: f32, y2: f32, s1: f32, t1: f32, s2: f32, t2: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTexRectQuery {
-                x1: x1,
-                y1: y1,
-                x2: x2,
-                y2: y2,
-                s1: s1,
-                t1: t1,
-                s2: s2,
-                t2: t2,
+                x1,
+                y1,
+                x2,
+                y2,
+                s1,
+                t1,
+                s2,
+                t2,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.TexRect.expect("TexRect function pointer must be initialized");
@@ -4147,7 +4195,7 @@ impl<'a> Gfx<'a> {
     pub fn shape(&self, primitive: u32, vertices: &[sys::GfxVertexData]) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxShapeQuery {
-                primitive: primitive,
+                primitive,
                 vertices: vertices.as_ptr(),
                 vertexCount: vertices.len() as u32,
             };

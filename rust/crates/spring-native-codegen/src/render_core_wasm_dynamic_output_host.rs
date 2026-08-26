@@ -565,12 +565,12 @@ fn render_type(
             let (method, value) = scalar_writer(name, expr);
             format!("{pad}if (!writer.{method}({value})) return false;\n")
         }
-        SemanticType::Enum { .. } => format!(
-            "{pad}if (!writer.I32(static_cast<std::int32_t>({expr}))) return false;\n"
-        ),
-        SemanticType::Handle { .. } => format!(
-            "{pad}if (!writer.U64(static_cast<std::uint64_t>({expr}))) return false;\n"
-        ),
+        SemanticType::Enum { .. } => {
+            format!("{pad}if (!writer.I32(static_cast<std::int32_t>({expr}))) return false;\n")
+        }
+        SemanticType::Handle { .. } => {
+            format!("{pad}if (!writer.U64(static_cast<std::uint64_t>({expr}))) return false;\n")
+        }
         SemanticType::String => format!(
             "{pad}{{\n{pad}    const std::string_view coreText = {expr} == nullptr ? std::string_view{{}} : std::string_view({expr});\n{pad}    if (coreText.size() > std::numeric_limits<std::uint32_t>::max()) return false;\n{pad}    if (!writer.U32(static_cast<std::uint32_t>(coreText.size()))) return false;\n{pad}    if (!coreText.empty() && !writer.Bytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(coreText.data()), coreText.size()))) return false;\n{pad}}}\n"
         ),

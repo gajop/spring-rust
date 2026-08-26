@@ -1,5 +1,5 @@
     pub mod debug_input {
-        use super::{Result, String, Vec};
+        use super::{Result, String};
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ClearEmulatedInputQuery {
@@ -105,20 +105,22 @@
 
         #[inline]
         pub fn emulate_text_editing(utf8_text: &str, start: u32, length: u32) -> Result<bool> {
-            let mut utf8_text_bytes = utf8_text.as_bytes().to_vec();
-            if utf8_text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            utf8_text_bytes.push(0);
-            let utf8_text_cstr = core::ffi::CStr::from_bytes_with_nul(&utf8_text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::debug_input::emulate_text_editing(utf8_text_cstr, start, length)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(utf8_text, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(utf8_text)?),
+            };
+            crate::generated::borrowed::debug_input::emulate_text_editing(__core_string_0_buf.as_cstr(), start, length)
         }
 
         #[inline]
         pub fn emulate_text_input(utf8_text: &str) -> Result<bool> {
-            let mut utf8_text_bytes = utf8_text.as_bytes().to_vec();
-            if utf8_text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            utf8_text_bytes.push(0);
-            let utf8_text_cstr = core::ffi::CStr::from_bytes_with_nul(&utf8_text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::debug_input::emulate_text_input(utf8_text_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(utf8_text, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(utf8_text)?),
+            };
+            crate::generated::borrowed::debug_input::emulate_text_input(__core_string_0_buf.as_cstr())
         }
 
     }

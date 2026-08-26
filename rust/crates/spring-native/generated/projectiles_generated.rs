@@ -95,8 +95,8 @@ impl<'a> Projectiles<'a> {
     pub fn get_projectiles_in_sphere(&self, center: sys::Float3, radius: f32, options: GetProjectilesInSphereOptions) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetProjectilesInSphereQuery {
-                center: center,
-                radius: radius,
+                center,
+                radius,
                 options: options.into(),
             };
             let mut result = MaybeUninit::<sys::GetProjectilesInSphereResult>::zeroed();

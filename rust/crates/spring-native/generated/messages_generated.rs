@@ -23,7 +23,7 @@ impl<'a> Messages<'a> {
             let message_cstr = std::ffi::CString::new(message).map_err(|_| Error::invalid_argument("message"))?;
             let query = sys::LogQuery {
                 section: section_cstr.as_ptr(),
-                level: level,
+                level,
                 message: message_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::LogResult>::zeroed();

@@ -34,7 +34,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_clipboard {
             #[link(wasm_import_module = "spring:unsynced-read")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-clipboard"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -43,7 +43,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_piece_projectile_name {
             #[link(wasm_import_module = "spring:unsynced-read")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-piece-projectile-name"]
                 pub fn call(pprojectile_id: i32, output: i32) -> i32;
             }
@@ -52,7 +52,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_prev_frame_sync_checksum {
             #[link(wasm_import_module = "spring:unsynced-read")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-prev-frame-sync-checksum"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }

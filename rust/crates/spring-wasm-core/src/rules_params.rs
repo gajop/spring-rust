@@ -1,11 +1,11 @@
 // RulesParams portion of the Spring Core-Wasm guest SDK.
 
-use super::{unpack_bool, unpack_f32, ApiError, ErrorCode, Result};
+use super::{ApiError, ErrorCode, Result, unpack_bool, unpack_f32};
 
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:rules-params")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "get-unit-rules-param-f32"]
         pub fn get_unit_rules_param_f32(unit_id: i32, name: i32, name_len: i32) -> i64;
         #[link_name = "set-unit-rules-param-f32"]

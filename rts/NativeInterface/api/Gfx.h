@@ -26,6 +26,17 @@ struct GfxUIntQuery { uint32_t value; };
 struct GfxFloatQuery { float value; };
 struct GfxStringQuery { const char* value; };
 
+// The numeric values are the OpenGL values exposed by Lua's GL constants.
+// Keep this separate from the boolean Culling operation: Lua accepts both
+// gl.Culling(false) and gl.Culling(GL_FRONT), and a typed WASM caller should
+// not have to pass an unvalidated integer for the latter form.
+enum GfxCullFace : uint32_t {
+	GFX_CULL_FACE_FRONT = 0x0404,
+	GFX_CULL_FACE_BACK = 0x0405,
+	GFX_CULL_FACE_FRONT_AND_BACK = 0x0408,
+};
+struct GfxCullFaceQuery { GfxCullFace face; };
+
 struct GfxBoolResult { const Error* error; bool value; };
 struct GfxIntResult { const Error* error; int32_t value; };
 struct GfxUIntResult { const Error* error; uint32_t value; };
@@ -427,6 +438,7 @@ struct GfxApi {
 	void (*DepthTest)(const GfxDepthTestQuery* query, GfxEmptyResult* result);
 	void (*DepthMask)(const GfxBoolQuery* query, GfxEmptyResult* result);
 	void (*Culling)(const GfxBoolQuery* query, GfxEmptyResult* result);
+	void (*CullFace)(const GfxCullFaceQuery* query, GfxEmptyResult* result);
 	void (*Blending)(const GfxBoolQuery* query, GfxEmptyResult* result);
 	void (*BlendFunc)(const GfxBlendFuncQuery* query, GfxEmptyResult* result);
 	void (*BlendFuncSeparate)(const GfxBlendFuncSeparateQuery* query, GfxEmptyResult* result);

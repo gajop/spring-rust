@@ -1,3 +1,6 @@
+/// The complete result tuple returned by [`get_unit_def_by_id`].
+pub type GetUnitDefByIDValue = (bool, sys::UnitDefBasicInfo, sys::UnitDefCosts, sys::UnitDefPhysics, sys::UnitDefWeapons, sys::UnitDefBuildOptions, sys::UnitDefSensors, sys::UnitDefHealth, sys::UnitDefClassify);
+
 impl<'a> UnitDefs<'a> {
     pub fn get_unit_def_ids(&self) -> Result<Vec<i32>, Error> {
         unsafe {
@@ -36,7 +39,7 @@ impl<'a> UnitDefs<'a> {
         }
     }
 
-    pub fn get_unit_def_by_id(&self, unit_def_id: i32) -> Result<(bool, sys::UnitDefBasicInfo, sys::UnitDefCosts, sys::UnitDefPhysics, sys::UnitDefWeapons, sys::UnitDefBuildOptions, sys::UnitDefSensors, sys::UnitDefHealth, sys::UnitDefClassify), Error> {
+    pub fn get_unit_def_by_id(&self, unit_def_id: i32) -> Result<GetUnitDefByIDValue, Error> {
         unsafe {
             let query = sys::GetUnitDefByIDQuery {
                 unitDefID: unit_def_id,

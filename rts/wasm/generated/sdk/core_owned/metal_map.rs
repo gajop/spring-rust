@@ -1,5 +1,5 @@
     pub mod metal_map {
-        use super::{Result, String, Vec};
+        use super::{Result};
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetMetalAmountQuery {

@@ -16,12 +16,13 @@
 /// }
 /// ```
 pub use crate::{
+    NATIVE_API_VERSION_MAJOR, NATIVE_API_VERSION_MINOR, NATIVE_API_VERSION_PATCH,
     callbacks::{GameSetupPlayerState, KeyAction, ModuleData, NativeModule, ViewGeometry},
     constants,
     error::Error,
     interface::NativeInterfaceRef,
     module_entry::{result_to_error_ptr, setup_panic_handler},
-    sys, NATIVE_API_VERSION_MAJOR, NATIVE_API_VERSION_MINOR, NATIVE_API_VERSION_PATCH,
+    sys,
 };
 
 // Re-export commonly used macros

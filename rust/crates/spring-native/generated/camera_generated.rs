@@ -187,7 +187,7 @@ impl<'a> Camera<'a> {
     pub fn set_camera_state(&self, state: sys::CameraState, transition_time: f32, transition_time_factor: f32, transition_time_exponent: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetCameraStateQuery {
-                state: state,
+                state,
                 transitionTime: transition_time,
                 transitionTimeFactor: transition_time_factor,
                 transitionTimeExponent: transition_time_exponent,
@@ -205,7 +205,7 @@ impl<'a> Camera<'a> {
     pub fn set_camera_target(&self, target: sys::Float3, options: SetCameraTargetOptions) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetCameraTargetQuery {
-                target: target,
+                target,
                 options: options.into(),
             };
             let mut result = MaybeUninit::<sys::SetCameraTargetResult>::zeroed();

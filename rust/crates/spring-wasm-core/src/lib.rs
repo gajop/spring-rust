@@ -105,7 +105,6 @@ pub use vfs::*;
 /// namespaced so specialized hand-written hot APIs remain the normal surface.
 #[cfg(target_arch = "wasm32")]
 #[doc(hidden)]
-#[allow(unused_imports, dead_code, non_snake_case)]
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/core_generated.rs"));
 }
@@ -119,7 +118,7 @@ pub use generated::{gaia_synced, gaia_unsynced, intro, menu, rules_synced, rules
 macro_rules! export_environment_mask {
     ($mask:expr) => {
         #[cfg(target_arch = "wasm32")]
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub extern "C" fn SPRING_ENV_MASK() -> i32 {
             $mask as i32
         }
@@ -262,7 +261,7 @@ pub const fn __pack_allow_unit_creation(value: AllowUnitCreationResult) -> i32 {
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:units-info")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "get-unit-def-id"]
         pub fn get_unit_def_id(unit_id: i32) -> i64;
         #[link_name = "get-unit-team"]
@@ -362,7 +361,7 @@ pub fn get_unit_health(unit_id: i32) -> Result<UnitHealth> {
 macro_rules! export_game_frame {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/game-frame"]
+        #[unsafe(export_name = "spring:callin/game-frame")]
         pub extern "C" fn __spring_wasm_core_game_frame(frame: i32) {
             $handler(frame)
         }
@@ -373,7 +372,7 @@ macro_rules! export_game_frame {
 macro_rules! export_game_frame_post {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/game-frame-post"]
+        #[unsafe(export_name = "spring:callin/game-frame-post")]
         pub extern "C" fn __spring_wasm_core_game_frame_post(frame: i32) {
             $handler(frame)
         }
@@ -384,7 +383,7 @@ macro_rules! export_game_frame_post {
 macro_rules! export_update {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/update"]
+        #[unsafe(export_name = "spring:callin/update")]
         pub extern "C" fn __spring_wasm_core_update(delta_seconds: f32) {
             $handler(delta_seconds)
         }
@@ -395,7 +394,7 @@ macro_rules! export_update {
 macro_rules! export_unit_created {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-created"]
+        #[unsafe(export_name = "spring:callin/unit-created")]
         pub extern "C" fn __spring_wasm_core_unit_created(
             unit_id: i32,
             unit_def_id: i32,
@@ -411,7 +410,7 @@ macro_rules! export_unit_created {
 macro_rules! export_unit_pre_damaged {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/unit-pre-damaged"]
+        #[unsafe(export_name = "spring:callin/unit-pre-damaged")]
         pub extern "C" fn __spring_wasm_core_unit_pre_damaged(
             unit_id: i32,
             unit_def_id: i32,
@@ -445,7 +444,7 @@ macro_rules! export_unit_pre_damaged {
 macro_rules! export_allow_unit_creation {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/allow-unit-creation"]
+        #[unsafe(export_name = "spring:callin/allow-unit-creation")]
         pub extern "C" fn __spring_wasm_core_allow_unit_creation(
             unit_def_id: i32,
             builder_id: i32,
@@ -473,7 +472,7 @@ macro_rules! export_allow_unit_creation {
 macro_rules! export_draw_world {
     ($handler:path) => {
         #[cfg(target_arch = "wasm32")]
-        #[export_name = "spring:callin/draw-world"]
+        #[unsafe(export_name = "spring:callin/draw-world")]
         pub extern "C" fn __spring_wasm_core_draw_world() {
             $handler()
         }

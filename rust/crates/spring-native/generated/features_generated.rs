@@ -64,8 +64,8 @@ impl<'a> Features<'a> {
     pub fn get_features_in_sphere(&self, center: sys::Float3, radius: f32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetFeaturesInSphereQuery {
-                center: center,
-                radius: radius,
+                center,
+                radius,
             };
             let mut result = MaybeUninit::<sys::GetFeaturesInSphereResult>::zeroed();
             let func = self.api.GetFeaturesInSphere.expect("GetFeaturesInSphere function pointer must be initialized");
@@ -87,10 +87,10 @@ impl<'a> Features<'a> {
     pub fn get_features_in_cylinder(&self, x: f32, z: f32, radius: f32, height: f32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetFeaturesInCylinderQuery {
-                x: x,
-                z: z,
-                radius: radius,
-                height: height,
+                x,
+                z,
+                radius,
+                height,
             };
             let mut result = MaybeUninit::<sys::GetFeaturesInCylinderResult>::zeroed();
             let func = self.api.GetFeaturesInCylinder.expect("GetFeaturesInCylinder function pointer must be initialized");
@@ -249,7 +249,7 @@ impl<'a> Features<'a> {
             let query = sys::GetFeatureSeparationQuery {
                 featureID1: feature_id1,
                 featureID2: feature_id2,
-                positional: positional,
+                positional,
             };
             let mut result = MaybeUninit::<sys::GetFeatureSeparationResult>::zeroed();
             let func = self.api.GetFeatureSeparation.expect("GetFeatureSeparation function pointer must be initialized");

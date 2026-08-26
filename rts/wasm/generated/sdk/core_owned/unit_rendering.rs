@@ -31,7 +31,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_features_in_screen_rectangle {
             #[link(wasm_import_module = "spring:unit-rendering")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-features-in-screen-rectangle"]
                 pub fn call(pleft: f32, ptop: f32, pright: f32, pbottom: f32, output: i32) -> i32;
             }
@@ -40,7 +40,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_units_in_screen_rectangle {
             #[link(wasm_import_module = "spring:unit-rendering")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-units-in-screen-rectangle"]
                 pub fn call(pleft: f32, ptop: f32, pright: f32, pbottom: f32, pallegiance: i32, output: i32) -> i32;
             }
@@ -49,7 +49,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_visible_units {
             #[link(wasm_import_module = "spring:unit-rendering")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-visible-units"]
                 pub fn call(pteam_id: i32, pradius: f32, pinclude_icons: i32, output: i32) -> i32;
             }

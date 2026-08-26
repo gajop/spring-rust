@@ -117,7 +117,7 @@ pub enum DataEventValueError {
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:rml-ui")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "context-add-event-listener"]
         pub fn context_add_event_listener(
             context_handle: i64,

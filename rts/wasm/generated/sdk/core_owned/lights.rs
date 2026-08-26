@@ -1,5 +1,5 @@
     pub mod lights {
-        use super::{Result, String, Vec};
+        use super::{Result, Vec};
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AddLightTrackingTargetQuery {

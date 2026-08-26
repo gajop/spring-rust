@@ -1,3 +1,6 @@
+/// The complete result tuple returned by [`get_factory_bugger_off`].
+pub type GetFactoryBuggerOffValue = (bool, f32, f32, i32, bool, bool);
+
 impl<'a> UnitsCommands<'a> {
     pub fn get_unit_command_count(&self, unit_id: i32) -> Result<u32, Error> {
         unsafe {
@@ -59,7 +62,7 @@ impl<'a> UnitsCommands<'a> {
         unsafe {
             let query = sys::GetFactoryCountsQuery {
                 unitID: unit_id,
-                count: count,
+                count,
                 addCmds: add_cmds,
             };
             let mut result = MaybeUninit::<sys::GetFactoryCountsResult>::zeroed();
@@ -110,7 +113,7 @@ impl<'a> UnitsCommands<'a> {
         }
     }
 
-    pub fn get_factory_bugger_off(&self, unit_id: i32) -> Result<(bool, f32, f32, i32, bool, bool), Error> {
+    pub fn get_factory_bugger_off(&self, unit_id: i32) -> Result<GetFactoryBuggerOffValue, Error> {
         unsafe {
             let query = sys::GetFactoryBuggerOffQuery {
                 unitID: unit_id,
@@ -264,10 +267,10 @@ impl<'a> UnitsCommands<'a> {
         unsafe {
             let query = sys::GiveOrderQuery {
                 cmdID: cmd_id,
-                params: params.as_ptr() as *mut _,
+                params: params.as_ptr(),
                 paramCount: params.len() as u32,
-                options: options,
-                timeout: timeout,
+                options,
+                timeout,
             };
             let mut result = MaybeUninit::<sys::GiveOrderResult>::zeroed();
             let func = self.api.GiveOrder.expect("GiveOrder function pointer must be initialized");
@@ -285,10 +288,10 @@ impl<'a> UnitsCommands<'a> {
                 unitIDs: unit_ids.as_ptr(),
                 count: unit_ids.len() as u32,
                 cmdID: cmd_id,
-                params: params.as_ptr() as *mut _,
+                params: params.as_ptr(),
                 paramCount: params.len() as u32,
-                options: options,
-                timeout: timeout,
+                options,
+                timeout,
             };
             let mut result = MaybeUninit::<sys::GiveOrderToUnitMapResult>::zeroed();
             let func = self.api.GiveOrderToUnitMap.expect("GiveOrderToUnitMap function pointer must be initialized");

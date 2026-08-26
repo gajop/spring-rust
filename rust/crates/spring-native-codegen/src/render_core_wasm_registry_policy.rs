@@ -173,9 +173,9 @@ pub(crate) fn production_visibility_environment_mask(
 #[cfg(test)]
 mod tests {
     use super::{
-        production_environment_mask, production_function_environment_mask,
-        production_import_allowed, production_process_safe, production_visibility_environment_mask,
-        CORE_SYNCED_ENVIRONMENT_MASK, CORE_UNSYNCED_ENVIRONMENT_MASK,
+        CORE_SYNCED_ENVIRONMENT_MASK, CORE_UNSYNCED_ENVIRONMENT_MASK, production_environment_mask,
+        production_function_environment_mask, production_import_allowed, production_process_safe,
+        production_visibility_environment_mask,
     };
 
     #[test]

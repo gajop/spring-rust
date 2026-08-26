@@ -378,8 +378,8 @@ impl<'a> Game<'a> {
     pub fn get_heading_from_vector(&self, x: f32, z: f32) -> Result<i32, Error> {
         unsafe {
             let query = sys::GetHeadingFromVectorQuery {
-                x: x,
-                z: z,
+                x,
+                z,
             };
             let mut result = MaybeUninit::<sys::GetHeadingFromVectorResult>::zeroed();
             let func = self.api.GetHeadingFromVector.expect("GetHeadingFromVector function pointer must be initialized");
@@ -394,7 +394,7 @@ impl<'a> Game<'a> {
     pub fn get_vector_from_heading(&self, heading: i32) -> Result<sys::Float2, Error> {
         unsafe {
             let query = sys::GetVectorFromHeadingQuery {
-                heading: heading,
+                heading,
             };
             let mut result = MaybeUninit::<sys::GetVectorFromHeadingResult>::zeroed();
             let func = self.api.GetVectorFromHeading.expect("GetVectorFromHeading function pointer must be initialized");
@@ -409,7 +409,7 @@ impl<'a> Game<'a> {
     pub fn get_facing_from_heading(&self, heading: i32) -> Result<i32, Error> {
         unsafe {
             let query = sys::GetFacingFromHeadingQuery {
-                heading: heading,
+                heading,
             };
             let mut result = MaybeUninit::<sys::GetFacingFromHeadingResult>::zeroed();
             let func = self.api.GetFacingFromHeading.expect("GetFacingFromHeading function pointer must be initialized");
@@ -424,7 +424,7 @@ impl<'a> Game<'a> {
     pub fn get_heading_from_facing(&self, facing: i32) -> Result<i32, Error> {
         unsafe {
             let query = sys::GetHeadingFromFacingQuery {
-                facing: facing,
+                facing,
             };
             let mut result = MaybeUninit::<sys::GetHeadingFromFacingResult>::zeroed();
             let func = self.api.GetHeadingFromFacing.expect("GetHeadingFromFacing function pointer must be initialized");

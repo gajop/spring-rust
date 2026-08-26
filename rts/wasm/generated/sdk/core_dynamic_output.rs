@@ -10,7 +10,7 @@ pub required: usize,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-query")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-team-units-sorted"]
 pub fn get_team_units_sorted(p0: i32, p1: i32) -> i32;
 }
@@ -69,7 +69,7 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-info")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-last-attacked-piece"]
 pub fn get_unit_last_attacked_piece(p0: i32, p1: i32) -> i32;
 }
@@ -128,7 +128,7 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-weapons")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-weapon-damages"]
 pub fn get_unit_weapon_damages(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -187,27 +187,27 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-commands")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-command-queue"]
 pub fn get_command_queue(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-factory-commands"]
 pub fn get_factory_commands(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-factory-counts"]
 pub fn get_factory_counts(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-cmd-descs"]
 pub fn get_unit_cmd_descs(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-current-command"]
 pub fn get_unit_current_command(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -454,47 +454,47 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-piece-info"]
 pub fn get_feature_piece_info(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-piece-list"]
 pub fn get_feature_piece_list(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-piece-map"]
 pub fn get_feature_piece_map(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-model-piece-list"]
 pub fn get_model_piece_list(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-model-piece-map"]
 pub fn get_model_piece_map(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-piece-info"]
 pub fn get_unit_piece_info(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-piece-list"]
 pub fn get_unit_piece_list(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-piece-map"]
 pub fn get_unit_piece_map(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-script-names"]
 pub fn get_unit_script_names(p0: i32, p1: i32) -> i32;
 }
@@ -929,22 +929,22 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:teams")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-ai-info"]
 pub fn get_ai_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:teams")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-ally-team-info"]
 pub fn get_ally_team_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:teams")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-player-info"]
 pub fn get_player_info(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:teams")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-team-info"]
 pub fn get_team_info(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -1144,12 +1144,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:features")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-last-attacked-piece"]
 pub fn get_feature_last_attacked_piece(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:features")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-resurrect"]
 pub fn get_feature_resurrect(p0: i32, p1: i32) -> i32;
 }
@@ -1255,12 +1255,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:projectiles")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-piece-projectile-params"]
 pub fn get_piece_projectile_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:projectiles")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-projectile-damages"]
 pub fn get_projectile_damages(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -1366,17 +1366,17 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-def-by-id"]
 pub fn get_unit_def_by_id(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-def-custom-param-keys"]
 pub fn get_unit_def_custom_param_keys(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-def-param-keys"]
 pub fn get_unit_def_param_keys(p0: i32, p1: i32) -> i32;
 }
@@ -1529,12 +1529,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:feature-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-def-by-id"]
 pub fn get_feature_def_by_id(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:feature-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-def-custom-param-keys"]
 pub fn get_feature_def_custom_param_keys(p0: i32, p1: i32) -> i32;
 }
@@ -1640,12 +1640,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:weapon-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-weapon-def-by-id"]
 pub fn get_weapon_def_by_id(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:weapon-defs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-weapon-def-custom-param-keys"]
 pub fn get_weapon_def_custom_param_keys(p0: i32, p1: i32) -> i32;
 }
@@ -1751,37 +1751,37 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:game")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-game-map-info"]
 pub fn get_game_map_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-game-mod-info"]
 pub fn get_game_mod_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-game-setup-info"]
 pub fn get_game_setup_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-map-options"]
 pub fn get_map_options(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-mod-options"]
 pub fn get_mod_options(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-side-data"]
 pub fn get_side_data(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-side-data-by-index"]
 pub fn get_side_data_by_index(p0: i32, p1: i32) -> i32;
 }
@@ -2122,7 +2122,7 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:player")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-player-roster"]
 pub fn get_player_roster(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -2181,52 +2181,52 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-rules-param"]
 pub fn get_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-feature-rules-params"]
 pub fn get_feature_rules_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-game-rules-param"]
 pub fn get_game_rules_param(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-game-rules-params"]
 pub fn get_game_rules_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-player-rules-param"]
 pub fn get_player_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-player-rules-params"]
 pub fn get_player_rules_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-team-rules-param"]
 pub fn get_team_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-team-rules-params"]
 pub fn get_team_rules_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-rules-param"]
 pub fn get_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-rules-params"]
 pub fn get_unit_rules_params(p0: i32, p1: i32) -> i32;
 }
@@ -2708,7 +2708,7 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:move-ctrl")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-unit-move-type-data"]
 pub fn get_unit_move_type_data(p0: i32, p1: i32) -> i32;
 }
@@ -2767,12 +2767,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:camera")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-camera-names"]
 pub fn get_camera_names(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:camera")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-camera-state"]
 pub fn get_camera_state(p0: i32, p1: i32) -> i32;
 }
@@ -2878,17 +2878,17 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:input")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-action-hot-keys"]
 pub fn get_action_hot_keys(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:input")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-key-bindings"]
 pub fn get_key_bindings(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:input")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-mouse-buttons-pressed"]
 pub fn get_mouse_buttons_pressed(p0: i32, p1: i32) -> i32;
 }
@@ -3041,17 +3041,17 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:selection")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-group-units-counts"]
 pub fn get_group_units_counts(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:selection")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-group-units-sorted"]
 pub fn get_group_units_sorted(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:selection")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-selected-units-counts"]
 pub fn get_selected_units_counts(p0: i32, p1: i32) -> i32;
 }
@@ -3204,7 +3204,7 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:sound")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-sound-devices"]
 pub fn get_sound_devices(p0: i32, p1: i32) -> i32;
 }
@@ -3263,7 +3263,7 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:messages")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-console-buffer"]
 pub fn get_console_buffer(p0: i32, p1: i32) -> i32;
 }
@@ -3322,12 +3322,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:config")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-config-params"]
 pub fn get_config_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:config")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-log-sections"]
 pub fn get_log_sections(p0: i32, p1: i32) -> i32;
 }
@@ -3433,27 +3433,27 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-active-uniforms"]
 pub fn get_active_uniforms(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-console-commands"]
 pub fn get_console_commands(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-engine-atlas-textures"]
 pub fn get_engine_atlas_textures(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-engine-texture-names"]
 pub fn get_engine_texture_names(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-global-tex-names"]
 pub fn get_global_tex_names(p0: i32, p1: i32) -> i32;
 }
@@ -3700,12 +3700,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:icons")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-all-icon-data-array"]
 pub fn get_all_icon_data_array(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:icons")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-icon-data"]
 pub fn get_icon_data(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -3811,7 +3811,7 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:ground-decals")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-ground-decal-textures"]
 pub fn get_ground_decal_textures(p0: i32, p1: i32) -> i32;
 }
@@ -3870,7 +3870,7 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:profiling")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-profiler-record-names"]
 pub fn get_profiler_record_names(p0: i32, p1: i32) -> i32;
 }
@@ -3929,12 +3929,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "element-get-active-pseudo-classes"]
 pub fn element_get_active_pseudo_classes(p0: i64, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-document-path-requests"]
 pub fn get_document_path_requests(p0: i32, p1: i32) -> i32;
 }
@@ -4040,67 +4040,67 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "dir-list"]
 pub fn dir_list(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-all-archives"]
 pub fn get_all_archives(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-archive-dependencies"]
 pub fn get_archive_dependencies(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-archive-info"]
 pub fn get_archive_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-archive-replaces"]
 pub fn get_archive_replaces(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-archives"]
 pub fn get_archives(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-available-a-is"]
 pub fn get_available_a_is(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-file-info"]
 pub fn get_file_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-games"]
 pub fn get_games(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-loaded-archives"]
 pub fn get_loaded_archives(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-maps"]
 pub fn get_maps(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "list-dir"]
 pub fn list_dir(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "sub-dirs"]
 pub fn sub_dirs(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -4723,12 +4723,12 @@ required: 0,
         #[cfg(target_arch = "wasm32")]
         mod raw {
             #[link(wasm_import_module = "spring:unsynced-read")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-active-cmd-desc"]
 pub fn get_active_cmd_desc(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:unsynced-read")]
-extern "C" {
+unsafe extern "C" {
 #[link_name = "get-active-cmd-descs"]
 pub fn get_active_cmd_descs(p0: i32, p1: i32) -> i32;
 }

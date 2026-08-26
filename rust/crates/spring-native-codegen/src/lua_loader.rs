@@ -156,6 +156,9 @@ impl LuaLoaderMatrix {
         // LuaUnsyncedRead, and LuaSyncedRead through their own Load* methods
         // rather than via Provider::PushEntries.  Parse those method bodies and
         // register each function for the appropriate environment.
+        let scoped_registration =
+            Regex::new(r"REGISTER_SCOPED_LUA_CFUNC\s*\(\s*[^,]+,\s*([A-Za-z0-9_]+)")
+                .expect("valid REGISTER_SCOPED_LUA_CFUNC pattern");
         for (source, env, methods) in [
             (
                 &menu_source,
@@ -177,11 +180,7 @@ impl LuaLoaderMatrix {
         ] {
             for method in methods {
                 if let Some(body) = function_body(source, method) {
-                    let scoped = Regex::new(
-                        r"REGISTER_SCOPED_LUA_CFUNC\s*\(\s*[^,]+,\s*([A-Za-z0-9_]+)",
-                    )
-                    .expect("valid REGISTER_SCOPED_LUA_CFUNC pattern");
-                    for captures in scoped.captures_iter(body) {
+                    for captures in scoped_registration.captures_iter(body) {
                         matrix
                             .function_environments
                             .entry(captures[1].to_string())

@@ -26,7 +26,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_architecture {
             #[link(wasm_import_module = "spring:platform")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-architecture"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }

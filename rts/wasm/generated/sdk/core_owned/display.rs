@@ -285,7 +285,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_map_draw_mode {
             #[link(wasm_import_module = "spring:display")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-map-draw-mode"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }

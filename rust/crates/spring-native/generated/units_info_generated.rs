@@ -826,7 +826,7 @@ impl<'a> UnitsInfo<'a> {
             let query = sys::GetUnitLosStateQuery {
                 unitID: unit_id,
                 allyTeamID: ally_team_id,
-                raw: raw,
+                raw,
             };
             let mut result = MaybeUninit::<sys::GetUnitLosStateResult>::zeroed();
             let func = self.api.GetUnitLosState.expect("GetUnitLosState function pointer must be initialized");

@@ -243,7 +243,7 @@ mod tests {
 
     use crate::model::{CallinModel, FieldModel, LoweringStatus, RecordModel, SemanticType};
 
-    use super::{executable_callin, ExpandedCallin, ResultAbi};
+    use super::{ExpandedCallin, ResultAbi, executable_callin};
 
     fn scalar_query() -> RecordModel {
         RecordModel {
@@ -314,14 +314,16 @@ mod tests {
         let mut records = BTreeMap::new();
         records.insert("Query".to_owned(), scalar_query());
         records.insert("OpaqueResult".to_owned(), opaque_result());
-        assert!(executable_callin(
-            ExpandedCallin {
-                name: callin.name.clone(),
-                callin: &callin,
-                ordinal: 1,
-            },
-            &records,
-        )
-        .is_none());
+        assert!(
+            executable_callin(
+                ExpandedCallin {
+                    name: callin.name.clone(),
+                    callin: &callin,
+                    ordinal: 1,
+                },
+                &records,
+            )
+            .is_none()
+        );
     }
 }

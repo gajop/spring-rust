@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
 
-use super::{executable, record_index, result, ScratchCallin};
+use super::{ScratchCallin, executable, record_index, result};
 
 #[path = "render_core_wasm_callin_scratch_guest_wire.rs"]
 mod wire;

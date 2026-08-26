@@ -234,7 +234,7 @@ impl<'a> Teams<'a> {
         unsafe {
             let query = sys::GetPlayerListQuery {
                 teamID: team_id,
-                active: active,
+                active,
             };
             let mut result = MaybeUninit::<sys::GetPlayerListResult>::zeroed();
             let func = self.api.GetPlayerList.expect("GetPlayerList function pointer must be initialized");

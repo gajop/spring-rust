@@ -4,7 +4,7 @@ impl<'a> TeamControl<'a> {
             let query = sys::SetAllyQuery {
                 firstAllyTeamID: first_ally_team_id,
                 secondAllyTeamID: second_ally_team_id,
-                allied: allied,
+                allied,
             };
             let mut result = MaybeUninit::<sys::SetAllyResult>::zeroed();
             let func = self.api.SetAlly.expect("SetAlly function pointer must be initialized");
@@ -86,7 +86,7 @@ impl<'a> TeamControl<'a> {
         unsafe {
             let query = sys::SetGlobalLosQuery {
                 allyTeamID: ally_team_id,
-                enabled: enabled,
+                enabled,
             };
             let mut result = MaybeUninit::<sys::SetGlobalLosResult>::zeroed();
             let func = self.api.SetGlobalLos.expect("SetGlobalLos function pointer must be initialized");
@@ -104,7 +104,7 @@ impl<'a> TeamControl<'a> {
             let query = sys::AddTeamResourceQuery {
                 teamID: team_id,
                 resourceType: resource_type_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::AddTeamResourceResult>::zeroed();
             let func = self.api.AddTeamResource.expect("AddTeamResource function pointer must be initialized");
@@ -122,7 +122,7 @@ impl<'a> TeamControl<'a> {
             let query = sys::AddTeamResourceExcessStatsQuery {
                 teamID: team_id,
                 resourceType: resource_type_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::AddTeamResourceExcessStatsResult>::zeroed();
             let func = self.api.AddTeamResourceExcessStats.expect("AddTeamResourceExcessStats function pointer must be initialized");
@@ -140,7 +140,7 @@ impl<'a> TeamControl<'a> {
             let query = sys::UseTeamResourceQuery {
                 teamID: team_id,
                 resourceType: resource_type_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::UseTeamResourceResult>::zeroed();
             let func = self.api.UseTeamResource.expect("UseTeamResource function pointer must be initialized");
@@ -158,7 +158,7 @@ impl<'a> TeamControl<'a> {
             let query = sys::SetTeamResourceQuery {
                 teamID: team_id,
                 resourceType: resource_type_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::SetTeamResourceResult>::zeroed();
             let func = self.api.SetTeamResource.expect("SetTeamResource function pointer must be initialized");
@@ -195,7 +195,7 @@ impl<'a> TeamControl<'a> {
                 teamID: team_id,
                 targetTeamID: target_team_id,
                 resourceType: resource_type_cstr.as_ptr(),
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::ShareTeamResourceResult>::zeroed();
             let func = self.api.ShareTeamResource.expect("ShareTeamResource function pointer must be initialized");
@@ -211,7 +211,7 @@ impl<'a> TeamControl<'a> {
         unsafe {
             let query = sys::SetTeamStartPositionQuery {
                 teamID: team_id,
-                pos: pos,
+                pos,
             };
             let mut result = MaybeUninit::<sys::SetTeamStartPositionResult>::zeroed();
             let func = self.api.SetTeamStartPosition.expect("SetTeamStartPosition function pointer must be initialized");
@@ -227,7 +227,7 @@ impl<'a> TeamControl<'a> {
         unsafe {
             let query = sys::SetPlayerReadyStateQuery {
                 playerID: player_id,
-                ready: ready,
+                ready,
             };
             let mut result = MaybeUninit::<sys::SetPlayerReadyStateResult>::zeroed();
             let func = self.api.SetPlayerReadyState.expect("SetPlayerReadyState function pointer must be initialized");
@@ -244,7 +244,7 @@ impl<'a> TeamControl<'a> {
             let query = sys::TransferTeamMaxUnitsQuery {
                 fromTeamID: from_team_id,
                 toTeamID: to_team_id,
-                amount: amount,
+                amount,
             };
             let mut result = MaybeUninit::<sys::TransferTeamMaxUnitsResult>::zeroed();
             let func = self.api.TransferTeamMaxUnits.expect("TransferTeamMaxUnits function pointer must be initialized");

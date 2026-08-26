@@ -14,7 +14,7 @@ pub struct CobCallResult {
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:cob-script")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "call-cob-script"]
         pub fn call_cob_script(
             unit_id: i32,

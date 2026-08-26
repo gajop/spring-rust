@@ -226,18 +226,18 @@ static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* quer
 		return;
 	}
 
+	const float3 targetPos(query->targetPos.x, query->targetPos.y, query->targetPos.z);
 	SWeaponTarget target;
-	target.isUserTarget = query->options.userTarget;
 	if (query->options.isGroundTarget) {
-		target.type = Target_Pos;
-		// Match Spring.GetUnitWeaponTryTarget's null-unit overload.  That
-		// overload deliberately uses a position-only target with the
-		// constructor's zero groundPos; the explicit coordinates are only
-		// supplied to the target test by the Lua call path.
-		target.groundPos = ZeroVector;
+		// Keep the explicit position in the target.  The old native path
+		// discarded query->targetPos and consequently tested every ground
+		// target at the origin.
+		target = SWeaponTarget(targetPos, query->options.userTarget);
 	} else if (query->targetID >= 0) {
-		target.type = Target_Unit;
-		target.unit = unitHandler.GetUnit(query->targetID);
+		const CUnit* targetUnit = unitHandler.GetUnit(query->targetID);
+		if (targetUnit == nullptr)
+			return;
+		target = SWeaponTarget(targetUnit, query->options.userTarget);
 	} else {
 		return; // Invalid target
 	}

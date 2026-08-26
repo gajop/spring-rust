@@ -4,10 +4,10 @@ impl<'a> Sound<'a> {
             let sound_file_cstr = std::ffi::CString::new(sound_file).map_err(|_| Error::invalid_argument("sound_file"))?;
             let query = sys::PlaySoundFileQuery {
                 soundFile: sound_file_cstr.as_ptr(),
-                volume: volume,
-                pos: pos,
-                velocity: velocity,
-                channel: channel,
+                volume,
+                pos,
+                velocity,
+                channel,
             };
             let mut result = MaybeUninit::<sys::PlaySoundFileResult>::zeroed();
             let func = self.api.PlaySoundFile.expect("PlaySoundFile function pointer must be initialized");
@@ -40,8 +40,8 @@ impl<'a> Sound<'a> {
             let ogg_file_cstr = std::ffi::CString::new(ogg_file).map_err(|_| Error::invalid_argument("ogg_file"))?;
             let query = sys::PlaySoundStreamQuery {
                 oggFile: ogg_file_cstr.as_ptr(),
-                volume: volume,
-                enqueue: enqueue,
+                volume,
+                enqueue,
             };
             let mut result = MaybeUninit::<sys::PlaySoundStreamResult>::zeroed();
             let func = self.api.PlaySoundStream.expect("PlaySoundStream function pointer must be initialized");
@@ -86,7 +86,7 @@ impl<'a> Sound<'a> {
     pub fn set_sound_stream_volume(&self, volume: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetSoundStreamVolumeQuery {
-                volume: volume,
+                volume,
             };
             let mut result = MaybeUninit::<sys::SetSoundStreamVolumeResult>::zeroed();
             let func = self.api.SetSoundStreamVolume.expect("SetSoundStreamVolume function pointer must be initialized");
@@ -159,7 +159,7 @@ impl<'a> Sound<'a> {
     pub fn set_sound_effect_params(&self, params: sys::SoundEffectParams) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetSoundEffectParamsQuery {
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::SetSoundEffectParamsResult>::zeroed();
             let func = self.api.SetSoundEffectParams.expect("SetSoundEffectParams function pointer must be initialized");

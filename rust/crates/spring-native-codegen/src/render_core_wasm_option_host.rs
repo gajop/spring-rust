@@ -445,9 +445,15 @@ fn render_read_type(
     let pad = "    ".repeat(indent);
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
-            "bool" => format!("{pad}if (!reader.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "f32" => format!("{pad}if (!reader.F32({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "f64" => format!("{pad}if (!reader.F64({destination})) return Trap(\"generated Core wire underflow\");\n"),
+            "bool" => format!(
+                "{pad}if (!reader.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
+            "f32" => format!(
+                "{pad}if (!reader.F32({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
+            "f64" => format!(
+                "{pad}if (!reader.F64({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
             "i64" | "isize" => scalar_read("I64", "std::int64_t", destination, &pad),
             "u64" | "usize" => scalar_read("U64", "std::uint64_t", destination, &pad),
             "i8" | "i16" | "i32" => scalar_read("I32", "std::int32_t", destination, &pad),
@@ -459,10 +465,18 @@ fn render_read_type(
             let mut output = records[name]
                 .fields
                 .iter()
-                .map(|field| render_read_field(field, &format!("{destination}.{}", field.name), destination, records, indent))
+                .map(|field| {
+                    render_read_field(
+                        field,
+                        &format!("{destination}.{}", field.name),
+                        destination,
+                        records,
+                        indent,
+                    )
+                })
                 .collect::<String>();
-            let (_, alignment) = fixed_layout(ty, records)
-                .expect("eligible option record must have a fixed layout");
+            let (_, alignment) =
+                fixed_layout(ty, records).expect("eligible option record must have a fixed layout");
             output.push_str(&format!(
                 "{pad}if (!reader.Align({alignment}u)) return Trap(\"generated option record alignment overflow\");\n"
             ));
@@ -470,8 +484,15 @@ fn render_read_type(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreReadIndex{indent}");
-            let nested = render_read_type(element, &format!("{destination}[{index}]"), records, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_read_type(
+                element,
+                &format!("{destination}[{index}]"),
+                records,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
@@ -489,7 +510,9 @@ fn render_write_field(
         SemanticType::Option { inner } => {
             let presence = presence_field(field).expect("eligible option has presence metadata");
             let native_ty = format!("std::remove_cv_t<std::remove_reference_t<decltype({value})>>");
-            let mut output = format!("{pad}if (!writer.Bool({owner}.{presence})) return Trap(\"generated option output overflow\");\n");
+            let mut output = format!(
+                "{pad}if (!writer.Bool({owner}.{presence})) return Trap(\"generated option output overflow\");\n"
+            );
             output.push_str(&format!("{pad}if ({owner}.{presence}) {{\n"));
             output.push_str(&render_write_type(inner, value, records, indent + 1));
             output.push_str(&format!(
@@ -539,22 +562,40 @@ fn render_write_type(
     match ty {
         SemanticType::Scalar { name } => {
             let method = match name.as_str() {
-                "bool" => "Bool", "f32" => "F32", "f64" => "F64",
-                "i64" | "isize" => "I64", "u64" | "usize" => "U64",
-                "i8" | "i16" | "i32" => "I32", _ => "U32",
+                "bool" => "Bool",
+                "f32" => "F32",
+                "f64" => "F64",
+                "i64" | "isize" => "I64",
+                "u64" | "usize" => "U64",
+                "i8" | "i16" | "i32" => "I32",
+                _ => "U32",
             };
-            format!("{pad}if (!writer.{method}({value})) return Trap(\"generated Core wire overflow\");\n")
+            format!(
+                "{pad}if (!writer.{method}({value})) return Trap(\"generated Core wire overflow\");\n"
+            )
         }
-        SemanticType::Enum { .. } => format!("{pad}if (!writer.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
-        SemanticType::Handle { .. } => format!("{pad}if (!writer.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
+        SemanticType::Enum { .. } => format!(
+            "{pad}if (!writer.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"
+        ),
+        SemanticType::Handle { .. } => format!(
+            "{pad}if (!writer.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"
+        ),
         SemanticType::Record { name } => {
             let mut output = records[name]
                 .fields
                 .iter()
-                .map(|field| render_write_field(field, &format!("{value}.{}", field.name), value, records, indent))
+                .map(|field| {
+                    render_write_field(
+                        field,
+                        &format!("{value}.{}", field.name),
+                        value,
+                        records,
+                        indent,
+                    )
+                })
                 .collect::<String>();
-            let (_, alignment) = fixed_layout(ty, records)
-                .expect("eligible option record must have a fixed layout");
+            let (_, alignment) =
+                fixed_layout(ty, records).expect("eligible option record must have a fixed layout");
             output.push_str(&format!(
                 "{pad}if (!writer.Align({alignment}u)) return Trap(\"generated option record alignment overflow\");\n"
             ));
@@ -562,20 +603,27 @@ fn render_write_type(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
-            let nested = render_write_type(element, &format!("{value}[{index}]"), records, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested =
+                render_write_type(element, &format!("{value}[{index}]"), records, indent + 1);
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
 }
 
 fn scalar_read(method: &str, raw: &str, destination: &str, pad: &str) -> String {
-    format!("{pad}{{ {raw} coreRaw = 0; if (!reader.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>(coreRaw); }}\n")
+    format!(
+        "{pad}{{ {raw} coreRaw = 0; if (!reader.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>(coreRaw); }}\n"
+    )
 }
 
 fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
     let cast = |value: String| {
-        format!("static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})")
+        format!(
+            "static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})"
+        )
     };
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
@@ -609,7 +657,9 @@ fn packed32_expr(ty: &SemanticType, value: &str) -> String {
 fn error_return(plan: &FunctionPlan, status: &str, indent: usize) -> String {
     let pad = "    ".repeat(indent);
     if matches!(plan.result_strategy, ResultStrategy::Packed32) {
-        format!("{pad}slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>({status})));\n{pad}return nullptr;\n")
+        format!(
+            "{pad}slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>({status})));\n{pad}return nullptr;\n"
+        )
     } else {
         format!("{pad}slots[0].i32 = static_cast<std::int32_t>({status});\n{pad}return nullptr;\n")
     }
@@ -626,9 +676,16 @@ fn presence_field(field: &FieldModel) -> Option<String> {
 fn render_registration(plan: &FunctionPlan, callback: &str) -> String {
     let params = kind_array("params", &plan.direct_params);
     let results = kind_array("results", &plan.direct_results);
-    format!("    {{\n{params}{results}        if (!DefineGeneratedOption(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
-        params=params, results=results, module=plan.import_module, name=plan.import_name,
-        pc=plan.direct_params.len(), rc=plan.direct_results.len(), callback=callback)
+    format!(
+        "    {{\n{params}{results}        if (!DefineGeneratedOption(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
+        params = params,
+        results = results,
+        module = plan.import_module,
+        name = plan.import_name,
+        pc = plan.direct_params.len(),
+        rc = plan.direct_results.len(),
+        callback = callback
+    )
 }
 
 fn kind_array(name: &str, kinds: &[CoreType]) -> String {

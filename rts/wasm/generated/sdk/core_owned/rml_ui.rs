@@ -1001,7 +1001,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_context_get_name {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "context-get-name"]
                 pub fn call(pcontext_handle: i64, output: i32) -> i32;
             }
@@ -1010,7 +1010,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_document_get_title {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "document-get-title"]
                 pub fn call(pdocument_handle: i64, output: i32) -> i32;
             }
@@ -1019,7 +1019,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_document_get_url {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "document-get-url"]
                 pub fn call(pdocument_handle: i64, output: i32) -> i32;
             }
@@ -1028,7 +1028,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_element_get_class_name {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-get-class-name"]
                 pub fn call(pelement_handle: i64, output: i32) -> i32;
             }
@@ -1037,7 +1037,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_element_get_id {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-get-id"]
                 pub fn call(pelement_handle: i64, output: i32) -> i32;
             }
@@ -1046,7 +1046,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_element_get_inner_rml {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-get-inner-rml"]
                 pub fn call(pelement_handle: i64, output: i32) -> i32;
             }
@@ -1055,7 +1055,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_element_get_tag_name {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-get-tag-name"]
                 pub fn call(pelement_handle: i64, output: i32) -> i32;
             }
@@ -1064,7 +1064,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_element_get_value {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "element-get-value"]
                 pub fn call(pelement_handle: i64, output: i32) -> i32;
             }
@@ -1073,7 +1073,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_version {
             #[link(wasm_import_module = "spring:rml-ui")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-version"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -1465,24 +1465,27 @@
 
         #[inline]
         pub fn add_translation_string(key: &str, translation: &str) -> Result<bool> {
-            let mut key_bytes = key.as_bytes().to_vec();
-            if key_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            key_bytes.push(0);
-            let key_cstr = core::ffi::CStr::from_bytes_with_nul(&key_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut translation_bytes = translation.as_bytes().to_vec();
-            if translation_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            translation_bytes.push(0);
-            let translation_cstr = core::ffi::CStr::from_bytes_with_nul(&translation_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::add_translation_string(key_cstr, translation_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(key, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(key)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(translation, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(translation)?),
+            };
+            crate::generated::borrowed::rml_ui::add_translation_string(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn clear_document_path_requests(document_path: &str) -> Result<bool> {
-            let mut document_path_bytes = document_path.as_bytes().to_vec();
-            if document_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            document_path_bytes.push(0);
-            let document_path_cstr = core::ffi::CStr::from_bytes_with_nul(&document_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::clear_document_path_requests(document_path_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(document_path, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(document_path)?),
+            };
+            crate::generated::borrowed::rml_ui::clear_document_path_requests(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -1493,11 +1496,12 @@
 
         #[inline]
         pub fn context_activate_theme(context_handle: u64, name: &str, value: bool) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_activate_theme(context_handle, name_cstr, value)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::rml_ui::context_activate_theme(context_handle, __core_string_1_buf.as_cstr(), value)
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -1646,11 +1650,12 @@
 
         #[inline]
         pub fn context_is_theme_active(context_handle: u64, name: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_is_theme_active(context_handle, name_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::rml_ui::context_is_theme_active(context_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -1721,11 +1726,12 @@
 
         #[inline]
         pub fn context_process_text_input(context_handle: u64, text: &str) -> Result<bool> {
-            let mut text_bytes = text.as_bytes().to_vec();
-            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            text_bytes.push(0);
-            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_process_text_input(context_handle, text_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(text, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(text)?),
+            };
+            crate::generated::borrowed::rml_ui::context_process_text_input(context_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -1748,20 +1754,22 @@
 
         #[inline]
         pub fn context_remove_data_model(context_handle: u64, name: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_remove_data_model(context_handle, name_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::rml_ui::context_remove_data_model(context_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn context_remove_event_listener(context_handle: u64, event_listener_handle: u64, event: &str, in_capture_phase: bool) -> Result<bool> {
-            let mut event_bytes = event.as_bytes().to_vec();
-            if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            event_bytes.push(0);
-            let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::context_remove_event_listener(context_handle, event_listener_handle, event_cstr, in_capture_phase)
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(event, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(event)?),
+            };
+            crate::generated::borrowed::rml_ui::context_remove_event_listener(context_handle, event_listener_handle, __core_string_2_buf.as_cstr(), in_capture_phase)
         }
 
         #[inline]
@@ -2059,11 +2067,12 @@
 
         #[inline]
         pub fn data_model_set_string(variable_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::data_model_set_string(variable_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::data_model_set_string(variable_handle, __core_string_1_buf.as_cstr())
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -2084,11 +2093,12 @@
 
         #[inline]
         pub fn document_append_to_style_sheet(document_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::document_append_to_style_sheet(document_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::document_append_to_style_sheet(document_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2202,24 +2212,27 @@
 
         #[inline]
         pub fn document_load_external_script(document_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::document_load_external_script(document_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::document_load_external_script(document_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn document_load_inline_script(document_handle: u64, content: &str, source_path: &str, source_line: i32) -> Result<bool> {
-            let mut content_bytes = content.as_bytes().to_vec();
-            if content_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            content_bytes.push(0);
-            let content_cstr = core::ffi::CStr::from_bytes_with_nul(&content_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut source_path_bytes = source_path.as_bytes().to_vec();
-            if source_path_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            source_path_bytes.push(0);
-            let source_path_cstr = core::ffi::CStr::from_bytes_with_nul(&source_path_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::document_load_inline_script(document_handle, content_cstr, source_path_cstr, source_line)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(content, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(content)?),
+            };
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(source_path, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(source_path)?),
+            };
+            crate::generated::borrowed::rml_ui::document_load_inline_script(document_handle, __core_string_1_buf.as_cstr(), __core_string_2_buf.as_cstr(), source_line)
         }
 
         #[inline]
@@ -2242,11 +2255,12 @@
 
         #[inline]
         pub fn document_set_title(document_handle: u64, title: &str) -> Result<bool> {
-            let mut title_bytes = title.as_bytes().to_vec();
-            if title_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            title_bytes.push(0);
-            let title_cstr = core::ffi::CStr::from_bytes_with_nul(&title_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::document_set_title(document_handle, title_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(title, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(title)?),
+            };
+            crate::generated::borrowed::rml_ui::document_set_title(document_handle, __core_string_1_buf.as_cstr())
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -2298,11 +2312,12 @@
 
         #[inline]
         pub fn element_are_pseudo_classes_set(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_are_pseudo_classes_set(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_are_pseudo_classes_set(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2340,11 +2355,12 @@
 
         #[inline]
         pub fn element_dispatch_event(element_handle: u64, event: &str) -> Result<bool> {
-            let mut event_bytes = event.as_bytes().to_vec();
-            if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            event_bytes.push(0);
-            let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_dispatch_event(element_handle, event_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(event, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(event)?),
+            };
+            crate::generated::borrowed::rml_ui::element_dispatch_event(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2429,15 +2445,17 @@
 
         #[inline]
         pub fn element_form_submit(element_handle: u64, name: &str, value: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_form_submit(element_handle, name_cstr, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(value, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_form_submit(element_handle, __core_string_1_buf.as_cstr(), __core_string_2_buf.as_cstr())
         }
 
         #[inline]
@@ -2553,11 +2571,12 @@
 
         #[inline]
         pub fn element_get_elements_by_class_name_count(element_handle: u64, value: &str) -> Result<i32> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_get_elements_by_class_name_count(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_get_elements_by_class_name_count(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2585,11 +2604,12 @@
 
         #[inline]
         pub fn element_get_elements_by_tag_name_count(element_handle: u64, value: &str) -> Result<i32> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_get_elements_by_tag_name_count(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_get_elements_by_tag_name_count(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2733,11 +2753,12 @@
 
         #[inline]
         pub fn element_has_attribute(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_has_attribute(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_has_attribute(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2757,11 +2778,12 @@
 
         #[inline]
         pub fn element_is_class_set(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_is_class_set(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_is_class_set(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2772,11 +2794,12 @@
 
         #[inline]
         pub fn element_is_pseudo_class_set(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_is_pseudo_class_set(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_is_pseudo_class_set(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2787,11 +2810,12 @@
 
         #[inline]
         pub fn element_matches(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_matches(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_matches(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2837,20 +2861,22 @@
 
         #[inline]
         pub fn element_query_selector_all_count(element_handle: u64, value: &str) -> Result<i32> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_query_selector_all_count(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_query_selector_all_count(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn element_remove_attribute(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_remove_attribute(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_remove_attribute(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
@@ -2864,11 +2890,12 @@
 
         #[inline]
         pub fn element_remove_event_listener(element_handle: u64, event_listener_handle: u64, event: &str, in_capture_phase: bool) -> Result<bool> {
-            let mut event_bytes = event.as_bytes().to_vec();
-            if event_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            event_bytes.push(0);
-            let event_cstr = core::ffi::CStr::from_bytes_with_nul(&event_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_remove_event_listener(element_handle, event_listener_handle, event_cstr, in_capture_phase)
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(event, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(event)?),
+            };
+            crate::generated::borrowed::rml_ui::element_remove_event_listener(element_handle, event_listener_handle, __core_string_2_buf.as_cstr(), in_capture_phase)
         }
 
         #[inline]
@@ -2888,60 +2915,67 @@
 
         #[inline]
         pub fn element_set_attribute(element_handle: u64, name: &str, value: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_attribute(element_handle, name_cstr, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(value, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_set_attribute(element_handle, __core_string_1_buf.as_cstr(), __core_string_2_buf.as_cstr())
         }
 
         #[inline]
         pub fn element_set_class(element_handle: u64, name: &str, value: bool) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_class(element_handle, name_cstr, value)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::rml_ui::element_set_class(element_handle, __core_string_1_buf.as_cstr(), value)
         }
 
         #[inline]
         pub fn element_set_class_name(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_class_name(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_set_class_name(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn element_set_id(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_id(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_set_id(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn element_set_inner_rml(element_handle: u64, value: &str) -> Result<bool> {
-            let mut value_bytes = value.as_bytes().to_vec();
-            if value_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            value_bytes.push(0);
-            let value_cstr = core::ffi::CStr::from_bytes_with_nul(&value_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_inner_rml(element_handle, value_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(value, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(value)?),
+            };
+            crate::generated::borrowed::rml_ui::element_set_inner_rml(element_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn element_set_pseudo_class(element_handle: u64, name: &str, value: bool) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_set_pseudo_class(element_handle, name_cstr, value)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::rml_ui::element_set_pseudo_class(element_handle, __core_string_1_buf.as_cstr(), value)
         }
 
         #[inline]
@@ -2964,20 +2998,22 @@
 
         #[inline]
         pub fn element_tab_set_set_panel(element_handle: u64, index: i32, rml: &str) -> Result<bool> {
-            let mut rml_bytes = rml.as_bytes().to_vec();
-            if rml_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            rml_bytes.push(0);
-            let rml_cstr = core::ffi::CStr::from_bytes_with_nul(&rml_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_tab_set_set_panel(element_handle, index, rml_cstr)
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(rml, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(rml)?),
+            };
+            crate::generated::borrowed::rml_ui::element_tab_set_set_panel(element_handle, index, __core_string_2_buf.as_cstr())
         }
 
         #[inline]
         pub fn element_tab_set_set_tab(element_handle: u64, index: i32, rml: &str) -> Result<bool> {
-            let mut rml_bytes = rml.as_bytes().to_vec();
-            if rml_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            rml_bytes.push(0);
-            let rml_cstr = core::ffi::CStr::from_bytes_with_nul(&rml_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::element_tab_set_set_tab(element_handle, index, rml_cstr)
+            let mut __core_string_2_scratch = [0u8; 256];
+            let __core_string_2_buf = match super::write_cstr(rml, &mut __core_string_2_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(rml)?),
+            };
+            crate::generated::borrowed::rml_ui::element_tab_set_set_tab(element_handle, index, __core_string_2_buf.as_cstr())
         }
 
         #[inline]
@@ -3304,11 +3340,12 @@
 
         #[inline]
         pub fn remove_context_by_name(name: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::remove_context_by_name(name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::rml_ui::remove_context_by_name(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -3319,33 +3356,37 @@
 
         #[inline]
         pub fn set_debug_context_by_name(name: &str) -> Result<bool> {
-            let mut name_bytes = name.as_bytes().to_vec();
-            if name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            name_bytes.push(0);
-            let name_cstr = core::ffi::CStr::from_bytes_with_nul(&name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::set_debug_context_by_name(name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::rml_ui::set_debug_context_by_name(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn set_mouse_cursor_alias(rml_name: &str, recoil_name: &str) -> Result<bool> {
-            let mut rml_name_bytes = rml_name.as_bytes().to_vec();
-            if rml_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            rml_name_bytes.push(0);
-            let rml_name_cstr = core::ffi::CStr::from_bytes_with_nul(&rml_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut recoil_name_bytes = recoil_name.as_bytes().to_vec();
-            if recoil_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            recoil_name_bytes.push(0);
-            let recoil_name_cstr = core::ffi::CStr::from_bytes_with_nul(&recoil_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::set_mouse_cursor_alias(rml_name_cstr, recoil_name_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(rml_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(rml_name)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(recoil_name, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(recoil_name)?),
+            };
+            crate::generated::borrowed::rml_ui::set_mouse_cursor_alias(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn sol_lua_data_model_set_dirty(data_model_handle: u64, property: &str) -> Result<bool> {
-            let mut property_bytes = property.as_bytes().to_vec();
-            if property_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            property_bytes.push(0);
-            let property_cstr = core::ffi::CStr::from_bytes_with_nul(&property_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::rml_ui::sol_lua_data_model_set_dirty(data_model_handle, property_cstr)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(property, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(property)?),
+            };
+            crate::generated::borrowed::rml_ui::sol_lua_data_model_set_dirty(data_model_handle, __core_string_1_buf.as_cstr())
         }
 
         #[inline]

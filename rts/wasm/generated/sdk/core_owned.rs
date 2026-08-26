@@ -2,9 +2,9 @@
 
 #[cfg(feature = "alloc")]
 pub mod owned {
-extern crate alloc;
-use alloc::{string::String, vec::Vec};
-use crate::Result;
+    extern crate alloc;
+    pub(crate) use alloc::{string::String, vec::Vec};
+    pub(crate) use crate::Result;
 
     #[inline]
     fn decode_core_string(bytes: Vec<u8>) -> String {
@@ -16,5 +16,49 @@ use crate::Result;
                 .map(char::from)
                 .collect(),
         }
+    }
+
+    enum CStrBuf<'a> {
+        Stack(&'a [u8]),
+        Heap(Vec<u8>),
+    }
+
+    impl CStrBuf<'_> {
+        #[inline]
+        fn as_cstr(&self) -> &core::ffi::CStr {
+            let bytes = match self {
+                CStrBuf::Stack(b) => *b,
+                CStrBuf::Heap(v) => v.as_slice(),
+            };
+            core::ffi::CStr::from_bytes_with_nul(bytes)
+                .expect("write_cstr and heap paths guarantee a trailing nul")
+        }
+    }
+
+    /// Write `s` + null terminator into `buf`. Returns the subslice written
+    /// (including the null), or `None` if it doesn't fit or contains interior
+    /// nulls.
+    #[inline]
+    fn write_cstr<'a>(s: &str, buf: &'a mut [u8]) -> Option<&'a [u8]> {
+        let bytes = s.as_bytes();
+        let needed = bytes.len() + 1;
+        if needed > buf.len() || bytes.contains(&0) {
+            return None;
+        }
+        buf[..bytes.len()].copy_from_slice(bytes);
+        buf[bytes.len()] = 0;
+        Some(&buf[..needed])
+    }
+
+    #[inline]
+    fn str_to_cstr_heap(s: &str) -> crate::Result<Vec<u8>> {
+        let bytes = s.as_bytes();
+        if bytes.contains(&0) {
+            return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32));
+        }
+        let mut v = Vec::with_capacity(bytes.len() + 1);
+        v.extend_from_slice(bytes);
+        v.push(0);
+        Ok(v)
     }
 

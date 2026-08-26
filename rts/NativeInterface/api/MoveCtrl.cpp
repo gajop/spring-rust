@@ -13,7 +13,10 @@
 #include "Sim/Path/IPathManager.h"
 #include "Sim/Misc/GlobalConstants.h"
 #include "System/StringUtil.h"
+#include "System/SpringHash.h"
 
+#include <cmath>
+#include <cstring>
 #include <vector>
 
 namespace {
@@ -32,6 +35,16 @@ static const Error NOT_READY_ERROR = {
 static const Error INVALID_UNIT_ERROR = {
 	.code = ERROR_INVALID_ARGUMENT,
 	.message = "Invalid unit ID"
+};
+
+static const Error INVALID_ARGUMENT_ERROR = {
+	.code = ERROR_INVALID_ARGUMENT,
+	.message = "Invalid movement speed"
+};
+
+static const Error INVALID_MOVE_TYPE_FIELD_ERROR = {
+	.code = ERROR_INVALID_ARGUMENT,
+	.message = "Move type field is not supported by this unit"
 };
 
 static const Error BUFFER_OVERFLOW_ERROR = {
@@ -226,6 +239,177 @@ static void NativeSetMoveCtrlGravity(const SetMoveCtrlGravityQuery* query, SetMo
 	result->success = true;
 }
 
+// Typed equivalent of Lua's MoveCtrl.SetGroundMoveTypeData(unitID,
+// {maxSpeed = value}). Keep Lua-facing units at this boundary; AMoveType
+// stores speeds per simulation frame internally.
+static void NativeSetGroundMoveTypeMaxSpeed(
+	const SetGroundMoveTypeMaxSpeedQuery* query,
+	SetGroundMoveTypeMaxSpeedResult* result
+)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+	if (!std::isfinite(query->maxSpeed)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr || unit->moveType == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+	if (dynamic_cast<CGroundMoveType*>(unit->moveType) == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	// SetMemberValue("maxSpeed", value) performs this same conversion and
+	// clamps the internal value to the valid non-zero range.
+	unit->moveType->SetMaxSpeed(query->maxSpeed / GAME_SPEED);
+	result->success = true;
+}
+
+static const char* MoveTypeNumericFieldName(MoveTypeNumericField field)
+{
+	switch (field) {
+		case MOVE_TYPE_MAX_SPEED: return "maxSpeed";
+		case MOVE_TYPE_MAX_WANTED_SPEED: return "maxWantedSpeed";
+		case MOVE_TYPE_MANEUVER_LEASH: return "maneuverLeash";
+		case MOVE_TYPE_WATERLINE: return "waterline";
+
+		case MOVE_TYPE_GROUND_TURN_RATE: return "turnRate";
+		case MOVE_TYPE_GROUND_TURN_ACCEL: return "turnAccel";
+		case MOVE_TYPE_GROUND_ACC_RATE: return "accRate";
+		case MOVE_TYPE_GROUND_DEC_RATE: return "decRate";
+		case MOVE_TYPE_GROUND_MY_GRAVITY: return "myGravity";
+		case MOVE_TYPE_GROUND_MAX_REVERSE_DIST: return "maxReverseDist";
+		case MOVE_TYPE_GROUND_MIN_REVERSE_ANGLE: return "minReverseAngle";
+		case MOVE_TYPE_GROUND_MAX_REVERSE_SPEED: return "maxReverseSpeed";
+		case MOVE_TYPE_GROUND_SQ_SKID_SPEED_MULT: return "sqSkidSpeedMult";
+		case MOVE_TYPE_GROUND_MIN_SCRIPT_CHANGE_HEADING: return "minScriptChangeHeading";
+
+		case MOVE_TYPE_GUNSHIP_WANTED_HEIGHT: return "wantedHeight";
+		case MOVE_TYPE_GUNSHIP_ACC_RATE: return "accRate";
+		case MOVE_TYPE_GUNSHIP_DEC_RATE: return "decRate";
+		case MOVE_TYPE_GUNSHIP_TURN_RATE: return "turnRate";
+		case MOVE_TYPE_GUNSHIP_ALTITUDE_RATE: return "altitudeRate";
+		case MOVE_TYPE_GUNSHIP_CURRENT_BANK: return "currentBank";
+		case MOVE_TYPE_GUNSHIP_CURRENT_PITCH: return "currentPitch";
+		case MOVE_TYPE_GUNSHIP_MAX_DRIFT: return "maxDrift";
+
+		case MOVE_TYPE_AIR_WANTED_HEIGHT: return "wantedHeight";
+		case MOVE_TYPE_AIR_TURN_RADIUS: return "turnRadius";
+		case MOVE_TYPE_AIR_ACC_RATE: return "accRate";
+		case MOVE_TYPE_AIR_DEC_RATE: return "decRate";
+		case MOVE_TYPE_AIR_MAX_ACC: return "maxAcc";
+		case MOVE_TYPE_AIR_MAX_DEC: return "maxDec";
+		case MOVE_TYPE_AIR_MAX_BANK: return "maxBank";
+		case MOVE_TYPE_AIR_MAX_PITCH: return "maxPitch";
+		case MOVE_TYPE_AIR_MAX_AILERON: return "maxAileron";
+		case MOVE_TYPE_AIR_MAX_ELEVATOR: return "maxElevator";
+		case MOVE_TYPE_AIR_MAX_RUDDER: return "maxRudder";
+		case MOVE_TYPE_AIR_ATTACK_SAFETY_DISTANCE: return "attackSafetyDistance";
+		case MOVE_TYPE_AIR_MY_GRAVITY: return "myGravity";
+		case MOVE_TYPE_AIR_MANEUVER_BLOCK_TIME: return "maneuverBlockTime";
+	}
+
+	return nullptr;
+}
+
+static const char* MoveTypeBooleanFieldName(MoveTypeBooleanField field)
+{
+	switch (field) {
+		case MOVE_TYPE_USE_WANTED_SPEED_INDIVIDUAL: return "useWantedSpeed[0]";
+		case MOVE_TYPE_USE_WANTED_SPEED_FORMATION: return "useWantedSpeed[1]";
+
+		case MOVE_TYPE_GROUND_AT_GOAL: return "atGoal";
+		case MOVE_TYPE_GROUND_AT_END_OF_PATH: return "atEndOfPath";
+		case MOVE_TYPE_GROUND_PUSH_RESISTANT: return "pushResistant";
+
+		case MOVE_TYPE_GUNSHIP_COLLIDE: return "collide";
+		case MOVE_TYPE_GUNSHIP_DONT_LAND: return "dontLand";
+		case MOVE_TYPE_GUNSHIP_AIR_STRAFE: return "airStrafe";
+		case MOVE_TYPE_GUNSHIP_USE_SMOOTH_MESH: return "useSmoothMesh";
+		case MOVE_TYPE_GUNSHIP_BANKING_ALLOWED: return "bankingAllowed";
+
+		case MOVE_TYPE_AIR_COLLIDE: return "collide";
+		case MOVE_TYPE_AIR_USE_SMOOTH_MESH: return "useSmoothMesh";
+		case MOVE_TYPE_AIR_LOOPBACK_ATTACK: return "loopbackAttack";
+	}
+
+	return nullptr;
+}
+
+static void NativeSetMoveTypeNumeric(
+	const SetMoveTypeNumericQuery* query,
+	SetMoveTypeNumericResult* result
+)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+	if (!std::isfinite(query->value)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const char* fieldName = MoveTypeNumericFieldName(query->field);
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr || unit->moveType == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+	float value = query->value;
+	if (fieldName == nullptr || !unit->moveType->SetMemberValue(
+		spring::LiteHash(fieldName, std::strlen(fieldName), 0),
+		&value)) {
+		result->error = &INVALID_MOVE_TYPE_FIELD_ERROR;
+		return;
+	}
+
+	result->success = true;
+}
+
+static void NativeSetMoveTypeBoolean(
+	const SetMoveTypeBooleanQuery* query,
+	SetMoveTypeBooleanResult* result
+)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const char* fieldName = MoveTypeBooleanFieldName(query->field);
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr || unit->moveType == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+	bool value = query->value;
+	if (fieldName == nullptr || !unit->moveType->SetMemberValue(
+		spring::LiteHash(fieldName, std::strlen(fieldName), 0),
+		&value)) {
+		result->error = &INVALID_MOVE_TYPE_FIELD_ERROR;
+		return;
+	}
+
+	result->success = true;
+}
+
 } // namespace
 
 const MoveCtrlApi MOVE_CTRL_API = {
@@ -234,4 +418,7 @@ const MoveCtrlApi MOVE_CTRL_API = {
 	.MoveCtrl = NativeMoveCtrl,
 	.IsMoveCtrlEnabled = NativeIsMoveCtrlEnabled,
 	.SetMoveCtrlGravity = NativeSetMoveCtrlGravity,
+	.SetGroundMoveTypeMaxSpeed = NativeSetGroundMoveTypeMaxSpeed,
+	.SetMoveTypeNumeric = NativeSetMoveTypeNumeric,
+	.SetMoveTypeBoolean = NativeSetMoveTypeBoolean,
 };

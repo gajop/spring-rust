@@ -33,6 +33,21 @@ impl From<RmlRegisterEventTypeOptions> for sys::RmlRegisterEventTypeOptions {
     }
 }
 
+/// The complete result tuple returned by [`element_get_rect`].
+pub type ElementGetRectValue = (f32, f32, f32, f32);
+
+/// The complete result tuple returned by [`element_form_control_input_get_selection`].
+pub type ElementFormControlInputGetSelectionValue = (i32, i32, Option<String>, bool);
+
+/// The complete result tuple returned by [`element_form_control_text_area_get_selection`].
+pub type ElementFormControlTextAreaGetSelectionValue = (i32, i32, Option<String>, bool);
+
+/// The complete result tuple returned by [`event_get_current`].
+pub type EventGetCurrentValue = (u64, u64, u64, bool);
+
+/// The complete result tuple returned by [`data_model_get_color`].
+pub type DataModelGetColorValue = (u8, u8, u8, u8, bool);
+
 impl<'a> RmlUi<'a> {
     pub fn create_context(&self, name: &str) -> Result<(u64, bool), Error> {
         unsafe {
@@ -137,7 +152,7 @@ impl<'a> RmlUi<'a> {
             let file_path_cstr = std::ffi::CString::new(file_path).map_err(|_| Error::invalid_argument("file_path"))?;
             let query = sys::RmlLoadFontFaceQuery {
                 filePath: file_path_cstr.as_ptr(),
-                fallback: fallback,
+                fallback,
                 weight: weight.unwrap_or(0),
                 hasWeight: weight.is_some(),
             };
@@ -333,11 +348,11 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let event_cstr = std::ffi::CString::new(event).map_err(|_| Error::invalid_argument("event"))?;
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             unsafe extern "C" fn destroy_callback<F>(user_data: *mut std::ffi::c_void) {
-                drop(Box::from_raw(user_data as *mut F));
+                unsafe { drop(Box::from_raw(user_data as *mut F)); }
             }
             let callback_user_data = Box::into_raw(Box::new(callback));
             let query = sys::RmlContextEventListenerCallbackQuery {
@@ -481,8 +496,8 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextMouseMoveQuery {
                 contextHandle: context_handle,
-                x: x,
-                y: y,
+                x,
+                y,
                 keyModifierState: key_modifier_state,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
@@ -499,7 +514,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextMouseButtonQuery {
                 contextHandle: context_handle,
-                button: button,
+                button,
                 keyModifierState: key_modifier_state,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
@@ -516,7 +531,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextMouseButtonQuery {
                 contextHandle: context_handle,
-                button: button,
+                button,
                 keyModifierState: key_modifier_state,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
@@ -533,8 +548,8 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextMouseWheelQuery {
                 contextHandle: context_handle,
-                x: x,
-                y: y,
+                x,
+                y,
                 keyModifierState: key_modifier_state,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
@@ -581,7 +596,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextKeyQuery {
                 contextHandle: context_handle,
-                key: key,
+                key,
                 keyModifierState: key_modifier_state,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
@@ -598,7 +613,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextKeyQuery {
                 contextHandle: context_handle,
-                key: key,
+                key,
                 keyModifierState: key_modifier_state,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
@@ -632,7 +647,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextBoolQuery {
                 contextHandle: context_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
             let func = self.api.ContextEnableMouseCursor.expect("ContextEnableMouseCursor function pointer must be initialized");
@@ -650,7 +665,7 @@ impl<'a> RmlUi<'a> {
             let query = sys::RmlContextStringBoolQuery {
                 contextHandle: context_handle,
                 name: name_cstr.as_ptr(),
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
             let func = self.api.ContextActivateTheme.expect("ContextActivateTheme function pointer must be initialized");
@@ -683,8 +698,8 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextGetElementAtPointQuery {
                 contextHandle: context_handle,
-                x: x,
-                y: y,
+                x,
+                y,
                 ignoreElementHandle: ignore_element_handle,
             };
             let mut result = MaybeUninit::<sys::RmlContextGetElementAtPointResult>::zeroed();
@@ -773,8 +788,8 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextSetDimensionsQuery {
                 contextHandle: context_handle,
-                x: x,
-                y: y,
+                x,
+                y,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
             let func = self.api.ContextSetDimensions.expect("ContextSetDimensions function pointer must be initialized");
@@ -805,7 +820,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlContextSetFloatQuery {
                 contextHandle: context_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
             let func = self.api.ContextSetDensityIndependentPixelRatio.expect("ContextSetDensityIndependentPixelRatio function pointer must be initialized");
@@ -1179,11 +1194,11 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let event_cstr = std::ffi::CString::new(event).map_err(|_| Error::invalid_argument("event"))?;
             unsafe extern "C" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {
-                let f = &mut *(user_data as *mut F);
+                let f = unsafe { &mut *(user_data as *mut F) };
                 f();
             }
             unsafe extern "C" fn destroy_callback<F>(user_data: *mut std::ffi::c_void) {
-                drop(Box::from_raw(user_data as *mut F));
+                unsafe { drop(Box::from_raw(user_data as *mut F)); }
             }
             let callback_user_data = Box::into_raw(Box::new(callback));
             let query = sys::RmlEventListenerCallbackQuery {
@@ -1478,7 +1493,7 @@ impl<'a> RmlUi<'a> {
             let query = sys::RmlElementStringBoolQuery {
                 elementHandle: element_handle,
                 name: name_cstr.as_ptr(),
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementSetClass.expect("ElementSetClass function pointer must be initialized");
@@ -1655,7 +1670,7 @@ impl<'a> RmlUi<'a> {
             let query = sys::RmlElementStringBoolQuery {
                 elementHandle: element_handle,
                 name: name_cstr.as_ptr(),
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementSetPseudoClass.expect("ElementSetPseudoClass function pointer must be initialized");
@@ -1733,8 +1748,8 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlElementPointQuery {
                 elementHandle: element_handle,
-                x: x,
-                y: y,
+                x,
+                y,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementIsPointWithinElement.expect("ElementIsPointWithinElement function pointer must be initialized");
@@ -1746,7 +1761,7 @@ impl<'a> RmlUi<'a> {
         }
     }
 
-    pub fn element_get_rect(&self, element_handle: u64) -> Result<(f32, f32, f32, f32), Error> {
+    pub fn element_get_rect(&self, element_handle: u64) -> Result<ElementGetRectValue, Error> {
         unsafe {
             let query = sys::RmlElementHandleQuery {
                 elementHandle: element_handle,
@@ -1840,7 +1855,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlElementGetChildQuery {
                 elementHandle: element_handle,
-                index: index,
+                index,
             };
             let mut result = MaybeUninit::<sys::RmlElementGetElementResult>::zeroed();
             let func = self.api.ElementGetChild.expect("ElementGetChild function pointer must be initialized");
@@ -1987,7 +2002,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlElementSetIntQuery {
                 elementHandle: element_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementSetScrollLeft.expect("ElementSetScrollLeft function pointer must be initialized");
@@ -2018,7 +2033,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlElementSetIntQuery {
                 elementHandle: element_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementSetScrollTop.expect("ElementSetScrollTop function pointer must be initialized");
@@ -2090,7 +2105,7 @@ impl<'a> RmlUi<'a> {
             let query = sys::RmlElementFormControlSelectAddQuery {
                 elementHandle: element_handle,
                 elementPtrHandle: element_ptr_handle,
-                before: before,
+                before,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementFormControlSelectAdd.expect("ElementFormControlSelectAdd function pointer must be initialized");
@@ -2106,7 +2121,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlElementFormControlSelectRemoveQuery {
                 elementHandle: element_handle,
-                index: index,
+                index,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementFormControlSelectRemove.expect("ElementFormControlSelectRemove function pointer must be initialized");
@@ -2152,8 +2167,8 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlElementFormControlSelectionQuery {
                 elementHandle: element_handle,
-                start: start,
-                end: end,
+                start,
+                end,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementFormControlInputSetSelection.expect("ElementFormControlInputSetSelection function pointer must be initialized");
@@ -2165,7 +2180,7 @@ impl<'a> RmlUi<'a> {
         }
     }
 
-    pub fn element_form_control_input_get_selection(&self, element_handle: u64) -> Result<(i32, i32, Option<String>, bool), Error> {
+    pub fn element_form_control_input_get_selection(&self, element_handle: u64) -> Result<ElementFormControlInputGetSelectionValue, Error> {
         unsafe {
             let query = sys::RmlElementHandleQuery {
                 elementHandle: element_handle,
@@ -2209,8 +2224,8 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlElementFormControlSelectionQuery {
                 elementHandle: element_handle,
-                start: start,
-                end: end,
+                start,
+                end,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementFormControlTextAreaSetSelection.expect("ElementFormControlTextAreaSetSelection function pointer must be initialized");
@@ -2222,7 +2237,7 @@ impl<'a> RmlUi<'a> {
         }
     }
 
-    pub fn element_form_control_text_area_get_selection(&self, element_handle: u64) -> Result<(i32, i32, Option<String>, bool), Error> {
+    pub fn element_form_control_text_area_get_selection(&self, element_handle: u64) -> Result<ElementFormControlTextAreaGetSelectionValue, Error> {
         unsafe {
             let query = sys::RmlElementHandleQuery {
                 elementHandle: element_handle,
@@ -2252,7 +2267,7 @@ impl<'a> RmlUi<'a> {
             let rml_cstr = std::ffi::CString::new(rml).map_err(|_| Error::invalid_argument("rml"))?;
             let query = sys::RmlElementTabSetIndexStringQuery {
                 elementHandle: element_handle,
-                index: index,
+                index,
                 rml: rml_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
@@ -2270,7 +2285,7 @@ impl<'a> RmlUi<'a> {
             let rml_cstr = std::ffi::CString::new(rml).map_err(|_| Error::invalid_argument("rml"))?;
             let query = sys::RmlElementTabSetIndexStringQuery {
                 elementHandle: element_handle,
-                index: index,
+                index,
                 rml: rml_cstr.as_ptr(),
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
@@ -2287,7 +2302,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlElementTabSetIndexQuery {
                 elementHandle: element_handle,
-                index: index,
+                index,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.ElementTabSetRemoveTab.expect("ElementTabSetRemoveTab function pointer must be initialized");
@@ -2347,7 +2362,7 @@ impl<'a> RmlUi<'a> {
         }
     }
 
-    pub fn event_get_current(&self) -> Result<(u64, u64, u64, bool), Error> {
+    pub fn event_get_current(&self) -> Result<EventGetCurrentValue, Error> {
         unsafe {
             let query = sys::RmlEventCurrentQuery {
                 _unused: 0,
@@ -2724,7 +2739,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlDataModelVariableBoolQuery {
                 variableHandle: variable_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.DataModelSetBool.expect("DataModelSetBool function pointer must be initialized");
@@ -2740,7 +2755,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlDataModelVariableIntQuery {
                 variableHandle: variable_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.DataModelSetInt.expect("DataModelSetInt function pointer must be initialized");
@@ -2756,7 +2771,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlDataModelVariableFloatQuery {
                 variableHandle: variable_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.DataModelSetFloat.expect("DataModelSetFloat function pointer must be initialized");
@@ -2862,8 +2877,8 @@ impl<'a> RmlUi<'a> {
     pub fn vector2f_new(&self, x: f32, y: f32) -> Result<(f32, f32), Error> {
         unsafe {
             let query = sys::RmlVector2fNewQuery {
-                x: x,
-                y: y,
+                x,
+                y,
             };
             let mut result = MaybeUninit::<sys::RmlVector2fNewResult>::zeroed();
             let func = self.api.Vector2fNew.expect("Vector2fNew function pointer must be initialized");
@@ -2880,8 +2895,8 @@ impl<'a> RmlUi<'a> {
     pub fn vector2i_new(&self, x: i32, y: i32) -> Result<(i32, i32), Error> {
         unsafe {
             let query = sys::RmlVector2iNewQuery {
-                x: x,
-                y: y,
+                x,
+                y,
             };
             let mut result = MaybeUninit::<sys::RmlVector2iNewResult>::zeroed();
             let func = self.api.Vector2iNew.expect("Vector2iNew function pointer must be initialized");
@@ -2901,10 +2916,10 @@ impl<'a> RmlUi<'a> {
             let query = sys::RmlDataModelBindColorQuery {
                 dataModelHandle: data_model_handle,
                 name: name_cstr.as_ptr(),
-                red: red,
-                green: green,
-                blue: blue,
-                alpha: alpha,
+                red,
+                green,
+                blue,
+                alpha,
             };
             let mut result = MaybeUninit::<sys::RmlDataModelBindResult>::zeroed();
             let func = self.api.DataModelBindColor.expect("DataModelBindColor function pointer must be initialized");
@@ -2922,10 +2937,10 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlDataModelVariableColorQuery {
                 variableHandle: variable_handle,
-                red: red,
-                green: green,
-                blue: blue,
-                alpha: alpha,
+                red,
+                green,
+                blue,
+                alpha,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.DataModelSetColor.expect("DataModelSetColor function pointer must be initialized");
@@ -2937,7 +2952,7 @@ impl<'a> RmlUi<'a> {
         }
     }
 
-    pub fn data_model_get_color(&self, variable_handle: u64) -> Result<(u8, u8, u8, u8, bool), Error> {
+    pub fn data_model_get_color(&self, variable_handle: u64) -> Result<DataModelGetColorValue, Error> {
         unsafe {
             let query = sys::RmlDataModelVariableHandleQuery {
                 variableHandle: variable_handle,
@@ -2981,7 +2996,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlDataModelVariablePixelsQuery {
                 variableHandle: variable_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.DataModelSetPixels.expect("DataModelSetPixels function pointer must be initialized");
@@ -3034,7 +3049,7 @@ impl<'a> RmlUi<'a> {
         unsafe {
             let query = sys::RmlDataModelVariablePercentQuery {
                 variableHandle: variable_handle,
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.DataModelSetPercent.expect("DataModelSetPercent function pointer must be initialized");
@@ -3084,7 +3099,7 @@ impl<'a> RmlUi<'a> {
                 contextHandle: context_handle,
                 anchorX: anchor_x,
                 anchorY: anchor_y,
-                active: active,
+                active,
             };
             let mut result = MaybeUninit::<sys::RmlContextBoolResult>::zeroed();
             let func = self.api.ContextSetPointerCapture.expect("ContextSetPointerCapture function pointer must be initialized");

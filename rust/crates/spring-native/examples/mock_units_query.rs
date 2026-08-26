@@ -1,4 +1,4 @@
-use spring_native::{sys, NativeInterfaceRef};
+use spring_native::{NativeInterfaceRef, sys};
 use std::ptr;
 
 static MOCK_UNITS: [i32; 3] = [101, 202, 303];
@@ -8,8 +8,8 @@ unsafe extern "C" fn mock_valid_unit_id(
     query: *const sys::ValidUnitIDQuery,
     result: *mut sys::ValidUnitIDResult,
 ) {
-    let query = &*query;
-    let result = &mut *result;
+    let query = unsafe { &*query };
+    let result = unsafe { &mut *result };
     result.error = ptr::null();
     result.valid = query.unitID >= 0;
 }
@@ -18,7 +18,7 @@ unsafe extern "C" fn mock_get_units_in_rectangle(
     _query: *const sys::GetUnitsInRectangleQuery,
     result: *mut sys::GetUnitsInRectangleResult,
 ) {
-    let result = &mut *result;
+    let result = unsafe { &mut *result };
     result.error = ptr::null();
     result.units = MOCK_UNITS.as_ptr() as *mut i32;
     result.count = MOCK_UNITS.len() as u32;
@@ -28,7 +28,7 @@ unsafe extern "C" fn mock_get_unit_separation(
     _query: *const sys::GetUnitSeparationQuery,
     result: *mut sys::GetUnitSeparationResult,
 ) {
-    let result = &mut *result;
+    let result = unsafe { &mut *result };
     result.error = ptr::null();
     result.separation = 123.0;
 }
@@ -37,7 +37,7 @@ unsafe extern "C" fn mock_get_unit_tooltip(
     _query: *const sys::GetUnitTooltipQuery,
     result: *mut sys::GetUnitTooltipResult,
 ) {
-    let result = &mut *result;
+    let result = unsafe { &mut *result };
     result.error = ptr::null();
     result.tooltip = TOOLTIP.as_ptr() as *const i8;
 }
@@ -46,20 +46,24 @@ unsafe extern "C" fn mock_get_unit_is_active(
     _query: *const sys::GetUnitIsActiveQuery,
     result: *mut sys::GetUnitIsActiveResult,
 ) {
-    let result = &mut *result;
+    let result = unsafe { &mut *result };
     result.error = ptr::null();
     result.isActive = true;
 }
 
 fn main() {
-    let mut units_query_api = sys::UnitsQueryApi::default();
-    units_query_api.ValidUnitID = Some(mock_valid_unit_id);
-    units_query_api.GetUnitsInRectangle = Some(mock_get_units_in_rectangle);
-    units_query_api.GetUnitSeparation = Some(mock_get_unit_separation);
+    let units_query_api = sys::UnitsQueryApi {
+        ValidUnitID: Some(mock_valid_unit_id),
+        GetUnitsInRectangle: Some(mock_get_units_in_rectangle),
+        GetUnitSeparation: Some(mock_get_unit_separation),
+        ..Default::default()
+    };
 
-    let mut units_info_api = sys::UnitsInfoApi::default();
-    units_info_api.GetUnitTooltip = Some(mock_get_unit_tooltip);
-    units_info_api.GetUnitIsActive = Some(mock_get_unit_is_active);
+    let units_info_api = sys::UnitsInfoApi {
+        GetUnitTooltip: Some(mock_get_unit_tooltip),
+        GetUnitIsActive: Some(mock_get_unit_is_active),
+        ..Default::default()
+    };
 
     macro_rules! empty_api {
         ($ty:ty) => {

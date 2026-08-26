@@ -11,7 +11,7 @@ use std::{
     path::Path,
 };
 
-use crate::{lua_loader::LuaLoaderMatrix, ApiSpec, CType, Primitive};
+use crate::{ApiSpec, CType, Primitive, lua_loader::LuaLoaderMatrix};
 
 /// An execution environment in which a module instance may run.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -1144,9 +1144,11 @@ mod tests {
                 }),
             }
         );
-        assert!(fields[0]
-            .metadata
-            .contains(&"count-field:dataSize".to_string()));
+        assert!(
+            fields[0]
+                .metadata
+                .contains(&"count-field:dataSize".to_string())
+        );
     }
 
     #[test]
@@ -1166,9 +1168,11 @@ mod tests {
                 family: "texture".to_string()
             }
         );
-        assert!(lowered
-            .metadata
-            .contains(&"spring.wasm.handle:texture".to_string()));
+        assert!(
+            lowered
+                .metadata
+                .contains(&"spring.wasm.handle:texture".to_string())
+        );
     }
 
     #[test]

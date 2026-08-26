@@ -1,5 +1,5 @@
     pub mod terrain {
-        use super::{Result, String, Vec};
+        use super::{Result, String};
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetGrassQuery {
@@ -250,7 +250,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_terrain_ground_extremes {
             #[link(wasm_import_module = "spring:terrain")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-ground-extremes"]
                 pub fn call(output: i32) -> i32;
             }
@@ -312,7 +312,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_terrain_height_map_size {
             #[link(wasm_import_module = "spring:terrain")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-height-map-size"]
                 pub fn call(output: i32) -> i32;
             }
@@ -362,7 +362,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_terrain_water_plane_level {
             #[link(wasm_import_module = "spring:terrain")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-water-plane-level"]
                 pub fn call() -> i64;
             }
@@ -385,7 +385,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_terrain_is_pos_in_map {
             #[link(wasm_import_module = "spring:terrain")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "is-pos-in-map"]
                 pub fn call(x: f32, z: f32) -> i64;
             }

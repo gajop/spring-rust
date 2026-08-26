@@ -532,32 +532,59 @@ fn render_wire_read(
     let pad = "    ".repeat(indent);
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
-            "bool" => format!("{pad}if (!{reader}.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "f32" => format!("{pad}if (!{reader}.F32({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "f64" => format!("{pad}if (!{reader}.F64({destination})) return Trap(\"generated Core wire underflow\");\n"),
+            "bool" => format!(
+                "{pad}if (!{reader}.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
+            "f32" => format!(
+                "{pad}if (!{reader}.F32({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
+            "f64" => format!(
+                "{pad}if (!{reader}.F64({destination})) return Trap(\"generated Core wire underflow\");\n"
+            ),
             "i64" | "isize" => scalar_read(reader, "I64", "std::int64_t", destination, &pad),
             "u64" | "usize" => scalar_read(reader, "U64", "std::uint64_t", destination, &pad),
             "i8" | "i16" | "i32" => scalar_read(reader, "I32", "std::int32_t", destination, &pad),
             _ => scalar_read(reader, "U32", "std::uint32_t", destination, &pad),
         },
         SemanticType::Enum { .. } => scalar_read(reader, "I32", "std::int32_t", destination, &pad),
-        SemanticType::Handle { .. } => scalar_read(reader, "U64", "std::uint64_t", destination, &pad),
+        SemanticType::Handle { .. } => {
+            scalar_read(reader, "U64", "std::uint64_t", destination, &pad)
+        }
         SemanticType::Record { name } => records[name]
             .fields
             .iter()
-            .map(|field| render_wire_read(&field.ty, &format!("{destination}.{}", field.name), records, reader, indent))
+            .map(|field| {
+                render_wire_read(
+                    &field.ty,
+                    &format!("{destination}.{}", field.name),
+                    records,
+                    reader,
+                    indent,
+                )
+            })
             .collect::<String>(),
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreReadIndex{indent}");
-            let nested = render_wire_read(element, &format!("{destination}[{index}]"), records, reader, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_wire_read(
+                element,
+                &format!("{destination}[{index}]"),
+                records,
+                reader,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
 }
 
 fn scalar_read(reader: &str, method: &str, raw: &str, destination: &str, pad: &str) -> String {
-    format!("{pad}{{ {raw} coreRaw = 0; if (!{reader}.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw"))
+    format!(
+        "{pad}{{ {raw} coreRaw = 0; if (!{reader}.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+        cast = native_cast(destination, "coreRaw")
+    )
 }
 
 fn render_wire_write(
@@ -571,23 +598,49 @@ fn render_wire_write(
     match ty {
         SemanticType::Scalar { name } => {
             let method = match name.as_str() {
-                "bool" => "Bool", "f32" => "F32", "f64" => "F64",
-                "i64" | "isize" => "I64", "u64" | "usize" => "U64",
-                "i8" | "i16" | "i32" => "I32", _ => "U32",
+                "bool" => "Bool",
+                "f32" => "F32",
+                "f64" => "F64",
+                "i64" | "isize" => "I64",
+                "u64" | "usize" => "U64",
+                "i8" | "i16" | "i32" => "I32",
+                _ => "U32",
             };
-            format!("{pad}if (!{writer}.{method}({value})) return Trap(\"generated Core wire overflow\");\n")
+            format!(
+                "{pad}if (!{writer}.{method}({value})) return Trap(\"generated Core wire overflow\");\n"
+            )
         }
-        SemanticType::Enum { .. } => format!("{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
-        SemanticType::Handle { .. } => format!("{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
+        SemanticType::Enum { .. } => format!(
+            "{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"
+        ),
+        SemanticType::Handle { .. } => format!(
+            "{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"
+        ),
         SemanticType::Record { name } => records[name]
             .fields
             .iter()
-            .map(|field| render_wire_write(&field.ty, &format!("{value}.{}", field.name), records, writer, indent))
+            .map(|field| {
+                render_wire_write(
+                    &field.ty,
+                    &format!("{value}.{}", field.name),
+                    records,
+                    writer,
+                    indent,
+                )
+            })
             .collect::<String>(),
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
-            let nested = render_wire_write(element, &format!("{value}[{index}]"), records, writer, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_wire_write(
+                element,
+                &format!("{value}[{index}]"),
+                records,
+                writer,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }
@@ -624,7 +677,9 @@ fn count_field(field: &FieldModel) -> Option<String> {
 fn error_return(plan: &FunctionPlan, status: &str, indent: usize) -> String {
     let pad = "    ".repeat(indent);
     if matches!(plan.result_strategy, ResultStrategy::Packed32) {
-        format!("{pad}slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>({status})));\n{pad}return nullptr;\n")
+        format!(
+            "{pad}slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>({status})));\n{pad}return nullptr;\n"
+        )
     } else {
         format!("{pad}slots[0].i32 = static_cast<std::int32_t>({status});\n{pad}return nullptr;\n")
     }
@@ -633,8 +688,16 @@ fn error_return(plan: &FunctionPlan, status: &str, indent: usize) -> String {
 fn render_registration(plan: &FunctionPlan, callback: &str) -> String {
     let params = kind_array("params", &plan.direct_params);
     let results = kind_array("results", &plan.direct_results);
-    format!("    {{\n{params}{results}        if (!DefineGeneratedVariable(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
-        params=params, results=results, module=plan.import_module, name=plan.import_name, pc=plan.direct_params.len(), rc=plan.direct_results.len(), callback=callback)
+    format!(
+        "    {{\n{params}{results}        if (!DefineGeneratedVariable(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
+        params = params,
+        results = results,
+        module = plan.import_module,
+        name = plan.import_name,
+        pc = plan.direct_params.len(),
+        rc = plan.direct_results.len(),
+        callback = callback
+    )
 }
 
 fn kind_array(name: &str, kinds: &[CoreType]) -> String {

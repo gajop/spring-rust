@@ -56,6 +56,9 @@ impl From<SetWindowGeometryOptions> for sys::SetWindowGeometryOptions {
     }
 }
 
+/// The complete result tuple returned by [`set_draw_models_deferred`].
+pub type SetDrawModelsDeferredValue = (bool, bool, bool, bool, bool);
+
 impl<'a> UnsyncedCtrl<'a> {
     pub fn set_unit_no_draw(&self, unit_id: i32, no_draw: bool) -> Result<bool, Error> {
         unsafe {
@@ -172,7 +175,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_mini_map_rotation(&self, radians: f32) -> Result<(bool, i32), Error> {
         unsafe {
             let query = sys::SetMiniMapRotationQuery {
-                radians: radians,
+                radians,
             };
             let mut result = MaybeUninit::<sys::SetMiniMapRotationResult>::zeroed();
             let func = self.api.SetMiniMapRotation.expect("SetMiniMapRotation function pointer must be initialized");
@@ -207,7 +210,7 @@ impl<'a> UnsyncedCtrl<'a> {
             let cursor_name_cstr = std::ffi::CString::new(cursor_name).map_err(|_| Error::invalid_argument("cursor_name"))?;
             let query = sys::SetMouseCursorQuery {
                 cursorName: cursor_name_cstr.as_ptr(),
-                scale: scale,
+                scale,
             };
             let mut result = MaybeUninit::<sys::SetMouseCursorResult>::zeroed();
             let func = self.api.SetMouseCursor.expect("SetMouseCursor function pointer must be initialized");
@@ -226,7 +229,7 @@ impl<'a> UnsyncedCtrl<'a> {
             let query = sys::AssignMouseCursorQuery {
                 commandName: command_name_cstr.as_ptr(),
                 cursorFileName: cursor_file_name_cstr.as_ptr(),
-                overwrite: overwrite,
+                overwrite,
                 hotSpotTopLeft: hot_spot_top_left,
             };
             let mut result = MaybeUninit::<sys::AssignMouseCursorResult>::zeroed();
@@ -261,8 +264,8 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn warp_mouse(&self, x: i32, y: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::WarpMouseQuery {
-                x: x,
-                y: y,
+                x,
+                y,
             };
             let mut result = MaybeUninit::<sys::WarpMouseResult>::zeroed();
             let func = self.api.WarpMouse.expect("WarpMouse function pointer must be initialized");
@@ -278,7 +281,7 @@ impl<'a> UnsyncedCtrl<'a> {
         unsafe {
             let query = sys::SetActiveCommandQuery {
                 cmdIndex: cmd_index,
-                button: button,
+                button,
                 options: options.into(),
             };
             let mut result = MaybeUninit::<sys::SetActiveCommandResult>::zeroed();
@@ -324,10 +327,10 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn sdlset_text_input_rect(&self, x: i32, y: i32, w: i32, h: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SDLSetTextInputRectQuery {
-                x: x,
-                y: y,
-                w: w,
-                h: h,
+                x,
+                y,
+                w,
+                h,
             };
             let mut result = MaybeUninit::<sys::SDLSetTextInputRectResult>::zeroed();
             let func = self.api.SDLSetTextInputRect.expect("SDLSetTextInputRect function pointer must be initialized");
@@ -342,7 +345,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_box_selection_by_engine(&self, state: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetBoxSelectionByEngineQuery {
-                state: state,
+                state,
             };
             let mut result = MaybeUninit::<sys::SetBoxSelectionByEngineResult>::zeroed();
             let func = self.api.SetBoxSelectionByEngine.expect("SetBoxSelectionByEngine function pointer must be initialized");
@@ -357,7 +360,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_build_facing(&self, facing: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetBuildFacingQuery {
-                facing: facing,
+                facing,
             };
             let mut result = MaybeUninit::<sys::SetBuildFacingResult>::zeroed();
             let func = self.api.SetBuildFacing.expect("SetBuildFacing function pointer must be initialized");
@@ -372,7 +375,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_build_spacing(&self, spacing: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetBuildSpacingQuery {
-                spacing: spacing,
+                spacing,
             };
             let mut result = MaybeUninit::<sys::SetBuildSpacingResult>::zeroed();
             let func = self.api.SetBuildSpacing.expect("SetBuildSpacing function pointer must be initialized");
@@ -502,7 +505,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn pause_dolly_camera(&self, percent: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::PauseDollyCameraQuery {
-                percent: percent,
+                percent,
             };
             let mut result = MaybeUninit::<sys::PauseDollyCameraResult>::zeroed();
             let func = self.api.PauseDollyCamera.expect("PauseDollyCamera function pointer must be initialized");
@@ -532,7 +535,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_dolly_camera_mode(&self, mode: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetDollyCameraModeQuery {
-                mode: mode,
+                mode,
             };
             let mut result = MaybeUninit::<sys::SetDollyCameraModeResult>::zeroed();
             let func = self.api.SetDollyCameraMode.expect("SetDollyCameraMode function pointer must be initialized");
@@ -547,7 +550,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_dolly_camera_position(&self, position: sys::Float3) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetDollyCameraPositionQuery {
-                position: position,
+                position,
             };
             let mut result = MaybeUninit::<sys::SetDollyCameraPositionResult>::zeroed();
             let func = self.api.SetDollyCameraPosition.expect("SetDollyCameraPosition function pointer must be initialized");
@@ -562,7 +565,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_dolly_camera_curve(&self, degree: i32, control_points: &[sys::Float4], knots: &[f32]) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetDollyCameraCurveQuery {
-                degree: degree,
+                degree,
                 controlPoints: control_points.as_ptr(),
                 controlPointsCount: control_points.len() as u32,
                 knots: knots.as_ptr(),
@@ -581,7 +584,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_dolly_camera_look_position(&self, position: sys::Float3) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetDollyCameraLookPositionQuery {
-                position: position,
+                position,
             };
             let mut result = MaybeUninit::<sys::SetDollyCameraLookPositionResult>::zeroed();
             let func = self.api.SetDollyCameraLookPosition.expect("SetDollyCameraLookPosition function pointer must be initialized");
@@ -611,7 +614,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_dolly_camera_look_curve(&self, degree: i32, control_points: &[sys::Float4], knots: &[f32]) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetDollyCameraLookCurveQuery {
-                degree: degree,
+                degree,
                 controlPoints: control_points.as_ptr(),
                 controlPointsCount: control_points.len() as u32,
                 knots: knots.as_ptr(),
@@ -630,7 +633,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_dolly_camera_relative_mode(&self, mode: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetDollyCameraRelativeModeQuery {
-                mode: mode,
+                mode,
             };
             let mut result = MaybeUninit::<sys::SetDollyCameraRelativeModeResult>::zeroed();
             let func = self.api.SetDollyCameraRelativeMode.expect("SetDollyCameraRelativeMode function pointer must be initialized");
@@ -737,7 +740,7 @@ impl<'a> UnsyncedCtrl<'a> {
         }
     }
 
-    pub fn set_draw_models_deferred(&self, draw_units_deferred: bool, draw_features_deferred: bool, draw_units_forward: bool, draw_features_forward: bool) -> Result<(bool, bool, bool, bool, bool), Error> {
+    pub fn set_draw_models_deferred(&self, draw_units_deferred: bool, draw_features_deferred: bool, draw_units_forward: bool, draw_features_forward: bool) -> Result<SetDrawModelsDeferredValue, Error> {
         unsafe {
             let query = sys::SetDrawModelsDeferredQuery {
                 drawUnitsDeferred: draw_units_deferred,
@@ -763,7 +766,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_atmosphere(&self, params: sys::AtmosphereParams) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetAtmosphereQuery {
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::SetAtmosphereResult>::zeroed();
             let func = self.api.SetAtmosphere.expect("SetAtmosphere function pointer must be initialized");
@@ -778,8 +781,8 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_sun_direction(&self, dir: sys::Float3, intensity: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetSunDirectionQuery {
-                dir: dir,
-                intensity: intensity,
+                dir,
+                intensity,
             };
             let mut result = MaybeUninit::<sys::SetSunDirectionResult>::zeroed();
             let func = self.api.SetSunDirection.expect("SetSunDirection function pointer must be initialized");
@@ -794,7 +797,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_sun_lighting(&self, params: sys::SunLightingParams) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetSunLightingQuery {
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::SetSunLightingResult>::zeroed();
             let func = self.api.SetSunLighting.expect("SetSunLighting function pointer must be initialized");
@@ -809,7 +812,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_water_params(&self, params: sys::WaterParams) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetWaterParamsQuery {
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::SetWaterParamsResult>::zeroed();
             let func = self.api.SetWaterParams.expect("SetWaterParams function pointer must be initialized");
@@ -844,7 +847,7 @@ impl<'a> UnsyncedCtrl<'a> {
             let query = sys::SetMapShadingTextureQuery {
                 texType: tex_type_cstr.as_ptr(),
                 texName: tex_name_cstr.as_ptr(),
-                num: num,
+                num,
             };
             let mut result = MaybeUninit::<sys::SetMapShadingTextureResult>::zeroed();
             let func = self.api.SetMapShadingTexture.expect("SetMapShadingTexture function pointer must be initialized");
@@ -875,7 +878,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_map_rendering_params(&self, params: sys::MapRenderingParams) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetMapRenderingParamsQuery {
-                params: params,
+                params,
             };
             let mut result = MaybeUninit::<sys::SetMapRenderingParamsResult>::zeroed();
             let func = self.api.SetMapRenderingParams.expect("SetMapRenderingParams function pointer must be initialized");
@@ -890,11 +893,11 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_los_view_colors(&self, always: sys::RgbColor, los: sys::RgbColor, radar: sys::RgbColor, jam: sys::RgbColor, radar2: sys::RgbColor) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetLosViewColorsQuery {
-                always: always,
-                los: los,
-                radar: radar,
-                jam: jam,
-                radar2: radar2,
+                always,
+                los,
+                radar,
+                jam,
+                radar2,
             };
             let mut result = MaybeUninit::<sys::SetLosViewColorsResult>::zeroed();
             let func = self.api.SetLosViewColors.expect("SetLosViewColors function pointer must be initialized");
@@ -909,7 +912,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_draw_selection_info(&self, draw: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetDrawSelectionInfoQuery {
-                draw: draw,
+                draw,
             };
             let mut result = MaybeUninit::<sys::SetDrawSelectionInfoResult>::zeroed();
             let func = self.api.SetDrawSelectionInfo.expect("SetDrawSelectionInfo function pointer must be initialized");
@@ -941,7 +944,7 @@ impl<'a> UnsyncedCtrl<'a> {
             let query = sys::SetCustomCommandDrawDataQuery {
                 cmdID: cmd_id,
                 cmdReference: cmd_reference,
-                color: color,
+                color,
                 showArea: show_area,
             };
             let mut result = MaybeUninit::<sys::SetCustomCommandDrawDataResult>::zeroed();
@@ -957,7 +960,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_last_message_position(&self, pos: sys::Float3) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetLastMessagePositionQuery {
-                pos: pos,
+                pos,
             };
             let mut result = MaybeUninit::<sys::SetLastMessagePositionResult>::zeroed();
             let func = self.api.SetLastMessagePosition.expect("SetLastMessagePosition function pointer must be initialized");
@@ -1035,8 +1038,8 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn force_tesselation_update(&self, normal: bool, shadow: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::ForceTesselationUpdateQuery {
-                normal: normal,
-                shadow: shadow,
+                normal,
+                shadow,
             };
             let mut result = MaybeUninit::<sys::ForceTesselationUpdateResult>::zeroed();
             let func = self.api.ForceTesselationUpdate.expect("ForceTesselationUpdate function pointer must be initialized");
@@ -1051,7 +1054,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_auto_show_metal(&self, enable: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetAutoShowMetalQuery {
-                enable: enable,
+                enable,
             };
             let mut result = MaybeUninit::<sys::SetAutoShowMetalResult>::zeroed();
             let func = self.api.SetAutoShowMetal.expect("SetAutoShowMetal function pointer must be initialized");
@@ -1133,10 +1136,10 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_custom_palette_color(&self, index: i32, r: f32, g: f32, b: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetCustomPaletteColorQuery {
-                index: index,
-                r: r,
-                g: g,
-                b: b,
+                index,
+                r,
+                g,
+                b,
             };
             let mut result = MaybeUninit::<sys::SetCustomPaletteColorResult>::zeroed();
             let func = self.api.SetCustomPaletteColor.expect("SetCustomPaletteColor function pointer must be initialized");
@@ -1183,7 +1186,7 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_engine_build_square_rendering(&self, enabled: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetEngineBuildSquareRenderingQuery {
-                enabled: enabled,
+                enabled,
             };
             let mut result = MaybeUninit::<sys::SetEngineBuildSquareRenderingResult>::zeroed();
             let func = self.api.SetEngineBuildSquareRendering.expect("SetEngineBuildSquareRendering function pointer must be initialized");
@@ -1215,7 +1218,7 @@ impl<'a> UnsyncedCtrl<'a> {
         unsafe {
             let query = sys::SetFeatureEngineDrawMaskQuery {
                 featureID: feature_id,
-                mask: mask,
+                mask,
             };
             let mut result = MaybeUninit::<sys::SetFeatureEngineDrawMaskResult>::zeroed();
             let func = self.api.SetFeatureEngineDrawMask.expect("SetFeatureEngineDrawMask function pointer must be initialized");
@@ -1231,7 +1234,7 @@ impl<'a> UnsyncedCtrl<'a> {
         unsafe {
             let query = sys::SetFeatureAlwaysUpdateMatrixQuery {
                 featureID: feature_id,
-                enable: enable,
+                enable,
             };
             let mut result = MaybeUninit::<sys::SetFeatureAlwaysUpdateMatrixResult>::zeroed();
             let func = self.api.SetFeatureAlwaysUpdateMatrix.expect("SetFeatureAlwaysUpdateMatrix function pointer must be initialized");
@@ -1247,7 +1250,7 @@ impl<'a> UnsyncedCtrl<'a> {
         unsafe {
             let query = sys::SetFeatureFadeQuery {
                 featureID: feature_id,
-                allow: allow,
+                allow,
             };
             let mut result = MaybeUninit::<sys::SetFeatureFadeResult>::zeroed();
             let func = self.api.SetFeatureFade.expect("SetFeatureFade function pointer must be initialized");
@@ -1262,9 +1265,9 @@ impl<'a> UnsyncedCtrl<'a> {
     pub fn set_nano_projectile_params(&self, r: f32, v: f32, a: f32, rand_r: f32, rand_v: f32, rand_a: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetNanoProjectileParamsQuery {
-                r: r,
-                v: v,
-                a: a,
+                r,
+                v,
+                a,
                 randR: rand_r,
                 randV: rand_v,
                 randA: rand_a,
@@ -1314,7 +1317,7 @@ impl<'a> UnsyncedCtrl<'a> {
             let query = sys::SelectUnitMapQuery {
                 unitIDs: unit_ids.as_ptr(),
                 count: unit_ids.len() as u32,
-                append: append,
+                append,
             };
             let mut result = MaybeUninit::<sys::SelectUnitMapResult>::zeroed();
             let func = self.api.SelectUnitMap.expect("SelectUnitMap function pointer must be initialized");

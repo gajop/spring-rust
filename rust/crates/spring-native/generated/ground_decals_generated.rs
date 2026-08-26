@@ -14,6 +14,12 @@ impl From<GetGroundDecalTexturesOptions> for sys::GetGroundDecalTexturesOptions 
     }
 }
 
+/// The complete result tuple returned by [`get_ground_decal_misc`].
+pub type GetGroundDecalMiscValue = (f32, f32, f32, f32, f32);
+
+/// The complete result tuple returned by [`get_ground_decal_size_and_height`].
+pub type GetGroundDecalSizeAndHeightValue = (f32, f32, f32, bool);
+
 impl<'a> GroundDecals<'a> {
     pub fn create_ground_decal(&self) -> Result<(u32, bool), Error> {
         unsafe {
@@ -253,7 +259,7 @@ impl<'a> GroundDecals<'a> {
         }
     }
 
-    pub fn get_ground_decal_misc(&self, decal_id: u32) -> Result<(f32, f32, f32, f32, f32), Error> {
+    pub fn get_ground_decal_misc(&self, decal_id: u32) -> Result<GetGroundDecalMiscValue, Error> {
         unsafe {
             let query = sys::GetGroundDecalMiscQuery {
                 decalID: decal_id,
@@ -359,7 +365,7 @@ impl<'a> GroundDecals<'a> {
         }
     }
 
-    pub fn get_ground_decal_size_and_height(&self, decal_id: u32) -> Result<(f32, f32, f32, bool), Error> {
+    pub fn get_ground_decal_size_and_height(&self, decal_id: u32) -> Result<GetGroundDecalSizeAndHeightValue, Error> {
         unsafe {
             let query = sys::GetGroundDecalSizeAndHeightQuery {
                 decalID: decal_id,
@@ -398,6 +404,7 @@ impl<'a> GroundDecals<'a> {
         }
     }
 
+    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_ground_decal_quad_pos_and_height(&self, decal_id: u32, pos_tlx: f32, pos_tly: f32, pos_trx: f32, pos_try: f32, pos_brx: f32, pos_bry: f32, pos_blx: f32, pos_bly: f32, proj_cube_height: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetGroundDecalQuadPosAndHeightQuery {
@@ -426,7 +433,7 @@ impl<'a> GroundDecals<'a> {
         unsafe {
             let query = sys::SetGroundDecalRotationQuery {
                 decalID: decal_id,
-                rotation: rotation,
+                rotation,
             };
             let mut result = MaybeUninit::<sys::SetGroundDecalRotationResult>::zeroed();
             let func = self.api.SetGroundDecalRotation.expect("SetGroundDecalRotation function pointer must be initialized");
@@ -477,7 +484,7 @@ impl<'a> GroundDecals<'a> {
         unsafe {
             let query = sys::SetGroundDecalAlphaQuery {
                 decalID: decal_id,
-                alpha: alpha,
+                alpha,
                 alphaFalloff: alpha_falloff,
             };
             let mut result = MaybeUninit::<sys::SetGroundDecalAlphaResult>::zeroed();
@@ -531,7 +538,7 @@ impl<'a> GroundDecals<'a> {
         unsafe {
             let query = sys::SetGroundDecalGlowParamsQuery {
                 decalID: decal_id,
-                glow: glow,
+                glow,
                 glowFalloff: glow_falloff,
             };
             let mut result = MaybeUninit::<sys::SetGroundDecalGlowParamsResult>::zeroed();

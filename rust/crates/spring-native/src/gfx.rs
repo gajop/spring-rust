@@ -77,8 +77,10 @@ mod tests {
 
     #[test]
     fn upload_texture_passes_a_byte_slice_and_region() {
-        let mut api = sys::GfxApi::default();
-        api.UploadTexture = Some(mock_upload_texture);
+        let api = sys::GfxApi {
+            UploadTexture: Some(mock_upload_texture),
+            ..Default::default()
+        };
         let gfx = Gfx::new(&api);
 
         gfx.upload_texture(

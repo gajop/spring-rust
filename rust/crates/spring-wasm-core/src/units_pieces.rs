@@ -3,9 +3,9 @@
 // Script names use the reviewed flat list<string> ABI: one descriptor table
 // plus one packed byte blob, both caller-owned and reusable.
 
-use super::config::{decode_string_list_result, mut_slice_parts};
 #[cfg(feature = "alloc")]
 use super::config::{StringListBuffer, StringListRequirements};
+use super::config::{decode_string_list_result, mut_slice_parts};
 #[cfg(feature = "alloc")]
 use super::{ApiError, ErrorCode};
 use super::{Result, StringListFill, StringRange};
@@ -13,7 +13,7 @@ use super::{Result, StringListFill, StringRange};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:units-pieces")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "get-unit-script-names-flat"]
         pub fn get_unit_script_names_flat(
             unit_id: i32,

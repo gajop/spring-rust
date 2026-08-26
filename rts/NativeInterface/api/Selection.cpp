@@ -1,4 +1,5 @@
 #include "Selection.h"
+#include "NativeInterface/ResultStorage.h"
 
 #include "Game/SelectedUnitsHandler.h"
 #include "Game/UI/Groups/GroupHandler.h"
@@ -9,62 +10,66 @@
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Units/UnitHandler.h"
 #include <algorithm>
+#include <limits>
 #include <unordered_map>
+#include <vector>
 
 namespace {
 
-// Scratch buffer
-static thread_local char scratchBuffer[1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local NativeResultStorage resultStorage;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Selection system not ready" };
 static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
 static const Error INVALID_GROUP_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid group ID" };
+static const Error RESULT_BUFFER_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Selection result buffer allocation failed" };
 
 static bool IsReady() { return (gu != nullptr); }
 
 static void NativeGetSelectedUnits(const GetSelectedUnitsQuery* query, GetSelectedUnitsResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
-
-	for (int unitID : selectedUnitsHandler.selectedUnits) {
-		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
-		units[count++] = unitID;
-		bufferPos += sizeof(int32_t);
+	const size_t count = selectedUnitsHandler.selectedUnits.size();
+	int32_t* units = resultStorage.Allocate<int32_t>(count);
+	if (count != 0 && units == nullptr) {
+		result->error = &RESULT_BUFFER_ERROR;
+		result->units = nullptr;
+		result->count = 0;
+		return;
 	}
+	if (count != 0)
+		std::copy(selectedUnitsHandler.selectedUnits.begin(), selectedUnitsHandler.selectedUnits.end(), units);
 
 	result->error = nullptr;
 	result->units = units;
-	result->count = count;
+	result->count = static_cast<uint32_t>(count);
 }
 
 static void NativeGetSelectedUnitsSorted(const GetSelectedUnitsSortedQuery* query, GetSelectedUnitsSortedResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
-
-	for (int unitID : selectedUnitsHandler.selectedUnits) {
-		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
-		units[count++] = unitID;
-		bufferPos += sizeof(int32_t);
+	const size_t count = selectedUnitsHandler.selectedUnits.size();
+	int32_t* units = resultStorage.Allocate<int32_t>(count);
+	if (count != 0 && units == nullptr) {
+		result->error = &RESULT_BUFFER_ERROR;
+		result->units = nullptr;
+		result->count = 0;
+		return;
 	}
-
-	std::sort(units, units + count);
+	if (count != 0) {
+		std::copy(selectedUnitsHandler.selectedUnits.begin(), selectedUnitsHandler.selectedUnits.end(), units);
+		std::sort(units, units + count);
+	}
 
 	result->error = nullptr;
 	result->units = units;
-	result->count = count;
+	result->count = static_cast<uint32_t>(count);
 }
 
 static void NativeGetSelectedUnitsCounts(const GetSelectedUnitsCountsQuery* query, GetSelectedUnitsCountsResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	std::unordered_map<int32_t, uint32_t> countMap;
@@ -76,31 +81,36 @@ static void NativeGetSelectedUnitsCounts(const GetSelectedUnitsCountsQuery* quer
 		}
 	}
 
-	int32_t* defIDs = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	size_t arraySize = countMap.size() * sizeof(int32_t);
-	if (bufferPos + arraySize > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
-	bufferPos += arraySize;
-
-	uint32_t* counts = reinterpret_cast<uint32_t*>(&scratchBuffer[bufferPos]);
-	arraySize = countMap.size() * sizeof(uint32_t);
-	if (bufferPos + arraySize > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
-	bufferPos += arraySize;
-
-	uint32_t idx = 0;
+	const size_t count = countMap.size();
+	constexpr size_t parallelBytes = sizeof(int32_t) + sizeof(uint32_t);
+	if (count > (std::numeric_limits<size_t>::max() - alignof(std::max_align_t)) / parallelBytes ||
+		!resultStorage.ReserveAdditional(count * parallelBytes + alignof(std::max_align_t))) {
+		result->error = &RESULT_BUFFER_ERROR;
+		result->counts = {};
+		return;
+	}
+	int32_t* unitDefIDs = resultStorage.Allocate<int32_t>(count);
+	uint32_t* counts = resultStorage.Allocate<uint32_t>(count);
+	if ((count != 0 && unitDefIDs == nullptr) || (count != 0 && counts == nullptr)) {
+		result->error = &RESULT_BUFFER_ERROR;
+		result->counts = {};
+		return;
+	}
+	size_t index = 0;
 	for (const auto& [defID, count] : countMap) {
-		defIDs[idx] = defID;
-		counts[idx] = count;
-		idx++;
+		unitDefIDs[index] = defID;
+		counts[index] = count;
+		++index;
 	}
 
 	result->error = nullptr;
-	result->counts.unitDefIDs = defIDs;
+	result->counts.unitDefIDs = unitDefIDs;
 	result->counts.counts = counts;
-	result->counts.uniqueCount = idx;
+	result->counts.uniqueCount = static_cast<uint32_t>(count);
 }
 
 static void NativeGetSelectedUnitsCount(const GetSelectedUnitsCountQuery* query, GetSelectedUnitsCountResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	result->error = nullptr;
@@ -108,7 +118,7 @@ static void NativeGetSelectedUnitsCount(const GetSelectedUnitsCountQuery* query,
 }
 
 static void NativeSelectUnit(const SelectUnitQuery* query, SelectUnitResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	const CUnit* unit = unitHandler.GetUnit(query->unitID);
@@ -124,7 +134,7 @@ static void NativeSelectUnit(const SelectUnitQuery* query, SelectUnitResult* res
 }
 
 static void NativeSelectUnitArray(const SelectUnitArrayQuery* query, SelectUnitArrayResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (!query->append) {
@@ -143,7 +153,7 @@ static void NativeSelectUnitArray(const SelectUnitArrayQuery* query, SelectUnitA
 }
 
 static void NativeDeselectUnit(const DeselectUnitQuery* query, DeselectUnitResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	const CUnit* unit = unitHandler.GetUnit(query->unitID);
@@ -156,7 +166,7 @@ static void NativeDeselectUnit(const DeselectUnitQuery* query, DeselectUnitResul
 }
 
 static void NativeDeselectUnitArray(const DeselectUnitArrayQuery* query, DeselectUnitArrayResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	for (uint32_t i = 0; i < query->count; i++) {
@@ -171,28 +181,25 @@ static void NativeDeselectUnitArray(const DeselectUnitArrayQuery* query, Deselec
 }
 
 static void NativeGetGroupList(const GetGroupListQuery* query, GetGroupListResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	int32_t* groups = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	int32_t* groups = resultStorage.Allocate<int32_t>(10);
+	if (groups == nullptr) { result->error = &RESULT_BUFFER_ERROR; return; }
 	uint32_t count = 0;
-
 	for (int g = 0; g < 10; g++) {
 		const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(g);
-		if (group != nullptr && !group->units.empty()) {
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
+		if (group != nullptr && !group->units.empty())
 			groups[count++] = g;
-			bufferPos += sizeof(int32_t);
-		}
 	}
 
 	result->error = nullptr;
-	result->groups = groups;
+	result->groups = (count == 0) ? nullptr : groups;
 	result->count = count;
 }
 
 static void NativeGetSelectedGroup(const GetSelectedGroupQuery* query, GetSelectedGroupResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	result->error = nullptr;
@@ -200,7 +207,7 @@ static void NativeGetSelectedGroup(const GetSelectedGroupQuery* query, GetSelect
 }
 
 static void NativeGetGroupUnits(const GetGroupUnitsQuery* query, GetGroupUnitsResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
@@ -208,22 +215,24 @@ static void NativeGetGroupUnits(const GetGroupUnitsQuery* query, GetGroupUnitsRe
 	const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(query->groupID);
 	if (group == nullptr) { result->error = &INVALID_GROUP_ERROR; return; }
 
-	int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
-
-	for (int unitID : group->units) {
-		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
-		units[count++] = unitID;
-		bufferPos += sizeof(int32_t);
+	const size_t count = group->units.size();
+	int32_t* units = resultStorage.Allocate<int32_t>(count);
+	if (count != 0 && units == nullptr) {
+		result->error = &RESULT_BUFFER_ERROR;
+		result->units = nullptr;
+		result->count = 0;
+		return;
 	}
+	if (count != 0)
+		std::copy(group->units.begin(), group->units.end(), units);
 
 	result->error = nullptr;
 	result->units = units;
-	result->count = count;
+	result->count = static_cast<uint32_t>(count);
 }
 
 static void NativeGetGroupUnitsSorted(const GetGroupUnitsSortedQuery* query, GetGroupUnitsSortedResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	result->groups = nullptr;
 	result->count = 0;
@@ -247,11 +256,6 @@ static void NativeGetGroupUnitsSorted(const GetGroupUnitsSortedQuery* query, Get
 		return;
 	}
 
-	const size_t groupBytes = unitsByDef.size() * sizeof(TeamUnitsByDef);
-	if (bufferPos + groupBytes > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
-	TeamUnitsByDef* groups = reinterpret_cast<TeamUnitsByDef*>(&scratchBuffer[bufferPos]);
-	bufferPos += groupBytes;
-
 	std::vector<int32_t> unitDefIDs;
 	unitDefIDs.reserve(unitsByDef.size());
 	for (const auto& [unitDefID, _] : unitsByDef) {
@@ -259,33 +263,56 @@ static void NativeGetGroupUnitsSorted(const GetGroupUnitsSortedQuery* query, Get
 	}
 	std::sort(unitDefIDs.begin(), unitDefIDs.end());
 
-	uint32_t groupCount = 0;
+	size_t totalUnitCount = 0;
+	for (const auto& [_, unitIDs] : unitsByDef) {
+		if (unitIDs.size() > std::numeric_limits<size_t>::max() - totalUnitCount) {
+			result->error = &RESULT_BUFFER_ERROR;
+			return;
+		}
+		totalUnitCount += unitIDs.size();
+	}
+	const size_t groupCount = unitDefIDs.size();
+	if (totalUnitCount > std::numeric_limits<size_t>::max() / sizeof(int32_t)) {
+		result->error = &RESULT_BUFFER_ERROR;
+		return;
+	}
+	const size_t unitBytes = totalUnitCount * sizeof(int32_t);
+	if (groupCount > (std::numeric_limits<size_t>::max() - unitBytes - alignof(std::max_align_t)) / sizeof(TeamUnitsByDef) ||
+		!resultStorage.ReserveAdditional(groupCount * sizeof(TeamUnitsByDef) + unitBytes + alignof(std::max_align_t))) {
+		result->error = &RESULT_BUFFER_ERROR;
+		return;
+	}
+	TeamUnitsByDef* groups = resultStorage.Allocate<TeamUnitsByDef>(groupCount);
+	if (groups == nullptr) {
+		result->error = &RESULT_BUFFER_ERROR;
+		return;
+	}
+	uint32_t groupIndex = 0;
 	for (int32_t unitDefID : unitDefIDs) {
 		auto& unitIDs = unitsByDef[unitDefID];
 		std::sort(unitIDs.begin(), unitIDs.end());
 
-		const size_t bytes = unitIDs.size() * sizeof(int32_t);
-		if (bufferPos + bytes > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
-
-		int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-		for (uint32_t i = 0; i < unitIDs.size(); ++i) {
-			units[i] = unitIDs[i];
+		int32_t* resultUnitIDs = resultStorage.Allocate<int32_t>(unitIDs.size());
+		if (!unitIDs.empty() && resultUnitIDs == nullptr) {
+			result->error = &RESULT_BUFFER_ERROR;
+			return;
 		}
-		bufferPos += bytes;
-
-		TeamUnitsByDef& groupEntry = groups[groupCount++];
-		groupEntry.unitDefID = unitDefID;
-		groupEntry.units = units;
-		groupEntry.count = unitIDs.size();
+		if (!unitIDs.empty())
+			std::copy(unitIDs.begin(), unitIDs.end(), resultUnitIDs);
+		groups[groupIndex++] = {
+			.unitDefID = unitDefID,
+			.units = resultUnitIDs,
+			.count = static_cast<uint32_t>(unitIDs.size()),
+		};
 	}
 
 	result->error = nullptr;
 	result->groups = groups;
-	result->count = groupCount;
+	result->count = static_cast<uint32_t>(groupCount);
 }
 
 static void NativeGetUnitGroup(const GetUnitGroupQuery* query, GetUnitGroupResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	const CUnit* unit = unitHandler.GetUnit(query->unitID);
@@ -305,7 +332,7 @@ static void NativeGetUnitGroup(const GetUnitGroupQuery* query, GetUnitGroupResul
 }
 
 static void NativeSetUnitGroup(const SetUnitGroupQuery* query, SetUnitGroupResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	result->error = nullptr;
 	result->success = true;
@@ -328,7 +355,7 @@ static void NativeSetUnitGroup(const SetUnitGroupQuery* query, SetUnitGroupResul
 }
 
 static void NativeGetGroupUnitsCount(const GetGroupUnitsCountQuery* query, GetGroupUnitsCountResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
@@ -341,7 +368,7 @@ static void NativeGetGroupUnitsCount(const GetGroupUnitsCountQuery* query, GetGr
 }
 
 static void NativeGetGroupUnitsCounts(const GetGroupUnitsCountsQuery* query, GetGroupUnitsCountsResult* result) {
-	bufferPos = 0;
+	resultStorage.Reset();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
@@ -358,27 +385,32 @@ static void NativeGetGroupUnitsCounts(const GetGroupUnitsCountsQuery* query, Get
 		}
 	}
 
-	int32_t* defIDs = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	size_t arraySize = countMap.size() * sizeof(int32_t);
-	if (bufferPos + arraySize > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
-	bufferPos += arraySize;
-
-	uint32_t* counts = reinterpret_cast<uint32_t*>(&scratchBuffer[bufferPos]);
-	arraySize = countMap.size() * sizeof(uint32_t);
-	if (bufferPos + arraySize > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
-	bufferPos += arraySize;
-
-	uint32_t idx = 0;
+	const size_t count = countMap.size();
+	constexpr size_t parallelBytes = sizeof(int32_t) + sizeof(uint32_t);
+	if (count > (std::numeric_limits<size_t>::max() - alignof(std::max_align_t)) / parallelBytes ||
+		!resultStorage.ReserveAdditional(count * parallelBytes + alignof(std::max_align_t))) {
+		result->error = &RESULT_BUFFER_ERROR;
+		result->counts = {};
+		return;
+	}
+	int32_t* unitDefIDs = resultStorage.Allocate<int32_t>(count);
+	uint32_t* counts = resultStorage.Allocate<uint32_t>(count);
+	if ((count != 0 && unitDefIDs == nullptr) || (count != 0 && counts == nullptr)) {
+		result->error = &RESULT_BUFFER_ERROR;
+		result->counts = {};
+		return;
+	}
+	size_t index = 0;
 	for (const auto& [defID, count] : countMap) {
-		defIDs[idx] = defID;
-		counts[idx] = count;
-		idx++;
+		unitDefIDs[index] = defID;
+		counts[index] = count;
+		++index;
 	}
 
 	result->error = nullptr;
-	result->counts.unitDefIDs = defIDs;
+	result->counts.unitDefIDs = unitDefIDs;
 	result->counts.counts = counts;
-	result->counts.uniqueCount = idx;
+	result->counts.uniqueCount = static_cast<uint32_t>(count);
 }
 
 } // namespace

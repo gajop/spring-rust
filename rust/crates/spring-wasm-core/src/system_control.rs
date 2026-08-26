@@ -8,7 +8,7 @@ use super::{Result, SyncCallback};
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:system-control")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "call-as-team"]
         pub fn call_as_team(team_id: i32, callback_id: i32, user_data: i32) -> i64;
     }

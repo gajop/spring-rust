@@ -47,10 +47,10 @@ pub fn render_cpp(model: &ApiModel) -> String {
                 continue;
             }
             for field in &function.inputs {
-                if record_pointer(field) {
-                    if let SemanticType::Record { name } = &field.ty {
-                        used_records.insert(name.clone());
-                    }
+                if record_pointer(field)
+                    && let SemanticType::Record { name } = &field.ty
+                {
+                    used_records.insert(name.clone());
                 }
                 collect_dynamic_records(&field.ty, &records, &mut used_records);
             }
@@ -533,16 +533,17 @@ fn render_top_input(
                     field_name = field.name,
                 );
             }
-            if let SemanticType::Record { name } = element.as_ref() {
-                if record_dynamic(name, records) {
-                    return format!(
-                        "    std::vector<CoreOwned_{name}> {stem}Owners;\n    std::vector<{name}> {stem}Values;\n    {{ std::uint32_t coreCount = 0; if (!{stem}Reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} {stem}Owners.resize(coreCount); {stem}Values.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) {{ if (!{stem}Owners[coreIndex].Decode(state, {stem}Reader)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} {stem}Values[coreIndex] = {stem}Owners[coreIndex].value; }} query.{field_name} = {stem}Values.empty() ? nullptr : {stem}Values.data(); if (!AssignDynamicCount(coreCount, query.{count})) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} }}\n",
-                        field_name = field.name,
-                    );
-                }
+            if let SemanticType::Record { name } = element.as_ref()
+                && record_dynamic(name, records)
+            {
+                return format!(
+                    "    std::vector<CoreOwned_{name}> {stem}Owners;\n    std::vector<{name}> {stem}Values;\n    {{ std::uint32_t coreCount = 0; if (!{stem}Reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} {stem}Owners.resize(coreCount); {stem}Values.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) {{ if (!{stem}Owners[coreIndex].Decode(state, {stem}Reader)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} {stem}Values[coreIndex] = {stem}Owners[coreIndex].value; }} query.{field_name} = {stem}Values.empty() ? nullptr : {stem}Values.data(); if (!AssignDynamicCount(coreCount, query.{count})) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} }}\n",
+                    field_name = field.name,
+                );
             }
             let cpp = native_cpp_type(element);
-            let item_read = render_fixed_read(element, "item", records, &format!("{stem}Reader"), 4);
+            let item_read =
+                render_fixed_read(element, "item", records, &format!("{stem}Reader"), 4);
             format!(
                 "    std::vector<{cpp}> {stem}Storage;\n    {{ std::uint32_t coreCount = 0; if (!{stem}Reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} {stem}Storage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) {{ {cpp} item{{}}; bool coreItemOk = [&]() -> bool {{\n{item_read}                return true;\n            }}(); if (!coreItemOk) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} {stem}Storage.push_back(item); }} query.{field_name} = {stem}Storage.empty() ? nullptr : {stem}Storage.data(); if (!AssignDynamicCount(coreCount, query.{count})) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} }}\n",
                 field_name = field.name,
@@ -601,8 +602,11 @@ fn render_output_setup(
         ),
         ResultStrategy::VariableOutputBuffer => {
             let field = &function.outputs[0];
-            let SemanticType::List { element } = &field.ty else { unreachable!() };
-            let (element_bytes, _) = fixed_wire_layout(element, records).expect("variable result element layout");
+            let SemanticType::List { element } = &field.ty else {
+                unreachable!()
+            };
+            let (element_bytes, _) =
+                fixed_wire_layout(element, records).expect("variable result element layout");
             format!(
                 "    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[{index}].i32);\n    std::span<std::uint8_t> outputControlWire;\n    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));\n    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;\n    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * {element_bytes}u;\n    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
             )
@@ -721,14 +725,19 @@ fn render_fixed_read(
                 reader,
                 indent + 1,
             );
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!("unsupported fixed dynamic-input field"),
     }
 }
 
 fn scalar_read(reader: &str, method: &str, raw: &str, destination: &str, pad: &str) -> String {
-    format!("{pad}{{ {raw} coreRaw = 0; if (!{reader}.{method}(coreRaw)) return false; {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw"))
+    format!(
+        "{pad}{{ {raw} coreRaw = 0; if (!{reader}.{method}(coreRaw)) return false; {destination} = {cast}; }}\n",
+        cast = native_cast(destination, "coreRaw")
+    )
 }
 
 fn render_fixed_write(
@@ -750,15 +759,29 @@ fn render_fixed_write(
                 "i8" | "i16" | "i32" => "I32",
                 _ => "U32",
             };
-            format!("{pad}if (!{writer}.{method}({value})) return Trap(\"dynamic-input Core wire overflow\");\n")
+            format!(
+                "{pad}if (!{writer}.{method}({value})) return Trap(\"dynamic-input Core wire overflow\");\n"
+            )
         }
-        SemanticType::Enum { .. } => format!("{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"dynamic-input Core wire overflow\");\n"),
-        SemanticType::Handle { .. } => format!("{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"dynamic-input Core wire overflow\");\n"),
+        SemanticType::Enum { .. } => format!(
+            "{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"dynamic-input Core wire overflow\");\n"
+        ),
+        SemanticType::Handle { .. } => format!(
+            "{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"dynamic-input Core wire overflow\");\n"
+        ),
         SemanticType::Record { name } => {
             let mut output = records[name]
                 .fields
                 .iter()
-                .map(|field| render_fixed_write(&field.ty, &format!("{value}.{}", field.name), records, writer, indent))
+                .map(|field| {
+                    render_fixed_write(
+                        &field.ty,
+                        &format!("{value}.{}", field.name),
+                        records,
+                        writer,
+                        indent,
+                    )
+                })
                 .collect::<String>();
             let (_, alignment) = fixed_wire_layout(ty, records).expect("fixed record layout");
             output.push_str(&format!("{pad}if (!{writer}.Align({alignment}u)) return Trap(\"dynamic-input Core record alignment overflow\");\n"));
@@ -766,8 +789,16 @@ fn render_fixed_write(
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
-            let nested = render_fixed_write(element, &format!("{value}[{index}]"), records, writer, indent + 1);
-            format!("{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n")
+            let nested = render_fixed_write(
+                element,
+                &format!("{value}[{index}]"),
+                records,
+                writer,
+                indent + 1,
+            );
+            format!(
+                "{pad}for (std::size_t {index} = 0; {index} < {length}u; ++{index}) {{\n{nested}{pad}}}\n"
+            )
         }
         _ => unreachable!(),
     }

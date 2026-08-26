@@ -13,7 +13,6 @@ pub mod variable_io {
     pub mod unit_script {
         use core::convert::TryFrom;
         use alloc::vec;
-        use alloc::vec::Vec;
 
         #[cfg(target_arch = "wasm32")]
         mod raw {

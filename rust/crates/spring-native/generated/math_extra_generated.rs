@@ -2,8 +2,8 @@ impl<'a> MathExtra<'a> {
     pub fn hypot(&self, x: f32, y: f32) -> Result<f32, Error> {
         unsafe {
             let query = sys::HypotQuery {
-                x: x,
-                y: y,
+                x,
+                y,
             };
             let mut result = MaybeUninit::<sys::HypotResult>::zeroed();
             let func = self.api.Hypot.expect("Hypot function pointer must be initialized");
@@ -34,9 +34,9 @@ impl<'a> MathExtra<'a> {
     pub fn clamp(&self, value: f32, min: f32, max: f32) -> Result<f32, Error> {
         unsafe {
             let query = sys::ClampQuery {
-                value: value,
-                min: min,
-                max: max,
+                value,
+                min,
+                max,
             };
             let mut result = MaybeUninit::<sys::ClampResult>::zeroed();
             let func = self.api.Clamp.expect("Clamp function pointer must be initialized");
@@ -51,7 +51,7 @@ impl<'a> MathExtra<'a> {
     pub fn sgn(&self, value: f32) -> Result<f32, Error> {
         unsafe {
             let query = sys::SgnQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::SgnResult>::zeroed();
             let func = self.api.Sgn.expect("Sgn function pointer must be initialized");
@@ -66,9 +66,9 @@ impl<'a> MathExtra<'a> {
     pub fn mix(&self, a: f32, b: f32, t: f32) -> Result<f32, Error> {
         unsafe {
             let query = sys::MixQuery {
-                a: a,
-                b: b,
-                t: t,
+                a,
+                b,
+                t,
             };
             let mut result = MaybeUninit::<sys::MixResult>::zeroed();
             let func = self.api.Mix.expect("Mix function pointer must be initialized");
@@ -83,7 +83,7 @@ impl<'a> MathExtra<'a> {
     pub fn round(&self, value: f32) -> Result<f32, Error> {
         unsafe {
             let query = sys::RoundQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::RoundResult>::zeroed();
             let func = self.api.Round.expect("Round function pointer must be initialized");
@@ -98,7 +98,7 @@ impl<'a> MathExtra<'a> {
     pub fn erf(&self, value: f32) -> Result<f32, Error> {
         unsafe {
             let query = sys::ErfQuery {
-                value: value,
+                value,
             };
             let mut result = MaybeUninit::<sys::ErfResult>::zeroed();
             let func = self.api.Erf.expect("Erf function pointer must be initialized");
@@ -113,9 +113,9 @@ impl<'a> MathExtra<'a> {
     pub fn smooth_step(&self, edge0: f32, edge1: f32, x: f32) -> Result<f32, Error> {
         unsafe {
             let query = sys::SmoothStepQuery {
-                edge0: edge0,
-                edge1: edge1,
-                x: x,
+                edge0,
+                edge1,
+                x,
             };
             let mut result = MaybeUninit::<sys::SmoothStepResult>::zeroed();
             let func = self.api.SmoothStep.expect("SmoothStep function pointer must be initialized");
@@ -145,8 +145,8 @@ impl<'a> MathExtra<'a> {
     pub fn bit_or(&self, a: u32, b: u32) -> Result<u32, Error> {
         unsafe {
             let query = sys::BitOrQuery {
-                a: a,
-                b: b,
+                a,
+                b,
             };
             let mut result = MaybeUninit::<sys::BitOrResult>::zeroed();
             let func = self.api.BitOr.expect("BitOr function pointer must be initialized");
@@ -161,8 +161,8 @@ impl<'a> MathExtra<'a> {
     pub fn bit_and(&self, a: u32, b: u32) -> Result<u32, Error> {
         unsafe {
             let query = sys::BitAndQuery {
-                a: a,
-                b: b,
+                a,
+                b,
             };
             let mut result = MaybeUninit::<sys::BitAndResult>::zeroed();
             let func = self.api.BitAnd.expect("BitAnd function pointer must be initialized");
@@ -177,8 +177,8 @@ impl<'a> MathExtra<'a> {
     pub fn bit_xor(&self, a: u32, b: u32) -> Result<u32, Error> {
         unsafe {
             let query = sys::BitXorQuery {
-                a: a,
-                b: b,
+                a,
+                b,
             };
             let mut result = MaybeUninit::<sys::BitXorResult>::zeroed();
             let func = self.api.BitXor.expect("BitXor function pointer must be initialized");
@@ -193,7 +193,7 @@ impl<'a> MathExtra<'a> {
     pub fn bit_inv(&self, a: u32) -> Result<u32, Error> {
         unsafe {
             let query = sys::BitInvQuery {
-                a: a,
+                a,
             };
             let mut result = MaybeUninit::<sys::BitInvResult>::zeroed();
             let func = self.api.BitInv.expect("BitInv function pointer must be initialized");

@@ -144,20 +144,22 @@
 
         #[inline]
         pub fn is_valid_base64(text: &str) -> Result<bool> {
-            let mut text_bytes = text.as_bytes().to_vec();
-            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            text_bytes.push(0);
-            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::encoding::is_valid_base64(text_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(text, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(text)?),
+            };
+            crate::generated::borrowed::encoding::is_valid_base64(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
         pub fn is_valid_base64_url(text: &str) -> Result<bool> {
-            let mut text_bytes = text.as_bytes().to_vec();
-            if text_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            text_bytes.push(0);
-            let text_cstr = core::ffi::CStr::from_bytes_with_nul(&text_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::encoding::is_valid_base64_url(text_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(text, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(text)?),
+            };
+            crate::generated::borrowed::encoding::is_valid_base64_url(__core_string_0_buf.as_cstr())
         }
 
     }

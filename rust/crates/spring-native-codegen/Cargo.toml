@@ -1,7 +1,7 @@
 [package]
 name = "spring-native-codegen"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 description = "Code generator for Spring NativeInterface Rust bindings"
 license = "GPL-2.0-or-later"
 

@@ -561,4 +561,62 @@ mod tests {
             &records,
         ));
     }
+
+    #[test]
+    fn unit_script_uses_the_restricted_synced_variable_io_contract() {
+        let scalar = |name: &str| SemanticType::Scalar {
+            name: name.to_owned(),
+        };
+        let field = |name: &str, ty| FieldModel {
+            name: name.to_owned(),
+            ty,
+            status: LoweringStatus::Automatic,
+            metadata: Vec::new(),
+        };
+        let function = FunctionModel {
+            name: "CallUnitScript".to_owned(),
+            query: "CallUnitScriptQuery".to_owned(),
+            result: "CallUnitScriptResult".to_owned(),
+            inputs: vec![
+                field("unitID", scalar("i32")),
+                field("functionName", SemanticType::String),
+                field(
+                    "args",
+                    SemanticType::List {
+                        element: Box::new(scalar("f32")),
+                    },
+                ),
+                field("retCapacity", scalar("u32")),
+            ],
+            outputs: vec![
+                field("functionFound", scalar("bool")),
+                field("success", scalar("bool")),
+                field(
+                    "retValues",
+                    SemanticType::List {
+                        element: Box::new(scalar("f32")),
+                    },
+                ),
+            ],
+            environments: [Environment::RulesSynced, Environment::GaiaSynced]
+                .into_iter()
+                .collect(),
+            mutating: true,
+            visibility_sensitive: false,
+            status: LoweringStatus::Annotated,
+            notes: vec!["reviewed mutating variable-size-result exception".to_owned()],
+        };
+
+        let plan = plan_function("unit_script", &function, &BTreeMap::new());
+
+        assert_eq!(plan.environment_mask, 5);
+        assert!(plan.mutating);
+        assert_eq!(plan.input_strategy, InputStrategy::VariableInputBuffer);
+        assert_eq!(plan.result_strategy, ResultStrategy::VariableOutputBuffer);
+        assert_eq!(plan.signature, "i32,i32,i32,i32->i32");
+        assert!(
+            plan.notes
+                .contains(&"reviewed mutating variable-size-result exception".to_owned())
+        );
+    }
 }

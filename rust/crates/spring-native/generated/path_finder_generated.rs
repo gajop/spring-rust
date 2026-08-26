@@ -8,7 +8,7 @@ impl<'a> PathFinder<'a> {
                 hasMoveDefName: move_def_name.is_some(),
                 startPos: start_pos,
                 endPos: end_pos,
-                radius: radius,
+                radius,
             };
             let mut result = MaybeUninit::<sys::RequestPathResult>::zeroed();
             let func = self.api.RequestPath.expect("RequestPath function pointer must be initialized");
@@ -159,7 +159,7 @@ impl<'a> PathFinder<'a> {
             let query = sys::SetPathNodeCostQuery {
                 overlayIndex: overlay_index,
                 costIndex: cost_index,
-                cost: cost,
+                cost,
             };
             let mut result = MaybeUninit::<sys::SetPathNodeCostResult>::zeroed();
             let func = self.api.SetPathNodeCost.expect("SetPathNodeCost function pointer must be initialized");
@@ -174,8 +174,8 @@ impl<'a> PathFinder<'a> {
     pub fn get_path_node_cost(&self, x: u32, z: u32) -> Result<f32, Error> {
         unsafe {
             let query = sys::GetPathNodeCostQuery {
-                x: x,
-                z: z,
+                x,
+                z,
             };
             let mut result = MaybeUninit::<sys::GetPathNodeCostResult>::zeroed();
             let func = self.api.GetPathNodeCost.expect("GetPathNodeCost function pointer must be initialized");

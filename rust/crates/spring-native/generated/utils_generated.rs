@@ -36,8 +36,8 @@ impl<'a> Utils<'a> {
         unsafe {
             let query = sys::TestBuildOrderQuery {
                 unitDefID: unit_def_id,
-                pos: pos,
-                facing: facing,
+                pos,
+                facing,
             };
             let mut result = MaybeUninit::<sys::TestBuildOrderResult>::zeroed();
             let func = self.api.TestBuildOrder.expect("TestBuildOrder function pointer must be initialized");
@@ -56,8 +56,8 @@ impl<'a> Utils<'a> {
         unsafe {
             let query = sys::Pos2BuildPosQuery {
                 unitDefID: unit_def_id,
-                pos: pos,
-                facing: facing,
+                pos,
+                facing,
             };
             let mut result = MaybeUninit::<sys::Pos2BuildPosResult>::zeroed();
             let func = self.api.Pos2BuildPos.expect("Pos2BuildPos function pointer must be initialized");
@@ -74,10 +74,10 @@ impl<'a> Utils<'a> {
             let query = sys::ClosestBuildPosQuery {
                 teamID: team_id,
                 unitDefID: unit_def_id,
-                pos: pos,
+                pos,
                 searchRadius: search_radius,
                 minDist: min_dist,
-                facing: facing,
+                facing,
             };
             let mut result = MaybeUninit::<sys::ClosestBuildPosResult>::zeroed();
             let func = self.api.ClosestBuildPos.expect("ClosestBuildPos function pointer must be initialized");
@@ -93,8 +93,8 @@ impl<'a> Utils<'a> {
         unsafe {
             let query = sys::TestMoveOrderQuery {
                 unitDefID: unit_def_id,
-                pos: pos,
-                dir: dir,
+                pos,
+                dir,
                 options: options.into(),
             };
             let mut result = MaybeUninit::<sys::TestMoveOrderResult>::zeroed();

@@ -253,7 +253,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_game_name {
             #[link(wasm_import_module = "spring:system-control")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-game-name"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -262,7 +262,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_menu_name {
             #[link(wasm_import_module = "spring:system-control")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-menu-name"]
                 pub fn call(punused: i32, output: i32) -> i32;
             }
@@ -322,11 +322,12 @@
 
         #[inline]
         pub fn clear_watch_dog_timer(thread_name: &str, keep_stopped: bool) -> Result<bool> {
-            let mut thread_name_bytes = thread_name.as_bytes().to_vec();
-            if thread_name_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            thread_name_bytes.push(0);
-            let thread_name_cstr = core::ffi::CStr::from_bytes_with_nul(&thread_name_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::system_control::clear_watch_dog_timer(thread_name_cstr, keep_stopped)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(thread_name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(thread_name)?),
+            };
+            crate::generated::borrowed::system_control::clear_watch_dog_timer(__core_string_0_buf.as_cstr(), keep_stopped)
         }
 
         #[inline]
@@ -494,11 +495,12 @@
 
         #[inline]
         pub fn reload(start_script: &str) -> Result<bool> {
-            let mut start_script_bytes = start_script.as_bytes().to_vec();
-            if start_script_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            start_script_bytes.push(0);
-            let start_script_cstr = core::ffi::CStr::from_bytes_with_nul(&start_script_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::system_control::reload(start_script_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(start_script, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(start_script)?),
+            };
+            crate::generated::borrowed::system_control::reload(__core_string_0_buf.as_cstr())
         }
 
         #[inline]
@@ -509,46 +511,52 @@
 
         #[inline]
         pub fn restart(cmd_args: &str, start_script: &str) -> Result<bool> {
-            let mut cmd_args_bytes = cmd_args.as_bytes().to_vec();
-            if cmd_args_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            cmd_args_bytes.push(0);
-            let cmd_args_cstr = core::ffi::CStr::from_bytes_with_nul(&cmd_args_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut start_script_bytes = start_script.as_bytes().to_vec();
-            if start_script_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            start_script_bytes.push(0);
-            let start_script_cstr = core::ffi::CStr::from_bytes_with_nul(&start_script_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::system_control::restart(cmd_args_cstr, start_script_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(cmd_args, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(cmd_args)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(start_script, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(start_script)?),
+            };
+            crate::generated::borrowed::system_control::restart(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr())
         }
 
         #[inline]
         pub fn set_share_level(resource: &str, level: f32) -> Result<bool> {
-            let mut resource_bytes = resource.as_bytes().to_vec();
-            if resource_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            resource_bytes.push(0);
-            let resource_cstr = core::ffi::CStr::from_bytes_with_nul(&resource_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::system_control::set_share_level(resource_cstr, level)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(resource, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(resource)?),
+            };
+            crate::generated::borrowed::system_control::set_share_level(__core_string_0_buf.as_cstr(), level)
         }
 
         #[inline]
         pub fn share_resources(team_id: i32, resource: &str, amount: f32) -> Result<bool> {
-            let mut resource_bytes = resource.as_bytes().to_vec();
-            if resource_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            resource_bytes.push(0);
-            let resource_cstr = core::ffi::CStr::from_bytes_with_nul(&resource_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::system_control::share_resources(team_id, resource_cstr, amount)
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(resource, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(resource)?),
+            };
+            crate::generated::borrowed::system_control::share_resources(team_id, __core_string_1_buf.as_cstr(), amount)
         }
 
         #[inline]
         pub fn start(cmd_args: &str, start_script: &str) -> Result<bool> {
-            let mut cmd_args_bytes = cmd_args.as_bytes().to_vec();
-            if cmd_args_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            cmd_args_bytes.push(0);
-            let cmd_args_cstr = core::ffi::CStr::from_bytes_with_nul(&cmd_args_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut start_script_bytes = start_script.as_bytes().to_vec();
-            if start_script_bytes.contains(&0) { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
-            start_script_bytes.push(0);
-            let start_script_cstr = core::ffi::CStr::from_bytes_with_nul(&start_script_bytes).map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            crate::generated::borrowed::system_control::start(cmd_args_cstr, start_script_cstr)
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(cmd_args, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(cmd_args)?),
+            };
+            let mut __core_string_1_scratch = [0u8; 256];
+            let __core_string_1_buf = match super::write_cstr(start_script, &mut __core_string_1_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(start_script)?),
+            };
+            crate::generated::borrowed::system_control::start(__core_string_0_buf.as_cstr(), __core_string_1_buf.as_cstr())
         }
 
         #[inline]

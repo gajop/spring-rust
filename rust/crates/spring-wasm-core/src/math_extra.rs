@@ -9,7 +9,7 @@ pub struct NormalizedVec3 {
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:math-extra")]
-    extern "C" {
+    unsafe extern "C" {
         pub fn normalize(x: f32, y: f32, z: f32, output: i32) -> i32;
     }
 }

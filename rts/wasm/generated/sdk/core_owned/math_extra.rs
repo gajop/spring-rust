@@ -1,5 +1,5 @@
     pub mod math_extra {
-        use super::{Result, String, Vec};
+        use super::{Result, Vec};
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct BitAndQuery {
@@ -220,7 +220,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_math_extra_normalize {
             #[link(wasm_import_module = "spring:math-extra")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "normalize"]
                 pub fn call(x: f32, y: f32, z: f32, output: i32) -> i32;
             }

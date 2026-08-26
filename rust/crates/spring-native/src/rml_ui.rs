@@ -1,5 +1,5 @@
 use std::{
-    ffi::{c_void, CStr, CString},
+    ffi::{CStr, CString, c_void},
     marker::PhantomData,
     mem::MaybeUninit,
     os::raw::c_char,
@@ -127,7 +127,7 @@ pub enum RmlValueRef<'a> {
 }
 
 impl RmlValueRef<'_> {
-    fn to_native(&self, string_value: *const c_char) -> sys::RmlDataValue {
+    fn into_native(self, string_value: *const c_char) -> sys::RmlDataValue {
         let mut native = sys::RmlDataValue {
             type_: 0,
             boolValue: false,
@@ -142,15 +142,15 @@ impl RmlValueRef<'_> {
         match self {
             Self::Bool(item) => {
                 native.type_ = RmlFieldType::Bool.native_type();
-                native.boolValue = *item;
+                native.boolValue = item;
             }
             Self::Int(item) => {
                 native.type_ = RmlFieldType::Int.native_type();
-                native.intValue = *item;
+                native.intValue = item;
             }
             Self::Float(item) => {
                 native.type_ = RmlFieldType::Float.native_type();
-                native.floatValue = *item;
+                native.floatValue = item;
             }
             Self::String(_) => {
                 native.type_ = RmlFieldType::String.native_type();
@@ -722,7 +722,7 @@ impl<'api> RmlDataRows<'api> {
     /// be a multiple of the schema's field count. The engine copies all
     /// values, including strings, before this call returns.
     pub fn set(&self, values: &[RmlValueRef<'_>]) -> Result<(), Error> {
-        if values.len() % self.field_count != 0 {
+        if !values.len().is_multiple_of(self.field_count) {
             return Err(Error::invalid_argument("values"));
         }
 
@@ -739,7 +739,7 @@ impl<'api> RmlDataRows<'api> {
             .iter()
             .zip(&strings)
             .map(|(value, string)| {
-                value.to_native(string.as_ref().map_or(ptr::null(), |value| value.as_ptr()))
+                (*value).into_native(string.as_ref().map_or(ptr::null(), |value| value.as_ptr()))
             })
             .collect::<Vec<_>>();
         let query = sys::RmlDataModelSetRowsQuery {

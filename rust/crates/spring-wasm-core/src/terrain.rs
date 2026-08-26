@@ -25,7 +25,7 @@ pub struct GroundExtremes {
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:terrain")]
-    extern "C" {
+    unsafe extern "C" {
         #[link_name = "is-pos-in-map"]
         pub fn is_pos_in_map(x: f32, z: f32) -> i64;
         #[link_name = "get-ground-height"]

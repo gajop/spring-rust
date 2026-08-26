@@ -75,166 +75,168 @@ impl NativeInterfaceRef {
     /// # Safety
     /// Caller must ensure the pointer is valid for the lifetime of the wrapper.
     pub unsafe fn from_ptr(ptr: *const sys::NativeInterface) -> Option<Self> {
-        let raw = NonNull::new(ptr as *mut sys::NativeInterface)?;
-        let iface = raw.as_ref();
+        unsafe {
+            let raw = NonNull::new(ptr as *mut sys::NativeInterface)?;
+            let iface = raw.as_ref();
 
-        // Unwrap all API pointers at initialization - they are guaranteed to be set by the engine
-        Some(Self {
-            raw,
-            units_query_api: iface
-                .unitsQuery
-                .as_ref()
-                .expect("unitsQuery API must be initialized"),
-            units_info_api: iface
-                .unitsInfo
-                .as_ref()
-                .expect("unitsInfo API must be initialized"),
-            teams_api: iface.teams.as_ref().expect("teams API must be initialized"),
-            units_weapons_api: iface
-                .unitsWeapons
-                .as_ref()
-                .expect("unitsWeapons API must be initialized"),
-            units_commands_api: iface
-                .unitsCommands
-                .as_ref()
-                .expect("unitsCommands API must be initialized"),
-            units_pieces_api: iface
-                .unitsPieces
-                .as_ref()
-                .expect("unitsPieces API must be initialized"),
-            features_api: iface
-                .features
-                .as_ref()
-                .expect("features API must be initialized"),
-            projectiles_api: iface
-                .projectiles
-                .as_ref()
-                .expect("projectiles API must be initialized"),
-            los_api: iface.los.as_ref().expect("los API must be initialized"),
-            unit_defs_api: iface
-                .unitDefs
-                .as_ref()
-                .expect("unitDefs API must be initialized"),
-            feature_defs_api: iface
-                .featureDefs
-                .as_ref()
-                .expect("featureDefs API must be initialized"),
-            weapon_defs_api: iface
-                .weaponDefs
-                .as_ref()
-                .expect("weaponDefs API must be initialized"),
-            game_api: iface.game.as_ref().expect("game API must be initialized"),
-            terrain_api: iface
-                .terrain
-                .as_ref()
-                .expect("terrain API must be initialized"),
-            player_api: iface
-                .player
-                .as_ref()
-                .expect("player API must be initialized"),
-            math_extra_api: iface
-                .mathExtra
-                .as_ref()
-                .expect("mathExtra API must be initialized"),
-            encoding_api: iface
-                .encoding
-                .as_ref()
-                .expect("encoding API must be initialized"),
-            metal_map_api: iface
-                .metalMap
-                .as_ref()
-                .expect("metalMap API must be initialized"),
-            path_finder_api: iface
-                .pathFinder
-                .as_ref()
-                .expect("pathFinder API must be initialized"),
-            platform_api: iface
-                .platform
-                .as_ref()
-                .expect("platform API must be initialized"),
-            rules_params_api: iface
-                .rulesParams
-                .as_ref()
-                .expect("rulesParams API must be initialized"),
-            rml_ui_api: iface.rmlUi.as_ref().expect("rmlUi API must be initialized"),
-            move_ctrl_api: iface
-                .moveCtrl
-                .as_ref()
-                .expect("moveCtrl API must be initialized"),
-            synced_ctrl_api: iface
-                .syncedCtrl
-                .as_ref()
-                .expect("syncedCtrl API must be initialized"),
-            camera_api: iface
-                .cameraApi
-                .as_ref()
-                .expect("cameraApi must be initialized"),
-            input_api: iface.input.as_ref().expect("input API must be initialized"),
-            debug_input_api: iface
-                .debugInput
-                .as_ref()
-                .expect("debugInput API must be initialized"),
-            display_api: iface
-                .display
-                .as_ref()
-                .expect("display API must be initialized"),
-            selection_api: iface
-                .selection
-                .as_ref()
-                .expect("selection API must be initialized"),
-            vfs_api: iface.vfs.as_ref().expect("vfs API must be initialized"),
-            sound_api: iface
-                .soundApi
-                .as_ref()
-                .expect("soundApi must be initialized"),
-            messages_api: iface
-                .messages
-                .as_ref()
-                .expect("messages API must be initialized"),
-            config_api: iface
-                .config
-                .as_ref()
-                .expect("config API must be initialized"),
-            tracing_api: iface
-                .tracing
-                .as_ref()
-                .expect("tracing API must be initialized"),
-            utils_api: iface.utils.as_ref().expect("utils API must be initialized"),
-            memory_api: iface
-                .memory
-                .as_ref()
-                .expect("memory API must be initialized"),
-            unsynced_ctrl_api: iface
-                .unsyncedCtrl
-                .as_ref()
-                .expect("unsyncedCtrl API must be initialized"),
-            unsynced_read_api: iface
-                .unsyncedRead
-                .as_ref()
-                .expect("unsyncedRead API must be initialized"),
-            lights_api: iface
-                .lights
-                .as_ref()
-                .expect("lights API must be initialized"),
-            icons_api: iface.icons.as_ref().expect("icons API must be initialized"),
-            markers_api: iface
-                .markers
-                .as_ref()
-                .expect("markers API must be initialized"),
-            ground_decals_api: iface
-                .groundDecals
-                .as_ref()
-                .expect("groundDecals API must be initialized"),
-            system_control_api: iface
-                .systemControl
-                .as_ref()
-                .expect("systemControl API must be initialized"),
-            profiling_api: iface
-                .profiling
-                .as_ref()
-                .expect("profiling API must be initialized"),
-            gfx_api: iface.gfx.as_ref().expect("gfx API must be initialized"),
-        })
+            // Unwrap all API pointers at initialization - they are guaranteed to be set by the engine
+            Some(Self {
+                raw,
+                units_query_api: iface
+                    .unitsQuery
+                    .as_ref()
+                    .expect("unitsQuery API must be initialized"),
+                units_info_api: iface
+                    .unitsInfo
+                    .as_ref()
+                    .expect("unitsInfo API must be initialized"),
+                teams_api: iface.teams.as_ref().expect("teams API must be initialized"),
+                units_weapons_api: iface
+                    .unitsWeapons
+                    .as_ref()
+                    .expect("unitsWeapons API must be initialized"),
+                units_commands_api: iface
+                    .unitsCommands
+                    .as_ref()
+                    .expect("unitsCommands API must be initialized"),
+                units_pieces_api: iface
+                    .unitsPieces
+                    .as_ref()
+                    .expect("unitsPieces API must be initialized"),
+                features_api: iface
+                    .features
+                    .as_ref()
+                    .expect("features API must be initialized"),
+                projectiles_api: iface
+                    .projectiles
+                    .as_ref()
+                    .expect("projectiles API must be initialized"),
+                los_api: iface.los.as_ref().expect("los API must be initialized"),
+                unit_defs_api: iface
+                    .unitDefs
+                    .as_ref()
+                    .expect("unitDefs API must be initialized"),
+                feature_defs_api: iface
+                    .featureDefs
+                    .as_ref()
+                    .expect("featureDefs API must be initialized"),
+                weapon_defs_api: iface
+                    .weaponDefs
+                    .as_ref()
+                    .expect("weaponDefs API must be initialized"),
+                game_api: iface.game.as_ref().expect("game API must be initialized"),
+                terrain_api: iface
+                    .terrain
+                    .as_ref()
+                    .expect("terrain API must be initialized"),
+                player_api: iface
+                    .player
+                    .as_ref()
+                    .expect("player API must be initialized"),
+                math_extra_api: iface
+                    .mathExtra
+                    .as_ref()
+                    .expect("mathExtra API must be initialized"),
+                encoding_api: iface
+                    .encoding
+                    .as_ref()
+                    .expect("encoding API must be initialized"),
+                metal_map_api: iface
+                    .metalMap
+                    .as_ref()
+                    .expect("metalMap API must be initialized"),
+                path_finder_api: iface
+                    .pathFinder
+                    .as_ref()
+                    .expect("pathFinder API must be initialized"),
+                platform_api: iface
+                    .platform
+                    .as_ref()
+                    .expect("platform API must be initialized"),
+                rules_params_api: iface
+                    .rulesParams
+                    .as_ref()
+                    .expect("rulesParams API must be initialized"),
+                rml_ui_api: iface.rmlUi.as_ref().expect("rmlUi API must be initialized"),
+                move_ctrl_api: iface
+                    .moveCtrl
+                    .as_ref()
+                    .expect("moveCtrl API must be initialized"),
+                synced_ctrl_api: iface
+                    .syncedCtrl
+                    .as_ref()
+                    .expect("syncedCtrl API must be initialized"),
+                camera_api: iface
+                    .cameraApi
+                    .as_ref()
+                    .expect("cameraApi must be initialized"),
+                input_api: iface.input.as_ref().expect("input API must be initialized"),
+                debug_input_api: iface
+                    .debugInput
+                    .as_ref()
+                    .expect("debugInput API must be initialized"),
+                display_api: iface
+                    .display
+                    .as_ref()
+                    .expect("display API must be initialized"),
+                selection_api: iface
+                    .selection
+                    .as_ref()
+                    .expect("selection API must be initialized"),
+                vfs_api: iface.vfs.as_ref().expect("vfs API must be initialized"),
+                sound_api: iface
+                    .soundApi
+                    .as_ref()
+                    .expect("soundApi must be initialized"),
+                messages_api: iface
+                    .messages
+                    .as_ref()
+                    .expect("messages API must be initialized"),
+                config_api: iface
+                    .config
+                    .as_ref()
+                    .expect("config API must be initialized"),
+                tracing_api: iface
+                    .tracing
+                    .as_ref()
+                    .expect("tracing API must be initialized"),
+                utils_api: iface.utils.as_ref().expect("utils API must be initialized"),
+                memory_api: iface
+                    .memory
+                    .as_ref()
+                    .expect("memory API must be initialized"),
+                unsynced_ctrl_api: iface
+                    .unsyncedCtrl
+                    .as_ref()
+                    .expect("unsyncedCtrl API must be initialized"),
+                unsynced_read_api: iface
+                    .unsyncedRead
+                    .as_ref()
+                    .expect("unsyncedRead API must be initialized"),
+                lights_api: iface
+                    .lights
+                    .as_ref()
+                    .expect("lights API must be initialized"),
+                icons_api: iface.icons.as_ref().expect("icons API must be initialized"),
+                markers_api: iface
+                    .markers
+                    .as_ref()
+                    .expect("markers API must be initialized"),
+                ground_decals_api: iface
+                    .groundDecals
+                    .as_ref()
+                    .expect("groundDecals API must be initialized"),
+                system_control_api: iface
+                    .systemControl
+                    .as_ref()
+                    .expect("systemControl API must be initialized"),
+                profiling_api: iface
+                    .profiling
+                    .as_ref()
+                    .expect("profiling API must be initialized"),
+                gfx_api: iface.gfx.as_ref().expect("gfx API must be initialized"),
+            })
+        }
     }
 
     pub fn as_ptr(&self) -> *const sys::NativeInterface {

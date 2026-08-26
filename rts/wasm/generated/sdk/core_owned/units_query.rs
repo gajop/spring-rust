@@ -1,12 +1,12 @@
     pub mod units_query {
-        use super::{Result, String, Vec};
+        use super::{Result, Vec};
 
         pub use super::types::{AtmosphereParams, BoolResult, BoxQuery, CollisionVolumeData, CommonErrorCode, CylinderQuery, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, GetAllUnitsQuery, GetAllUnitsResult, GetClosestEnemyUnitOptions, GetClosestEnemyUnitQuery, GetClosestEnemyUnitResult, GetRenderUnitsDrawFlagChangedQuery, GetRenderUnitsDrawFlagChangedResult, GetRenderUnitsQuery, GetRenderUnitsResult, GetTeamUnitCountQuery, GetTeamUnitCountResult, GetTeamUnitDefCountQuery, GetTeamUnitDefCountResult, GetTeamUnitsByDefsQuery, GetTeamUnitsByDefsResult, GetTeamUnitsCountsQuery, GetTeamUnitsCountsResult, GetTeamUnitsQuery, GetTeamUnitsResult, GetTeamUnitsSortedQuery, GetTeamUnitsSortedResult, GetUnitArrayCentroidQuery, GetUnitArrayCentroidResult, GetUnitMapCentroidQuery, GetUnitMapCentroidResult, GetUnitNearestAllyQuery, GetUnitNearestAllyResult, GetUnitNearestEnemyOptions, GetUnitNearestEnemyQuery, GetUnitNearestEnemyResult, GetUnitSeparationOptions, GetUnitSeparationQuery, GetUnitSeparationResult, GetUnitsInBoxQuery, GetUnitsInBoxResult, GetUnitsInCylinderQuery, GetUnitsInCylinderResult, GetUnitsInPlanesQuery, GetUnitsInPlanesResult, GetUnitsInRectangleQuery, GetUnitsInRectangleResult, GetUnitsInSphereQuery, GetUnitsInSphereResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, PlanesQuery, ProjectileTargetRef, RectangleQuery, ResourcePack, RgbColor, SoundEffectParams, SphereQuery, StringArray, StringResult, SunLightingParams, TeamUnitsByDef, UInt32Array, UInt32Result, UnitCostOverrides, UnitDefCount, UnitFilter, UnitFilterParams, UnitHealthValue, UnitTargetRef, ValidUnitIDQuery, ValidUnitIDResult, WaterParams};
 
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_render_units {
             #[link(wasm_import_module = "spring:units-query")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-render-units"]
                 pub fn call(pdraw_mask: i32, psend_mask: i32, output: i32) -> i32;
             }
@@ -15,7 +15,7 @@
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_render_units_draw_flag_changed {
             #[link(wasm_import_module = "spring:units-query")]
-            extern "C" {
+            unsafe extern "C" {
                 #[link_name = "get-render-units-draw-flag-changed"]
                 pub fn call(psend_mask: i32, output: i32) -> i32;
             }

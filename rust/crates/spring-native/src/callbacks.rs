@@ -355,6 +355,10 @@ pub trait NativeModule: Sized {
     }
 
     /// Called when the minimap geometry changes.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn minimap_geometry_changed(
         &mut self,
         new_pos_x: i32,
@@ -524,6 +528,10 @@ pub trait NativeModule: Sized {
     /// Called when a unit is destroyed.
     ///
     /// `attacker_id` is -1 if there was no attacker.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn unit_destroyed(
         &mut self,
         unit_id: i32,
@@ -641,6 +649,10 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn unit_command(
         &mut self,
         unit_id: i32,
@@ -677,6 +689,10 @@ pub trait NativeModule: Sized {
     }
 
     /// Called before a command is added to a unit's queue.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn allow_command(
         &mut self,
         unit_id: i32,
@@ -773,6 +789,10 @@ pub trait NativeModule: Sized {
         Ok(true)
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn allow_unit_transport_load(
         &mut self,
         transporter_id: i32,
@@ -797,6 +817,10 @@ pub trait NativeModule: Sized {
         Ok(allowed)
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn allow_unit_transport_unload(
         &mut self,
         transporter_id: i32,
@@ -857,6 +881,10 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn unit_damaged(
         &mut self,
         unit_id: i32,
@@ -1149,6 +1177,10 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn feature_damaged(
         &mut self,
         feature_id: i32,
@@ -1331,6 +1363,10 @@ pub trait NativeModule: Sized {
         Ok(true)
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn unit_pre_damaged(
         &mut self,
         unit_id: i32,
@@ -1361,6 +1397,10 @@ pub trait NativeModule: Sized {
         Ok((new_damage, impulse_mult))
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn feature_pre_damaged(
         &mut self,
         feature_id: i32,
@@ -1389,6 +1429,10 @@ pub trait NativeModule: Sized {
         Ok((new_damage, impulse_mult))
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn shield_pre_damaged(
         &mut self,
         projectile_id: i32,
@@ -1503,6 +1547,10 @@ pub trait NativeModule: Sized {
         Ok(false)
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn key_press(
         &mut self,
         key_code: i32,
@@ -1522,6 +1570,10 @@ pub trait NativeModule: Sized {
         Ok(false)
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "Spring callback preserves the Lua callback signature"
+    )]
     fn key_release(
         &mut self,
         key_code: i32,
@@ -1738,11 +1790,12 @@ impl<T: NativeModule> ModuleData<T> {
     /// The `interface_ptr` must be a valid pointer to a `NativeInterface` struct
     /// that remains valid for the lifetime of this `ModuleData`.
     pub unsafe fn new(interface_ptr: *const crate::sys::NativeInterface) -> Box<Self> {
-        let interface =
-            NativeInterfaceRef::from_ptr(interface_ptr).expect("Invalid NativeInterface pointer");
+        let interface = unsafe {
+            NativeInterfaceRef::from_ptr(interface_ptr).expect("Invalid NativeInterface pointer")
+        };
 
         Box::new(ModuleData {
-            module: Box::new(T::new(interface.clone())),
+            module: Box::new(T::new(interface)),
             interface,
         })
     }
