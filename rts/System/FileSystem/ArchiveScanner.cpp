@@ -44,8 +44,6 @@
 #define LOG_SECTION_ARCHIVESCANNER "ArchiveScanner"
 LOG_REGISTER_SECTION_GLOBAL(LOG_SECTION_ARCHIVESCANNER)
 
-#define ACRHIVE_CHECKSUM_DUMP 1
-
 /*
  * The archive scanner is used to find stuff in archives
  * which are needed before building the virtual filesystem.
@@ -1666,16 +1664,15 @@ std::string CArchiveScanner::MapNameToMapFile(const std::string& versionedMapNam
 }
 
 void DumpArchiveChecksum(const std::string& lcName, const sha512::raw_digest& cs) {
-#if ACRHIVE_CHECKSUM_DUMP == 1
-	{
-		sha512::hex_digest hexHash;
-		hexHash.fill(0);
+	if (!LOG_IS_ENABLED_S(LOG_SECTION_ARCHIVESCANNER, L_DEBUG))
+		return;
 
-		sha512::dump_digest(cs, hexHash);
+	sha512::hex_digest hexHash;
+	hexHash.fill(0);
 
-		LOG_L(L_INFO, "[CAS::GASCB] Archive file=\"%s\" cs=\"%s\"", lcName.c_str(), &hexHash[0]);
-	}
-#endif
+	sha512::dump_digest(cs, hexHash);
+
+	LOG_SL(LOG_SECTION_ARCHIVESCANNER, L_DEBUG, "[CAS::GASCB] Archive file=\"%s\" cs=\"%s\"", lcName.c_str(), &hexHash[0]);
 }
 
 sha512::raw_digest CArchiveScanner::GetArchiveSingleChecksumBytes(const std::string& filePath)
