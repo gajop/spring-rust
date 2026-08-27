@@ -1060,20 +1060,10 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_unit_last_attacker {
-            #[link(wasm_import_module = "spring:units-info")]
-            unsafe extern "C" {
-                #[link_name = "get-unit-last-attacker"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-last-attacker."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_unit_last_attacker(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_unit_last_attacker::call(p0, p1)
+        pub fn get_unit_last_attacker(unit_id: i32) -> Result<Option<UnitLastAttacker>> {
+            let value = crate::generated::units_info::get_unit_last_attacker(unit_id)?;
+            Ok(match value { Some(value) => Some(UnitLastAttacker { attacker_id: value.attacker_id, attacker_def_id: value.attacker_def_id, attacker_team: value.attacker_team }), None => None })
         }
 
         #[inline]
@@ -1190,20 +1180,10 @@
             Ok(UnitSensorRadius { los: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, air_los: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, radar: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, sonar: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, seismic: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, radar_jammer: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, sonar_jammer: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_unit_shield_state {
-            #[link(wasm_import_module = "spring:units-info")]
-            unsafe extern "C" {
-                #[link_name = "get-unit-shield-state"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-shield-state."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_unit_shield_state(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_get_unit_shield_state::call(p0, p1, p2)
+        pub fn get_unit_shield_state(unit_id: i32, weapon_num: i32) -> Result<Option<UnitShieldState>> {
+            let value = crate::generated::units_info::get_unit_shield_state(unit_id, weapon_num)?;
+            Ok(match value { Some(value) => Some(UnitShieldState { shield_enabled: value.shield_enabled, shield_power: value.shield_power, shield_alpha: value.shield_alpha }), None => None })
         }
 
         #[inline]
@@ -1212,20 +1192,10 @@
             Ok(UnitStates { fire_state: value.fire_state, move_state: value.move_state, auto_repair_level: value.auto_repair_level, repeat: value.repeat, cloak: value.cloak, active: value.active, trajectory: value.trajectory, auto_land: value.auto_land, loopback_attack: value.loopback_attack })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_unit_stockpile {
-            #[link(wasm_import_module = "spring:units-info")]
-            unsafe extern "C" {
-                #[link_name = "get-unit-stockpile"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:units-info.get-unit-stockpile."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_unit_stockpile(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_unit_stockpile::call(p0, p1)
+        pub fn get_unit_stockpile(unit_id: i32) -> Result<Option<UnitStockpile>> {
+            let value = crate::generated::units_info::get_unit_stockpile(unit_id)?;
+            Ok(match value { Some(value) => Some(UnitStockpile { stockpile: value.stockpile, stockpile_queue_size: value.stockpile_queue_size, build_percent: value.build_percent }), None => None })
         }
 
         #[inline]

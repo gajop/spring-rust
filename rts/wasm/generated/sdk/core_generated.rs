@@ -477,6 +477,13 @@ pub mod units_info {
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct UnitLastAttacker {
+        pub attacker_id: i32,
+        pub attacker_def_id: i32,
+        pub attacker_team: i32,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct UnitLosState {
         pub raw_mask: u8,
         pub los: bool,
@@ -510,6 +517,13 @@ pub mod units_info {
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct UnitShieldState {
+        pub shield_enabled: bool,
+        pub shield_power: f32,
+        pub shield_alpha: f32,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct UnitStates {
         pub fire_state: i32,
         pub move_state: i32,
@@ -527,6 +541,13 @@ pub mod units_info {
         pub ret_table: bool,
         pub bin_state: bool,
         pub amt_state: bool,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct UnitStockpile {
+        pub stockpile: u32,
+        pub stockpile_queue_size: u32,
+        pub build_percent: f32,
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
@@ -1413,6 +1434,30 @@ pub mod units_info {
     }
 
     #[inline]
+    pub fn get_unit_last_attacker(unit_id: i32) -> Result<Option<UnitLastAttacker>> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 16];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_last_attacker(unit_id, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = { let core_present = super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?; let core_value = { let core_value = UnitLastAttacker { attacker_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, attacker_def_id: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, attacker_team: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }; if core_present { Some(core_value) } else { None } };
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn get_unit_los_state(unit_id: i32, ally_team_id: i32, raw: bool) -> Result<UnitLosState> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -1697,6 +1742,30 @@ pub mod units_info {
     }
 
     #[inline]
+    pub fn get_unit_shield_state(unit_id: i32, weapon_num: i32) -> Result<Option<UnitShieldState>> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 16];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_shield_state(unit_id, weapon_num, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = { let core_present = super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?; let core_value = { let core_value = UnitShieldState { shield_enabled: super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, shield_power: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, shield_alpha: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }; if core_present { Some(core_value) } else { None } };
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, weapon_num);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn get_unit_states(unit_id: i32, options: UnitStatesOptions) -> Result<UnitStates> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -1727,6 +1796,30 @@ pub mod units_info {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unit_id, options);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn get_unit_stockpile(unit_id: i32) -> Result<Option<UnitStockpile>> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 16];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_stockpile(unit_id, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = { let core_present = super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?; let core_value = { let core_value = UnitStockpile { stockpile: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, stockpile_queue_size: super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, build_percent: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }; if core_present { Some(core_value) } else { None } };
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id,);
             Err(unreachable!())
         }
     }
@@ -6465,6 +6558,13 @@ pub mod metal_map {
 pub mod path_finder {
     use crate::{ApiError, ErrorCode, Result};
 
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct Float3 {
+        pub x: f32,
+        pub y: f32,
+        pub z: f32,
+    }
+
     #[cfg(target_arch = "wasm32")]
     pub mod raw {
         #[link(wasm_import_module = "spring:path-finder")]
@@ -6554,6 +6654,41 @@ pub mod path_finder {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (overlay_index,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn get_next_way_point(path_id: u32, caller_pos: Float3, min_dist: f32) -> Result<Option<Float3>> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 12];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, caller_pos.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, caller_pos.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, caller_pos.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let mut output_wire = [0u8; 16];
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_get_next_way_point(path_id as i32, min_dist, input_pointer, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let wire = output_wire;
+            let mut cursor = 0usize;
+            let value = { let core_present = super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?; let core_value = { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }; if core_present { Some(core_value) } else { None } };
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (path_id, caller_pos, min_dist);
             Err(unreachable!())
         }
     }
@@ -6872,6 +7007,14 @@ pub mod camera {
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct SetCameraTargetOptions {
+        pub transition_time: Option<f32>,
+        pub dir_x: Option<f32>,
+        pub dir_y: Option<f32>,
+        pub dir_z: Option<f32>,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct TraceScreenRayOptions {
         pub only_coords: bool,
         pub use_minimap: bool,
@@ -7005,6 +7148,51 @@ pub mod camera {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (screen_x, screen_y);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_camera_target(target: Float3, options: SetCameraTargetOptions) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 44];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, target.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_transition_time = options.transition_time.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.transition_time.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_options_transition_time).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_dir_x = options.dir_x.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.dir_x.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_options_dir_x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_dir_y = options.dir_y.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.dir_y.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_options_dir_y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_dir_z = options.dir_z.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.dir_z.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_options_dir_z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_camera_target(input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (target, options);
             Err(unreachable!())
         }
     }
@@ -8569,6 +8757,17 @@ pub mod tracing {
         pub ally_team_id: i32,
     }
 
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct TraceRayGroundBetweenPositionsOptions {
+        pub test_water: Option<bool>,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct TraceRayGroundInDirectionOptions {
+        pub length: Option<f32>,
+        pub test_water: Option<bool>,
+    }
+
     #[cfg(target_arch = "wasm32")]
     pub mod raw {
         #[link(wasm_import_module = "spring:tracing")]
@@ -8690,6 +8889,95 @@ pub mod tracing {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (ray,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn trace_ray_ground_between_positions(start: Float3, end: Float3, options: TraceRayGroundBetweenPositionsOptions) -> Result<(bool, f32, Float3, Float3)> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 32];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, start.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, start.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, start.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, end.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, end.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, end.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_test_water = options.test_water.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.test_water.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, __core_option_options_test_water).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let mut output_wire = [0u8; 32];
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_trace_ray_ground_between_positions(input_pointer, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let wire = output_wire;
+            let mut cursor = 0usize;
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (start, end, options);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn trace_ray_ground_in_direction(start: Float3, dir: Float3, options: TraceRayGroundInDirectionOptions) -> Result<(bool, f32, Float3, Float3)> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 40];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, start.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, start.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, start.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, dir.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, dir.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, dir.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_length = options.length.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.length.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_options_length).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_test_water = options.test_water.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.test_water.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, __core_option_options_test_water).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let mut output_wire = [0u8; 32];
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_trace_ray_ground_in_direction(input_pointer, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let wire = output_wire;
+            let mut cursor = 0usize;
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value });
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (start, dir, options);
             Err(unreachable!())
         }
     }
@@ -9004,10 +9292,30 @@ pub mod unsynced_ctrl {
     use crate::{ApiError, ErrorCode, Result};
 
     #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct AtmosphereParams {
+        pub fog_color: Option<[f32; 4]>,
+        pub sky_color: Option<[f32; 4]>,
+        pub sun_color: Option<[f32; 4]>,
+        pub cloud_color: Option<[f32; 4]>,
+        pub sky_axis_angle: Option<[f32; 4]>,
+        pub fog_start: Option<f32>,
+        pub fog_end: Option<f32>,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct Float3 {
         pub x: f32,
         pub y: f32,
         pub z: f32,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct MapRenderingParams {
+        pub splat_tex_scales: Option<[f32; 4]>,
+        pub splat_tex_mults: Option<[f32; 4]>,
+        pub void_water: Option<bool>,
+        pub void_ground: Option<bool>,
+        pub splat_detail_normal_diffuse_alpha: Option<bool>,
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
@@ -9028,9 +9336,67 @@ pub mod unsynced_ctrl {
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct SetShockFrontFactorsOptions {
+        pub min_area: Option<f32>,
+        pub min_power: Option<f32>,
+        pub dist_adj: Option<f32>,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct SetWindowGeometryOptions {
         pub full_screen: bool,
         pub borderless: bool,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct SunLightingParams {
+        pub ground_ambient_color: Option<[f32; 4]>,
+        pub ground_diffuse_color: Option<[f32; 4]>,
+        pub ground_specular_color: Option<[f32; 4]>,
+        pub model_ambient_color: Option<[f32; 4]>,
+        pub model_diffuse_color: Option<[f32; 4]>,
+        pub model_specular_color: Option<[f32; 4]>,
+        pub specular_exponent: Option<f32>,
+        pub ground_shadow_density: Option<f32>,
+        pub model_shadow_density: Option<f32>,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct WaterParams {
+        pub absorb: Option<[f32; 3]>,
+        pub base_color: Option<[f32; 3]>,
+        pub min_color: Option<[f32; 3]>,
+        pub surface_color: Option<[f32; 3]>,
+        pub diffuse_color: Option<[f32; 3]>,
+        pub specular_color: Option<[f32; 3]>,
+        pub plane_color: Option<[f32; 3]>,
+        pub repeat_x: Option<f32>,
+        pub repeat_y: Option<f32>,
+        pub surface_alpha: Option<f32>,
+        pub ambient_factor: Option<f32>,
+        pub diffuse_factor: Option<f32>,
+        pub specular_factor: Option<f32>,
+        pub specular_power: Option<f32>,
+        pub fresnel_min: Option<f32>,
+        pub fresnel_max: Option<f32>,
+        pub fresnel_power: Option<f32>,
+        pub reflection_distortion: Option<f32>,
+        pub blur_base: Option<f32>,
+        pub blur_exponent: Option<f32>,
+        pub perlin_start_freq: Option<f32>,
+        pub perlin_lacunarity: Option<f32>,
+        pub perlin_amplitude: Option<f32>,
+        pub wind_speed: Option<f32>,
+        pub wave_offset_factor: Option<f32>,
+        pub wave_length: Option<f32>,
+        pub wave_foam_distortion: Option<f32>,
+        pub wave_foam_intensity: Option<f32>,
+        pub caustics_resolution: Option<f32>,
+        pub caustics_strength: Option<f32>,
+        pub num_tiles: Option<f32>,
+        pub shore_waves: Option<bool>,
+        pub force_rendering: Option<bool>,
+        pub has_water_plane: Option<bool>,
     }
 
     #[cfg(target_arch = "wasm32")]
@@ -9593,6 +9959,71 @@ pub mod unsynced_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (cmd_index, button, options);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_atmosphere(params: AtmosphereParams) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 116];
+            let mut input_cursor = 0usize;
+            let __core_option_params_fog_color = params.fog_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.fog_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fog_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fog_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fog_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fog_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_sky_color = params.sky_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.sky_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sky_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sky_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sky_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sky_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_sun_color = params.sun_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.sun_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sun_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sun_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sun_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sun_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_cloud_color = params.cloud_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.cloud_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_cloud_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_cloud_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_cloud_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_cloud_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_sky_axis_angle = params.sky_axis_angle.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.sky_axis_angle.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sky_axis_angle[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sky_axis_angle[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sky_axis_angle[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_sky_axis_angle[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_fog_start = params.fog_start.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.fog_start.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fog_start).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_fog_end = params.fog_end.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.fog_end.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fog_end).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_atmosphere(input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (params,);
             Err(unreachable!())
         }
     }
@@ -10222,6 +10653,56 @@ pub mod unsynced_ctrl {
     }
 
     #[inline]
+    pub fn set_map_rendering_params(params: MapRenderingParams) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 64];
+            let mut input_cursor = 0usize;
+            let __core_option_params_splat_tex_scales = params.splat_tex_scales.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.splat_tex_scales.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_splat_tex_scales[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_splat_tex_scales[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_splat_tex_scales[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_splat_tex_scales[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_splat_tex_mults = params.splat_tex_mults.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.splat_tex_mults.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_splat_tex_mults[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_splat_tex_mults[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_splat_tex_mults[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_splat_tex_mults[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_void_water = params.void_water.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.void_water.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, __core_option_params_void_water).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_void_ground = params.void_ground.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.void_ground.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, __core_option_params_void_ground).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_splat_detail_normal_diffuse_alpha = params.splat_detail_normal_diffuse_alpha.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.splat_detail_normal_diffuse_alpha.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, __core_option_params_splat_detail_normal_diffuse_alpha).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_map_rendering_params(input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (params,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn set_map_shader(standard_shader_id: i32, deferred_shader_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -10290,6 +10771,44 @@ pub mod unsynced_ctrl {
     }
 
     #[inline]
+    pub fn set_shock_front_factors(options: SetShockFrontFactorsOptions) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 24];
+            let mut input_cursor = 0usize;
+            let __core_option_options_min_area = options.min_area.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.min_area.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_options_min_area).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_min_power = options.min_power.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.min_power.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_options_min_power).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_dist_adj = options.dist_adj.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.dist_adj.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_options_dist_adj).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_shock_front_factors(input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (options,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn set_sun_direction(dir: Float3, intensity: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -10317,6 +10836,80 @@ pub mod unsynced_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (dir, intensity);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_sun_lighting(params: SunLightingParams) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 144];
+            let mut input_cursor = 0usize;
+            let __core_option_params_ground_ambient_color = params.ground_ambient_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ground_ambient_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_ambient_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_ambient_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_ambient_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_ambient_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_ground_diffuse_color = params.ground_diffuse_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ground_diffuse_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_diffuse_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_diffuse_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_diffuse_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_diffuse_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_ground_specular_color = params.ground_specular_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ground_specular_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_specular_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_specular_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_specular_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_specular_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_model_ambient_color = params.model_ambient_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.model_ambient_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_ambient_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_ambient_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_ambient_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_ambient_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_model_diffuse_color = params.model_diffuse_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.model_diffuse_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_diffuse_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_diffuse_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_diffuse_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_diffuse_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_model_specular_color = params.model_specular_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.model_specular_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_specular_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_specular_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_specular_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_specular_color[3]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_specular_exponent = params.specular_exponent.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.specular_exponent.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_specular_exponent).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_ground_shadow_density = params.ground_shadow_density.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ground_shadow_density.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ground_shadow_density).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_model_shadow_density = params.model_shadow_density.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.model_shadow_density.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_model_shadow_density).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_sun_lighting(input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (params,);
             Err(unreachable!())
         }
     }
@@ -10559,6 +11152,151 @@ pub mod unsynced_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (time_offset,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_water_params(params: WaterParams) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 328];
+            let mut input_cursor = 0usize;
+            let __core_option_params_absorb = params.absorb.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.absorb.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_absorb[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_absorb[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_absorb[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_base_color = params.base_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.base_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_base_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_base_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_base_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_min_color = params.min_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.min_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_min_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_min_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_min_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_surface_color = params.surface_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.surface_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_surface_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_surface_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_surface_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_diffuse_color = params.diffuse_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.diffuse_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_diffuse_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_diffuse_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_diffuse_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_specular_color = params.specular_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.specular_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_specular_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_specular_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_specular_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_plane_color = params.plane_color.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.plane_color.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_plane_color[0]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_plane_color[1]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_plane_color[2]).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_repeat_x = params.repeat_x.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.repeat_x.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_repeat_x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_repeat_y = params.repeat_y.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.repeat_y.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_repeat_y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_surface_alpha = params.surface_alpha.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.surface_alpha.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_surface_alpha).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_ambient_factor = params.ambient_factor.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.ambient_factor.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_ambient_factor).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_diffuse_factor = params.diffuse_factor.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.diffuse_factor.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_diffuse_factor).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_specular_factor = params.specular_factor.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.specular_factor.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_specular_factor).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_specular_power = params.specular_power.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.specular_power.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_specular_power).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_fresnel_min = params.fresnel_min.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.fresnel_min.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fresnel_min).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_fresnel_max = params.fresnel_max.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.fresnel_max.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fresnel_max).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_fresnel_power = params.fresnel_power.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.fresnel_power.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_fresnel_power).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_reflection_distortion = params.reflection_distortion.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.reflection_distortion.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_reflection_distortion).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_blur_base = params.blur_base.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.blur_base.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_blur_base).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_blur_exponent = params.blur_exponent.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.blur_exponent.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_blur_exponent).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_perlin_start_freq = params.perlin_start_freq.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.perlin_start_freq.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_perlin_start_freq).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_perlin_lacunarity = params.perlin_lacunarity.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.perlin_lacunarity.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_perlin_lacunarity).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_perlin_amplitude = params.perlin_amplitude.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.perlin_amplitude.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_perlin_amplitude).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_wind_speed = params.wind_speed.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.wind_speed.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_wind_speed).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_wave_offset_factor = params.wave_offset_factor.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.wave_offset_factor.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_wave_offset_factor).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_wave_length = params.wave_length.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.wave_length.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_wave_length).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_wave_foam_distortion = params.wave_foam_distortion.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.wave_foam_distortion.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_wave_foam_distortion).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_wave_foam_intensity = params.wave_foam_intensity.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.wave_foam_intensity.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_wave_foam_intensity).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_caustics_resolution = params.caustics_resolution.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.caustics_resolution.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_caustics_resolution).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_caustics_strength = params.caustics_strength.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.caustics_strength.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_caustics_strength).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_num_tiles = params.num_tiles.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.num_tiles.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, __core_option_params_num_tiles).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_shore_waves = params.shore_waves.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.shore_waves.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, __core_option_params_shore_waves).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_force_rendering = params.force_rendering.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.force_rendering.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, __core_option_params_force_rendering).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_params_has_water_plane = params.has_water_plane.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, params.has_water_plane.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, __core_option_params_has_water_plane).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_water_params(input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (params,);
             Err(unreachable!())
         }
     }
@@ -16284,6 +17022,12 @@ pub mod profiling {
 pub mod rml_ui {
     use crate::{ApiError, ErrorCode, Result};
 
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct RmlDocumentShowOptions {
+        pub modal: Option<i32>,
+        pub focus: Option<i32>,
+    }
+
     #[cfg(target_arch = "wasm32")]
     pub mod raw {
         #[link(wasm_import_module = "spring:rml-ui")]
@@ -17853,6 +18597,41 @@ pub mod rml_ui {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (document_handle,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn document_show(document_handle: u64, options: RmlDocumentShowOptions) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 16];
+            let mut input_cursor = 0usize;
+            let __core_option_options_modal = options.modal.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.modal.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, __core_option_options_modal).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            let __core_option_options_focus = options.focus.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.focus.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, __core_option_options_focus).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_document_show(document_handle as i64, input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (document_handle, options);
             Err(unreachable!())
         }
     }

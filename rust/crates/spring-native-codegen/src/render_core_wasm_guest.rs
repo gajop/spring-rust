@@ -797,6 +797,13 @@ fn decode_fixed_value(
                 rust_type_ident(name),
             )
         }
+        SemanticType::Option { inner } => {
+            let present = format!(
+                "super::__core_wire::boolean(&{wire}, &mut {cursor}).ok_or({internal})?"
+            );
+            let payload = decode_fixed_value(inner, records, wire, cursor);
+            format!("{{ let core_present = {present}; let core_value = {payload}; if core_present {{ Some(core_value) }} else {{ None }} }}")
+        }
         _ => unreachable!(),
     }
 }
@@ -807,6 +814,18 @@ fn cast_wire_value(value: String, wire_type: &str, rust_type: String) -> String 
     } else {
         format!("{value} as {rust_type}")
     }
+}
+
+fn option_temp_ident(value: &str) -> String {
+    let mut ident = String::from("__core_option_");
+    for character in value.chars() {
+        if character.is_ascii_alphanumeric() {
+            ident.push(character);
+        } else {
+            ident.push('_');
+        }
+    }
+    ident
 }
 
 fn encode_fixed_value(
@@ -841,6 +860,13 @@ fn encode_fixed_value(
         SemanticType::Handle { .. } => format!(
             "{pad}super::__core_wire::put_u64(&mut {wire}, &mut {cursor}, {value}).ok_or({internal})?;\n"
         ),
+        SemanticType::Option { inner } => {
+            let temp = option_temp_ident(value);
+            let payload = encode_fixed_value(inner, &temp, records, wire, cursor, indent);
+            format!(
+                "{pad}let {temp} = {value}.unwrap_or_default();\n{pad}super::__core_wire::put_boolean(&mut {wire}, &mut {cursor}, {value}.is_some()).ok_or({internal})?;\n{payload}"
+            )
+        }
         SemanticType::FixedArray { element, length } => (0..*length)
             .map(|index| {
                 encode_fixed_value(
@@ -1006,6 +1032,7 @@ fn collect_record_types(
             }
         }
         SemanticType::FixedArray { element, .. } => collect_record_types(element, records, names),
+        SemanticType::Option { inner } => collect_record_types(inner, records, names),
         _ => {}
     }
 }
@@ -1066,6 +1093,9 @@ fn public_fixed_rust_type(ty: &SemanticType, records: &BTreeMap<String, RecordMo
             debug_assert!(records.contains_key(name));
             rust_type_ident(name)
         }
+        SemanticType::Option { inner } => {
+            format!("Option<{}>", public_fixed_rust_type(inner, records))
+        }
         _ => panic!("non-fixed type requested for fixed Core wrapper"),
     }
 }
@@ -1100,6 +1130,7 @@ fn fixed_wire_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -
                 .iter()
                 .all(|field| fixed_wire_type(&field.ty, records))
         }),
+        SemanticType::Option { inner } => fixed_wire_type(inner, records),
         _ => false,
     }
 }
@@ -1122,6 +1153,10 @@ fn fixed_wire_layout(
         SemanticType::Record { name } => {
             let record = records.get(name)?;
             layout_fields(&record.fields, records)
+        }
+        SemanticType::Option { inner } => {
+            let (bytes, alignment) = fixed_wire_layout(inner, records)?;
+            Some((bytes.checked_add(4)?, alignment.max(4)))
         }
         _ => None,
     }

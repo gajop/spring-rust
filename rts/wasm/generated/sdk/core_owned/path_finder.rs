@@ -142,20 +142,10 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_next_way_point {
-            #[link(wasm_import_module = "spring:path-finder")]
-            unsafe extern "C" {
-                #[link_name = "get-next-way-point"]
-                pub safe fn call(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:path-finder.get-next-way-point."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_next_way_point(p0: i32, p1: f32, p2: i32, p3: i32) -> i32 {
-            __core_owned_get_next_way_point::call(p0, p1, p2, p3)
+        pub fn get_next_way_point(path_id: u32, caller_pos: Float3, min_dist: f32) -> Result<Option<Float3>> {
+            let value = crate::generated::path_finder::get_next_way_point(path_id, crate::generated::path_finder::Float3 { x: caller_pos.x, y: caller_pos.y, z: caller_pos.z }, min_dist)?;
+            Ok(match value { Some(value) => Some(Float3 { x: value.x, y: value.y, z: value.z }), None => None })
         }
 
         #[inline]

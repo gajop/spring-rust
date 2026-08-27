@@ -2269,20 +2269,10 @@
             crate::generated::borrowed::rml_ui::document_set_title(document_handle, __core_string_1_buf.as_cstr())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_document_show {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            unsafe extern "C" {
-                #[link_name = "document-show"]
-                pub safe fn call(p0: i64, p1: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.document-show."]
-        #[doc(hidden)]
         #[inline]
-        pub fn document_show(p0: i64, p1: i32) -> i64 {
-            __core_owned_document_show::call(p0, p1)
+        pub fn document_show(document_handle: u64, options: RmlDocumentShowOptions) -> Result<bool> {
+            let value = crate::generated::rml_ui::document_show(document_handle, crate::generated::rml_ui::RmlDocumentShowOptions { modal: options.modal, focus: options.focus })?;
+            Ok(value)
         }
 
         #[inline]

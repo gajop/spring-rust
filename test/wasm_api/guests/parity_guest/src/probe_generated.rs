@@ -786,6 +786,30 @@ fn probe_encoding_is_valid_base64_url(fixture: &super::Fixture) -> String {
     format!("WASM_API|encoding_is_valid_base64_url|{fields}")
 }
 
+fn probe_trace_ray_ground_in_direction(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::tracing::trace_ray_ground_in_direction(crate::bindings::recoil::spring_api::tracing::Float3 { x: (1024f32) as f32, y: (256f32) as f32, z: (1024f32) as f32 }, crate::bindings::recoil::spring_api::tracing::Float3 { x: (0f32) as f32, y: (-1f32) as f32, z: (0f32) as f32 }, crate::bindings::recoil::spring_api::tracing::TraceRayGroundInDirectionOptions { length: Some((512f32) as f32), test_water: Some(false) });
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_f32("rayLength", value.hit_length), encode_f32("posX", value.hit_pos.x), encode_f32("posY", value.hit_pos.y), encode_f32("posZ", value.hit_pos.z)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|trace_ray_ground_in_direction|{fields}")
+}
+
+fn probe_trace_ray_ground_between_positions(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::tracing::trace_ray_ground_between_positions(crate::bindings::recoil::spring_api::tracing::Float3 { x: (1024f32) as f32, y: (256f32) as f32, z: (1024f32) as f32 }, crate::bindings::recoil::spring_api::tracing::Float3 { x: (1024f32) as f32, y: (-256f32) as f32, z: (1024f32) as f32 }, crate::bindings::recoil::spring_api::tracing::TraceRayGroundBetweenPositionsOptions { test_water: Some(false) });
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_f32("rayLength", value.hit_length), encode_f32("posX", value.hit_pos.x), encode_f32("posY", value.hit_pos.y), encode_f32("posZ", value.hit_pos.z)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|trace_ray_ground_between_positions|{fields}")
+}
+
 fn probe_trace_ray_between_positions(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::tracing::trace_ray_between_positions(crate::bindings::recoil::spring_api::tracing::Float3 { x: (0f32) as f32, y: (256f32) as f32, z: (0f32) as f32 }, crate::bindings::recoil::spring_api::tracing::Float3 { x: (512f32) as f32, y: (256f32) as f32, z: (0f32) as f32 }, &"both");
     let fields = match result {
@@ -1608,6 +1632,30 @@ fn probe_get_unit_transporter(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_unit_transporter|{fields}")
+}
+
+fn probe_get_unit_last_attacker(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::units_info::get_unit_last_attacker((fixture.unit_id) as i32);
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_bool("hasAttacker", value.is_some())];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|get_unit_last_attacker|{fields}")
+}
+
+fn probe_get_unit_shield_state(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::units_info::get_unit_shield_state((fixture.unit_id) as i32, (1i32) as i32);
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_bool("hasShield", value.is_some())];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|get_unit_shield_state|{fields}")
 }
 
 fn probe_get_unit_command_count(fixture: &super::Fixture) -> String {
@@ -2465,6 +2513,18 @@ fn probe_get_feature_blocking(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_feature_blocking|{fields}")
+}
+
+fn probe_unit_stockpile_fixed_shape(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::units_info::get_unit_stockpile((fixture.unit_id) as i32);
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_bool("hasStockpile", value.is_some()), encode_optional_u32("stockpile", value.as_ref().map(|value| value.stockpile)), encode_optional_u32("stockpileQueueSize", value.as_ref().map(|value| value.stockpile_queue_size)), encode_optional_f32("buildPercent", value.as_ref().map(|value| value.build_percent))];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|unit_stockpile_fixed_shape|{fields}")
 }
 
 fn probe_unit_storage_fixed_getter(fixture: &super::Fixture) -> String {
@@ -5757,6 +5817,8 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_encoding_decode_base64_url(fixture));
     emit(probe_encoding_encode_base64_url(fixture));
     emit(probe_encoding_is_valid_base64_url(fixture));
+    emit(probe_trace_ray_ground_in_direction(fixture));
+    emit(probe_trace_ray_ground_between_positions(fixture));
     emit(probe_trace_ray_between_positions(fixture));
     emit(probe_unit_health(fixture));
     emit(probe_unit_max_health(fixture));
@@ -5818,6 +5880,8 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_unit_in_build_stance(fixture));
     emit(probe_get_unit_nano_pieces_count(fixture));
     emit(probe_get_unit_transporter(fixture));
+    emit(probe_get_unit_last_attacker(fixture));
+    emit(probe_get_unit_shield_state(fixture));
     emit(probe_get_unit_command_count(fixture));
     emit(probe_get_command_queue(fixture));
     emit(probe_get_unit_current_command(fixture));
@@ -5886,6 +5950,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_unit_buildee_radius(fixture));
     emit(probe_unit_blocking(fixture));
     emit(probe_get_feature_blocking(fixture));
+    emit(probe_unit_stockpile_fixed_shape(fixture));
     emit(probe_unit_storage_fixed_getter(fixture));
     emit(probe_unit_is_transporting_fixed_shape(fixture));
     emit(probe_unit_pos_error_params_fixed_shape(fixture));

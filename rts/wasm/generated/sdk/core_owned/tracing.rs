@@ -234,36 +234,26 @@
             })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_trace_ray_ground_between_positions {
-            #[link(wasm_import_module = "spring:tracing")]
-            unsafe extern "C" {
-                #[link_name = "trace-ray-ground-between-positions"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:tracing.trace-ray-ground-between-positions."]
-        #[doc(hidden)]
         #[inline]
-        pub fn trace_ray_ground_between_positions(p0: i32, p1: i32) -> i32 {
-            __core_owned_trace_ray_ground_between_positions::call(p0, p1)
+        pub fn trace_ray_ground_between_positions(start: Float3, end: Float3, options: TraceRayGroundBetweenPositionsOptions) -> Result<TraceRayGroundBetweenPositionsValue> {
+            let value = crate::generated::tracing::trace_ray_ground_between_positions(crate::generated::tracing::Float3 { x: start.x, y: start.y, z: start.z }, crate::generated::tracing::Float3 { x: end.x, y: end.y, z: end.z }, crate::generated::tracing::TraceRayGroundBetweenPositionsOptions { test_water: options.test_water })?;
+            Ok(TraceRayGroundBetweenPositionsValue {
+                hit: value.0,
+                hit_length: value.1,
+                hit_pos: Float3 { x: value.2.x, y: value.2.y, z: value.2.z },
+                hit_normal: Float3 { x: value.3.x, y: value.3.y, z: value.3.z }
+            })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_trace_ray_ground_in_direction {
-            #[link(wasm_import_module = "spring:tracing")]
-            unsafe extern "C" {
-                #[link_name = "trace-ray-ground-in-direction"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:tracing.trace-ray-ground-in-direction."]
-        #[doc(hidden)]
         #[inline]
-        pub fn trace_ray_ground_in_direction(p0: i32, p1: i32) -> i32 {
-            __core_owned_trace_ray_ground_in_direction::call(p0, p1)
+        pub fn trace_ray_ground_in_direction(start: Float3, dir: Float3, options: TraceRayGroundInDirectionOptions) -> Result<TraceRayGroundInDirectionValue> {
+            let value = crate::generated::tracing::trace_ray_ground_in_direction(crate::generated::tracing::Float3 { x: start.x, y: start.y, z: start.z }, crate::generated::tracing::Float3 { x: dir.x, y: dir.y, z: dir.z }, crate::generated::tracing::TraceRayGroundInDirectionOptions { length: options.length, test_water: options.test_water })?;
+            Ok(TraceRayGroundInDirectionValue {
+                hit: value.0,
+                hit_length: value.1,
+                hit_pos: Float3 { x: value.2.x, y: value.2.y, z: value.2.z },
+                hit_normal: Float3 { x: value.3.x, y: value.3.y, z: value.3.z }
+            })
         }
 
         #[cfg(target_arch = "wasm32")]

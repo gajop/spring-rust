@@ -1104,20 +1104,10 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_atmosphere {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            unsafe extern "C" {
-                #[link_name = "set-atmosphere"]
-                pub safe fn call(p0: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-atmosphere."]
-        #[doc(hidden)]
         #[inline]
-        pub fn set_atmosphere(p0: i32) -> i64 {
-            __core_owned_set_atmosphere::call(p0)
+        pub fn set_atmosphere(params: AtmosphereParams) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_atmosphere(crate::generated::unsynced_ctrl::AtmosphereParams { fog_color: match params.fog_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, sky_color: match params.sky_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, sun_color: match params.sun_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, cloud_color: match params.cloud_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, sky_axis_angle: match params.sky_axis_angle { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, fog_start: params.fog_start, fog_end: params.fog_end })?;
+            Ok(value)
         }
 
         #[inline]
@@ -1311,20 +1301,10 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_map_rendering_params {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            unsafe extern "C" {
-                #[link_name = "set-map-rendering-params"]
-                pub safe fn call(p0: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-map-rendering-params."]
-        #[doc(hidden)]
         #[inline]
-        pub fn set_map_rendering_params(p0: i32) -> i64 {
-            __core_owned_set_map_rendering_params::call(p0)
+        pub fn set_map_rendering_params(params: MapRenderingParams) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_map_rendering_params(crate::generated::unsynced_ctrl::MapRenderingParams { splat_tex_scales: match params.splat_tex_scales { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, splat_tex_mults: match params.splat_tex_mults { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, void_water: params.void_water, void_ground: params.void_ground, splat_detail_normal_diffuse_alpha: params.splat_detail_normal_diffuse_alpha })?;
+            Ok(value)
         }
 
         #[inline]
@@ -1373,20 +1353,10 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_shock_front_factors {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            unsafe extern "C" {
-                #[link_name = "set-shock-front-factors"]
-                pub safe fn call(p0: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-shock-front-factors."]
-        #[doc(hidden)]
         #[inline]
-        pub fn set_shock_front_factors(p0: i32) -> i64 {
-            __core_owned_set_shock_front_factors::call(p0)
+        pub fn set_shock_front_factors(options: SetShockFrontFactorsOptions) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_shock_front_factors(crate::generated::unsynced_ctrl::SetShockFrontFactorsOptions { min_area: options.min_area, min_power: options.min_power, dist_adj: options.dist_adj })?;
+            Ok(value)
         }
 
         #[inline]
@@ -1405,20 +1375,10 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_sun_lighting {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            unsafe extern "C" {
-                #[link_name = "set-sun-lighting"]
-                pub safe fn call(p0: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-sun-lighting."]
-        #[doc(hidden)]
         #[inline]
-        pub fn set_sun_lighting(p0: i32) -> i64 {
-            __core_owned_set_sun_lighting::call(p0)
+        pub fn set_sun_lighting(params: SunLightingParams) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_sun_lighting(crate::generated::unsynced_ctrl::SunLightingParams { ground_ambient_color: match params.ground_ambient_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, ground_diffuse_color: match params.ground_diffuse_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, ground_specular_color: match params.ground_specular_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, model_ambient_color: match params.model_ambient_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, model_diffuse_color: match params.model_diffuse_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, model_specular_color: match params.model_specular_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, specular_exponent: params.specular_exponent, ground_shadow_density: params.ground_shadow_density, model_shadow_density: params.model_shadow_density })?;
+            Ok(value)
         }
 
         #[inline]
@@ -1542,20 +1502,10 @@
             crate::generated::borrowed::unsynced_ctrl::set_wm_icon(__core_string_0_buf.as_cstr(), force_resolution)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_water_params {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            unsafe extern "C" {
-                #[link_name = "set-water-params"]
-                pub safe fn call(p0: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.set-water-params."]
-        #[doc(hidden)]
         #[inline]
-        pub fn set_water_params(p0: i32) -> i64 {
-            __core_owned_set_water_params::call(p0)
+        pub fn set_water_params(params: WaterParams) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_water_params(crate::generated::unsynced_ctrl::WaterParams { absorb: match params.absorb { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, base_color: match params.base_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, min_color: match params.min_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, surface_color: match params.surface_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, diffuse_color: match params.diffuse_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, specular_color: match params.specular_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, plane_color: match params.plane_color { Some(value) => Some(value.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?), None => None }, repeat_x: params.repeat_x, repeat_y: params.repeat_y, surface_alpha: params.surface_alpha, ambient_factor: params.ambient_factor, diffuse_factor: params.diffuse_factor, specular_factor: params.specular_factor, specular_power: params.specular_power, fresnel_min: params.fresnel_min, fresnel_max: params.fresnel_max, fresnel_power: params.fresnel_power, reflection_distortion: params.reflection_distortion, blur_base: params.blur_base, blur_exponent: params.blur_exponent, perlin_start_freq: params.perlin_start_freq, perlin_lacunarity: params.perlin_lacunarity, perlin_amplitude: params.perlin_amplitude, wind_speed: params.wind_speed, wave_offset_factor: params.wave_offset_factor, wave_length: params.wave_length, wave_foam_distortion: params.wave_foam_distortion, wave_foam_intensity: params.wave_foam_intensity, caustics_resolution: params.caustics_resolution, caustics_strength: params.caustics_strength, num_tiles: params.num_tiles, shore_waves: params.shore_waves, force_rendering: params.force_rendering, has_water_plane: params.has_water_plane })?;
+            Ok(value)
         }
 
         #[inline]

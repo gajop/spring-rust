@@ -1633,6 +1633,16 @@ fn convert_to_core(
         SemanticType::FixedArray { .. } => format!(
             "{expression}.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?"
         ),
+        SemanticType::Option { inner } => {
+            let converted = convert_to_core(inner, "value", records, enums, module_ident);
+            if converted == "value" {
+                expression.to_owned()
+            } else {
+                format!(
+                    "match {expression} {{ Some(value) => Some({converted}), None => None }}"
+                )
+            }
+        }
         _ => expression.to_owned(),
     }
 }
@@ -1690,6 +1700,16 @@ fn convert_from_core(
             } else {
                 format!(
                     "{expression}.into_iter().map(|value| Ok({converted})).collect::<crate::Result<Vec<_>>>()?"
+                )
+            }
+        }
+        SemanticType::Option { inner } => {
+            let converted = convert_from_core(inner, "value", records, enums);
+            if converted == "value" {
+                expression.to_owned()
+            } else {
+                format!(
+                    "match {expression} {{ Some(value) => Some({converted}), None => None }}"
                 )
             }
         }

@@ -87,6 +87,10 @@ return {
 
 		"encoding_is_valid_base64_url",
 
+		"trace_ray_ground_in_direction",
+
+		"trace_ray_ground_between_positions",
+
 		"trace_ray_between_positions",
 
 		"unit_health",
@@ -208,6 +212,10 @@ return {
 		"get_unit_nano_pieces_count",
 
 		"get_unit_transporter",
+
+		"get_unit_last_attacker",
+
+		"get_unit_shield_state",
 
 		"get_unit_command_count",
 
@@ -344,6 +352,8 @@ return {
 		"unit_blocking",
 
 		"get_feature_blocking",
+
+		"unit_stockpile_fixed_shape",
 
 		"unit_storage_fixed_getter",
 
@@ -911,6 +921,25 @@ return {
 		["encoding_is_valid_base64_url"] = {
 			text = "SGVsbG8-_",
 		},
+		["trace_ray_ground_in_direction"] = {
+			startX = 1024,
+			startY = 256,
+			startZ = 1024,
+			dirX = 0,
+			dirY = -1,
+			dirZ = 0,
+			maxLength = 512,
+			testWater = false,
+		},
+		["trace_ray_ground_between_positions"] = {
+			startX = 1024,
+			startY = 256,
+			startZ = 1024,
+			endX = 1024,
+			endY = -256,
+			endZ = 1024,
+			testWater = false,
+		},
 		["trace_ray_between_positions"] = {
 			startX = 0,
 			startY = 256,
@@ -1037,6 +1066,9 @@ return {
 			useLOS = false,
 			sphereDistTest = false,
 			checkSightDist = false,
+		},
+		["get_unit_shield_state"] = {
+			weaponNum = 1,
 		},
 		["get_command_queue"] = {
 			maxCommands = 999,

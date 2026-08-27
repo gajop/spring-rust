@@ -234,20 +234,10 @@
             crate::generated::dynamic_input::camera::set_camera_state(transition_time, transition_time_factor, transition_time_exponent, &__blob0)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_set_camera_target {
-            #[link(wasm_import_module = "spring:camera")]
-            unsafe extern "C" {
-                #[link_name = "set-camera-target"]
-                pub safe fn call(p0: i32) -> i64;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:camera.set-camera-target."]
-        #[doc(hidden)]
         #[inline]
-        pub fn set_camera_target(p0: i32) -> i64 {
-            __core_owned_set_camera_target::call(p0)
+        pub fn set_camera_target(target: Float3, options: SetCameraTargetOptions) -> Result<bool> {
+            let value = crate::generated::camera::set_camera_target(crate::generated::camera::Float3 { x: target.x, y: target.y, z: target.z }, crate::generated::camera::SetCameraTargetOptions { transition_time: options.transition_time, dir_x: options.dir_x, dir_y: options.dir_y, dir_z: options.dir_z })?;
+            Ok(value)
         }
 
         #[inline]
