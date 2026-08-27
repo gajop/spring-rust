@@ -6860,6 +6860,11 @@ pub mod move_ctrl {
             #[link_name = "set-move-type-numeric"]
             pub safe fn core_set_move_type_numeric(p0: i32, p1: i32, p2: f32) -> i64;
         }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-no-blocking"]
+            pub safe fn core_set_no_blocking(p0: i32, p1: i32) -> i64;
+        }
     }
 
     #[inline]
@@ -6990,6 +6995,28 @@ pub mod move_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unit_id, field, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_no_blocking(unit_id: i32, no_blocking: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_no_blocking(unit_id, if no_blocking { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, no_blocking);
             Err(unreachable!())
         }
     }

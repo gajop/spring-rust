@@ -374,6 +374,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"move_ctrl", "SetMoveCtrlGravity", 5u, true, false, LoweringStatus::automatic},
 	{"move_ctrl", "SetMoveTypeBoolean", 5u, true, false, LoweringStatus::automatic},
 	{"move_ctrl", "SetMoveTypeNumeric", 5u, true, false, LoweringStatus::automatic},
+	{"move_ctrl", "SetNoBlocking", 5u, true, false, LoweringStatus::automatic},
 	{"camera", "GetCameraDirection", 26u, false, false, LoweringStatus::automatic},
 	{"camera", "GetCameraFOV", 26u, false, false, LoweringStatus::automatic},
 	{"camera", "GetCameraNames", 26u, false, false, LoweringStatus::annotated},

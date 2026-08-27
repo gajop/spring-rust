@@ -174,6 +174,17 @@
             pub success: bool,
         }
 
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetNoBlockingQuery {
+            pub unit_id: i32,
+            pub no_blocking: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetNoBlockingResult {
+            pub success: bool,
+        }
+
         pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
         #[derive(Debug, Clone, PartialEq)]
@@ -253,6 +264,12 @@
         #[inline]
         pub fn set_move_type_numeric(unit_id: i32, field: MoveTypeNumericField, value: f32) -> Result<bool> {
             let value = crate::generated::move_ctrl::set_move_type_numeric(unit_id, match field { MoveTypeNumericField::MoveTypeAirAccRate => 24i32, MoveTypeNumericField::MoveTypeAirAttackSafetyDistance => 33i32, MoveTypeNumericField::MoveTypeAirDecRate => 25i32, MoveTypeNumericField::MoveTypeAirManeuverBlockTime => 35i32, MoveTypeNumericField::MoveTypeAirMaxAcc => 26i32, MoveTypeNumericField::MoveTypeAirMaxAileron => 30i32, MoveTypeNumericField::MoveTypeAirMaxBank => 28i32, MoveTypeNumericField::MoveTypeAirMaxDec => 27i32, MoveTypeNumericField::MoveTypeAirMaxElevator => 31i32, MoveTypeNumericField::MoveTypeAirMaxPitch => 29i32, MoveTypeNumericField::MoveTypeAirMaxRudder => 32i32, MoveTypeNumericField::MoveTypeAirMyGravity => 34i32, MoveTypeNumericField::MoveTypeAirTurnRadius => 23i32, MoveTypeNumericField::MoveTypeAirWantedHeight => 22i32, MoveTypeNumericField::MoveTypeGroundAccRate => 6i32, MoveTypeNumericField::MoveTypeGroundDecRate => 7i32, MoveTypeNumericField::MoveTypeGroundMaxReverseDist => 9i32, MoveTypeNumericField::MoveTypeGroundMaxReverseSpeed => 11i32, MoveTypeNumericField::MoveTypeGroundMinReverseAngle => 10i32, MoveTypeNumericField::MoveTypeGroundMinScriptChangeHeading => 13i32, MoveTypeNumericField::MoveTypeGroundMyGravity => 8i32, MoveTypeNumericField::MoveTypeGroundSqSkidSpeedMult => 12i32, MoveTypeNumericField::MoveTypeGroundTurnAccel => 5i32, MoveTypeNumericField::MoveTypeGroundTurnRate => 4i32, MoveTypeNumericField::MoveTypeGunshipAccRate => 15i32, MoveTypeNumericField::MoveTypeGunshipAltitudeRate => 18i32, MoveTypeNumericField::MoveTypeGunshipCurrentBank => 19i32, MoveTypeNumericField::MoveTypeGunshipCurrentPitch => 20i32, MoveTypeNumericField::MoveTypeGunshipDecRate => 16i32, MoveTypeNumericField::MoveTypeGunshipMaxDrift => 21i32, MoveTypeNumericField::MoveTypeGunshipTurnRate => 17i32, MoveTypeNumericField::MoveTypeGunshipWantedHeight => 14i32, MoveTypeNumericField::MoveTypeManeuverLeash => 2i32, MoveTypeNumericField::MoveTypeMaxSpeed => 0i32, MoveTypeNumericField::MoveTypeMaxWantedSpeed => 1i32, MoveTypeNumericField::MoveTypeWaterline => 3i32 }, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_no_blocking(unit_id: i32, no_blocking: bool) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_no_blocking(unit_id, no_blocking)?;
             Ok(value)
         }
 

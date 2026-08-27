@@ -555,6 +555,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:move-ctrl", "set-move-ctrl-gravity", "i32,f32->i64", 5u, Strategy::direct},
 	{"spring:move-ctrl", "set-move-type-boolean", "i32,i32,i32->i64", 5u, Strategy::direct},
 	{"spring:move-ctrl", "set-move-type-numeric", "i32,i32,f32->i64", 5u, Strategy::direct},
+	{"spring:move-ctrl", "set-no-blocking", "i32,i32->i64", 5u, Strategy::direct},
 	{"spring:path-finder", "delete-path", "i32->i64", 5u, Strategy::direct},
 	{"spring:path-finder", "free-path-node-costs-array", "i32->i64", 31u, Strategy::direct},
 	{"spring:path-finder", "get-next-way-point", "i32,f32,i32,i32->i32", 31u, Strategy::fixedInput},

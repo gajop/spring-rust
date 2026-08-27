@@ -354,6 +354,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:move-ctrl", "set-move-ctrl-gravity", "i32,f32->i64", 5u},
     {"spring:move-ctrl", "set-move-type-boolean", "i32,i32,i32->i64", 5u},
     {"spring:move-ctrl", "set-move-type-numeric", "i32,i32,f32->i64", 5u},
+    {"spring:move-ctrl", "set-no-blocking", "i32,i32->i64", 5u},
     {"spring:camera", "get-camera-direction", "i32,i32->i32", 26u},
     {"spring:camera", "get-camera-fov", "i32->i64", 26u},
     {"spring:camera", "get-camera-names", "i32,i32->i32", 26u},

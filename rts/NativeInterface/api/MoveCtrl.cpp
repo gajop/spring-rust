@@ -239,6 +239,33 @@ static void NativeSetMoveCtrlGravity(const SetMoveCtrlGravityQuery* query, SetMo
 	result->success = true;
 }
 
+static void NativeSetNoBlocking(const SetNoBlockingQuery* query, SetNoBlockingResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CScriptMoveType* moveType = dynamic_cast<CScriptMoveType*>(unit->moveType);
+	if (moveType == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	moveType->SetNoBlocking(query->noBlocking);
+	result->success = true;
+}
+
 // Typed equivalent of Lua's MoveCtrl.SetGroundMoveTypeData(unitID,
 // {maxSpeed = value}). Keep Lua-facing units at this boundary; AMoveType
 // stores speeds per simulation frame internally.
@@ -421,4 +448,5 @@ const MoveCtrlApi MOVE_CTRL_API = {
 	.SetGroundMoveTypeMaxSpeed = NativeSetGroundMoveTypeMaxSpeed,
 	.SetMoveTypeNumeric = NativeSetMoveTypeNumeric,
 	.SetMoveTypeBoolean = NativeSetMoveTypeBoolean,
+	.SetNoBlocking = NativeSetNoBlocking,
 };

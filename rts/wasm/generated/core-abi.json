@@ -12128,6 +12128,27 @@
       "notes": []
     },
     {
+      "module": "move_ctrl",
+      "function": "SetNoBlocking",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-no-blocking",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
       "module": "path_finder",
       "function": "DeletePath",
       "import_module": "spring:path-finder",
@@ -30274,7 +30295,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1149,
+  "automatic_count": 1150,
   "manual_count": 194,
   "unsupported_count": 17
 }

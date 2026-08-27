@@ -1,20 +1,20 @@
 {
   "modules": 56,
-  "functions": 1360,
-  "automatic": 1149,
+  "functions": 1361,
+  "automatic": 1150,
   "annotated": 183,
   "manual": 28,
   "unsupported": 0,
   "per_environment": {
-    "gaia-synced": 748,
+    "gaia-synced": 749,
     "gaia-unsynced": 1152,
     "intro": 327,
     "menu": 336,
-    "rules-synced": 748,
+    "rules-synced": 749,
     "rules-unsynced": 1152,
     "ui": 1155
   }
 }
 
 # core-wasm planning
-automatic=1149 manual=194 unsupported=17
+automatic=1150 manual=194 unsupported=17

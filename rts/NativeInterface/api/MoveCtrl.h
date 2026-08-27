@@ -77,6 +77,20 @@ struct SetMoveCtrlGravityResult {
 	bool success;
 };
 
+// Marks or unmarks the unit on the blocking-map without changing its blocking
+// (collidable) state, matching Spring.MoveCtrl.SetNoBlocking. Script move types
+// re-Block their owner on every update that moved it, so a unit meant to stay
+// off the blocking map needs this in addition to Spring.SetUnitBlocking.
+struct SetNoBlockingQuery {
+	int32_t unitID;
+	bool noBlocking;
+};
+
+struct SetNoBlockingResult {
+	const Error* error;
+	bool success;
+};
+
 // Typed equivalent of MoveCtrl.SetGroundMoveTypeData(unitID,
 // {maxSpeed = value}). The value uses the Lua-facing world-units-per-second
 // convention; the engine converts it to its per-simulation-frame value.
@@ -241,6 +255,11 @@ struct MoveCtrlApi {
 	void (*SetMoveTypeBoolean)(
 		const SetMoveTypeBooleanQuery* query,
 		SetMoveTypeBooleanResult* result
+	);
+
+	void (*SetNoBlocking)(
+		const SetNoBlockingQuery* query,
+		SetNoBlockingResult* result
 	);
 };
 
