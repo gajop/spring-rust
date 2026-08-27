@@ -9648,6 +9648,11 @@ pub mod unsynced_ctrl {
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
+            #[link_name = "set-unit-lua-draw"]
+            pub safe fn core_set_unit_lua_draw(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unsynced-ctrl")]
+        unsafe extern "C" {
             #[link_name = "set-unit-no-draw"]
             pub safe fn core_set_unit_no_draw(p0: i32, p1: i32) -> i64;
         }
@@ -10998,6 +11003,28 @@ pub mod unsynced_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unit_id, leave_tracks);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_unit_lua_draw(unit_id: i32, lua_draw: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_unit_lua_draw(unit_id, if lua_draw { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, lua_draw);
             Err(unreachable!())
         }
     }

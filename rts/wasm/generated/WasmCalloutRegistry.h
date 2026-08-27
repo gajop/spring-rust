@@ -573,6 +573,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"unsynced_ctrl", "SetUnitIcon", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetUnitIconDraw", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetUnitLeaveTracks", 31u, false, false, LoweringStatus::automatic},
+	{"unsynced_ctrl", "SetUnitLuaDraw", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetUnitNoDraw", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetUnitNoGroup", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetUnitNoMinimap", 31u, false, false, LoweringStatus::automatic},

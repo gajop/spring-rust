@@ -27982,6 +27982,27 @@
     },
     {
       "module": "unsynced_ctrl",
+      "function": "SetUnitLuaDraw",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "set-unit-lua-draw",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_ctrl",
       "function": "SetUnitNoDraw",
       "import_module": "spring:unsynced-ctrl",
       "import_name": "set-unit-no-draw",
@@ -30253,7 +30274,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1148,
+  "automatic_count": 1149,
   "manual_count": 194,
   "unsupported_count": 17
 }

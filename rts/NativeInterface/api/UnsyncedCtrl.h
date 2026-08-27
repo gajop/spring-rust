@@ -29,6 +29,9 @@ struct SetUnitAlwaysUpdateMatrixResult { const Error* error; bool success; };
 struct SetUnitNoMinimapQuery { int32_t unitID; bool noMinimap; };
 struct SetUnitNoMinimapResult { const Error* error; bool success; };
 
+struct SetUnitLuaDrawQuery { int32_t unitID; bool luaDraw; };
+struct SetUnitLuaDrawResult { const Error* error; bool success; };
+
 struct SetUnitNoGroupQuery { int32_t unitID; bool noGroup; };
 struct SetUnitNoGroupResult { const Error* error; bool success; };
 
@@ -405,6 +408,7 @@ struct UnsyncedCtrlApi {
 	void (*DrawUnitCommands)(const DrawUnitCommandsQuery* query, DrawUnitCommandsResult* result);
 	void (*SetWaterTexture)(const SetWaterTextureQuery* query, SetWaterTextureResult* result);
 	void (*GetWaterTexture)(const GetWaterTextureQuery* query, GetWaterTextureResult* result);
+	void (*SetUnitLuaDraw)(const SetUnitLuaDrawQuery* query, SetUnitLuaDrawResult* result);
 };
 
 extern const UnsyncedCtrlApi UNSYNCED_CTRL_API;

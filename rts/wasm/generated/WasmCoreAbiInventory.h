@@ -1265,6 +1265,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:unsynced-ctrl", "set-unit-icon", "i32,i32->i64", 31u, Strategy::variableInput},
 	{"spring:unsynced-ctrl", "set-unit-icon-draw", "i32,i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-ctrl", "set-unit-leave-tracks", "i32,i32->i64", 31u, Strategy::direct},
+	{"spring:unsynced-ctrl", "set-unit-lua-draw", "i32,i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-ctrl", "set-unit-no-draw", "i32,i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-ctrl", "set-unit-no-group", "i32,i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-ctrl", "set-unit-no-minimap", "i32,i32->i64", 31u, Strategy::direct},

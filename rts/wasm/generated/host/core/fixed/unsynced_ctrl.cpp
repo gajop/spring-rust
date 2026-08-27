@@ -1422,6 +1422,33 @@ wasm_trap_t* Core_unsynced_ctrl_set_unit_leave_tracks(void* environment, wasmtim
     return nullptr;
 }
 
+wasm_trap_t* Core_unsynced_ctrl_set_unit_lua_draw(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->SetUnitLuaDraw == nullptr)
+        return Trap("SetUnitLuaDraw generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetUnitLuaDraw generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetUnitLuaDraw generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    SetUnitLuaDrawQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.luaDraw = slots[1].i32 != 0;
+    SetUnitLuaDrawResult result{};
+    state->native->unsyncedCtrl->SetUnitLuaDraw(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_unsynced_ctrl_set_unit_no_draw(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -2056,6 +2083,13 @@ bool RegisterGeneratedImports_unsynced_ctrl(wasmtime_linker_t* linker, HostState
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:unsynced-ctrl", "set-unit-lua-draw",
+                MakeFuncType(params, 2, results, 1), Core_unsynced_ctrl_set_unit_lua_draw, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:unsynced-ctrl", "set-unit-no-draw",
                 MakeFuncType(params, 2, results, 1), Core_unsynced_ctrl_set_unit_no_draw, state, error))
             return false;
@@ -2134,6 +2168,6 @@ bool RegisterGeneratedImports_unsynced_ctrl(wasmtime_linker_t* linker, HostState
     return true;
 }
 
-static_assert(55 >= 0, "generated Core Wasm callback count");
+static_assert(56 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

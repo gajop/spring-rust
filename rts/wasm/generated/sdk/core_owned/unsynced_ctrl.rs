@@ -751,6 +751,17 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitLuaDrawQuery {
+            pub unit_id: i32,
+            pub lua_draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitLuaDrawResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNoDrawQuery {
             pub unit_id: i32,
             pub no_draw: bool,
@@ -1432,6 +1443,12 @@
         #[inline]
         pub fn set_unit_leave_tracks(unit_id: i32, leave_tracks: bool) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_unit_leave_tracks(unit_id, leave_tracks)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_unit_lua_draw(unit_id: i32, lua_draw: bool) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_unit_lua_draw(unit_id, lua_draw)?;
             Ok(value)
         }
 

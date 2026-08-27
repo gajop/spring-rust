@@ -198,6 +198,10 @@ static CUnit* GetUnit(const SetUnitNoMinimapQuery* query) {
 	return unitHandler.GetUnit(query->unitID);
 }
 
+static CUnit* GetUnit(const SetUnitLuaDrawQuery* query) {
+	return unitHandler.GetUnit(query->unitID);
+}
+
 static CUnit* GetUnit(const SetUnitNoGroupQuery* query) {
 	return unitHandler.GetUnit(query->unitID);
 }
@@ -252,6 +256,21 @@ static void NativeSetUnitAlwaysUpdateMatrix(const SetUnitAlwaysUpdateMatrixQuery
 	}
 
 	unit->alwaysUpdateMat = query->alwaysUpdateMatrix;
+	result->success = true;
+}
+
+static void NativeSetUnitLuaDraw(const SetUnitLuaDrawQuery* query, SetUnitLuaDrawResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	CUnit* unit = GetUnit(query);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->luaDraw = query->luaDraw;
 	result->success = true;
 }
 
@@ -1946,4 +1965,5 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.DrawUnitCommands = NativeDrawUnitCommands,
 	.SetWaterTexture = NativeSetWaterTexture,
 	.GetWaterTexture = NativeGetWaterTexture,
+	.SetUnitLuaDraw = NativeSetUnitLuaDraw,
 };
