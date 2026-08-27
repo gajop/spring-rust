@@ -702,6 +702,30 @@ fn probe_encoding_decode_base64(fixture: &super::Fixture) -> String {
     format!("WASM_API|encoding_decode_base64|{fields}")
 }
 
+fn probe_encoding_encode_base64_default_padding(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::encoding::encode_base64(&("Hello").as_bytes().to_vec(), true);
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_string("value", &value)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|encoding_encode_base64_default_padding|{fields}")
+}
+
+fn probe_encoding_encode_base64_padded(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::encoding::encode_base64(&("Hello").as_bytes().to_vec(), false);
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_string("value", &value)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|encoding_encode_base64_padded|{fields}")
+}
+
 fn probe_encoding_is_valid_base64(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::encoding::is_valid_base64(&"SGVsbG8=");
     let fields = match result {
@@ -736,6 +760,18 @@ fn probe_encoding_decode_base64_url(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|encoding_decode_base64_url|{fields}")
+}
+
+fn probe_encoding_encode_base64_url(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::encoding::encode_base64_url(&("Hello").as_bytes().to_vec());
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_string("value", &value)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|encoding_encode_base64_url|{fields}")
 }
 
 fn probe_encoding_is_valid_base64_url(fixture: &super::Fixture) -> String {
@@ -3511,6 +3547,18 @@ fn probe_get_unit_def_speed(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_unit_def_speed|{fields}")
 }
 
+fn probe_get_unit_def_custom_param(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::unit_defs::get_unit_def_custom_param((fixture.unit_def_id) as i32, &"native_api_parity_unit");
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_string("value", &value)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|get_unit_def_custom_param|{fields}")
+}
+
 fn probe_get_unit_def_custom_param_keys(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::unit_defs::get_unit_def_custom_param_keys((fixture.unit_def_id) as i32);
     let fields = match result {
@@ -3619,6 +3667,18 @@ fn probe_get_feature_def_energy(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_feature_def_energy|{fields}")
 }
 
+fn probe_get_feature_def_custom_param(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::feature_defs::get_feature_def_custom_param((fixture.feature_def_id) as i32, &"native_api_parity_feature");
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_string("value", &value)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|get_feature_def_custom_param|{fields}")
+}
+
 fn probe_get_feature_def_custom_param_keys(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::feature_defs::get_feature_def_custom_param_keys((fixture.feature_def_id) as i32);
     let fields = match result {
@@ -3725,6 +3785,18 @@ fn probe_get_weapon_def_damage(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_weapon_def_damage|{fields}")
+}
+
+fn probe_get_weapon_def_custom_param(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::weapon_defs::get_weapon_def_custom_param((fixture.weapon_def_id) as i32, &"native_api_parity_weapon");
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_string("value", &value)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|get_weapon_def_custom_param|{fields}")
 }
 
 fn probe_get_weapon_def_custom_param_keys(fixture: &super::Fixture) -> String {
@@ -5678,9 +5750,12 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_math_bit_inv(fixture));
     emit(probe_math_bit_bits(fixture));
     emit(probe_encoding_decode_base64(fixture));
+    emit(probe_encoding_encode_base64_default_padding(fixture));
+    emit(probe_encoding_encode_base64_padded(fixture));
     emit(probe_encoding_is_valid_base64(fixture));
     emit(probe_encoding_is_invalid_base64(fixture));
     emit(probe_encoding_decode_base64_url(fixture));
+    emit(probe_encoding_encode_base64_url(fixture));
     emit(probe_encoding_is_valid_base64_url(fixture));
     emit(probe_trace_ray_between_positions(fixture));
     emit(probe_unit_health(fixture));
@@ -5887,6 +5962,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_unit_def_energy_cost(fixture));
     emit(probe_get_unit_def_build_time(fixture));
     emit(probe_get_unit_def_speed(fixture));
+    emit(probe_get_unit_def_custom_param(fixture));
     emit(probe_get_unit_def_custom_param_keys(fixture));
     emit(probe_get_unit_def_by_id(fixture));
     emit(probe_get_feature_def_ids(fixture));
@@ -5896,6 +5972,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_feature_def_name(fixture));
     emit(probe_get_feature_def_metal(fixture));
     emit(probe_get_feature_def_energy(fixture));
+    emit(probe_get_feature_def_custom_param(fixture));
     emit(probe_get_feature_def_custom_param_keys(fixture));
     emit(probe_get_feature_def_by_id(fixture));
     emit(probe_get_weapon_def_ids(fixture));
@@ -5905,6 +5982,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_weapon_def_id(fixture));
     emit(probe_get_weapon_def_range(fixture));
     emit(probe_get_weapon_def_damage(fixture));
+    emit(probe_get_weapon_def_custom_param(fixture));
     emit(probe_get_weapon_def_custom_param_keys(fixture));
     emit(probe_get_weapon_def_by_id(fixture));
     emit(probe_get_cegid(fixture));

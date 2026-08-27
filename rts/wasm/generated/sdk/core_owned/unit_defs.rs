@@ -377,20 +377,23 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_unit_def_custom_param {
-            #[link(wasm_import_module = "spring:unit-defs")]
-            unsafe extern "C" {
-                #[link_name = "get-unit-def-custom-param"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-custom-param."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_unit_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_get_unit_def_custom_param::call(p0, p1, p2)
+        pub fn get_unit_def_custom_param(unit_def_id: i32, key: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + key.len()); __b.extend_from_slice(&(key.len() as u32).to_le_bytes()); __b.extend_from_slice(key.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::unit_defs::get_unit_def_custom_param(unit_def_id, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -546,20 +549,23 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_unit_def_param_string {
-            #[link(wasm_import_module = "spring:unit-defs")]
-            unsafe extern "C" {
-                #[link_name = "get-unit-def-param-string"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-param-string."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_unit_def_param_string(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_get_unit_def_param_string::call(p0, p1, p2)
+        pub fn get_unit_def_param_string(unit_def_id: i32, key: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + key.len()); __b.extend_from_slice(&(key.len() as u32).to_le_bytes()); __b.extend_from_slice(key.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::unit_defs::get_unit_def_param_string(unit_def_id, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

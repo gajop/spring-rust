@@ -13,13 +13,13 @@ pub(crate) mod bindings {
             pub(crate) use spring::owned::effects_control::{DefRef, Float3, NativeExplosionParams, spawn_ceg, spawn_explosion, spawn_sfx};
         }
         pub(crate) mod encoding {
-            pub(crate) use spring::owned::encoding::{decode_base64, decode_base64_url, is_valid_base64, is_valid_base64_url};
+            pub(crate) use spring::owned::encoding::{decode_base64, decode_base64_url, encode_base64, encode_base64_url, is_valid_base64, is_valid_base64_url};
         }
         pub(crate) mod feature_control {
             pub(crate) use spring::owned::feature_control::{DefRef, Float3, SetFeatureBlockingOptions, add_feature_damage, create_feature, create_feature_wreck, create_unit_wreck, destroy_feature, set_feature_always_visible, set_feature_blocking, set_feature_collision_volume_data, set_feature_direction, set_feature_fire_time, set_feature_heading_and_up_dir, set_feature_health, set_feature_mass, set_feature_max_health, set_feature_mid_and_aim_pos, set_feature_move_ctrl, set_feature_no_select, set_feature_physics, set_feature_piece_collision_volume_data, set_feature_piece_matrix, set_feature_piece_visible, set_feature_position, set_feature_radius_and_height, set_feature_reclaim, set_feature_resources, set_feature_resurrect, set_feature_rotation, set_feature_selection_volume_data, set_feature_smoke_time, set_feature_use_air_los, set_feature_velocity, transfer_feature};
         }
         pub(crate) mod feature_defs {
-            pub(crate) use spring::owned::feature_defs::{get_feature_def_by_id, get_feature_def_count, get_feature_def_custom_param_keys, get_feature_def_energy, get_feature_def_i_ds, get_feature_def_id_by_name, get_feature_def_metal, get_feature_def_name, valid_feature_def_id};
+            pub(crate) use spring::owned::feature_defs::{get_feature_def_by_id, get_feature_def_count, get_feature_def_custom_param, get_feature_def_custom_param_keys, get_feature_def_energy, get_feature_def_i_ds, get_feature_def_id_by_name, get_feature_def_metal, get_feature_def_name, valid_feature_def_id};
         }
         pub(crate) mod features {
             pub(crate) use spring::owned::features::{get_all_features, get_feature_ally_team, get_feature_blocking, get_feature_collision_volume_data, get_feature_def_id, get_feature_direction, get_feature_fire_time, get_feature_heading, get_feature_health, get_feature_height, get_feature_last_attacked_piece, get_feature_mass, get_feature_no_select, get_feature_piece_collision_volume_data, get_feature_position, get_feature_radius, get_feature_resources, get_feature_resurrect, get_feature_rotation, get_feature_separation, get_feature_smoke_time, get_feature_team, get_feature_velocity, get_features_in_cylinder, get_features_in_rectangle, valid_feature_id};
@@ -70,7 +70,7 @@ pub(crate) mod bindings {
             pub(crate) use spring::owned::unit_control::{BuggerOffOptions, CreateUnitOptions, DefRef, DestroyUnitOptions, Float3, NativeCommand, NativeCommandDescription, NumberOrBool, SetUnitBlockingOptions, SetUnitLeavesGhostOptions, SetUnitTargetOptions, SetUnitUseWeaponsOptions, UnitCostOverrides, UnitHealthValue, UnitTargetRef, add_unit_damage, add_unit_experience, add_unit_impulse, add_unit_resource, add_unit_seismic_ping, bugger_off, clear_unit_goal, create_unit, destroy_unit, edit_unit_cmd_desc, force_unit_collision_update, get_unit_feature_separation, get_unit_leaves_ghost, get_unit_physical_state, give_order_array_to_unit, give_order_array_to_unit_array, insert_unit_cmd_desc, remove_unit_cmd_desc, set_unit_always_visible, set_unit_armored, set_unit_blocking, set_unit_build_speed, set_unit_buildee_radius, set_unit_cloak, set_unit_collision_volume_data, set_unit_costs, set_unit_crashing, set_unit_direction, set_unit_experience, set_unit_flanking, set_unit_harvest_storage, set_unit_heading_and_up_dir, set_unit_health, set_unit_land_goal, set_unit_leaves_ghost, set_unit_loading_transport, set_unit_los_mask, set_unit_los_state, set_unit_mass, set_unit_max_health, set_unit_max_range, set_unit_metal_extraction, set_unit_mid_and_aim_pos, set_unit_move_goal, set_unit_nano_pieces, set_unit_neutral, set_unit_physical_state_bit, set_unit_physics, set_unit_piece_collision_volume_data, set_unit_piece_matrix, set_unit_piece_parent, set_unit_piece_visible, set_unit_pos_error_params, set_unit_position, set_unit_radius_and_height, set_unit_resourcing, set_unit_rotation, set_unit_seismic_signature, set_unit_sensor_radius, set_unit_shield_recharge_delay, set_unit_shield_state, set_unit_sonar_stealth, set_unit_stealth, set_unit_stockpile, set_unit_storage, set_unit_target, set_unit_tooltip, set_unit_use_air_los, set_unit_use_weapons, set_unit_velocity, set_unit_weapon_damages, set_unit_weapon_state, transfer_unit, unit_attach, unit_detach, unit_detach_from_air, unit_finish_command, unit_weapon_fire, unit_weapon_hold_fire, use_unit_resource};
         }
         pub(crate) mod unit_defs {
-            pub(crate) use spring::owned::unit_defs::{get_unit_def_by_id, get_unit_def_costs, get_unit_def_count, get_unit_def_custom_param_keys, get_unit_def_health, get_unit_def_i_ds, get_unit_def_id_by_name, get_unit_def_speed, valid_unit_def_id};
+            pub(crate) use spring::owned::unit_defs::{get_unit_def_by_id, get_unit_def_costs, get_unit_def_count, get_unit_def_custom_param, get_unit_def_custom_param_keys, get_unit_def_health, get_unit_def_i_ds, get_unit_def_id_by_name, get_unit_def_speed, valid_unit_def_id};
         }
         pub(crate) mod units_commands {
             pub(crate) use spring::owned::units_commands::{find_unit_cmd_desc, get_command_queue, get_factory_command_count, get_factory_commands, get_factory_counts, get_real_build_queue, get_unit_cmd_descs, get_unit_command_count, get_unit_current_command};
@@ -91,7 +91,7 @@ pub(crate) mod bindings {
             pub(crate) use spring::owned::utils::{Float3, TestMoveOrderOptions, closest_build_pos, get_cegid, get_unit_def_dimensions, pos2_build_pos, test_build_order, test_move_order};
         }
         pub(crate) mod weapon_defs {
-            pub(crate) use spring::owned::weapon_defs::{get_weapon_def_by_id, get_weapon_def_count, get_weapon_def_custom_param_keys, get_weapon_def_damage, get_weapon_def_i_ds, get_weapon_def_id, get_weapon_def_name, get_weapon_def_range, valid_weapon_def_id};
+            pub(crate) use spring::owned::weapon_defs::{get_weapon_def_by_id, get_weapon_def_count, get_weapon_def_custom_param, get_weapon_def_custom_param_keys, get_weapon_def_damage, get_weapon_def_i_ds, get_weapon_def_id, get_weapon_def_name, get_weapon_def_range, valid_weapon_def_id};
         }
         }
     }

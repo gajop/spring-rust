@@ -2026,6 +2026,9 @@ fn di_render_variable_output_forward(
         return false;
     }
     let field = &function.outputs[0];
+    if matches!(field.ty, SemanticType::String) {
+        return di_render_string_output_forward(output, function, &context);
+    }
     let SemanticType::List { element } = &field.ty else {
         return false;
     };
@@ -2059,6 +2062,48 @@ fn di_render_variable_output_forward(
                     }}
                     Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {{
                         __output.resize(error.required * {element_bytes}, 0);
+                    }}
+                    Err(error) => return Err(error.error),
+                }}
+            }}
+        }}
+
+"#,
+        name = rust_ident(&function.name),
+        params = context.params,
+        blob_setup = context.blob_setup,
+        di_path = context.di_path,
+        arity_lint = arity_lint,
+    ));
+    true
+}
+
+fn di_render_string_output_forward(
+    output: &mut String,
+    function: &FunctionModel,
+    context: &VariableOutputRenderContext<'_>,
+) -> bool {
+    let all_args = context
+        .direct_args
+        .iter()
+        .chain(context.blob_args.iter())
+        .cloned()
+        .collect::<Vec<_>>()
+        .join(", ");
+    let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
+    output.push_str(&format!(
+        r#"        #[inline]
+        {arity_lint}pub fn {name}({params}) -> Result<String> {{
+{blob_setup}            let mut __output = Vec::<u8>::new();
+            loop {{
+                match {di_path}({all_args}, &mut __output) {{
+                    Ok(required) => {{
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }}
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {{
+                        __output.resize(error.required, 0);
                     }}
                     Err(error) => return Err(error.error),
                 }}

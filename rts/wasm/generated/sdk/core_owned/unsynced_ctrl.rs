@@ -981,20 +981,23 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_water_texture {
-            #[link(wasm_import_module = "spring:unsynced-ctrl")]
-            unsafe extern "C" {
-                #[link_name = "get-water-texture"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:unsynced-ctrl.get-water-texture."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_water_texture(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_water_texture::call(p0, p1)
+        pub fn get_water_texture(tex_type: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + tex_type.len()); __b.extend_from_slice(&(tex_type.len() as u32).to_le_bytes()); __b.extend_from_slice(tex_type.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::unsynced_ctrl::get_water_texture(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

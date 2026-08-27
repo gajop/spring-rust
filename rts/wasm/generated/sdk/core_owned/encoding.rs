@@ -110,36 +110,42 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_encode_base64 {
-            #[link(wasm_import_module = "spring:encoding")]
-            unsafe extern "C" {
-                #[link_name = "encode-base64"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
+        #[inline]
+        pub fn encode_base64(text: &[u8], strip_padding: bool) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(text.len() as u32).to_le_bytes()); for __item in text.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::encoding::encode_base64(strip_padding as i32, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
             }
         }
 
-        #[doc = "Exact Core ABI forwarding entry for spring:encoding.encode-base64."]
-        #[doc(hidden)]
         #[inline]
-        pub fn encode_base64(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_encode_base64::call(p0, p1, p2)
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_encode_base64_url {
-            #[link(wasm_import_module = "spring:encoding")]
-            unsafe extern "C" {
-                #[link_name = "encode-base64-url"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
+        pub fn encode_base64_url(text: &[u8]) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(text.len() as u32).to_le_bytes()); for __item in text.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::encoding::encode_base64_url(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
             }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:encoding.encode-base64-url."]
-        #[doc(hidden)]
-        #[inline]
-        pub fn encode_base64_url(p0: i32, p1: i32) -> i32 {
-            __core_owned_encode_base64_url::call(p0, p1)
         }
 
         #[inline]

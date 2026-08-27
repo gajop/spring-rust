@@ -5,6 +5,7 @@
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <span>
 #include <string>
@@ -701,6 +702,68 @@ wasm_trap_t* CoreDynamicInput_teams_get_team_resources(void* environment, wasmti
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_custom_param(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unitDefs == nullptr ||
+        state->native->unitDefs->GetUnitDefCustomParam == nullptr)
+        return Trap("GetUnitDefCustomParam dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 3u)
+        return Trap("GetUnitDefCustomParam dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetUnitDefCustomParamQuery query{};
+    query.unitDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitDefID)>>>(slots[0].i32);
+    std::uint32_t keyPointer = 0, keyBytes = 0;
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(keyBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> keyWire;
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyReader(keyWire);
+    std::string keyStorage;
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetUnitDefCustomParamResult result{};
+    state->native->unitDefs->GetUnitDefCustomParam(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.value, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_id_by_name(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -864,6 +927,68 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_int(void* environment
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_string(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unitDefs == nullptr ||
+        state->native->unitDefs->GetUnitDefParamString == nullptr)
+        return Trap("GetUnitDefParamString dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 3u)
+        return Trap("GetUnitDefParamString dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetUnitDefParamStringQuery query{};
+    query.unitDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitDefID)>>>(slots[0].i32);
+    std::uint32_t keyPointer = 0, keyBytes = 0;
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(keyBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> keyWire;
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyReader(keyWire);
+    std::string keyStorage;
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetUnitDefParamStringResult result{};
+    state->native->unitDefs->GetUnitDefParamString(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.value, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_type(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -904,6 +1029,68 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_type(void* environmen
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_feature_defs_get_feature_def_custom_param(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->featureDefs == nullptr ||
+        state->native->featureDefs->GetFeatureDefCustomParam == nullptr)
+        return Trap("GetFeatureDefCustomParam dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 3u)
+        return Trap("GetFeatureDefCustomParam dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetFeatureDefCustomParamQuery query{};
+    query.featureDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.featureDefID)>>>(slots[0].i32);
+    std::uint32_t keyPointer = 0, keyBytes = 0;
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(keyBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> keyWire;
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyReader(keyWire);
+    std::string keyStorage;
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetFeatureDefCustomParamResult result{};
+    state->native->featureDefs->GetFeatureDefCustomParam(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.value, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_feature_defs_get_feature_def_id_by_name(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -941,6 +1128,68 @@ wasm_trap_t* CoreDynamicInput_feature_defs_get_feature_def_id_by_name(void* envi
     state->native->featureDefs->GetFeatureDefIDByName(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.id), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_weapon_defs_get_weapon_def_custom_param(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->weaponDefs == nullptr ||
+        state->native->weaponDefs->GetWeaponDefCustomParam == nullptr)
+        return Trap("GetWeaponDefCustomParam dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 3u)
+        return Trap("GetWeaponDefCustomParam dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetWeaponDefCustomParamQuery query{};
+    query.weaponDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponDefID)>>>(slots[0].i32);
+    std::uint32_t keyPointer = 0, keyBytes = 0;
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(keyBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> keyWire;
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyReader(keyWire);
+    std::string keyStorage;
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetWeaponDefCustomParamResult result{};
+    state->native->weaponDefs->GetWeaponDefCustomParam(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.value == nullptr ? 0u : std::char_traits<char>::length(result.value);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.value, requiredSize);
+    }
+    slots[0].i32 = 0;
     return nullptr;
 }
 
@@ -1192,6 +1441,135 @@ wasm_trap_t* CoreDynamicInput_encoding_decode_base64_url(void* environment, wasm
         if (!writer.U32(result.decoded[coreIndex])) return Trap("dynamic-input Core wire overflow");
     }
     if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_encoding_encode_base64(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->encoding == nullptr ||
+        state->native->encoding->EncodeBase64 == nullptr)
+        return Trap("EncodeBase64 dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 3u)
+        return Trap("EncodeBase64 dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    EncodeBase64Query query{};
+    std::uint32_t textPointer = 0, textBytes = 0;
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(textBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> textWire;
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader textReader(textWire);
+    std::vector<std::uint8_t> textStorage;
+    { std::uint32_t coreCount = 0; if (!textReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint8_t item{}; bool coreItemOk = [&]() -> bool {
+                { std::uint32_t coreRaw = 0; if (!textReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+                return true;
+            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.push_back(item); } query.text = textStorage.empty() ? nullptr : textStorage.data(); if (!AssignDynamicCount(coreCount, query.textLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
+    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.stripPadding = slots[0].i32 != 0;
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    EncodeBase64Result result{};
+    state->native->encoding->EncodeBase64(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.encoded == nullptr ? 0u : std::char_traits<char>::length(result.encoded);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.encoded, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_encoding_encode_base64_url(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->encoding == nullptr ||
+        state->native->encoding->EncodeBase64Url == nullptr)
+        return Trap("EncodeBase64Url dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("EncodeBase64Url dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    EncodeBase64UrlQuery query{};
+    std::uint32_t textPointer = 0, textBytes = 0;
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(textBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> textWire;
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader textReader(textWire);
+    std::vector<std::uint8_t> textStorage;
+    { std::uint32_t coreCount = 0; if (!textReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint8_t item{}; bool coreItemOk = [&]() -> bool {
+                { std::uint32_t coreRaw = 0; if (!textReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+                return true;
+            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.push_back(item); } query.text = textStorage.empty() ? nullptr : textStorage.data(); if (!AssignDynamicCount(coreCount, query.textLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
+    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    EncodeBase64UrlResult result{};
+    state->native->encoding->EncodeBase64Url(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.encoded == nullptr ? 0u : std::char_traits<char>::length(result.encoded);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.encoded, requiredSize);
+    }
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -1616,6 +1994,67 @@ wasm_trap_t* CoreDynamicInput_input_get_key_code(void* environment, wasmtime_cal
     state->native->input->GetKeyCode(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.keyCode), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_input_get_key_from_scan_symbol(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->input == nullptr ||
+        state->native->input->GetKeyFromScanSymbol == nullptr)
+        return Trap("GetKeyFromScanSymbol dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("GetKeyFromScanSymbol dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetKeyFromScanSymbolQuery query{};
+    std::uint32_t scanSymbolPointer = 0, scanSymbolBytes = 0;
+    if (!inputControl.U32(scanSymbolPointer) || !inputControl.U32(scanSymbolBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(scanSymbolBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> scanSymbolWire;
+    if (!state->memory.View(scanSymbolPointer, scanSymbolBytes, scanSymbolWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader scanSymbolReader(scanSymbolWire);
+    std::string scanSymbolStorage;
+    { std::uint32_t coreLength = 0; if (!scanSymbolReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!scanSymbolReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } scanSymbolStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.scanSymbol = scanSymbolStorage.data(); }
+    if (!scanSymbolReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetKeyFromScanSymbolResult result{};
+    state->native->input->GetKeyFromScanSymbol(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.keyName == nullptr ? 0u : std::char_traits<char>::length(result.keyName);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.keyName, requiredSize);
+    }
+    slots[0].i32 = 0;
     return nullptr;
 }
 
@@ -2536,6 +2975,67 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_draw_unit_commands(void* environment
     state->native->unsyncedCtrl->DrawUnitCommands(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_unsynced_ctrl_get_water_texture(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->GetWaterTexture == nullptr)
+        return Trap("GetWaterTexture dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("GetWaterTexture dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetWaterTextureQuery query{};
+    std::uint32_t texTypePointer = 0, texTypeBytes = 0;
+    if (!inputControl.U32(texTypePointer) || !inputControl.U32(texTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(texTypeBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> texTypeWire;
+    if (!state->memory.View(texTypePointer, texTypeBytes, texTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader texTypeReader(texTypeWire);
+    std::string texTypeStorage;
+    { std::uint32_t coreLength = 0; if (!texTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texType = texTypeStorage.data(); }
+    if (!texTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetWaterTextureResult result{};
+    state->native->unsyncedCtrl->GetWaterTexture(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.texName == nullptr ? 0u : std::char_traits<char>::length(result.texName);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.texName, requiredSize);
+    }
+    slots[0].i32 = 0;
     return nullptr;
 }
 
@@ -9407,6 +9907,71 @@ wasm_trap_t* CoreDynamicInput_rml_ui_sol_lua_data_model_set_dirty(void* environm
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_vfs_calculate_hash(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->CalculateHash == nullptr)
+        return Trap("CalculateHash dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 3u)
+        return Trap("CalculateHash dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    CalculateHashQuery query{};
+    std::uint32_t dataPointer = 0, dataBytes = 0;
+    if (!inputControl.U32(dataPointer) || !inputControl.U32(dataBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(dataBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> dataWire;
+    if (!state->memory.View(dataPointer, dataBytes, dataWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader dataReader(dataWire);
+    std::vector<std::uint8_t> dataStorage;
+    { std::uint32_t coreCount = 0; if (!dataReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint8_t item{}; bool coreItemOk = [&]() -> bool {
+                { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+                return true;
+            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
+    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.hashType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.hashType)>>>(slots[0].i32);
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    CalculateHashResult result{};
+    state->native->vfs->CalculateHash(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.hash == nullptr ? 0u : std::char_traits<char>::length(result.hash);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.hash, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_vfs_compress_folder(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -9644,6 +10209,207 @@ wasm_trap_t* CoreDynamicInput_vfs_file_exists(void* environment, wasmtime_caller
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_vfs_get_archive_containing_file(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->GetArchiveContainingFile == nullptr)
+        return Trap("GetArchiveContainingFile dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("GetArchiveContainingFile dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetArchiveContainingFileQuery query{};
+    std::uint32_t pathPointer = 0, pathBytes = 0;
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(pathBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> pathWire;
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathReader(pathWire);
+    std::string pathStorage;
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::uint32_t modePointer = 0, modeBytes = 0;
+    if (!inputControl.U32(modePointer) || !inputControl.U32(modeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(modeBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> modeWire;
+    if (!state->memory.View(modePointer, modeBytes, modeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeReader(modeWire);
+    std::string modeStorage;
+    { std::uint32_t coreLength = 0; if (!modeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.mode = modeStorage.data(); }
+    if (!modeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetArchiveContainingFileResult result{};
+    state->native->vfs->GetArchiveContainingFile(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.archiveName == nullptr ? 0u : std::char_traits<char>::length(result.archiveName);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.archiveName, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_vfs_get_archive_path(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->GetArchivePath == nullptr)
+        return Trap("GetArchivePath dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("GetArchivePath dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetArchivePathQuery query{};
+    std::uint32_t archiveNamePointer = 0, archiveNameBytes = 0;
+    if (!inputControl.U32(archiveNamePointer) || !inputControl.U32(archiveNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(archiveNameBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> archiveNameWire;
+    if (!state->memory.View(archiveNamePointer, archiveNameBytes, archiveNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader archiveNameReader(archiveNameWire);
+    std::string archiveNameStorage;
+    { std::uint32_t coreLength = 0; if (!archiveNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.archiveName = archiveNameStorage.data(); }
+    if (!archiveNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetArchivePathResult result{};
+    state->native->vfs->GetArchivePath(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.path == nullptr ? 0u : std::char_traits<char>::length(result.path);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.path, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_vfs_get_file_absolute_path(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->GetFileAbsolutePath == nullptr)
+        return Trap("GetFileAbsolutePath dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("GetFileAbsolutePath dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetFileAbsolutePathQuery query{};
+    std::uint32_t pathPointer = 0, pathBytes = 0;
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(pathBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> pathWire;
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathReader(pathWire);
+    std::string pathStorage;
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::uint32_t modePointer = 0, modeBytes = 0;
+    if (!inputControl.U32(modePointer) || !inputControl.U32(modeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(modeBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> modeWire;
+    if (!state->memory.View(modePointer, modeBytes, modeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeReader(modeWire);
+    std::string modeStorage;
+    { std::uint32_t coreLength = 0; if (!modeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.mode = modeStorage.data(); }
+    if (!modeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetFileAbsolutePathResult result{};
+    state->native->vfs->GetFileAbsolutePath(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.path == nullptr ? 0u : std::char_traits<char>::length(result.path);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.path, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_vfs_get_file_size(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -9725,6 +10491,67 @@ wasm_trap_t* CoreDynamicInput_vfs_get_map_square_texture(void* environment, wasm
     state->native->vfs->GetMapSquareTexture(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_vfs_get_name_from_rapid_tag(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->GetNameFromRapidTag == nullptr)
+        return Trap("GetNameFromRapidTag dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("GetNameFromRapidTag dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetNameFromRapidTagQuery query{};
+    std::uint32_t rapidTagPointer = 0, rapidTagBytes = 0;
+    if (!inputControl.U32(rapidTagPointer) || !inputControl.U32(rapidTagBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(rapidTagBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> rapidTagWire;
+    if (!state->memory.View(rapidTagPointer, rapidTagBytes, rapidTagWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader rapidTagReader(rapidTagWire);
+    std::string rapidTagStorage;
+    { std::uint32_t coreLength = 0; if (!rapidTagReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rapidTagReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } rapidTagStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.rapidTag = rapidTagStorage.data(); }
+    if (!rapidTagReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetNameFromRapidTagResult result{};
+    state->native->vfs->GetNameFromRapidTag(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.archiveName == nullptr ? 0u : std::char_traits<char>::length(result.archiveName);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.archiveName, requiredSize);
+    }
+    slots[0].i32 = 0;
     return nullptr;
 }
 
@@ -10401,6 +11228,67 @@ wasm_trap_t* CoreDynamicInput_vfs_read_file(void* environment, wasmtime_caller_t
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
     }
     if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_vfs_read_file_as_string(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->ReadFileAsString == nullptr)
+        return Trap("ReadFileAsString dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("ReadFileAsString dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    ReadFileAsStringQuery query{};
+    std::uint32_t pathPointer = 0, pathBytes = 0;
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(pathBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> pathWire;
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathReader(pathWire);
+    std::string pathStorage;
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    ReadFileAsStringResult result{};
+    state->native->vfs->ReadFileAsString(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    const std::size_t requiredSize = result.content == nullptr ? 0u : std::char_traits<char>::length(result.content);
+    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.content, requiredSize);
+    }
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -12686,6 +13574,34 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:unit-defs", "get-unit-def-custom-param",
+                MakeFuncType(params, 3, results, 1), CoreDynamicInput_unit_defs_get_unit_def_custom_param, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:unit-defs", "get-unit-def-param-string",
+                MakeFuncType(params, 3, results, 1), CoreDynamicInput_unit_defs_get_unit_def_param_string, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:feature-defs", "get-feature-def-custom-param",
+                MakeFuncType(params, 3, results, 1), CoreDynamicInput_feature_defs_get_feature_def_custom_param, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:weapon-defs", "get-weapon-def-custom-param",
+                MakeFuncType(params, 3, results, 1), CoreDynamicInput_weapon_defs_get_weapon_def_custom_param, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicInput(linker, "spring:encoding", "decode-base64",
@@ -12697,6 +13613,20 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicInput(linker, "spring:encoding", "decode-base64-url",
                 MakeFuncType(params, 2, results, 1), CoreDynamicInput_encoding_decode_base64_url, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:encoding", "encode-base64",
+                MakeFuncType(params, 3, results, 1), CoreDynamicInput_encoding_encode_base64, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:encoding", "encode-base64-url",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_encoding_encode_base64_url, state, error))
             return false;
     }
     {
@@ -12744,6 +13674,13 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:input", "get-key-from-scan-symbol",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_input_get_key_from_scan_symbol, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicInput(linker, "spring:input", "get-mouse-buttons-pressed",
                 MakeFuncType(params, 2, results, 1), CoreDynamicInput_input_get_mouse_buttons_pressed, state, error))
             return false;
@@ -12767,6 +13704,13 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicInput(linker, "spring:tracing", "trace-ray-between-positions",
                 MakeFuncType(params, 2, results, 1), CoreDynamicInput_tracing_trace_ray_between_positions, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:unsynced-ctrl", "get-water-texture",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_unsynced_ctrl_get_water_texture, state, error))
             return false;
     }
     {
@@ -13099,6 +14043,41 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "calculate-hash",
+                MakeFuncType(params, 3, results, 1), CoreDynamicInput_vfs_calculate_hash, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "get-archive-containing-file",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_vfs_get_archive_containing_file, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "get-archive-path",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_vfs_get_archive_path, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "get-file-absolute-path",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_vfs_get_file_absolute_path, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "get-name-from-rapid-tag",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_vfs_get_name_from_rapid_tag, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "load-file",
@@ -13159,6 +14138,13 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "read-file",
                 MakeFuncType(params, 2, results, 1), CoreDynamicInput_vfs_read_file, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "read-file-as-string",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_vfs_read_file_as_string, state, error))
             return false;
     }
     {
@@ -13312,6 +14298,6 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     return true;
 }
 
-static_assert(251u >= 0u, "generated dynamic-input Core callback count");
+static_assert(265u >= 0u, "generated dynamic-input Core callback count");
 
 } // namespace recoil::wasm::core::generated

@@ -226,12 +226,15 @@ fn render_wrapper(
         }
         ResultStrategy::VariableOutputBuffer => {
             let field = &function.outputs[0];
-            let SemanticType::List { element } = &field.ty else {
-                unreachable!()
+            let element_bytes = match &field.ty {
+                SemanticType::List { element } => {
+                    fixed_wire_layout(element, records)
+                        .expect("eligible variable result layout")
+                        .0
+                }
+                SemanticType::String => 1,
+                _ => unreachable!(),
             };
-            let element_bytes = fixed_wire_layout(element, records)
-                .expect("eligible variable result layout")
-                .0;
             params.push("output: &mut [u8]".to_owned());
             let arity_lint = too_many_arguments_attribute(params.len(), 20);
             let mut call_args = direct_args;

@@ -73,11 +73,17 @@ return {
 
 		"encoding_decode_base64",
 
+		"encoding_encode_base64_default_padding",
+
+		"encoding_encode_base64_padded",
+
 		"encoding_is_valid_base64",
 
 		"encoding_is_invalid_base64",
 
 		"encoding_decode_base64_url",
+
+		"encoding_encode_base64_url",
 
 		"encoding_is_valid_base64_url",
 
@@ -491,6 +497,8 @@ return {
 
 		"get_unit_def_speed",
 
+		"get_unit_def_custom_param",
+
 		"get_unit_def_custom_param_keys",
 
 		"get_unit_def_by_id",
@@ -509,6 +517,8 @@ return {
 
 		"get_feature_def_energy",
 
+		"get_feature_def_custom_param",
+
 		"get_feature_def_custom_param_keys",
 
 		"get_feature_def_by_id",
@@ -526,6 +536,8 @@ return {
 		"get_weapon_def_range",
 
 		"get_weapon_def_damage",
+
+		"get_weapon_def_custom_param",
 
 		"get_weapon_def_custom_param_keys",
 
@@ -876,6 +888,14 @@ return {
 		["encoding_decode_base64"] = {
 			text = "SGVsbG8=",
 		},
+		["encoding_encode_base64_default_padding"] = {
+			text = "Hello",
+			stripPadding = true,
+		},
+		["encoding_encode_base64_padded"] = {
+			text = "Hello",
+			stripPadding = false,
+		},
 		["encoding_is_valid_base64"] = {
 			text = "SGVsbG8=",
 		},
@@ -884,6 +904,9 @@ return {
 		},
 		["encoding_decode_base64_url"] = {
 			text = "SGVsbG8",
+		},
+		["encoding_encode_base64_url"] = {
+			text = "Hello",
 		},
 		["encoding_is_valid_base64_url"] = {
 			text = "SGVsbG8-_",
@@ -1443,8 +1466,17 @@ return {
 		["get_unit_def_idby_name"] = {
 			defName = "native_api_test_unit",
 		},
+		["get_unit_def_custom_param"] = {
+			key = "native_api_parity_unit",
+		},
 		["get_feature_def_idby_name"] = {
 			defName = "native_api_test_feature",
+		},
+		["get_feature_def_custom_param"] = {
+			key = "native_api_parity_feature",
+		},
+		["get_weapon_def_custom_param"] = {
+			key = "native_api_parity_weapon",
 		},
 		["get_cegid"] = {
 			cegName = "native_api_parity_missing_ceg",

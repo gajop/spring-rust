@@ -15,6 +15,8 @@ return {
 
 		"get_key_code",
 
+		"get_key_from_scan_symbol",
+
 		"get_key_state",
 
 		"get_pressed_keys",
@@ -113,6 +115,9 @@ return {
 		},
 		["get_key_code"] = {
 			keySym = "a",
+		},
+		["get_key_from_scan_symbol"] = {
+			scanSymbol = "a",
 		},
 		["get_key_state"] = {
 			keyCode = 97,

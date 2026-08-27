@@ -93,6 +93,7 @@ pub fn render_cpp(model: &ApiModel) -> String {
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <span>
 #include <string>
@@ -586,6 +587,7 @@ fn variable_result_supported(
         SemanticType::List { element } => {
             count_field(field).is_some() && fixed_wire_type(element, records)
         }
+        SemanticType::String => true,
         _ => false,
     }
 }
@@ -602,11 +604,15 @@ fn render_output_setup(
         ),
         ResultStrategy::VariableOutputBuffer => {
             let field = &function.outputs[0];
-            let SemanticType::List { element } = &field.ty else {
-                unreachable!()
+            let element_bytes = match &field.ty {
+                SemanticType::List { element } => {
+                    fixed_wire_layout(element, records)
+                        .expect("variable result element layout")
+                        .0
+                }
+                SemanticType::String => 1,
+                _ => unreachable!(),
             };
-            let (element_bytes, _) =
-                fixed_wire_layout(element, records).expect("variable result element layout");
             format!(
                 "    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[{index}].i32);\n    std::span<std::uint8_t> outputControlWire;\n    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));\n    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;\n    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * {element_bytes}u;\n    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
             )
@@ -649,6 +655,13 @@ fn render_result(
                 "    if (!writer.Finish({alignment}u)) return Trap(\"dynamic-input Core fixed output layout mismatch\");\n    if (!state->memory.Write(output, wire.data(), wire.size())) return Trap(\"dynamic-input Core output range changed unexpectedly\");\n    slots[0].i32 = 0;\n    return nullptr;\n"
             ));
             output
+        }
+        ResultStrategy::VariableOutputBuffer if matches!(function.outputs[0].ty, SemanticType::String) => {
+            let field_name = &function.outputs[0].name;
+            format!(
+                "    if (errorCode != 0) {{ slots[0].i32 = errorCode; return nullptr; }}\n    const std::size_t requiredSize = result.{field_name} == nullptr ? 0u : std::char_traits<char>::length(result.{field_name});\n    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);\n    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap(\"dynamic-input output descriptor changed unexpectedly\");\n    if (outputCapacity < required) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!CheckResultBytes(state, requiredSize)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!guard.Charge(requiredSize)) return Trap(budgetError);\n    if (required != 0) {{\n        std::span<std::uint8_t> outputWire;\n        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap(\"dynamic-input output range changed unexpectedly\");\n        std::memcpy(outputWire.data(), result.{field_name}, requiredSize);\n    }}\n    slots[0].i32 = 0;\n    return nullptr;\n",
+                field_name = field_name,
+            )
         }
         ResultStrategy::VariableOutputBuffer => {
             let field = &function.outputs[0];

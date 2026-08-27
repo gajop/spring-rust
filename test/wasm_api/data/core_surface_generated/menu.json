@@ -1,0 +1,2589 @@
+{
+  "alias_callin_count": 24,
+  "callin_count": 50,
+  "callins": [
+    {
+      "alias": false,
+      "canonical": "ActivateGame",
+      "class": "generated-direct-ignored-result",
+      "name": "ActivateGame",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "ActivateMenu",
+      "class": "generated-shared-scratch-ignored-result",
+      "name": "ActivateMenu",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "AddConsoleLine",
+      "class": "specialized",
+      "name": "AddConsoleLine",
+      "params": [
+        "i32"
+      ],
+      "results": [
+        "i64"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "AllowDraw",
+      "class": "generated-direct",
+      "name": "AllowDraw",
+      "params": [
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "CollectGarbage",
+      "class": "generated-direct-ignored-result",
+      "name": "CollectGarbage",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "DownloadFailed",
+      "class": "generated-direct-ignored-result",
+      "name": "DownloadFailed",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "DownloadFinished",
+      "class": "generated-direct-ignored-result",
+      "name": "DownloadFinished",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "DownloadProgress",
+      "class": "generated-direct-ignored-result",
+      "name": "DownloadProgress",
+      "params": [
+        "i32",
+        "i64",
+        "i64"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "DownloadQueued",
+      "class": "generated-shared-scratch-ignored-result",
+      "name": "DownloadQueued",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "DownloadStarted",
+      "class": "generated-direct-ignored-result",
+      "name": "DownloadStarted",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "DrawScreen",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawScreen",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "DrawScreen",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawScreenEffects",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "DrawScreen",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawScreenPost",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "DrawScreen",
+      "class": "generated-direct-ignored-result",
+      "name": "ScreenCallin",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "KeyMapChanged",
+      "class": "generated-direct",
+      "name": "KeyMapChanged",
+      "params": [
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "KeyPress",
+      "class": "generated-shared-scratch",
+      "name": "KeyPress",
+      "params": [
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "KeyRelease",
+      "class": "generated-shared-scratch",
+      "name": "KeyRelease",
+      "params": [
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "MouseMove",
+      "class": "generated-direct",
+      "name": "MouseMove",
+      "params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "MousePress",
+      "class": "generated-direct",
+      "name": "MousePress",
+      "params": [
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "MouseRelease",
+      "class": "generated-direct-ignored-result",
+      "name": "MouseRelease",
+      "params": [
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "MouseWheel",
+      "class": "generated-direct",
+      "name": "MouseWheel",
+      "params": [
+        "i32",
+        "f32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "ScreenPosition",
+      "class": "generated-direct",
+      "name": "ScreenPosition",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": true,
+      "canonical": "ScreenPosition",
+      "class": "generated-direct",
+      "name": "IsAbove",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "ScreenTooltip",
+      "class": "generated-first-non-empty-string",
+      "name": "ScreenTooltip",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i64"
+      ]
+    },
+    {
+      "alias": true,
+      "canonical": "ScreenTooltip",
+      "class": "generated-first-non-empty-string",
+      "name": "GetTooltip",
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i64"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "Shutdown",
+      "class": "generated-direct-ignored-result",
+      "name": "Shutdown",
+      "params": [],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "SimpleCallin",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawFeaturesPostDeferred",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawGenesis",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawGroundDeferred",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawGroundPostDeferred",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawGroundPostForward",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawGroundPreDeferred",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawGroundPreForward",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawPreDecals",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawShadowFeaturesLua",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawShadowPassTransparent",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawShadowUnitsLua",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawUnitsPostDeferred",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawWaterPost",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawWorld",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawWorldPreUnit",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawWorldReflection",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawWorldRefraction",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "DrawWorldShadow",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": true,
+      "canonical": "SimpleCallin",
+      "class": "generated-direct-ignored-result",
+      "name": "FontsChanged",
+      "params": [
+        "i32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "TextEditing",
+      "class": "generated-shared-scratch",
+      "name": "TextEditing",
+      "params": [
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "TextInput",
+      "class": "generated-shared-scratch",
+      "name": "TextInput",
+      "params": [
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "alias": false,
+      "canonical": "Update",
+      "class": "specialized",
+      "name": "Update",
+      "params": [
+        "f32"
+      ],
+      "results": []
+    },
+    {
+      "alias": false,
+      "canonical": "ViewResize",
+      "class": "generated-direct-ignored-result",
+      "name": "ViewResize",
+      "params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "results": []
+    }
+  ],
+  "callout_count": 336,
+  "callouts": [
+    {
+      "class": "fixed",
+      "function": "BitAnd",
+      "module": "math_extra",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "BitBits",
+      "module": "math_extra",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "BitInv",
+      "module": "math_extra",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "BitOr",
+      "module": "math_extra",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "BitXor",
+      "module": "math_extra",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Clamp",
+      "module": "math_extra",
+      "signature": "f32,f32,f32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "Diag",
+      "module": "math_extra",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Erf",
+      "module": "math_extra",
+      "signature": "f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Hypot",
+      "module": "math_extra",
+      "signature": "f32,f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Mix",
+      "module": "math_extra",
+      "signature": "f32,f32,f32->i64"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "Normalize",
+      "module": "math_extra",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Round",
+      "module": "math_extra",
+      "signature": "f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Sgn",
+      "module": "math_extra",
+      "signature": "f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SmoothStep",
+      "module": "math_extra",
+      "signature": "f32,f32,f32->i64"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "DecodeBase64",
+      "module": "encoding",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "DecodeBase64Url",
+      "module": "encoding",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "EncodeBase64",
+      "module": "encoding",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "EncodeBase64Url",
+      "module": "encoding",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "IsValidBase64",
+      "module": "encoding",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "IsValidBase64Url",
+      "module": "encoding",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetArchitecture",
+      "module": "platform",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "IsHeadless",
+      "module": "platform",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "ClearEmulatedInput",
+      "module": "debug_input",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "EmulateKey",
+      "module": "debug_input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "EmulateMouseButton",
+      "module": "debug_input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "EmulateMouseMove",
+      "module": "debug_input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "EmulateMouseWheel",
+      "module": "debug_input",
+      "signature": "f32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "EmulateTextEditing",
+      "module": "debug_input",
+      "signature": "i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "EmulateTextInput",
+      "module": "debug_input",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetTeamColor",
+      "module": "display",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetSoundEffectParams",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetSoundStreamTime",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetConfigFloat",
+      "module": "config",
+      "signature": "f32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetConfigInt",
+      "module": "config",
+      "signature": "i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetConfigString",
+      "module": "config",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetLogSectionFilterLevel",
+      "module": "config",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetFeatureDefDimensions",
+      "module": "utils",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "ActiveFBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "ActiveShader",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ActiveTexture",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "AddAtlasTexture",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "AddFallbackFont",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "AddFeatureDefsToSubmissionVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "AddFeaturesToSubmissionVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "AddUnitDefsToSubmissionVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "AddUnitsToSubmissionVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "AlphaTest",
+      "module": "gfx",
+      "signature": "i32,i32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "AlphaToCoverage",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "AttachIndexBufferVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "AttachInstanceBufferVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "AttachVertexBufferVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "BeginEnd",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "BeginText",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Billboard",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "BindBufferRangeVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "BindImageTexture",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "BindTexture",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "BlendEquation",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "BlendEquationSeparate",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "BlendFunc",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "BlendFuncSeparate",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Blending",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "BlitFBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32,i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "CallList",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "ChangeTextureParams",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Clear",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ClearAttachmentFBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "ClearFallbackFonts",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ClearSubmissionVAO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ClearVBO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ClipDistance",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ClipPlane",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Color",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ColorMask",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ConfigMiniMap",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "CopyToTexture",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "CopyToVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-nested-adapted",
+      "function": "CreateFBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "CreateList",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "CreateQuery",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "CreateRBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "CreateShader",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "CreateTexture",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "CreateTextureAtlas",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "CullFace",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Culling",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "variable-input-adapted",
+      "function": "DefineVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteFBO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteFont",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteList",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteQuery",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteRBO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteShader",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "DeleteTexture",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "DeleteTextureAtlas",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "DeleteTextureFBO",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteVAO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteVBO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DepthClamp",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DepthMask",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DepthTest",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DispatchCompute",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "DownloadVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DrawArraysVAO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DrawElementsVAO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "DrawFuncAtUnit",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DrawGroundCircle",
+      "module": "gfx",
+      "signature": "f32,i32,i32,f32,f32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DrawGroundQuad",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32,i32,f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DrawListAtUnit",
+      "module": "gfx",
+      "signature": "i32,i32,i32,f32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DrawMiniMap",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DumpDefinitionVBO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "EdgeFlag",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "EndText",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Feature",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FeatureMultMatrix",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FeaturePiece",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FeaturePieceMatrix",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FeaturePieceMultMatrix",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FeatureRaw",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FeatureShape",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FeatureShapeTextures",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FeatureTextures",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "FinalizeTextureAtlas",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Finish",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Flush",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Fog",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FogCoord",
+      "module": "gfx",
+      "signature": "f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FontBegin",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FontBindTexture",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FontEnd",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "FontGetTextHeight",
+      "module": "gfx",
+      "signature": "i32,f32,f32,f32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "FontGetTextWidth",
+      "module": "gfx",
+      "signature": "i32,f32,f32,f32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "FontPrint",
+      "module": "gfx",
+      "signature": "i32,f32,f32,f32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "FontPrintWorld",
+      "module": "gfx",
+      "signature": "i32,f32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FontSetAutoOutlineColor",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FontSetOutlineColor",
+      "module": "gfx",
+      "signature": "i32,f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FontSetTextColor",
+      "module": "gfx",
+      "signature": "i32,f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "FontSubmitBuffered",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "FontWrapText",
+      "module": "gfx",
+      "signature": "i32,f32,f32,f32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Frustum",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GenerateMipmap",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetActiveUniforms",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetAtlasTexture",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetAtmosphere",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetConsoleCommands",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetEngineAtlasTextures",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetEngineModelUniformDataDef",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetEngineModelUniformDataSize",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetEngineTextureNames",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetEngineUniformBufferDef",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetFixedState",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetFontInfo",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetGlobalTexCoords",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetGlobalTexNames",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetIDVBO",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetMapRendering",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetMatrixData",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetNumber",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetQuery",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetRBOInfo",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetScreenViewTrans",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetShaderLog",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetShadowMapParams",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetString",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetSubroutineIndex",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetSun",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetTextHeight",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetTextWidth",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetUniformLocation",
+      "module": "gfx",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetVBOInfo",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetViewRange",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetViewSizes",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetWaterRendering",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "HasExtension",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "InstanceDataFromFeatureDefsVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "InstanceDataFromFeaturesVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "InstanceDataFromUnitDefsVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "InstanceDataFromUnitsVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "IsValidFBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Light",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Lighting",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "LineStipple",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "LineWidth",
+      "module": "gfx",
+      "signature": "f32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "LoadFont",
+      "module": "gfx",
+      "signature": "i32,i32,f32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "LoadIdentity",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "LoadMatrix",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "LogicOp",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Material",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "MatrixDataFromProjectilesVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "MatrixMode",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "MemoryBarrier",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ModelsVBO",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "MultMatrix",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "MultiTexCoord",
+      "module": "gfx",
+      "signature": "i32,f32,f32,f32,f32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "MultiTexEnv",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "MultiTexGen",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Normal",
+      "module": "gfx",
+      "signature": "f32,f32,f32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "ObjectLabel",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Ortho",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PointParameter",
+      "module": "gfx",
+      "signature": "i32,f32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PointSize",
+      "module": "gfx",
+      "signature": "f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PointSprite",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PolygonMode",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PolygonOffset",
+      "module": "gfx",
+      "signature": "f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PopAttrib",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PopDebugGroup",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PopMatrix",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PushAttrib",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "PushDebugGroup",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "PushMatrix",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "PushPopMatrix",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "RawBindFBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "ReadPixels",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Rect",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "RemoveFromSubmissionVAO",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "RenderToTexture",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ResetMatrices",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ResetState",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Rotate",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "RunQuery",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "SaveImage",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Scale",
+      "module": "gfx",
+      "signature": "f32,f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Scissor",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "SecondaryColor",
+      "module": "gfx",
+      "signature": "f32,f32,f32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetFBOAttachment",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetFBODrawBuffers",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "SetFBOReadBuffer",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetFeatureBufferUniforms",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetGeometryShaderParameter",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "SetTesselationShaderParameter",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetUnitBufferUniforms",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "ShadeModel",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "variable-input-adapted",
+      "function": "Shape",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "SlaveMiniMap",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "StencilFunc",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "StencilFuncSeparate",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "StencilMask",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "StencilMaskSeparate",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "StencilOp",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "StencilOpSeparate",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "StencilTest",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "SubmitVAO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "SwapBuffers",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "TexCoord",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "TexEnv",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "TexGen",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "TexRect",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32,f32,f32,f32,f32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "Text",
+      "module": "gfx",
+      "signature": "f32,f32,f32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "TextEnv",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "TextureInfo",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Translate",
+      "module": "gfx",
+      "signature": "f32,f32,f32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnbindBufferRangeVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Uniform",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "UniformArrayFloat",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "UniformArrayInt",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UniformInt",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "UniformMatrix",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UniformSubroutine",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Unit",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitMultMatrix",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitPiece",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitPieceMatrix",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitPieceMultMatrix",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitRaw",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitShape",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitShapeTextures",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitTextures",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "UnsafeState",
+      "module": "gfx",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "UploadTexture",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "UploadVBO",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "UseShader",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "Vertex",
+      "module": "gfx",
+      "signature": "f32,f32,f32,f32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Viewport",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "CallAsTeam",
+      "module": "system_control",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetGameName",
+      "module": "system_control",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetReplayFilePath",
+      "module": "system_control",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetReplayRecordingFilePath",
+      "module": "system_control",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "Quit",
+      "module": "system_control",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "Reload",
+      "module": "system_control",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "Restart",
+      "module": "system_control",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "Start",
+      "module": "system_control",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "DiffTimers",
+      "module": "profiling",
+      "signature": "i64,i64,i32->i64"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "GetLuaMemUsage",
+      "module": "profiling",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "GetTimer",
+      "module": "profiling",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "AbortDownload",
+      "module": "vfs",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "CalculateHash",
+      "module": "vfs",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "CompressFolder",
+      "module": "vfs",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "CreateDir",
+      "module": "vfs",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "DirList",
+      "module": "vfs",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "DownloadArchive",
+      "module": "vfs",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "ExtractModArchiveFile",
+      "module": "vfs",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "FileExists",
+      "module": "vfs",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetAllArchives",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetArchiveChecksum",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetArchiveContainingFile",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetArchiveDependencies",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetArchiveInfo",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetArchivePath",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetArchiveReplaces",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetArchives",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetAvailableAIs",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetFileAbsolutePath",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetFileInfo",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetFileSize",
+      "module": "vfs",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetGames",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetLoadedArchives",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetMapSquareTextureInfo",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetMaps",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetNameFromRapidTag",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "HasArchive",
+      "module": "vfs",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "IsDirectory",
+      "module": "vfs",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "ListDir",
+      "module": "vfs",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "LoadFile",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "PackF32",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "PackS16",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "PackS32",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "PackS8",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "PackU16",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "PackU32",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "PackU8",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "ReadFile",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "ReadFileAsString",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "ScanAllDirs",
+      "module": "vfs",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "SubDirs",
+      "module": "vfs",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "UnpackF32",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "UnpackS16",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "UnpackS32",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "UnpackS8",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "UnpackU16",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "UnpackU32",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "UnpackU8",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "UseArchive",
+      "module": "vfs",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "ZlibCompress",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "ZlibDecompress",
+      "module": "vfs",
+      "signature": "i32,i32->i32"
+    }
+  ],
+  "canonical_callin_count": 26,
+  "environment": "menu",
+  "surface_count": 386
+}

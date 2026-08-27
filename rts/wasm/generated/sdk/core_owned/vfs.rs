@@ -610,20 +610,23 @@
             Ok(value)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_calculate_hash {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "calculate-hash"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.calculate-hash."]
-        #[doc(hidden)]
         #[inline]
-        pub fn calculate_hash(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_calculate_hash::call(p0, p1, p2)
+        pub fn calculate_hash(data: &[u8], hash_type: i32) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::vfs::calculate_hash(hash_type, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -750,20 +753,24 @@
             __core_owned_get_archive_checksum::call(p0, p1)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_archive_containing_file {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-archive-containing-file"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-containing-file."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_archive_containing_file(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_archive_containing_file::call(p0, p1)
+        pub fn get_archive_containing_file(path: &str, mode: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::vfs::get_archive_containing_file(&__blob0, &__blob1, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -798,20 +805,23 @@
             __core_owned_get_archive_info::call(p0, p1)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_archive_path {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-archive-path"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-path."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_archive_path(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_archive_path::call(p0, p1)
+        pub fn get_archive_path(archive_name: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + archive_name.len()); __b.extend_from_slice(&(archive_name.len() as u32).to_le_bytes()); __b.extend_from_slice(archive_name.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::vfs::get_archive_path(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -868,20 +878,24 @@
             __core_owned_get_available_a_is::call(p0, p1)
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_file_absolute_path {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-file-absolute-path"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-file-absolute-path."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_file_absolute_path(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_file_absolute_path::call(p0, p1)
+        pub fn get_file_absolute_path(path: &str, mode: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::vfs::get_file_absolute_path(&__blob0, &__blob1, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -996,20 +1010,23 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_name_from_rapid_tag {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-name-from-rapid-tag"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-name-from-rapid-tag."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_name_from_rapid_tag(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_name_from_rapid_tag::call(p0, p1)
+        pub fn get_name_from_rapid_tag(rapid_tag: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + rapid_tag.len()); __b.extend_from_slice(&(rapid_tag.len() as u32).to_le_bytes()); __b.extend_from_slice(rapid_tag.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::vfs::get_name_from_rapid_tag(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -1256,20 +1273,23 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_read_file_as_string {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "read-file-as-string"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.read-file-as-string."]
-        #[doc(hidden)]
         #[inline]
-        pub fn read_file_as_string(p0: i32, p1: i32) -> i32 {
-            __core_owned_read_file_as_string::call(p0, p1)
+        pub fn read_file_as_string(path: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::vfs::read_file_as_string(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

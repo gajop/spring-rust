@@ -412,20 +412,23 @@
             crate::generated::borrowed::input::get_key_code(__core_string_0_buf.as_cstr())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_key_from_scan_symbol {
-            #[link(wasm_import_module = "spring:input")]
-            unsafe extern "C" {
-                #[link_name = "get-key-from-scan-symbol"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:input.get-key-from-scan-symbol."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_key_from_scan_symbol(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_key_from_scan_symbol::call(p0, p1)
+        pub fn get_key_from_scan_symbol(scan_symbol: &str) -> Result<String> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + scan_symbol.len()); __b.extend_from_slice(&(scan_symbol.len() as u32).to_le_bytes()); __b.extend_from_slice(scan_symbol.as_bytes()); __b };
+            let mut __output = Vec::<u8>::new();
+            loop {
+                match crate::generated::dynamic_input::input::get_key_from_scan_symbol(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __output.truncate(required);
+                        return String::from_utf8(__output)
+                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

@@ -10,6 +10,7 @@
     "get_mouse_buttons_pressed",
     "is_above_mini_map",
     "get_key_code",
+    "get_key_from_scan_symbol",
     "get_key_state",
     "get_pressed_keys",
     "get_pressed_scans",
@@ -59,9 +60,9 @@
   "coverage": {
     "source_context": "widget",
     "source_test_count": 76,
-    "selected_count": 52,
+    "selected_count": 53,
     "selected_kind_counts": {
-      "readonly": 35,
+      "readonly": 36,
       "setter_getter": 17
     },
     "selected_ids": [
@@ -72,6 +73,7 @@
       "get_mouse_buttons_pressed",
       "is_above_mini_map",
       "get_key_code",
+      "get_key_from_scan_symbol",
       "get_key_state",
       "get_pressed_keys",
       "get_pressed_scans",
@@ -122,7 +124,6 @@
       "core_owned_unsupported": [
         "get_key_symbol",
         "get_scan_symbol",
-        "get_key_from_scan_symbol",
         "get_active_command",
         "get_default_command",
         "get_action_hot_keys",
