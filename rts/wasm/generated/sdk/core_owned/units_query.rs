@@ -8,7 +8,7 @@
             #[link(wasm_import_module = "spring:units-query")]
             unsafe extern "C" {
                 #[link_name = "get-render-units"]
-                pub fn call(pdraw_mask: i32, psend_mask: i32, output: i32) -> i32;
+                pub safe fn call(pdraw_mask: i32, psend_mask: i32, output: i32) -> i32;
             }
         }
 
@@ -17,7 +17,7 @@
             #[link(wasm_import_module = "spring:units-query")]
             unsafe extern "C" {
                 #[link_name = "get-render-units-draw-flag-changed"]
-                pub fn call(psend_mask: i32, output: i32) -> i32;
+                pub safe fn call(psend_mask: i32, output: i32) -> i32;
             }
         }
 
@@ -39,7 +39,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_render_units::call(draw_mask, u32::from(send_mask) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_render_units::call(draw_mask, u32::from(send_mask) as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -49,8 +53,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -68,7 +70,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_render_units_draw_flag_changed::call(u32::from(send_mask) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_render_units_draw_flag_changed::call(u32::from(send_mask) as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -78,8 +84,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -104,7 +108,7 @@
 
         #[inline]
         pub fn get_team_units(team_id: i32) -> Result<Vec<i32>> {
-            crate::get_team_units(team_id)
+            crate::get_team_units(crate::TeamId::from(team_id))
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -201,12 +205,12 @@
 
         #[inline]
         pub fn get_unit_nearest_enemy(unit_id: i32, range: f32, options: GetUnitNearestEnemyOptions) -> Result<i32> {
-            crate::get_unit_nearest_enemy(unit_id, range, options.use_los, options.sphere_dist_test, options.check_sight_dist)
+            crate::get_unit_nearest_enemy(crate::UnitId::from(unit_id), range, options.use_los, options.sphere_dist_test, options.check_sight_dist).map(i32::from)
         }
 
         #[inline]
         pub fn get_unit_separation(unit_id1: i32, unit_id2: i32, options: GetUnitSeparationOptions) -> Result<f32> {
-            crate::get_unit_separation(unit_id1, unit_id2, options.positional, options.check_map)
+            crate::get_unit_separation(crate::UnitId::from(unit_id1), crate::UnitId::from(unit_id2), options.positional, options.check_map)
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -221,8 +225,7 @@
         #[doc = "Exact Core ABI forwarding entry for spring:units-query.get-units-in-box."]
         #[doc(hidden)]
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
-            pub fn get_units_in_box(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, p7: i32, p8: i32) -> i64 {
+        pub fn get_units_in_box(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, p7: i32, p8: i32) -> i64 {
             __core_owned_get_units_in_box::call(p0, p1, p2, p3, p4, p5, p6, p7, p8)
         }
 

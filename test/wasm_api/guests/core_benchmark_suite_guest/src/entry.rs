@@ -91,7 +91,12 @@ fn on_game_frame_post(_frame: i32) {}
 spring::export_game_frame_post!(on_game_frame_post);
 
 #[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
-fn on_unit_created(unit_id: i32, unit_def_id: i32, unit_team: i32, builder_id: i32) {
+fn on_unit_created(
+    unit_id: spring::UnitId,
+    unit_def_id: spring::DefId,
+    unit_team: spring::TeamId,
+    builder_id: spring::UnitId,
+) {
     black_box((unit_id, unit_def_id, unit_team, builder_id));
 }
 #[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
@@ -99,16 +104,16 @@ spring::export_unit_created!(on_unit_created);
 
 #[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
 fn on_unit_pre_damaged(
-    unit_id: i32,
-    unit_def_id: i32,
-    unit_team: i32,
+    unit_id: spring::UnitId,
+    unit_def_id: spring::DefId,
+    unit_team: spring::TeamId,
     damage: f32,
     paralyzer: bool,
-    weapon_def_id: i32,
-    projectile_id: i32,
-    attacker_id: i32,
-    attacker_def_id: i32,
-    attacker_team: i32,
+    weapon_def_id: spring::WeaponDefId,
+    projectile_id: spring::ProjectileId,
+    attacker_id: spring::UnitId,
+    attacker_def_id: spring::DefId,
+    attacker_team: spring::TeamId,
 ) -> spring::DamageResult {
     black_box((
         unit_id,
@@ -128,11 +133,11 @@ spring::export_unit_pre_damaged!(on_unit_pre_damaged);
 
 #[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
 fn on_allow_unit_creation(
-    unit_def_id: i32,
-    builder_id: i32,
-    builder_team: i32,
+    unit_def_id: spring::DefId,
+    builder_id: spring::UnitId,
+    builder_team: spring::TeamId,
     has_build_info: bool,
-    build_pos: [f32; 3],
+    build_pos: spring::Float3,
     build_facing: i32,
 ) -> spring::AllowUnitCreationResult {
     black_box((
@@ -149,7 +154,7 @@ fn on_allow_unit_creation(
 spring::export_allow_unit_creation!(on_allow_unit_creation);
 
 #[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
-#[export_name = "spring:callback/dispatch"]
+#[unsafe(export_name = "spring:callback/dispatch")]
 pub extern "C" fn spring_callback_dispatch(callback_id: i32, _user_data: i32) {
     match callback_id as u32 {
         1 => heightmap::callback(),
@@ -166,7 +171,7 @@ fn on_update(delta_seconds: f32) {
     if RAN.load(Ordering::Acquire) {
         return;
     }
-    let has_units = spring::get_team_units(0)
+    let has_units = spring::get_team_units(spring::TeamId::from(0))
         .map(|units| !units.is_empty())
         .unwrap_or(false);
     if !has_units {

@@ -2508,7 +2508,7 @@ def render_core_bindings(referenced_sources: tuple[str, ...] = ()) -> str:
     module_lines.extend(
         [
             "        pub(crate) mod messages {",
-            "            pub(crate) use spring_wasm_core::owned::messages::{"
+            "            pub(crate) use spring::owned::messages::{"
             + ", ".join(sorted(message_names))
             + "};",
             "        }",
@@ -2521,7 +2521,7 @@ def render_core_bindings(referenced_sources: tuple[str, ...] = ()) -> str:
         module_lines.extend(
             [
                 f"        pub(crate) mod {module} {{",
-                f"            pub(crate) use spring_wasm_core::owned::{module}::{{{names}}};",
+                f"            pub(crate) use spring::owned::{module}::{{{names}}};",
                 "        }",
             ]
         )
@@ -2539,10 +2539,11 @@ __API_MODULES__
         fn callback_1(user_data: u32);
     }
 
+    #[macro_export]
     macro_rules! export {
         ($guest:ident with_types_in $bindings:ident) => {
             #[cfg(target_arch = "wasm32")]
-            #[export_name = "spring:callin/game-frame"]
+            #[unsafe(export_name = "spring:callin/game-frame")]
             pub extern "C" fn __spring_core_game_frame(frame: i32) {
                 let _ = <$guest as crate::callin::Guest>::game_frame(
                     crate::callin::GameFrameQuery { game_frame: frame },
@@ -2550,7 +2551,7 @@ __API_MODULES__
             }
 
             #[cfg(target_arch = "wasm32")]
-            #[export_name = "spring:callin/game-frame-post"]
+            #[unsafe(export_name = "spring:callin/game-frame-post")]
             pub extern "C" fn __spring_core_game_frame_post(frame: i32) {
                 let _ = <$guest as crate::callin::Guest>::game_frame_post(
                     crate::callin::GameFrameQuery { game_frame: frame },
@@ -2558,7 +2559,7 @@ __API_MODULES__
             }
 
             #[cfg(target_arch = "wasm32")]
-            #[export_name = "spring:callin/update"]
+            #[unsafe(export_name = "spring:callin/update")]
             pub extern "C" fn __spring_core_update(delta_seconds: f32) {
                 let _ = <$guest as crate::callin::Guest>::update(
                     crate::callin::UpdateQuery { delta_seconds },

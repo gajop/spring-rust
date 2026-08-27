@@ -1,11 +1,9 @@
-
-
 #[cfg(feature = "alloc")]
 pub use crate::owned::profiling::{get_profiler_record_names, get_profiler_time_record};
 
 // Unsynced profiling helpers for the Spring Core-Wasm guest SDK.
 
-use crate::{ApiError, ErrorCode, Result};
+use crate::{ApiError, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LuaMemUsage {
@@ -30,26 +28,26 @@ mod raw {
     #[link(wasm_import_module = "spring:profiling")]
     unsafe extern "C" {
         #[link_name = "get-timer"]
-        pub fn get_timer(unused: i32, output: i32) -> i32;
+        pub safe fn get_timer(unused: i32, output: i32) -> i32;
         #[link_name = "get-timer-micros"]
-        pub fn get_timer_micros(unused: i32, output: i32) -> i32;
+        pub safe fn get_timer_micros(unused: i32, output: i32) -> i32;
         #[link_name = "diff-timers"]
-        pub fn diff_timers(
+        pub safe fn diff_timers(
             end_timer: i64,
             start_timer: i64,
             return_ms: i32,
             from_micros: i32,
         ) -> i64;
         #[link_name = "get-frame-timer"]
-        pub fn get_frame_timer(last_frame_time: i32, output: i32) -> i32;
+        pub safe fn get_frame_timer(last_frame_time: i32, output: i32) -> i32;
         #[link_name = "get-draw-seconds"]
-        pub fn get_draw_seconds(unused: i32) -> i64;
+        pub safe fn get_draw_seconds(unused: i32) -> i64;
         #[link_name = "get-lua-mem-usage"]
-        pub fn get_lua_mem_usage(unused: i32, output: i32) -> i32;
+        pub safe fn get_lua_mem_usage(unused: i32, output: i32) -> i32;
         #[link_name = "get-vid-mem-usage"]
-        pub fn get_vid_mem_usage(unused: i32, output: i32) -> i32;
+        pub safe fn get_vid_mem_usage(unused: i32, output: i32) -> i32;
         #[link_name = "get-synced-gc-info"]
-        pub fn get_synced_gc_info(collect: i32) -> i64;
+        pub safe fn get_synced_gc_info(collect: i32) -> i64;
     }
 }
 
@@ -58,11 +56,8 @@ pub fn get_timer() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
         let mut value = [0u8; 8];
-        let pointer = value.as_mut_ptr() as usize;
-        if pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-        }
-        let status = unsafe { raw::get_timer(0, pointer as u32 as i32) };
+        let pointer = super::wasm_output_ptr(&mut value)?;
+        let status = raw::get_timer(0, pointer);
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -79,11 +74,8 @@ pub fn get_timer_micros() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
         let mut value = [0u8; 8];
-        let pointer = value.as_mut_ptr() as usize;
-        if pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-        }
-        let status = unsafe { raw::get_timer_micros(0, pointer as u32 as i32) };
+        let pointer = super::wasm_output_ptr(&mut value)?;
+        let status = raw::get_timer_micros(0, pointer);
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -104,14 +96,12 @@ pub fn diff_timers(
 ) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        crate::unpack_f32(unsafe {
-            raw::diff_timers(
-                end_timer as i64,
-                start_timer as i64,
-                return_ms as i32,
-                from_microseconds as i32,
-            )
-        })
+        crate::decode_packed_f32(raw::diff_timers(
+            end_timer as i64,
+            start_timer as i64,
+            return_ms as i32,
+            from_microseconds as i32,
+        ))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -125,11 +115,8 @@ pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
         let mut value = [0u8; 8];
-        let pointer = value.as_mut_ptr() as usize;
-        if pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-        }
-        let status = unsafe { raw::get_frame_timer(last_frame_time as i32, pointer as u32 as i32) };
+        let pointer = super::wasm_output_ptr(&mut value)?;
+        let status = raw::get_frame_timer(last_frame_time as i32, pointer);
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -146,7 +133,7 @@ pub fn get_frame_timer(last_frame_time: bool) -> Result<u64> {
 pub fn get_draw_seconds() -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        crate::unpack_f32(unsafe { raw::get_draw_seconds(0) })
+        crate::decode_packed_f32(raw::get_draw_seconds(0))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -159,11 +146,8 @@ pub fn get_lua_mem_usage() -> Result<LuaMemUsage> {
     #[cfg(target_arch = "wasm32")]
     {
         let mut values = [0.0f32; 8];
-        let pointer = values.as_mut_ptr() as usize;
-        if pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-        }
-        let status = unsafe { raw::get_lua_mem_usage(0, pointer as u32 as i32) };
+        let pointer = super::wasm_output_ptr(&mut values)?;
+        let status = raw::get_lua_mem_usage(0, pointer);
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -189,11 +173,8 @@ pub fn get_vid_mem_usage() -> Result<VidMemUsage> {
     #[cfg(target_arch = "wasm32")]
     {
         let mut values = [0.0f32; 2];
-        let pointer = values.as_mut_ptr() as usize;
-        if pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-        }
-        let status = unsafe { raw::get_vid_mem_usage(0, pointer as u32 as i32) };
+        let pointer = super::wasm_output_ptr(&mut values)?;
+        let status = raw::get_vid_mem_usage(0, pointer);
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -212,7 +193,7 @@ pub fn get_vid_mem_usage() -> Result<VidMemUsage> {
 pub fn get_synced_gc_info(collect: bool) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        crate::unpack_f32(unsafe { raw::get_synced_gc_info(collect as i32) })
+        crate::decode_packed_f32(raw::get_synced_gc_info(collect as i32))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

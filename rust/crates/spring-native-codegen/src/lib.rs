@@ -1036,11 +1036,10 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
     } else {
         ""
     };
-    let arity_lint = if params.len() + 1 > 7 {
-        "    #[expect(clippy::too_many_arguments, reason = \"NativeInterface preserves the corresponding Lua API arity\")]\n"
-    } else {
-        ""
-    };
+    // Wide signatures are normal for Spring's Lua-compatible callouts. The
+    // generated façade applies the crate-wide policy instead of making each
+    // generated function or game author repeat a local lint attribute.
+    let arity_lint = "";
     let mut sig = format!("{arity_lint}    pub fn {}{}(&self", method_name, generics);
     for param in &params {
         let ty = match &param.ty {

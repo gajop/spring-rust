@@ -36,7 +36,7 @@
             #[link(wasm_import_module = "spring:unsynced-read")]
             unsafe extern "C" {
                 #[link_name = "get-clipboard"]
-                pub fn call(punused: i32, output: i32) -> i32;
+                pub safe fn call(punused: i32, output: i32) -> i32;
             }
         }
 
@@ -45,7 +45,7 @@
             #[link(wasm_import_module = "spring:unsynced-read")]
             unsafe extern "C" {
                 #[link_name = "get-piece-projectile-name"]
-                pub fn call(pprojectile_id: i32, output: i32) -> i32;
+                pub safe fn call(pprojectile_id: i32, output: i32) -> i32;
             }
         }
 
@@ -54,7 +54,7 @@
             #[link(wasm_import_module = "spring:unsynced-read")]
             unsafe extern "C" {
                 #[link_name = "get-prev-frame-sync-checksum"]
-                pub fn call(punused: i32, output: i32) -> i32;
+                pub safe fn call(punused: i32, output: i32) -> i32;
             }
         }
 
@@ -179,7 +179,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_clipboard::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_clipboard::call(unused as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -189,8 +193,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -275,7 +277,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_piece_projectile_name::call(projectile_id, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_piece_projectile_name::call(projectile_id, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -285,8 +291,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -304,7 +308,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_prev_frame_sync_checksum::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_prev_frame_sync_checksum::call(unused as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -314,8 +322,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }

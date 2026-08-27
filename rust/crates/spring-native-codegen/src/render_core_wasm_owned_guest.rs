@@ -23,7 +23,46 @@ pub fn render(model: &ApiModel) -> String {
         output.push_str(&module_source);
     }
     output.push_str(&render_owned_footer(model));
-    normalize_import_blocks(output)
+    normalize_import_blocks(normalize_special_forward_pointers(output))
+}
+
+/// The reviewed compatibility projections below retain a few compact legacy
+/// ABIs. Normalize their pointer expressions after rendering so they share
+/// the checked pointer boundary with generated transports. Keeping this as a
+/// final source transformation avoids duplicating the long legacy snippets in
+/// two subtly different forms.
+fn normalize_special_forward_pointers(output: String) -> String {
+    output
+        .replace(
+            "call(unit_id, crate::wasm_output_ptr(&mut output)?, output.len() as i32",
+            "call(unit_id, crate::wasm_mut_slice_parts(&mut output)?.0, output.len()",
+        )
+        .replace(
+            "descriptor[0] = output.as_mut_ptr() as usize as u32;",
+            "descriptor[0] = crate::wasm_mut_slice_parts(&mut output)?.0 as u32;",
+        )
+        .replace(
+            "output.as_mut_ptr() as usize as u32 as i32",
+            "crate::wasm_output_ptr(&mut output)?",
+        )
+        .replace(
+            "state.as_mut_ptr() as usize as u32 as i32",
+            "crate::wasm_output_ptr(&mut state)?",
+        )
+        .replace(
+            "input.as_ptr() as usize as u32 as i32",
+            "crate::wasm_input_ptr(&input)?",
+        )
+        .replace(
+            "descriptor.as_mut_ptr() as usize as u32 as i32",
+            "crate::wasm_output_ptr(&mut descriptor)?",
+        )
+        // The preceding replacement turns the legacy Vec pointer expression
+        // into `wasm_output_ptr`; apply the Vec-specific correction after it.
+        .replace(
+            "call(unit_id, crate::wasm_output_ptr(&mut output)?, output.len() as i32",
+            "call(unit_id, crate::wasm_mut_slice_parts(&mut output)?.0, output.len() as i32",
+        )
 }
 
 /// Rust 2024 requires every imported ABI block to state that the declarations
@@ -34,6 +73,7 @@ fn normalize_import_blocks(output: String) -> String {
     output
         .replace("extern \"C\" {", "unsafe extern \"C\" {")
         .replace("unsafe unsafe extern \"C\" {", "unsafe extern \"C\" {")
+        .replace("pub fn call(", "pub safe fn call(")
 }
 
 pub fn render_owned_prelude() -> String {
@@ -144,7 +184,10 @@ pub fn render_owned_shards(model: &ApiModel) -> Vec<(String, String)> {
     if !shared_records.is_empty() || !shared_enums.is_empty() {
         let types_source =
             render_shared_types_module(&shared_records, &shared_enums, &records, &enums);
-        shards.push(("types".to_owned(), normalize_import_blocks(types_source)));
+        shards.push((
+            "types".to_owned(),
+            normalize_special_forward_pointers(normalize_import_blocks(types_source)),
+        ));
     }
 
     shards.extend(model.modules.iter().map(|module| {
@@ -158,7 +201,10 @@ pub fn render_owned_shards(model: &ApiModel) -> Vec<(String, String)> {
             &shared_records,
             &shared_enums,
         );
-        (rust_ident(&module.name), normalize_import_blocks(source))
+        (
+            rust_ident(&module.name),
+            normalize_special_forward_pointers(normalize_import_blocks(source)),
+        )
     }));
     shards
 }
@@ -356,11 +402,19 @@ pub fn coverage_errors(model: &ApiModel, owned: &str, environments: &str) -> Vec
     if owned.contains("pub unsafe fn ") {
         errors.push("owned surface exposes a public unsafe function".to_owned());
     }
+    if owned.contains("unsafe {") {
+        errors.push("owned surface exposes an unsafe call expression".to_owned());
+    }
     for module in &model.modules {
         let module_ident = rust_ident(&module.name);
         for function in &module.functions {
             let name = rust_ident(&function.name);
-            let safe_marker = format!("        pub fn {name}(");
+            // The arity lint is emitted immediately before some functions and
+            // intentionally carries the module indentation with it. Match
+            // the declaration itself rather than assuming its indentation;
+            // otherwise valid wide Lua-parity functions are reported as
+            // missing by `--strict`.
+            let safe_marker = format!("pub fn {name}(");
             if !owned_module_contains(owned, &module_ident, &safe_marker) {
                 errors.push(format!(
                     "owned surface omits {}::{}",
@@ -393,7 +447,10 @@ pub fn coverage_errors(model: &ApiModel, owned: &str, environments: &str) -> Vec
 }
 
 fn owned_module_contains(source: &str, module: &str, marker: &str) -> bool {
-    let start_marker = format!("    pub mod {module} {{");
+    // Accept both the combined renderer output and an individual shard. The
+    // latter starts at column zero, while the former nests modules inside the
+    // `owned` module. Coverage should validate declarations, not formatting.
+    let start_marker = format!("pub mod {module} {{");
     let Some(start) = source.find(&start_marker) else {
         return false;
     };
@@ -695,9 +752,7 @@ fn render_variable_list_forward(
     let call_args = args
         .iter()
         .cloned()
-        .chain(std::iter::once(
-            "descriptor.as_mut_ptr() as usize as u32 as i32".to_owned(),
-        ))
+        .chain(std::iter::once("descriptor_ptr".to_owned()))
         .collect::<Vec<_>>()
         .join(", ");
     let name = rust_ident(&function.name);
@@ -715,7 +770,11 @@ fn render_variable_list_forward(
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<{element_type}>::new();
                 loop {{
-                    let status = unsafe {{ {raw_module}::call({call_args}) }};
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = {raw_module}::call({call_args});
                     let required = descriptor[2] as usize;
                     if status == 0 {{
                         output.truncate(required);
@@ -725,8 +784,6 @@ fn render_variable_list_forward(
                         return Err(crate::ApiError::new(status));
                     }}
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }}
             }}
@@ -781,9 +838,7 @@ fn render_variable_output_forward(
     let call_args = args
         .iter()
         .cloned()
-        .chain(std::iter::once(
-            "descriptor.as_mut_ptr() as usize as u32 as i32".to_owned(),
-        ))
+        .chain(std::iter::once("descriptor_ptr".to_owned()))
         .collect::<Vec<_>>()
         .join(", ");
     output.push_str(&format!(
@@ -794,7 +849,11 @@ fn render_variable_output_forward(
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {{
-                    let status = unsafe {{ {raw_module}::call({call_args}) }};
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = {raw_module}::call({call_args});
                     let required = descriptor[2] as usize;
                     if status == 0 {{
                         output.truncate(required);
@@ -804,8 +863,6 @@ fn render_variable_output_forward(
                         return Err(crate::ApiError::new(status));
                     }}
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }}
             }}
@@ -1035,53 +1092,53 @@ fn render_special_forward(
     }
     if module.name == "units_query" && rust_ident(&function.name) == "get_team_units" {
         output.push_str(
-            "        #[inline]\n        pub fn get_team_units(team_id: i32) -> Result<Vec<i32>> {\n            crate::get_team_units(team_id)\n        }\n\n",
+            "        #[inline]\n        pub fn get_team_units(team_id: i32) -> Result<Vec<i32>> {\n            crate::get_team_units(crate::TeamId::from(team_id))\n        }\n\n",
         );
         return true;
     }
     if module.name == "units_query" && rust_ident(&function.name) == "get_unit_nearest_enemy" {
         output.push_str(
-            "        #[inline]\n        pub fn get_unit_nearest_enemy(unit_id: i32, range: f32, options: GetUnitNearestEnemyOptions) -> Result<i32> {\n            crate::get_unit_nearest_enemy(unit_id, range, options.use_los, options.sphere_dist_test, options.check_sight_dist)\n        }\n\n",
+            "        #[inline]\n        pub fn get_unit_nearest_enemy(unit_id: i32, range: f32, options: GetUnitNearestEnemyOptions) -> Result<i32> {\n            crate::get_unit_nearest_enemy(crate::UnitId::from(unit_id), range, options.use_los, options.sphere_dist_test, options.check_sight_dist).map(i32::from)\n        }\n\n",
         );
         return true;
     }
     if module.name == "units_query" && rust_ident(&function.name) == "get_unit_separation" {
         output.push_str(
-            "        #[inline]\n        pub fn get_unit_separation(unit_id1: i32, unit_id2: i32, options: GetUnitSeparationOptions) -> Result<f32> {\n            crate::get_unit_separation(unit_id1, unit_id2, options.positional, options.check_map)\n        }\n\n",
+            "        #[inline]\n        pub fn get_unit_separation(unit_id1: i32, unit_id2: i32, options: GetUnitSeparationOptions) -> Result<f32> {\n            crate::get_unit_separation(crate::UnitId::from(unit_id1), crate::UnitId::from(unit_id2), options.positional, options.check_map)\n        }\n\n",
         );
         return true;
     }
     if module.name == "units_info" && rust_ident(&function.name) == "get_unit_nano_pieces" {
         output.push_str(
-            "        #[inline]\n        pub fn get_unit_nano_pieces(unit_id: i32) -> Result<Vec<i32>> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = Vec::<i32>::new();\n                loop {\n                    let packed = unsafe { __core_units_info_nano_pieces::call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32) } as u64;\n                    let status = (packed >> 32) as u32 as i32;\n                    let required = packed as u32 as usize;\n                    if status == 0 { output.truncate(required); return Ok(output); }\n                    if status != crate::ErrorCode::BufferOverflow as i32 { return Err(crate::ApiError::new(status)); }\n                    output.resize(required, 0);\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = unit_id; Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_units_info_nano_pieces {\n            #[link(wasm_import_module = \"spring:units-info\")]\n            extern \"C\" {\n                #[link_name = \"get-unit-nano-pieces\"]\n                pub fn call(unit_id: i32, output: i32, capacity: i32) -> i64;\n            }\n        }\n\n",
+            "        #[inline]\n        pub fn get_unit_nano_pieces(unit_id: i32) -> Result<Vec<i32>> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = Vec::<i32>::new();\n                loop {\n                    let packed = __core_units_info_nano_pieces::call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32) as u64;\n                    let status = (packed >> 32) as u32 as i32;\n                    let required = packed as u32 as usize;\n                    if status == 0 { output.truncate(required); return Ok(output); }\n                    if status != crate::ErrorCode::BufferOverflow as i32 { return Err(crate::ApiError::new(status)); }\n                    output.resize(required, 0);\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = unit_id; Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_units_info_nano_pieces {\n            #[link(wasm_import_module = \"spring:units-info\")]\n            extern \"C\" {\n                #[link_name = \"get-unit-nano-pieces\"]\n                pub fn call(unit_id: i32, output: i32, capacity: i32) -> i64;\n            }\n        }\n\n",
         );
         return true;
     }
     if module.name == "units_info" && rust_ident(&function.name) == "get_unit_is_transporting" {
         output.push_str(
-            "        #[inline]\n        pub fn get_unit_is_transporting(unit_id: i32) -> Result<GetUnitIsTransportingValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = Vec::<i32>::new();\n                let mut state = [0u8; 4];\n                loop {\n                    let packed = unsafe { __core_units_info_is_transporting::call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32, state.as_mut_ptr() as usize as u32 as i32) } as u64;\n                    let status = (packed >> 32) as u32 as i32;\n                    let required = packed as u32 as usize;\n                    if status == 0 {\n                        output.truncate(required);\n                        return Ok(GetUnitIsTransportingValue { unit_i_ds: output, is_transporting: u32::from_le_bytes(state) != 0 });\n                    }\n                    if status != crate::ErrorCode::BufferOverflow as i32 { return Err(crate::ApiError::new(status)); }\n                    output.resize(required, 0);\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = unit_id; Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_units_info_is_transporting {\n            #[link(wasm_import_module = \"spring:units-info\")]\n            extern \"C\" {\n                #[link_name = \"get-unit-is-transporting\"]\n                pub fn call(unit_id: i32, output: i32, capacity: i32, state: i32) -> i64;\n            }\n        }\n\n",
+            "        #[inline]\n        pub fn get_unit_is_transporting(unit_id: i32) -> Result<GetUnitIsTransportingValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = Vec::<i32>::new();\n                let mut state = [0u8; 4];\n                loop {\n                    let packed = __core_units_info_is_transporting::call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32, state.as_mut_ptr() as usize as u32 as i32) as u64;\n                    let status = (packed >> 32) as u32 as i32;\n                    let required = packed as u32 as usize;\n                    if status == 0 {\n                        output.truncate(required);\n                        return Ok(GetUnitIsTransportingValue { unit_i_ds: output, is_transporting: u32::from_le_bytes(state) != 0 });\n                    }\n                    if status != crate::ErrorCode::BufferOverflow as i32 { return Err(crate::ApiError::new(status)); }\n                    output.resize(required, 0);\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = unit_id; Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_units_info_is_transporting {\n            #[link(wasm_import_module = \"spring:units-info\")]\n            extern \"C\" {\n                #[link_name = \"get-unit-is-transporting\"]\n                pub fn call(unit_id: i32, output: i32, capacity: i32, state: i32) -> i64;\n            }\n        }\n\n",
         );
         return true;
     }
     if module.name == "projectiles" && rust_ident(&function.name) == "get_all_projectiles" {
         output.push_str(
-            "        #[inline]\n        pub fn get_all_projectiles(options: GetAllProjectilesOptions) -> Result<Vec<i32>> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut input = [0u8; 8];\n                input[0..4].copy_from_slice(&u32::from(options.exclude_weapon_projectiles).to_le_bytes());\n                input[4..8].copy_from_slice(&u32::from(options.exclude_piece_projectiles).to_le_bytes());\n                let mut descriptor = [0u32; 3];\n                let mut output = Vec::<i32>::new();\n                loop {\n                    let status = unsafe { crate::generated::projectiles::raw::core_get_all_projectiles(input.as_ptr() as usize as u32 as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };\n                    let required = descriptor[2] as usize;\n                    if status == 0 {\n                        output.truncate(required);\n                        return Ok(output);\n                    }\n                    if status != crate::ErrorCode::BufferOverflow as i32 {\n                        return Err(crate::ApiError::new(status));\n                    }\n                    output.resize(required, 0);\n                    descriptor[0] = output.as_mut_ptr() as usize as u32;\n                    descriptor[1] = output.len() as u32;\n                    descriptor[2] = 0;\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            {\n                let _ = options;\n                Err(unreachable!())\n            }\n        }\n\n",
+            "        #[inline]\n        pub fn get_all_projectiles(options: GetAllProjectilesOptions) -> Result<Vec<i32>> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut input = [0u8; 8];\n                input[0..4].copy_from_slice(&u32::from(options.exclude_weapon_projectiles).to_le_bytes());\n                input[4..8].copy_from_slice(&u32::from(options.exclude_piece_projectiles).to_le_bytes());\n                let mut descriptor = [0u32; 3];\n                let mut output = Vec::<i32>::new();\n                loop {\n                    let status = crate::generated::projectiles::raw::core_get_all_projectiles(input.as_ptr() as usize as u32 as i32, descriptor.as_mut_ptr() as usize as u32 as i32);\n                    let required = descriptor[2] as usize;\n                    if status == 0 {\n                        output.truncate(required);\n                        return Ok(output);\n                    }\n                    if status != crate::ErrorCode::BufferOverflow as i32 {\n                        return Err(crate::ApiError::new(status));\n                    }\n                    output.resize(required, 0);\n                    descriptor[0] = output.as_mut_ptr() as usize as u32;\n                    descriptor[1] = output.len() as u32;\n                    descriptor[2] = 0;\n                }\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            {\n                let _ = options;\n                Err(unreachable!())\n            }\n        }\n\n",
         );
         return true;
     }
     if module.name == "terrain" {
         match rust_ident(&function.name).as_str() {
             "get_water_plane_level" => output.push_str(
-                "        #[inline]\n        pub fn get_water_plane_level(_unused: u8) -> Result<f32> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_water_plane_level::call() } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(f32::from_bits(packed as u32))\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_water_plane_level {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-water-plane-level\"]\n                pub fn call() -> i64;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_water_plane_level(_unused: u8) -> Result<f32> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = __core_terrain_water_plane_level::call() as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(f32::from_bits(packed as u32))\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_water_plane_level {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-water-plane-level\"]\n                pub fn call() -> i64;\n            }\n        }\n\n",
             ),
             "is_pos_in_map" => output.push_str(
-                "        #[inline]\n        pub fn is_pos_in_map(x: f32, z: f32) -> Result<IsPosInMapValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = unsafe { __core_terrain_is_pos_in_map::call(x, z) } as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                let flags = packed as u32;\n                Ok(IsPosInMapValue { in_map: flags & 1 != 0, in_play_area: flags & 2 != 0 })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = (x, z); Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_is_pos_in_map {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"is-pos-in-map\"]\n                pub fn call(x: f32, z: f32) -> i64;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn is_pos_in_map(x: f32, z: f32) -> Result<IsPosInMapValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let packed = __core_terrain_is_pos_in_map::call(x, z) as u64;\n                let status = (packed >> 32) as u32 as i32;\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                let flags = packed as u32;\n                Ok(IsPosInMapValue { in_map: flags & 1 != 0, in_play_area: flags & 2 != 0 })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { let _ = (x, z); Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_is_pos_in_map {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"is-pos-in-map\"]\n                pub fn call(x: f32, z: f32) -> i64;\n            }\n        }\n\n",
             ),
             "get_ground_extremes" => output.push_str(
-                "        #[inline]\n        pub fn get_ground_extremes(_unused: u8) -> Result<GetGroundExtremesValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 16];\n                let status = unsafe { __core_terrain_ground_extremes::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(GetGroundExtremesValue {\n                    init_min_height: f32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    init_max_height: f32::from_le_bytes(output[4..8].try_into().unwrap()),\n                    curr_min_height: f32::from_le_bytes(output[8..12].try_into().unwrap()),\n                    curr_max_height: f32::from_le_bytes(output[12..16].try_into().unwrap()),\n                })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_ground_extremes {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-ground-extremes\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_ground_extremes(_unused: u8) -> Result<GetGroundExtremesValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 16];\n                let status = __core_terrain_ground_extremes::call(output.as_mut_ptr() as usize as u32 as i32);\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(GetGroundExtremesValue {\n                    init_min_height: f32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    init_max_height: f32::from_le_bytes(output[4..8].try_into().unwrap()),\n                    curr_min_height: f32::from_le_bytes(output[8..12].try_into().unwrap()),\n                    curr_max_height: f32::from_le_bytes(output[12..16].try_into().unwrap()),\n                })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_ground_extremes {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-ground-extremes\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
             ),
             "get_height_map_size" => output.push_str(
-                "        #[inline]\n        pub fn get_height_map_size(_unused: u8) -> Result<GetHeightMapSizeValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 8];\n                let status = unsafe { __core_terrain_height_map_size::call(output.as_mut_ptr() as usize as u32 as i32) };\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(GetHeightMapSizeValue {\n                    points_x: i32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    points_z: i32::from_le_bytes(output[4..8].try_into().unwrap()),\n                })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_height_map_size {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-height-map-size\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
+                "        #[inline]\n        pub fn get_height_map_size(_unused: u8) -> Result<GetHeightMapSizeValue> {\n            #[cfg(target_arch = \"wasm32\")]\n            {\n                let mut output = [0u8; 8];\n                let status = __core_terrain_height_map_size::call(output.as_mut_ptr() as usize as u32 as i32);\n                if status != 0 { return Err(crate::ApiError::new(status)); }\n                Ok(GetHeightMapSizeValue {\n                    points_x: i32::from_le_bytes(output[0..4].try_into().unwrap()),\n                    points_z: i32::from_le_bytes(output[4..8].try_into().unwrap()),\n                })\n            }\n            #[cfg(not(target_arch = \"wasm32\"))]\n            { Err(unreachable!()) }\n        }\n\n        #[cfg(target_arch = \"wasm32\")]\n        mod __core_terrain_height_map_size {\n            #[link(wasm_import_module = \"spring:terrain\")]\n            extern \"C\" {\n                #[link_name = \"get-height-map-size\"]\n                pub fn call(output: i32) -> i32;\n            }\n        }\n\n",
             ),
             _ => return false,
         }
@@ -1234,12 +1291,18 @@ fn record_derives(
     format!("        #[derive({})]\n", derives.join(", "))
 }
 
+const CRATE_ROOT_TYPES: &[&str] = &["Float3"];
+
 fn render_record(
     output: &mut String,
     record: &RecordModel,
     records: &BTreeMap<String, &RecordModel>,
     enums: &BTreeMap<String, &EnumModel>,
 ) {
+    if CRATE_ROOT_TYPES.contains(&record.name.as_str()) {
+        output.push_str(&format!("        pub use crate::{};\n\n", record.name));
+        return;
+    }
     output.push_str(&record_derives(&record.fields, records, enums));
     output.push_str(&format!("        pub struct {} {{\n", record.name));
     for field in &record.fields {
@@ -1411,7 +1474,7 @@ fn render_normalize_forward(output: &mut String) {
             #[link(wasm_import_module = "spring:math-extra")]
             unsafe extern "C" {
                 #[link_name = "normalize"]
-                pub fn call(x: f32, y: f32, z: f32, output: i32) -> i32;
+                pub safe fn call(x: f32, y: f32, z: f32, output: i32) -> i32;
             }
         }
 
@@ -1420,18 +1483,8 @@ fn render_normalize_forward(output: &mut String) {
             #[cfg(target_arch = "wasm32")]
             {
                 let mut output = [0.0f32; 4];
-                let pointer = output.as_mut_ptr() as usize;
-                if pointer > u32::MAX as usize {
-                    return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32));
-                }
-                let status = unsafe {
-                    __core_math_extra_normalize::call(
-                        vec.x,
-                        vec.y,
-                        vec.z,
-                        pointer as u32 as i32,
-                    )
-                };
+                let pointer = crate::wasm_output_ptr(&mut output)?;
+                let status = __core_math_extra_normalize::call(vec.x, vec.y, vec.z, pointer);
                 if status != 0 {
                     return Err(crate::ApiError::new(status));
                 }
@@ -1748,14 +1801,8 @@ fn enum_variant_ident(_enum_name: &str, variant: &str) -> String {
 }
 
 fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
-    if count > 7 {
-        format!(
-            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
-            " ".repeat(indent)
-        )
-    } else {
-        String::new()
-    }
+    let _ = (count, indent);
+    String::new()
 }
 
 fn rust_ident(value: &str) -> String {
@@ -2624,6 +2671,33 @@ mod tests {
         assert_eq!(
             errors,
             vec!["owned surface exposes a public unsafe function"]
+        );
+    }
+
+    #[test]
+    fn coverage_rejects_unsafe_owned_call_expressions() {
+        let model = ApiModel {
+            model_version: 1,
+            native_api_version: None,
+            modules: Vec::new(),
+            callins: Vec::new(),
+        };
+        let errors = coverage_errors(&model, "unsafe { legacy() }", "");
+        assert_eq!(
+            errors,
+            vec!["owned surface exposes an unsafe call expression"]
+        );
+    }
+
+    #[test]
+    fn special_forward_vectors_use_mutable_slice_pointer() {
+        let source = normalize_special_forward_pointers(
+            "call(unit_id, output.as_mut_ptr() as usize as u32 as i32, output.len() as i32)"
+                .to_owned(),
+        );
+        assert_eq!(
+            source,
+            "call(unit_id, crate::wasm_mut_slice_parts(&mut output)?.0, output.len() as i32)"
         );
     }
 }

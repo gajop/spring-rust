@@ -37,33 +37,33 @@ pub mod variable_io {
         ) -> crate::Result<crate::generated::owned::unit_script::CallUnitScriptValue> {
             let ret_capacity = i32::try_from(ret_capacity)
                 .map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let function_name_pointer = u32::try_from(function_name.as_ptr() as usize)
-                .map_err(|_| crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32))?;
-            let args_pointer = u32::try_from(args.as_ptr() as usize)
-                .map_err(|_| crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32))?;
-            let function_name_length = u32::try_from(function_name.len())
-                .map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let args_length = u32::try_from(args.len())
-                .map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-            let mut input = [function_name_pointer, function_name_length,
-                args_pointer, args_length];
-            let input_pointer = u32::try_from(input.as_mut_ptr() as usize)
-                .map_err(|_| crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32))?;
+            let (function_name_pointer, function_name_length) =
+                crate::wasm_slice_parts(function_name.as_bytes())?;
+            let (args_pointer, args_length) = crate::wasm_slice_parts(args)?;
+            let mut input = [
+                function_name_pointer as u32,
+                function_name_length as u32,
+                args_pointer as u32,
+                args_length as u32,
+            ];
+            let input_pointer = crate::wasm_output_ptr(&mut input)?;
             let mut ret_values = vec![0.0f32; ret_capacity as usize];
 
             loop {
-                let ret_pointer = u32::try_from(ret_values.as_mut_ptr() as usize)
-                    .map_err(|_| crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32))?;
-                let capacity = i32::try_from(ret_values.len())
-                    .map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
-                let mut output = [ret_pointer, capacity as u32, 0u32, 0u32, 0u32];
-                let output_pointer = u32::try_from(output.as_mut_ptr() as usize)
-                    .map_err(|_| crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32))?;
+                let (ret_pointer, capacity) = crate::wasm_mut_slice_parts(&mut ret_values)?;
+                let mut output = [
+                    ret_pointer as u32,
+                    capacity as u32,
+                    0u32,
+                    0u32,
+                    0u32,
+                ];
+                let output_pointer = crate::wasm_output_ptr(&mut output)?;
                 let status = raw::call(
                     unit_id,
                     capacity,
-                    input_pointer as i32,
-                    output_pointer as i32,
+                    input_pointer,
+                    output_pointer,
                 );
                 let required = output[2] as usize;
                 if status == crate::ErrorCode::BufferOverflow as i32 {
@@ -85,4 +85,20 @@ pub mod variable_io {
 }
 "#
     .to_owned()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::render;
+
+    #[test]
+    fn unit_script_wrapper_exposes_a_typed_safe_boundary() {
+        let output = render();
+        assert!(output.contains("pub fn call_unit_script("));
+        assert!(output.contains("function_name: &str"));
+        assert!(output.contains("args: &[f32]"));
+        assert!(output.contains("ret_capacity: usize"));
+        assert!(output.contains("ret_values.resize(required, 0.0)"));
+        assert!(!output.contains("pub unsafe fn call_unit_script"));
+    }
 }

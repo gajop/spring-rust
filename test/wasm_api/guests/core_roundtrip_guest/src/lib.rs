@@ -44,8 +44,8 @@ fn on_game_frame(_: i32) {
     // Unit 0 may or may not exist in a particular fixture. Either outcome is
     // useful here: both execute the full NativeInterface query path. Preserve
     // the returned value/error so the optimizer cannot discard the import.
-    let value = match spring::get_unit_def_id(0) {
-        Ok(unit_def_id) => unit_def_id,
+    let value = match spring::get_unit_def_id(spring::UnitId::from(0)) {
+        Ok(unit_def_id) => i32::from(unit_def_id),
         Err(error) => error.code,
     };
     // SAFETY: synced Core Wasm is single-threaded and this is the only writer.

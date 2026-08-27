@@ -1434,7 +1434,7 @@
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "download-vbo"]
-                pub fn call(pvbo_id: i32, pattribute_index: i32, pelement_offset: i32, pelement_count: i32, pforce_gpu_read: i32, output: i32) -> i32;
+                pub safe fn call(pvbo_id: i32, pattribute_index: i32, pelement_offset: i32, pelement_count: i32, pforce_gpu_read: i32, output: i32) -> i32;
             }
         }
 
@@ -1443,7 +1443,7 @@
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-engine-model-uniform-data-def"]
-                pub fn call(punused: i32, output: i32) -> i32;
+                pub safe fn call(punused: i32, output: i32) -> i32;
             }
         }
 
@@ -1452,7 +1452,7 @@
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-engine-uniform-buffer-def"]
-                pub fn call(pindex: i32, output: i32) -> i32;
+                pub safe fn call(pindex: i32, output: i32) -> i32;
             }
         }
 
@@ -1461,7 +1461,7 @@
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-shader-log"]
-                pub fn call(punused: i32, output: i32) -> i32;
+                pub safe fn call(punused: i32, output: i32) -> i32;
             }
         }
 
@@ -1470,7 +1470,7 @@
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-string"]
-                pub fn call(ppname: i32, output: i32) -> i32;
+                pub safe fn call(ppname: i32, output: i32) -> i32;
             }
         }
 
@@ -1878,7 +1878,6 @@
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn blit_fbo(src_fboid: u32, dst_fboid: u32, x0_src: i32, y0_src: i32, x1_src: i32, y1_src: i32, x0_dst: i32, y0_dst: i32, x1_dst: i32, y1_dst: i32, mask: u32, filter: u32) -> Result<()> {
             crate::generated::gfx::blit_fbo(src_fboid, dst_fboid, x0_src, y0_src, x1_src, y1_src, x0_dst, y0_dst, x1_dst, y1_dst, mask, filter)?;
             Ok(())
@@ -1958,7 +1957,6 @@
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn copy_to_texture(name: &str, xoff: i32, yoff: i32, x: i32, y: i32, width: i32, height: i32, target: u32, level: u32) -> Result<()> {
             let mut __core_string_0_scratch = [0u8; 256];
             let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
@@ -2016,7 +2014,6 @@
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn create_shader(definitions: &str, vertex: &str, tcs: &str, tes: &str, geometry: &str, fragment: &str, compute: &str, options: GfxCreateShaderOptions) -> Result<CreateShaderValue> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + definitions.len()); __b.extend_from_slice(&(definitions.len() as u32).to_le_bytes()); __b.extend_from_slice(definitions.as_bytes()); __b };
             let __blob1 = { let mut __b = Vec::with_capacity(4 + vertex.len()); __b.extend_from_slice(&(vertex.len() as u32).to_le_bytes()); __b.extend_from_slice(vertex.as_bytes()); __b };
@@ -2194,7 +2191,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<f32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_download_vbo::call(vbo_id as i32, attribute_index, element_offset, element_count, u32::from(force_gpu_read) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_download_vbo::call(vbo_id as i32, attribute_index, element_offset, element_count, u32::from(force_gpu_read) as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2204,8 +2205,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2251,7 +2250,6 @@
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn draw_ground_quad(x0: f32, z0: f32, x1: f32, z1: f32, use_tex_coords: bool, tu0: f32, tv0: f32, tu1: f32, tv1: f32) -> Result<()> {
             crate::generated::gfx::draw_ground_quad(x0, z0, x1, z1, use_tex_coords, tu0, tv0, tu1, tv1)?;
             Ok(())
@@ -2600,7 +2598,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_engine_model_uniform_data_def::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_engine_model_uniform_data_def::call(unused as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2610,8 +2612,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2660,7 +2660,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_engine_uniform_buffer_def::call(index, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_engine_uniform_buffer_def::call(index, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2670,8 +2674,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2824,7 +2826,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_shader_log::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_shader_log::call(unused as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2834,8 +2840,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2859,7 +2863,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_string::call(pname as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_string::call(pname as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2869,8 +2877,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -3508,7 +3514,6 @@
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn tex_rect(x1: f32, y1: f32, x2: f32, y2: f32, s1: f32, t1: f32, s2: f32, t2: f32) -> Result<()> {
             crate::generated::gfx::tex_rect(x1, y1, x2, y2, s1, t1, s2, t2)?;
             Ok(())
@@ -3667,7 +3672,6 @@
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn upload_texture(name: &str, target: u32, level: i32, xoff: i32, yoff: i32, zoff: i32, width: i32, height: i32, depth: i32, format: u32, pixel_type: u32, data: &[u8]) -> Result<()> {
             let mut __core_string_0_scratch = [0u8; 256];
             let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {

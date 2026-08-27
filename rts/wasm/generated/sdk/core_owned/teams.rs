@@ -315,7 +315,7 @@
             #[link(wasm_import_module = "spring:teams")]
             unsafe extern "C" {
                 #[link_name = "get-ally-team-list"]
-                pub fn call(punused: i32, output: i32) -> i32;
+                pub safe fn call(punused: i32, output: i32) -> i32;
             }
         }
 
@@ -324,7 +324,7 @@
             #[link(wasm_import_module = "spring:teams")]
             unsafe extern "C" {
                 #[link_name = "get-player-list"]
-                pub fn call(pteam_id: i32, pactive: i32, output: i32) -> i32;
+                pub safe fn call(pteam_id: i32, pactive: i32, output: i32) -> i32;
             }
         }
 
@@ -333,7 +333,7 @@
             #[link(wasm_import_module = "spring:teams")]
             unsafe extern "C" {
                 #[link_name = "get-player-list-in-ally-team"]
-                pub fn call(pally_team_id: i32, output: i32) -> i32;
+                pub safe fn call(pally_team_id: i32, output: i32) -> i32;
             }
         }
 
@@ -342,7 +342,7 @@
             #[link(wasm_import_module = "spring:teams")]
             unsafe extern "C" {
                 #[link_name = "get-player-list-in-team"]
-                pub fn call(pteam_id: i32, output: i32) -> i32;
+                pub safe fn call(pteam_id: i32, output: i32) -> i32;
             }
         }
 
@@ -351,7 +351,7 @@
             #[link(wasm_import_module = "spring:teams")]
             unsafe extern "C" {
                 #[link_name = "get-team-list"]
-                pub fn call(pally_team_id: i32, output: i32) -> i32;
+                pub safe fn call(pally_team_id: i32, output: i32) -> i32;
             }
         }
 
@@ -360,7 +360,7 @@
             #[link(wasm_import_module = "spring:teams")]
             unsafe extern "C" {
                 #[link_name = "get-team-lua-ai"]
-                pub fn call(pteam_id: i32, output: i32) -> i32;
+                pub safe fn call(pteam_id: i32, output: i32) -> i32;
             }
         }
 
@@ -442,7 +442,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_ally_team_list::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_ally_team_list::call(unused as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -452,8 +456,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -502,7 +504,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_player_list::call(team_id, u32::from(active) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_player_list::call(team_id, u32::from(active) as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -512,8 +518,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -531,7 +535,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_player_list_in_ally_team::call(ally_team_id, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_player_list_in_ally_team::call(ally_team_id, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -541,8 +549,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -560,7 +566,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_player_list_in_team::call(team_id, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_player_list_in_team::call(team_id, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -570,8 +580,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -617,7 +625,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_team_list::call(ally_team_id, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_team_list::call(ally_team_id, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -627,8 +639,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -646,7 +656,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_team_lua_ai::call(team_id, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_team_lua_ai::call(team_id, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -656,8 +670,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }

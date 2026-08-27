@@ -4,7 +4,7 @@
 // discovery path used by real Core modules, without importing any host API.
 static mut FRAME_SINK: i32 = 0;
 
-#[export_name = "spring:callin/game-frame"]
+#[unsafe(export_name = "spring:callin/game-frame")]
 pub extern "C" fn game_frame(frame: i32) {
     // SAFETY: WebAssembly execution is single-threaded for the synced profile.
     // Volatile prevents the empty callback from being folded away while adding

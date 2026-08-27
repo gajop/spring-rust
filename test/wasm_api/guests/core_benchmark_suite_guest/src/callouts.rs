@@ -26,9 +26,9 @@ fn owned_cylinder(x: f32, z: f32, radius: f32, allegiance: i32) -> spring::Resul
 
 #[cfg(feature = "transport_ceiling")]
 fn run_transport_ceiling(
-    unit_id: i32,
-    unit_def_id: i32,
-    position: [f32; 3],
+    unit_id: spring::UnitId,
+    unit_def_id: spring::DefId,
+    position: spring::Float3,
     scale: f64,
 ) -> spring::Result<()> {
     // These rows deliberately avoid per-call allocation. They measure the
@@ -86,12 +86,12 @@ fn run_transport_ceiling(
         },
     )?;
 
-    let team_capacity = spring::get_team_unit_count(0)? as usize;
+    let team_capacity = spring::get_team_unit_count(spring::TeamId::from(0))? as usize;
     let mut team_buffer = vec![0i32; team_capacity.max(1)];
     common::measure(
         "core_ceiling_list_out_reuse",
         common::scaled_count(20_000, scale),
-        || match spring::get_team_units_into(0, &mut team_buffer)? {
+        || match spring::get_team_units_into(spring::TeamId::from(0), &mut team_buffer)? {
             spring::BufferFill::Complete(count) => {
                 black_box(&team_buffer[..count]);
                 Ok(())
@@ -194,12 +194,12 @@ fn run_transport_ceiling(
 
 pub fn run(scalar_only: bool) -> spring::Result<()> {
     let scale = common::scale();
-    let units = spring::get_team_units(0)?;
+    let units = spring::get_team_units(spring::TeamId::from(0))?;
     let unit_id = *units
         .first()
         .ok_or(spring::ApiError::new(spring::ErrorCode::NotFound as i32))?;
-    let unit_def_id = spring::get_unit_def_id(unit_id)?;
-    let position = spring::get_unit_position(unit_id, false, false)?;
+    let unit_def_id = spring::get_unit_def_id(spring::UnitId::from(unit_id))?;
+    let position = spring::get_unit_position(spring::UnitId::from(unit_id), false, false)?;
 
     common::measure(
         "callout_scalar",
@@ -209,7 +209,7 @@ pub fn run(scalar_only: bool) -> spring::Result<()> {
             common::scaled_count(100_000, scale)
         },
         || {
-            spring::get_unit_def_id(unit_id)
+            spring::get_unit_def_id(spring::UnitId::from(unit_id))
                 .map(|value| black_box(value))
                 .map(|_| ())
         },
@@ -220,7 +220,7 @@ pub fn run(scalar_only: bool) -> spring::Result<()> {
     }
 
     common::measure("callout_vec3", common::scaled_count(100_000, scale), || {
-        spring::get_unit_position(unit_id, false, false)
+        spring::get_unit_position(spring::UnitId::from(unit_id), false, false)
             .map(|value| black_box(value))
             .map(|_| ())
     })?;
@@ -232,22 +232,22 @@ pub fn run(scalar_only: bool) -> spring::Result<()> {
         Ok(())
     })?;
     common::measure("callout_smalllist", common::scaled_count(20_000, scale), || {
-        spring::get_unit_commands(unit_id, 5)
+        spring::get_unit_commands(spring::UnitId::from(unit_id), 5)
             .map(|value| black_box(value))
             .map(|_| ())
     })?;
     common::measure("callout_biglist", common::scaled_count(1_000, scale), || {
-        spring::get_team_units(0)
+        spring::get_team_units(spring::TeamId::from(0))
             .map(|value| black_box(value))
             .map(|_| ())
     })?;
     common::measure("callout_spatial", common::scaled_count(10_000, scale), || {
-        owned_cylinder(position[0], position[2], 300.0, -1)
+        owned_cylinder(position.x, position.z, 300.0, -1)
             .map(|value| black_box(value))
             .map(|_| ())
     })?;
     common::measure("callout_mutate", common::scaled_count(100_000, scale), || {
-        spring::set_unit_rules_param_f32(unit_id, "bench", 1.0, -1)
+        spring::set_unit_rules_param_f32(spring::UnitId::from(unit_id), "bench", 1.0, -1)
             .map(|value| black_box(value))
             .map(|_| ())
     })?;
@@ -256,26 +256,10 @@ pub fn run(scalar_only: bool) -> spring::Result<()> {
     // fields directly, while Core carries the same payload as four Float3
     // records. Keep the values stable so the row measures transport and host
     // adaptation rather than a changing simulation outcome.
-    let physics_position = spring::rules_synced::unit_control::Float3 {
-        x: position[0],
-        y: position[1],
-        z: position[2],
-    };
-    let velocity = spring::rules_synced::unit_control::Float3 {
-        x: 1.0,
-        y: 0.0,
-        z: 0.0,
-    };
-    let rotation = spring::rules_synced::unit_control::Float3 {
-        x: 0.0,
-        y: 1.0,
-        z: 0.0,
-    };
-    let drag = spring::rules_synced::unit_control::Float3 {
-        x: 1.0,
-        y: 0.0,
-        z: 0.0,
-    };
+    let physics_position = spring::Float3::new(position.x, position.y, position.z);
+    let velocity = spring::Float3::new(1.0, 0.0, 0.0);
+    let rotation = spring::Float3::new(0.0, 1.0, 0.0);
+    let drag = spring::Float3::new(1.0, 0.0, 0.0);
     common::measure(
         "callout_wide_unit_physics",
         common::scaled_count(20_000, scale),
@@ -310,7 +294,7 @@ pub fn run(scalar_only: bool) -> spring::Result<()> {
     }
 
     #[cfg(feature = "transport_ceiling")]
-    run_transport_ceiling(unit_id, unit_def_id, position, scale)?;
+    run_transport_ceiling(spring::UnitId::from(unit_id), unit_def_id, position, scale)?;
     #[cfg(not(feature = "transport_ceiling"))]
     let _ = (unit_def_id, position);
 

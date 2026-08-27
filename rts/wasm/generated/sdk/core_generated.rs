@@ -72,6 +72,7 @@ mod __core_wire {
     }
 
     #[inline]
+    #[cfg(feature = "alloc")]
     pub fn bytes(bytes: &[u8], cursor: &mut usize) -> Option<alloc::vec::Vec<u8>> {
         let length = u32(bytes, cursor)? as usize;
         let end = cursor.checked_add(length)?;
@@ -81,6 +82,7 @@ mod __core_wire {
     }
 
     #[inline]
+    #[cfg(feature = "alloc")]
     pub fn string(input: &[u8], cursor: &mut usize) -> Option<alloc::string::String> {
         alloc::string::String::from_utf8(bytes(input, cursor)?).ok()
     }
@@ -174,57 +176,57 @@ pub mod units_query {
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-closest-enemy-unit"]
-            pub fn core_get_closest_enemy_unit(p0: f32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_get_closest_enemy_unit(p0: f32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-render-units"]
-            pub fn core_get_render_units(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_render_units(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-render-units-draw-flag-changed"]
-            pub fn core_get_render_units_draw_flag_changed(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_render_units_draw_flag_changed(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-team-unit-count"]
-            pub fn core_get_team_unit_count(p0: i32) -> i64;
+            pub safe fn core_get_team_unit_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-team-unit-def-count"]
-            pub fn core_get_team_unit_def_count(p0: i32, p1: i32) -> i64;
+            pub safe fn core_get_team_unit_def_count(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-team-units-counts"]
-            pub fn core_get_team_units_counts(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_team_units_counts(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-unit-nearest-ally"]
-            pub fn core_get_unit_nearest_ally(p0: i32, p1: f32) -> i64;
+            pub safe fn core_get_unit_nearest_ally(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-unit-nearest-enemy"]
-            pub fn core_get_unit_nearest_enemy(p0: i32, p1: f32, p2: i32) -> i64;
+            pub safe fn core_get_unit_nearest_enemy(p0: i32, p1: f32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-unit-separation"]
-            pub fn core_get_unit_separation(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_get_unit_separation(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "get-units-in-planes"]
-            pub fn core_get_units_in_planes(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_units_in_planes(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-query")]
         unsafe extern "C" {
             #[link_name = "valid-unit-id"]
-            pub fn core_valid_unit_id(p0: i32) -> i64;
+            pub safe fn core_valid_unit_id(p0: i32) -> i64;
         }
     }
 
@@ -245,11 +247,8 @@ pub mod units_query {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_closest_enemy_unit(range, ally_team_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_get_closest_enemy_unit(range, ally_team_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -267,8 +266,7 @@ pub mod units_query {
     pub fn get_team_unit_count(team_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_team_unit_count(team_id) } as u64;
+            let packed = raw::core_get_team_unit_count(team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -286,8 +284,7 @@ pub mod units_query {
     pub fn get_team_unit_def_count(team_id: i32, unit_def_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_team_unit_def_count(team_id, unit_def_id) } as u64;
+            let packed = raw::core_get_team_unit_def_count(team_id, unit_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -305,8 +302,7 @@ pub mod units_query {
     pub fn get_unit_nearest_ally(unit_id: i32, range: f32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_nearest_ally(unit_id, range) } as u64;
+            let packed = raw::core_get_unit_nearest_ally(unit_id, range) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -333,11 +329,8 @@ pub mod units_query {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_nearest_enemy(unit_id, range, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_get_unit_nearest_enemy(unit_id, range, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -363,11 +356,8 @@ pub mod units_query {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_separation(unit_id1, unit_id2, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_get_unit_separation(unit_id1, unit_id2, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -385,8 +375,7 @@ pub mod units_query {
     pub fn valid_unit_id(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_unit_id(unit_id) } as u64;
+            let packed = raw::core_valid_unit_id(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -566,262 +555,262 @@ pub mod units_info {
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "clear-units-previous-draw-flag"]
-            pub fn core_clear_units_previous_draw_flag(p0: i32) -> i64;
+            pub safe fn core_clear_units_previous_draw_flag(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-ally-team"]
-            pub fn core_get_unit_ally_team(p0: i32) -> i64;
+            pub safe fn core_get_unit_ally_team(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-armored"]
-            pub fn core_get_unit_armored(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_armored(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-base-position"]
-            pub fn core_get_unit_base_position(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_base_position(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-blocking"]
-            pub fn core_get_unit_blocking(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_blocking(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-build-facing"]
-            pub fn core_get_unit_build_facing(p0: i32) -> i64;
+            pub safe fn core_get_unit_build_facing(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-buildee-radius"]
-            pub fn core_get_unit_buildee_radius(p0: i32) -> i64;
+            pub safe fn core_get_unit_buildee_radius(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-collision-volume-data"]
-            pub fn core_get_unit_collision_volume_data(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_collision_volume_data(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-cost-table"]
-            pub fn core_get_unit_cost_table(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_cost_table(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-costs"]
-            pub fn core_get_unit_costs(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_costs(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-crashing"]
-            pub fn core_get_unit_crashing(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_crashing(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-current-build-power"]
-            pub fn core_get_unit_current_build_power(p0: i32) -> i64;
+            pub safe fn core_get_unit_current_build_power(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-id"]
-            pub fn core_get_unit_def_id(p0: i32) -> i64;
+            pub safe fn core_get_unit_def_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-direction"]
-            pub fn core_get_unit_direction(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_direction(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-effective-build-range"]
-            pub fn core_get_unit_effective_build_range(p0: i32, p1: i32) -> i64;
+            pub safe fn core_get_unit_effective_build_range(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-experience"]
-            pub fn core_get_unit_experience(p0: i32) -> i64;
+            pub safe fn core_get_unit_experience(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-flanking"]
-            pub fn core_get_unit_flanking(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_flanking(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-harvest-storage"]
-            pub fn core_get_unit_harvest_storage(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_harvest_storage(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-heading"]
-            pub fn core_get_unit_heading(p0: i32, p1: i32) -> i64;
+            pub safe fn core_get_unit_heading(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-health"]
-            pub fn core_get_unit_health(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_health(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-height"]
-            pub fn core_get_unit_height(p0: i32) -> i64;
+            pub safe fn core_get_unit_height(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-in-build-stance"]
-            pub fn core_get_unit_in_build_stance(p0: i32) -> i64;
+            pub safe fn core_get_unit_in_build_stance(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-is-active"]
-            pub fn core_get_unit_is_active(p0: i32) -> i64;
+            pub safe fn core_get_unit_is_active(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-is-being-built"]
-            pub fn core_get_unit_is_being_built(p0: i32) -> i64;
+            pub safe fn core_get_unit_is_being_built(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-is-building"]
-            pub fn core_get_unit_is_building(p0: i32) -> i64;
+            pub safe fn core_get_unit_is_building(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-is-cloaked"]
-            pub fn core_get_unit_is_cloaked(p0: i32) -> i64;
+            pub safe fn core_get_unit_is_cloaked(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-is-dead"]
-            pub fn core_get_unit_is_dead(p0: i32) -> i64;
+            pub safe fn core_get_unit_is_dead(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-is-stunned"]
-            pub fn core_get_unit_is_stunned(p0: i32) -> i64;
+            pub safe fn core_get_unit_is_stunned(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-last-attacker"]
-            pub fn core_get_unit_last_attacker(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_last_attacker(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-los-state"]
-            pub fn core_get_unit_los_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_get_unit_los_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-mass"]
-            pub fn core_get_unit_mass(p0: i32) -> i64;
+            pub safe fn core_get_unit_mass(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-metal-extraction"]
-            pub fn core_get_unit_metal_extraction(p0: i32) -> i64;
+            pub safe fn core_get_unit_metal_extraction(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-move-def-id"]
-            pub fn core_get_unit_move_def_id(p0: i32) -> i64;
+            pub safe fn core_get_unit_move_def_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-neutral"]
-            pub fn core_get_unit_neutral(p0: i32) -> i64;
+            pub safe fn core_get_unit_neutral(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-piece-collision-volume-data"]
-            pub fn core_get_unit_piece_collision_volume_data(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_piece_collision_volume_data(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-pos-error-params"]
-            pub fn core_get_unit_pos_error_params(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_pos_error_params(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-position"]
-            pub fn core_get_unit_position(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_position(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-radius"]
-            pub fn core_get_unit_radius(p0: i32) -> i64;
+            pub safe fn core_get_unit_radius(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-resources"]
-            pub fn core_get_unit_resources(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_resources(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-rotation"]
-            pub fn core_get_unit_rotation(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_rotation(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-seismic-signature"]
-            pub fn core_get_unit_seismic_signature(p0: i32) -> i64;
+            pub safe fn core_get_unit_seismic_signature(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-self-d-time"]
-            pub fn core_get_unit_self_d_time(p0: i32) -> i64;
+            pub safe fn core_get_unit_self_d_time(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-shield-state"]
-            pub fn core_get_unit_shield_state(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_shield_state(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-states"]
-            pub fn core_get_unit_states(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_states(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-stockpile"]
-            pub fn core_get_unit_stockpile(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_stockpile(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-storage"]
-            pub fn core_get_unit_storage(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_storage(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-team"]
-            pub fn core_get_unit_team(p0: i32) -> i64;
+            pub safe fn core_get_unit_team(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-tooltip"]
-            pub fn core_get_unit_tooltip(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_tooltip(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-transporter"]
-            pub fn core_get_unit_transporter(p0: i32) -> i64;
+            pub safe fn core_get_unit_transporter(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-vectors"]
-            pub fn core_get_unit_vectors(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_vectors(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-velocity"]
-            pub fn core_get_unit_velocity(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_velocity(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         unsafe extern "C" {
             #[link_name = "get-unit-worker-task"]
-            pub fn core_get_unit_worker_task(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_worker_task(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -829,8 +818,7 @@ pub mod units_info {
     pub fn clear_units_previous_draw_flag(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_clear_units_previous_draw_flag(unused as i32) } as u64;
+            let packed = raw::core_clear_units_previous_draw_flag(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -852,8 +840,7 @@ pub mod units_info {
     pub fn get_unit_ally_team(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_ally_team(unit_id) } as u64;
+            let packed = raw::core_get_unit_ally_team(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -872,12 +859,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_armored(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_armored(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -900,12 +883,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_base_position(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_base_position(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -928,12 +907,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 28];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_blocking(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_blocking(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -955,8 +930,7 @@ pub mod units_info {
     pub fn get_unit_build_facing(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_build_facing(unit_id) } as u64;
+            let packed = raw::core_get_unit_build_facing(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -974,8 +948,7 @@ pub mod units_info {
     pub fn get_unit_buildee_radius(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_buildee_radius(unit_id) } as u64;
+            let packed = raw::core_get_unit_buildee_radius(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -994,12 +967,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 40];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_collision_volume_data(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_collision_volume_data(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1022,12 +991,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_cost_table(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_cost_table(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1050,12 +1015,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_costs(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_costs(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1078,12 +1039,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_crashing(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_crashing(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1105,8 +1062,7 @@ pub mod units_info {
     pub fn get_unit_current_build_power(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_current_build_power(unit_id) } as u64;
+            let packed = raw::core_get_unit_current_build_power(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1124,8 +1080,7 @@ pub mod units_info {
     pub fn get_unit_def_id(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_def_id(unit_id) } as u64;
+            let packed = raw::core_get_unit_def_id(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1144,12 +1099,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_direction(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_direction(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1171,8 +1122,7 @@ pub mod units_info {
     pub fn get_unit_effective_build_range(unit_id: i32, buildee_def_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_effective_build_range(unit_id, buildee_def_id) } as u64;
+            let packed = raw::core_get_unit_effective_build_range(unit_id, buildee_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1190,8 +1140,7 @@ pub mod units_info {
     pub fn get_unit_experience(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_experience(unit_id) } as u64;
+            let packed = raw::core_get_unit_experience(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1210,12 +1159,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 32];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_flanking(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_flanking(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1238,12 +1183,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_harvest_storage(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_harvest_storage(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1265,8 +1206,7 @@ pub mod units_info {
     pub fn get_unit_heading(unit_id: i32, convert_to_radians: bool) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_heading(unit_id, if convert_to_radians { 1 } else { 0 }) } as u64;
+            let packed = raw::core_get_unit_heading(unit_id, if convert_to_radians { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1285,12 +1225,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_health(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_health(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1312,8 +1248,7 @@ pub mod units_info {
     pub fn get_unit_height(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_height(unit_id) } as u64;
+            let packed = raw::core_get_unit_height(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1331,8 +1266,7 @@ pub mod units_info {
     pub fn get_unit_in_build_stance(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_in_build_stance(unit_id) } as u64;
+            let packed = raw::core_get_unit_in_build_stance(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1354,8 +1288,7 @@ pub mod units_info {
     pub fn get_unit_is_active(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_active(unit_id) } as u64;
+            let packed = raw::core_get_unit_is_active(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1377,8 +1310,7 @@ pub mod units_info {
     pub fn get_unit_is_being_built(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_being_built(unit_id) } as u64;
+            let packed = raw::core_get_unit_is_being_built(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1400,8 +1332,7 @@ pub mod units_info {
     pub fn get_unit_is_building(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_building(unit_id) } as u64;
+            let packed = raw::core_get_unit_is_building(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1419,8 +1350,7 @@ pub mod units_info {
     pub fn get_unit_is_cloaked(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_cloaked(unit_id) } as u64;
+            let packed = raw::core_get_unit_is_cloaked(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1442,8 +1372,7 @@ pub mod units_info {
     pub fn get_unit_is_dead(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_dead(unit_id) } as u64;
+            let packed = raw::core_get_unit_is_dead(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1465,8 +1394,7 @@ pub mod units_info {
     pub fn get_unit_is_stunned(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_is_stunned(unit_id) } as u64;
+            let packed = raw::core_get_unit_is_stunned(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1489,12 +1417,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_los_state(unit_id, ally_team_id, if raw { 1 } else { 0 }, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_los_state(unit_id, ally_team_id, if raw { 1 } else { 0 }, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1516,8 +1440,7 @@ pub mod units_info {
     pub fn get_unit_mass(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_mass(unit_id) } as u64;
+            let packed = raw::core_get_unit_mass(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1535,8 +1458,7 @@ pub mod units_info {
     pub fn get_unit_metal_extraction(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_metal_extraction(unit_id) } as u64;
+            let packed = raw::core_get_unit_metal_extraction(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1554,8 +1476,7 @@ pub mod units_info {
     pub fn get_unit_move_def_id(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_move_def_id(unit_id) } as u64;
+            let packed = raw::core_get_unit_move_def_id(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1573,8 +1494,7 @@ pub mod units_info {
     pub fn get_unit_neutral(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_neutral(unit_id) } as u64;
+            let packed = raw::core_get_unit_neutral(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1597,12 +1517,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 40];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_collision_volume_data(unit_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_piece_collision_volume_data(unit_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1625,12 +1541,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 32];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_pos_error_params(unit_id, ally_team_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_pos_error_params(unit_id, ally_team_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1660,15 +1572,10 @@ pub mod units_info {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 12];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_get_unit_position(unit_id, input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_get_unit_position(unit_id, input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1691,8 +1598,7 @@ pub mod units_info {
     pub fn get_unit_radius(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_radius(unit_id) } as u64;
+            let packed = raw::core_get_unit_radius(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1711,12 +1617,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_resources(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_resources(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1739,12 +1641,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_rotation(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_rotation(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1766,8 +1664,7 @@ pub mod units_info {
     pub fn get_unit_seismic_signature(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_seismic_signature(unit_id) } as u64;
+            let packed = raw::core_get_unit_seismic_signature(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1785,8 +1682,7 @@ pub mod units_info {
     pub fn get_unit_self_d_time(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_self_d_time(unit_id) } as u64;
+            let packed = raw::core_get_unit_self_d_time(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1813,15 +1709,10 @@ pub mod units_info {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 36];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_get_unit_states(unit_id, input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_get_unit_states(unit_id, input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1845,12 +1736,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_storage(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_storage(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1872,8 +1759,7 @@ pub mod units_info {
     pub fn get_unit_team(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_team(unit_id) } as u64;
+            let packed = raw::core_get_unit_team(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1891,8 +1777,7 @@ pub mod units_info {
     pub fn get_unit_transporter(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_transporter(unit_id) } as u64;
+            let packed = raw::core_get_unit_transporter(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -1911,12 +1796,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 36];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_vectors(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_vectors(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1939,12 +1820,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_velocity(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_velocity(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -1967,12 +1844,8 @@ pub mod units_info {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_worker_task(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_worker_task(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2037,47 +1910,47 @@ pub mod units_weapons {
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-max-range"]
-            pub fn core_get_unit_max_range(p0: i32) -> i64;
+            pub safe fn core_get_unit_max_range(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-weapon-can-fire"]
-            pub fn core_get_unit_weapon_can_fire(p0: i32, p1: i32) -> i64;
+            pub safe fn core_get_unit_weapon_can_fire(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-weapon-count"]
-            pub fn core_get_unit_weapon_count(p0: i32) -> i64;
+            pub safe fn core_get_unit_weapon_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-weapon-have-free-line-of-fire"]
-            pub fn core_get_unit_weapon_have_free_line_of_fire(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_get_unit_weapon_have_free_line_of_fire(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-weapon-target"]
-            pub fn core_get_unit_weapon_target(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_weapon_target(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-weapon-test-range"]
-            pub fn core_get_unit_weapon_test_range(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_get_unit_weapon_test_range(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-weapon-test-target"]
-            pub fn core_get_unit_weapon_test_target(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_get_unit_weapon_test_target(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-weapon-try-target"]
-            pub fn core_get_unit_weapon_try_target(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_get_unit_weapon_try_target(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-weapons")]
         unsafe extern "C" {
             #[link_name = "get-unit-weapon-vectors"]
-            pub fn core_get_unit_weapon_vectors(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_weapon_vectors(p0: i32, p1: i32, p2: i32) -> i32;
         }
     }
 
@@ -2085,8 +1958,7 @@ pub mod units_weapons {
     pub fn get_unit_max_range(unit_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_max_range(unit_id) } as u64;
+            let packed = raw::core_get_unit_max_range(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2104,8 +1976,7 @@ pub mod units_weapons {
     pub fn get_unit_weapon_can_fire(unit_id: i32, weapon_num: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_weapon_can_fire(unit_id, weapon_num) } as u64;
+            let packed = raw::core_get_unit_weapon_can_fire(unit_id, weapon_num) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2127,8 +1998,7 @@ pub mod units_weapons {
     pub fn get_unit_weapon_count(unit_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_weapon_count(unit_id) } as u64;
+            let packed = raw::core_get_unit_weapon_count(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2161,11 +2031,8 @@ pub mod units_weapons {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_weapon_have_free_line_of_fire(unit_id, weapon_num, target_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_get_unit_weapon_have_free_line_of_fire(unit_id, weapon_num, target_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2188,12 +2055,8 @@ pub mod units_weapons {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_weapon_target(unit_id, weapon_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_weapon_target(unit_id, weapon_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2224,11 +2087,8 @@ pub mod units_weapons {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_weapon_test_range(unit_id, weapon_num, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_get_unit_weapon_test_range(unit_id, weapon_num, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2261,11 +2121,8 @@ pub mod units_weapons {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_weapon_test_target(unit_id, weapon_num, target_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_get_unit_weapon_test_target(unit_id, weapon_num, target_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2299,11 +2156,8 @@ pub mod units_weapons {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_get_unit_weapon_try_target(unit_id, weapon_num, target_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_get_unit_weapon_try_target(unit_id, weapon_num, target_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2326,12 +2180,8 @@ pub mod units_weapons {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 36];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_weapon_vectors(unit_id, weapon_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_weapon_vectors(unit_id, weapon_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2359,32 +2209,32 @@ pub mod units_commands {
         #[link(wasm_import_module = "spring:units-commands")]
         unsafe extern "C" {
             #[link_name = "find-unit-cmd-desc"]
-            pub fn core_find_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_find_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-commands")]
         unsafe extern "C" {
             #[link_name = "get-factory-bugger-off"]
-            pub fn core_get_factory_bugger_off(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_factory_bugger_off(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-commands")]
         unsafe extern "C" {
             #[link_name = "get-factory-command-count"]
-            pub fn core_get_factory_command_count(p0: i32) -> i64;
+            pub safe fn core_get_factory_command_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-commands")]
         unsafe extern "C" {
             #[link_name = "get-full-build-queue"]
-            pub fn core_get_full_build_queue(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_full_build_queue(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-commands")]
         unsafe extern "C" {
             #[link_name = "get-real-build-queue"]
-            pub fn core_get_real_build_queue(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_real_build_queue(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-commands")]
         unsafe extern "C" {
             #[link_name = "get-unit-command-count"]
-            pub fn core_get_unit_command_count(p0: i32) -> i64;
+            pub safe fn core_get_unit_command_count(p0: i32) -> i64;
         }
     }
 
@@ -2393,12 +2243,8 @@ pub mod units_commands {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_find_unit_cmd_desc(unit_id, cmd_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_find_unit_cmd_desc(unit_id, cmd_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2421,12 +2267,8 @@ pub mod units_commands {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_factory_bugger_off(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_factory_bugger_off(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2448,8 +2290,7 @@ pub mod units_commands {
     pub fn get_factory_command_count(unit_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_factory_command_count(unit_id) } as u64;
+            let packed = raw::core_get_factory_command_count(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2467,8 +2308,7 @@ pub mod units_commands {
     pub fn get_unit_command_count(unit_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_command_count(unit_id) } as u64;
+            let packed = raw::core_get_unit_command_count(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2510,57 +2350,57 @@ pub mod units_pieces {
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-feature-piece-direction"]
-            pub fn core_get_feature_piece_direction(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_feature_piece_direction(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-feature-piece-matrix"]
-            pub fn core_get_feature_piece_matrix(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_feature_piece_matrix(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-feature-piece-pos-dir"]
-            pub fn core_get_feature_piece_pos_dir(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_feature_piece_pos_dir(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-feature-piece-position"]
-            pub fn core_get_feature_piece_position(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_feature_piece_position(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-feature-root-piece"]
-            pub fn core_get_feature_root_piece(p0: i32) -> i64;
+            pub safe fn core_get_feature_root_piece(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-unit-piece-direction"]
-            pub fn core_get_unit_piece_direction(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_piece_direction(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-unit-piece-matrix"]
-            pub fn core_get_unit_piece_matrix(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_piece_matrix(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-unit-piece-pos-dir"]
-            pub fn core_get_unit_piece_pos_dir(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_piece_pos_dir(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-unit-piece-position"]
-            pub fn core_get_unit_piece_position(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_piece_position(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-unit-root-piece"]
-            pub fn core_get_unit_root_piece(p0: i32) -> i64;
+            pub safe fn core_get_unit_root_piece(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:units-pieces")]
         unsafe extern "C" {
             #[link_name = "get-unit-script-piece"]
-            pub fn core_get_unit_script_piece(p0: i32, p1: i32) -> i64;
+            pub safe fn core_get_unit_script_piece(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -2569,12 +2409,8 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_direction(feature_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_piece_direction(feature_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2597,12 +2433,8 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 64];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_matrix(feature_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_piece_matrix(feature_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2625,12 +2457,8 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_pos_dir(feature_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_piece_pos_dir(feature_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2653,12 +2481,8 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_position(feature_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_piece_position(feature_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2680,8 +2504,7 @@ pub mod units_pieces {
     pub fn get_feature_root_piece(feature_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_root_piece(feature_id) } as u64;
+            let packed = raw::core_get_feature_root_piece(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2700,12 +2523,8 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_direction(unit_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_piece_direction(unit_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2728,12 +2547,8 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 64];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_matrix(unit_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_piece_matrix(unit_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2756,12 +2571,8 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_pos_dir(unit_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_piece_pos_dir(unit_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2784,12 +2595,8 @@ pub mod units_pieces {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_piece_position(unit_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_piece_position(unit_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -2811,8 +2618,7 @@ pub mod units_pieces {
     pub fn get_unit_root_piece(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_root_piece(unit_id) } as u64;
+            let packed = raw::core_get_unit_root_piece(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2830,8 +2636,7 @@ pub mod units_pieces {
     pub fn get_unit_script_piece(unit_id: i32, script_num: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_script_piece(unit_id, script_num) } as u64;
+            let packed = raw::core_get_unit_script_piece(unit_id, script_num) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2865,67 +2670,67 @@ pub mod teams {
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "are-players-allied"]
-            pub fn core_are_players_allied(p0: i32, p1: i32) -> i64;
+            pub safe fn core_are_players_allied(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "are-teams-allied"]
-            pub fn core_are_teams_allied(p0: i32, p1: i32) -> i64;
+            pub safe fn core_are_teams_allied(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-ally-team-list"]
-            pub fn core_get_ally_team_list(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ally_team_list(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-player-controlled-unit"]
-            pub fn core_get_player_controlled_unit(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_player_controlled_unit(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-player-list"]
-            pub fn core_get_player_list(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_player_list(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-player-list-in-ally-team"]
-            pub fn core_get_player_list_in_ally_team(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_player_list_in_ally_team(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-player-list-in-team"]
-            pub fn core_get_player_list_in_team(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_player_list_in_team(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-team-ally-team-id"]
-            pub fn core_get_team_ally_team_id(p0: i32) -> i64;
+            pub safe fn core_get_team_ally_team_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-team-list"]
-            pub fn core_get_team_list(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_team_list(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-team-lua-ai"]
-            pub fn core_get_team_lua_ai(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_team_lua_ai(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-team-max-units"]
-            pub fn core_get_team_max_units(p0: i32) -> i64;
+            pub safe fn core_get_team_max_units(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-team-stats-history"]
-            pub fn core_get_team_stats_history(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_get_team_stats_history(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:teams")]
         unsafe extern "C" {
             #[link_name = "get-team-unit-stats"]
-            pub fn core_get_team_unit_stats(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_team_unit_stats(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -2933,8 +2738,7 @@ pub mod teams {
     pub fn are_players_allied(player_id1: i32, player_id2: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_are_players_allied(player_id1, player_id2) } as u64;
+            let packed = raw::core_are_players_allied(player_id1, player_id2) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2956,8 +2760,7 @@ pub mod teams {
     pub fn are_teams_allied(team_id1: i32, team_id2: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_are_teams_allied(team_id1, team_id2) } as u64;
+            let packed = raw::core_are_teams_allied(team_id1, team_id2) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -2980,12 +2783,8 @@ pub mod teams {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_player_controlled_unit(player_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_player_controlled_unit(player_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3007,8 +2806,7 @@ pub mod teams {
     pub fn get_team_ally_team_id(team_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_team_ally_team_id(team_id) } as u64;
+            let packed = raw::core_get_team_ally_team_id(team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3026,8 +2824,7 @@ pub mod teams {
     pub fn get_team_max_units(team_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_team_max_units(team_id) } as u64;
+            let packed = raw::core_get_team_max_units(team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3046,12 +2843,8 @@ pub mod teams {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_unit_stats(team_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_team_unit_stats(team_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3158,182 +2951,182 @@ pub mod features {
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "clear-features-previous-draw-flag"]
-            pub fn core_clear_features_previous_draw_flag(p0: i32) -> i64;
+            pub safe fn core_clear_features_previous_draw_flag(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-all-features"]
-            pub fn core_get_all_features(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_all_features(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-ally-team"]
-            pub fn core_get_feature_ally_team(p0: i32) -> i64;
+            pub safe fn core_get_feature_ally_team(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-always-update-matrix"]
-            pub fn core_get_feature_always_update_matrix(p0: i32) -> i64;
+            pub safe fn core_get_feature_always_update_matrix(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-blocking"]
-            pub fn core_get_feature_blocking(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_blocking(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-collision-volume-data"]
-            pub fn core_get_feature_collision_volume_data(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_collision_volume_data(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-def-id"]
-            pub fn core_get_feature_def_id(p0: i32) -> i64;
+            pub safe fn core_get_feature_def_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-direction"]
-            pub fn core_get_feature_direction(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_direction(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-draw-flag"]
-            pub fn core_get_feature_draw_flag(p0: i32) -> i64;
+            pub safe fn core_get_feature_draw_flag(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-engine-draw-mask"]
-            pub fn core_get_feature_engine_draw_mask(p0: i32) -> i64;
+            pub safe fn core_get_feature_engine_draw_mask(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-fire-time"]
-            pub fn core_get_feature_fire_time(p0: i32) -> i64;
+            pub safe fn core_get_feature_fire_time(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-heading"]
-            pub fn core_get_feature_heading(p0: i32) -> i64;
+            pub safe fn core_get_feature_heading(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-health"]
-            pub fn core_get_feature_health(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_health(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-height"]
-            pub fn core_get_feature_height(p0: i32) -> i64;
+            pub safe fn core_get_feature_height(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-lua-draw"]
-            pub fn core_get_feature_lua_draw(p0: i32) -> i64;
+            pub safe fn core_get_feature_lua_draw(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-mass"]
-            pub fn core_get_feature_mass(p0: i32) -> i64;
+            pub safe fn core_get_feature_mass(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-no-draw"]
-            pub fn core_get_feature_no_draw(p0: i32) -> i64;
+            pub safe fn core_get_feature_no_draw(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-no-select"]
-            pub fn core_get_feature_no_select(p0: i32) -> i64;
+            pub safe fn core_get_feature_no_select(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-piece-collision-volume-data"]
-            pub fn core_get_feature_piece_collision_volume_data(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_feature_piece_collision_volume_data(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-position"]
-            pub fn core_get_feature_position(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_position(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-position-ext"]
-            pub fn core_get_feature_position_ext(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_position_ext(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-radius"]
-            pub fn core_get_feature_radius(p0: i32) -> i64;
+            pub safe fn core_get_feature_radius(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-resources"]
-            pub fn core_get_feature_resources(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_resources(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-rotation"]
-            pub fn core_get_feature_rotation(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_rotation(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-selection-volume-data"]
-            pub fn core_get_feature_selection_volume_data(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_selection_volume_data(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-separation"]
-            pub fn core_get_feature_separation(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_get_feature_separation(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-smoke-time"]
-            pub fn core_get_feature_smoke_time(p0: i32) -> i64;
+            pub safe fn core_get_feature_smoke_time(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-team"]
-            pub fn core_get_feature_team(p0: i32) -> i64;
+            pub safe fn core_get_feature_team(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-transform-matrix"]
-            pub fn core_get_feature_transform_matrix(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_transform_matrix(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-feature-velocity"]
-            pub fn core_get_feature_velocity(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_velocity(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-features-in-cylinder"]
-            pub fn core_get_features_in_cylinder(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
+            pub safe fn core_get_features_in_cylinder(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-features-in-rectangle"]
-            pub fn core_get_features_in_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
+            pub safe fn core_get_features_in_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-features-in-sphere"]
-            pub fn core_get_features_in_sphere(p0: f32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_features_in_sphere(p0: f32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-render-features"]
-            pub fn core_get_render_features(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_render_features(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "get-render-features-draw-flag-changed"]
-            pub fn core_get_render_features_draw_flag_changed(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_render_features_draw_flag_changed(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:features")]
         unsafe extern "C" {
             #[link_name = "valid-feature-id"]
-            pub fn core_valid_feature_id(p0: i32) -> i64;
+            pub safe fn core_valid_feature_id(p0: i32) -> i64;
         }
     }
 
@@ -3341,8 +3134,7 @@ pub mod features {
     pub fn clear_features_previous_draw_flag(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_clear_features_previous_draw_flag(unused as i32) } as u64;
+            let packed = raw::core_clear_features_previous_draw_flag(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3364,8 +3156,7 @@ pub mod features {
     pub fn get_feature_ally_team(feature_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_ally_team(feature_id) } as u64;
+            let packed = raw::core_get_feature_ally_team(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3383,8 +3174,7 @@ pub mod features {
     pub fn get_feature_always_update_matrix(feature_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_always_update_matrix(feature_id) } as u64;
+            let packed = raw::core_get_feature_always_update_matrix(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3407,12 +3197,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 28];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_blocking(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_blocking(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3435,12 +3221,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 40];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_collision_volume_data(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_collision_volume_data(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3462,8 +3244,7 @@ pub mod features {
     pub fn get_feature_def_id(feature_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_def_id(feature_id) } as u64;
+            let packed = raw::core_get_feature_def_id(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3482,12 +3263,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_direction(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_direction(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3509,8 +3286,7 @@ pub mod features {
     pub fn get_feature_draw_flag(feature_id: i32) -> Result<u8> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_draw_flag(feature_id) } as u64;
+            let packed = raw::core_get_feature_draw_flag(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3528,8 +3304,7 @@ pub mod features {
     pub fn get_feature_engine_draw_mask(feature_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_engine_draw_mask(feature_id) } as u64;
+            let packed = raw::core_get_feature_engine_draw_mask(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3547,8 +3322,7 @@ pub mod features {
     pub fn get_feature_fire_time(feature_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_fire_time(feature_id) } as u64;
+            let packed = raw::core_get_feature_fire_time(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3566,8 +3340,7 @@ pub mod features {
     pub fn get_feature_heading(feature_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_heading(feature_id) } as u64;
+            let packed = raw::core_get_feature_heading(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3586,12 +3359,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_health(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_health(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3613,8 +3382,7 @@ pub mod features {
     pub fn get_feature_height(feature_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_height(feature_id) } as u64;
+            let packed = raw::core_get_feature_height(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3632,8 +3400,7 @@ pub mod features {
     pub fn get_feature_lua_draw(feature_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_lua_draw(feature_id) } as u64;
+            let packed = raw::core_get_feature_lua_draw(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3655,8 +3422,7 @@ pub mod features {
     pub fn get_feature_mass(feature_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_mass(feature_id) } as u64;
+            let packed = raw::core_get_feature_mass(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3674,8 +3440,7 @@ pub mod features {
     pub fn get_feature_no_draw(feature_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_no_draw(feature_id) } as u64;
+            let packed = raw::core_get_feature_no_draw(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3697,8 +3462,7 @@ pub mod features {
     pub fn get_feature_no_select(feature_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_no_select(feature_id) } as u64;
+            let packed = raw::core_get_feature_no_select(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3721,12 +3485,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 40];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_piece_collision_volume_data(feature_id, piece_num, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_piece_collision_volume_data(feature_id, piece_num, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3749,12 +3509,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_position(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_position(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3777,12 +3533,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 36];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_position_ext(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_position_ext(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3804,8 +3556,7 @@ pub mod features {
     pub fn get_feature_radius(feature_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_radius(feature_id) } as u64;
+            let packed = raw::core_get_feature_radius(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3824,12 +3575,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_resources(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_resources(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3852,12 +3599,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_rotation(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_rotation(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3880,12 +3623,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 40];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_selection_volume_data(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_selection_volume_data(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3907,8 +3646,7 @@ pub mod features {
     pub fn get_feature_separation(feature_id1: i32, feature_id2: i32, positional: bool) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_separation(feature_id1, feature_id2, if positional { 1 } else { 0 }) } as u64;
+            let packed = raw::core_get_feature_separation(feature_id1, feature_id2, if positional { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3926,8 +3664,7 @@ pub mod features {
     pub fn get_feature_smoke_time(feature_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_smoke_time(feature_id) } as u64;
+            let packed = raw::core_get_feature_smoke_time(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3945,8 +3682,7 @@ pub mod features {
     pub fn get_feature_team(feature_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_team(feature_id) } as u64;
+            let packed = raw::core_get_feature_team(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -3965,12 +3701,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 64];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_transform_matrix(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_transform_matrix(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -3993,12 +3725,8 @@ pub mod features {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_velocity(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_velocity(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4020,8 +3748,7 @@ pub mod features {
     pub fn valid_feature_id(feature_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_feature_id(feature_id) } as u64;
+            let packed = raw::core_valid_feature_id(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4063,77 +3790,77 @@ pub mod projectiles {
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-all-projectiles"]
-            pub fn core_get_all_projectiles(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_all_projectiles(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-ally-team-id"]
-            pub fn core_get_projectile_ally_team_id(p0: i32) -> i64;
+            pub safe fn core_get_projectile_ally_team_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-def-id"]
-            pub fn core_get_projectile_def_id(p0: i32) -> i64;
+            pub safe fn core_get_projectile_def_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-direction"]
-            pub fn core_get_projectile_direction(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_projectile_direction(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-gravity"]
-            pub fn core_get_projectile_gravity(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_projectile_gravity(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-is-intercepted"]
-            pub fn core_get_projectile_is_intercepted(p0: i32) -> i64;
+            pub safe fn core_get_projectile_is_intercepted(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-owner-id"]
-            pub fn core_get_projectile_owner_id(p0: i32) -> i64;
+            pub safe fn core_get_projectile_owner_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-position"]
-            pub fn core_get_projectile_position(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_projectile_position(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-target"]
-            pub fn core_get_projectile_target(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_projectile_target(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-team-id"]
-            pub fn core_get_projectile_team_id(p0: i32) -> i64;
+            pub safe fn core_get_projectile_team_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-time-to-live"]
-            pub fn core_get_projectile_time_to_live(p0: i32) -> i64;
+            pub safe fn core_get_projectile_time_to_live(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-type"]
-            pub fn core_get_projectile_type(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_projectile_type(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectile-velocity"]
-            pub fn core_get_projectile_velocity(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_projectile_velocity(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectiles-in-rectangle"]
-            pub fn core_get_projectiles_in_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+            pub safe fn core_get_projectiles_in_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:projectiles")]
         unsafe extern "C" {
             #[link_name = "get-projectiles-in-sphere"]
-            pub fn core_get_projectiles_in_sphere(p0: f32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_projectiles_in_sphere(p0: f32, p1: i32, p2: i32) -> i32;
         }
     }
 
@@ -4141,8 +3868,7 @@ pub mod projectiles {
     pub fn get_projectile_ally_team_id(projectile_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_ally_team_id(projectile_id) } as u64;
+            let packed = raw::core_get_projectile_ally_team_id(projectile_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4160,8 +3886,7 @@ pub mod projectiles {
     pub fn get_projectile_def_id(projectile_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_def_id(projectile_id) } as u64;
+            let packed = raw::core_get_projectile_def_id(projectile_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4180,12 +3905,8 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_direction(projectile_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_projectile_direction(projectile_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4208,12 +3929,8 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_gravity(projectile_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_projectile_gravity(projectile_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4235,8 +3952,7 @@ pub mod projectiles {
     pub fn get_projectile_is_intercepted(projectile_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_is_intercepted(projectile_id) } as u64;
+            let packed = raw::core_get_projectile_is_intercepted(projectile_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4258,8 +3974,7 @@ pub mod projectiles {
     pub fn get_projectile_owner_id(projectile_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_owner_id(projectile_id) } as u64;
+            let packed = raw::core_get_projectile_owner_id(projectile_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4278,12 +3993,8 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_position(projectile_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_projectile_position(projectile_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4306,12 +4017,8 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_target(projectile_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_projectile_target(projectile_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4333,8 +4040,7 @@ pub mod projectiles {
     pub fn get_projectile_team_id(projectile_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_team_id(projectile_id) } as u64;
+            let packed = raw::core_get_projectile_team_id(projectile_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4352,8 +4058,7 @@ pub mod projectiles {
     pub fn get_projectile_time_to_live(projectile_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_projectile_time_to_live(projectile_id) } as u64;
+            let packed = raw::core_get_projectile_time_to_live(projectile_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4372,12 +4077,8 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_type(projectile_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_projectile_type(projectile_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4400,12 +4101,8 @@ pub mod projectiles {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_projectile_velocity(projectile_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_projectile_velocity(projectile_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4455,52 +4152,52 @@ pub mod los {
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "get-closest-valid-position"]
-            pub fn core_get_closest_valid_position(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
+            pub safe fn core_get_closest_valid_position(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "get-position-los-state"]
-            pub fn core_get_position_los_state(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_position_los_state(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "get-radar-error-params"]
-            pub fn core_get_radar_error_params(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_radar_error_params(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "is-pos-in-air-los"]
-            pub fn core_is_pos_in_air_los(p0: i32, p1: i32) -> i64;
+            pub safe fn core_is_pos_in_air_los(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "is-pos-in-los"]
-            pub fn core_is_pos_in_los(p0: i32, p1: i32) -> i64;
+            pub safe fn core_is_pos_in_los(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "is-pos-in-radar"]
-            pub fn core_is_pos_in_radar(p0: i32, p1: i32) -> i64;
+            pub safe fn core_is_pos_in_radar(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "is-unit-in-air-los"]
-            pub fn core_is_unit_in_air_los(p0: i32, p1: i32) -> i64;
+            pub safe fn core_is_unit_in_air_los(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "is-unit-in-jammer"]
-            pub fn core_is_unit_in_jammer(p0: i32, p1: i32) -> i64;
+            pub safe fn core_is_unit_in_jammer(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "is-unit-in-los"]
-            pub fn core_is_unit_in_los(p0: i32, p1: i32) -> i64;
+            pub safe fn core_is_unit_in_los(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
             #[link_name = "is-unit-in-radar"]
-            pub fn core_is_unit_in_radar(p0: i32, p1: i32) -> i64;
+            pub safe fn core_is_unit_in_radar(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -4509,12 +4206,8 @@ pub mod los {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_closest_valid_position(unit_def_id, x, z, radius, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_closest_valid_position(unit_def_id, x, z, radius, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4545,15 +4238,10 @@ pub mod los {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 16];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_get_position_los_state(ally_team_id, input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_get_position_los_state(ally_team_id, input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4577,12 +4265,8 @@ pub mod los {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_radar_error_params(ally_team_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_radar_error_params(ally_team_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4613,11 +4297,8 @@ pub mod los {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_is_pos_in_air_los(ally_team_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_is_pos_in_air_los(ally_team_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4648,11 +4329,8 @@ pub mod los {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_is_pos_in_los(ally_team_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_is_pos_in_los(ally_team_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4683,11 +4361,8 @@ pub mod los {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_is_pos_in_radar(ally_team_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_is_pos_in_radar(ally_team_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4709,8 +4384,7 @@ pub mod los {
     pub fn is_unit_in_air_los(unit_id: i32, ally_team_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_air_los(unit_id, ally_team_id) } as u64;
+            let packed = raw::core_is_unit_in_air_los(unit_id, ally_team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4732,8 +4406,7 @@ pub mod los {
     pub fn is_unit_in_jammer(unit_id: i32, ally_team_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_jammer(unit_id, ally_team_id) } as u64;
+            let packed = raw::core_is_unit_in_jammer(unit_id, ally_team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4755,8 +4428,7 @@ pub mod los {
     pub fn is_unit_in_los(unit_id: i32, ally_team_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_los(unit_id, ally_team_id) } as u64;
+            let packed = raw::core_is_unit_in_los(unit_id, ally_team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4778,8 +4450,7 @@ pub mod los {
     pub fn is_unit_in_radar(unit_id: i32, ally_team_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_radar(unit_id, ally_team_id) } as u64;
+            let packed = raw::core_is_unit_in_radar(unit_id, ally_team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4832,47 +4503,47 @@ pub mod unit_defs {
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-classify"]
-            pub fn core_get_unit_def_classify(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_def_classify(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-costs"]
-            pub fn core_get_unit_def_costs(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_def_costs(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-count"]
-            pub fn core_get_unit_def_count(p0: i32) -> i64;
+            pub safe fn core_get_unit_def_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-custom-param"]
-            pub fn core_get_unit_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-health"]
-            pub fn core_get_unit_def_health(p0: i32) -> i64;
+            pub safe fn core_get_unit_def_health(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-i-ds"]
-            pub fn core_get_unit_def_i_ds(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_def_i_ds(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-param-string"]
-            pub fn core_get_unit_def_param_string(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_def_param_string(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-speed"]
-            pub fn core_get_unit_def_speed(p0: i32) -> i64;
+            pub safe fn core_get_unit_def_speed(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
             #[link_name = "valid-unit-def-id"]
-            pub fn core_valid_unit_def_id(p0: i32) -> i64;
+            pub safe fn core_valid_unit_def_id(p0: i32) -> i64;
         }
     }
 
@@ -4881,12 +4552,8 @@ pub mod unit_defs {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 56];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_def_classify(unit_def_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_def_classify(unit_def_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4909,12 +4576,8 @@ pub mod unit_defs {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_def_costs(unit_def_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_def_costs(unit_def_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -4936,8 +4599,7 @@ pub mod unit_defs {
     pub fn get_unit_def_count(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_def_count(unused as i32) } as u64;
+            let packed = raw::core_get_unit_def_count(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4955,8 +4617,7 @@ pub mod unit_defs {
     pub fn get_unit_def_health(unit_def_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_def_health(unit_def_id) } as u64;
+            let packed = raw::core_get_unit_def_health(unit_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4974,8 +4635,7 @@ pub mod unit_defs {
     pub fn get_unit_def_speed(unit_def_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_def_speed(unit_def_id) } as u64;
+            let packed = raw::core_get_unit_def_speed(unit_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -4993,8 +4653,7 @@ pub mod unit_defs {
     pub fn valid_unit_def_id(unit_def_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_unit_def_id(unit_def_id) } as u64;
+            let packed = raw::core_valid_unit_def_id(unit_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5022,37 +4681,37 @@ pub mod feature_defs {
         #[link(wasm_import_module = "spring:feature-defs")]
         unsafe extern "C" {
             #[link_name = "get-feature-def-count"]
-            pub fn core_get_feature_def_count(p0: i32) -> i64;
+            pub safe fn core_get_feature_def_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-defs")]
         unsafe extern "C" {
             #[link_name = "get-feature-def-custom-param"]
-            pub fn core_get_feature_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_feature_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:feature-defs")]
         unsafe extern "C" {
             #[link_name = "get-feature-def-energy"]
-            pub fn core_get_feature_def_energy(p0: i32) -> i64;
+            pub safe fn core_get_feature_def_energy(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-defs")]
         unsafe extern "C" {
             #[link_name = "get-feature-def-i-ds"]
-            pub fn core_get_feature_def_i_ds(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_def_i_ds(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:feature-defs")]
         unsafe extern "C" {
             #[link_name = "get-feature-def-metal"]
-            pub fn core_get_feature_def_metal(p0: i32) -> i64;
+            pub safe fn core_get_feature_def_metal(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-defs")]
         unsafe extern "C" {
             #[link_name = "get-feature-def-name"]
-            pub fn core_get_feature_def_name(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_def_name(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:feature-defs")]
         unsafe extern "C" {
             #[link_name = "valid-feature-def-id"]
-            pub fn core_valid_feature_def_id(p0: i32) -> i64;
+            pub safe fn core_valid_feature_def_id(p0: i32) -> i64;
         }
     }
 
@@ -5060,8 +4719,7 @@ pub mod feature_defs {
     pub fn get_feature_def_count(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_def_count(unused as i32) } as u64;
+            let packed = raw::core_get_feature_def_count(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5079,8 +4737,7 @@ pub mod feature_defs {
     pub fn get_feature_def_energy(feature_def_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_def_energy(feature_def_id) } as u64;
+            let packed = raw::core_get_feature_def_energy(feature_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5098,8 +4755,7 @@ pub mod feature_defs {
     pub fn get_feature_def_metal(feature_def_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_feature_def_metal(feature_def_id) } as u64;
+            let packed = raw::core_get_feature_def_metal(feature_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5117,8 +4773,7 @@ pub mod feature_defs {
     pub fn valid_feature_def_id(feature_def_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_feature_def_id(feature_def_id) } as u64;
+            let packed = raw::core_valid_feature_def_id(feature_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5146,37 +4801,37 @@ pub mod weapon_defs {
         #[link(wasm_import_module = "spring:weapon-defs")]
         unsafe extern "C" {
             #[link_name = "get-weapon-def-count"]
-            pub fn core_get_weapon_def_count(p0: i32) -> i64;
+            pub safe fn core_get_weapon_def_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:weapon-defs")]
         unsafe extern "C" {
             #[link_name = "get-weapon-def-custom-param"]
-            pub fn core_get_weapon_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_weapon_def_custom_param(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:weapon-defs")]
         unsafe extern "C" {
             #[link_name = "get-weapon-def-damage"]
-            pub fn core_get_weapon_def_damage(p0: i32) -> i64;
+            pub safe fn core_get_weapon_def_damage(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:weapon-defs")]
         unsafe extern "C" {
             #[link_name = "get-weapon-def-i-ds"]
-            pub fn core_get_weapon_def_i_ds(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_weapon_def_i_ds(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:weapon-defs")]
         unsafe extern "C" {
             #[link_name = "get-weapon-def-name"]
-            pub fn core_get_weapon_def_name(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_weapon_def_name(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:weapon-defs")]
         unsafe extern "C" {
             #[link_name = "get-weapon-def-range"]
-            pub fn core_get_weapon_def_range(p0: i32) -> i64;
+            pub safe fn core_get_weapon_def_range(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:weapon-defs")]
         unsafe extern "C" {
             #[link_name = "valid-weapon-def-id"]
-            pub fn core_valid_weapon_def_id(p0: i32) -> i64;
+            pub safe fn core_valid_weapon_def_id(p0: i32) -> i64;
         }
     }
 
@@ -5184,8 +4839,7 @@ pub mod weapon_defs {
     pub fn get_weapon_def_count(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_weapon_def_count(unused as i32) } as u64;
+            let packed = raw::core_get_weapon_def_count(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5203,8 +4857,7 @@ pub mod weapon_defs {
     pub fn get_weapon_def_damage(weapon_def_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_weapon_def_damage(weapon_def_id) } as u64;
+            let packed = raw::core_get_weapon_def_damage(weapon_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5222,8 +4875,7 @@ pub mod weapon_defs {
     pub fn get_weapon_def_range(weapon_def_id: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_weapon_def_range(weapon_def_id) } as u64;
+            let packed = raw::core_get_weapon_def_range(weapon_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5241,8 +4893,7 @@ pub mod weapon_defs {
     pub fn valid_weapon_def_id(weapon_def_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_valid_weapon_def_id(weapon_def_id) } as u64;
+            let packed = raw::core_valid_weapon_def_id(weapon_def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5345,132 +4996,132 @@ pub mod game {
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "are-helper-a-is-enabled"]
-            pub fn core_are_helper_a_is_enabled(p0: i32) -> i64;
+            pub safe fn core_are_helper_a_is_enabled(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "fixed-allies"]
-            pub fn core_fixed_allies(p0: i32) -> i64;
+            pub safe fn core_fixed_allies(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-ally-team-start-box"]
-            pub fn core_get_ally_team_start_box(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ally_team_start_box(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-facing-from-heading"]
-            pub fn core_get_facing_from_heading(p0: i32) -> i64;
+            pub safe fn core_get_facing_from_heading(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-gaia-team-id"]
-            pub fn core_get_gaia_team_id(p0: i32) -> i64;
+            pub safe fn core_get_gaia_team_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-game-frame"]
-            pub fn core_get_game_frame(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_game_frame(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-game-rules-info"]
-            pub fn core_get_game_rules_info(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_game_rules_info(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-game-rules-resource-info"]
-            pub fn core_get_game_rules_resource_info(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_game_rules_resource_info(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-game-seconds"]
-            pub fn core_get_game_seconds(p0: i32) -> i64;
+            pub safe fn core_get_game_seconds(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-global-los"]
-            pub fn core_get_global_los(p0: i32) -> i64;
+            pub safe fn core_get_global_los(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-heading-from-facing"]
-            pub fn core_get_heading_from_facing(p0: i32) -> i64;
+            pub safe fn core_get_heading_from_facing(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-heading-from-vector"]
-            pub fn core_get_heading_from_vector(p0: f32, p1: f32) -> i64;
+            pub safe fn core_get_heading_from_vector(p0: f32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-map-option"]
-            pub fn core_get_map_option(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_map_option(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-map-start-positions"]
-            pub fn core_get_map_start_positions(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_map_start_positions(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-mod-option"]
-            pub fn core_get_mod_option(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_mod_option(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-side-data-count"]
-            pub fn core_get_side_data_count(p0: i32) -> i64;
+            pub safe fn core_get_side_data_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-team-start-position"]
-            pub fn core_get_team_start_position(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_team_start_position(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-tidal"]
-            pub fn core_get_tidal(p0: i32) -> i64;
+            pub safe fn core_get_tidal(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-vector-from-heading"]
-            pub fn core_get_vector_from_heading(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_vector_from_heading(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "get-wind"]
-            pub fn core_get_wind(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_wind(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "is-cheating-enabled"]
-            pub fn core_is_cheating_enabled(p0: i32) -> i64;
+            pub safe fn core_is_cheating_enabled(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "is-dev-lua-enabled"]
-            pub fn core_is_dev_lua_enabled(p0: i32) -> i64;
+            pub safe fn core_is_dev_lua_enabled(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "is-edit-defs-enabled"]
-            pub fn core_is_edit_defs_enabled(p0: i32) -> i64;
+            pub safe fn core_is_edit_defs_enabled(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "is-game-over"]
-            pub fn core_is_game_over(p0: i32) -> i64;
+            pub safe fn core_is_game_over(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "is-god-mode-enabled"]
-            pub fn core_is_god_mode_enabled(p0: i32) -> i64;
+            pub safe fn core_is_god_mode_enabled(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "is-no-cost-enabled"]
-            pub fn core_is_no_cost_enabled(p0: i32) -> i64;
+            pub safe fn core_is_no_cost_enabled(p0: i32) -> i64;
         }
     }
 
@@ -5478,8 +5129,7 @@ pub mod game {
     pub fn are_helper_a_is_enabled(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_are_helper_a_is_enabled(unused as i32) } as u64;
+            let packed = raw::core_are_helper_a_is_enabled(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5501,8 +5151,7 @@ pub mod game {
     pub fn fixed_allies(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_fixed_allies(unused as i32) } as u64;
+            let packed = raw::core_fixed_allies(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5525,12 +5174,8 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ally_team_start_box(ally_team_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ally_team_start_box(ally_team_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5552,8 +5197,7 @@ pub mod game {
     pub fn get_facing_from_heading(heading: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_facing_from_heading(heading) } as u64;
+            let packed = raw::core_get_facing_from_heading(heading) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5571,8 +5215,7 @@ pub mod game {
     pub fn get_gaia_team_id(unused: u8) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_gaia_team_id(unused as i32) } as u64;
+            let packed = raw::core_get_gaia_team_id(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5591,12 +5234,8 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_game_frame(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_game_frame(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5619,12 +5258,8 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 108];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_game_rules_info(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_game_rules_info(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5647,12 +5282,8 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 48];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_game_rules_resource_info(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_game_rules_resource_info(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5674,8 +5305,7 @@ pub mod game {
     pub fn get_game_seconds(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_game_seconds(unused as i32) } as u64;
+            let packed = raw::core_get_game_seconds(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5693,8 +5323,7 @@ pub mod game {
     pub fn get_global_los(ally_team_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_global_los(ally_team_id) } as u64;
+            let packed = raw::core_get_global_los(ally_team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5712,8 +5341,7 @@ pub mod game {
     pub fn get_heading_from_facing(facing: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_heading_from_facing(facing) } as u64;
+            let packed = raw::core_get_heading_from_facing(facing) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5731,8 +5359,7 @@ pub mod game {
     pub fn get_heading_from_vector(x: f32, z: f32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_heading_from_vector(x, z) } as u64;
+            let packed = raw::core_get_heading_from_vector(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5750,8 +5377,7 @@ pub mod game {
     pub fn get_side_data_count(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_side_data_count(unused as i32) } as u64;
+            let packed = raw::core_get_side_data_count(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5770,12 +5396,8 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_start_position(team_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_team_start_position(team_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5797,8 +5419,7 @@ pub mod game {
     pub fn get_tidal(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_tidal(unused as i32) } as u64;
+            let packed = raw::core_get_tidal(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5817,12 +5438,8 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_vector_from_heading(heading, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_vector_from_heading(heading, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5845,12 +5462,8 @@ pub mod game {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_wind(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_wind(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -5872,8 +5485,7 @@ pub mod game {
     pub fn is_cheating_enabled(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_cheating_enabled(unused as i32) } as u64;
+            let packed = raw::core_is_cheating_enabled(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5895,8 +5507,7 @@ pub mod game {
     pub fn is_dev_lua_enabled(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_dev_lua_enabled(unused as i32) } as u64;
+            let packed = raw::core_is_dev_lua_enabled(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5918,8 +5529,7 @@ pub mod game {
     pub fn is_edit_defs_enabled(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_edit_defs_enabled(unused as i32) } as u64;
+            let packed = raw::core_is_edit_defs_enabled(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5941,8 +5551,7 @@ pub mod game {
     pub fn is_game_over(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_game_over(unused as i32) } as u64;
+            let packed = raw::core_is_game_over(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5964,8 +5573,7 @@ pub mod game {
     pub fn is_god_mode_enabled(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_god_mode_enabled(unused as i32) } as u64;
+            let packed = raw::core_is_god_mode_enabled(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -5987,8 +5595,7 @@ pub mod game {
     pub fn is_no_cost_enabled(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_no_cost_enabled(unused as i32) } as u64;
+            let packed = raw::core_is_no_cost_enabled(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6023,67 +5630,67 @@ pub mod terrain {
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-grass"]
-            pub fn core_get_grass(p0: f32, p1: f32) -> i64;
+            pub safe fn core_get_grass(p0: f32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-ground-blocked"]
-            pub fn core_get_ground_blocked(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
+            pub safe fn core_get_ground_blocked(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-ground-extremes"]
-            pub fn core_get_ground_extremes(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_extremes(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-ground-height"]
-            pub fn core_get_ground_height(p0: f32, p1: f32) -> i64;
+            pub safe fn core_get_ground_height(p0: f32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-ground-info"]
-            pub fn core_get_ground_info(p0: f32, p1: f32, p2: i32) -> i32;
+            pub safe fn core_get_ground_info(p0: f32, p1: f32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-ground-normal"]
-            pub fn core_get_ground_normal(p0: f32, p1: f32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_get_ground_normal(p0: f32, p1: f32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-ground-orig-height"]
-            pub fn core_get_ground_orig_height(p0: f32, p1: f32) -> i64;
+            pub safe fn core_get_ground_orig_height(p0: f32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-height-map-size"]
-            pub fn core_get_height_map_size(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_height_map_size(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-smooth-mesh-height"]
-            pub fn core_get_smooth_mesh_height(p0: f32, p1: f32) -> i64;
+            pub safe fn core_get_smooth_mesh_height(p0: f32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-terrain-type-data"]
-            pub fn core_get_terrain_type_data(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_terrain_type_data(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-water-level"]
-            pub fn core_get_water_level(p0: f32, p1: f32) -> i64;
+            pub safe fn core_get_water_level(p0: f32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "get-water-plane-level"]
-            pub fn core_get_water_plane_level(p0: i32) -> i64;
+            pub safe fn core_get_water_plane_level(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
             #[link_name = "is-pos-in-map"]
-            pub fn core_is_pos_in_map(p0: f32, p1: f32, p2: i32) -> i32;
+            pub safe fn core_is_pos_in_map(p0: f32, p1: f32, p2: i32) -> i32;
         }
     }
 
@@ -6091,8 +5698,7 @@ pub mod terrain {
     pub fn get_grass(x: f32, z: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_grass(x, z) } as u64;
+            let packed = raw::core_get_grass(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6110,8 +5716,7 @@ pub mod terrain {
     pub fn get_ground_blocked(x1: f32, z1: f32, x2: f32, z2: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_ground_blocked(x1, z1, x2, z2) } as u64;
+            let packed = raw::core_get_ground_blocked(x1, z1, x2, z2) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6134,12 +5739,8 @@ pub mod terrain {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_extremes(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_extremes(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -6161,8 +5762,7 @@ pub mod terrain {
     pub fn get_ground_height(x: f32, z: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_ground_height(x, z) } as u64;
+            let packed = raw::core_get_ground_height(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6181,12 +5781,8 @@ pub mod terrain {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_normal(x, z, if smoothed { 1 } else { 0 }, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_normal(x, z, if smoothed { 1 } else { 0 }, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -6208,8 +5804,7 @@ pub mod terrain {
     pub fn get_ground_orig_height(x: f32, z: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_ground_orig_height(x, z) } as u64;
+            let packed = raw::core_get_ground_orig_height(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6228,12 +5823,8 @@ pub mod terrain {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_height_map_size(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_height_map_size(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -6255,8 +5846,7 @@ pub mod terrain {
     pub fn get_smooth_mesh_height(x: f32, z: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_smooth_mesh_height(x, z) } as u64;
+            let packed = raw::core_get_smooth_mesh_height(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6274,8 +5864,7 @@ pub mod terrain {
     pub fn get_water_level(x: f32, z: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_water_level(x, z) } as u64;
+            let packed = raw::core_get_water_level(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6293,8 +5882,7 @@ pub mod terrain {
     pub fn get_water_plane_level(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_water_plane_level(unused as i32) } as u64;
+            let packed = raw::core_get_water_plane_level(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6313,12 +5901,8 @@ pub mod terrain {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_is_pos_in_map(x, z, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_is_pos_in_map(x, z, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -6355,32 +5939,32 @@ pub mod player {
         #[link(wasm_import_module = "spring:player")]
         unsafe extern "C" {
             #[link_name = "get-local-ally-team-id"]
-            pub fn core_get_local_ally_team_id(p0: i32) -> i64;
+            pub safe fn core_get_local_ally_team_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:player")]
         unsafe extern "C" {
             #[link_name = "get-local-player-id"]
-            pub fn core_get_local_player_id(p0: i32) -> i64;
+            pub safe fn core_get_local_player_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:player")]
         unsafe extern "C" {
             #[link_name = "get-local-team-id"]
-            pub fn core_get_local_team_id(p0: i32) -> i64;
+            pub safe fn core_get_local_team_id(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:player")]
         unsafe extern "C" {
             #[link_name = "get-player-statistics"]
-            pub fn core_get_player_statistics(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_player_statistics(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:player")]
         unsafe extern "C" {
             #[link_name = "get-player-traffic"]
-            pub fn core_get_player_traffic(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_player_traffic(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:player")]
         unsafe extern "C" {
             #[link_name = "get-spectating-state"]
-            pub fn core_get_spectating_state(p0: i32) -> i64;
+            pub safe fn core_get_spectating_state(p0: i32) -> i64;
         }
     }
 
@@ -6388,8 +5972,7 @@ pub mod player {
     pub fn get_local_ally_team_id(unused: u8) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_local_ally_team_id(unused as i32) } as u64;
+            let packed = raw::core_get_local_ally_team_id(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6407,8 +5990,7 @@ pub mod player {
     pub fn get_local_player_id(unused: u8) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_local_player_id(unused as i32) } as u64;
+            let packed = raw::core_get_local_player_id(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6426,8 +6008,7 @@ pub mod player {
     pub fn get_local_team_id(unused: u8) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_local_team_id(unused as i32) } as u64;
+            let packed = raw::core_get_local_team_id(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6446,12 +6027,8 @@ pub mod player {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_player_statistics(player_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_player_statistics(player_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -6473,8 +6050,7 @@ pub mod player {
     pub fn get_spectating_state(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_spectating_state(unused as i32) } as u64;
+            let packed = raw::core_get_spectating_state(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6502,57 +6078,57 @@ pub mod math_extra {
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "bit-and"]
-            pub fn core_bit_and(p0: i32, p1: i32) -> i64;
+            pub safe fn core_bit_and(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "bit-inv"]
-            pub fn core_bit_inv(p0: i32) -> i64;
+            pub safe fn core_bit_inv(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "bit-or"]
-            pub fn core_bit_or(p0: i32, p1: i32) -> i64;
+            pub safe fn core_bit_or(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "bit-xor"]
-            pub fn core_bit_xor(p0: i32, p1: i32) -> i64;
+            pub safe fn core_bit_xor(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "clamp"]
-            pub fn core_clamp(p0: f32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_clamp(p0: f32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "erf"]
-            pub fn core_erf(p0: f32) -> i64;
+            pub safe fn core_erf(p0: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "hypot"]
-            pub fn core_hypot(p0: f32, p1: f32) -> i64;
+            pub safe fn core_hypot(p0: f32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "mix"]
-            pub fn core_mix(p0: f32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_mix(p0: f32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "round"]
-            pub fn core_round(p0: f32) -> i64;
+            pub safe fn core_round(p0: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "sgn"]
-            pub fn core_sgn(p0: f32) -> i64;
+            pub safe fn core_sgn(p0: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:math-extra")]
         unsafe extern "C" {
             #[link_name = "smooth-step"]
-            pub fn core_smooth_step(p0: f32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_smooth_step(p0: f32, p1: f32, p2: f32) -> i64;
         }
     }
 
@@ -6560,8 +6136,7 @@ pub mod math_extra {
     pub fn bit_and(a: u32, b: u32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_bit_and(a as i32, b as i32) } as u64;
+            let packed = raw::core_bit_and(a as i32, b as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6579,8 +6154,7 @@ pub mod math_extra {
     pub fn bit_inv(a: u32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_bit_inv(a as i32) } as u64;
+            let packed = raw::core_bit_inv(a as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6598,8 +6172,7 @@ pub mod math_extra {
     pub fn bit_or(a: u32, b: u32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_bit_or(a as i32, b as i32) } as u64;
+            let packed = raw::core_bit_or(a as i32, b as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6617,8 +6190,7 @@ pub mod math_extra {
     pub fn bit_xor(a: u32, b: u32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_bit_xor(a as i32, b as i32) } as u64;
+            let packed = raw::core_bit_xor(a as i32, b as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6636,8 +6208,7 @@ pub mod math_extra {
     pub fn clamp(value: f32, min: f32, max: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_clamp(value, min, max) } as u64;
+            let packed = raw::core_clamp(value, min, max) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6655,8 +6226,7 @@ pub mod math_extra {
     pub fn erf(value: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_erf(value) } as u64;
+            let packed = raw::core_erf(value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6674,8 +6244,7 @@ pub mod math_extra {
     pub fn hypot(x: f32, y: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_hypot(x, y) } as u64;
+            let packed = raw::core_hypot(x, y) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6693,8 +6262,7 @@ pub mod math_extra {
     pub fn mix(a: f32, b: f32, t: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_mix(a, b, t) } as u64;
+            let packed = raw::core_mix(a, b, t) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6712,8 +6280,7 @@ pub mod math_extra {
     pub fn round(value: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_round(value) } as u64;
+            let packed = raw::core_round(value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6731,8 +6298,7 @@ pub mod math_extra {
     pub fn sgn(value: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_sgn(value) } as u64;
+            let packed = raw::core_sgn(value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6750,8 +6316,7 @@ pub mod math_extra {
     pub fn smooth_step(edge0: f32, edge1: f32, x: f32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_smooth_step(edge0, edge1, x) } as u64;
+            let packed = raw::core_smooth_step(edge0, edge1, x) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6773,22 +6338,22 @@ pub mod encoding {
         #[link(wasm_import_module = "spring:encoding")]
         unsafe extern "C" {
             #[link_name = "decode-base64"]
-            pub fn core_decode_base64(p0: i32, p1: i32) -> i32;
+            pub safe fn core_decode_base64(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:encoding")]
         unsafe extern "C" {
             #[link_name = "decode-base64-url"]
-            pub fn core_decode_base64_url(p0: i32, p1: i32) -> i32;
+            pub safe fn core_decode_base64_url(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:encoding")]
         unsafe extern "C" {
             #[link_name = "encode-base64"]
-            pub fn core_encode_base64(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_encode_base64(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:encoding")]
         unsafe extern "C" {
             #[link_name = "encode-base64-url"]
-            pub fn core_encode_base64_url(p0: i32, p1: i32) -> i32;
+            pub safe fn core_encode_base64_url(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -6802,22 +6367,22 @@ pub mod metal_map {
         #[link(wasm_import_module = "spring:metal-map")]
         unsafe extern "C" {
             #[link_name = "get-metal-amount"]
-            pub fn core_get_metal_amount(p0: i32, p1: i32) -> i64;
+            pub safe fn core_get_metal_amount(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:metal-map")]
         unsafe extern "C" {
             #[link_name = "get-metal-extraction"]
-            pub fn core_get_metal_extraction(p0: i32, p1: i32) -> i64;
+            pub safe fn core_get_metal_extraction(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:metal-map")]
         unsafe extern "C" {
             #[link_name = "get-metal-map-size"]
-            pub fn core_get_metal_map_size(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_metal_map_size(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:metal-map")]
         unsafe extern "C" {
             #[link_name = "set-metal-amount"]
-            pub fn core_set_metal_amount(p0: i32, p1: i32, p2: f32) -> i32;
+            pub safe fn core_set_metal_amount(p0: i32, p1: i32, p2: f32) -> i32;
         }
     }
 
@@ -6825,8 +6390,7 @@ pub mod metal_map {
     pub fn get_metal_amount(x: i32, z: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_metal_amount(x, z) } as u64;
+            let packed = raw::core_get_metal_amount(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6844,8 +6408,7 @@ pub mod metal_map {
     pub fn get_metal_extraction(x: i32, z: i32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_metal_extraction(x, z) } as u64;
+            let packed = raw::core_get_metal_extraction(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6864,12 +6427,8 @@ pub mod metal_map {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_metal_map_size(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_metal_map_size(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -6891,8 +6450,7 @@ pub mod metal_map {
     pub fn set_metal_amount(x: i32, z: i32, amount: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_set_metal_amount(x, z, amount) };
+            let status = raw::core_set_metal_amount(x, z, amount);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -6912,47 +6470,47 @@ pub mod path_finder {
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "delete-path"]
-            pub fn core_delete_path(p0: i32) -> i64;
+            pub safe fn core_delete_path(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "free-path-node-costs-array"]
-            pub fn core_free_path_node_costs_array(p0: i32) -> i64;
+            pub safe fn core_free_path_node_costs_array(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "get-next-way-point"]
-            pub fn core_get_next_way_point(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_get_next_way_point(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "get-path-node-cost"]
-            pub fn core_get_path_node_cost(p0: i32, p1: i32) -> i64;
+            pub safe fn core_get_path_node_cost(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "get-path-node-costs"]
-            pub fn core_get_path_node_costs(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_path_node_costs(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "get-path-way-points"]
-            pub fn core_get_path_way_points(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_path_way_points(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "init-path-node-costs-array"]
-            pub fn core_init_path_node_costs_array(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_init_path_node_costs_array(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "set-path-node-cost"]
-            pub fn core_set_path_node_cost(p0: i32, p1: i32, p2: f32) -> i64;
+            pub safe fn core_set_path_node_cost(p0: i32, p1: i32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:path-finder")]
         unsafe extern "C" {
             #[link_name = "set-path-node-costs"]
-            pub fn core_set_path_node_costs(p0: i32) -> i64;
+            pub safe fn core_set_path_node_costs(p0: i32) -> i64;
         }
     }
 
@@ -6960,8 +6518,7 @@ pub mod path_finder {
     pub fn delete_path(path_id: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_delete_path(path_id as i32) } as u64;
+            let packed = raw::core_delete_path(path_id as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -6983,8 +6540,7 @@ pub mod path_finder {
     pub fn free_path_node_costs_array(overlay_index: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_free_path_node_costs_array(overlay_index as i32) } as u64;
+            let packed = raw::core_free_path_node_costs_array(overlay_index as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7006,8 +6562,7 @@ pub mod path_finder {
     pub fn get_path_node_cost(x: u32, z: u32) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_path_node_cost(x as i32, z as i32) } as u64;
+            let packed = raw::core_get_path_node_cost(x as i32, z as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7025,8 +6580,7 @@ pub mod path_finder {
     pub fn init_path_node_costs_array(overlay_index: u32, size_x: u32, size_z: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_init_path_node_costs_array(overlay_index as i32, size_x as i32, size_z as i32) } as u64;
+            let packed = raw::core_init_path_node_costs_array(overlay_index as i32, size_x as i32, size_z as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7048,8 +6602,7 @@ pub mod path_finder {
     pub fn set_path_node_cost(overlay_index: u32, cost_index: u32, cost: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_path_node_cost(overlay_index as i32, cost_index as i32, cost) } as u64;
+            let packed = raw::core_set_path_node_cost(overlay_index as i32, cost_index as i32, cost) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7071,8 +6624,7 @@ pub mod path_finder {
     pub fn set_path_node_costs(overlay_index: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_path_node_costs(overlay_index as i32) } as u64;
+            let packed = raw::core_set_path_node_costs(overlay_index as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7100,12 +6652,12 @@ pub mod platform {
         #[link(wasm_import_module = "spring:platform")]
         unsafe extern "C" {
             #[link_name = "get-architecture"]
-            pub fn core_get_architecture(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_architecture(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:platform")]
         unsafe extern "C" {
             #[link_name = "is-headless"]
-            pub fn core_is_headless(p0: i32) -> i64;
+            pub safe fn core_is_headless(p0: i32) -> i64;
         }
     }
 
@@ -7113,8 +6665,7 @@ pub mod platform {
     pub fn is_headless(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_headless(unused as i32) } as u64;
+            let packed = raw::core_is_headless(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7142,37 +6693,37 @@ pub mod move_ctrl {
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
             #[link_name = "get-unit-estimated-path"]
-            pub fn core_get_unit_estimated_path(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_estimated_path(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
             #[link_name = "is-move-ctrl-enabled"]
-            pub fn core_is_move_ctrl_enabled(p0: i32) -> i64;
+            pub safe fn core_is_move_ctrl_enabled(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
             #[link_name = "move-ctrl"]
-            pub fn core_move_ctrl(p0: i32, p1: i32) -> i64;
+            pub safe fn core_move_ctrl(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-ground-move-type-max-speed"]
-            pub fn core_set_ground_move_type_max_speed(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_ground_move_type_max_speed(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-move-ctrl-gravity"]
-            pub fn core_set_move_ctrl_gravity(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_move_ctrl_gravity(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-move-type-boolean"]
-            pub fn core_set_move_type_boolean(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_move_type_boolean(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-move-type-numeric"]
-            pub fn core_set_move_type_numeric(p0: i32, p1: i32, p2: f32) -> i64;
+            pub safe fn core_set_move_type_numeric(p0: i32, p1: i32, p2: f32) -> i64;
         }
     }
 
@@ -7180,8 +6731,7 @@ pub mod move_ctrl {
     pub fn is_move_ctrl_enabled(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_move_ctrl_enabled(unit_id) } as u64;
+            let packed = raw::core_is_move_ctrl_enabled(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7203,8 +6753,7 @@ pub mod move_ctrl {
     pub fn move_ctrl(unit_id: i32, enable: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_move_ctrl(unit_id, if enable { 1 } else { 0 }) } as u64;
+            let packed = raw::core_move_ctrl(unit_id, if enable { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7226,8 +6775,7 @@ pub mod move_ctrl {
     pub fn set_ground_move_type_max_speed(unit_id: i32, max_speed: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_move_type_max_speed(unit_id, max_speed) } as u64;
+            let packed = raw::core_set_ground_move_type_max_speed(unit_id, max_speed) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7249,8 +6797,7 @@ pub mod move_ctrl {
     pub fn set_move_ctrl_gravity(unit_id: i32, gravity_factor: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_move_ctrl_gravity(unit_id, gravity_factor) } as u64;
+            let packed = raw::core_set_move_ctrl_gravity(unit_id, gravity_factor) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7272,8 +6819,7 @@ pub mod move_ctrl {
     pub fn set_move_type_boolean(unit_id: i32, field: i32, value: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_move_type_boolean(unit_id, field, if value { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_move_type_boolean(unit_id, field, if value { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7295,8 +6841,7 @@ pub mod move_ctrl {
     pub fn set_move_type_numeric(unit_id: i32, field: i32, value: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_move_type_numeric(unit_id, field, value) } as u64;
+            let packed = raw::core_set_move_type_numeric(unit_id, field, value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7340,37 +6885,37 @@ pub mod camera {
         #[link(wasm_import_module = "spring:camera")]
         unsafe extern "C" {
             #[link_name = "get-camera-direction"]
-            pub fn core_get_camera_direction(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_camera_direction(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:camera")]
         unsafe extern "C" {
             #[link_name = "get-camera-fov"]
-            pub fn core_get_camera_fov(p0: i32) -> i64;
+            pub safe fn core_get_camera_fov(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:camera")]
         unsafe extern "C" {
             #[link_name = "get-camera-position"]
-            pub fn core_get_camera_position(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_camera_position(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:camera")]
         unsafe extern "C" {
             #[link_name = "get-pixel-dir"]
-            pub fn core_get_pixel_dir(p0: f32, p1: f32, p2: i32) -> i32;
+            pub safe fn core_get_pixel_dir(p0: f32, p1: f32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:camera")]
         unsafe extern "C" {
             #[link_name = "set-camera-target"]
-            pub fn core_set_camera_target(p0: i32) -> i64;
+            pub safe fn core_set_camera_target(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:camera")]
         unsafe extern "C" {
             #[link_name = "trace-screen-ray"]
-            pub fn core_trace_screen_ray(p0: f32, p1: f32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_trace_screen_ray(p0: f32, p1: f32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:camera")]
         unsafe extern "C" {
             #[link_name = "world-to-screen-coords"]
-            pub fn core_world_to_screen_coords(p0: i32, p1: i32) -> i32;
+            pub safe fn core_world_to_screen_coords(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -7379,12 +6924,8 @@ pub mod camera {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_camera_direction(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_camera_direction(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7406,8 +6947,7 @@ pub mod camera {
     pub fn get_camera_fov(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_camera_fov(unused as i32) } as u64;
+            let packed = raw::core_get_camera_fov(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7426,12 +6966,8 @@ pub mod camera {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_camera_position(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_camera_position(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7454,12 +6990,8 @@ pub mod camera {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_pixel_dir(screen_x, screen_y, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_pixel_dir(screen_x, screen_y, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7492,15 +7024,10 @@ pub mod camera {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 20];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_trace_screen_ray(screen_x, screen_y, input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_trace_screen_ray(screen_x, screen_y, input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7532,15 +7059,10 @@ pub mod camera {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 16];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_world_to_screen_coords(input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_world_to_screen_coords(input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7603,82 +7125,82 @@ pub mod input {
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-active-command"]
-            pub fn core_get_active_command(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_active_command(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-active-page"]
-            pub fn core_get_active_page(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_active_page(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-default-command"]
-            pub fn core_get_default_command(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_default_command(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-invert-queue-key"]
-            pub fn core_get_invert_queue_key(p0: i32) -> i64;
+            pub safe fn core_get_invert_queue_key(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-key-from-scan-symbol"]
-            pub fn core_get_key_from_scan_symbol(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_key_from_scan_symbol(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-key-state"]
-            pub fn core_get_key_state(p0: i32) -> i64;
+            pub safe fn core_get_key_state(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-key-symbol"]
-            pub fn core_get_key_symbol(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_key_symbol(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-mod-key-state"]
-            pub fn core_get_mod_key_state(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_mod_key_state(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-mouse-cursor"]
-            pub fn core_get_mouse_cursor(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_mouse_cursor(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-mouse-start-position"]
-            pub fn core_get_mouse_start_position(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_mouse_start_position(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-mouse-state"]
-            pub fn core_get_mouse_state(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_mouse_state(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-pressed-keys"]
-            pub fn core_get_pressed_keys(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_pressed_keys(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-pressed-scans"]
-            pub fn core_get_pressed_scans(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_pressed_scans(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-scan-symbol"]
-            pub fn core_get_scan_symbol(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_scan_symbol(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "get-selection-box"]
-            pub fn core_get_selection_box(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_selection_box(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:input")]
         unsafe extern "C" {
             #[link_name = "is-above-mini-map"]
-            pub fn core_is_above_mini_map(p0: f32, p1: f32) -> i64;
+            pub safe fn core_is_above_mini_map(p0: f32, p1: f32) -> i64;
         }
     }
 
@@ -7687,12 +7209,8 @@ pub mod input {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_active_page(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_active_page(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7714,8 +7232,7 @@ pub mod input {
     pub fn get_invert_queue_key(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_invert_queue_key(unused as i32) } as u64;
+            let packed = raw::core_get_invert_queue_key(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7737,8 +7254,7 @@ pub mod input {
     pub fn get_key_state(key_code: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_key_state(key_code) } as u64;
+            let packed = raw::core_get_key_state(key_code) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7761,12 +7277,8 @@ pub mod input {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_mod_key_state(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_mod_key_state(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7789,12 +7301,8 @@ pub mod input {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 32];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_mouse_start_position(button, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_mouse_start_position(button, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7817,12 +7325,8 @@ pub mod input {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 32];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_mouse_state(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_mouse_state(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7845,12 +7349,8 @@ pub mod input {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_selection_box(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_selection_box(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -7872,8 +7372,7 @@ pub mod input {
     pub fn is_above_mini_map(screen_x: f32, screen_y: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_above_mini_map(screen_x, screen_y) } as u64;
+            let packed = raw::core_is_above_mini_map(screen_x, screen_y) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -7901,27 +7400,27 @@ pub mod debug_input {
         #[link(wasm_import_module = "spring:debug-input")]
         unsafe extern "C" {
             #[link_name = "clear-emulated-input"]
-            pub fn core_clear_emulated_input(p0: i32) -> i32;
+            pub safe fn core_clear_emulated_input(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:debug-input")]
         unsafe extern "C" {
             #[link_name = "emulate-key"]
-            pub fn core_emulate_key(p0: i32, p1: i32) -> i32;
+            pub safe fn core_emulate_key(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:debug-input")]
         unsafe extern "C" {
             #[link_name = "emulate-mouse-button"]
-            pub fn core_emulate_mouse_button(p0: i32, p1: i32) -> i32;
+            pub safe fn core_emulate_mouse_button(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:debug-input")]
         unsafe extern "C" {
             #[link_name = "emulate-mouse-move"]
-            pub fn core_emulate_mouse_move(p0: i32, p1: i32) -> i32;
+            pub safe fn core_emulate_mouse_move(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:debug-input")]
         unsafe extern "C" {
             #[link_name = "emulate-mouse-wheel"]
-            pub fn core_emulate_mouse_wheel(p0: f32) -> i32;
+            pub safe fn core_emulate_mouse_wheel(p0: f32) -> i32;
         }
     }
 
@@ -7929,8 +7428,7 @@ pub mod debug_input {
     pub fn clear_emulated_input(fire_releases: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_clear_emulated_input(if fire_releases { 1 } else { 0 }) };
+            let status = raw::core_clear_emulated_input(if fire_releases { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -7944,8 +7442,7 @@ pub mod debug_input {
     pub fn emulate_key(key_code: i32, pressed: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_emulate_key(key_code, if pressed { 1 } else { 0 }) };
+            let status = raw::core_emulate_key(key_code, if pressed { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -7959,8 +7456,7 @@ pub mod debug_input {
     pub fn emulate_mouse_button(button: i32, pressed: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_emulate_mouse_button(button, if pressed { 1 } else { 0 }) };
+            let status = raw::core_emulate_mouse_button(button, if pressed { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -7974,8 +7470,7 @@ pub mod debug_input {
     pub fn emulate_mouse_move(x: i32, y: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_emulate_mouse_move(x, y) };
+            let status = raw::core_emulate_mouse_move(x, y);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -7989,8 +7484,7 @@ pub mod debug_input {
     pub fn emulate_mouse_wheel(delta: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_emulate_mouse_wheel(delta) };
+            let status = raw::core_emulate_mouse_wheel(delta);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -8043,122 +7537,122 @@ pub mod display {
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-draw-frame"]
-            pub fn core_get_draw_frame(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_draw_frame(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-dual-view-geometry"]
-            pub fn core_get_dual_view_geometry(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_dual_view_geometry(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-fps"]
-            pub fn core_get_fps(p0: i32) -> i64;
+            pub safe fn core_get_fps(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-frame-time-offset"]
-            pub fn core_get_frame_time_offset(p0: i32) -> i64;
+            pub safe fn core_get_frame_time_offset(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-game-speed"]
-            pub fn core_get_game_speed(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_game_speed(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-last-update-seconds"]
-            pub fn core_get_last_update_seconds(p0: i32) -> i64;
+            pub safe fn core_get_last_update_seconds(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-los-view-colors"]
-            pub fn core_get_los_view_colors(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_los_view_colors(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-map-draw-mode"]
-            pub fn core_get_map_draw_mode(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_map_draw_mode(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-mini-map-dual-screen"]
-            pub fn core_get_mini_map_dual_screen(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_mini_map_dual_screen(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-mini-map-geometry"]
-            pub fn core_get_mini_map_geometry(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_mini_map_geometry(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-mini-map-rotation"]
-            pub fn core_get_mini_map_rotation(p0: i32) -> i64;
+            pub safe fn core_get_mini_map_rotation(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-num-displays"]
-            pub fn core_get_num_displays(p0: i32) -> i64;
+            pub safe fn core_get_num_displays(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-screen-geometry"]
-            pub fn core_get_screen_geometry(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_screen_geometry(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-team-color"]
-            pub fn core_get_team_color(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_team_color(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-team-orig-color"]
-            pub fn core_get_team_orig_color(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_team_orig_color(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-view-geometry"]
-            pub fn core_get_view_geometry(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_view_geometry(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-water-mode"]
-            pub fn core_get_water_mode(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_water_mode(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "get-window-geometry"]
-            pub fn core_get_window_geometry(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_window_geometry(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "have-adv-shading"]
-            pub fn core_have_adv_shading(p0: i32) -> i64;
+            pub safe fn core_have_adv_shading(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "have-shadows"]
-            pub fn core_have_shadows(p0: i32) -> i64;
+            pub safe fn core_have_shadows(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "is-aabb-in-view"]
-            pub fn core_is_aabb_in_view(p0: i32) -> i64;
+            pub safe fn core_is_aabb_in_view(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "is-gui-hidden"]
-            pub fn core_is_gui_hidden(p0: i32) -> i64;
+            pub safe fn core_is_gui_hidden(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "is-sphere-in-view"]
-            pub fn core_is_sphere_in_view(p0: f32, p1: i32) -> i64;
+            pub safe fn core_is_sphere_in_view(p0: f32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
             #[link_name = "set-team-color"]
-            pub fn core_set_team_color(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_team_color(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -8167,12 +7661,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_draw_frame(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_draw_frame(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8195,12 +7685,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_dual_view_geometry(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_dual_view_geometry(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8222,8 +7708,7 @@ pub mod display {
     pub fn get_fps(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_fps(unused as i32) } as u64;
+            let packed = raw::core_get_fps(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8241,8 +7726,7 @@ pub mod display {
     pub fn get_frame_time_offset(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_frame_time_offset(unused as i32) } as u64;
+            let packed = raw::core_get_frame_time_offset(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8261,12 +7745,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_game_speed(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_game_speed(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8288,8 +7768,7 @@ pub mod display {
     pub fn get_last_update_seconds(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_last_update_seconds(unused as i32) } as u64;
+            let packed = raw::core_get_last_update_seconds(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8308,12 +7787,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 60];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_los_view_colors(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_los_view_colors(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8336,12 +7811,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_mini_map_geometry(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_mini_map_geometry(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8363,8 +7834,7 @@ pub mod display {
     pub fn get_mini_map_rotation(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_mini_map_rotation(unused as i32) } as u64;
+            let packed = raw::core_get_mini_map_rotation(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8382,8 +7852,7 @@ pub mod display {
     pub fn get_num_displays(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_num_displays(unused as i32) } as u64;
+            let packed = raw::core_get_num_displays(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8402,12 +7871,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_screen_geometry(screen_num, if query_usable { 1 } else { 0 }, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_screen_geometry(screen_num, if query_usable { 1 } else { 0 }, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8430,12 +7895,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_color(team_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_team_color(team_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8458,12 +7919,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_orig_color(team_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_team_orig_color(team_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8486,12 +7943,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_view_geometry(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_view_geometry(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8514,12 +7967,8 @@ pub mod display {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_window_geometry(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_window_geometry(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -8541,8 +7990,7 @@ pub mod display {
     pub fn have_adv_shading(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_have_adv_shading(unused as i32) } as u64;
+            let packed = raw::core_have_adv_shading(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8564,8 +8012,7 @@ pub mod display {
     pub fn have_shadows(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_have_shadows(unused as i32) } as u64;
+            let packed = raw::core_have_shadows(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8600,11 +8047,8 @@ pub mod display {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_is_aabb_in_view(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_is_aabb_in_view(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8626,8 +8070,7 @@ pub mod display {
     pub fn is_gui_hidden(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_gui_hidden(unused as i32) } as u64;
+            let packed = raw::core_is_gui_hidden(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8658,11 +8101,8 @@ pub mod display {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_is_sphere_in_view(radius, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_is_sphere_in_view(radius, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8694,11 +8134,8 @@ pub mod display {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_team_color(team_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_team_color(team_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8726,57 +8163,57 @@ pub mod selection {
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "deselect-unit"]
-            pub fn core_deselect_unit(p0: i32) -> i64;
+            pub safe fn core_deselect_unit(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-group-list"]
-            pub fn core_get_group_list(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_group_list(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-group-units"]
-            pub fn core_get_group_units(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_group_units(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-group-units-count"]
-            pub fn core_get_group_units_count(p0: i32) -> i64;
+            pub safe fn core_get_group_units_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-selected-group"]
-            pub fn core_get_selected_group(p0: i32) -> i64;
+            pub safe fn core_get_selected_group(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-selected-units"]
-            pub fn core_get_selected_units(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_selected_units(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-selected-units-count"]
-            pub fn core_get_selected_units_count(p0: i32) -> i64;
+            pub safe fn core_get_selected_units_count(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-selected-units-sorted"]
-            pub fn core_get_selected_units_sorted(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_selected_units_sorted(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-unit-group"]
-            pub fn core_get_unit_group(p0: i32) -> i64;
+            pub safe fn core_get_unit_group(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "select-unit"]
-            pub fn core_select_unit(p0: i32, p1: i32) -> i64;
+            pub safe fn core_select_unit(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "set-unit-group"]
-            pub fn core_set_unit_group(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_group(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -8784,8 +8221,7 @@ pub mod selection {
     pub fn deselect_unit(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_deselect_unit(unit_id) } as u64;
+            let packed = raw::core_deselect_unit(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8807,8 +8243,7 @@ pub mod selection {
     pub fn get_group_units_count(group_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_group_units_count(group_id) } as u64;
+            let packed = raw::core_get_group_units_count(group_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8826,8 +8261,7 @@ pub mod selection {
     pub fn get_selected_group(unused: u8) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_selected_group(unused as i32) } as u64;
+            let packed = raw::core_get_selected_group(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8845,8 +8279,7 @@ pub mod selection {
     pub fn get_selected_units_count(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_selected_units_count(unused as i32) } as u64;
+            let packed = raw::core_get_selected_units_count(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8864,8 +8297,7 @@ pub mod selection {
     pub fn get_unit_group(unit_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_group(unit_id) } as u64;
+            let packed = raw::core_get_unit_group(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8883,8 +8315,7 @@ pub mod selection {
     pub fn select_unit(unit_id: i32, append: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_select_unit(unit_id, if append { 1 } else { 0 }) } as u64;
+            let packed = raw::core_select_unit(unit_id, if append { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8906,8 +8337,7 @@ pub mod selection {
     pub fn set_unit_group(unit_id: i32, group_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_group(unit_id, group_id) } as u64;
+            let packed = raw::core_set_unit_group(unit_id, group_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8935,27 +8365,27 @@ pub mod sound {
         #[link(wasm_import_module = "spring:sound")]
         unsafe extern "C" {
             #[link_name = "get-sound-effect-params"]
-            pub fn core_get_sound_effect_params(p0: i32) -> i64;
+            pub safe fn core_get_sound_effect_params(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:sound")]
         unsafe extern "C" {
             #[link_name = "get-sound-stream-time"]
-            pub fn core_get_sound_stream_time(p0: i32) -> i64;
+            pub safe fn core_get_sound_stream_time(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:sound")]
         unsafe extern "C" {
             #[link_name = "pause-sound-stream"]
-            pub fn core_pause_sound_stream(p0: i32) -> i64;
+            pub safe fn core_pause_sound_stream(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:sound")]
         unsafe extern "C" {
             #[link_name = "set-sound-stream-volume"]
-            pub fn core_set_sound_stream_volume(p0: f32) -> i64;
+            pub safe fn core_set_sound_stream_volume(p0: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:sound")]
         unsafe extern "C" {
             #[link_name = "stop-sound-stream"]
-            pub fn core_stop_sound_stream(p0: i32) -> i64;
+            pub safe fn core_stop_sound_stream(p0: i32) -> i64;
         }
     }
 
@@ -8963,8 +8393,7 @@ pub mod sound {
     pub fn get_sound_effect_params(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_sound_effect_params(unused as i32) } as u64;
+            let packed = raw::core_get_sound_effect_params(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -8986,8 +8415,7 @@ pub mod sound {
     pub fn get_sound_stream_time(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_sound_stream_time(unused as i32) } as u64;
+            let packed = raw::core_get_sound_stream_time(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -9005,8 +8433,7 @@ pub mod sound {
     pub fn pause_sound_stream(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_pause_sound_stream(unused as i32) } as u64;
+            let packed = raw::core_pause_sound_stream(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -9028,8 +8455,7 @@ pub mod sound {
     pub fn set_sound_stream_volume(volume: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_sound_stream_volume(volume) } as u64;
+            let packed = raw::core_set_sound_stream_volume(volume) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -9051,8 +8477,7 @@ pub mod sound {
     pub fn stop_sound_stream(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_stop_sound_stream(unused as i32) } as u64;
+            let packed = raw::core_stop_sound_stream(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -9080,12 +8505,12 @@ pub mod messages {
         #[link(wasm_import_module = "spring:messages")]
         unsafe extern "C" {
             #[link_name = "get-current-tooltip"]
-            pub fn core_get_current_tooltip(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_current_tooltip(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:messages")]
         unsafe extern "C" {
             #[link_name = "is-user-writing"]
-            pub fn core_is_user_writing(p0: i32) -> i64;
+            pub safe fn core_is_user_writing(p0: i32) -> i64;
         }
     }
 
@@ -9093,8 +8518,7 @@ pub mod messages {
     pub fn is_user_writing(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_user_writing(unused as i32) } as u64;
+            let packed = raw::core_is_user_writing(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -9120,7 +8544,7 @@ pub mod config {
         #[link(wasm_import_module = "spring:config")]
         unsafe extern "C" {
             #[link_name = "get-config-string"]
-            pub fn core_get_config_string(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_config_string(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -9150,37 +8574,37 @@ pub mod tracing {
         #[link(wasm_import_module = "spring:tracing")]
         unsafe extern "C" {
             #[link_name = "trace-ray"]
-            pub fn core_trace_ray(p0: i32, p1: i32) -> i32;
+            pub safe fn core_trace_ray(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:tracing")]
         unsafe extern "C" {
             #[link_name = "trace-ray-between-positions"]
-            pub fn core_trace_ray_between_positions(p0: i32, p1: i32) -> i32;
+            pub safe fn core_trace_ray_between_positions(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:tracing")]
         unsafe extern "C" {
             #[link_name = "trace-ray-features"]
-            pub fn core_trace_ray_features(p0: i32, p1: i32) -> i32;
+            pub safe fn core_trace_ray_features(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:tracing")]
         unsafe extern "C" {
             #[link_name = "trace-ray-ground-between-positions"]
-            pub fn core_trace_ray_ground_between_positions(p0: i32, p1: i32) -> i32;
+            pub safe fn core_trace_ray_ground_between_positions(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:tracing")]
         unsafe extern "C" {
             #[link_name = "trace-ray-ground-in-direction"]
-            pub fn core_trace_ray_ground_in_direction(p0: i32, p1: i32) -> i32;
+            pub safe fn core_trace_ray_ground_in_direction(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:tracing")]
         unsafe extern "C" {
             #[link_name = "trace-ray-in-direction"]
-            pub fn core_trace_ray_in_direction(p0: i32, p1: i32) -> i32;
+            pub safe fn core_trace_ray_in_direction(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:tracing")]
         unsafe extern "C" {
             #[link_name = "trace-ray-units"]
-            pub fn core_trace_ray_units(p0: i32, p1: i32) -> i32;
+            pub safe fn core_trace_ray_units(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -9205,15 +8629,10 @@ pub mod tracing {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 36];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_trace_ray(input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_trace_ray(input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9253,15 +8672,10 @@ pub mod tracing {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 36];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_trace_ray_features(input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_trace_ray_features(input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9301,15 +8715,10 @@ pub mod tracing {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 36];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_trace_ray_units(input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_trace_ray_units(input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9367,32 +8776,32 @@ pub mod utils {
         #[link(wasm_import_module = "spring:utils")]
         unsafe extern "C" {
             #[link_name = "closest-build-pos"]
-            pub fn core_closest_build_pos(p0: i32, p1: i32, p2: f32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+            pub safe fn core_closest_build_pos(p0: i32, p1: i32, p2: f32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:utils")]
         unsafe extern "C" {
             #[link_name = "get-feature-def-dimensions"]
-            pub fn core_get_feature_def_dimensions(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_def_dimensions(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:utils")]
         unsafe extern "C" {
             #[link_name = "get-unit-def-dimensions"]
-            pub fn core_get_unit_def_dimensions(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_def_dimensions(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:utils")]
         unsafe extern "C" {
             #[link_name = "pos2-build-pos"]
-            pub fn core_pos2_build_pos(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_pos2_build_pos(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:utils")]
         unsafe extern "C" {
             #[link_name = "test-build-order"]
-            pub fn core_test_build_order(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_test_build_order(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:utils")]
         unsafe extern "C" {
             #[link_name = "test-move-order"]
-            pub fn core_test_move_order(p0: i32, p1: i32) -> i64;
+            pub safe fn core_test_move_order(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -9409,15 +8818,10 @@ pub mod utils {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 12];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_closest_build_pos(team_id, unit_def_id, search_radius, min_dist, facing, input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_closest_build_pos(team_id, unit_def_id, search_radius, min_dist, facing, input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9441,12 +8845,8 @@ pub mod utils {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 44];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_def_dimensions(feature_def_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_def_dimensions(feature_def_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9469,12 +8869,8 @@ pub mod utils {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 44];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_def_dimensions(unit_def_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_def_dimensions(unit_def_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9505,15 +8901,10 @@ pub mod utils {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 12];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_pos2_build_pos(unit_def_id, facing, input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_pos2_build_pos(unit_def_id, facing, input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9545,15 +8936,10 @@ pub mod utils {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
             let mut output_wire = [0u8; 12];
-            let output_pointer_usize = output_wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: input/output pointers reference live stack buffers.
-            let status = unsafe { raw::core_test_build_order(unit_def_id, facing, input_pointer, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;
+            let status = raw::core_test_build_order(unit_def_id, facing, input_pointer, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -9593,11 +8979,8 @@ pub mod utils {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_test_move_order(unit_def_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_test_move_order(unit_def_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -9655,307 +9038,307 @@ pub mod unsynced_ctrl {
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "force-layout-update"]
-            pub fn core_force_layout_update(p0: i32) -> i64;
+            pub safe fn core_force_layout_update(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "force-tesselation-update"]
-            pub fn core_force_tesselation_update(p0: i32, p1: i32) -> i64;
+            pub safe fn core_force_tesselation_update(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "get-water-texture"]
-            pub fn core_get_water_texture(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_water_texture(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "pause-dolly-camera"]
-            pub fn core_pause_dolly_camera(p0: f32) -> i64;
+            pub safe fn core_pause_dolly_camera(p0: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "preload-feature-def-model"]
-            pub fn core_preload_feature_def_model(p0: i32) -> i64;
+            pub safe fn core_preload_feature_def_model(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "preload-unit-def-model"]
-            pub fn core_preload_unit_def_model(p0: i32) -> i64;
+            pub safe fn core_preload_unit_def_model(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "resume-dolly-camera"]
-            pub fn core_resume_dolly_camera(p0: i32) -> i64;
+            pub safe fn core_resume_dolly_camera(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "run-dolly-camera"]
-            pub fn core_run_dolly_camera(p0: f32) -> i64;
+            pub safe fn core_run_dolly_camera(p0: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "sdl-set-text-input-rect"]
-            pub fn core_sdl_set_text_input_rect(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_sdl_set_text_input_rect(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "sdl-start-text-input"]
-            pub fn core_sdl_start_text_input(p0: i32) -> i64;
+            pub safe fn core_sdl_start_text_input(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "sdl-stop-text-input"]
-            pub fn core_sdl_stop_text_input(p0: i32) -> i64;
+            pub safe fn core_sdl_stop_text_input(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-active-command"]
-            pub fn core_set_active_command(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_active_command(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-atmosphere"]
-            pub fn core_set_atmosphere(p0: i32) -> i64;
+            pub safe fn core_set_atmosphere(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-auto-show-metal"]
-            pub fn core_set_auto_show_metal(p0: i32) -> i64;
+            pub safe fn core_set_auto_show_metal(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-box-selection-by-engine"]
-            pub fn core_set_box_selection_by_engine(p0: i32) -> i64;
+            pub safe fn core_set_box_selection_by_engine(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-build-facing"]
-            pub fn core_set_build_facing(p0: i32) -> i64;
+            pub safe fn core_set_build_facing(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-build-spacing"]
-            pub fn core_set_build_spacing(p0: i32) -> i64;
+            pub safe fn core_set_build_spacing(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-camera-offset"]
-            pub fn core_set_camera_offset(p0: i32) -> i64;
+            pub safe fn core_set_camera_offset(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-custom-palette-color"]
-            pub fn core_set_custom_palette_color(p0: i32, p1: f32, p2: f32, p3: f32) -> i64;
+            pub safe fn core_set_custom_palette_color(p0: i32, p1: f32, p2: f32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-dolly-camera-look-position"]
-            pub fn core_set_dolly_camera_look_position(p0: i32) -> i64;
+            pub safe fn core_set_dolly_camera_look_position(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-dolly-camera-look-unit"]
-            pub fn core_set_dolly_camera_look_unit(p0: i32) -> i64;
+            pub safe fn core_set_dolly_camera_look_unit(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-dolly-camera-mode"]
-            pub fn core_set_dolly_camera_mode(p0: i32) -> i64;
+            pub safe fn core_set_dolly_camera_mode(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-dolly-camera-position"]
-            pub fn core_set_dolly_camera_position(p0: i32) -> i64;
+            pub safe fn core_set_dolly_camera_position(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-dolly-camera-relative-mode"]
-            pub fn core_set_dolly_camera_relative_mode(p0: i32) -> i64;
+            pub safe fn core_set_dolly_camera_relative_mode(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-draw-ground"]
-            pub fn core_set_draw_ground(p0: i32) -> i64;
+            pub safe fn core_set_draw_ground(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-draw-ground-deferred"]
-            pub fn core_set_draw_ground_deferred(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_set_draw_ground_deferred(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-draw-models-deferred"]
-            pub fn core_set_draw_models_deferred(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
+            pub safe fn core_set_draw_models_deferred(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-draw-selection-info"]
-            pub fn core_set_draw_selection_info(p0: i32) -> i64;
+            pub safe fn core_set_draw_selection_info(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-draw-sky"]
-            pub fn core_set_draw_sky(p0: i32) -> i64;
+            pub safe fn core_set_draw_sky(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-draw-water"]
-            pub fn core_set_draw_water(p0: i32) -> i64;
+            pub safe fn core_set_draw_water(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-engine-build-square-rendering"]
-            pub fn core_set_engine_build_square_rendering(p0: i32) -> i64;
+            pub safe fn core_set_engine_build_square_rendering(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-feature-always-update-matrix"]
-            pub fn core_set_feature_always_update_matrix(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_always_update_matrix(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-feature-engine-draw-mask"]
-            pub fn core_set_feature_engine_draw_mask(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_engine_draw_mask(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-feature-fade"]
-            pub fn core_set_feature_fade(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_fade(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-feature-no-draw"]
-            pub fn core_set_feature_no_draw(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_no_draw(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-feature-palette-index"]
-            pub fn core_set_feature_palette_index(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_palette_index(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-last-message-position"]
-            pub fn core_set_last_message_position(p0: i32) -> i64;
+            pub safe fn core_set_last_message_position(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-los-view-colors"]
-            pub fn core_set_los_view_colors(p0: i32) -> i64;
+            pub safe fn core_set_los_view_colors(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-map-rendering-params"]
-            pub fn core_set_map_rendering_params(p0: i32) -> i64;
+            pub safe fn core_set_map_rendering_params(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-map-shader"]
-            pub fn core_set_map_shader(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_map_shader(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-mini-map-rotation"]
-            pub fn core_set_mini_map_rotation(p0: f32, p1: i32) -> i32;
+            pub safe fn core_set_mini_map_rotation(p0: f32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-nano-projectile-params"]
-            pub fn core_set_nano_projectile_params(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
+            pub safe fn core_set_nano_projectile_params(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-shock-front-factors"]
-            pub fn core_set_shock_front_factors(p0: i32) -> i64;
+            pub safe fn core_set_shock_front_factors(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-sun-direction"]
-            pub fn core_set_sun_direction(p0: f32, p1: i32) -> i64;
+            pub safe fn core_set_sun_direction(p0: f32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-sun-lighting"]
-            pub fn core_set_sun_lighting(p0: i32) -> i64;
+            pub safe fn core_set_sun_lighting(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-always-update-matrix"]
-            pub fn core_set_unit_always_update_matrix(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_always_update_matrix(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-engine-draw-mask"]
-            pub fn core_set_unit_engine_draw_mask(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_engine_draw_mask(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-icon-draw"]
-            pub fn core_set_unit_icon_draw(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_icon_draw(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-leave-tracks"]
-            pub fn core_set_unit_leave_tracks(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_leave_tracks(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-no-draw"]
-            pub fn core_set_unit_no_draw(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_no_draw(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-no-group"]
-            pub fn core_set_unit_no_group(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_no_group(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-no-minimap"]
-            pub fn core_set_unit_no_minimap(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_no_minimap(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-no-select"]
-            pub fn core_set_unit_no_select(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_no_select(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-unit-palette-index"]
-            pub fn core_set_unit_palette_index(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_palette_index(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-video-capturing-mode"]
-            pub fn core_set_video_capturing_mode(p0: i32) -> i64;
+            pub safe fn core_set_video_capturing_mode(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-video-capturing-time-offset"]
-            pub fn core_set_video_capturing_time_offset(p0: f32) -> i64;
+            pub safe fn core_set_video_capturing_time_offset(p0: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-water-params"]
-            pub fn core_set_water_params(p0: i32) -> i64;
+            pub safe fn core_set_water_params(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-window-geometry"]
-            pub fn core_set_window_geometry(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+            pub safe fn core_set_window_geometry(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-window-maximized"]
-            pub fn core_set_window_maximized(p0: i32) -> i64;
+            pub safe fn core_set_window_maximized(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "set-window-minimized"]
-            pub fn core_set_window_minimized(p0: i32) -> i64;
+            pub safe fn core_set_window_minimized(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
             #[link_name = "warp-mouse"]
-            pub fn core_warp_mouse(p0: i32, p1: i32) -> i64;
+            pub safe fn core_warp_mouse(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -9963,8 +9346,7 @@ pub mod unsynced_ctrl {
     pub fn force_layout_update(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_force_layout_update(unused as i32) } as u64;
+            let packed = raw::core_force_layout_update(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -9986,8 +9368,7 @@ pub mod unsynced_ctrl {
     pub fn force_tesselation_update(normal: bool, shadow: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_force_tesselation_update(if normal { 1 } else { 0 }, if shadow { 1 } else { 0 }) } as u64;
+            let packed = raw::core_force_tesselation_update(if normal { 1 } else { 0 }, if shadow { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10009,8 +9390,7 @@ pub mod unsynced_ctrl {
     pub fn pause_dolly_camera(percent: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_pause_dolly_camera(percent) } as u64;
+            let packed = raw::core_pause_dolly_camera(percent) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10032,8 +9412,7 @@ pub mod unsynced_ctrl {
     pub fn preload_feature_def_model(def_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_preload_feature_def_model(def_id) } as u64;
+            let packed = raw::core_preload_feature_def_model(def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10055,8 +9434,7 @@ pub mod unsynced_ctrl {
     pub fn preload_unit_def_model(def_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_preload_unit_def_model(def_id) } as u64;
+            let packed = raw::core_preload_unit_def_model(def_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10078,8 +9456,7 @@ pub mod unsynced_ctrl {
     pub fn resume_dolly_camera(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_resume_dolly_camera(unused as i32) } as u64;
+            let packed = raw::core_resume_dolly_camera(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10101,8 +9478,7 @@ pub mod unsynced_ctrl {
     pub fn run_dolly_camera(runtime_ms: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_run_dolly_camera(runtime_ms) } as u64;
+            let packed = raw::core_run_dolly_camera(runtime_ms) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10124,8 +9500,7 @@ pub mod unsynced_ctrl {
     pub fn sdl_set_text_input_rect(x: i32, y: i32, w: i32, h: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_sdl_set_text_input_rect(x, y, w, h) } as u64;
+            let packed = raw::core_sdl_set_text_input_rect(x, y, w, h) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10147,8 +9522,7 @@ pub mod unsynced_ctrl {
     pub fn sdl_start_text_input(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_sdl_start_text_input(unused as i32) } as u64;
+            let packed = raw::core_sdl_start_text_input(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10170,8 +9544,7 @@ pub mod unsynced_ctrl {
     pub fn sdl_stop_text_input(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_sdl_stop_text_input(unused as i32) } as u64;
+            let packed = raw::core_sdl_stop_text_input(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10205,11 +9578,8 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_active_command(cmd_index, button, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_active_command(cmd_index, button, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10231,8 +9601,7 @@ pub mod unsynced_ctrl {
     pub fn set_auto_show_metal(enable: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_auto_show_metal(if enable { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_auto_show_metal(if enable { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10254,8 +9623,7 @@ pub mod unsynced_ctrl {
     pub fn set_box_selection_by_engine(state: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_box_selection_by_engine(if state { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_box_selection_by_engine(if state { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10277,8 +9645,7 @@ pub mod unsynced_ctrl {
     pub fn set_build_facing(facing: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_build_facing(facing) } as u64;
+            let packed = raw::core_set_build_facing(facing) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10300,8 +9667,7 @@ pub mod unsynced_ctrl {
     pub fn set_build_spacing(spacing: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_build_spacing(spacing) } as u64;
+            let packed = raw::core_set_build_spacing(spacing) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10336,11 +9702,8 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_camera_offset(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_camera_offset(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10362,8 +9725,7 @@ pub mod unsynced_ctrl {
     pub fn set_custom_palette_color(index: i32, r: f32, g: f32, b: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_custom_palette_color(index, r, g, b) } as u64;
+            let packed = raw::core_set_custom_palette_color(index, r, g, b) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10394,11 +9756,8 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_dolly_camera_look_position(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_dolly_camera_look_position(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10420,8 +9779,7 @@ pub mod unsynced_ctrl {
     pub fn set_dolly_camera_look_unit(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_dolly_camera_look_unit(unit_id) } as u64;
+            let packed = raw::core_set_dolly_camera_look_unit(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10443,8 +9801,7 @@ pub mod unsynced_ctrl {
     pub fn set_dolly_camera_mode(mode: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_dolly_camera_mode(mode) } as u64;
+            let packed = raw::core_set_dolly_camera_mode(mode) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10475,11 +9832,8 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_dolly_camera_position(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_dolly_camera_position(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10501,8 +9855,7 @@ pub mod unsynced_ctrl {
     pub fn set_dolly_camera_relative_mode(mode: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_dolly_camera_relative_mode(mode) } as u64;
+            let packed = raw::core_set_dolly_camera_relative_mode(mode) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10524,8 +9877,7 @@ pub mod unsynced_ctrl {
     pub fn set_draw_ground(draw_ground: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_draw_ground(if draw_ground { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_draw_ground(if draw_ground { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10548,12 +9900,8 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_set_draw_ground_deferred(if draw_deferred { 1 } else { 0 }, if draw_forward { 1 } else { 0 }, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_set_draw_ground_deferred(if draw_deferred { 1 } else { 0 }, if draw_forward { 1 } else { 0 }, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -10576,12 +9924,8 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_set_draw_models_deferred(if draw_units_deferred { 1 } else { 0 }, if draw_features_deferred { 1 } else { 0 }, if draw_units_forward { 1 } else { 0 }, if draw_features_forward { 1 } else { 0 }, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_set_draw_models_deferred(if draw_units_deferred { 1 } else { 0 }, if draw_features_deferred { 1 } else { 0 }, if draw_units_forward { 1 } else { 0 }, if draw_features_forward { 1 } else { 0 }, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -10603,8 +9947,7 @@ pub mod unsynced_ctrl {
     pub fn set_draw_selection_info(draw: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_draw_selection_info(if draw { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_draw_selection_info(if draw { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10626,8 +9969,7 @@ pub mod unsynced_ctrl {
     pub fn set_draw_sky(draw_sky: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_draw_sky(if draw_sky { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_draw_sky(if draw_sky { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10649,8 +9991,7 @@ pub mod unsynced_ctrl {
     pub fn set_draw_water(draw_water: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_draw_water(if draw_water { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_draw_water(if draw_water { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10672,8 +10013,7 @@ pub mod unsynced_ctrl {
     pub fn set_engine_build_square_rendering(enabled: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_engine_build_square_rendering(if enabled { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_engine_build_square_rendering(if enabled { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10695,8 +10035,7 @@ pub mod unsynced_ctrl {
     pub fn set_feature_always_update_matrix(feature_id: i32, enable: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_always_update_matrix(feature_id, if enable { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_feature_always_update_matrix(feature_id, if enable { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10718,8 +10057,7 @@ pub mod unsynced_ctrl {
     pub fn set_feature_engine_draw_mask(feature_id: i32, mask: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_engine_draw_mask(feature_id, mask as i32) } as u64;
+            let packed = raw::core_set_feature_engine_draw_mask(feature_id, mask as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10741,8 +10079,7 @@ pub mod unsynced_ctrl {
     pub fn set_feature_fade(feature_id: i32, allow: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_fade(feature_id, if allow { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_feature_fade(feature_id, if allow { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10764,8 +10101,7 @@ pub mod unsynced_ctrl {
     pub fn set_feature_no_draw(feature_id: i32, no_draw: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_no_draw(feature_id, if no_draw { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_feature_no_draw(feature_id, if no_draw { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10787,8 +10123,7 @@ pub mod unsynced_ctrl {
     pub fn set_feature_palette_index(feature_id: i32, custom_index: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_palette_index(feature_id, custom_index) } as u64;
+            let packed = raw::core_set_feature_palette_index(feature_id, custom_index) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10819,11 +10154,8 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_last_message_position(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_last_message_position(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10870,11 +10202,8 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_los_view_colors(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_los_view_colors(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10896,8 +10225,7 @@ pub mod unsynced_ctrl {
     pub fn set_map_shader(standard_shader_id: i32, deferred_shader_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_map_shader(standard_shader_id, deferred_shader_id) } as u64;
+            let packed = raw::core_set_map_shader(standard_shader_id, deferred_shader_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10920,12 +10248,8 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_set_mini_map_rotation(radians, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_set_mini_map_rotation(radians, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -10947,8 +10271,7 @@ pub mod unsynced_ctrl {
     pub fn set_nano_projectile_params(r: f32, v: f32, a: f32, rand_r: f32, rand_v: f32, rand_a: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_nano_projectile_params(r, v, a, rand_r, rand_v, rand_a) } as u64;
+            let packed = raw::core_set_nano_projectile_params(r, v, a, rand_r, rand_v, rand_a) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -10979,11 +10302,8 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_sun_direction(intensity, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_sun_direction(intensity, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11005,8 +10325,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_always_update_matrix(unit_id: i32, always_update_matrix: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_always_update_matrix(unit_id, if always_update_matrix { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_always_update_matrix(unit_id, if always_update_matrix { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11028,8 +10347,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_engine_draw_mask(unit_id: i32, draw_mask: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_engine_draw_mask(unit_id, draw_mask as i32) } as u64;
+            let packed = raw::core_set_unit_engine_draw_mask(unit_id, draw_mask as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11051,8 +10369,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_icon_draw(unit_id: i32, draw_icon: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_icon_draw(unit_id, if draw_icon { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_icon_draw(unit_id, if draw_icon { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11074,8 +10391,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_leave_tracks(unit_id: i32, leave_tracks: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_leave_tracks(unit_id, if leave_tracks { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_leave_tracks(unit_id, if leave_tracks { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11097,8 +10413,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_no_draw(unit_id: i32, no_draw: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_no_draw(unit_id, if no_draw { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_no_draw(unit_id, if no_draw { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11120,8 +10435,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_no_group(unit_id: i32, no_group: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_no_group(unit_id, if no_group { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_no_group(unit_id, if no_group { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11143,8 +10457,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_no_minimap(unit_id: i32, no_minimap: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_no_minimap(unit_id, if no_minimap { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_no_minimap(unit_id, if no_minimap { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11166,8 +10479,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_no_select(unit_id: i32, no_select: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_no_select(unit_id, if no_select { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_no_select(unit_id, if no_select { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11189,8 +10501,7 @@ pub mod unsynced_ctrl {
     pub fn set_unit_palette_index(unit_id: i32, custom_index: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_palette_index(unit_id, custom_index) } as u64;
+            let packed = raw::core_set_unit_palette_index(unit_id, custom_index) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11212,8 +10523,7 @@ pub mod unsynced_ctrl {
     pub fn set_video_capturing_mode(allow_capture_mode: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_video_capturing_mode(if allow_capture_mode { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_video_capturing_mode(if allow_capture_mode { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11235,8 +10545,7 @@ pub mod unsynced_ctrl {
     pub fn set_video_capturing_time_offset(time_offset: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_video_capturing_time_offset(time_offset) } as u64;
+            let packed = raw::core_set_video_capturing_time_offset(time_offset) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11266,11 +10575,8 @@ pub mod unsynced_ctrl {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_window_geometry(display_index, window_pos_x, window_pos_y, window_size_x, window_size_y, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_window_geometry(display_index, window_pos_x, window_pos_y, window_size_x, window_size_y, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11292,8 +10598,7 @@ pub mod unsynced_ctrl {
     pub fn set_window_maximized(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_window_maximized(unused as i32) } as u64;
+            let packed = raw::core_set_window_maximized(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11315,8 +10620,7 @@ pub mod unsynced_ctrl {
     pub fn set_window_minimized(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_window_minimized(unused as i32) } as u64;
+            let packed = raw::core_set_window_minimized(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11338,8 +10642,7 @@ pub mod unsynced_ctrl {
     pub fn warp_mouse(x: i32, y: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_warp_mouse(x, y) } as u64;
+            let packed = raw::core_warp_mouse(x, y) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -11443,857 +10746,857 @@ pub mod gfx {
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "active-texture"]
-            pub fn core_active_texture(p0: i32) -> i32;
+            pub safe fn core_active_texture(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "alpha-test"]
-            pub fn core_alpha_test(p0: i32, p1: i32, p2: f32) -> i32;
+            pub safe fn core_alpha_test(p0: i32, p1: i32, p2: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "alpha-to-coverage"]
-            pub fn core_alpha_to_coverage(p0: i32) -> i32;
+            pub safe fn core_alpha_to_coverage(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "attach-index-buffer-vao"]
-            pub fn core_attach_index_buffer_vao(p0: i32, p1: i32) -> i32;
+            pub safe fn core_attach_index_buffer_vao(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "attach-instance-buffer-vao"]
-            pub fn core_attach_instance_buffer_vao(p0: i32, p1: i32) -> i32;
+            pub safe fn core_attach_instance_buffer_vao(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "attach-vertex-buffer-vao"]
-            pub fn core_attach_vertex_buffer_vao(p0: i32, p1: i32) -> i32;
+            pub safe fn core_attach_vertex_buffer_vao(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "begin-text"]
-            pub fn core_begin_text(p0: i32) -> i32;
+            pub safe fn core_begin_text(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "billboard"]
-            pub fn core_billboard(p0: i32) -> i32;
+            pub safe fn core_billboard(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "bind-buffer-range-vbo"]
-            pub fn core_bind_buffer_range_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+            pub safe fn core_bind_buffer_range_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "blend-equation"]
-            pub fn core_blend_equation(p0: i32) -> i32;
+            pub safe fn core_blend_equation(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "blend-equation-separate"]
-            pub fn core_blend_equation_separate(p0: i32, p1: i32) -> i32;
+            pub safe fn core_blend_equation_separate(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "blend-func"]
-            pub fn core_blend_func(p0: i32, p1: i32) -> i32;
+            pub safe fn core_blend_func(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "blend-func-separate"]
-            pub fn core_blend_func_separate(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_blend_func_separate(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "blending"]
-            pub fn core_blending(p0: i32) -> i32;
+            pub safe fn core_blending(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "blit-fbo"]
-            pub fn core_blit_fbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32, p11: i32) -> i32;
+            pub safe fn core_blit_fbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32, p11: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "call-list"]
-            pub fn core_call_list(p0: i32) -> i32;
+            pub safe fn core_call_list(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "clear"]
-            pub fn core_clear(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_clear(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "clear-attachment-fbo"]
-            pub fn core_clear_attachment_fbo(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_clear_attachment_fbo(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "clear-fallback-fonts"]
-            pub fn core_clear_fallback_fonts(p0: i32) -> i32;
+            pub safe fn core_clear_fallback_fonts(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "clear-submission-vao"]
-            pub fn core_clear_submission_vao(p0: i32) -> i32;
+            pub safe fn core_clear_submission_vao(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "clear-vbo"]
-            pub fn core_clear_vbo(p0: i32) -> i32;
+            pub safe fn core_clear_vbo(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "clip-distance"]
-            pub fn core_clip_distance(p0: i32, p1: i32) -> i32;
+            pub safe fn core_clip_distance(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "clip-plane"]
-            pub fn core_clip_plane(p0: i32, p1: i32) -> i32;
+            pub safe fn core_clip_plane(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "color"]
-            pub fn core_color(p0: f32, p1: f32, p2: f32, p3: f32) -> i32;
+            pub safe fn core_color(p0: f32, p1: f32, p2: f32, p3: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "color-mask"]
-            pub fn core_color_mask(p0: i32) -> i32;
+            pub safe fn core_color_mask(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "config-mini-map"]
-            pub fn core_config_mini_map(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_config_mini_map(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "copy-to-vbo"]
-            pub fn core_copy_to_vbo(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_copy_to_vbo(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "create-query"]
-            pub fn core_create_query(p0: i32) -> i64;
+            pub safe fn core_create_query(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "create-rbo"]
-            pub fn core_create_rbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            pub safe fn core_create_rbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "cull-face"]
-            pub fn core_cull_face(p0: i32) -> i32;
+            pub safe fn core_cull_face(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "culling"]
-            pub fn core_culling(p0: i32) -> i32;
+            pub safe fn core_culling(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "delete-fbo"]
-            pub fn core_delete_fbo(p0: i32) -> i32;
+            pub safe fn core_delete_fbo(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "delete-font"]
-            pub fn core_delete_font(p0: i32) -> i32;
+            pub safe fn core_delete_font(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "delete-list"]
-            pub fn core_delete_list(p0: i32) -> i32;
+            pub safe fn core_delete_list(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "delete-query"]
-            pub fn core_delete_query(p0: i32) -> i32;
+            pub safe fn core_delete_query(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "delete-rbo"]
-            pub fn core_delete_rbo(p0: i32) -> i32;
+            pub safe fn core_delete_rbo(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "delete-shader"]
-            pub fn core_delete_shader(p0: i32) -> i64;
+            pub safe fn core_delete_shader(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "delete-vao"]
-            pub fn core_delete_vao(p0: i32) -> i32;
+            pub safe fn core_delete_vao(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "delete-vbo"]
-            pub fn core_delete_vbo(p0: i32) -> i32;
+            pub safe fn core_delete_vbo(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "depth-clamp"]
-            pub fn core_depth_clamp(p0: i32) -> i32;
+            pub safe fn core_depth_clamp(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "depth-mask"]
-            pub fn core_depth_mask(p0: i32) -> i32;
+            pub safe fn core_depth_mask(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "depth-test"]
-            pub fn core_depth_test(p0: i32) -> i32;
+            pub safe fn core_depth_test(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "dispatch-compute"]
-            pub fn core_dispatch_compute(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_dispatch_compute(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "download-vbo"]
-            pub fn core_download_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
+            pub safe fn core_download_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "draw-arrays-vao"]
-            pub fn core_draw_arrays_vao(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
+            pub safe fn core_draw_arrays_vao(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "draw-elements-vao"]
-            pub fn core_draw_elements_vao(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+            pub safe fn core_draw_elements_vao(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "draw-ground-circle"]
-            pub fn core_draw_ground_circle(p0: f32, p1: i32, p2: i32, p3: f32, p4: f32, p5: i32, p6: i32) -> i32;
+            pub safe fn core_draw_ground_circle(p0: f32, p1: i32, p2: i32, p3: f32, p4: f32, p5: i32, p6: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "draw-ground-quad"]
-            pub fn core_draw_ground_quad(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: f32, p6: f32, p7: f32, p8: f32) -> i32;
+            pub safe fn core_draw_ground_quad(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: f32, p6: f32, p7: f32, p8: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "draw-list-at-unit"]
-            pub fn core_draw_list_at_unit(p0: i32, p1: i32, p2: i32, p3: f32, p4: i32) -> i32;
+            pub safe fn core_draw_list_at_unit(p0: i32, p1: i32, p2: i32, p3: f32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "draw-mini-map"]
-            pub fn core_draw_mini_map(p0: i32) -> i32;
+            pub safe fn core_draw_mini_map(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "dump-definition-vbo"]
-            pub fn core_dump_definition_vbo(p0: i32) -> i32;
+            pub safe fn core_dump_definition_vbo(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "edge-flag"]
-            pub fn core_edge_flag(p0: i32) -> i32;
+            pub safe fn core_edge_flag(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "end-text"]
-            pub fn core_end_text(p0: i32) -> i32;
+            pub safe fn core_end_text(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature"]
-            pub fn core_feature(p0: i32, p1: i32) -> i32;
+            pub safe fn core_feature(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature-mult-matrix"]
-            pub fn core_feature_mult_matrix(p0: i32) -> i32;
+            pub safe fn core_feature_mult_matrix(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature-piece"]
-            pub fn core_feature_piece(p0: i32, p1: i32) -> i32;
+            pub safe fn core_feature_piece(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature-piece-matrix"]
-            pub fn core_feature_piece_matrix(p0: i32, p1: i32) -> i32;
+            pub safe fn core_feature_piece_matrix(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature-piece-mult-matrix"]
-            pub fn core_feature_piece_mult_matrix(p0: i32, p1: i32) -> i32;
+            pub safe fn core_feature_piece_mult_matrix(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature-raw"]
-            pub fn core_feature_raw(p0: i32, p1: i32) -> i32;
+            pub safe fn core_feature_raw(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature-shape"]
-            pub fn core_feature_shape(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_feature_shape(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature-shape-textures"]
-            pub fn core_feature_shape_textures(p0: i32, p1: i32) -> i32;
+            pub safe fn core_feature_shape_textures(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "feature-textures"]
-            pub fn core_feature_textures(p0: i32, p1: i32) -> i32;
+            pub safe fn core_feature_textures(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "finish"]
-            pub fn core_finish(p0: i32) -> i32;
+            pub safe fn core_finish(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "flush"]
-            pub fn core_flush(p0: i32) -> i32;
+            pub safe fn core_flush(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "fog"]
-            pub fn core_fog(p0: i32) -> i32;
+            pub safe fn core_fog(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "fog-coord"]
-            pub fn core_fog_coord(p0: f32) -> i32;
+            pub safe fn core_fog_coord(p0: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "font-begin"]
-            pub fn core_font_begin(p0: i32, p1: i32) -> i32;
+            pub safe fn core_font_begin(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "font-bind-texture"]
-            pub fn core_font_bind_texture(p0: i32) -> i32;
+            pub safe fn core_font_bind_texture(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "font-end"]
-            pub fn core_font_end(p0: i32) -> i32;
+            pub safe fn core_font_end(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "font-set-auto-outline-color"]
-            pub fn core_font_set_auto_outline_color(p0: i32, p1: i32) -> i32;
+            pub safe fn core_font_set_auto_outline_color(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "font-set-outline-color"]
-            pub fn core_font_set_outline_color(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i32;
+            pub safe fn core_font_set_outline_color(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "font-set-text-color"]
-            pub fn core_font_set_text_color(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i32;
+            pub safe fn core_font_set_text_color(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "font-submit-buffered"]
-            pub fn core_font_submit_buffered(p0: i32, p1: i32) -> i32;
+            pub safe fn core_font_submit_buffered(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "font-wrap-text"]
-            pub fn core_font_wrap_text(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+            pub safe fn core_font_wrap_text(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "frustum"]
-            pub fn core_frustum(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i32;
+            pub safe fn core_frustum(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-atmosphere"]
-            pub fn core_get_atmosphere(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_atmosphere(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-engine-model-uniform-data-def"]
-            pub fn core_get_engine_model_uniform_data_def(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_engine_model_uniform_data_def(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-engine-model-uniform-data-size"]
-            pub fn core_get_engine_model_uniform_data_size(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_engine_model_uniform_data_size(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-engine-uniform-buffer-def"]
-            pub fn core_get_engine_uniform_buffer_def(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_engine_uniform_buffer_def(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-font-info"]
-            pub fn core_get_font_info(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_font_info(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-idvbo"]
-            pub fn core_get_idvbo(p0: i32) -> i64;
+            pub safe fn core_get_idvbo(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-map-rendering"]
-            pub fn core_get_map_rendering(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_map_rendering(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-matrix-data"]
-            pub fn core_get_matrix_data(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_matrix_data(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-number"]
-            pub fn core_get_number(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_number(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-query"]
-            pub fn core_get_query(p0: i32) -> i64;
+            pub safe fn core_get_query(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-rbo-info"]
-            pub fn core_get_rbo_info(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_rbo_info(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-screen-view-trans"]
-            pub fn core_get_screen_view_trans(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_screen_view_trans(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-shader-log"]
-            pub fn core_get_shader_log(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_shader_log(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-shadow-map-params"]
-            pub fn core_get_shadow_map_params(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_shadow_map_params(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-string"]
-            pub fn core_get_string(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_string(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-sun"]
-            pub fn core_get_sun(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_sun(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-vao"]
-            pub fn core_get_vao(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_vao(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-vbo"]
-            pub fn core_get_vbo(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_vbo(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-vbo-info"]
-            pub fn core_get_vbo_info(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_vbo_info(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-view-range"]
-            pub fn core_get_view_range(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_view_range(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-view-sizes"]
-            pub fn core_get_view_sizes(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_view_sizes(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-water-rendering"]
-            pub fn core_get_water_rendering(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_water_rendering(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "is-valid-fbo"]
-            pub fn core_is_valid_fbo(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_is_valid_fbo(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "light"]
-            pub fn core_light(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_light(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "lighting"]
-            pub fn core_lighting(p0: i32) -> i32;
+            pub safe fn core_lighting(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "line-stipple"]
-            pub fn core_line_stipple(p0: i32, p1: i32) -> i32;
+            pub safe fn core_line_stipple(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "line-width"]
-            pub fn core_line_width(p0: f32) -> i32;
+            pub safe fn core_line_width(p0: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "load-identity"]
-            pub fn core_load_identity(p0: i32) -> i32;
+            pub safe fn core_load_identity(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "load-matrix"]
-            pub fn core_load_matrix(p0: i32) -> i32;
+            pub safe fn core_load_matrix(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "logic-op"]
-            pub fn core_logic_op(p0: i32, p1: i32) -> i32;
+            pub safe fn core_logic_op(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "material"]
-            pub fn core_material(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_material(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "matrix-mode"]
-            pub fn core_matrix_mode(p0: i32) -> i32;
+            pub safe fn core_matrix_mode(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "memory-barrier"]
-            pub fn core_memory_barrier(p0: i32) -> i32;
+            pub safe fn core_memory_barrier(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "models-vbo"]
-            pub fn core_models_vbo(p0: i32) -> i64;
+            pub safe fn core_models_vbo(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "mult-matrix"]
-            pub fn core_mult_matrix(p0: i32) -> i32;
+            pub safe fn core_mult_matrix(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "multi-tex-coord"]
-            pub fn core_multi_tex_coord(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: i32) -> i32;
+            pub safe fn core_multi_tex_coord(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "multi-tex-env"]
-            pub fn core_multi_tex_env(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
+            pub safe fn core_multi_tex_env(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "multi-tex-gen"]
-            pub fn core_multi_tex_gen(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
+            pub safe fn core_multi_tex_gen(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "normal"]
-            pub fn core_normal(p0: f32, p1: f32, p2: f32) -> i32;
+            pub safe fn core_normal(p0: f32, p1: f32, p2: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "ortho"]
-            pub fn core_ortho(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i32;
+            pub safe fn core_ortho(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "point-parameter"]
-            pub fn core_point_parameter(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_point_parameter(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "point-size"]
-            pub fn core_point_size(p0: f32) -> i32;
+            pub safe fn core_point_size(p0: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "point-sprite"]
-            pub fn core_point_sprite(p0: i32) -> i32;
+            pub safe fn core_point_sprite(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "polygon-mode"]
-            pub fn core_polygon_mode(p0: i32, p1: i32) -> i32;
+            pub safe fn core_polygon_mode(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "polygon-offset"]
-            pub fn core_polygon_offset(p0: f32, p1: f32) -> i32;
+            pub safe fn core_polygon_offset(p0: f32, p1: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "pop-attrib"]
-            pub fn core_pop_attrib(p0: i32) -> i32;
+            pub safe fn core_pop_attrib(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "pop-debug-group"]
-            pub fn core_pop_debug_group(p0: i32) -> i32;
+            pub safe fn core_pop_debug_group(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "pop-matrix"]
-            pub fn core_pop_matrix(p0: i32) -> i32;
+            pub safe fn core_pop_matrix(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "push-attrib"]
-            pub fn core_push_attrib(p0: i32) -> i32;
+            pub safe fn core_push_attrib(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "push-matrix"]
-            pub fn core_push_matrix(p0: i32) -> i32;
+            pub safe fn core_push_matrix(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "raw-bind-fbo"]
-            pub fn core_raw_bind_fbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
+            pub safe fn core_raw_bind_fbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "read-pixels"]
-            pub fn core_read_pixels(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
+            pub safe fn core_read_pixels(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "rect"]
-            pub fn core_rect(p0: f32, p1: f32, p2: f32, p3: f32) -> i32;
+            pub safe fn core_rect(p0: f32, p1: f32, p2: f32, p3: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "remove-from-submission-vao"]
-            pub fn core_remove_from_submission_vao(p0: i32, p1: i32) -> i32;
+            pub safe fn core_remove_from_submission_vao(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "reset-matrices"]
-            pub fn core_reset_matrices(p0: i32) -> i32;
+            pub safe fn core_reset_matrices(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "reset-state"]
-            pub fn core_reset_state(p0: i32) -> i32;
+            pub safe fn core_reset_state(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "rotate"]
-            pub fn core_rotate(p0: f32, p1: f32, p2: f32, p3: f32) -> i32;
+            pub safe fn core_rotate(p0: f32, p1: f32, p2: f32, p3: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "scale"]
-            pub fn core_scale(p0: f32, p1: f32, p2: f32) -> i32;
+            pub safe fn core_scale(p0: f32, p1: f32, p2: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "scissor"]
-            pub fn core_scissor(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_scissor(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "secondary-color"]
-            pub fn core_secondary_color(p0: f32, p1: f32, p2: f32) -> i32;
+            pub safe fn core_secondary_color(p0: f32, p1: f32, p2: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "set-fbo-read-buffer"]
-            pub fn core_set_fbo_read_buffer(p0: i32, p1: i32) -> i32;
+            pub safe fn core_set_fbo_read_buffer(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "set-geometry-shader-parameter"]
-            pub fn core_set_geometry_shader_parameter(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_set_geometry_shader_parameter(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "set-tesselation-shader-parameter"]
-            pub fn core_set_tesselation_shader_parameter(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
+            pub safe fn core_set_tesselation_shader_parameter(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "shade-model"]
-            pub fn core_shade_model(p0: i32) -> i32;
+            pub safe fn core_shade_model(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "slave-mini-map"]
-            pub fn core_slave_mini_map(p0: i32) -> i32;
+            pub safe fn core_slave_mini_map(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "stencil-func"]
-            pub fn core_stencil_func(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_stencil_func(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "stencil-func-separate"]
-            pub fn core_stencil_func_separate(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_stencil_func_separate(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "stencil-mask"]
-            pub fn core_stencil_mask(p0: i32) -> i32;
+            pub safe fn core_stencil_mask(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "stencil-mask-separate"]
-            pub fn core_stencil_mask_separate(p0: i32, p1: i32) -> i32;
+            pub safe fn core_stencil_mask_separate(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "stencil-op"]
-            pub fn core_stencil_op(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_stencil_op(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "stencil-op-separate"]
-            pub fn core_stencil_op_separate(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_stencil_op_separate(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "stencil-test"]
-            pub fn core_stencil_test(p0: i32) -> i32;
+            pub safe fn core_stencil_test(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "submit-vao"]
-            pub fn core_submit_vao(p0: i32) -> i32;
+            pub safe fn core_submit_vao(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "swap-buffers"]
-            pub fn core_swap_buffers(p0: i32) -> i32;
+            pub safe fn core_swap_buffers(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "tex-coord"]
-            pub fn core_tex_coord(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
+            pub safe fn core_tex_coord(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "tex-env"]
-            pub fn core_tex_env(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_tex_env(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "tex-gen"]
-            pub fn core_tex_gen(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_tex_gen(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "tex-rect"]
-            pub fn core_tex_rect(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: f32, p7: f32) -> i32;
+            pub safe fn core_tex_rect(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: f32, p7: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "text-env"]
-            pub fn core_text_env(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_text_env(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "translate"]
-            pub fn core_translate(p0: f32, p1: f32, p2: f32) -> i32;
+            pub safe fn core_translate(p0: f32, p1: f32, p2: f32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unbind-buffer-range-vbo"]
-            pub fn core_unbind_buffer_range_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+            pub safe fn core_unbind_buffer_range_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "uniform"]
-            pub fn core_uniform(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_uniform(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "uniform-int"]
-            pub fn core_uniform_int(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_uniform_int(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "uniform-subroutine"]
-            pub fn core_uniform_subroutine(p0: i32, p1: i32) -> i32;
+            pub safe fn core_uniform_subroutine(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit"]
-            pub fn core_unit(p0: i32, p1: i32) -> i32;
+            pub safe fn core_unit(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit-mult-matrix"]
-            pub fn core_unit_mult_matrix(p0: i32) -> i32;
+            pub safe fn core_unit_mult_matrix(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit-piece"]
-            pub fn core_unit_piece(p0: i32, p1: i32) -> i32;
+            pub safe fn core_unit_piece(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit-piece-matrix"]
-            pub fn core_unit_piece_matrix(p0: i32, p1: i32) -> i32;
+            pub safe fn core_unit_piece_matrix(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit-piece-mult-matrix"]
-            pub fn core_unit_piece_mult_matrix(p0: i32, p1: i32) -> i32;
+            pub safe fn core_unit_piece_mult_matrix(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit-raw"]
-            pub fn core_unit_raw(p0: i32, p1: i32) -> i32;
+            pub safe fn core_unit_raw(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit-shape"]
-            pub fn core_unit_shape(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_unit_shape(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit-shape-textures"]
-            pub fn core_unit_shape_textures(p0: i32, p1: i32) -> i32;
+            pub safe fn core_unit_shape_textures(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "unit-textures"]
-            pub fn core_unit_textures(p0: i32, p1: i32) -> i32;
+            pub safe fn core_unit_textures(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "use-shader"]
-            pub fn core_use_shader(p0: i32) -> i64;
+            pub safe fn core_use_shader(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "vertex"]
-            pub fn core_vertex(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
+            pub safe fn core_vertex(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "viewport"]
-            pub fn core_viewport(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_viewport(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
     }
 
@@ -12301,8 +11604,7 @@ pub mod gfx {
     pub fn active_texture(tex_num: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_active_texture(tex_num) };
+            let status = raw::core_active_texture(tex_num);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12316,8 +11618,7 @@ pub mod gfx {
     pub fn alpha_test(enable: bool, func: u32, ref_: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_alpha_test(if enable { 1 } else { 0 }, func as i32, ref_) };
+            let status = raw::core_alpha_test(if enable { 1 } else { 0 }, func as i32, ref_);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12331,8 +11632,7 @@ pub mod gfx {
     pub fn alpha_to_coverage(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_alpha_to_coverage(if value { 1 } else { 0 }) };
+            let status = raw::core_alpha_to_coverage(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12346,8 +11646,7 @@ pub mod gfx {
     pub fn attach_index_buffer_vao(vao_id: u32, vbo_id: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_attach_index_buffer_vao(vao_id as i32, vbo_id as i32) };
+            let status = raw::core_attach_index_buffer_vao(vao_id as i32, vbo_id as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12361,8 +11660,7 @@ pub mod gfx {
     pub fn attach_instance_buffer_vao(vao_id: u32, vbo_id: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_attach_instance_buffer_vao(vao_id as i32, vbo_id as i32) };
+            let status = raw::core_attach_instance_buffer_vao(vao_id as i32, vbo_id as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12376,8 +11674,7 @@ pub mod gfx {
     pub fn attach_vertex_buffer_vao(vao_id: u32, vbo_id: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_attach_vertex_buffer_vao(vao_id as i32, vbo_id as i32) };
+            let status = raw::core_attach_vertex_buffer_vao(vao_id as i32, vbo_id as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12391,8 +11688,7 @@ pub mod gfx {
     pub fn begin_text(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_begin_text(if value { 1 } else { 0 }) };
+            let status = raw::core_begin_text(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12406,8 +11702,7 @@ pub mod gfx {
     pub fn billboard(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_billboard(unused as i32) };
+            let status = raw::core_billboard(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12421,8 +11716,7 @@ pub mod gfx {
     pub fn bind_buffer_range_vbo(vbo_id: u32, binding_index: u32, element_offset: i32, element_count: i32, target: u32, bind: bool) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_bind_buffer_range_vbo(vbo_id as i32, binding_index as i32, element_offset, element_count, target as i32, if bind { 1 } else { 0 }) } as u64;
+            let packed = raw::core_bind_buffer_range_vbo(vbo_id as i32, binding_index as i32, element_offset, element_count, target as i32, if bind { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -12440,8 +11734,7 @@ pub mod gfx {
     pub fn blend_equation(mode: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_blend_equation(mode as i32) };
+            let status = raw::core_blend_equation(mode as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12455,8 +11748,7 @@ pub mod gfx {
     pub fn blend_equation_separate(mode_rgb: u32, mode_alpha: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_blend_equation_separate(mode_rgb as i32, mode_alpha as i32) };
+            let status = raw::core_blend_equation_separate(mode_rgb as i32, mode_alpha as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12470,8 +11762,7 @@ pub mod gfx {
     pub fn blend_func(src: u32, dst: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_blend_func(src as i32, dst as i32) };
+            let status = raw::core_blend_func(src as i32, dst as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12485,8 +11776,7 @@ pub mod gfx {
     pub fn blend_func_separate(src_rgb: u32, dst_rgb: u32, src_alpha: u32, dst_alpha: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_blend_func_separate(src_rgb as i32, dst_rgb as i32, src_alpha as i32, dst_alpha as i32) };
+            let status = raw::core_blend_func_separate(src_rgb as i32, dst_rgb as i32, src_alpha as i32, dst_alpha as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12500,8 +11790,7 @@ pub mod gfx {
     pub fn blending(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_blending(if value { 1 } else { 0 }) };
+            let status = raw::core_blending(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12512,12 +11801,10 @@ pub mod gfx {
     }
 
     #[inline]
-    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn blit_fbo(src_fboid: u32, dst_fboid: u32, x0_src: i32, y0_src: i32, x1_src: i32, y1_src: i32, x0_dst: i32, y0_dst: i32, x1_dst: i32, y1_dst: i32, mask: u32, filter: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_blit_fbo(src_fboid as i32, dst_fboid as i32, x0_src, y0_src, x1_src, y1_src, x0_dst, y0_dst, x1_dst, y1_dst, mask as i32, filter as i32) };
+            let status = raw::core_blit_fbo(src_fboid as i32, dst_fboid as i32, x0_src, y0_src, x1_src, y1_src, x0_dst, y0_dst, x1_dst, y1_dst, mask as i32, filter as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12531,8 +11818,7 @@ pub mod gfx {
     pub fn call_list(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_call_list(value as i32) };
+            let status = raw::core_call_list(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12555,11 +11841,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_clear(bits as i32, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_clear(bits as i32, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12582,11 +11865,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_clear_attachment_fbo(target as i32, attachment as i32, count as i32, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_clear_attachment_fbo(target as i32, attachment as i32, count as i32, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -12608,8 +11888,7 @@ pub mod gfx {
     pub fn clear_fallback_fonts(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_clear_fallback_fonts(unused as i32) };
+            let status = raw::core_clear_fallback_fonts(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12623,8 +11902,7 @@ pub mod gfx {
     pub fn clear_submission_vao(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_clear_submission_vao(value as i32) };
+            let status = raw::core_clear_submission_vao(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12638,8 +11916,7 @@ pub mod gfx {
     pub fn clear_vbo(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_clear_vbo(value as i32) };
+            let status = raw::core_clear_vbo(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12653,8 +11930,7 @@ pub mod gfx {
     pub fn clip_distance(index: u32, enable: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_clip_distance(index as i32, if enable { 1 } else { 0 }) };
+            let status = raw::core_clip_distance(index as i32, if enable { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12677,11 +11953,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_clip_plane(plane as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_clip_plane(plane as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12695,8 +11968,7 @@ pub mod gfx {
     pub fn color(r: f32, g: f32, b: f32, a: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_color(r, g, b, a) };
+            let status = raw::core_color(r, g, b, a);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12720,11 +11992,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_color_mask(input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_color_mask(input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12738,8 +12007,7 @@ pub mod gfx {
     pub fn config_mini_map(px: i32, py: i32, sx: i32, sy: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_config_mini_map(px, py, sx, sy) };
+            let status = raw::core_config_mini_map(px, py, sx, sy);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12753,8 +12021,7 @@ pub mod gfx {
     pub fn copy_to_vbo(source_vboid: u32, destination_vboid: u32, copy_size_in_bytes: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_copy_to_vbo(source_vboid as i32, destination_vboid as i32, copy_size_in_bytes) } as u64;
+            let packed = raw::core_copy_to_vbo(source_vboid as i32, destination_vboid as i32, copy_size_in_bytes) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -12776,8 +12043,7 @@ pub mod gfx {
     pub fn create_query(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_create_query(unused as i32) } as u64;
+            let packed = raw::core_create_query(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -12795,8 +12061,7 @@ pub mod gfx {
     pub fn create_rbo(xsize: i32, ysize: i32, target: u32, format: u32, samples: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_create_rbo(xsize, ysize, target as i32, format as i32, samples) } as u64;
+            let packed = raw::core_create_rbo(xsize, ysize, target as i32, format as i32, samples) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -12814,8 +12079,7 @@ pub mod gfx {
     pub fn cull_face(face: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_cull_face(face) };
+            let status = raw::core_cull_face(face);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12829,8 +12093,7 @@ pub mod gfx {
     pub fn culling(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_culling(if value { 1 } else { 0 }) };
+            let status = raw::core_culling(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12844,8 +12107,7 @@ pub mod gfx {
     pub fn delete_fbo(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_delete_fbo(value as i32) };
+            let status = raw::core_delete_fbo(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12859,8 +12121,7 @@ pub mod gfx {
     pub fn delete_font(font_id: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_delete_font(font_id as i32) };
+            let status = raw::core_delete_font(font_id as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12874,8 +12135,7 @@ pub mod gfx {
     pub fn delete_list(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_delete_list(value as i32) };
+            let status = raw::core_delete_list(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12889,8 +12149,7 @@ pub mod gfx {
     pub fn delete_query(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_delete_query(value as i32) };
+            let status = raw::core_delete_query(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12904,8 +12163,7 @@ pub mod gfx {
     pub fn delete_rbo(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_delete_rbo(value as i32) };
+            let status = raw::core_delete_rbo(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12919,8 +12177,7 @@ pub mod gfx {
     pub fn delete_shader(shader_id: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_delete_shader(shader_id as i32) } as u64;
+            let packed = raw::core_delete_shader(shader_id as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -12942,8 +12199,7 @@ pub mod gfx {
     pub fn delete_vao(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_delete_vao(value as i32) };
+            let status = raw::core_delete_vao(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12957,8 +12213,7 @@ pub mod gfx {
     pub fn delete_vbo(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_delete_vbo(value as i32) };
+            let status = raw::core_delete_vbo(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12972,8 +12227,7 @@ pub mod gfx {
     pub fn depth_clamp(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_depth_clamp(if value { 1 } else { 0 }) };
+            let status = raw::core_depth_clamp(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -12987,8 +12241,7 @@ pub mod gfx {
     pub fn depth_mask(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_depth_mask(if value { 1 } else { 0 }) };
+            let status = raw::core_depth_mask(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13011,11 +12264,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_depth_test(input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_depth_test(input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13029,8 +12279,7 @@ pub mod gfx {
     pub fn dispatch_compute(num_group_x: u32, num_group_y: u32, num_group_z: u32, barriers: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_dispatch_compute(num_group_x as i32, num_group_y as i32, num_group_z as i32, barriers as i32) };
+            let status = raw::core_dispatch_compute(num_group_x as i32, num_group_y as i32, num_group_z as i32, barriers as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13044,8 +12293,7 @@ pub mod gfx {
     pub fn draw_arrays_vao(vao_id: u32, mode: u32, vertex_count: i32, vertex_first: i32, instance_count: i32, instance_first: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_draw_arrays_vao(vao_id as i32, mode as i32, vertex_count, vertex_first, instance_count, instance_first) };
+            let status = raw::core_draw_arrays_vao(vao_id as i32, mode as i32, vertex_count, vertex_first, instance_count, instance_first);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13059,8 +12307,7 @@ pub mod gfx {
     pub fn draw_elements_vao(vao_id: u32, mode: u32, draw_count: i32, base_index: i32, instance_count: i32, base_vertex: i32, base_instance: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_draw_elements_vao(vao_id as i32, mode as i32, draw_count, base_index, instance_count, base_vertex, base_instance) };
+            let status = raw::core_draw_elements_vao(vao_id as i32, mode as i32, draw_count, base_index, instance_count, base_vertex, base_instance);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13083,11 +12330,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_draw_ground_circle(radius, resolution, if ballistic { 1 } else { 0 }, slope, gravity, weapon_def_id, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_draw_ground_circle(radius, resolution, if ballistic { 1 } else { 0 }, slope, gravity, weapon_def_id, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13098,12 +12342,10 @@ pub mod gfx {
     }
 
     #[inline]
-    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn draw_ground_quad(x0: f32, z0: f32, x1: f32, z1: f32, use_tex_coords: bool, tu0: f32, tv0: f32, tu1: f32, tv1: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_draw_ground_quad(x0, z0, x1, z1, if use_tex_coords { 1 } else { 0 }, tu0, tv0, tu1, tv1) };
+            let status = raw::core_draw_ground_quad(x0, z0, x1, z1, if use_tex_coords { 1 } else { 0 }, tu0, tv0, tu1, tv1);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13130,11 +12372,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_draw_list_at_unit(unit_id, list_id as i32, if use_mid_pos { 1 } else { 0 }, degrees, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_draw_list_at_unit(unit_id, list_id as i32, if use_mid_pos { 1 } else { 0 }, degrees, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13148,8 +12387,7 @@ pub mod gfx {
     pub fn draw_mini_map(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_draw_mini_map(if value { 1 } else { 0 }) };
+            let status = raw::core_draw_mini_map(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13163,8 +12401,7 @@ pub mod gfx {
     pub fn dump_definition_vbo(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_dump_definition_vbo(value as i32) };
+            let status = raw::core_dump_definition_vbo(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13178,8 +12415,7 @@ pub mod gfx {
     pub fn edge_flag(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_edge_flag(if value { 1 } else { 0 }) };
+            let status = raw::core_edge_flag(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13193,8 +12429,7 @@ pub mod gfx {
     pub fn end_text(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_end_text(unused as i32) };
+            let status = raw::core_end_text(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13217,11 +12452,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_feature(feature_id, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_feature(feature_id, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13235,8 +12467,7 @@ pub mod gfx {
     pub fn feature_mult_matrix(value: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_mult_matrix(value) };
+            let status = raw::core_feature_mult_matrix(value);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13250,8 +12481,7 @@ pub mod gfx {
     pub fn feature_piece(object_id: i32, piece_id: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_piece(object_id, piece_id) };
+            let status = raw::core_feature_piece(object_id, piece_id);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13265,8 +12495,7 @@ pub mod gfx {
     pub fn feature_piece_matrix(object_id: i32, piece_id: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_piece_matrix(object_id, piece_id) };
+            let status = raw::core_feature_piece_matrix(object_id, piece_id);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13280,8 +12509,7 @@ pub mod gfx {
     pub fn feature_piece_mult_matrix(object_id: i32, piece_id: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_piece_mult_matrix(object_id, piece_id) };
+            let status = raw::core_feature_piece_mult_matrix(object_id, piece_id);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13304,11 +12532,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_feature_raw(feature_id, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_feature_raw(feature_id, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13331,11 +12556,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_feature_shape(def_id, team_id, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_feature_shape(def_id, team_id, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13349,8 +12571,7 @@ pub mod gfx {
     pub fn feature_shape_textures(object_id: i32, push: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_shape_textures(object_id, if push { 1 } else { 0 }) };
+            let status = raw::core_feature_shape_textures(object_id, if push { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13364,8 +12585,7 @@ pub mod gfx {
     pub fn feature_textures(object_id: i32, push: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_feature_textures(object_id, if push { 1 } else { 0 }) };
+            let status = raw::core_feature_textures(object_id, if push { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13379,8 +12599,7 @@ pub mod gfx {
     pub fn finish(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_finish(unused as i32) };
+            let status = raw::core_finish(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13394,8 +12613,7 @@ pub mod gfx {
     pub fn flush(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_flush(unused as i32) };
+            let status = raw::core_flush(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13409,8 +12627,7 @@ pub mod gfx {
     pub fn fog(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_fog(if value { 1 } else { 0 }) };
+            let status = raw::core_fog(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13424,8 +12641,7 @@ pub mod gfx {
     pub fn fog_coord(value: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_fog_coord(value) };
+            let status = raw::core_fog_coord(value);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13439,8 +12655,7 @@ pub mod gfx {
     pub fn font_begin(font_id: u32, user_defined_blending: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_font_begin(font_id as i32, if user_defined_blending { 1 } else { 0 }) };
+            let status = raw::core_font_begin(font_id as i32, if user_defined_blending { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13454,8 +12669,7 @@ pub mod gfx {
     pub fn font_bind_texture(font_id: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_font_bind_texture(font_id as i32) };
+            let status = raw::core_font_bind_texture(font_id as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13469,8 +12683,7 @@ pub mod gfx {
     pub fn font_end(font_id: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_font_end(font_id as i32) };
+            let status = raw::core_font_end(font_id as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13484,8 +12697,7 @@ pub mod gfx {
     pub fn font_set_auto_outline_color(font_id: u32, enable: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_font_set_auto_outline_color(font_id as i32, if enable { 1 } else { 0 }) };
+            let status = raw::core_font_set_auto_outline_color(font_id as i32, if enable { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13499,8 +12711,7 @@ pub mod gfx {
     pub fn font_set_outline_color(font_id: u32, r: f32, g: f32, b: f32, a: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_font_set_outline_color(font_id as i32, r, g, b, a) };
+            let status = raw::core_font_set_outline_color(font_id as i32, r, g, b, a);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13514,8 +12725,7 @@ pub mod gfx {
     pub fn font_set_text_color(font_id: u32, r: f32, g: f32, b: f32, a: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_font_set_text_color(font_id as i32, r, g, b, a) };
+            let status = raw::core_font_set_text_color(font_id as i32, r, g, b, a);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13537,11 +12747,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_font_submit_buffered(font_id as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_font_submit_buffered(font_id as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13555,8 +12762,7 @@ pub mod gfx {
     pub fn frustum(left: f32, right: f32, bottom: f32, top: f32, near_val: f32, far_val: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_frustum(left, right, bottom, top, near_val, far_val) };
+            let status = raw::core_frustum(left, right, bottom, top, near_val, far_val);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13571,12 +12777,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_engine_model_uniform_data_size(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_engine_model_uniform_data_size(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13598,8 +12800,7 @@ pub mod gfx {
     pub fn get_idvbo(value: u32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_idvbo(value as i32) } as u64;
+            let packed = raw::core_get_idvbo(value as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -13618,12 +12819,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 64];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_matrix_data(mode as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_matrix_data(mode as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13646,12 +12843,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 68];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_number(pname as i32, max_values as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_number(pname as i32, max_values as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13673,8 +12866,7 @@ pub mod gfx {
     pub fn get_query(value: u32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_query(value as i32) } as u64;
+            let packed = raw::core_get_query(value as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -13693,12 +12885,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_rbo_info(rbo_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_rbo_info(rbo_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13721,12 +12909,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_screen_view_trans(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_screen_view_trans(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13749,12 +12933,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_shadow_map_params(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_shadow_map_params(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13777,12 +12957,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_vao(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_vao(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13805,12 +12981,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_vbo(target as i32, if freq_updated { 1 } else { 0 }, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_vbo(target as i32, if freq_updated { 1 } else { 0 }, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13833,12 +13005,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_vbo_info(vbo_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_vbo_info(vbo_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13861,12 +13029,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_view_range(camera_type, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_view_range(camera_type, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13889,12 +13053,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_view_sizes(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_view_sizes(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13917,12 +13077,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_is_valid_fbo(fbo_id as i32, target as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_is_valid_fbo(fbo_id as i32, target as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -13956,11 +13112,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_light(light, pname as i32, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_light(light, pname as i32, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13974,8 +13127,7 @@ pub mod gfx {
     pub fn lighting(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_lighting(if value { 1 } else { 0 }) };
+            let status = raw::core_lighting(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -13989,8 +13141,7 @@ pub mod gfx {
     pub fn line_stipple(factor: i32, pattern: u16) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_line_stipple(factor, pattern as i32) };
+            let status = raw::core_line_stipple(factor, pattern as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14004,8 +13155,7 @@ pub mod gfx {
     pub fn line_width(value: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_line_width(value) };
+            let status = raw::core_line_width(value);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14019,8 +13169,7 @@ pub mod gfx {
     pub fn load_identity(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_load_identity(unused as i32) };
+            let status = raw::core_load_identity(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14055,11 +13204,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_load_matrix(input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_load_matrix(input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14073,8 +13219,7 @@ pub mod gfx {
     pub fn logic_op(enable: bool, opcode: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_logic_op(if enable { 1 } else { 0 }, opcode as i32) };
+            let status = raw::core_logic_op(if enable { 1 } else { 0 }, opcode as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14097,11 +13242,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_material(pname as i32, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_material(pname as i32, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14115,8 +13257,7 @@ pub mod gfx {
     pub fn matrix_mode(mode: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_matrix_mode(mode as i32) };
+            let status = raw::core_matrix_mode(mode as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14130,8 +13271,7 @@ pub mod gfx {
     pub fn memory_barrier(barriers: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_memory_barrier(barriers as i32) };
+            let status = raw::core_memory_barrier(barriers as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14145,8 +13285,7 @@ pub mod gfx {
     pub fn models_vbo(value: u32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_models_vbo(value as i32) } as u64;
+            let packed = raw::core_models_vbo(value as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -14185,11 +13324,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_mult_matrix(input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_mult_matrix(input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14203,8 +13339,7 @@ pub mod gfx {
     pub fn multi_tex_coord(tex_num: i32, s: f32, t: f32, r: f32, q: f32, count: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_multi_tex_coord(tex_num, s, t, r, q, count as i32) };
+            let status = raw::core_multi_tex_coord(tex_num, s, t, r, q, count as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14227,11 +13362,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_multi_tex_env(tex_num, target as i32, pname as i32, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_multi_tex_env(tex_num, target as i32, pname as i32, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14257,11 +13389,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_multi_tex_gen(tex_num, target as i32, pname as i32, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_multi_tex_gen(tex_num, target as i32, pname as i32, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14275,8 +13404,7 @@ pub mod gfx {
     pub fn normal(x: f32, y: f32, z: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_normal(x, y, z) };
+            let status = raw::core_normal(x, y, z);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14290,8 +13418,7 @@ pub mod gfx {
     pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near_val: f32, far_val: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_ortho(left, right, bottom, top, near_val, far_val) };
+            let status = raw::core_ortho(left, right, bottom, top, near_val, far_val);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14314,11 +13441,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_point_parameter(pname as i32, value, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_point_parameter(pname as i32, value, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14332,8 +13456,7 @@ pub mod gfx {
     pub fn point_size(value: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_point_size(value) };
+            let status = raw::core_point_size(value);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14347,8 +13470,7 @@ pub mod gfx {
     pub fn point_sprite(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_point_sprite(if value { 1 } else { 0 }) };
+            let status = raw::core_point_sprite(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14362,8 +13484,7 @@ pub mod gfx {
     pub fn polygon_mode(face: u32, mode: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_polygon_mode(face as i32, mode as i32) };
+            let status = raw::core_polygon_mode(face as i32, mode as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14377,8 +13498,7 @@ pub mod gfx {
     pub fn polygon_offset(factor: f32, units: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_polygon_offset(factor, units) };
+            let status = raw::core_polygon_offset(factor, units);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14392,8 +13512,7 @@ pub mod gfx {
     pub fn pop_attrib(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_pop_attrib(unused as i32) };
+            let status = raw::core_pop_attrib(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14407,8 +13526,7 @@ pub mod gfx {
     pub fn pop_debug_group(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_pop_debug_group(unused as i32) };
+            let status = raw::core_pop_debug_group(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14422,8 +13540,7 @@ pub mod gfx {
     pub fn pop_matrix(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_pop_matrix(unused as i32) };
+            let status = raw::core_pop_matrix(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14437,8 +13554,7 @@ pub mod gfx {
     pub fn push_attrib(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_push_attrib(value as i32) };
+            let status = raw::core_push_attrib(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14452,8 +13568,7 @@ pub mod gfx {
     pub fn push_matrix(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_push_matrix(unused as i32) };
+            let status = raw::core_push_matrix(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14468,12 +13583,8 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_raw_bind_fbo(if bind_default { 1 } else { 0 }, fbo_id as i32, target as i32, raw_fbo_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_raw_bind_fbo(if bind_default { 1 } else { 0 }, fbo_id as i32, target as i32, raw_fbo_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -14495,8 +13606,7 @@ pub mod gfx {
     pub fn rect(x1: f32, y1: f32, x2: f32, y2: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_rect(x1, y1, x2, y2) };
+            let status = raw::core_rect(x1, y1, x2, y2);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14510,8 +13620,7 @@ pub mod gfx {
     pub fn remove_from_submission_vao(vao_id: u32, index: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_remove_from_submission_vao(vao_id as i32, index) };
+            let status = raw::core_remove_from_submission_vao(vao_id as i32, index);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14525,8 +13634,7 @@ pub mod gfx {
     pub fn reset_matrices(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_reset_matrices(unused as i32) };
+            let status = raw::core_reset_matrices(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14540,8 +13648,7 @@ pub mod gfx {
     pub fn reset_state(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_reset_state(unused as i32) };
+            let status = raw::core_reset_state(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14555,8 +13662,7 @@ pub mod gfx {
     pub fn rotate(degrees: f32, x: f32, y: f32, z: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_rotate(degrees, x, y, z) };
+            let status = raw::core_rotate(degrees, x, y, z);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14570,8 +13676,7 @@ pub mod gfx {
     pub fn scale(x: f32, y: f32, z: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_scale(x, y, z) };
+            let status = raw::core_scale(x, y, z);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14585,8 +13690,7 @@ pub mod gfx {
     pub fn scissor(x: i32, y: i32, width: i32, height: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_scissor(x, y, width, height) };
+            let status = raw::core_scissor(x, y, width, height);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14600,8 +13704,7 @@ pub mod gfx {
     pub fn secondary_color(x: f32, y: f32, z: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_secondary_color(x, y, z) };
+            let status = raw::core_secondary_color(x, y, z);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14615,8 +13718,7 @@ pub mod gfx {
     pub fn set_fbo_read_buffer(fbo_id: u32, buffer: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_set_fbo_read_buffer(fbo_id as i32, buffer as i32) };
+            let status = raw::core_set_fbo_read_buffer(fbo_id as i32, buffer as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14630,8 +13732,7 @@ pub mod gfx {
     pub fn set_geometry_shader_parameter(shader_id: u32, param: u32, value: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_set_geometry_shader_parameter(shader_id as i32, param as i32, value) };
+            let status = raw::core_set_geometry_shader_parameter(shader_id as i32, param as i32, value);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14654,11 +13755,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_set_tesselation_shader_parameter(param as i32, value, value_count as i32, if use_float_array { 1 } else { 0 }, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_set_tesselation_shader_parameter(param as i32, value, value_count as i32, if use_float_array { 1 } else { 0 }, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14672,8 +13770,7 @@ pub mod gfx {
     pub fn shade_model(mode: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_shade_model(mode as i32) };
+            let status = raw::core_shade_model(mode as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14687,8 +13784,7 @@ pub mod gfx {
     pub fn slave_mini_map(value: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_slave_mini_map(if value { 1 } else { 0 }) };
+            let status = raw::core_slave_mini_map(if value { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14702,8 +13798,7 @@ pub mod gfx {
     pub fn stencil_func(func: u32, ref_: i32, mask: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_func(func as i32, ref_, mask as i32) };
+            let status = raw::core_stencil_func(func as i32, ref_, mask as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14717,8 +13812,7 @@ pub mod gfx {
     pub fn stencil_func_separate(face: u32, func: u32, ref_: i32, mask: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_func_separate(face as i32, func as i32, ref_, mask as i32) };
+            let status = raw::core_stencil_func_separate(face as i32, func as i32, ref_, mask as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14732,8 +13826,7 @@ pub mod gfx {
     pub fn stencil_mask(mask: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_mask(mask as i32) };
+            let status = raw::core_stencil_mask(mask as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14747,8 +13840,7 @@ pub mod gfx {
     pub fn stencil_mask_separate(face: u32, mask: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_mask_separate(face as i32, mask as i32) };
+            let status = raw::core_stencil_mask_separate(face as i32, mask as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14762,8 +13854,7 @@ pub mod gfx {
     pub fn stencil_op(fail: u32, zfail: u32, zpass: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_op(fail as i32, zfail as i32, zpass as i32) };
+            let status = raw::core_stencil_op(fail as i32, zfail as i32, zpass as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14777,8 +13868,7 @@ pub mod gfx {
     pub fn stencil_op_separate(face: u32, fail: u32, zfail: u32, zpass: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_op_separate(face as i32, fail as i32, zfail as i32, zpass as i32) };
+            let status = raw::core_stencil_op_separate(face as i32, fail as i32, zfail as i32, zpass as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14792,8 +13882,7 @@ pub mod gfx {
     pub fn stencil_test(enable: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_stencil_test(if enable { 1 } else { 0 }) };
+            let status = raw::core_stencil_test(if enable { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14807,8 +13896,7 @@ pub mod gfx {
     pub fn submit_vao(value: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_submit_vao(value as i32) };
+            let status = raw::core_submit_vao(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14822,8 +13910,7 @@ pub mod gfx {
     pub fn swap_buffers(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_swap_buffers(unused as i32) };
+            let status = raw::core_swap_buffers(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14837,8 +13924,7 @@ pub mod gfx {
     pub fn tex_coord(x: f32, y: f32, z: f32, w: f32, count: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_tex_coord(x, y, z, w, count as i32) };
+            let status = raw::core_tex_coord(x, y, z, w, count as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14861,11 +13947,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_tex_env(target as i32, pname as i32, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_tex_env(target as i32, pname as i32, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14891,11 +13974,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_tex_gen(target as i32, pname as i32, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_tex_gen(target as i32, pname as i32, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14906,12 +13986,10 @@ pub mod gfx {
     }
 
     #[inline]
-    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn tex_rect(x1: f32, y1: f32, x2: f32, y2: f32, s1: f32, t1: f32, s2: f32, t2: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_tex_rect(x1, y1, x2, y2, s1, t1, s2, t2) };
+            let status = raw::core_tex_rect(x1, y1, x2, y2, s1, t1, s2, t2);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14934,11 +14012,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_text_env(target as i32, pname as i32, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_text_env(target as i32, pname as i32, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14952,8 +14027,7 @@ pub mod gfx {
     pub fn translate(x: f32, y: f32, z: f32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_translate(x, y, z) };
+            let status = raw::core_translate(x, y, z);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14967,8 +14041,7 @@ pub mod gfx {
     pub fn unbind_buffer_range_vbo(vbo_id: u32, binding_index: u32, element_offset: i32, element_count: i32, target: u32, bind: bool) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unbind_buffer_range_vbo(vbo_id as i32, binding_index as i32, element_offset, element_count, target as i32, if bind { 1 } else { 0 }) } as u64;
+            let packed = raw::core_unbind_buffer_range_vbo(vbo_id as i32, binding_index as i32, element_offset, element_count, target as i32, if bind { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -14995,11 +14068,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_uniform(location, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_uniform(location, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15022,11 +14092,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_uniform_int(location, count as i32, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_uniform_int(location, count as i32, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15040,8 +14107,7 @@ pub mod gfx {
     pub fn uniform_subroutine(shader_type: u32, index: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_uniform_subroutine(shader_type as i32, index as i32) };
+            let status = raw::core_uniform_subroutine(shader_type as i32, index as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15065,11 +14131,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_unit(unit_id, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_unit(unit_id, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15083,8 +14146,7 @@ pub mod gfx {
     pub fn unit_mult_matrix(value: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_mult_matrix(value) };
+            let status = raw::core_unit_mult_matrix(value);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15098,8 +14160,7 @@ pub mod gfx {
     pub fn unit_piece(object_id: i32, piece_id: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_piece(object_id, piece_id) };
+            let status = raw::core_unit_piece(object_id, piece_id);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15113,8 +14174,7 @@ pub mod gfx {
     pub fn unit_piece_matrix(object_id: i32, piece_id: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_piece_matrix(object_id, piece_id) };
+            let status = raw::core_unit_piece_matrix(object_id, piece_id);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15128,8 +14188,7 @@ pub mod gfx {
     pub fn unit_piece_mult_matrix(object_id: i32, piece_id: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_piece_mult_matrix(object_id, piece_id) };
+            let status = raw::core_unit_piece_mult_matrix(object_id, piece_id);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15153,11 +14212,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_unit_raw(unit_id, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_unit_raw(unit_id, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15180,11 +14236,8 @@ pub mod gfx {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let status = unsafe { raw::core_unit_shape(def_id, team_id, input_pointer) };
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let status = raw::core_unit_shape(def_id, team_id, input_pointer);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15198,8 +14251,7 @@ pub mod gfx {
     pub fn unit_shape_textures(object_id: i32, push: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_shape_textures(object_id, if push { 1 } else { 0 }) };
+            let status = raw::core_unit_shape_textures(object_id, if push { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15213,8 +14265,7 @@ pub mod gfx {
     pub fn unit_textures(object_id: i32, push: bool) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_unit_textures(object_id, if push { 1 } else { 0 }) };
+            let status = raw::core_unit_textures(object_id, if push { 1 } else { 0 });
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15228,8 +14279,7 @@ pub mod gfx {
     pub fn use_shader(shader_id: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_use_shader(shader_id as i32) } as u64;
+            let packed = raw::core_use_shader(shader_id as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15251,8 +14301,7 @@ pub mod gfx {
     pub fn vertex(x: f32, y: f32, z: f32, w: f32, count: u32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_vertex(x, y, z, w, count as i32) };
+            let status = raw::core_vertex(x, y, z, w, count as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15266,8 +14315,7 @@ pub mod gfx {
     pub fn viewport(x: i32, y: i32, width: i32, height: i32) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_viewport(x, y, width, height) };
+            let status = raw::core_viewport(x, y, width, height);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -15308,37 +14356,37 @@ pub mod lights {
         #[link(wasm_import_module = "spring:lights")]
         unsafe extern "C" {
             #[link_name = "add-light-tracking-target"]
-            pub fn core_add_light_tracking_target(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_add_light_tracking_target(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:lights")]
         unsafe extern "C" {
             #[link_name = "add-map-light"]
-            pub fn core_add_map_light(p0: i32) -> i64;
+            pub safe fn core_add_map_light(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:lights")]
         unsafe extern "C" {
             #[link_name = "add-model-light"]
-            pub fn core_add_model_light(p0: i32) -> i64;
+            pub safe fn core_add_model_light(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:lights")]
         unsafe extern "C" {
             #[link_name = "set-map-light-tracking-state"]
-            pub fn core_set_map_light_tracking_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_set_map_light_tracking_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:lights")]
         unsafe extern "C" {
             #[link_name = "set-model-light-tracking-state"]
-            pub fn core_set_model_light_tracking_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_set_model_light_tracking_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:lights")]
         unsafe extern "C" {
             #[link_name = "update-map-light"]
-            pub fn core_update_map_light(p0: i32, p1: i32) -> i64;
+            pub safe fn core_update_map_light(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:lights")]
         unsafe extern "C" {
             #[link_name = "update-model-light"]
-            pub fn core_update_model_light(p0: i32, p1: i32) -> i64;
+            pub safe fn core_update_model_light(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -15346,8 +14394,7 @@ pub mod lights {
     pub fn add_light_tracking_target(light_handle: u32, object_id: i32, track_unit: bool, enable_tracking: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_light_tracking_target(light_handle as i32, object_id, if track_unit { 1 } else { 0 }, if enable_tracking { 1 } else { 0 }) } as u64;
+            let packed = raw::core_add_light_tracking_target(light_handle as i32, object_id, if track_unit { 1 } else { 0 }, if enable_tracking { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15414,11 +14461,8 @@ pub mod lights {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_map_light(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_add_map_light(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15481,11 +14525,8 @@ pub mod lights {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_model_light(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_add_model_light(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15503,8 +14544,7 @@ pub mod lights {
     pub fn set_map_light_tracking_state(light_handle: u32, object_id: i32, enable_tracking: bool, track_unit: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_map_light_tracking_state(light_handle as i32, object_id, if enable_tracking { 1 } else { 0 }, if track_unit { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_map_light_tracking_state(light_handle as i32, object_id, if enable_tracking { 1 } else { 0 }, if track_unit { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15526,8 +14566,7 @@ pub mod lights {
     pub fn set_model_light_tracking_state(light_handle: u32, object_id: i32, enable_tracking: bool, track_unit: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_model_light_tracking_state(light_handle as i32, object_id, if enable_tracking { 1 } else { 0 }, if track_unit { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_model_light_tracking_state(light_handle as i32, object_id, if enable_tracking { 1 } else { 0 }, if track_unit { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15594,11 +14633,8 @@ pub mod lights {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_update_map_light(light_handle as i32, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_update_map_light(light_handle as i32, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15665,11 +14701,8 @@ pub mod lights {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_update_model_light(light_handle as i32, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_update_model_light(light_handle as i32, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15697,12 +14730,12 @@ pub mod icons {
         #[link(wasm_import_module = "spring:icons")]
         unsafe extern "C" {
             #[link_name = "unit-icon-get-draw"]
-            pub fn core_unit_icon_get_draw(p0: i32) -> i64;
+            pub safe fn core_unit_icon_get_draw(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:icons")]
         unsafe extern "C" {
             #[link_name = "unit-icon-set-draw"]
-            pub fn core_unit_icon_set_draw(p0: i32, p1: i32) -> i64;
+            pub safe fn core_unit_icon_set_draw(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -15710,8 +14743,7 @@ pub mod icons {
     pub fn unit_icon_get_draw(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_icon_get_draw(unit_id) } as u64;
+            let packed = raw::core_unit_icon_get_draw(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15733,8 +14765,7 @@ pub mod icons {
     pub fn unit_icon_set_draw(unit_id: i32, draw_icon: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_icon_set_draw(unit_id, if draw_icon { 1 } else { 0 }) } as u64;
+            let packed = raw::core_unit_icon_set_draw(unit_id, if draw_icon { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15775,22 +14806,22 @@ pub mod markers {
         #[link(wasm_import_module = "spring:markers")]
         unsafe extern "C" {
             #[link_name = "add-world-icon"]
-            pub fn core_add_world_icon(p0: i32, p1: i32) -> i64;
+            pub safe fn core_add_world_icon(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:markers")]
         unsafe extern "C" {
             #[link_name = "add-world-unit"]
-            pub fn core_add_world_unit(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_add_world_unit(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:markers")]
         unsafe extern "C" {
             #[link_name = "marker-add-line"]
-            pub fn core_marker_add_line(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_marker_add_line(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:markers")]
         unsafe extern "C" {
             #[link_name = "marker-erase-position"]
-            pub fn core_marker_erase_position(p0: f32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_marker_erase_position(p0: f32, p1: i32, p2: i32) -> i64;
         }
     }
 
@@ -15807,11 +14838,8 @@ pub mod markers {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_world_icon(cmd_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_add_world_icon(cmd_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15842,11 +14870,8 @@ pub mod markers {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_world_unit(unit_def_id, team_id, facing, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_add_world_unit(unit_def_id, team_id, facing, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15881,11 +14906,8 @@ pub mod markers {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_marker_add_line(if local_only { 1 } else { 0 }, player_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_marker_add_line(if local_only { 1 } else { 0 }, player_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15919,11 +14941,8 @@ pub mod markers {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_marker_erase_position(unused, player_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_marker_erase_position(unused, player_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -15951,147 +14970,147 @@ pub mod ground_decals {
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "create-ground-decal"]
-            pub fn core_create_ground_decal(p0: i32, p1: i32) -> i32;
+            pub safe fn core_create_ground_decal(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "destroy-ground-decal"]
-            pub fn core_destroy_ground_decal(p0: i32) -> i64;
+            pub safe fn core_destroy_ground_decal(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-all-ground-decals"]
-            pub fn core_get_all_ground_decals(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_all_ground_decals(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-alpha"]
-            pub fn core_get_ground_decal_alpha(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_alpha(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-creation-frame"]
-            pub fn core_get_ground_decal_creation_frame(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_creation_frame(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-glow-params"]
-            pub fn core_get_ground_decal_glow_params(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_glow_params(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-middle-pos"]
-            pub fn core_get_ground_decal_middle_pos(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_middle_pos(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-misc"]
-            pub fn core_get_ground_decal_misc(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_misc(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-normal"]
-            pub fn core_get_ground_decal_normal(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_normal(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-owner"]
-            pub fn core_get_ground_decal_owner(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_owner(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-quad-pos"]
-            pub fn core_get_ground_decal_quad_pos(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_quad_pos(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-rotation"]
-            pub fn core_get_ground_decal_rotation(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_rotation(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-size-and-height"]
-            pub fn core_get_ground_decal_size_and_height(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_size_and_height(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-texture"]
-            pub fn core_get_ground_decal_texture(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_ground_decal_texture(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-texture-params"]
-            pub fn core_get_ground_decal_texture_params(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_texture_params(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-tint"]
-            pub fn core_get_ground_decal_tint(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_tint(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-type"]
-            pub fn core_get_ground_decal_type(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_ground_decal_type(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "get-ground-decal-user-data"]
-            pub fn core_get_ground_decal_user_data(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_ground_decal_user_data(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-alpha"]
-            pub fn core_set_ground_decal_alpha(p0: i32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_set_ground_decal_alpha(p0: i32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-creation-frame"]
-            pub fn core_set_ground_decal_creation_frame(p0: i32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_set_ground_decal_creation_frame(p0: i32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-glow-params"]
-            pub fn core_set_ground_decal_glow_params(p0: i32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_set_ground_decal_glow_params(p0: i32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-misc"]
-            pub fn core_set_ground_decal_misc(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
+            pub safe fn core_set_ground_decal_misc(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-normal"]
-            pub fn core_set_ground_decal_normal(p0: i32, p1: f32, p2: f32, p3: f32) -> i64;
+            pub safe fn core_set_ground_decal_normal(p0: i32, p1: f32, p2: f32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-pos-and-dims"]
-            pub fn core_set_ground_decal_pos_and_dims(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
+            pub safe fn core_set_ground_decal_pos_and_dims(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-quad-pos-and-height"]
-            pub fn core_set_ground_decal_quad_pos_and_height(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: f32, p7: f32, p8: f32, p9: f32) -> i64;
+            pub safe fn core_set_ground_decal_quad_pos_and_height(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: f32, p7: f32, p8: f32, p9: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-rotation"]
-            pub fn core_set_ground_decal_rotation(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_ground_decal_rotation(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-texture-params"]
-            pub fn core_set_ground_decal_texture_params(p0: i32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_set_ground_decal_texture_params(p0: i32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-tint"]
-            pub fn core_set_ground_decal_tint(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_set_ground_decal_tint(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:ground-decals")]
         unsafe extern "C" {
             #[link_name = "set-ground-decal-user-data"]
-            pub fn core_set_ground_decal_user_data(p0: i32, p1: i32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
+            pub safe fn core_set_ground_decal_user_data(p0: i32, p1: i32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
         }
     }
 
@@ -16100,12 +15119,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_create_ground_decal(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_create_ground_decal(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16127,8 +15142,7 @@ pub mod ground_decals {
     pub fn destroy_ground_decal(decal_id: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_destroy_ground_decal(decal_id as i32) } as u64;
+            let packed = raw::core_destroy_ground_decal(decal_id as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16151,12 +15165,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_alpha(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_alpha(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16179,12 +15189,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_creation_frame(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_creation_frame(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16207,12 +15213,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_glow_params(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_glow_params(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16235,12 +15237,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_middle_pos(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_middle_pos(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16263,12 +15261,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_misc(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_misc(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16291,12 +15285,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_normal(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_normal(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16319,12 +15309,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_owner(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_owner(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16347,12 +15333,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 36];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_quad_pos(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_quad_pos(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16375,12 +15357,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_rotation(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_rotation(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16403,12 +15381,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_size_and_height(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_size_and_height(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16431,12 +15405,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_texture_params(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_texture_params(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16459,12 +15429,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_tint(decal_id as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_tint(decal_id as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16487,12 +15453,8 @@ pub mod ground_decals {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_ground_decal_user_data(decal_id as i32, quad_index as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_ground_decal_user_data(decal_id as i32, quad_index as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16514,8 +15476,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_alpha(decal_id: u32, alpha: f32, alpha_falloff: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_alpha(decal_id as i32, alpha, alpha_falloff) } as u64;
+            let packed = raw::core_set_ground_decal_alpha(decal_id as i32, alpha, alpha_falloff) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16537,8 +15498,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_creation_frame(decal_id: u32, creation_frame_min: f32, creation_frame_max: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_creation_frame(decal_id as i32, creation_frame_min, creation_frame_max) } as u64;
+            let packed = raw::core_set_ground_decal_creation_frame(decal_id as i32, creation_frame_min, creation_frame_max) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16560,8 +15520,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_glow_params(decal_id: u32, glow: f32, glow_falloff: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_glow_params(decal_id as i32, glow, glow_falloff) } as u64;
+            let packed = raw::core_set_ground_decal_glow_params(decal_id as i32, glow, glow_falloff) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16583,8 +15542,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_misc(decal_id: u32, dot_elim_exp: f32, ref_height: f32, min_height: f32, max_height: f32, force_height_mode: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_misc(decal_id as i32, dot_elim_exp, ref_height, min_height, max_height, force_height_mode) } as u64;
+            let packed = raw::core_set_ground_decal_misc(decal_id as i32, dot_elim_exp, ref_height, min_height, max_height, force_height_mode) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16606,8 +15564,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_normal(decal_id: u32, normal_x: f32, normal_y: f32, normal_z: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_normal(decal_id as i32, normal_x, normal_y, normal_z) } as u64;
+            let packed = raw::core_set_ground_decal_normal(decal_id as i32, normal_x, normal_y, normal_z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16629,8 +15586,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_pos_and_dims(decal_id: u32, mid_pos_x: f32, mid_pos_z: f32, size_x: f32, size_z: f32, proj_cube_height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_pos_and_dims(decal_id as i32, mid_pos_x, mid_pos_z, size_x, size_z, proj_cube_height) } as u64;
+            let packed = raw::core_set_ground_decal_pos_and_dims(decal_id as i32, mid_pos_x, mid_pos_z, size_x, size_z, proj_cube_height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16649,12 +15605,10 @@ pub mod ground_decals {
     }
 
     #[inline]
-    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn set_ground_decal_quad_pos_and_height(decal_id: u32, pos_tlx: f32, pos_tly: f32, pos_trx: f32, pos_try: f32, pos_brx: f32, pos_bry: f32, pos_blx: f32, pos_bly: f32, proj_cube_height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_quad_pos_and_height(decal_id as i32, pos_tlx, pos_tly, pos_trx, pos_try, pos_brx, pos_bry, pos_blx, pos_bly, proj_cube_height) } as u64;
+            let packed = raw::core_set_ground_decal_quad_pos_and_height(decal_id as i32, pos_tlx, pos_tly, pos_trx, pos_try, pos_brx, pos_bry, pos_blx, pos_bly, proj_cube_height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16676,8 +15630,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_rotation(decal_id: u32, rotation: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_rotation(decal_id as i32, rotation) } as u64;
+            let packed = raw::core_set_ground_decal_rotation(decal_id as i32, rotation) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16699,8 +15652,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_texture_params(decal_id: u32, tex_wrap_distance: f32, tex_traveled_distance: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_texture_params(decal_id as i32, tex_wrap_distance, tex_traveled_distance) } as u64;
+            let packed = raw::core_set_ground_decal_texture_params(decal_id as i32, tex_wrap_distance, tex_traveled_distance) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16722,8 +15674,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_tint(decal_id: u32, tint_r: f32, tint_g: f32, tint_b: f32, tint_a: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_tint(decal_id as i32, tint_r, tint_g, tint_b, tint_a) } as u64;
+            let packed = raw::core_set_ground_decal_tint(decal_id as i32, tint_r, tint_g, tint_b, tint_a) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16745,8 +15696,7 @@ pub mod ground_decals {
     pub fn set_ground_decal_user_data(decal_id: u32, quad_index: u32, value_x: f32, value_y: f32, value_z: f32, value_w: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ground_decal_user_data(decal_id as i32, quad_index as i32, value_x, value_y, value_z, value_w) } as u64;
+            let packed = raw::core_set_ground_decal_user_data(decal_id as i32, quad_index as i32, value_x, value_y, value_z, value_w) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16781,87 +15731,85 @@ pub mod system_control {
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "garbage-collect-ctrl"]
-            pub fn core_garbage_collect_ctrl(p0: i32, p1: i32, p2: i32, p3: i32, p4: f32, p5: f32, p6: f32, p7: f32) -> i64;
+            pub safe fn core_garbage_collect_ctrl(p0: i32, p1: i32, p2: i32, p3: i32, p4: f32, p5: f32, p6: f32, p7: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-game-name"]
-            pub fn core_get_game_name(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_game_name(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-game-state"]
-            pub fn core_get_game_state(p0: f32, p1: i32) -> i32;
+            pub safe fn core_get_game_state(p0: f32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-gather-mode"]
-            pub fn core_get_gather_mode(p0: i32) -> i64;
+            pub safe fn core_get_gather_mode(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-menu-name"]
-            pub fn core_get_menu_name(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_menu_name(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-replay-file-path"]
-            pub fn core_get_replay_file_path(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_replay_file_path(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-replay-length"]
-            pub fn core_get_replay_length(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_replay_length(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-replay-recording-file-path"]
-            pub fn core_get_replay_recording_file_path(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_replay_recording_file_path(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-video-capturing-mode"]
-            pub fn core_get_video_capturing_mode(p0: i32) -> i64;
+            pub safe fn core_get_video_capturing_mode(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "get-window-display-mode"]
-            pub fn core_get_window_display_mode(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_window_display_mode(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "is-replay"]
-            pub fn core_is_replay(p0: i32) -> i64;
+            pub safe fn core_is_replay(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "ping"]
-            pub fn core_ping(p0: i32) -> i64;
+            pub safe fn core_ping(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "quit"]
-            pub fn core_quit(p0: i32) -> i64;
+            pub safe fn core_quit(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "request-start-position"]
-            pub fn core_request_start_position(p0: i32, p1: i32) -> i64;
+            pub safe fn core_request_start_position(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:system-control")]
         unsafe extern "C" {
             #[link_name = "yield"]
-            pub fn core_yield_(p0: i32) -> i64;
+            pub safe fn core_yield_(p0: i32) -> i64;
         }
     }
 
     #[inline]
-    #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
     pub fn garbage_collect_ctrl(iters_per_batch: i32, num_steps_per_iter: i32, min_steps_per_iter: i32, max_steps_per_iter: i32, min_loop_run_time: f32, max_loop_run_time: f32, base_run_time_mult: f32, base_mem_load_mult: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_garbage_collect_ctrl(iters_per_batch, num_steps_per_iter, min_steps_per_iter, max_steps_per_iter, min_loop_run_time, max_loop_run_time, base_run_time_mult, base_mem_load_mult) } as u64;
+            let packed = raw::core_garbage_collect_ctrl(iters_per_batch, num_steps_per_iter, min_steps_per_iter, max_steps_per_iter, min_loop_run_time, max_loop_run_time, base_run_time_mult, base_mem_load_mult) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16884,12 +15832,8 @@ pub mod system_control {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_game_state(max_latency, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_game_state(max_latency, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16911,8 +15855,7 @@ pub mod system_control {
     pub fn get_gather_mode(unused: u8) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_gather_mode(unused as i32) } as u64;
+            let packed = raw::core_get_gather_mode(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16931,12 +15874,8 @@ pub mod system_control {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_replay_length(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_replay_length(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -16958,8 +15897,7 @@ pub mod system_control {
     pub fn get_video_capturing_mode(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_video_capturing_mode(unused as i32) } as u64;
+            let packed = raw::core_get_video_capturing_mode(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -16981,8 +15919,7 @@ pub mod system_control {
     pub fn is_replay(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_replay(unused as i32) } as u64;
+            let packed = raw::core_is_replay(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17004,8 +15941,7 @@ pub mod system_control {
     pub fn ping(tag: u32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_ping(tag as i32) } as u64;
+            let packed = raw::core_ping(tag as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17027,8 +15963,7 @@ pub mod system_control {
     pub fn quit(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_quit(unused as i32) } as u64;
+            let packed = raw::core_quit(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17059,11 +15994,8 @@ pub mod system_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_request_start_position(if ready { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_request_start_position(if ready { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17085,8 +16017,7 @@ pub mod system_control {
     pub fn yield_(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_yield_(unused as i32) } as u64;
+            let packed = raw::core_yield_(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17121,47 +16052,47 @@ pub mod profiling {
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "diff-timers"]
-            pub fn core_diff_timers(p0: i64, p1: i64, p2: i32) -> i64;
+            pub safe fn core_diff_timers(p0: i64, p1: i64, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "get-draw-seconds"]
-            pub fn core_get_draw_seconds(p0: i32) -> i64;
+            pub safe fn core_get_draw_seconds(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "get-frame-timer"]
-            pub fn core_get_frame_timer(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_frame_timer(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "get-lua-mem-usage"]
-            pub fn core_get_lua_mem_usage(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_lua_mem_usage(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "get-profiler-time-record"]
-            pub fn core_get_profiler_time_record(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_profiler_time_record(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "get-synced-gc-info"]
-            pub fn core_get_synced_gc_info(p0: i32) -> i64;
+            pub safe fn core_get_synced_gc_info(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "get-timer"]
-            pub fn core_get_timer(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_timer(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "get-timer-micros"]
-            pub fn core_get_timer_micros(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_timer_micros(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:profiling")]
         unsafe extern "C" {
             #[link_name = "get-vid-mem-usage"]
-            pub fn core_get_vid_mem_usage(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_vid_mem_usage(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -17177,11 +16108,8 @@ pub mod profiling {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_diff_timers(end_timer as i64, start_timer as i64, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_diff_timers(end_timer as i64, start_timer as i64, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17199,8 +16127,7 @@ pub mod profiling {
     pub fn get_draw_seconds(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_draw_seconds(unused as i32) } as u64;
+            let packed = raw::core_get_draw_seconds(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17219,12 +16146,8 @@ pub mod profiling {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_frame_timer(if last_frame_time { 1 } else { 0 }, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_frame_timer(if last_frame_time { 1 } else { 0 }, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -17247,12 +16170,8 @@ pub mod profiling {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 32];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_lua_mem_usage(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_lua_mem_usage(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -17274,8 +16193,7 @@ pub mod profiling {
     pub fn get_synced_gc_info(collect: bool) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_synced_gc_info(if collect { 1 } else { 0 }) } as u64;
+            let packed = raw::core_get_synced_gc_info(if collect { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17294,12 +16212,8 @@ pub mod profiling {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_timer(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_timer(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -17322,12 +16236,8 @@ pub mod profiling {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_timer_micros(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_timer_micros(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -17350,12 +16260,8 @@ pub mod profiling {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_vid_mem_usage(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_vid_mem_usage(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -17383,537 +16289,537 @@ pub mod rml_ui {
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "clear-translations"]
-            pub fn core_clear_translations(p0: i32) -> i64;
+            pub safe fn core_clear_translations(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-enable-mouse-cursor"]
-            pub fn core_context_enable_mouse_cursor(p0: i64, p1: i32) -> i64;
+            pub safe fn core_context_enable_mouse_cursor(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-get-density-independent-pixel-ratio"]
-            pub fn core_context_get_density_independent_pixel_ratio(p0: i64) -> i64;
+            pub safe fn core_context_get_density_independent_pixel_ratio(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-get-dimensions"]
-            pub fn core_context_get_dimensions(p0: i64, p1: i32) -> i32;
+            pub safe fn core_context_get_dimensions(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-get-element-at-point"]
-            pub fn core_context_get_element_at_point(p0: i64, p1: f32, p2: f32, p3: i64, p4: i32) -> i32;
+            pub safe fn core_context_get_element_at_point(p0: i64, p1: f32, p2: f32, p3: i64, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-get-focus-element"]
-            pub fn core_context_get_focus_element(p0: i64, p1: i32) -> i32;
+            pub safe fn core_context_get_focus_element(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-get-hover-element"]
-            pub fn core_context_get_hover_element(p0: i64, p1: i32) -> i32;
+            pub safe fn core_context_get_hover_element(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-get-name"]
-            pub fn core_context_get_name(p0: i64, p1: i32) -> i32;
+            pub safe fn core_context_get_name(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-get-root-element"]
-            pub fn core_context_get_root_element(p0: i64, p1: i32) -> i32;
+            pub safe fn core_context_get_root_element(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-is-mouse-interacting"]
-            pub fn core_context_is_mouse_interacting(p0: i64) -> i64;
+            pub safe fn core_context_is_mouse_interacting(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-process-key-down"]
-            pub fn core_context_process_key_down(p0: i64, p1: i32, p2: i32) -> i64;
+            pub safe fn core_context_process_key_down(p0: i64, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-process-key-up"]
-            pub fn core_context_process_key_up(p0: i64, p1: i32, p2: i32) -> i64;
+            pub safe fn core_context_process_key_up(p0: i64, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-process-mouse-button-down"]
-            pub fn core_context_process_mouse_button_down(p0: i64, p1: i32, p2: i32) -> i64;
+            pub safe fn core_context_process_mouse_button_down(p0: i64, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-process-mouse-button-up"]
-            pub fn core_context_process_mouse_button_up(p0: i64, p1: i32, p2: i32) -> i64;
+            pub safe fn core_context_process_mouse_button_up(p0: i64, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-process-mouse-leave"]
-            pub fn core_context_process_mouse_leave(p0: i64) -> i64;
+            pub safe fn core_context_process_mouse_leave(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-process-mouse-move"]
-            pub fn core_context_process_mouse_move(p0: i64, p1: f32, p2: f32, p3: i32) -> i64;
+            pub safe fn core_context_process_mouse_move(p0: i64, p1: f32, p2: f32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-process-mouse-wheel"]
-            pub fn core_context_process_mouse_wheel(p0: i64, p1: f32, p2: f32, p3: i32) -> i64;
+            pub safe fn core_context_process_mouse_wheel(p0: i64, p1: f32, p2: f32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-pull-document-to-front"]
-            pub fn core_context_pull_document_to_front(p0: i64, p1: i64) -> i64;
+            pub safe fn core_context_pull_document_to_front(p0: i64, p1: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-pull-to-front"]
-            pub fn core_context_pull_to_front(p0: i64) -> i64;
+            pub safe fn core_context_pull_to_front(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-push-document-to-back"]
-            pub fn core_context_push_document_to_back(p0: i64, p1: i64) -> i64;
+            pub safe fn core_context_push_document_to_back(p0: i64, p1: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-render"]
-            pub fn core_context_render(p0: i64) -> i64;
+            pub safe fn core_context_render(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-set-density-independent-pixel-ratio"]
-            pub fn core_context_set_density_independent_pixel_ratio(p0: i64, p1: f32) -> i64;
+            pub safe fn core_context_set_density_independent_pixel_ratio(p0: i64, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-set-dimensions"]
-            pub fn core_context_set_dimensions(p0: i64, p1: i32, p2: i32) -> i64;
+            pub safe fn core_context_set_dimensions(p0: i64, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-set-pointer-capture"]
-            pub fn core_context_set_pointer_capture(p0: i64, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_context_set_pointer_capture(p0: i64, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-take-pointer-capture-delta"]
-            pub fn core_context_take_pointer_capture_delta(p0: i64, p1: i32) -> i32;
+            pub safe fn core_context_take_pointer_capture_delta(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-unload-all-documents"]
-            pub fn core_context_unload_all_documents(p0: i64) -> i64;
+            pub safe fn core_context_unload_all_documents(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-unload-document"]
-            pub fn core_context_unload_document(p0: i64, p1: i64) -> i64;
+            pub safe fn core_context_unload_document(p0: i64, p1: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "context-update"]
-            pub fn core_context_update(p0: i64) -> i64;
+            pub safe fn core_context_update(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-get-bool"]
-            pub fn core_data_model_get_bool(p0: i64, p1: i32) -> i32;
+            pub safe fn core_data_model_get_bool(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-get-color"]
-            pub fn core_data_model_get_color(p0: i64, p1: i32) -> i32;
+            pub safe fn core_data_model_get_color(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-get-float"]
-            pub fn core_data_model_get_float(p0: i64, p1: i32) -> i32;
+            pub safe fn core_data_model_get_float(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-get-int"]
-            pub fn core_data_model_get_int(p0: i64, p1: i32) -> i32;
+            pub safe fn core_data_model_get_int(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-get-percent"]
-            pub fn core_data_model_get_percent(p0: i64, p1: i32) -> i32;
+            pub safe fn core_data_model_get_percent(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-get-pixels"]
-            pub fn core_data_model_get_pixels(p0: i64, p1: i32) -> i32;
+            pub safe fn core_data_model_get_pixels(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-get-string"]
-            pub fn core_data_model_get_string(p0: i64, p1: i32) -> i32;
+            pub safe fn core_data_model_get_string(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-set-bool"]
-            pub fn core_data_model_set_bool(p0: i64, p1: i32) -> i64;
+            pub safe fn core_data_model_set_bool(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-set-color"]
-            pub fn core_data_model_set_color(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            pub safe fn core_data_model_set_color(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-set-float"]
-            pub fn core_data_model_set_float(p0: i64, p1: f32) -> i64;
+            pub safe fn core_data_model_set_float(p0: i64, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-set-int"]
-            pub fn core_data_model_set_int(p0: i64, p1: i32) -> i64;
+            pub safe fn core_data_model_set_int(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-set-percent"]
-            pub fn core_data_model_set_percent(p0: i64, p1: f32) -> i64;
+            pub safe fn core_data_model_set_percent(p0: i64, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "data-model-set-pixels"]
-            pub fn core_data_model_set_pixels(p0: i64, p1: f32) -> i64;
+            pub safe fn core_data_model_set_pixels(p0: i64, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-close"]
-            pub fn core_document_close(p0: i64) -> i64;
+            pub safe fn core_document_close(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-get-context"]
-            pub fn core_document_get_context(p0: i64, p1: i32) -> i32;
+            pub safe fn core_document_get_context(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-get-title"]
-            pub fn core_document_get_title(p0: i64, p1: i32) -> i32;
+            pub safe fn core_document_get_title(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-get-url"]
-            pub fn core_document_get_url(p0: i64, p1: i32) -> i32;
+            pub safe fn core_document_get_url(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-hide"]
-            pub fn core_document_hide(p0: i64) -> i64;
+            pub safe fn core_document_hide(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-is-modal"]
-            pub fn core_document_is_modal(p0: i64) -> i64;
+            pub safe fn core_document_is_modal(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-pull-to-front"]
-            pub fn core_document_pull_to_front(p0: i64) -> i64;
+            pub safe fn core_document_pull_to_front(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-push-to-back"]
-            pub fn core_document_push_to_back(p0: i64) -> i64;
+            pub safe fn core_document_push_to_back(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-reload-style-sheet"]
-            pub fn core_document_reload_style_sheet(p0: i64) -> i64;
+            pub safe fn core_document_reload_style_sheet(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-show"]
-            pub fn core_document_show(p0: i64, p1: i32) -> i64;
+            pub safe fn core_document_show(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "document-update-document"]
-            pub fn core_document_update_document(p0: i64) -> i64;
+            pub safe fn core_document_update_document(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-append-child"]
-            pub fn core_element_append_child(p0: i64, p1: i64, p2: i32) -> i32;
+            pub safe fn core_element_append_child(p0: i64, p1: i64, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-blur"]
-            pub fn core_element_blur(p0: i64) -> i64;
+            pub safe fn core_element_blur(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-click"]
-            pub fn core_element_click(p0: i64) -> i64;
+            pub safe fn core_element_click(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-clone"]
-            pub fn core_element_clone(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_clone(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-focus"]
-            pub fn core_element_focus(p0: i64) -> i64;
+            pub safe fn core_element_focus(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-input-get-selection"]
-            pub fn core_element_form_control_input_get_selection(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_form_control_input_get_selection(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-input-select"]
-            pub fn core_element_form_control_input_select(p0: i64) -> i64;
+            pub safe fn core_element_form_control_input_select(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-input-set-selection"]
-            pub fn core_element_form_control_input_set_selection(p0: i64, p1: i32, p2: i32) -> i64;
+            pub safe fn core_element_form_control_input_set_selection(p0: i64, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-select-add"]
-            pub fn core_element_form_control_select_add(p0: i64, p1: i64, p2: i32) -> i64;
+            pub safe fn core_element_form_control_select_add(p0: i64, p1: i64, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-select-remove"]
-            pub fn core_element_form_control_select_remove(p0: i64, p1: i32) -> i64;
+            pub safe fn core_element_form_control_select_remove(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-select-remove-all"]
-            pub fn core_element_form_control_select_remove_all(p0: i64) -> i64;
+            pub safe fn core_element_form_control_select_remove_all(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-text-area-get-selection"]
-            pub fn core_element_form_control_text_area_get_selection(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_form_control_text_area_get_selection(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-text-area-select"]
-            pub fn core_element_form_control_text_area_select(p0: i64) -> i64;
+            pub safe fn core_element_form_control_text_area_select(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-form-control-text-area-set-selection"]
-            pub fn core_element_form_control_text_area_set_selection(p0: i64, p1: i32, p2: i32) -> i64;
+            pub safe fn core_element_form_control_text_area_set_selection(p0: i64, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-attribute"]
-            pub fn core_element_get_attribute(p0: i64, p1: i32, p2: i32) -> i32;
+            pub safe fn core_element_get_attribute(p0: i64, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-child"]
-            pub fn core_element_get_child(p0: i64, p1: i32, p2: i32) -> i32;
+            pub safe fn core_element_get_child(p0: i64, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-class-name"]
-            pub fn core_element_get_class_name(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_get_class_name(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-elements-by-class-name"]
-            pub fn core_element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32;
+            pub safe fn core_element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-elements-by-tag-name"]
-            pub fn core_element_get_elements_by_tag_name(p0: i64, p1: i32, p2: i32) -> i32;
+            pub safe fn core_element_get_elements_by_tag_name(p0: i64, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-id"]
-            pub fn core_element_get_id(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_get_id(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-inner-rml"]
-            pub fn core_element_get_inner_rml(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_get_inner_rml(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-rect"]
-            pub fn core_element_get_rect(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_get_rect(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-scroll-left"]
-            pub fn core_element_get_scroll_left(p0: i64) -> i64;
+            pub safe fn core_element_get_scroll_left(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-scroll-top"]
-            pub fn core_element_get_scroll_top(p0: i64) -> i64;
+            pub safe fn core_element_get_scroll_top(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-tag-name"]
-            pub fn core_element_get_tag_name(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_get_tag_name(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-get-value"]
-            pub fn core_element_get_value(p0: i64, p1: i32) -> i32;
+            pub safe fn core_element_get_value(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-has-child-nodes"]
-            pub fn core_element_has_child_nodes(p0: i64) -> i64;
+            pub safe fn core_element_has_child_nodes(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-insert-before"]
-            pub fn core_element_insert_before(p0: i64, p1: i64, p2: i64, p3: i32) -> i32;
+            pub safe fn core_element_insert_before(p0: i64, p1: i64, p2: i64, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-is-point-within-element"]
-            pub fn core_element_is_point_within_element(p0: i64, p1: f32, p2: f32) -> i64;
+            pub safe fn core_element_is_point_within_element(p0: i64, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-is-visible"]
-            pub fn core_element_is_visible(p0: i64) -> i64;
+            pub safe fn core_element_is_visible(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-process-default-action"]
-            pub fn core_element_process_default_action(p0: i64, p1: i64) -> i64;
+            pub safe fn core_element_process_default_action(p0: i64, p1: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-query-selector-all"]
-            pub fn core_element_query_selector_all(p0: i64, p1: i32, p2: i32) -> i32;
+            pub safe fn core_element_query_selector_all(p0: i64, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-remove-child"]
-            pub fn core_element_remove_child(p0: i64, p1: i64, p2: i32) -> i32;
+            pub safe fn core_element_remove_child(p0: i64, p1: i64, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-replace-child"]
-            pub fn core_element_replace_child(p0: i64, p1: i64, p2: i64, p3: i32) -> i32;
+            pub safe fn core_element_replace_child(p0: i64, p1: i64, p2: i64, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-scroll-into-view"]
-            pub fn core_element_scroll_into_view(p0: i64, p1: i32) -> i64;
+            pub safe fn core_element_scroll_into_view(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-set-scroll-left"]
-            pub fn core_element_set_scroll_left(p0: i64, p1: i32) -> i64;
+            pub safe fn core_element_set_scroll_left(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-set-scroll-top"]
-            pub fn core_element_set_scroll_top(p0: i64, p1: i32) -> i64;
+            pub safe fn core_element_set_scroll_top(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "element-tab-set-remove-tab"]
-            pub fn core_element_tab_set_remove_tab(p0: i64, p1: i32) -> i64;
+            pub safe fn core_element_tab_set_remove_tab(p0: i64, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-get-current"]
-            pub fn core_event_get_current(p0: i32, p1: i32) -> i32;
+            pub safe fn core_event_get_current(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-get-current-element"]
-            pub fn core_event_get_current_element(p0: i64, p1: i32) -> i32;
+            pub safe fn core_event_get_current_element(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-get-parameter-string"]
-            pub fn core_event_get_parameter_string(p0: i64, p1: i32, p2: i32) -> i32;
+            pub safe fn core_event_get_parameter_string(p0: i64, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-get-phase"]
-            pub fn core_event_get_phase(p0: i64, p1: i32) -> i32;
+            pub safe fn core_event_get_phase(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-get-target-element"]
-            pub fn core_event_get_target_element(p0: i64, p1: i32) -> i32;
+            pub safe fn core_event_get_target_element(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-get-type"]
-            pub fn core_event_get_type(p0: i64, p1: i32) -> i32;
+            pub safe fn core_event_get_type(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-is-immediate-propagating"]
-            pub fn core_event_is_immediate_propagating(p0: i64, p1: i32) -> i32;
+            pub safe fn core_event_is_immediate_propagating(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-is-interruptible"]
-            pub fn core_event_is_interruptible(p0: i64, p1: i32) -> i32;
+            pub safe fn core_event_is_interruptible(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-is-propagating"]
-            pub fn core_event_is_propagating(p0: i64, p1: i32) -> i32;
+            pub safe fn core_event_is_propagating(p0: i64, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-stop-immediate-propagation"]
-            pub fn core_event_stop_immediate_propagation(p0: i64) -> i64;
+            pub safe fn core_event_stop_immediate_propagation(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "event-stop-propagation"]
-            pub fn core_event_stop_propagation(p0: i64) -> i64;
+            pub safe fn core_event_stop_propagation(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "get-version"]
-            pub fn core_get_version(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_version(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "is-ready"]
-            pub fn core_is_ready(p0: i32) -> i64;
+            pub safe fn core_is_ready(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "remove-context"]
-            pub fn core_remove_context(p0: i64) -> i64;
+            pub safe fn core_remove_context(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "set-debug-context"]
-            pub fn core_set_debug_context(p0: i64) -> i64;
+            pub safe fn core_set_debug_context(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "vector2f-new"]
-            pub fn core_vector2f_new(p0: f32, p1: f32, p2: i32) -> i32;
+            pub safe fn core_vector2f_new(p0: f32, p1: f32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
             #[link_name = "vector2i-new"]
-            pub fn core_vector2i_new(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_vector2i_new(p0: i32, p1: i32, p2: i32) -> i32;
         }
     }
 
@@ -17921,8 +16827,7 @@ pub mod rml_ui {
     pub fn clear_translations(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_clear_translations(unused as i32) } as u64;
+            let packed = raw::core_clear_translations(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17944,8 +16849,7 @@ pub mod rml_ui {
     pub fn context_enable_mouse_cursor(context_handle: u64, value: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_enable_mouse_cursor(context_handle as i64, if value { 1 } else { 0 }) } as u64;
+            let packed = raw::core_context_enable_mouse_cursor(context_handle as i64, if value { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17967,8 +16871,7 @@ pub mod rml_ui {
     pub fn context_get_density_independent_pixel_ratio(context_handle: u64) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_get_density_independent_pixel_ratio(context_handle as i64) } as u64;
+            let packed = raw::core_context_get_density_independent_pixel_ratio(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -17987,12 +16890,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_context_get_dimensions(context_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_context_get_dimensions(context_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18015,12 +16914,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_context_get_element_at_point(context_handle as i64, x, y, ignore_element_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_context_get_element_at_point(context_handle as i64, x, y, ignore_element_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18043,12 +16938,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_context_get_focus_element(context_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_context_get_focus_element(context_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18071,12 +16962,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_context_get_hover_element(context_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_context_get_hover_element(context_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18099,12 +16986,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_context_get_root_element(context_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_context_get_root_element(context_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18126,8 +17009,7 @@ pub mod rml_ui {
     pub fn context_is_mouse_interacting(context_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_is_mouse_interacting(context_handle as i64) } as u64;
+            let packed = raw::core_context_is_mouse_interacting(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18149,8 +17031,7 @@ pub mod rml_ui {
     pub fn context_process_key_down(context_handle: u64, key: i32, key_modifier_state: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_key_down(context_handle as i64, key, key_modifier_state) } as u64;
+            let packed = raw::core_context_process_key_down(context_handle as i64, key, key_modifier_state) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18172,8 +17053,7 @@ pub mod rml_ui {
     pub fn context_process_key_up(context_handle: u64, key: i32, key_modifier_state: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_key_up(context_handle as i64, key, key_modifier_state) } as u64;
+            let packed = raw::core_context_process_key_up(context_handle as i64, key, key_modifier_state) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18195,8 +17075,7 @@ pub mod rml_ui {
     pub fn context_process_mouse_button_down(context_handle: u64, button: i32, key_modifier_state: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_button_down(context_handle as i64, button, key_modifier_state) } as u64;
+            let packed = raw::core_context_process_mouse_button_down(context_handle as i64, button, key_modifier_state) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18218,8 +17097,7 @@ pub mod rml_ui {
     pub fn context_process_mouse_button_up(context_handle: u64, button: i32, key_modifier_state: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_button_up(context_handle as i64, button, key_modifier_state) } as u64;
+            let packed = raw::core_context_process_mouse_button_up(context_handle as i64, button, key_modifier_state) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18241,8 +17119,7 @@ pub mod rml_ui {
     pub fn context_process_mouse_leave(context_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_leave(context_handle as i64) } as u64;
+            let packed = raw::core_context_process_mouse_leave(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18264,8 +17141,7 @@ pub mod rml_ui {
     pub fn context_process_mouse_move(context_handle: u64, x: f32, y: f32, key_modifier_state: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_move(context_handle as i64, x, y, key_modifier_state) } as u64;
+            let packed = raw::core_context_process_mouse_move(context_handle as i64, x, y, key_modifier_state) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18287,8 +17163,7 @@ pub mod rml_ui {
     pub fn context_process_mouse_wheel(context_handle: u64, x: f32, y: f32, key_modifier_state: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_process_mouse_wheel(context_handle as i64, x, y, key_modifier_state) } as u64;
+            let packed = raw::core_context_process_mouse_wheel(context_handle as i64, x, y, key_modifier_state) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18310,8 +17185,7 @@ pub mod rml_ui {
     pub fn context_pull_document_to_front(context_handle: u64, document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_pull_document_to_front(context_handle as i64, document_handle as i64) } as u64;
+            let packed = raw::core_context_pull_document_to_front(context_handle as i64, document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18333,8 +17207,7 @@ pub mod rml_ui {
     pub fn context_pull_to_front(context_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_pull_to_front(context_handle as i64) } as u64;
+            let packed = raw::core_context_pull_to_front(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18356,8 +17229,7 @@ pub mod rml_ui {
     pub fn context_push_document_to_back(context_handle: u64, document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_push_document_to_back(context_handle as i64, document_handle as i64) } as u64;
+            let packed = raw::core_context_push_document_to_back(context_handle as i64, document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18379,8 +17251,7 @@ pub mod rml_ui {
     pub fn context_render(context_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_render(context_handle as i64) } as u64;
+            let packed = raw::core_context_render(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18402,8 +17273,7 @@ pub mod rml_ui {
     pub fn context_set_density_independent_pixel_ratio(context_handle: u64, value: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_set_density_independent_pixel_ratio(context_handle as i64, value) } as u64;
+            let packed = raw::core_context_set_density_independent_pixel_ratio(context_handle as i64, value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18425,8 +17295,7 @@ pub mod rml_ui {
     pub fn context_set_dimensions(context_handle: u64, x: i32, y: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_set_dimensions(context_handle as i64, x, y) } as u64;
+            let packed = raw::core_context_set_dimensions(context_handle as i64, x, y) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18448,8 +17317,7 @@ pub mod rml_ui {
     pub fn context_set_pointer_capture(context_handle: u64, anchor_x: i32, anchor_y: i32, active: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_set_pointer_capture(context_handle as i64, anchor_x, anchor_y, if active { 1 } else { 0 }) } as u64;
+            let packed = raw::core_context_set_pointer_capture(context_handle as i64, anchor_x, anchor_y, if active { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18472,12 +17340,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_context_take_pointer_capture_delta(context_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_context_take_pointer_capture_delta(context_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18499,8 +17363,7 @@ pub mod rml_ui {
     pub fn context_unload_all_documents(context_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_unload_all_documents(context_handle as i64) } as u64;
+            let packed = raw::core_context_unload_all_documents(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18522,8 +17385,7 @@ pub mod rml_ui {
     pub fn context_unload_document(context_handle: u64, document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_unload_document(context_handle as i64, document_handle as i64) } as u64;
+            let packed = raw::core_context_unload_document(context_handle as i64, document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18545,8 +17407,7 @@ pub mod rml_ui {
     pub fn context_update(context_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_context_update(context_handle as i64) } as u64;
+            let packed = raw::core_context_update(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18569,12 +17430,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_data_model_get_bool(variable_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_data_model_get_bool(variable_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18597,12 +17454,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 20];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_data_model_get_color(variable_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_data_model_get_color(variable_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18625,12 +17478,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_data_model_get_float(variable_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_data_model_get_float(variable_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18653,12 +17502,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_data_model_get_int(variable_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_data_model_get_int(variable_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18681,12 +17526,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_data_model_get_percent(variable_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_data_model_get_percent(variable_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18709,12 +17550,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_data_model_get_pixels(variable_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_data_model_get_pixels(variable_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18736,8 +17573,7 @@ pub mod rml_ui {
     pub fn data_model_set_bool(variable_handle: u64, value: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_data_model_set_bool(variable_handle as i64, if value { 1 } else { 0 }) } as u64;
+            let packed = raw::core_data_model_set_bool(variable_handle as i64, if value { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18759,8 +17595,7 @@ pub mod rml_ui {
     pub fn data_model_set_color(variable_handle: u64, red: u8, green: u8, blue: u8, alpha: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_data_model_set_color(variable_handle as i64, red as i32, green as i32, blue as i32, alpha as i32) } as u64;
+            let packed = raw::core_data_model_set_color(variable_handle as i64, red as i32, green as i32, blue as i32, alpha as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18782,8 +17617,7 @@ pub mod rml_ui {
     pub fn data_model_set_float(variable_handle: u64, value: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_data_model_set_float(variable_handle as i64, value) } as u64;
+            let packed = raw::core_data_model_set_float(variable_handle as i64, value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18805,8 +17639,7 @@ pub mod rml_ui {
     pub fn data_model_set_int(variable_handle: u64, value: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_data_model_set_int(variable_handle as i64, value) } as u64;
+            let packed = raw::core_data_model_set_int(variable_handle as i64, value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18828,8 +17661,7 @@ pub mod rml_ui {
     pub fn data_model_set_percent(variable_handle: u64, value: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_data_model_set_percent(variable_handle as i64, value) } as u64;
+            let packed = raw::core_data_model_set_percent(variable_handle as i64, value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18851,8 +17683,7 @@ pub mod rml_ui {
     pub fn data_model_set_pixels(variable_handle: u64, value: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_data_model_set_pixels(variable_handle as i64, value) } as u64;
+            let packed = raw::core_data_model_set_pixels(variable_handle as i64, value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18874,8 +17705,7 @@ pub mod rml_ui {
     pub fn document_close(document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_document_close(document_handle as i64) } as u64;
+            let packed = raw::core_document_close(document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18898,12 +17728,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_document_get_context(document_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_document_get_context(document_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -18925,8 +17751,7 @@ pub mod rml_ui {
     pub fn document_hide(document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_document_hide(document_handle as i64) } as u64;
+            let packed = raw::core_document_hide(document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18948,8 +17773,7 @@ pub mod rml_ui {
     pub fn document_is_modal(document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_document_is_modal(document_handle as i64) } as u64;
+            let packed = raw::core_document_is_modal(document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18971,8 +17795,7 @@ pub mod rml_ui {
     pub fn document_pull_to_front(document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_document_pull_to_front(document_handle as i64) } as u64;
+            let packed = raw::core_document_pull_to_front(document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -18994,8 +17817,7 @@ pub mod rml_ui {
     pub fn document_push_to_back(document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_document_push_to_back(document_handle as i64) } as u64;
+            let packed = raw::core_document_push_to_back(document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19017,8 +17839,7 @@ pub mod rml_ui {
     pub fn document_reload_style_sheet(document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_document_reload_style_sheet(document_handle as i64) } as u64;
+            let packed = raw::core_document_reload_style_sheet(document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19040,8 +17861,7 @@ pub mod rml_ui {
     pub fn document_update_document(document_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_document_update_document(document_handle as i64) } as u64;
+            let packed = raw::core_document_update_document(document_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19064,12 +17884,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_element_append_child(element_handle as i64, element_ptr_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_element_append_child(element_handle as i64, element_ptr_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19091,8 +17907,7 @@ pub mod rml_ui {
     pub fn element_blur(element_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_blur(element_handle as i64) } as u64;
+            let packed = raw::core_element_blur(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19114,8 +17929,7 @@ pub mod rml_ui {
     pub fn element_click(element_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_click(element_handle as i64) } as u64;
+            let packed = raw::core_element_click(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19138,12 +17952,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_element_clone(element_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_element_clone(element_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19165,8 +17975,7 @@ pub mod rml_ui {
     pub fn element_focus(element_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_focus(element_handle as i64) } as u64;
+            let packed = raw::core_element_focus(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19188,8 +17997,7 @@ pub mod rml_ui {
     pub fn element_form_control_input_select(element_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_input_select(element_handle as i64) } as u64;
+            let packed = raw::core_element_form_control_input_select(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19211,8 +18019,7 @@ pub mod rml_ui {
     pub fn element_form_control_input_set_selection(element_handle: u64, start: i32, end: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_input_set_selection(element_handle as i64, start, end) } as u64;
+            let packed = raw::core_element_form_control_input_set_selection(element_handle as i64, start, end) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19234,8 +18041,7 @@ pub mod rml_ui {
     pub fn element_form_control_select_add(element_handle: u64, element_ptr_handle: u64, before: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_select_add(element_handle as i64, element_ptr_handle as i64, before) } as u64;
+            let packed = raw::core_element_form_control_select_add(element_handle as i64, element_ptr_handle as i64, before) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19257,8 +18063,7 @@ pub mod rml_ui {
     pub fn element_form_control_select_remove(element_handle: u64, index: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_select_remove(element_handle as i64, index) } as u64;
+            let packed = raw::core_element_form_control_select_remove(element_handle as i64, index) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19280,8 +18085,7 @@ pub mod rml_ui {
     pub fn element_form_control_select_remove_all(element_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_select_remove_all(element_handle as i64) } as u64;
+            let packed = raw::core_element_form_control_select_remove_all(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19303,8 +18107,7 @@ pub mod rml_ui {
     pub fn element_form_control_text_area_select(element_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_text_area_select(element_handle as i64) } as u64;
+            let packed = raw::core_element_form_control_text_area_select(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19326,8 +18129,7 @@ pub mod rml_ui {
     pub fn element_form_control_text_area_set_selection(element_handle: u64, start: i32, end: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_form_control_text_area_set_selection(element_handle as i64, start, end) } as u64;
+            let packed = raw::core_element_form_control_text_area_set_selection(element_handle as i64, start, end) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19350,12 +18152,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_element_get_child(element_handle as i64, index, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_element_get_child(element_handle as i64, index, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19378,12 +18176,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_element_get_rect(element_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_element_get_rect(element_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19405,8 +18199,7 @@ pub mod rml_ui {
     pub fn element_get_scroll_left(element_handle: u64) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_get_scroll_left(element_handle as i64) } as u64;
+            let packed = raw::core_element_get_scroll_left(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19424,8 +18217,7 @@ pub mod rml_ui {
     pub fn element_get_scroll_top(element_handle: u64) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_get_scroll_top(element_handle as i64) } as u64;
+            let packed = raw::core_element_get_scroll_top(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19443,8 +18235,7 @@ pub mod rml_ui {
     pub fn element_has_child_nodes(element_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_has_child_nodes(element_handle as i64) } as u64;
+            let packed = raw::core_element_has_child_nodes(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19467,12 +18258,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_element_insert_before(element_handle as i64, element_ptr_handle as i64, adjacent_element_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_element_insert_before(element_handle as i64, element_ptr_handle as i64, adjacent_element_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19494,8 +18281,7 @@ pub mod rml_ui {
     pub fn element_is_point_within_element(element_handle: u64, x: f32, y: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_is_point_within_element(element_handle as i64, x, y) } as u64;
+            let packed = raw::core_element_is_point_within_element(element_handle as i64, x, y) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19517,8 +18303,7 @@ pub mod rml_ui {
     pub fn element_is_visible(element_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_is_visible(element_handle as i64) } as u64;
+            let packed = raw::core_element_is_visible(element_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19540,8 +18325,7 @@ pub mod rml_ui {
     pub fn element_process_default_action(element_handle: u64, event_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_process_default_action(element_handle as i64, event_handle as i64) } as u64;
+            let packed = raw::core_element_process_default_action(element_handle as i64, event_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19564,12 +18348,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_element_remove_child(element_handle as i64, child_element_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_element_remove_child(element_handle as i64, child_element_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19592,12 +18372,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_element_replace_child(element_handle as i64, element_ptr_handle as i64, replaced_element_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_element_replace_child(element_handle as i64, element_ptr_handle as i64, replaced_element_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19619,8 +18395,7 @@ pub mod rml_ui {
     pub fn element_scroll_into_view(element_handle: u64, align_with_top: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_scroll_into_view(element_handle as i64, if align_with_top { 1 } else { 0 }) } as u64;
+            let packed = raw::core_element_scroll_into_view(element_handle as i64, if align_with_top { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19642,8 +18417,7 @@ pub mod rml_ui {
     pub fn element_set_scroll_left(element_handle: u64, value: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_set_scroll_left(element_handle as i64, value) } as u64;
+            let packed = raw::core_element_set_scroll_left(element_handle as i64, value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19665,8 +18439,7 @@ pub mod rml_ui {
     pub fn element_set_scroll_top(element_handle: u64, value: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_set_scroll_top(element_handle as i64, value) } as u64;
+            let packed = raw::core_element_set_scroll_top(element_handle as i64, value) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19688,8 +18461,7 @@ pub mod rml_ui {
     pub fn element_tab_set_remove_tab(element_handle: u64, index: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_element_tab_set_remove_tab(element_handle as i64, index) } as u64;
+            let packed = raw::core_element_tab_set_remove_tab(element_handle as i64, index) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19712,12 +18484,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 32];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_event_get_current(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_event_get_current(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19740,12 +18508,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_event_get_current_element(event_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_event_get_current_element(event_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19768,12 +18532,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_event_get_phase(event_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_event_get_phase(event_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19796,12 +18556,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_event_get_target_element(event_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_event_get_target_element(event_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19824,12 +18580,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_event_is_immediate_propagating(event_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_event_is_immediate_propagating(event_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19852,12 +18604,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_event_is_interruptible(event_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_event_is_interruptible(event_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19880,12 +18628,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_event_is_propagating(event_handle as i64, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_event_is_propagating(event_handle as i64, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -19907,8 +18651,7 @@ pub mod rml_ui {
     pub fn event_stop_immediate_propagation(event_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_event_stop_immediate_propagation(event_handle as i64) } as u64;
+            let packed = raw::core_event_stop_immediate_propagation(event_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19930,8 +18673,7 @@ pub mod rml_ui {
     pub fn event_stop_propagation(event_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_event_stop_propagation(event_handle as i64) } as u64;
+            let packed = raw::core_event_stop_propagation(event_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19953,8 +18695,7 @@ pub mod rml_ui {
     pub fn is_ready(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_ready(unused as i32) } as u64;
+            let packed = raw::core_is_ready(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19976,8 +18717,7 @@ pub mod rml_ui {
     pub fn remove_context(context_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_remove_context(context_handle as i64) } as u64;
+            let packed = raw::core_remove_context(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -19999,8 +18739,7 @@ pub mod rml_ui {
     pub fn set_debug_context(context_handle: u64) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_debug_context(context_handle as i64) } as u64;
+            let packed = raw::core_set_debug_context(context_handle as i64) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20023,12 +18762,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_vector2f_new(x, y, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_vector2f_new(x, y, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20051,12 +18786,8 @@ pub mod rml_ui {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_vector2i_new(x, y, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_vector2i_new(x, y, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20084,142 +18815,142 @@ pub mod vfs {
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "abort-download"]
-            pub fn core_abort_download(p0: i32) -> i64;
+            pub safe fn core_abort_download(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "calculate-hash"]
-            pub fn core_calculate_hash(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_calculate_hash(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "get-archive-checksum"]
-            pub fn core_get_archive_checksum(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_archive_checksum(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "get-archive-containing-file"]
-            pub fn core_get_archive_containing_file(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_archive_containing_file(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "get-archive-path"]
-            pub fn core_get_archive_path(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_archive_path(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "get-file-absolute-path"]
-            pub fn core_get_file_absolute_path(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_file_absolute_path(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "get-map-square-texture-info"]
-            pub fn core_get_map_square_texture_info(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_map_square_texture_info(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "get-name-from-rapid-tag"]
-            pub fn core_get_name_from_rapid_tag(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_name_from_rapid_tag(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "load-file"]
-            pub fn core_load_file(p0: i32, p1: i32) -> i32;
+            pub safe fn core_load_file(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "pack-f32"]
-            pub fn core_pack_f32(p0: i32, p1: i32) -> i32;
+            pub safe fn core_pack_f32(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "pack-s16"]
-            pub fn core_pack_s16(p0: i32, p1: i32) -> i32;
+            pub safe fn core_pack_s16(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "pack-s32"]
-            pub fn core_pack_s32(p0: i32, p1: i32) -> i32;
+            pub safe fn core_pack_s32(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "pack-s8"]
-            pub fn core_pack_s8(p0: i32, p1: i32) -> i32;
+            pub safe fn core_pack_s8(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "pack-u16"]
-            pub fn core_pack_u16(p0: i32, p1: i32) -> i32;
+            pub safe fn core_pack_u16(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "pack-u32"]
-            pub fn core_pack_u32(p0: i32, p1: i32) -> i32;
+            pub safe fn core_pack_u32(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "pack-u8"]
-            pub fn core_pack_u8(p0: i32, p1: i32) -> i32;
+            pub safe fn core_pack_u8(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "read-file"]
-            pub fn core_read_file(p0: i32, p1: i32) -> i32;
+            pub safe fn core_read_file(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "read-file-as-string"]
-            pub fn core_read_file_as_string(p0: i32, p1: i32) -> i32;
+            pub safe fn core_read_file_as_string(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "scan-all-dirs"]
-            pub fn core_scan_all_dirs(p0: i32) -> i32;
+            pub safe fn core_scan_all_dirs(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "unpack-f32"]
-            pub fn core_unpack_f32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_unpack_f32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "unpack-s16"]
-            pub fn core_unpack_s16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_unpack_s16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "unpack-s32"]
-            pub fn core_unpack_s32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_unpack_s32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "unpack-s8"]
-            pub fn core_unpack_s8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_unpack_s8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "unpack-u16"]
-            pub fn core_unpack_u16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_unpack_u16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "unpack-u32"]
-            pub fn core_unpack_u32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_unpack_u32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "unpack-u8"]
-            pub fn core_unpack_u8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_unpack_u8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "zlib-compress"]
-            pub fn core_zlib_compress(p0: i32, p1: i32) -> i32;
+            pub safe fn core_zlib_compress(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
             #[link_name = "zlib-decompress"]
-            pub fn core_zlib_decompress(p0: i32, p1: i32) -> i32;
+            pub safe fn core_zlib_decompress(p0: i32, p1: i32) -> i32;
         }
     }
 
@@ -20227,8 +18958,7 @@ pub mod vfs {
     pub fn abort_download(id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_abort_download(id) } as u64;
+            let packed = raw::core_abort_download(id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20251,12 +18981,8 @@ pub mod vfs {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_map_square_texture_info(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_map_square_texture_info(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20278,8 +19004,7 @@ pub mod vfs {
     pub fn scan_all_dirs(unused: u8) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let status = unsafe { raw::core_scan_all_dirs(unused as i32) };
+            let status = raw::core_scan_all_dirs(unused as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -20299,92 +19024,92 @@ pub mod unsynced_read {
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-box-selection-by-engine"]
-            pub fn core_get_box_selection_by_engine(p0: i32) -> i64;
+            pub safe fn core_get_box_selection_by_engine(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-build-facing"]
-            pub fn core_get_build_facing(p0: i32) -> i64;
+            pub safe fn core_get_build_facing(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-build-spacing"]
-            pub fn core_get_build_spacing(p0: i32) -> i64;
+            pub safe fn core_get_build_spacing(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-clipboard"]
-            pub fn core_get_clipboard(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_clipboard(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-cmd-desc-index"]
-            pub fn core_get_cmd_desc_index(p0: i32) -> i64;
+            pub safe fn core_get_cmd_desc_index(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-custom-palette-color"]
-            pub fn core_get_custom_palette_color(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_custom_palette_color(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-draw-selection-info"]
-            pub fn core_get_draw_selection_info(p0: i32) -> i64;
+            pub safe fn core_get_draw_selection_info(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-feature-palette-index"]
-            pub fn core_get_feature_palette_index(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_feature_palette_index(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-game-seconds-interpolated"]
-            pub fn core_get_game_seconds_interpolated(p0: i32) -> i64;
+            pub safe fn core_get_game_seconds_interpolated(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-last-message-positions"]
-            pub fn core_get_last_message_positions(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_last_message_positions(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-nano-projectile-params"]
-            pub fn core_get_nano_projectile_params(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_nano_projectile_params(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-piece-projectile-name"]
-            pub fn core_get_piece_projectile_name(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_piece_projectile_name(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-prev-frame-sync-checksum"]
-            pub fn core_get_prev_frame_sync_checksum(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_prev_frame_sync_checksum(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-team-damage-stats"]
-            pub fn core_get_team_damage_stats(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_team_damage_stats(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "get-unit-palette-index"]
-            pub fn core_get_unit_palette_index(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_palette_index(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "is-unit-allied"]
-            pub fn core_is_unit_allied(p0: i32) -> i64;
+            pub safe fn core_is_unit_allied(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "is-unit-selected"]
-            pub fn core_is_unit_selected(p0: i32) -> i64;
+            pub safe fn core_is_unit_selected(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-read")]
         unsafe extern "C" {
             #[link_name = "solve-nurbs-curve"]
-            pub fn core_solve_nurbs_curve(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_solve_nurbs_curve(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
     }
 
@@ -20392,8 +19117,7 @@ pub mod unsynced_read {
     pub fn get_box_selection_by_engine(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_box_selection_by_engine(unused as i32) } as u64;
+            let packed = raw::core_get_box_selection_by_engine(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20415,8 +19139,7 @@ pub mod unsynced_read {
     pub fn get_build_facing(unused: u8) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_build_facing(unused as i32) } as u64;
+            let packed = raw::core_get_build_facing(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20434,8 +19157,7 @@ pub mod unsynced_read {
     pub fn get_build_spacing(unused: u8) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_build_spacing(unused as i32) } as u64;
+            let packed = raw::core_get_build_spacing(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20453,8 +19175,7 @@ pub mod unsynced_read {
     pub fn get_cmd_desc_index(cmd_id: i32) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_cmd_desc_index(cmd_id) } as u64;
+            let packed = raw::core_get_cmd_desc_index(cmd_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20473,12 +19194,8 @@ pub mod unsynced_read {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 16];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_custom_palette_color(index, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_custom_palette_color(index, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20500,8 +19217,7 @@ pub mod unsynced_read {
     pub fn get_draw_selection_info(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_draw_selection_info(unused as i32) } as u64;
+            let packed = raw::core_get_draw_selection_info(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20524,12 +19240,8 @@ pub mod unsynced_read {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_feature_palette_index(feature_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_feature_palette_index(feature_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20551,8 +19263,7 @@ pub mod unsynced_read {
     pub fn get_game_seconds_interpolated(unused: u8) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_game_seconds_interpolated(unused as i32) } as u64;
+            let packed = raw::core_get_game_seconds_interpolated(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20571,12 +19282,8 @@ pub mod unsynced_read {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 24];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_nano_projectile_params(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_nano_projectile_params(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20599,12 +19306,8 @@ pub mod unsynced_read {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_team_damage_stats(team_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_team_damage_stats(team_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20627,12 +19330,8 @@ pub mod unsynced_read {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 8];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_palette_index(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_palette_index(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -20654,8 +19353,7 @@ pub mod unsynced_read {
     pub fn is_unit_allied(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_allied(unit_id) } as u64;
+            let packed = raw::core_is_unit_allied(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20677,8 +19375,7 @@ pub mod unsynced_read {
     pub fn is_unit_selected(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_selected(unit_id) } as u64;
+            let packed = raw::core_is_unit_selected(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20713,42 +19410,42 @@ pub mod team_control {
         #[link(wasm_import_module = "spring:team-control")]
         unsafe extern "C" {
             #[link_name = "assign-player-to-team"]
-            pub fn core_assign_player_to_team(p0: i32, p1: i32) -> i64;
+            pub safe fn core_assign_player_to_team(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:team-control")]
         unsafe extern "C" {
             #[link_name = "kill-team"]
-            pub fn core_kill_team(p0: i32) -> i64;
+            pub safe fn core_kill_team(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:team-control")]
         unsafe extern "C" {
             #[link_name = "set-ally"]
-            pub fn core_set_ally(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_ally(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:team-control")]
         unsafe extern "C" {
             #[link_name = "set-ally-team-start-box"]
-            pub fn core_set_ally_team_start_box(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_set_ally_team_start_box(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:team-control")]
         unsafe extern "C" {
             #[link_name = "set-global-los"]
-            pub fn core_set_global_los(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_global_los(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:team-control")]
         unsafe extern "C" {
             #[link_name = "set-player-ready-state"]
-            pub fn core_set_player_ready_state(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_player_ready_state(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:team-control")]
         unsafe extern "C" {
             #[link_name = "set-team-start-position"]
-            pub fn core_set_team_start_position(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_team_start_position(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:team-control")]
         unsafe extern "C" {
             #[link_name = "transfer-team-max-units"]
-            pub fn core_transfer_team_max_units(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_transfer_team_max_units(p0: i32, p1: i32, p2: i32) -> i64;
         }
     }
 
@@ -20756,8 +19453,7 @@ pub mod team_control {
     pub fn assign_player_to_team(player_id: i32, team_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_assign_player_to_team(player_id, team_id) } as u64;
+            let packed = raw::core_assign_player_to_team(player_id, team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20779,8 +19475,7 @@ pub mod team_control {
     pub fn kill_team(team_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_kill_team(team_id) } as u64;
+            let packed = raw::core_kill_team(team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20802,8 +19497,7 @@ pub mod team_control {
     pub fn set_ally(first_ally_team_id: i32, second_ally_team_id: i32, allied: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ally(first_ally_team_id, second_ally_team_id, if allied { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_ally(first_ally_team_id, second_ally_team_id, if allied { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20825,8 +19519,7 @@ pub mod team_control {
     pub fn set_ally_team_start_box(ally_team_id: i32, min_x: f32, min_z: f32, max_x: f32, max_z: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_ally_team_start_box(ally_team_id, min_x, min_z, max_x, max_z) } as u64;
+            let packed = raw::core_set_ally_team_start_box(ally_team_id, min_x, min_z, max_x, max_z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20848,8 +19541,7 @@ pub mod team_control {
     pub fn set_global_los(ally_team_id: i32, enabled: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_global_los(ally_team_id, if enabled { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_global_los(ally_team_id, if enabled { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20871,8 +19563,7 @@ pub mod team_control {
     pub fn set_player_ready_state(player_id: i32, ready: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_player_ready_state(player_id, if ready { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_player_ready_state(player_id, if ready { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20903,11 +19594,8 @@ pub mod team_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_team_start_position(team_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_team_start_position(team_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -20929,8 +19617,7 @@ pub mod team_control {
     pub fn transfer_team_max_units(from_team_id: i32, to_team_id: i32, amount: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_transfer_team_max_units(from_team_id, to_team_id, amount) } as u64;
+            let packed = raw::core_transfer_team_max_units(from_team_id, to_team_id, amount) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21042,347 +19729,347 @@ pub mod unit_control {
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "add-object-decal"]
-            pub fn core_add_object_decal(p0: i32) -> i64;
+            pub safe fn core_add_object_decal(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "add-unit-damage"]
-            pub fn core_add_unit_damage(p0: i32, p1: f32, p2: f32, p3: i32, p4: i32, p5: i32) -> i64;
+            pub safe fn core_add_unit_damage(p0: i32, p1: f32, p2: f32, p3: i32, p4: i32, p5: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "add-unit-experience"]
-            pub fn core_add_unit_experience(p0: i32, p1: f32) -> i64;
+            pub safe fn core_add_unit_experience(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "add-unit-impulse"]
-            pub fn core_add_unit_impulse(p0: i32, p1: f32, p2: i32) -> i64;
+            pub safe fn core_add_unit_impulse(p0: i32, p1: f32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "add-unit-seismic-ping"]
-            pub fn core_add_unit_seismic_ping(p0: i32, p1: f32) -> i64;
+            pub safe fn core_add_unit_seismic_ping(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "clear-unit-goal"]
-            pub fn core_clear_unit_goal(p0: i32, p1: i32) -> i64;
+            pub safe fn core_clear_unit_goal(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "destroy-unit"]
-            pub fn core_destroy_unit(p0: i32, p1: i32) -> i64;
+            pub safe fn core_destroy_unit(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "force-unit-collision-update"]
-            pub fn core_force_unit_collision_update(p0: i32) -> i64;
+            pub safe fn core_force_unit_collision_update(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "get-unit-feature-separation"]
-            pub fn core_get_unit_feature_separation(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_get_unit_feature_separation(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "get-unit-leaves-ghost"]
-            pub fn core_get_unit_leaves_ghost(p0: i32) -> i64;
+            pub safe fn core_get_unit_leaves_ghost(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "get-unit-physical-state"]
-            pub fn core_get_unit_physical_state(p0: i32) -> i64;
+            pub safe fn core_get_unit_physical_state(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "remove-object-decal"]
-            pub fn core_remove_object_decal(p0: i32) -> i64;
+            pub safe fn core_remove_object_decal(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "remove-unit-cmd-desc"]
-            pub fn core_remove_unit_cmd_desc(p0: i32, p1: i32) -> i64;
+            pub safe fn core_remove_unit_cmd_desc(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-factory-bugger-off"]
-            pub fn core_set_factory_bugger_off(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_factory_bugger_off(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-always-visible"]
-            pub fn core_set_unit_always_visible(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_always_visible(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-armored"]
-            pub fn core_set_unit_armored(p0: i32, p1: i32, p2: f32) -> i64;
+            pub safe fn core_set_unit_armored(p0: i32, p1: i32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-blocking"]
-            pub fn core_set_unit_blocking(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_blocking(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-build-speed"]
-            pub fn core_set_unit_build_speed(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: f32) -> i64;
+            pub safe fn core_set_unit_build_speed(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-buildee-radius"]
-            pub fn core_set_unit_buildee_radius(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_unit_buildee_radius(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-cloak"]
-            pub fn core_set_unit_cloak(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_cloak(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-collision-volume-data"]
-            pub fn core_set_unit_collision_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            pub safe fn core_set_unit_collision_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-costs"]
-            pub fn core_set_unit_costs(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_costs(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-crashing"]
-            pub fn core_set_unit_crashing(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_crashing(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-direction"]
-            pub fn core_set_unit_direction(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_direction(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-experience"]
-            pub fn core_set_unit_experience(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_unit_experience(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-harvest-storage"]
-            pub fn core_set_unit_harvest_storage(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_set_unit_harvest_storage(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-heading"]
-            pub fn core_set_unit_heading(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_heading(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-heading-and-up-dir"]
-            pub fn core_set_unit_heading_and_up_dir(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_heading_and_up_dir(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-health"]
-            pub fn core_set_unit_health(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_health(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-land-goal"]
-            pub fn core_set_unit_land_goal(p0: i32, p1: f32, p2: i32) -> i64;
+            pub safe fn core_set_unit_land_goal(p0: i32, p1: f32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-leaves-ghost"]
-            pub fn core_set_unit_leaves_ghost(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_leaves_ghost(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-loading-transport"]
-            pub fn core_set_unit_loading_transport(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_loading_transport(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-los-mask"]
-            pub fn core_set_unit_los_mask(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_los_mask(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-los-state"]
-            pub fn core_set_unit_los_state(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_los_state(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-mass"]
-            pub fn core_set_unit_mass(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_unit_mass(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-max-health"]
-            pub fn core_set_unit_max_health(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_unit_max_health(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-max-range"]
-            pub fn core_set_unit_max_range(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_unit_max_range(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-metal-extraction"]
-            pub fn core_set_unit_metal_extraction(p0: i32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_set_unit_metal_extraction(p0: i32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-mid-and-aim-pos"]
-            pub fn core_set_unit_mid_and_aim_pos(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_mid_and_aim_pos(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-move-goal"]
-            pub fn core_set_unit_move_goal(p0: i32, p1: f32, p2: f32, p3: i32, p4: i32) -> i64;
+            pub safe fn core_set_unit_move_goal(p0: i32, p1: f32, p2: f32, p3: i32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-neutral"]
-            pub fn core_set_unit_neutral(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_neutral(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-physical-state-bit"]
-            pub fn core_set_unit_physical_state_bit(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_physical_state_bit(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-physics"]
-            pub fn core_set_unit_physics(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_physics(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-piece-collision-volume-data"]
-            pub fn core_set_unit_piece_collision_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+            pub safe fn core_set_unit_piece_collision_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-piece-matrix"]
-            pub fn core_set_unit_piece_matrix(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_piece_matrix(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-piece-parent"]
-            pub fn core_set_unit_piece_parent(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_piece_parent(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-piece-visible"]
-            pub fn core_set_unit_piece_visible(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_piece_visible(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-pos-error-params"]
-            pub fn core_set_unit_pos_error_params(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            pub safe fn core_set_unit_pos_error_params(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-position"]
-            pub fn core_set_unit_position(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_position(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-radius-and-height"]
-            pub fn core_set_unit_radius_and_height(p0: i32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_set_unit_radius_and_height(p0: i32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-rotation"]
-            pub fn core_set_unit_rotation(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_rotation(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-seismic-signature"]
-            pub fn core_set_unit_seismic_signature(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_unit_seismic_signature(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-selection-volume-data"]
-            pub fn core_set_unit_selection_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            pub safe fn core_set_unit_selection_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-shield-recharge-delay"]
-            pub fn core_set_unit_shield_recharge_delay(p0: i32, p1: i32, p2: f32) -> i64;
+            pub safe fn core_set_unit_shield_recharge_delay(p0: i32, p1: i32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-shield-state"]
-            pub fn core_set_unit_shield_state(p0: i32, p1: i32, p2: i32, p3: f32) -> i64;
+            pub safe fn core_set_unit_shield_state(p0: i32, p1: i32, p2: i32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-sonar-stealth"]
-            pub fn core_set_unit_sonar_stealth(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_sonar_stealth(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-stealth"]
-            pub fn core_set_unit_stealth(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_stealth(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-stockpile"]
-            pub fn core_set_unit_stockpile(p0: i32, p1: i32, p2: f32) -> i64;
+            pub safe fn core_set_unit_stockpile(p0: i32, p1: i32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-target"]
-            pub fn core_set_unit_target(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_unit_target(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-use-air-los"]
-            pub fn core_set_unit_use_air_los(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_use_air_los(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-use-weapons"]
-            pub fn core_set_unit_use_weapons(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_use_weapons(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "set-unit-velocity"]
-            pub fn core_set_unit_velocity(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_unit_velocity(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "transfer-unit"]
-            pub fn core_transfer_unit(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+            pub safe fn core_transfer_unit(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "unit-attach"]
-            pub fn core_unit_attach(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_unit_attach(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "unit-detach"]
-            pub fn core_unit_detach(p0: i32) -> i64;
+            pub safe fn core_unit_detach(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "unit-detach-from-air"]
-            pub fn core_unit_detach_from_air(p0: i32, p1: i32) -> i64;
+            pub safe fn core_unit_detach_from_air(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "unit-finish-command"]
-            pub fn core_unit_finish_command(p0: i32) -> i64;
+            pub safe fn core_unit_finish_command(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "unit-weapon-fire"]
-            pub fn core_unit_weapon_fire(p0: i32, p1: i32) -> i64;
+            pub safe fn core_unit_weapon_fire(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
             #[link_name = "unit-weapon-hold-fire"]
-            pub fn core_unit_weapon_hold_fire(p0: i32, p1: i32) -> i64;
+            pub safe fn core_unit_weapon_hold_fire(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -21390,8 +20077,7 @@ pub mod unit_control {
     pub fn add_object_decal(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_object_decal(unit_id) } as u64;
+            let packed = raw::core_add_object_decal(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21422,11 +20108,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_unit_damage(unit_id, damage, paralyze_time, weapon_def_id, attacker_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_add_unit_damage(unit_id, damage, paralyze_time, weapon_def_id, attacker_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21448,8 +20131,7 @@ pub mod unit_control {
     pub fn add_unit_experience(unit_id: i32, experience: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_unit_experience(unit_id, experience) } as u64;
+            let packed = raw::core_add_unit_experience(unit_id, experience) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21480,11 +20162,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_unit_impulse(unit_id, decay_rate, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_add_unit_impulse(unit_id, decay_rate, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21506,8 +20185,7 @@ pub mod unit_control {
     pub fn add_unit_seismic_ping(unit_id: i32, ping_size: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_unit_seismic_ping(unit_id, ping_size) } as u64;
+            let packed = raw::core_add_unit_seismic_ping(unit_id, ping_size) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21529,8 +20207,7 @@ pub mod unit_control {
     pub fn clear_unit_goal(unit_id: i32, cancel_raw: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_clear_unit_goal(unit_id, if cancel_raw { 1 } else { 0 }) } as u64;
+            let packed = raw::core_clear_unit_goal(unit_id, if cancel_raw { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21562,11 +20239,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_destroy_unit(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_destroy_unit(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21588,8 +20262,7 @@ pub mod unit_control {
     pub fn force_unit_collision_update(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_force_unit_collision_update(unit_id) } as u64;
+            let packed = raw::core_force_unit_collision_update(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21611,8 +20284,7 @@ pub mod unit_control {
     pub fn get_unit_feature_separation(unit_id: i32, feature_id: i32, ignore_y: bool) -> Result<f32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_feature_separation(unit_id, feature_id, if ignore_y { 1 } else { 0 }) } as u64;
+            let packed = raw::core_get_unit_feature_separation(unit_id, feature_id, if ignore_y { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21630,8 +20302,7 @@ pub mod unit_control {
     pub fn get_unit_leaves_ghost(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_leaves_ghost(unit_id) } as u64;
+            let packed = raw::core_get_unit_leaves_ghost(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21653,8 +20324,7 @@ pub mod unit_control {
     pub fn get_unit_physical_state(unit_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_physical_state(unit_id) } as u64;
+            let packed = raw::core_get_unit_physical_state(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21672,8 +20342,7 @@ pub mod unit_control {
     pub fn remove_object_decal(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_remove_object_decal(unit_id) } as u64;
+            let packed = raw::core_remove_object_decal(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21695,8 +20364,7 @@ pub mod unit_control {
     pub fn remove_unit_cmd_desc(unit_id: i32, cmd_desc_index: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_remove_unit_cmd_desc(unit_id, cmd_desc_index) } as u64;
+            let packed = raw::core_remove_unit_cmd_desc(unit_id, cmd_desc_index) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21730,11 +20398,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_factory_bugger_off(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_factory_bugger_off(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21756,8 +20421,7 @@ pub mod unit_control {
     pub fn set_unit_always_visible(unit_id: i32, always_visible: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_always_visible(unit_id, if always_visible { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_always_visible(unit_id, if always_visible { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21779,8 +20443,7 @@ pub mod unit_control {
     pub fn set_unit_armored(unit_id: i32, armored_state: bool, armored_multiple: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_armored(unit_id, if armored_state { 1 } else { 0 }, armored_multiple) } as u64;
+            let packed = raw::core_set_unit_armored(unit_id, if armored_state { 1 } else { 0 }, armored_multiple) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21815,11 +20478,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_blocking(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_blocking(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21841,8 +20501,7 @@ pub mod unit_control {
     pub fn set_unit_build_speed(unit_id: i32, build_speed: f32, repair_speed: f32, reclaim_speed: f32, resurrect_speed: f32, capture_speed: f32, terraform_speed: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_build_speed(unit_id, build_speed, repair_speed, reclaim_speed, resurrect_speed, capture_speed, terraform_speed) } as u64;
+            let packed = raw::core_set_unit_build_speed(unit_id, build_speed, repair_speed, reclaim_speed, resurrect_speed, capture_speed, terraform_speed) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21864,8 +20523,7 @@ pub mod unit_control {
     pub fn set_unit_buildee_radius(unit_id: i32, radius: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_buildee_radius(unit_id, radius) } as u64;
+            let packed = raw::core_set_unit_buildee_radius(unit_id, radius) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21900,11 +20558,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_cloak(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_cloak(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21939,11 +20594,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_collision_volume_data(unit_id, volume_type, test_type, primary_axis, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_collision_volume_data(unit_id, volume_type, test_type, primary_axis, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -21974,11 +20626,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_costs(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_costs(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22000,8 +20649,7 @@ pub mod unit_control {
     pub fn set_unit_crashing(unit_id: i32, want_crash: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_crashing(unit_id, if want_crash { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_crashing(unit_id, if want_crash { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22036,11 +20684,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_direction(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_direction(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22062,8 +20707,7 @@ pub mod unit_control {
     pub fn set_unit_experience(unit_id: i32, experience: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_experience(unit_id, experience) } as u64;
+            let packed = raw::core_set_unit_experience(unit_id, experience) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22085,8 +20729,7 @@ pub mod unit_control {
     pub fn set_unit_harvest_storage(unit_id: i32, stored_metal: f32, max_stored_metal: f32, stored_energy: f32, max_stored_energy: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_harvest_storage(unit_id, stored_metal, max_stored_metal, stored_energy, max_stored_energy) } as u64;
+            let packed = raw::core_set_unit_harvest_storage(unit_id, stored_metal, max_stored_metal, stored_energy, max_stored_energy) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22108,8 +20751,7 @@ pub mod unit_control {
     pub fn set_unit_heading(unit_id: i32, heading: i32, use_smoothing: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_heading(unit_id, heading, if use_smoothing { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_heading(unit_id, heading, if use_smoothing { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22140,11 +20782,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_heading_and_up_dir(unit_id, heading, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_heading_and_up_dir(unit_id, heading, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22177,11 +20816,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_health(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_health(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22212,11 +20848,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_land_goal(unit_id, radius_sq, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_land_goal(unit_id, radius_sq, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22246,11 +20879,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_leaves_ghost(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_leaves_ghost(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22272,8 +20902,7 @@ pub mod unit_control {
     pub fn set_unit_loading_transport(unit_id: i32, transport_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_loading_transport(unit_id, transport_id) } as u64;
+            let packed = raw::core_set_unit_loading_transport(unit_id, transport_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22295,8 +20924,7 @@ pub mod unit_control {
     pub fn set_unit_los_mask(unit_id: i32, ally_team_id: i32, los_mask: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_los_mask(unit_id, ally_team_id, los_mask as i32) } as u64;
+            let packed = raw::core_set_unit_los_mask(unit_id, ally_team_id, los_mask as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22318,8 +20946,7 @@ pub mod unit_control {
     pub fn set_unit_los_state(unit_id: i32, ally_team_id: i32, los_state: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_los_state(unit_id, ally_team_id, los_state as i32) } as u64;
+            let packed = raw::core_set_unit_los_state(unit_id, ally_team_id, los_state as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22341,8 +20968,7 @@ pub mod unit_control {
     pub fn set_unit_mass(unit_id: i32, mass: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_mass(unit_id, mass) } as u64;
+            let packed = raw::core_set_unit_mass(unit_id, mass) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22364,8 +20990,7 @@ pub mod unit_control {
     pub fn set_unit_max_health(unit_id: i32, max_health: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_max_health(unit_id, max_health) } as u64;
+            let packed = raw::core_set_unit_max_health(unit_id, max_health) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22387,8 +21012,7 @@ pub mod unit_control {
     pub fn set_unit_max_range(unit_id: i32, max_range: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_max_range(unit_id, max_range) } as u64;
+            let packed = raw::core_set_unit_max_range(unit_id, max_range) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22410,8 +21034,7 @@ pub mod unit_control {
     pub fn set_unit_metal_extraction(unit_id: i32, depth: f32, range: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_metal_extraction(unit_id, depth, range) } as u64;
+            let packed = raw::core_set_unit_metal_extraction(unit_id, depth, range) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22446,11 +21069,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_mid_and_aim_pos(unit_id, if set_relative { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_mid_and_aim_pos(unit_id, if set_relative { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22481,11 +21101,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_move_goal(unit_id, radius, speed, if raw { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_move_goal(unit_id, radius, speed, if raw { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22507,8 +21124,7 @@ pub mod unit_control {
     pub fn set_unit_neutral(unit_id: i32, neutral: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_neutral(unit_id, if neutral { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_neutral(unit_id, if neutral { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22530,8 +21146,7 @@ pub mod unit_control {
     pub fn set_unit_physical_state_bit(unit_id: i32, state_bit: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_physical_state_bit(unit_id, state_bit) } as u64;
+            let packed = raw::core_set_unit_physical_state_bit(unit_id, state_bit) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22574,11 +21189,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_physics(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_physics(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22613,11 +21225,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_piece_collision_volume_data(unit_id, piece_index, if enable { 1 } else { 0 }, volume_type, primary_axis, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_piece_collision_volume_data(unit_id, piece_index, if enable { 1 } else { 0 }, volume_type, primary_axis, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22660,11 +21269,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_piece_matrix(unit_id, piece_index, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_piece_matrix(unit_id, piece_index, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22686,8 +21292,7 @@ pub mod unit_control {
     pub fn set_unit_piece_parent(unit_id: i32, child_piece_index: i32, parent_piece_index: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_piece_parent(unit_id, child_piece_index, parent_piece_index) } as u64;
+            let packed = raw::core_set_unit_piece_parent(unit_id, child_piece_index, parent_piece_index) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22709,8 +21314,7 @@ pub mod unit_control {
     pub fn set_unit_piece_visible(unit_id: i32, piece_index: i32, visible: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_piece_visible(unit_id, piece_index, if visible { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_piece_visible(unit_id, piece_index, if visible { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22745,11 +21349,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_pos_error_params(unit_id, next_pos_error_update, ally_team_id, if set_pos_error_bit { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_pos_error_params(unit_id, next_pos_error_update, ally_team_id, if set_pos_error_bit { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22780,11 +21381,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_position(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_position(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22806,8 +21404,7 @@ pub mod unit_control {
     pub fn set_unit_radius_and_height(unit_id: i32, radius: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_radius_and_height(unit_id, radius, height) } as u64;
+            let packed = raw::core_set_unit_radius_and_height(unit_id, radius, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22838,11 +21435,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_rotation(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_rotation(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22864,8 +21458,7 @@ pub mod unit_control {
     pub fn set_unit_seismic_signature(unit_id: i32, seismic_signature: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_seismic_signature(unit_id, seismic_signature) } as u64;
+            let packed = raw::core_set_unit_seismic_signature(unit_id, seismic_signature) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22900,11 +21493,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_selection_volume_data(unit_id, volume_type, test_type, primary_axis, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_selection_volume_data(unit_id, volume_type, test_type, primary_axis, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22926,8 +21516,7 @@ pub mod unit_control {
     pub fn set_unit_shield_recharge_delay(unit_id: i32, weapon_num: i32, recharge_delay: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_shield_recharge_delay(unit_id, weapon_num, recharge_delay) } as u64;
+            let packed = raw::core_set_unit_shield_recharge_delay(unit_id, weapon_num, recharge_delay) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22949,8 +21538,7 @@ pub mod unit_control {
     pub fn set_unit_shield_state(unit_id: i32, weapon_num: i32, enabled: bool, power: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_shield_state(unit_id, weapon_num, if enabled { 1 } else { 0 }, power) } as u64;
+            let packed = raw::core_set_unit_shield_state(unit_id, weapon_num, if enabled { 1 } else { 0 }, power) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22972,8 +21560,7 @@ pub mod unit_control {
     pub fn set_unit_sonar_stealth(unit_id: i32, sonar_stealth: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_sonar_stealth(unit_id, if sonar_stealth { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_sonar_stealth(unit_id, if sonar_stealth { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -22995,8 +21582,7 @@ pub mod unit_control {
     pub fn set_unit_stealth(unit_id: i32, stealth: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_stealth(unit_id, if stealth { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_stealth(unit_id, if stealth { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23018,8 +21604,7 @@ pub mod unit_control {
     pub fn set_unit_stockpile(unit_id: i32, stockpile: i32, build_percent: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_stockpile(unit_id, stockpile, build_percent) } as u64;
+            let packed = raw::core_set_unit_stockpile(unit_id, stockpile, build_percent) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23056,11 +21641,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_target(unit_id, weapon_num, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_target(unit_id, weapon_num, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23082,8 +21664,7 @@ pub mod unit_control {
     pub fn set_unit_use_air_los(unit_id: i32, use_air_los: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_unit_use_air_los(unit_id, if use_air_los { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_unit_use_air_los(unit_id, if use_air_los { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23113,11 +21694,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_use_weapons(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_use_weapons(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23148,11 +21726,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_unit_velocity(unit_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_unit_velocity(unit_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23174,8 +21749,7 @@ pub mod unit_control {
     pub fn transfer_unit(unit_id: i32, new_team_id: i32, given: bool, adjust_unit_limit: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_transfer_unit(unit_id, new_team_id, if given { 1 } else { 0 }, if adjust_unit_limit { 1 } else { 0 }) } as u64;
+            let packed = raw::core_transfer_unit(unit_id, new_team_id, if given { 1 } else { 0 }, if adjust_unit_limit { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23197,8 +21771,7 @@ pub mod unit_control {
     pub fn unit_attach(transporter_id: i32, transportee_id: i32, piece_num: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_attach(transporter_id, transportee_id, piece_num) } as u64;
+            let packed = raw::core_unit_attach(transporter_id, transportee_id, piece_num) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23220,8 +21793,7 @@ pub mod unit_control {
     pub fn unit_detach(transportee_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_detach(transportee_id) } as u64;
+            let packed = raw::core_unit_detach(transportee_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23252,11 +21824,8 @@ pub mod unit_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_unit_detach_from_air(transportee_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_unit_detach_from_air(transportee_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23278,8 +21847,7 @@ pub mod unit_control {
     pub fn unit_finish_command(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_finish_command(unit_id) } as u64;
+            let packed = raw::core_unit_finish_command(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23301,8 +21869,7 @@ pub mod unit_control {
     pub fn unit_weapon_fire(unit_id: i32, weapon_num: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_weapon_fire(unit_id, weapon_num) } as u64;
+            let packed = raw::core_unit_weapon_fire(unit_id, weapon_num) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23324,8 +21891,7 @@ pub mod unit_control {
     pub fn unit_weapon_hold_fire(unit_id: i32, weapon_num: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_unit_weapon_hold_fire(unit_id, weapon_num) } as u64;
+            let packed = raw::core_unit_weapon_hold_fire(unit_id, weapon_num) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23371,152 +21937,152 @@ pub mod feature_control {
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "add-feature-damage"]
-            pub fn core_add_feature_damage(p0: i32, p1: f32, p2: f32, p3: i32, p4: i32, p5: i32) -> i64;
+            pub safe fn core_add_feature_damage(p0: i32, p1: f32, p2: f32, p3: i32, p4: i32, p5: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "create-feature-wreck"]
-            pub fn core_create_feature_wreck(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_create_feature_wreck(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "create-unit-wreck"]
-            pub fn core_create_unit_wreck(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_create_unit_wreck(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "destroy-feature"]
-            pub fn core_destroy_feature(p0: i32) -> i64;
+            pub safe fn core_destroy_feature(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-always-visible"]
-            pub fn core_set_feature_always_visible(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_always_visible(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-blocking"]
-            pub fn core_set_feature_blocking(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_blocking(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-collision-volume-data"]
-            pub fn core_set_feature_collision_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            pub safe fn core_set_feature_collision_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-direction"]
-            pub fn core_set_feature_direction(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_direction(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-fire-time"]
-            pub fn core_set_feature_fire_time(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_feature_fire_time(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-heading-and-up-dir"]
-            pub fn core_set_feature_heading_and_up_dir(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_feature_heading_and_up_dir(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-health"]
-            pub fn core_set_feature_health(p0: i32, p1: f32, p2: i32) -> i64;
+            pub safe fn core_set_feature_health(p0: i32, p1: f32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-mass"]
-            pub fn core_set_feature_mass(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_feature_mass(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-max-health"]
-            pub fn core_set_feature_max_health(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_feature_max_health(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-mid-and-aim-pos"]
-            pub fn core_set_feature_mid_and_aim_pos(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_feature_mid_and_aim_pos(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-move-ctrl"]
-            pub fn core_set_feature_move_ctrl(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_feature_move_ctrl(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-no-select"]
-            pub fn core_set_feature_no_select(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_no_select(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-physics"]
-            pub fn core_set_feature_physics(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_physics(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-piece-collision-volume-data"]
-            pub fn core_set_feature_piece_collision_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+            pub safe fn core_set_feature_piece_collision_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-piece-matrix"]
-            pub fn core_set_feature_piece_matrix(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_feature_piece_matrix(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-piece-visible"]
-            pub fn core_set_feature_piece_visible(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_feature_piece_visible(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-position"]
-            pub fn core_set_feature_position(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_feature_position(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-radius-and-height"]
-            pub fn core_set_feature_radius_and_height(p0: i32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_set_feature_radius_and_height(p0: i32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-reclaim"]
-            pub fn core_set_feature_reclaim(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_feature_reclaim(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-resources"]
-            pub fn core_set_feature_resources(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: f32) -> i64;
+            pub safe fn core_set_feature_resources(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-rotation"]
-            pub fn core_set_feature_rotation(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_rotation(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-selection-volume-data"]
-            pub fn core_set_feature_selection_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+            pub safe fn core_set_feature_selection_volume_data(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-smoke-time"]
-            pub fn core_set_feature_smoke_time(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_feature_smoke_time(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-use-air-los"]
-            pub fn core_set_feature_use_air_los(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_use_air_los(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "set-feature-velocity"]
-            pub fn core_set_feature_velocity(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_feature_velocity(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:feature-control")]
         unsafe extern "C" {
             #[link_name = "transfer-feature"]
-            pub fn core_transfer_feature(p0: i32, p1: i32) -> i64;
+            pub safe fn core_transfer_feature(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -23533,11 +22099,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_add_feature_damage(feature_id, damage, paralyze_time, weapon_def_id, attacker_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_add_feature_damage(feature_id, damage, paralyze_time, weapon_def_id, attacker_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23559,8 +22122,7 @@ pub mod feature_control {
     pub fn create_feature_wreck(feature_id: i32, wreck_level: i32, do_smoke: bool) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_create_feature_wreck(feature_id, wreck_level, if do_smoke { 1 } else { 0 }) } as u64;
+            let packed = raw::core_create_feature_wreck(feature_id, wreck_level, if do_smoke { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23578,8 +22140,7 @@ pub mod feature_control {
     pub fn create_unit_wreck(unit_id: i32, wreck_level: i32, do_smoke: bool) -> Result<i32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_create_unit_wreck(unit_id, wreck_level, if do_smoke { 1 } else { 0 }) } as u64;
+            let packed = raw::core_create_unit_wreck(unit_id, wreck_level, if do_smoke { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23597,8 +22158,7 @@ pub mod feature_control {
     pub fn destroy_feature(feature_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_destroy_feature(feature_id) } as u64;
+            let packed = raw::core_destroy_feature(feature_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23620,8 +22180,7 @@ pub mod feature_control {
     pub fn set_feature_always_visible(feature_id: i32, always_visible: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_always_visible(feature_id, if always_visible { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_feature_always_visible(feature_id, if always_visible { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23656,11 +22215,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_blocking(feature_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_blocking(feature_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23695,11 +22251,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_collision_volume_data(feature_id, volume_type, test_type, primary_axis, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_collision_volume_data(feature_id, volume_type, test_type, primary_axis, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23734,11 +22287,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_direction(feature_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_direction(feature_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23760,8 +22310,7 @@ pub mod feature_control {
     pub fn set_feature_fire_time(feature_id: i32, fire_time: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_fire_time(feature_id, fire_time) } as u64;
+            let packed = raw::core_set_feature_fire_time(feature_id, fire_time) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23792,11 +22341,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_heading_and_up_dir(feature_id, heading, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_heading_and_up_dir(feature_id, heading, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23818,8 +22364,7 @@ pub mod feature_control {
     pub fn set_feature_health(feature_id: i32, health: f32, check_destruction: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_health(feature_id, health, if check_destruction { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_feature_health(feature_id, health, if check_destruction { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23841,8 +22386,7 @@ pub mod feature_control {
     pub fn set_feature_mass(feature_id: i32, mass: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_mass(feature_id, mass) } as u64;
+            let packed = raw::core_set_feature_mass(feature_id, mass) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23864,8 +22408,7 @@ pub mod feature_control {
     pub fn set_feature_max_health(feature_id: i32, max_health: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_max_health(feature_id, max_health) } as u64;
+            let packed = raw::core_set_feature_max_health(feature_id, max_health) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23900,11 +22443,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_mid_and_aim_pos(feature_id, if set_relative { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_mid_and_aim_pos(feature_id, if set_relative { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23943,11 +22483,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_move_ctrl(feature_id, if enable { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_move_ctrl(feature_id, if enable { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -23969,8 +22506,7 @@ pub mod feature_control {
     pub fn set_feature_no_select(feature_id: i32, no_select: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_no_select(feature_id, if no_select { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_feature_no_select(feature_id, if no_select { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24013,11 +22549,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_physics(feature_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_physics(feature_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24052,11 +22585,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_piece_collision_volume_data(feature_id, piece_index, if enable { 1 } else { 0 }, volume_type, primary_axis, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_piece_collision_volume_data(feature_id, piece_index, if enable { 1 } else { 0 }, volume_type, primary_axis, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24099,11 +22629,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_piece_matrix(feature_id, piece_index, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_piece_matrix(feature_id, piece_index, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24125,8 +22652,7 @@ pub mod feature_control {
     pub fn set_feature_piece_visible(feature_id: i32, piece_index: i32, visible: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_piece_visible(feature_id, piece_index, if visible { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_feature_piece_visible(feature_id, piece_index, if visible { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24157,11 +22683,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_position(feature_id, if snap_to_ground { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_position(feature_id, if snap_to_ground { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24183,8 +22706,7 @@ pub mod feature_control {
     pub fn set_feature_radius_and_height(feature_id: i32, radius: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_radius_and_height(feature_id, radius, height) } as u64;
+            let packed = raw::core_set_feature_radius_and_height(feature_id, radius, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24206,8 +22728,7 @@ pub mod feature_control {
     pub fn set_feature_reclaim(feature_id: i32, reclaim_left: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_reclaim(feature_id, reclaim_left) } as u64;
+            let packed = raw::core_set_feature_reclaim(feature_id, reclaim_left) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24229,8 +22750,7 @@ pub mod feature_control {
     pub fn set_feature_resources(feature_id: i32, metal: f32, energy: f32, reclaim_time: f32, reclaim_left: f32, feature_def_metal: f32, feature_def_energy: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_resources(feature_id, metal, energy, reclaim_time, reclaim_left, feature_def_metal, feature_def_energy) } as u64;
+            let packed = raw::core_set_feature_resources(feature_id, metal, energy, reclaim_time, reclaim_left, feature_def_metal, feature_def_energy) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24261,11 +22781,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_rotation(feature_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_rotation(feature_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24300,11 +22817,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_selection_volume_data(feature_id, volume_type, primary_axis, if use_cont_hit_test { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_selection_volume_data(feature_id, volume_type, primary_axis, if use_cont_hit_test { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24326,8 +22840,7 @@ pub mod feature_control {
     pub fn set_feature_smoke_time(feature_id: i32, smoke_time: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_smoke_time(feature_id, smoke_time) } as u64;
+            let packed = raw::core_set_feature_smoke_time(feature_id, smoke_time) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24349,8 +22862,7 @@ pub mod feature_control {
     pub fn set_feature_use_air_los(feature_id: i32, use_air_los: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_feature_use_air_los(feature_id, if use_air_los { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_feature_use_air_los(feature_id, if use_air_los { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24381,11 +22893,8 @@ pub mod feature_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_feature_velocity(feature_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_feature_velocity(feature_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24407,8 +22916,7 @@ pub mod feature_control {
     pub fn transfer_feature(feature_id: i32, new_team_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_transfer_feature(feature_id, new_team_id) } as u64;
+            let packed = raw::core_transfer_feature(feature_id, new_team_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24436,107 +22944,107 @@ pub mod terrain_control {
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "add-grass"]
-            pub fn core_add_grass(p0: f32, p1: f32, p2: i32) -> i64;
+            pub safe fn core_add_grass(p0: f32, p1: f32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "add-height-map"]
-            pub fn core_add_height_map(p0: f32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_add_height_map(p0: f32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "add-original-height-map"]
-            pub fn core_add_original_height_map(p0: f32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_add_original_height_map(p0: f32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "add-smooth-mesh"]
-            pub fn core_add_smooth_mesh(p0: f32, p1: f32, p2: f32) -> i64;
+            pub safe fn core_add_smooth_mesh(p0: f32, p1: f32, p2: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "adjust-height-map"]
-            pub fn core_adjust_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_adjust_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "adjust-original-height-map"]
-            pub fn core_adjust_original_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_adjust_original_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "adjust-smooth-mesh"]
-            pub fn core_adjust_smooth_mesh(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_adjust_smooth_mesh(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "level-height-map"]
-            pub fn core_level_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_level_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "level-original-height-map"]
-            pub fn core_level_original_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_level_original_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "level-smooth-mesh"]
-            pub fn core_level_smooth_mesh(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_level_smooth_mesh(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "rebuild-smooth-mesh"]
-            pub fn core_rebuild_smooth_mesh(p0: i32) -> i64;
+            pub safe fn core_rebuild_smooth_mesh(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "remove-grass"]
-            pub fn core_remove_grass(p0: f32, p1: f32) -> i64;
+            pub safe fn core_remove_grass(p0: f32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "revert-height-map"]
-            pub fn core_revert_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_revert_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "revert-original-height-map"]
-            pub fn core_revert_original_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_revert_original_height_map(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "revert-smooth-mesh"]
-            pub fn core_revert_smooth_mesh(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
+            pub safe fn core_revert_smooth_mesh(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "set-height-map"]
-            pub fn core_set_height_map(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
+            pub safe fn core_set_height_map(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "set-map-square-terrain-type"]
-            pub fn core_set_map_square_terrain_type(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_map_square_terrain_type(p0: i32, p1: i32, p2: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "set-original-height-map"]
-            pub fn core_set_original_height_map(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
+            pub safe fn core_set_original_height_map(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "set-smooth-mesh"]
-            pub fn core_set_smooth_mesh(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
+            pub safe fn core_set_smooth_mesh(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "set-tidal"]
-            pub fn core_set_tidal(p0: f32) -> i64;
+            pub safe fn core_set_tidal(p0: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:terrain-control")]
         unsafe extern "C" {
             #[link_name = "set-wind"]
-            pub fn core_set_wind(p0: f32, p1: f32) -> i64;
+            pub safe fn core_set_wind(p0: f32, p1: f32) -> i64;
         }
     }
 
@@ -24544,8 +23052,7 @@ pub mod terrain_control {
     pub fn add_grass(x: f32, z: f32, grass_value: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_grass(x, z, grass_value as i32) } as u64;
+            let packed = raw::core_add_grass(x, z, grass_value as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24567,8 +23074,7 @@ pub mod terrain_control {
     pub fn add_height_map(x: f32, z: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_height_map(x, z, height) } as u64;
+            let packed = raw::core_add_height_map(x, z, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24590,8 +23096,7 @@ pub mod terrain_control {
     pub fn add_original_height_map(x: f32, z: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_original_height_map(x, z, height) } as u64;
+            let packed = raw::core_add_original_height_map(x, z, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24613,8 +23118,7 @@ pub mod terrain_control {
     pub fn add_smooth_mesh(x: f32, z: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_add_smooth_mesh(x, z, height) } as u64;
+            let packed = raw::core_add_smooth_mesh(x, z, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24636,8 +23140,7 @@ pub mod terrain_control {
     pub fn adjust_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_adjust_height_map(x1, z1, x2, z2, height) } as u64;
+            let packed = raw::core_adjust_height_map(x1, z1, x2, z2, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24659,8 +23162,7 @@ pub mod terrain_control {
     pub fn adjust_original_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_adjust_original_height_map(x1, z1, x2, z2, height) } as u64;
+            let packed = raw::core_adjust_original_height_map(x1, z1, x2, z2, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24682,8 +23184,7 @@ pub mod terrain_control {
     pub fn adjust_smooth_mesh(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_adjust_smooth_mesh(x1, z1, x2, z2, height) } as u64;
+            let packed = raw::core_adjust_smooth_mesh(x1, z1, x2, z2, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24705,8 +23206,7 @@ pub mod terrain_control {
     pub fn level_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_level_height_map(x1, z1, x2, z2, height) } as u64;
+            let packed = raw::core_level_height_map(x1, z1, x2, z2, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24728,8 +23228,7 @@ pub mod terrain_control {
     pub fn level_original_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_level_original_height_map(x1, z1, x2, z2, height) } as u64;
+            let packed = raw::core_level_original_height_map(x1, z1, x2, z2, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24751,8 +23250,7 @@ pub mod terrain_control {
     pub fn level_smooth_mesh(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_level_smooth_mesh(x1, z1, x2, z2, height) } as u64;
+            let packed = raw::core_level_smooth_mesh(x1, z1, x2, z2, height) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24774,8 +23272,7 @@ pub mod terrain_control {
     pub fn rebuild_smooth_mesh(unused: u8) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_rebuild_smooth_mesh(unused as i32) } as u64;
+            let packed = raw::core_rebuild_smooth_mesh(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24797,8 +23294,7 @@ pub mod terrain_control {
     pub fn remove_grass(x: f32, z: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_remove_grass(x, z) } as u64;
+            let packed = raw::core_remove_grass(x, z) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24820,8 +23316,7 @@ pub mod terrain_control {
     pub fn revert_height_map(x1: f32, z1: f32, x2: f32, z2: f32, orig_factor: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_revert_height_map(x1, z1, x2, z2, orig_factor) } as u64;
+            let packed = raw::core_revert_height_map(x1, z1, x2, z2, orig_factor) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24843,8 +23338,7 @@ pub mod terrain_control {
     pub fn revert_original_height_map(x1: f32, z1: f32, x2: f32, z2: f32, orig_factor: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_revert_original_height_map(x1, z1, x2, z2, orig_factor) } as u64;
+            let packed = raw::core_revert_original_height_map(x1, z1, x2, z2, orig_factor) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24866,8 +23360,7 @@ pub mod terrain_control {
     pub fn revert_smooth_mesh(x1: f32, z1: f32, x2: f32, z2: f32, orig_factor: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_revert_smooth_mesh(x1, z1, x2, z2, orig_factor) } as u64;
+            let packed = raw::core_revert_smooth_mesh(x1, z1, x2, z2, orig_factor) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24889,8 +23382,7 @@ pub mod terrain_control {
     pub fn set_height_map(x: f32, z: f32, height: f32, terraform: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_height_map(x, z, height, terraform) } as u64;
+            let packed = raw::core_set_height_map(x, z, height, terraform) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24912,8 +23404,7 @@ pub mod terrain_control {
     pub fn set_map_square_terrain_type(x: i32, z: i32, terrain_type: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_map_square_terrain_type(x, z, terrain_type) } as u64;
+            let packed = raw::core_set_map_square_terrain_type(x, z, terrain_type) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24935,8 +23426,7 @@ pub mod terrain_control {
     pub fn set_original_height_map(x: f32, z: f32, height: f32, factor: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_original_height_map(x, z, height, factor) } as u64;
+            let packed = raw::core_set_original_height_map(x, z, height, factor) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24958,8 +23448,7 @@ pub mod terrain_control {
     pub fn set_smooth_mesh(x: f32, z: f32, height: f32, terraform: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_smooth_mesh(x, z, height, terraform) } as u64;
+            let packed = raw::core_set_smooth_mesh(x, z, height, terraform) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -24981,8 +23470,7 @@ pub mod terrain_control {
     pub fn set_tidal(tidal: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_tidal(tidal) } as u64;
+            let packed = raw::core_set_tidal(tidal) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25004,8 +23492,7 @@ pub mod terrain_control {
     pub fn set_wind(min_wind: f32, max_wind: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_wind(min_wind, max_wind) } as u64;
+            let packed = raw::core_set_wind(min_wind, max_wind) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25048,67 +23535,67 @@ pub mod projectile_control {
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "delete-projectile"]
-            pub fn core_delete_projectile(p0: i32) -> i64;
+            pub safe fn core_delete_projectile(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-piece-projectile-params"]
-            pub fn core_set_piece_projectile_params(p0: i32, p1: i32, p2: f32, p3: f32, p4: i32) -> i64;
+            pub safe fn core_set_piece_projectile_params(p0: i32, p1: i32, p2: f32, p3: f32, p4: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-always-visible"]
-            pub fn core_set_projectile_always_visible(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_always_visible(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-collision"]
-            pub fn core_set_projectile_collision(p0: i32) -> i64;
+            pub safe fn core_set_projectile_collision(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-gravity"]
-            pub fn core_set_projectile_gravity(p0: i32, p1: f32) -> i64;
+            pub safe fn core_set_projectile_gravity(p0: i32, p1: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-ignore-tracking-error"]
-            pub fn core_set_projectile_ignore_tracking_error(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_ignore_tracking_error(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-is-intercepted"]
-            pub fn core_set_projectile_is_intercepted(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_is_intercepted(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-move-control"]
-            pub fn core_set_projectile_move_control(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_move_control(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-position"]
-            pub fn core_set_projectile_position(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_position(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-target"]
-            pub fn core_set_projectile_target(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_target(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-time-to-live"]
-            pub fn core_set_projectile_time_to_live(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_time_to_live(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-use-air-los"]
-            pub fn core_set_projectile_use_air_los(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_use_air_los(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
             #[link_name = "set-projectile-velocity"]
-            pub fn core_set_projectile_velocity(p0: i32, p1: i32) -> i64;
+            pub safe fn core_set_projectile_velocity(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -25116,8 +23603,7 @@ pub mod projectile_control {
     pub fn delete_projectile(projectile_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_delete_projectile(projectile_id) } as u64;
+            let packed = raw::core_delete_projectile(projectile_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25148,11 +23634,8 @@ pub mod projectile_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_piece_projectile_params(projectile_id, expl_flags, spin_angle, spin_speed, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_piece_projectile_params(projectile_id, expl_flags, spin_angle, spin_speed, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25174,8 +23657,7 @@ pub mod projectile_control {
     pub fn set_projectile_always_visible(projectile_id: i32, always_visible: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_always_visible(projectile_id, if always_visible { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_projectile_always_visible(projectile_id, if always_visible { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25197,8 +23679,7 @@ pub mod projectile_control {
     pub fn set_projectile_collision(projectile_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_collision(projectile_id) } as u64;
+            let packed = raw::core_set_projectile_collision(projectile_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25220,8 +23701,7 @@ pub mod projectile_control {
     pub fn set_projectile_gravity(projectile_id: i32, gravity: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_gravity(projectile_id, gravity) } as u64;
+            let packed = raw::core_set_projectile_gravity(projectile_id, gravity) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25243,8 +23723,7 @@ pub mod projectile_control {
     pub fn set_projectile_ignore_tracking_error(projectile_id: i32, ignore: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_ignore_tracking_error(projectile_id, if ignore { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_projectile_ignore_tracking_error(projectile_id, if ignore { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25266,8 +23745,7 @@ pub mod projectile_control {
     pub fn set_projectile_is_intercepted(projectile_id: i32, intercepted: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_is_intercepted(projectile_id, if intercepted { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_projectile_is_intercepted(projectile_id, if intercepted { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25289,8 +23767,7 @@ pub mod projectile_control {
     pub fn set_projectile_move_control(projectile_id: i32, enable: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_move_control(projectile_id, if enable { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_projectile_move_control(projectile_id, if enable { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25321,11 +23798,8 @@ pub mod projectile_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_projectile_position(projectile_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_projectile_position(projectile_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25360,11 +23834,8 @@ pub mod projectile_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_projectile_target(projectile_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_projectile_target(projectile_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25386,8 +23857,7 @@ pub mod projectile_control {
     pub fn set_projectile_time_to_live(projectile_id: i32, time_to_live: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_time_to_live(projectile_id, time_to_live) } as u64;
+            let packed = raw::core_set_projectile_time_to_live(projectile_id, time_to_live) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25409,8 +23879,7 @@ pub mod projectile_control {
     pub fn set_projectile_use_air_los(projectile_id: i32, use_air_los: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_projectile_use_air_los(projectile_id, if use_air_los { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_projectile_use_air_los(projectile_id, if use_air_los { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25441,11 +23910,8 @@ pub mod projectile_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_projectile_velocity(projectile_id, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_projectile_velocity(projectile_id, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25498,12 +23964,12 @@ pub mod effects_control {
         #[link(wasm_import_module = "spring:effects-control")]
         unsafe extern "C" {
             #[link_name = "spawn-explosion"]
-            pub fn core_spawn_explosion(p0: i32) -> i64;
+            pub safe fn core_spawn_explosion(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:effects-control")]
         unsafe extern "C" {
             #[link_name = "spawn-sfx"]
-            pub fn core_spawn_sfx(p0: i32, p1: i32, p2: f32, p3: f32, p4: i32, p5: i32) -> i64;
+            pub safe fn core_spawn_sfx(p0: i32, p1: i32, p2: f32, p3: f32, p4: i32, p5: i32) -> i64;
         }
     }
 
@@ -25539,11 +24005,8 @@ pub mod effects_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_spawn_explosion(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_spawn_explosion(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25578,11 +24041,8 @@ pub mod effects_control {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_spawn_sfx(unit_id, sfx_id, radius, damage, if absolute { 1 } else { 0 }, input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_spawn_sfx(unit_id, sfx_id, radius, damage, if absolute { 1 } else { 0 }, input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25616,32 +24076,32 @@ pub mod game_config {
         #[link(wasm_import_module = "spring:game-config")]
         unsafe extern "C" {
             #[link_name = "set-cheating-enabled"]
-            pub fn core_set_cheating_enabled(p0: i32) -> i64;
+            pub safe fn core_set_cheating_enabled(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game-config")]
         unsafe extern "C" {
             #[link_name = "set-experience-grade"]
-            pub fn core_set_experience_grade(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
+            pub safe fn core_set_experience_grade(p0: f32, p1: f32, p2: f32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:game-config")]
         unsafe extern "C" {
             #[link_name = "set-god-mode"]
-            pub fn core_set_god_mode(p0: i32) -> i64;
+            pub safe fn core_set_god_mode(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game-config")]
         unsafe extern "C" {
             #[link_name = "set-no-pause"]
-            pub fn core_set_no_pause(p0: i32) -> i64;
+            pub safe fn core_set_no_pause(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:game-config")]
         unsafe extern "C" {
             #[link_name = "set-radar-error-params"]
-            pub fn core_set_radar_error_params(p0: i32, p1: f32, p2: f32, p3: f32) -> i64;
+            pub safe fn core_set_radar_error_params(p0: i32, p1: f32, p2: f32, p3: f32) -> i64;
         }
         #[link(wasm_import_module = "spring:game-config")]
         unsafe extern "C" {
             #[link_name = "set-square-building-mask"]
-            pub fn core_set_square_building_mask(p0: i32, p1: i32, p2: i32) -> i64;
+            pub safe fn core_set_square_building_mask(p0: i32, p1: i32, p2: i32) -> i64;
         }
     }
 
@@ -25649,8 +24109,7 @@ pub mod game_config {
     pub fn set_cheating_enabled(enabled: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_cheating_enabled(if enabled { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_cheating_enabled(if enabled { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25672,8 +24131,7 @@ pub mod game_config {
     pub fn set_experience_grade(exp_grade: f32, exp_power_scale: f32, exp_health_scale: f32, exp_reload_scale: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_experience_grade(exp_grade, exp_power_scale, exp_health_scale, exp_reload_scale) } as u64;
+            let packed = raw::core_set_experience_grade(exp_grade, exp_power_scale, exp_health_scale, exp_reload_scale) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25703,11 +24161,8 @@ pub mod game_config {
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
-            let input_pointer_usize = input_wire.as_mut_ptr() as usize;
-            debug_assert!(input_pointer_usize <= u32::MAX as usize);
-            let input_pointer = input_pointer_usize as u32 as i32;
-            // SAFETY: fixed inputs are encoded into this live stack buffer.
-            let packed = unsafe { raw::core_set_god_mode(input_pointer) } as u64;
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_god_mode(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25729,8 +24184,7 @@ pub mod game_config {
     pub fn set_no_pause(no_pause: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_no_pause(if no_pause { 1 } else { 0 }) } as u64;
+            let packed = raw::core_set_no_pause(if no_pause { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25752,8 +24206,7 @@ pub mod game_config {
     pub fn set_radar_error_params(ally_team_id: i32, ally_team_error_size: f32, base_error_size: f32, base_error_mult: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_radar_error_params(ally_team_id, ally_team_error_size, base_error_size, base_error_mult) } as u64;
+            let packed = raw::core_set_radar_error_params(ally_team_id, ally_team_error_size, base_error_size, base_error_mult) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25775,8 +24228,7 @@ pub mod game_config {
     pub fn set_square_building_mask(x: i32, z: i32, mask: u16) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_set_square_building_mask(x, z, mask as i32) } as u64;
+            let packed = raw::core_set_square_building_mask(x, z, mask as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -25802,7 +24254,7 @@ pub mod unit_script {
         #[link(wasm_import_module = "spring:unit-script")]
         unsafe extern "C" {
             #[link_name = "call-unit-script"]
-            pub fn core_call_unit_script(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_call_unit_script(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
     }
 
@@ -25823,122 +24275,122 @@ pub mod unit_rendering {
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-camera-rotation"]
-            pub fn core_get_camera_rotation(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_camera_rotation(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-camera-vectors"]
-            pub fn core_get_camera_vectors(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_camera_vectors(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-features-in-screen-rectangle"]
-            pub fn core_get_features_in_screen_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
+            pub safe fn core_get_features_in_screen_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-frustum-planes"]
-            pub fn core_get_frustum_planes(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_frustum_planes(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-always-update-matrix"]
-            pub fn core_get_unit_always_update_matrix(p0: i32) -> i64;
+            pub safe fn core_get_unit_always_update_matrix(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-draw-flag"]
-            pub fn core_get_unit_draw_flag(p0: i32) -> i64;
+            pub safe fn core_get_unit_draw_flag(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-engine-draw-mask"]
-            pub fn core_get_unit_engine_draw_mask(p0: i32) -> i64;
+            pub safe fn core_get_unit_engine_draw_mask(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-icon"]
-            pub fn core_get_unit_icon(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_icon(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-icon-data"]
-            pub fn core_get_unit_icon_data(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_icon_data(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-lua-draw"]
-            pub fn core_get_unit_lua_draw(p0: i32) -> i64;
+            pub safe fn core_get_unit_lua_draw(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-no-draw"]
-            pub fn core_get_unit_no_draw(p0: i32) -> i64;
+            pub safe fn core_get_unit_no_draw(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-no-group"]
-            pub fn core_get_unit_no_group(p0: i32) -> i64;
+            pub safe fn core_get_unit_no_group(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-no-minimap"]
-            pub fn core_get_unit_no_minimap(p0: i32) -> i64;
+            pub safe fn core_get_unit_no_minimap(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-no-select"]
-            pub fn core_get_unit_no_select(p0: i32) -> i64;
+            pub safe fn core_get_unit_no_select(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-selection-volume-data"]
-            pub fn core_get_unit_selection_volume_data(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_selection_volume_data(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-transform-matrix"]
-            pub fn core_get_unit_transform_matrix(p0: i32, p1: i32) -> i32;
+            pub safe fn core_get_unit_transform_matrix(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-unit-view-position"]
-            pub fn core_get_unit_view_position(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_unit_view_position(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-units-in-screen-rectangle"]
-            pub fn core_get_units_in_screen_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+            pub safe fn core_get_units_in_screen_rectangle(p0: f32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-visible-features"]
-            pub fn core_get_visible_features(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_get_visible_features(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-visible-projectiles"]
-            pub fn core_get_visible_projectiles(p0: i32, p1: i32, p2: i32) -> i32;
+            pub safe fn core_get_visible_projectiles(p0: i32, p1: i32, p2: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "get-visible-units"]
-            pub fn core_get_visible_units(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
+            pub safe fn core_get_visible_units(p0: i32, p1: f32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "is-unit-icon"]
-            pub fn core_is_unit_icon(p0: i32) -> i64;
+            pub safe fn core_is_unit_icon(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "is-unit-in-view"]
-            pub fn core_is_unit_in_view(p0: i32) -> i64;
+            pub safe fn core_is_unit_in_view(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-rendering")]
         unsafe extern "C" {
             #[link_name = "is-unit-visible"]
-            pub fn core_is_unit_visible(p0: i32, p1: f32, p2: i32) -> i64;
+            pub safe fn core_is_unit_visible(p0: i32, p1: f32, p2: i32) -> i64;
         }
     }
 
@@ -25947,12 +24399,8 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_camera_rotation(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_camera_rotation(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -25975,12 +24423,8 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 36];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_camera_vectors(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_camera_vectors(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -26003,12 +24447,8 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 64];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_frustum_planes(unused as i32, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_frustum_planes(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -26030,8 +24470,7 @@ pub mod unit_rendering {
     pub fn get_unit_always_update_matrix(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_always_update_matrix(unit_id) } as u64;
+            let packed = raw::core_get_unit_always_update_matrix(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26053,8 +24492,7 @@ pub mod unit_rendering {
     pub fn get_unit_draw_flag(unit_id: i32) -> Result<u8> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_draw_flag(unit_id) } as u64;
+            let packed = raw::core_get_unit_draw_flag(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26072,8 +24510,7 @@ pub mod unit_rendering {
     pub fn get_unit_engine_draw_mask(unit_id: i32) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_engine_draw_mask(unit_id) } as u64;
+            let packed = raw::core_get_unit_engine_draw_mask(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26091,8 +24528,7 @@ pub mod unit_rendering {
     pub fn get_unit_lua_draw(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_lua_draw(unit_id) } as u64;
+            let packed = raw::core_get_unit_lua_draw(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26114,8 +24550,7 @@ pub mod unit_rendering {
     pub fn get_unit_no_draw(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_no_draw(unit_id) } as u64;
+            let packed = raw::core_get_unit_no_draw(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26137,8 +24572,7 @@ pub mod unit_rendering {
     pub fn get_unit_no_group(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_no_group(unit_id) } as u64;
+            let packed = raw::core_get_unit_no_group(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26160,8 +24594,7 @@ pub mod unit_rendering {
     pub fn get_unit_no_minimap(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_no_minimap(unit_id) } as u64;
+            let packed = raw::core_get_unit_no_minimap(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26183,8 +24616,7 @@ pub mod unit_rendering {
     pub fn get_unit_no_select(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_get_unit_no_select(unit_id) } as u64;
+            let packed = raw::core_get_unit_no_select(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26207,12 +24639,8 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 40];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_selection_volume_data(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_selection_volume_data(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -26235,12 +24663,8 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 64];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_transform_matrix(unit_id, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_transform_matrix(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -26263,12 +24687,8 @@ pub mod unit_rendering {
         #[cfg(target_arch = "wasm32")]
         {
             let mut wire = [0u8; 12];
-            let output_pointer_usize = wire.as_mut_ptr() as usize;
-            debug_assert!(output_pointer_usize <= u32::MAX as usize);
-            let output_pointer = output_pointer_usize as u32 as i32;
-            // SAFETY: all semantic arguments are scalar and output_pointer
-            // references this live stack buffer for the synchronous import.
-            let status = unsafe { raw::core_get_unit_view_position(unit_id, if use_mid_pos { 1 } else { 0 }, output_pointer) };
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_view_position(unit_id, if use_mid_pos { 1 } else { 0 }, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
@@ -26290,8 +24710,7 @@ pub mod unit_rendering {
     pub fn is_unit_icon(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_icon(unit_id) } as u64;
+            let packed = raw::core_is_unit_icon(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26313,8 +24732,7 @@ pub mod unit_rendering {
     pub fn is_unit_in_view(unit_id: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_in_view(unit_id) } as u64;
+            let packed = raw::core_is_unit_in_view(unit_id) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -26336,8 +24754,7 @@ pub mod unit_rendering {
     pub fn is_unit_visible(unit_id: i32, radius: f32, check_icon: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
-            // SAFETY: generated scalar-only Core signature.
-            let packed = unsafe { raw::core_is_unit_visible(unit_id, radius, if check_icon { 1 } else { 0 }) } as u64;
+            let packed = raw::core_is_unit_visible(unit_id, radius, if check_icon { 1 } else { 0 }) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));

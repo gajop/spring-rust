@@ -1,15 +1,16 @@
 //! Small semantic conveniences built on the generated owned Core façade.
 //!
-//! These functions exist only where a game wants one stable type across
-//! several generated modules. They deliberately contain no ABI encoding or
-//! pointer handling; that belongs to the generated engine SDK.
+//! These wrappers accept borrowed data (`&str`) and construct the generated
+//! owned values. ABI encoding remains an implementation detail of the engine's
+//! generated layer.
 
+extern crate alloc;
 use alloc::string::String;
 
+use crate::Float3;
 use crate::generated;
 
 pub use generated::owned::move_ctrl::{MoveTypeBooleanField, MoveTypeNumericField};
-pub use generated::owned::types::Float3;
 
 #[derive(Clone, Copy, Debug)]
 pub struct UnitDefRef<'a> {
@@ -90,8 +91,7 @@ pub fn call_unit_script(
 }
 
 /// Set one of the numeric properties accepted by Lua's
-/// `MoveCtrl.Set*MoveTypeData` family. The enum keeps the property set typed;
-/// the engine still applies the move-type-specific validation and conversion.
+/// `MoveCtrl.Set*MoveTypeData` family.
 pub fn set_move_type_numeric(
     unit_id: i32,
     field: MoveTypeNumericField,

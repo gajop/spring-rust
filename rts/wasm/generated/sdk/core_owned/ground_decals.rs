@@ -386,7 +386,7 @@
             #[link(wasm_import_module = "spring:ground-decals")]
             unsafe extern "C" {
                 #[link_name = "get-all-ground-decals"]
-                pub fn call(punused: i32, output: i32) -> i32;
+                pub safe fn call(punused: i32, output: i32) -> i32;
             }
         }
 
@@ -395,7 +395,7 @@
             #[link(wasm_import_module = "spring:ground-decals")]
             unsafe extern "C" {
                 #[link_name = "get-ground-decal-texture"]
-                pub fn call(pdecal_id: i32, pmain_tex: i32, output: i32) -> i32;
+                pub safe fn call(pdecal_id: i32, pmain_tex: i32, output: i32) -> i32;
             }
         }
 
@@ -404,7 +404,7 @@
             #[link(wasm_import_module = "spring:ground-decals")]
             unsafe extern "C" {
                 #[link_name = "get-ground-decal-type"]
-                pub fn call(pdecal_id: i32, output: i32) -> i32;
+                pub safe fn call(pdecal_id: i32, output: i32) -> i32;
             }
         }
 
@@ -513,7 +513,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_all_ground_decals::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_all_ground_decals::call(unused as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -523,8 +527,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -634,7 +636,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_ground_decal_texture::call(decal_id as i32, u32::from(main_tex) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_ground_decal_texture::call(decal_id as i32, u32::from(main_tex) as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -644,8 +650,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -694,7 +698,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_ground_decal_type::call(decal_id as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_ground_decal_type::call(decal_id as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -704,8 +712,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -762,7 +768,6 @@
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn set_ground_decal_quad_pos_and_height(decal_id: u32, pos_tlx: f32, pos_tly: f32, pos_trx: f32, pos_try: f32, pos_brx: f32, pos_bry: f32, pos_blx: f32, pos_bly: f32, proj_cube_height: f32) -> Result<bool> {
             let value = crate::generated::ground_decals::set_ground_decal_quad_pos_and_height(decal_id, pos_tlx, pos_tly, pos_trx, pos_try, pos_brx, pos_bry, pos_blx, pos_bly, proj_cube_height)?;
             Ok(value)

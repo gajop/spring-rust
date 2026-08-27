@@ -6,10 +6,13 @@
 
 use crate::{ApiError, ErrorCode, Result};
 
+#[cfg(feature = "alloc")]
+use alloc::string::String;
+
 pub const NATIVE_GFX_RESOURCE_NAME_MAX_BYTES: usize = 17;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct GfxTextureParams {
+pub struct TextureCreateParams {
     pub target: u32,
     pub format: u32,
     pub border: i32,
@@ -26,7 +29,7 @@ pub struct GfxTextureParams {
     pub fbo_depth: bool,
 }
 
-impl Default for GfxTextureParams {
+impl Default for TextureCreateParams {
     fn default() -> Self {
         Self {
             target: 0,
@@ -47,12 +50,61 @@ impl Default for GfxTextureParams {
     }
 }
 
+/// The engine-side texture parameter record has C layout and uses four-byte
+/// boolean slots. Keeping this as a typed record lets the guest pass the
+/// native layout directly; callers never need to construct an ABI byte blob.
+#[cfg(target_arch = "wasm32")]
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct TextureCreateParamsWire {
+    target: u32,
+    format: u32,
+    border: i32,
+    min_filter: u32,
+    mag_filter: u32,
+    wrap_s: u32,
+    wrap_t: u32,
+    wrap_r: u32,
+    compare_func: u32,
+    lod_bias: f32,
+    aniso: f32,
+    samples: u32,
+    fbo: u32,
+    fbo_depth: u32,
+}
+
+#[cfg(target_arch = "wasm32")]
+const _: () = assert!(core::mem::size_of::<TextureCreateParamsWire>() == 56);
+
+#[cfg(target_arch = "wasm32")]
+impl From<TextureCreateParams> for TextureCreateParamsWire {
+    #[inline]
+    fn from(params: TextureCreateParams) -> Self {
+        Self {
+            target: params.target,
+            format: params.format,
+            border: params.border,
+            min_filter: params.min_filter,
+            mag_filter: params.mag_filter,
+            wrap_s: params.wrap_s,
+            wrap_t: params.wrap_t,
+            wrap_r: params.wrap_r,
+            compare_func: params.compare_func,
+            lod_bias: params.lod_bias,
+            aniso: params.aniso,
+            samples: params.samples,
+            fbo: u32::from(params.fbo),
+            fbo_depth: u32::from(params.fbo_depth),
+        }
+    }
+}
+
 #[cfg(target_arch = "wasm32")]
 mod raw {
     #[link(wasm_import_module = "spring:gfx")]
     unsafe extern "C" {
         #[link_name = "create-texture"]
-        pub fn create_texture(
+        pub safe fn create_texture(
             xsize: i32,
             ysize: i32,
             zsize: i32,
@@ -62,7 +114,7 @@ mod raw {
         ) -> i64;
 
         #[link_name = "create-texture-atlas"]
-        pub fn create_texture_atlas(
+        pub safe fn create_texture_atlas(
             xsize: i32,
             ysize: i32,
             alloc_type: i32,
@@ -74,42 +126,11 @@ mod raw {
 
 #[cfg(target_arch = "wasm32")]
 #[inline]
-fn put_u32(output: &mut [u8; 56], offset: usize, value: u32) {
-    output[offset..offset + 4].copy_from_slice(&value.to_le_bytes());
-}
-
-#[cfg(target_arch = "wasm32")]
-#[inline]
-fn encode_texture_params(params: GfxTextureParams) -> [u8; 56] {
-    let mut output = [0u8; 56];
-    put_u32(&mut output, 0, params.target);
-    put_u32(&mut output, 4, params.format);
-    put_u32(&mut output, 8, params.border as u32);
-    put_u32(&mut output, 12, params.min_filter);
-    put_u32(&mut output, 16, params.mag_filter);
-    put_u32(&mut output, 20, params.wrap_s);
-    put_u32(&mut output, 24, params.wrap_t);
-    put_u32(&mut output, 28, params.wrap_r);
-    put_u32(&mut output, 32, params.compare_func);
-    put_u32(&mut output, 36, params.lod_bias.to_bits());
-    put_u32(&mut output, 40, params.aniso.to_bits());
-    put_u32(&mut output, 44, params.samples);
-    put_u32(&mut output, 48, params.fbo as u32);
-    put_u32(&mut output, 52, params.fbo_depth as u32);
-    output
-}
-
-#[cfg(target_arch = "wasm32")]
-#[inline]
 fn checked_output(output: &mut [u8]) -> Result<(i32, i32)> {
-    if output.len() < NATIVE_GFX_RESOURCE_NAME_MAX_BYTES || output.len() > u32::MAX as usize {
+    if output.len() < NATIVE_GFX_RESOURCE_NAME_MAX_BYTES {
         return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
     }
-    let pointer = output.as_mut_ptr() as usize;
-    if pointer > u32::MAX as usize {
-        return Err(ApiError::new(ErrorCode::OutOfBounds as i32));
-    }
-    Ok((pointer as u32 as i32, output.len() as u32 as i32))
+    crate::wasm_mut_slice_parts(output)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -127,31 +148,26 @@ fn finish_name(packed: i64, output: &[u8]) -> Result<&str> {
 }
 
 #[inline]
-pub fn create_texture(
+pub fn create_texture_into(
     xsize: i32,
     ysize: i32,
     zsize: i32,
-    params: GfxTextureParams,
+    params: TextureCreateParams,
     output: &mut [u8],
 ) -> Result<&str> {
     #[cfg(target_arch = "wasm32")]
     {
-        let wire = encode_texture_params(params);
-        let wire_pointer = wire.as_ptr() as usize;
-        if wire_pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::OutOfBounds as i32));
-        }
+        let wire = TextureCreateParamsWire::from(params);
+        let wire_pointer = crate::wasm_input_ptr(&wire)?;
         let (output_pointer, output_capacity) = checked_output(output)?;
-        let packed = unsafe {
-            raw::create_texture(
-                xsize,
-                ysize,
-                zsize,
-                wire_pointer as u32 as i32,
-                output_pointer,
-                output_capacity,
-            )
-        };
+        let packed = raw::create_texture(
+            xsize,
+            ysize,
+            zsize,
+            wire_pointer,
+            output_pointer,
+            output_capacity,
+        );
         finish_name(packed, output)
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -162,7 +178,7 @@ pub fn create_texture(
 }
 
 #[inline]
-pub fn create_texture_atlas(
+pub fn create_texture_atlas_into(
     xsize: i32,
     ysize: i32,
     alloc_type: i32,
@@ -171,9 +187,8 @@ pub fn create_texture_atlas(
     #[cfg(target_arch = "wasm32")]
     {
         let (output_pointer, output_capacity) = checked_output(output)?;
-        let packed = unsafe {
-            raw::create_texture_atlas(xsize, ysize, alloc_type, output_pointer, output_capacity)
-        };
+        let packed =
+            raw::create_texture_atlas(xsize, ysize, alloc_type, output_pointer, output_capacity);
         finish_name(packed, output)
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -181,4 +196,28 @@ pub fn create_texture_atlas(
         let _ = (xsize, ysize, alloc_type, output);
         Err(unreachable!())
     }
+}
+
+/// Create a texture and return the native name as an owned string.
+///
+/// This is the convenient path for setup code. Render-loop code can use
+/// [`create_texture_into`] with retained storage to avoid the allocation.
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn create_texture(
+    xsize: i32,
+    ysize: i32,
+    zsize: i32,
+    params: TextureCreateParams,
+) -> Result<String> {
+    let mut output = [0u8; NATIVE_GFX_RESOURCE_NAME_MAX_BYTES];
+    create_texture_into(xsize, ysize, zsize, params, &mut output).map(String::from)
+}
+
+/// Create a texture atlas and return the native name as an owned string.
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn create_texture_atlas(xsize: i32, ysize: i32, alloc_type: i32) -> Result<String> {
+    let mut output = [0u8; NATIVE_GFX_RESOURCE_NAME_MAX_BYTES];
+    create_texture_atlas_into(xsize, ysize, alloc_type, &mut output).map(String::from)
 }

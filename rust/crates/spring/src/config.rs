@@ -1,7 +1,8 @@
-
-
 #[cfg(feature = "alloc")]
-pub use crate::owned::config::{get_config_float, get_config_int, get_config_params, get_config_string, get_log_sections, set_config_float, set_config_int, set_config_string, set_log_section_filter_level};
+pub use crate::owned::config::{
+    get_config_float, get_config_int, get_config_params, get_config_string, get_log_sections,
+    set_config_float, set_config_int, set_config_string, set_log_section_filter_level,
+};
 
 // Config portion of the Spring Core-Wasm guest SDK.
 //
@@ -164,14 +165,8 @@ impl StringListBuffer {
 }
 
 #[inline]
-pub(crate) fn mut_slice_parts<T>(slice: &mut [T]) -> (i32, i32) {
-    if slice.is_empty() {
-        return (0, 0);
-    }
-    let pointer = slice.as_mut_ptr() as usize;
-    debug_assert!(pointer <= u32::MAX as usize);
-    debug_assert!(slice.len() <= u32::MAX as usize);
-    (pointer as u32 as i32, slice.len() as u32 as i32)
+pub(crate) fn mut_slice_parts<T>(slice: &mut [T]) -> Result<(i32, i32)> {
+    super::wasm_mut_slice_parts(slice)
 }
 
 #[inline]
@@ -218,7 +213,7 @@ mod config_raw {
     #[link(wasm_import_module = "spring:config")]
     unsafe extern "C" {
         #[link_name = "get-log-sections-flat"]
-        pub fn get_log_sections_flat(
+        pub safe fn get_log_sections_flat(
             descriptor_ptr: i32,
             descriptor_capacity: i32,
             bytes_ptr: i32,
@@ -236,23 +231,18 @@ pub fn get_log_sections_into<'a>(
 ) -> Result<StringListFill<'a>> {
     #[cfg(target_arch = "wasm32")]
     {
-        let (range_ptr, range_capacity) = mut_slice_parts(ranges);
-        let (bytes_ptr, bytes_capacity) = mut_slice_parts(bytes);
+        let (range_ptr, range_capacity) = mut_slice_parts(ranges)?;
+        let (bytes_ptr, bytes_capacity) = mut_slice_parts(bytes)?;
         let mut meta = [0u32; 2];
-        let meta_ptr = meta.as_mut_ptr() as usize as u32 as i32;
+        let meta_ptr = super::wasm_output_ptr(&mut meta)?;
 
-        // SAFETY: all pointers refer to live guest slices/stack storage for the
-        // synchronous import. The host validates every advertised range before
-        // writing and returns required sizes through `meta`.
-        let status = unsafe {
-            config_raw::get_log_sections_flat(
-                range_ptr,
-                range_capacity,
-                bytes_ptr,
-                bytes_capacity,
-                meta_ptr,
-            )
-        };
+        let status = config_raw::get_log_sections_flat(
+            range_ptr,
+            range_capacity,
+            bytes_ptr,
+            bytes_capacity,
+            meta_ptr,
+        );
         decode_string_list_result(status, meta, ranges, bytes)
     }
     #[cfg(not(target_arch = "wasm32"))]

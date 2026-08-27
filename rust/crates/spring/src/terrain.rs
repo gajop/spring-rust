@@ -1,11 +1,9 @@
-
-
 #[cfg(feature = "alloc")]
 pub use crate::owned::terrain::{get_ground_info, get_terrain_type_data};
 
 // Fixed-width Terrain reads for the Spring Core-Wasm guest SDK.
 
-use super::{ApiError, ErrorCode, Result};
+use super::{ApiError, ErrorCode, Float3, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MapPosition {
@@ -15,7 +13,7 @@ pub struct MapPosition {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct GroundNormal {
-    pub normal: [f32; 3],
+    pub normal: Float3,
     pub slope: f32,
 }
 
@@ -32,27 +30,27 @@ mod raw {
     #[link(wasm_import_module = "spring:terrain")]
     unsafe extern "C" {
         #[link_name = "is-pos-in-map"]
-        pub fn is_pos_in_map(x: f32, z: f32) -> i64;
+        pub safe fn is_pos_in_map(x: f32, z: f32) -> i64;
         #[link_name = "get-ground-height"]
-        pub fn get_ground_height(x: f32, z: f32) -> i64;
+        pub safe fn get_ground_height(x: f32, z: f32) -> i64;
         #[link_name = "get-ground-orig-height"]
-        pub fn get_ground_orig_height(x: f32, z: f32) -> i64;
+        pub safe fn get_ground_orig_height(x: f32, z: f32) -> i64;
         #[link_name = "get-smooth-mesh-height"]
-        pub fn get_smooth_mesh_height(x: f32, z: f32) -> i64;
+        pub safe fn get_smooth_mesh_height(x: f32, z: f32) -> i64;
         #[link_name = "get-water-plane-level"]
-        pub fn get_water_plane_level() -> i64;
+        pub safe fn get_water_plane_level() -> i64;
         #[link_name = "get-water-level"]
-        pub fn get_water_level(x: f32, z: f32) -> i64;
+        pub safe fn get_water_level(x: f32, z: f32) -> i64;
         #[link_name = "get-ground-normal"]
-        pub fn get_ground_normal(x: f32, z: f32, smoothed: i32, output: i32) -> i32;
+        pub safe fn get_ground_normal(x: f32, z: f32, smoothed: i32, output: i32) -> i32;
         #[link_name = "get-ground-extremes"]
-        pub fn get_ground_extremes(output: i32) -> i32;
+        pub safe fn get_ground_extremes(output: i32) -> i32;
         #[link_name = "get-height-map-size"]
-        pub fn get_height_map_size(output: i32) -> i32;
+        pub safe fn get_height_map_size(output: i32) -> i32;
         #[link_name = "get-ground-blocked"]
-        pub fn get_ground_blocked(x1: f32, z1: f32, x2: f32, z2: f32) -> i64;
+        pub safe fn get_ground_blocked(x1: f32, z1: f32, x2: f32, z2: f32) -> i64;
         #[link_name = "get-grass"]
-        pub fn get_grass(x: f32, z: f32) -> i64;
+        pub safe fn get_grass(x: f32, z: f32) -> i64;
     }
 }
 
@@ -60,7 +58,7 @@ mod raw {
 pub fn is_pos_in_map(x: f32, z: f32) -> Result<MapPosition> {
     #[cfg(target_arch = "wasm32")]
     {
-        let packed = unsafe { raw::is_pos_in_map(x, z) } as u64;
+        let packed = raw::is_pos_in_map(x, z) as u64;
         let status = (packed >> 32) as u32 as i32;
         if status != 0 {
             return Err(ApiError::new(status));
@@ -87,7 +85,7 @@ macro_rules! scalar_f32_query {
         pub fn $name(x: f32, z: f32) -> Result<f32> {
             #[cfg(target_arch = "wasm32")]
             {
-                return super::unpack_f32(unsafe { raw::$raw(x, z) });
+                return super::decode_packed_f32(raw::$raw(x, z));
             }
             #[cfg(not(target_arch = "wasm32"))]
             {
@@ -108,7 +106,7 @@ scalar_f32_query!(get_grass, get_grass);
 pub fn get_water_plane_level() -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        super::unpack_f32(unsafe { raw::get_water_plane_level() })
+        super::decode_packed_f32(raw::get_water_plane_level())
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -120,7 +118,7 @@ pub fn get_water_plane_level() -> Result<f32> {
 pub fn get_ground_blocked(x1: f32, z1: f32, x2: f32, z2: f32) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        super::unpack_bool(unsafe { raw::get_ground_blocked(x1, z1, x2, z2) })
+        super::unpack_bool(raw::get_ground_blocked(x1, z1, x2, z2))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -134,11 +132,8 @@ pub fn get_height_map_size() -> Result<[i32; 2]> {
     #[cfg(target_arch = "wasm32")]
     {
         let mut output = [0i32; 2];
-        let pointer = output.as_mut_ptr() as usize;
-        if pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-        }
-        let status = unsafe { raw::get_height_map_size(pointer as u32 as i32) };
+        let pointer = super::wasm_output_ptr(&mut output)?;
+        let status = raw::get_height_map_size(pointer);
         if status == 0 {
             Ok(output)
         } else {
@@ -156,11 +151,8 @@ pub fn get_ground_extremes() -> Result<GroundExtremes> {
     #[cfg(target_arch = "wasm32")]
     {
         let mut output = [0.0f32; 4];
-        let pointer = output.as_mut_ptr() as usize;
-        if pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-        }
-        let status = unsafe { raw::get_ground_extremes(pointer as u32 as i32) };
+        let pointer = super::wasm_output_ptr(&mut output)?;
+        let status = raw::get_ground_extremes(pointer);
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -182,17 +174,13 @@ pub fn get_ground_normal(x: f32, z: f32, smoothed: bool) -> Result<GroundNormal>
     #[cfg(target_arch = "wasm32")]
     {
         let mut output = [0.0f32; 4];
-        let pointer = output.as_mut_ptr() as usize;
-        if pointer > u32::MAX as usize {
-            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-        }
-        let status =
-            unsafe { raw::get_ground_normal(x, z, smoothed as i32, pointer as u32 as i32) };
+        let pointer = super::wasm_output_ptr(&mut output)?;
+        let status = raw::get_ground_normal(x, z, smoothed as i32, pointer);
         if status != 0 {
             return Err(ApiError::new(status));
         }
         Ok(GroundNormal {
-            normal: [output[0], output[1], output[2]],
+            normal: Float3::new(output[0], output[1], output[2]),
             slope: output[3],
         })
     }

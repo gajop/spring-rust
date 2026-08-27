@@ -13,6 +13,8 @@ return {
 
 		"get_spectating_state",
 
+		"get_player_roster_count",
+
 		"get_player_statistics",
 
 		"is_replay",
@@ -144,6 +146,10 @@ return {
 		},
 		["platform_is_headless"] = {
 			key = "isHeadless",
+		},
+		["get_player_roster_count"] = {
+			sortMode = 0,
+			showPathingPlayers = false,
 		},
 		["get_player_statistics"] = {
 			playerID = 0,

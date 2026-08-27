@@ -16,11 +16,11 @@ mod raw {
     #[link(wasm_import_module = "spring:desync")]
     unsafe extern "C" {
         #[link_name = "get-timer"]
-        pub fn get_timer() -> i64;
+        pub safe fn get_timer() -> i64;
         #[link_name = "get-timer-micros"]
-        pub fn get_timer_micros() -> i64;
+        pub safe fn get_timer_micros() -> i64;
         #[link_name = "diff-timers"]
-        pub fn diff_timers(
+        pub safe fn diff_timers(
             end_timer: i64,
             start_timer: i64,
             return_ms: i32,
@@ -34,7 +34,7 @@ mod raw {
 pub fn get_timer() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        Ok(unsafe { raw::get_timer() } as u64)
+        Ok(raw::get_timer() as u64)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -47,7 +47,7 @@ pub fn get_timer() -> Result<u64> {
 pub fn get_timer_micros() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        Ok(unsafe { raw::get_timer_micros() } as u64)
+        Ok(raw::get_timer_micros() as u64)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -65,14 +65,12 @@ pub fn diff_timers(
 ) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        let packed = unsafe {
-            raw::diff_timers(
-                end_timer as i64,
-                start_timer as i64,
-                return_ms as i32,
-                from_micro_secs as i32,
-            )
-        };
+        let packed = raw::diff_timers(
+            end_timer as i64,
+            start_timer as i64,
+            return_ms as i32,
+            from_micro_secs as i32,
+        );
         let status = (packed >> 32) as i32;
         if status != 0 {
             return Err(ApiError::new(status));

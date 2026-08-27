@@ -12,7 +12,7 @@ pub required: usize,
             #[link(wasm_import_module = "spring:units-info")]
 unsafe extern "C" {
 #[link_name = "get-unit-sensor-radius"]
-pub fn get_unit_sensor_radius(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_unit_sensor_radius(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -22,16 +22,16 @@ pub fn get_unit_sensor_radius(p0: i32, blob0: &[u8], output: &mut [u8]) -> crate
 {
 if output.len() != 28usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_unit_sensor_radius(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_unit_sensor_radius(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -49,7 +49,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:units-weapons")]
 unsafe extern "C" {
 #[link_name = "get-unit-weapon-state"]
-pub fn get_unit_weapon_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn get_unit_weapon_state(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
         }
 
@@ -59,16 +59,16 @@ pub fn get_unit_weapon_state(p0: i32, p1: i32, blob0: &[u8], output: &mut [u8]) 
 {
 if output.len() != 52usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_unit_weapon_state(p0, p1, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_unit_weapon_state(p0, p1, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -86,12 +86,12 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:units-commands")]
 unsafe extern "C" {
 #[link_name = "get-command-params"]
-pub fn get_command_params(p0: i32, p1: i32) -> i32;
+pub safe fn get_command_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
 unsafe extern "C" {
 #[link_name = "give-order-array-to-unit-map"]
-pub fn give_order_array_to_unit_map(p0: i32) -> i64;
+pub safe fn give_order_array_to_unit_map(p0: i32) -> i64;
 }
         }
 
@@ -103,23 +103,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::get_command_params(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::get_command_params(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -135,21 +134,25 @@ pub fn give_order_array_to_unit_map(blob0: &[u8], blob1: &[u8]) -> crate::Result
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::give_order_array_to_unit_map(descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::give_order_array_to_unit_map(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -166,7 +169,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-model-root-piece"]
-pub fn get_model_root_piece(p0: i32) -> i64;
+pub safe fn get_model_root_piece(p0: i32) -> i64;
 }
         }
 
@@ -175,15 +178,18 @@ pub fn get_model_root_piece(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_model_root_piece(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_model_root_piece(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -200,12 +206,12 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:teams")]
 unsafe extern "C" {
 #[link_name = "get-team-resource-stats"]
-pub fn get_team_resource_stats(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_team_resource_stats(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:teams")]
 unsafe extern "C" {
 #[link_name = "get-team-resources"]
-pub fn get_team_resources(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_team_resources(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -215,16 +221,16 @@ pub fn get_team_resource_stats(p0: i32, blob0: &[u8], output: &mut [u8]) -> crat
 {
 if output.len() != 72usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_team_resource_stats(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_team_resource_stats(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -240,16 +246,16 @@ pub fn get_team_resources(p0: i32, blob0: &[u8], output: &mut [u8]) -> crate::Re
 {
 if output.len() != 72usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_team_resources(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_team_resources(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -267,27 +273,27 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:unit-defs")]
 unsafe extern "C" {
 #[link_name = "get-unit-def-id-by-name"]
-pub fn get_unit_def_id_by_name(p0: i32) -> i64;
+pub safe fn get_unit_def_id_by_name(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
 unsafe extern "C" {
 #[link_name = "get-unit-def-param-bool"]
-pub fn get_unit_def_param_bool(p0: i32, p1: i32) -> i64;
+pub safe fn get_unit_def_param_bool(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
 unsafe extern "C" {
 #[link_name = "get-unit-def-param-float"]
-pub fn get_unit_def_param_float(p0: i32, p1: i32) -> i64;
+pub safe fn get_unit_def_param_float(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
 unsafe extern "C" {
 #[link_name = "get-unit-def-param-int"]
-pub fn get_unit_def_param_int(p0: i32, p1: i32) -> i64;
+pub safe fn get_unit_def_param_int(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
 unsafe extern "C" {
 #[link_name = "get-unit-def-param-type"]
-pub fn get_unit_def_param_type(p0: i32) -> i64;
+pub safe fn get_unit_def_param_type(p0: i32) -> i64;
 }
         }
 
@@ -296,15 +302,18 @@ pub fn get_unit_def_id_by_name(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_unit_def_id_by_name(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_unit_def_id_by_name(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -318,15 +327,18 @@ pub fn get_unit_def_param_bool(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::get_unit_def_param_bool(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::get_unit_def_param_bool(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -340,15 +352,18 @@ pub fn get_unit_def_param_float(p0: i32, blob0: &[u8]) -> crate::Result<f32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_f32(unsafe { raw::get_unit_def_param_float(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::decode_packed_f32(raw::get_unit_def_param_float(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -362,15 +377,18 @@ pub fn get_unit_def_param_int(p0: i32, blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_unit_def_param_int(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_unit_def_param_int(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -384,15 +402,18 @@ pub fn get_unit_def_param_type(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_unit_def_param_type(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_unit_def_param_type(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -409,7 +430,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:feature-defs")]
 unsafe extern "C" {
 #[link_name = "get-feature-def-id-by-name"]
-pub fn get_feature_def_id_by_name(p0: i32) -> i64;
+pub safe fn get_feature_def_id_by_name(p0: i32) -> i64;
 }
         }
 
@@ -418,15 +439,18 @@ pub fn get_feature_def_id_by_name(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_feature_def_id_by_name(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_feature_def_id_by_name(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -443,7 +467,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:weapon-defs")]
 unsafe extern "C" {
 #[link_name = "get-weapon-def-id"]
-pub fn get_weapon_def_id(p0: i32) -> i64;
+pub safe fn get_weapon_def_id(p0: i32) -> i64;
 }
         }
 
@@ -452,15 +476,18 @@ pub fn get_weapon_def_id(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_weapon_def_id(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_weapon_def_id(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -477,12 +504,12 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:math-extra")]
 unsafe extern "C" {
 #[link_name = "bit-bits"]
-pub fn bit_bits(p0: i32) -> i64;
+pub safe fn bit_bits(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:math-extra")]
 unsafe extern "C" {
 #[link_name = "diag"]
-pub fn diag(p0: i32) -> i64;
+pub safe fn diag(p0: i32) -> i64;
 }
         }
 
@@ -491,15 +518,18 @@ pub fn bit_bits(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::bit_bits(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::bit_bits(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -513,15 +543,18 @@ pub fn diag(blob0: &[u8]) -> crate::Result<f32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_f32(unsafe { raw::diag(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::decode_packed_f32(raw::diag(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -538,22 +571,22 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:encoding")]
 unsafe extern "C" {
 #[link_name = "decode-base64"]
-pub fn decode_base64(p0: i32, p1: i32) -> i32;
+pub safe fn decode_base64(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:encoding")]
 unsafe extern "C" {
 #[link_name = "decode-base64-url"]
-pub fn decode_base64_url(p0: i32, p1: i32) -> i32;
+pub safe fn decode_base64_url(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:encoding")]
 unsafe extern "C" {
 #[link_name = "is-valid-base64"]
-pub fn is_valid_base64(p0: i32) -> i64;
+pub safe fn is_valid_base64(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:encoding")]
 unsafe extern "C" {
 #[link_name = "is-valid-base64-url"]
-pub fn is_valid_base64_url(p0: i32) -> i64;
+pub safe fn is_valid_base64_url(p0: i32) -> i64;
 }
         }
 
@@ -565,23 +598,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::decode_base64(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::decode_base64(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -600,23 +632,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::decode_base64_url(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::decode_base64_url(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -632,15 +663,18 @@ pub fn is_valid_base64(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::is_valid_base64(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::is_valid_base64(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -654,15 +688,18 @@ pub fn is_valid_base64_url(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::is_valid_base64_url(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::is_valid_base64_url(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -679,27 +716,27 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "set-feature-rules-param"]
-pub fn set_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "set-game-rules-param"]
-pub fn set_game_rules_param(p0: i32, p1: i32) -> i64;
+pub safe fn set_game_rules_param(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "set-player-rules-param"]
-pub fn set_player_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_player_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "set-team-rules-param"]
-pub fn set_team_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_team_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "set-unit-rules-param"]
-pub fn set_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i64;
 }
         }
 
@@ -708,21 +745,25 @@ pub fn set_feature_rules_param(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8]) -> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_feature_rules_param(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_feature_rules_param(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -736,21 +777,25 @@ pub fn set_game_rules_param(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate::Resul
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_game_rules_param(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_game_rules_param(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -764,21 +809,25 @@ pub fn set_player_rules_param(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8]) -> c
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_player_rules_param(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_player_rules_param(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -792,21 +841,25 @@ pub fn set_team_rules_param(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8]) -> cra
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_team_rules_param(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_team_rules_param(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -820,21 +873,25 @@ pub fn set_unit_rules_param(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8]) -> cra
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_rules_param(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_rules_param(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -851,7 +908,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:camera")]
 unsafe extern "C" {
 #[link_name = "set-camera-state"]
-pub fn set_camera_state(p0: f32, p1: f32, p2: f32, p3: i32) -> i64;
+pub safe fn set_camera_state(p0: f32, p1: f32, p2: f32, p3: i32) -> i64;
 }
         }
 
@@ -860,15 +917,18 @@ pub fn set_camera_state(p0: f32, p1: f32, p2: f32, blob0: &[u8]) -> crate::Resul
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_camera_state(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_camera_state(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -885,12 +945,12 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:input")]
 unsafe extern "C" {
 #[link_name = "get-key-code"]
-pub fn get_key_code(p0: i32) -> i64;
+pub safe fn get_key_code(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:input")]
 unsafe extern "C" {
 #[link_name = "get-mouse-buttons-pressed"]
-pub fn get_mouse_buttons_pressed(p0: i32, p1: i32) -> i32;
+pub safe fn get_mouse_buttons_pressed(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -899,15 +959,18 @@ pub fn get_key_code(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_key_code(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_key_code(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -924,23 +987,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::get_mouse_buttons_pressed(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::get_mouse_buttons_pressed(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -959,12 +1021,12 @@ Err(super::VariableResultError { error: unreachable!(), required: 0 })
             #[link(wasm_import_module = "spring:debug-input")]
 unsafe extern "C" {
 #[link_name = "emulate-text-editing"]
-pub fn emulate_text_editing(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn emulate_text_editing(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:debug-input")]
 unsafe extern "C" {
 #[link_name = "emulate-text-input"]
-pub fn emulate_text_input(p0: i32) -> i64;
+pub safe fn emulate_text_input(p0: i32) -> i64;
 }
         }
 
@@ -973,15 +1035,18 @@ pub fn emulate_text_editing(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<boo
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::emulate_text_editing(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::emulate_text_editing(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -995,15 +1060,18 @@ pub fn emulate_text_input(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::emulate_text_input(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::emulate_text_input(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1020,12 +1088,12 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:selection")]
 unsafe extern "C" {
 #[link_name = "deselect-unit-array"]
-pub fn deselect_unit_array(p0: i32) -> i64;
+pub safe fn deselect_unit_array(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:selection")]
 unsafe extern "C" {
 #[link_name = "select-unit-array"]
-pub fn select_unit_array(p0: i32, p1: i32) -> i64;
+pub safe fn select_unit_array(p0: i32, p1: i32) -> i64;
 }
         }
 
@@ -1034,15 +1102,18 @@ pub fn deselect_unit_array(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::deselect_unit_array(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::deselect_unit_array(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1056,15 +1127,18 @@ pub fn select_unit_array(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::select_unit_array(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::select_unit_array(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1081,27 +1155,27 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:sound")]
 unsafe extern "C" {
 #[link_name = "load-sound-def"]
-pub fn load_sound_def(p0: i32) -> i64;
+pub safe fn load_sound_def(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:sound")]
 unsafe extern "C" {
 #[link_name = "play-sound-file"]
-pub fn play_sound_file(p0: f32, p1: i32, p2: i32) -> i64;
+pub safe fn play_sound_file(p0: f32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:sound")]
 unsafe extern "C" {
 #[link_name = "play-sound-stream"]
-pub fn play_sound_stream(p0: f32, p1: i32, p2: i32) -> i64;
+pub safe fn play_sound_stream(p0: f32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:sound")]
 unsafe extern "C" {
 #[link_name = "preload-sound-item"]
-pub fn preload_sound_item(p0: i32) -> i64;
+pub safe fn preload_sound_item(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:sound")]
 unsafe extern "C" {
 #[link_name = "set-sound-effect-params"]
-pub fn set_sound_effect_params(p0: i32) -> i64;
+pub safe fn set_sound_effect_params(p0: i32) -> i64;
 }
         }
 
@@ -1110,15 +1184,18 @@ pub fn load_sound_def(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::load_sound_def(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::load_sound_def(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1132,27 +1209,32 @@ pub fn play_sound_file(p0: f32, p1: i32, blob0: &[u8], blob1: &[u8], blob2: &[u8
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 6];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-            let blob2_ptr = blob2.as_ptr() as usize;
-if blob2_ptr > u32::MAX as usize || blob2.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[3] = blob1_len as u32;
+            let (blob2_ptr, blob2_len) =
+match crate::wasm_slice_parts(blob2) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[4] = blob2_ptr as u32;
-descriptor[5] = blob2.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::play_sound_file(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[5] = blob2_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::play_sound_file(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1166,15 +1248,18 @@ pub fn play_sound_stream(p0: f32, p1: i32, blob0: &[u8]) -> crate::Result<bool> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::play_sound_stream(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::play_sound_stream(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1188,15 +1273,18 @@ pub fn preload_sound_item(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::preload_sound_item(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::preload_sound_item(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1210,15 +1298,18 @@ pub fn set_sound_effect_params(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_sound_effect_params(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_sound_effect_params(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1235,22 +1326,22 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:config")]
 unsafe extern "C" {
 #[link_name = "set-config-float"]
-pub fn set_config_float(p0: f32, p1: i32, p2: i32) -> i64;
+pub safe fn set_config_float(p0: f32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:config")]
 unsafe extern "C" {
 #[link_name = "set-config-int"]
-pub fn set_config_int(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_config_int(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:config")]
 unsafe extern "C" {
 #[link_name = "set-config-string"]
-pub fn set_config_string(p0: i32, p1: i32) -> i64;
+pub safe fn set_config_string(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:config")]
 unsafe extern "C" {
 #[link_name = "set-log-section-filter-level"]
-pub fn set_log_section_filter_level(p0: i32, p1: i32) -> i64;
+pub safe fn set_log_section_filter_level(p0: i32, p1: i32) -> i64;
 }
         }
 
@@ -1259,15 +1350,18 @@ pub fn set_config_float(p0: f32, p1: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_config_float(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_config_float(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1281,15 +1375,18 @@ pub fn set_config_int(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_config_int(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_config_int(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1303,21 +1400,25 @@ pub fn set_config_string(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate::Result<b
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_config_string(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_config_string(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1331,15 +1432,18 @@ pub fn set_log_section_filter_level(p0: i32, blob0: &[u8]) -> crate::Result<bool
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_log_section_filter_level(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_log_section_filter_level(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1356,7 +1460,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:tracing")]
 unsafe extern "C" {
 #[link_name = "trace-ray-between-positions"]
-pub fn trace_ray_between_positions(p0: i32, p1: i32) -> i32;
+pub safe fn trace_ray_between_positions(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -1368,35 +1472,36 @@ if !output.len().is_multiple_of(12usize) || output.len() / 12usize > u32::MAX as
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 6];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-            let blob2_ptr = blob2.as_ptr() as usize;
-if blob2_ptr > u32::MAX as usize || blob2.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+descriptor[3] = blob1_len as u32;
+            let (blob2_ptr, blob2_len) =
+match crate::wasm_slice_parts(blob2) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[4] = blob2_ptr as u32;
-descriptor[5] = blob2.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 12usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::trace_ray_between_positions(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[5] = blob2_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 12usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::trace_ray_between_positions(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -1415,7 +1520,7 @@ Err(super::VariableResultError { error: unreachable!(), required: 0 })
             #[link(wasm_import_module = "spring:utils")]
 unsafe extern "C" {
 #[link_name = "get-cegid"]
-pub fn get_cegid(p0: i32) -> i64;
+pub safe fn get_cegid(p0: i32) -> i64;
 }
         }
 
@@ -1424,15 +1529,18 @@ pub fn get_cegid(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_cegid(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_cegid(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1449,107 +1557,107 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "assign-mouse-cursor"]
-pub fn assign_mouse_cursor(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn assign_mouse_cursor(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "deselect-unit-map"]
-pub fn deselect_unit_map(p0: i32) -> i64;
+pub safe fn deselect_unit_map(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "draw-unit-commands"]
-pub fn draw_unit_commands(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn draw_unit_commands(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "load-cmd-colors-config"]
-pub fn load_cmd_colors_config(p0: i32) -> i64;
+pub safe fn load_cmd_colors_config(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "load-ctrl-panel-config"]
-pub fn load_ctrl_panel_config(p0: i32) -> i64;
+pub safe fn load_ctrl_panel_config(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "load-model-textures"]
-pub fn load_model_textures(p0: i32) -> i64;
+pub safe fn load_model_textures(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "replace-mouse-cursor"]
-pub fn replace_mouse_cursor(p0: i32, p1: i32) -> i64;
+pub safe fn replace_mouse_cursor(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "select-unit-map"]
-pub fn select_unit_map(p0: i32, p1: i32) -> i64;
+pub safe fn select_unit_map(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-clipboard"]
-pub fn set_clipboard(p0: i32) -> i64;
+pub safe fn set_clipboard(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-custom-command-draw-data"]
-pub fn set_custom_command_draw_data(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_custom_command_draw_data(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-dolly-camera-curve"]
-pub fn set_dolly_camera_curve(p0: i32, p1: i32) -> i64;
+pub safe fn set_dolly_camera_curve(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-dolly-camera-look-curve"]
-pub fn set_dolly_camera_look_curve(p0: i32, p1: i32) -> i64;
+pub safe fn set_dolly_camera_look_curve(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-map-shading-texture"]
-pub fn set_map_shading_texture(p0: i32, p1: i32) -> i64;
+pub safe fn set_map_shading_texture(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-mouse-cursor"]
-pub fn set_mouse_cursor(p0: f32, p1: i32) -> i64;
+pub safe fn set_mouse_cursor(p0: f32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-sky-box-texture"]
-pub fn set_sky_box_texture(p0: i32) -> i64;
+pub safe fn set_sky_box_texture(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-unit-def-icon"]
-pub fn set_unit_def_icon(p0: i32, p1: i32) -> i64;
+pub safe fn set_unit_def_icon(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-unit-def-image"]
-pub fn set_unit_def_image(p0: i32, p1: i32) -> i64;
+pub safe fn set_unit_def_image(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-unit-icon"]
-pub fn set_unit_icon(p0: i32, p1: i32) -> i64;
+pub safe fn set_unit_icon(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-wm-caption"]
-pub fn set_wm_caption(p0: i32) -> i64;
+pub safe fn set_wm_caption(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-wm-icon"]
-pub fn set_wm_icon(p0: i32, p1: i32) -> i64;
+pub safe fn set_wm_icon(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
 unsafe extern "C" {
 #[link_name = "set-water-texture"]
-pub fn set_water_texture(p0: i32) -> i64;
+pub safe fn set_water_texture(p0: i32) -> i64;
 }
         }
 
@@ -1558,21 +1666,25 @@ pub fn assign_mouse_cursor(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8]) -> crat
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::assign_mouse_cursor(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::assign_mouse_cursor(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1586,15 +1698,18 @@ pub fn deselect_unit_map(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::deselect_unit_map(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::deselect_unit_map(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1608,15 +1723,18 @@ pub fn draw_unit_commands(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<bool>
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::draw_unit_commands(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::draw_unit_commands(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1630,15 +1748,18 @@ pub fn load_cmd_colors_config(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::load_cmd_colors_config(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::load_cmd_colors_config(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1652,15 +1773,18 @@ pub fn load_ctrl_panel_config(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::load_ctrl_panel_config(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::load_ctrl_panel_config(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1674,15 +1798,18 @@ pub fn load_model_textures(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::load_model_textures(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::load_model_textures(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1696,21 +1823,25 @@ pub fn replace_mouse_cursor(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate::Resul
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::replace_mouse_cursor(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::replace_mouse_cursor(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1724,15 +1855,18 @@ pub fn select_unit_map(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::select_unit_map(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::select_unit_map(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1746,15 +1880,18 @@ pub fn set_clipboard(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_clipboard(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_clipboard(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1768,21 +1905,25 @@ pub fn set_custom_command_draw_data(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8]
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_custom_command_draw_data(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_custom_command_draw_data(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1796,21 +1937,25 @@ pub fn set_dolly_camera_curve(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate::Res
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_dolly_camera_curve(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_dolly_camera_curve(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1824,21 +1969,25 @@ pub fn set_dolly_camera_look_curve(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_dolly_camera_look_curve(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_dolly_camera_look_curve(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1852,21 +2001,25 @@ pub fn set_map_shading_texture(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate::Re
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_map_shading_texture(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_map_shading_texture(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1880,15 +2033,18 @@ pub fn set_mouse_cursor(p0: f32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_mouse_cursor(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_mouse_cursor(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1902,15 +2058,18 @@ pub fn set_sky_box_texture(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_sky_box_texture(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_sky_box_texture(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1924,15 +2083,18 @@ pub fn set_unit_def_icon(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_def_icon(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_def_icon(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1946,15 +2108,18 @@ pub fn set_unit_def_image(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_def_image(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_def_image(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1968,15 +2133,18 @@ pub fn set_unit_icon(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_icon(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_icon(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -1990,21 +2158,25 @@ pub fn set_wm_caption(blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_wm_caption(descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_wm_caption(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2018,15 +2190,18 @@ pub fn set_wm_icon(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_wm_icon(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_wm_icon(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2040,21 +2215,25 @@ pub fn set_water_texture(blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_water_texture(descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_water_texture(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2071,257 +2250,257 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "add-atlas-texture"]
-pub fn add_atlas_texture(p0: i32) -> i32;
+pub safe fn add_atlas_texture(p0: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "add-fallback-font"]
-pub fn add_fallback_font(p0: i32) -> i64;
+pub safe fn add_fallback_font(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "add-feature-defs-to-submission-vao"]
-pub fn add_feature_defs_to_submission_vao(p0: i32, p1: i32) -> i64;
+pub safe fn add_feature_defs_to_submission_vao(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "add-features-to-submission-vao"]
-pub fn add_features_to_submission_vao(p0: i32, p1: i32) -> i64;
+pub safe fn add_features_to_submission_vao(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "add-unit-defs-to-submission-vao"]
-pub fn add_unit_defs_to_submission_vao(p0: i32, p1: i32) -> i64;
+pub safe fn add_unit_defs_to_submission_vao(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "add-units-to-submission-vao"]
-pub fn add_units_to_submission_vao(p0: i32, p1: i32) -> i64;
+pub safe fn add_units_to_submission_vao(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "bind-image-texture"]
-pub fn bind_image_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+pub safe fn bind_image_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "bind-texture"]
-pub fn bind_texture(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn bind_texture(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "change-texture-params"]
-pub fn change_texture_params(p0: i32) -> i32;
+pub safe fn change_texture_params(p0: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "copy-to-texture"]
-pub fn copy_to_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32) -> i32;
+pub safe fn copy_to_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "create-fbo"]
-pub fn create_fbo(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn create_fbo(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "create-shader"]
-pub fn create_shader(p0: i32, p1: i32) -> i32;
+pub safe fn create_shader(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "define-vbo"]
-pub fn define_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+pub safe fn define_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "delete-texture"]
-pub fn delete_texture(p0: i32) -> i64;
+pub safe fn delete_texture(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "delete-texture-atlas"]
-pub fn delete_texture_atlas(p0: i32) -> i64;
+pub safe fn delete_texture_atlas(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "delete-texture-fbo"]
-pub fn delete_texture_fbo(p0: i32) -> i64;
+pub safe fn delete_texture_fbo(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "finalize-texture-atlas"]
-pub fn finalize_texture_atlas(p0: i32) -> i64;
+pub safe fn finalize_texture_atlas(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "font-get-text-height"]
-pub fn font_get_text_height(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
+pub safe fn font_get_text_height(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32, p5: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "font-get-text-width"]
-pub fn font_get_text_width(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i64;
+pub safe fn font_get_text_width(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "font-print"]
-pub fn font_print(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
+pub safe fn font_print(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "font-print-world"]
-pub fn font_print_world(p0: i32, p1: f32, p2: i32) -> i32;
+pub safe fn font_print_world(p0: i32, p1: f32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "generate-mipmap"]
-pub fn generate_mipmap(p0: i32) -> i32;
+pub safe fn generate_mipmap(p0: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-atlas-texture"]
-pub fn get_atlas_texture(p0: i32, p1: i32) -> i32;
+pub safe fn get_atlas_texture(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-fixed-state"]
-pub fn get_fixed_state(p0: i32, p1: i32) -> i32;
+pub safe fn get_fixed_state(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-global-tex-coords"]
-pub fn get_global_tex_coords(p0: i32, p1: i32) -> i32;
+pub safe fn get_global_tex_coords(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-subroutine-index"]
-pub fn get_subroutine_index(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn get_subroutine_index(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-text-height"]
-pub fn get_text_height(p0: i32, p1: i32) -> i32;
+pub safe fn get_text_height(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-text-width"]
-pub fn get_text_width(p0: i32) -> i64;
+pub safe fn get_text_width(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-uniform-location"]
-pub fn get_uniform_location(p0: i32, p1: i32) -> i64;
+pub safe fn get_uniform_location(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "has-extension"]
-pub fn has_extension(p0: i32) -> i64;
+pub safe fn has_extension(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "instance-data-from-feature-defs-vbo"]
-pub fn instance_data_from_feature_defs_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+pub safe fn instance_data_from_feature_defs_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "instance-data-from-features-vbo"]
-pub fn instance_data_from_features_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+pub safe fn instance_data_from_features_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "instance-data-from-unit-defs-vbo"]
-pub fn instance_data_from_unit_defs_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+pub safe fn instance_data_from_unit_defs_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "instance-data-from-units-vbo"]
-pub fn instance_data_from_units_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+pub safe fn instance_data_from_units_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "load-font"]
-pub fn load_font(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+pub safe fn load_font(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "matrix-data-from-projectiles-vbo"]
-pub fn matrix_data_from_projectiles_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+pub safe fn matrix_data_from_projectiles_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "object-label"]
-pub fn object_label(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn object_label(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "push-debug-group"]
-pub fn push_debug_group(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn push_debug_group(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "save-image"]
-pub fn save_image(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+pub safe fn save_image(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "set-fbo-attachment"]
-pub fn set_fbo_attachment(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+pub safe fn set_fbo_attachment(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "set-fbo-draw-buffers"]
-pub fn set_fbo_draw_buffers(p0: i32, p1: i32) -> i32;
+pub safe fn set_fbo_draw_buffers(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "set-feature-buffer-uniforms"]
-pub fn set_feature_buffer_uniforms(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_feature_buffer_uniforms(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "set-unit-buffer-uniforms"]
-pub fn set_unit_buffer_uniforms(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_unit_buffer_uniforms(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "shape"]
-pub fn shape(p0: i32, p1: i32) -> i32;
+pub safe fn shape(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "text"]
-pub fn text(p0: f32, p1: f32, p2: f32, p3: i32) -> i32;
+pub safe fn text(p0: f32, p1: f32, p2: f32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "texture-info"]
-pub fn texture_info(p0: i32, p1: i32) -> i32;
+pub safe fn texture_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "uniform-array-float"]
-pub fn uniform_array_float(p0: i32, p1: i32) -> i32;
+pub safe fn uniform_array_float(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "uniform-array-int"]
-pub fn uniform_array_int(p0: i32, p1: i32) -> i32;
+pub safe fn uniform_array_int(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "uniform-matrix"]
-pub fn uniform_matrix(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn uniform_matrix(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "upload-texture"]
-pub fn upload_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32) -> i32;
+pub safe fn upload_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, p10: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "upload-vbo"]
-pub fn upload_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+pub safe fn upload_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
 }
         }
 
@@ -2330,21 +2509,25 @@ pub fn add_atlas_texture(blob0: &[u8], blob1: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::add_atlas_texture(descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::add_atlas_texture(descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2358,15 +2541,18 @@ pub fn add_fallback_font(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::add_fallback_font(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::add_fallback_font(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2380,15 +2566,18 @@ pub fn add_feature_defs_to_submission_vao(p0: i32, blob0: &[u8]) -> crate::Resul
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::add_feature_defs_to_submission_vao(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::add_feature_defs_to_submission_vao(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2402,15 +2591,18 @@ pub fn add_features_to_submission_vao(p0: i32, blob0: &[u8]) -> crate::Result<i3
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::add_features_to_submission_vao(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::add_features_to_submission_vao(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2424,15 +2616,18 @@ pub fn add_unit_defs_to_submission_vao(p0: i32, blob0: &[u8]) -> crate::Result<i
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::add_unit_defs_to_submission_vao(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::add_unit_defs_to_submission_vao(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2446,15 +2641,18 @@ pub fn add_units_to_submission_vao(p0: i32, blob0: &[u8]) -> crate::Result<i32> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::add_units_to_submission_vao(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::add_units_to_submission_vao(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2468,15 +2666,18 @@ pub fn bind_image_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::bind_image_texture(p0, p1, p2, p3, p4, p5, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::bind_image_texture(p0, p1, p2, p3, p4, p5, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2490,15 +2691,18 @@ pub fn bind_texture(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::bind_texture(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::bind_texture(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2512,21 +2716,25 @@ pub fn change_texture_params(blob0: &[u8], blob1: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::change_texture_params(descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::change_texture_params(descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2536,20 +2744,22 @@ Err(unreachable!())
 }
 
         #[inline]
-#[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
-                    pub fn copy_to_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, blob0: &[u8]) -> crate::Result<()> {
+pub fn copy_to_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::copy_to_texture(p0, p1, p2, p3, p4, p5, p6, p7, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::copy_to_texture(p0, p1, p2, p3, p4, p5, p6, p7, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2564,22 +2774,23 @@ pub fn create_fbo(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8], output: &mut [u8
 {
 if output.len() != 8usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::create_fbo(p0, p1, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::create_fbo(p0, p1, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -2590,64 +2801,70 @@ Err(unreachable!())
 }
 
         #[inline]
-#[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
-                    pub fn create_shader(blob0: &[u8], blob1: &[u8], blob2: &[u8], blob3: &[u8], blob4: &[u8], blob5: &[u8], blob6: &[u8], blob7: &[u8], output: &mut [u8]) -> crate::Result<()> {
+pub fn create_shader(blob0: &[u8], blob1: &[u8], blob2: &[u8], blob3: &[u8], blob4: &[u8], blob5: &[u8], blob6: &[u8], blob7: &[u8], output: &mut [u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 if output.len() != 8usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 16];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-            let blob2_ptr = blob2.as_ptr() as usize;
-if blob2_ptr > u32::MAX as usize || blob2.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[3] = blob1_len as u32;
+            let (blob2_ptr, blob2_len) =
+match crate::wasm_slice_parts(blob2) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[4] = blob2_ptr as u32;
-descriptor[5] = blob2.len() as u32;
-            let blob3_ptr = blob3.as_ptr() as usize;
-if blob3_ptr > u32::MAX as usize || blob3.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[5] = blob2_len as u32;
+            let (blob3_ptr, blob3_len) =
+match crate::wasm_slice_parts(blob3) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[6] = blob3_ptr as u32;
-descriptor[7] = blob3.len() as u32;
-            let blob4_ptr = blob4.as_ptr() as usize;
-if blob4_ptr > u32::MAX as usize || blob4.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[7] = blob3_len as u32;
+            let (blob4_ptr, blob4_len) =
+match crate::wasm_slice_parts(blob4) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[8] = blob4_ptr as u32;
-descriptor[9] = blob4.len() as u32;
-            let blob5_ptr = blob5.as_ptr() as usize;
-if blob5_ptr > u32::MAX as usize || blob5.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[9] = blob4_len as u32;
+            let (blob5_ptr, blob5_len) =
+match crate::wasm_slice_parts(blob5) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[10] = blob5_ptr as u32;
-descriptor[11] = blob5.len() as u32;
-            let blob6_ptr = blob6.as_ptr() as usize;
-if blob6_ptr > u32::MAX as usize || blob6.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[11] = blob5_len as u32;
+            let (blob6_ptr, blob6_len) =
+match crate::wasm_slice_parts(blob6) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[12] = blob6_ptr as u32;
-descriptor[13] = blob6.len() as u32;
-            let blob7_ptr = blob7.as_ptr() as usize;
-if blob7_ptr > u32::MAX as usize || blob7.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[13] = blob6_len as u32;
+            let (blob7_ptr, blob7_len) =
+match crate::wasm_slice_parts(blob7) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[14] = blob7_ptr as u32;
-descriptor[15] = blob7.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::create_shader(descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[15] = blob7_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::create_shader(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -2662,15 +2879,18 @@ pub fn define_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, blob0: &
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::define_vbo(p0, p1, p2, p3, p4, p5, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::define_vbo(p0, p1, p2, p3, p4, p5, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2684,15 +2904,18 @@ pub fn delete_texture(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::delete_texture(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::delete_texture(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2706,15 +2929,18 @@ pub fn delete_texture_atlas(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::delete_texture_atlas(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::delete_texture_atlas(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2728,15 +2954,18 @@ pub fn delete_texture_fbo(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::delete_texture_fbo(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::delete_texture_fbo(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2750,15 +2979,18 @@ pub fn finalize_texture_atlas(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::finalize_texture_atlas(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::finalize_texture_atlas(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2773,22 +3005,23 @@ pub fn font_get_text_height(p0: i32, p1: f32, p2: f32, p3: f32, blob0: &[u8], bl
 {
 if output.len() != 12usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::font_get_text_height(p0, p1, p2, p3, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::font_get_text_height(p0, p1, p2, p3, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -2803,21 +3036,25 @@ pub fn font_get_text_width(p0: i32, p1: f32, p2: f32, p3: f32, blob0: &[u8], blo
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_f32(unsafe { raw::font_get_text_width(p0, p1, p2, p3, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::decode_packed_f32(raw::font_get_text_width(p0, p1, p2, p3, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2831,21 +3068,25 @@ pub fn font_print(p0: i32, p1: f32, p2: f32, p3: f32, blob0: &[u8], blob1: &[u8]
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::font_print(p0, p1, p2, p3, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::font_print(p0, p1, p2, p3, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2859,27 +3100,32 @@ pub fn font_print_world(p0: i32, p1: f32, blob0: &[u8], blob1: &[u8], blob2: &[u
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 6];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-            let blob2_ptr = blob2.as_ptr() as usize;
-if blob2_ptr > u32::MAX as usize || blob2.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[3] = blob1_len as u32;
+            let (blob2_ptr, blob2_len) =
+match crate::wasm_slice_parts(blob2) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[4] = blob2_ptr as u32;
-descriptor[5] = blob2.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::font_print_world(p0, p1, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[5] = blob2_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::font_print_world(p0, p1, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2893,15 +3139,18 @@ pub fn generate_mipmap(blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::generate_mipmap(descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::generate_mipmap(descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -2916,22 +3165,23 @@ pub fn get_atlas_texture(blob0: &[u8], blob1: &[u8], output: &mut [u8]) -> crate
 {
 if output.len() != 20usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_atlas_texture(descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_atlas_texture(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -2947,16 +3197,16 @@ pub fn get_fixed_state(blob0: &[u8], output: &mut [u8]) -> crate::Result<()> {
 {
 if output.len() != 172usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_fixed_state(descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_fixed_state(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -2972,16 +3222,16 @@ pub fn get_global_tex_coords(blob0: &[u8], output: &mut [u8]) -> crate::Result<(
 {
 if output.len() != 20usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_global_tex_coords(descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_global_tex_coords(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -2997,16 +3247,16 @@ pub fn get_subroutine_index(p0: i32, p1: i32, blob0: &[u8], output: &mut [u8]) -
 {
 if output.len() != 8usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_subroutine_index(p0, p1, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_subroutine_index(p0, p1, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -3022,16 +3272,16 @@ pub fn get_text_height(blob0: &[u8], output: &mut [u8]) -> crate::Result<()> {
 {
 if output.len() != 12usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_text_height(descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_text_height(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -3046,15 +3296,18 @@ pub fn get_text_width(blob0: &[u8]) -> crate::Result<f32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_f32(unsafe { raw::get_text_width(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::decode_packed_f32(raw::get_text_width(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3068,15 +3321,18 @@ pub fn get_uniform_location(p0: i32, blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_uniform_location(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_uniform_location(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3090,15 +3346,18 @@ pub fn has_extension(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::has_extension(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::has_extension(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3112,15 +3371,18 @@ pub fn instance_data_from_feature_defs_vbo(p0: i32, p1: i32, p2: i32, p3: i32, b
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::instance_data_from_feature_defs_vbo(p0, p1, p2, p3, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::instance_data_from_feature_defs_vbo(p0, p1, p2, p3, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3134,15 +3396,18 @@ pub fn instance_data_from_features_vbo(p0: i32, p1: i32, p2: i32, p3: i32, blob0
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::instance_data_from_features_vbo(p0, p1, p2, p3, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::instance_data_from_features_vbo(p0, p1, p2, p3, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3156,15 +3421,18 @@ pub fn instance_data_from_unit_defs_vbo(p0: i32, p1: i32, p2: i32, p3: i32, blob
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::instance_data_from_unit_defs_vbo(p0, p1, p2, p3, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::instance_data_from_unit_defs_vbo(p0, p1, p2, p3, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3178,15 +3446,18 @@ pub fn instance_data_from_units_vbo(p0: i32, p1: i32, p2: i32, p3: i32, blob0: &
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::instance_data_from_units_vbo(p0, p1, p2, p3, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::instance_data_from_units_vbo(p0, p1, p2, p3, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3200,15 +3471,18 @@ pub fn load_font(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate::Result<i32> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::load_font(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::load_font(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3222,15 +3496,18 @@ pub fn matrix_data_from_projectiles_vbo(p0: i32, p1: i32, p2: i32, p3: i32, blob
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::matrix_data_from_projectiles_vbo(p0, p1, p2, p3, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::matrix_data_from_projectiles_vbo(p0, p1, p2, p3, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3244,15 +3521,18 @@ pub fn object_label(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::object_label(p0, p1, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::object_label(p0, p1, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3266,15 +3546,18 @@ pub fn push_debug_group(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::push_debug_group(p0, p1, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::push_debug_group(p0, p1, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3288,21 +3571,25 @@ pub fn save_image(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, blob0: &[u8], blo
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::save_image(p0, p1, p2, p3, p4, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::save_image(p0, p1, p2, p3, p4, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3316,15 +3603,18 @@ pub fn set_fbo_attachment(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::set_fbo_attachment(p0, p1, p2, p3, p4, p5, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::set_fbo_attachment(p0, p1, p2, p3, p4, p5, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3338,15 +3628,18 @@ pub fn set_fbo_draw_buffers(p0: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::set_fbo_draw_buffers(p0, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::set_fbo_draw_buffers(p0, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3360,15 +3653,18 @@ pub fn set_feature_buffer_uniforms(p0: i32, p1: i32, blob0: &[u8]) -> crate::Res
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::set_feature_buffer_uniforms(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::set_feature_buffer_uniforms(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3382,15 +3678,18 @@ pub fn set_unit_buffer_uniforms(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::set_unit_buffer_uniforms(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::set_unit_buffer_uniforms(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3404,15 +3703,18 @@ pub fn shape(p0: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::shape(p0, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::shape(p0, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3426,21 +3728,25 @@ pub fn text(p0: f32, p1: f32, p2: f32, blob0: &[u8], blob1: &[u8]) -> crate::Res
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::text(p0, p1, p2, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::text(p0, p1, p2, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3455,16 +3761,16 @@ pub fn texture_info(blob0: &[u8], output: &mut [u8]) -> crate::Result<()> {
 {
 if output.len() != 24usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::texture_info(descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::texture_info(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -3479,15 +3785,18 @@ pub fn uniform_array_float(p0: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::uniform_array_float(p0, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::uniform_array_float(p0, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3501,15 +3810,18 @@ pub fn uniform_array_int(p0: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::uniform_array_int(p0, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::uniform_array_int(p0, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3523,15 +3835,18 @@ pub fn uniform_matrix(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::uniform_matrix(p0, p1, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::uniform_matrix(p0, p1, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3541,26 +3856,29 @@ Err(unreachable!())
 }
 
         #[inline]
-#[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
-                    pub fn upload_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, blob0: &[u8], blob1: &[u8]) -> crate::Result<()> {
+pub fn upload_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32, p7: i32, p8: i32, p9: i32, blob0: &[u8], blob1: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::upload_texture(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::upload_texture(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3574,15 +3892,18 @@ pub fn upload_vbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, blob0: &[u8]) -> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::upload_vbo(p0, p1, p2, p3, p4, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::upload_vbo(p0, p1, p2, p3, p4, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3599,36 +3920,39 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:icons")]
 unsafe extern "C" {
 #[link_name = "add-unit-icon"]
-pub fn add_unit_icon(p0: f32, p1: f32, p2: i32, p3: f32, p4: f32, p5: f32, p6: f32, p7: i32) -> i64;
+pub safe fn add_unit_icon(p0: f32, p1: f32, p2: i32, p3: f32, p4: f32, p5: f32, p6: f32, p7: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:icons")]
 unsafe extern "C" {
 #[link_name = "free-unit-icon"]
-pub fn free_unit_icon(p0: i32) -> i64;
+pub safe fn free_unit_icon(p0: i32) -> i64;
 }
         }
 
         #[inline]
-#[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
-                    pub fn add_unit_icon(p0: f32, p1: f32, p2: i32, p3: f32, p4: f32, p5: f32, p6: f32, blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
+pub fn add_unit_icon(p0: f32, p1: f32, p2: i32, p3: f32, p4: f32, p5: f32, p6: f32, blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::add_unit_icon(p0, p1, p2, p3, p4, p5, p6, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::add_unit_icon(p0, p1, p2, p3, p4, p5, p6, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3642,15 +3966,18 @@ pub fn free_unit_icon(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::free_unit_icon(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::free_unit_icon(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3667,12 +3994,12 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:markers")]
 unsafe extern "C" {
 #[link_name = "add-world-text"]
-pub fn add_world_text(p0: i32) -> i64;
+pub safe fn add_world_text(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:markers")]
 unsafe extern "C" {
 #[link_name = "marker-add-point"]
-pub fn marker_add_point(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn marker_add_point(p0: i32, p1: i32, p2: i32) -> i64;
 }
         }
 
@@ -3681,21 +4008,25 @@ pub fn add_world_text(blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::add_world_text(descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::add_world_text(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3709,21 +4040,25 @@ pub fn marker_add_point(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8]) -> crate::
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::marker_add_point(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::marker_add_point(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3740,7 +4075,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:ground-decals")]
 unsafe extern "C" {
 #[link_name = "set-ground-decal-texture"]
-pub fn set_ground_decal_texture(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_ground_decal_texture(p0: i32, p1: i32, p2: i32) -> i64;
 }
         }
 
@@ -3749,15 +4084,18 @@ pub fn set_ground_decal_texture(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_ground_decal_texture(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_ground_decal_texture(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3774,32 +4112,32 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:system-control")]
 unsafe extern "C" {
 #[link_name = "clear-watch-dog-timer"]
-pub fn clear_watch_dog_timer(p0: i32, p1: i32) -> i64;
+pub safe fn clear_watch_dog_timer(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
 unsafe extern "C" {
 #[link_name = "reload"]
-pub fn reload(p0: i32) -> i64;
+pub safe fn reload(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
 unsafe extern "C" {
 #[link_name = "restart"]
-pub fn restart(p0: i32) -> i64;
+pub safe fn restart(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
 unsafe extern "C" {
 #[link_name = "set-share-level"]
-pub fn set_share_level(p0: f32, p1: i32) -> i64;
+pub safe fn set_share_level(p0: f32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
 unsafe extern "C" {
 #[link_name = "share-resources"]
-pub fn share_resources(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn share_resources(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:system-control")]
 unsafe extern "C" {
 #[link_name = "start"]
-pub fn start(p0: i32) -> i64;
+pub safe fn start(p0: i32) -> i64;
 }
         }
 
@@ -3808,15 +4146,18 @@ pub fn clear_watch_dog_timer(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::clear_watch_dog_timer(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::clear_watch_dog_timer(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3830,15 +4171,18 @@ pub fn reload(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::reload(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::reload(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3852,21 +4196,25 @@ pub fn restart(blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::restart(descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::restart(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3880,15 +4228,18 @@ pub fn set_share_level(p0: f32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_share_level(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_share_level(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3902,15 +4253,18 @@ pub fn share_resources(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::share_resources(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::share_resources(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3924,21 +4278,25 @@ pub fn start(blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::start(descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::start(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -3955,322 +4313,322 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "add-translation-string"]
-pub fn add_translation_string(p0: i32) -> i64;
+pub safe fn add_translation_string(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "clear-document-path-requests"]
-pub fn clear_document_path_requests(p0: i32) -> i64;
+pub safe fn clear_document_path_requests(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-activate-theme"]
-pub fn context_activate_theme(p0: i64, p1: i32, p2: i32) -> i64;
+pub safe fn context_activate_theme(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-create-data-model"]
-pub fn context_create_data_model(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn context_create_data_model(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-create-document"]
-pub fn context_create_document(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn context_create_document(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-get-document"]
-pub fn context_get_document(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn context_get_document(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-is-theme-active"]
-pub fn context_is_theme_active(p0: i64, p1: i32) -> i64;
+pub safe fn context_is_theme_active(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-load-document"]
-pub fn context_load_document(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn context_load_document(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-open-data-model"]
-pub fn context_open_data_model(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn context_open_data_model(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-process-text-input"]
-pub fn context_process_text_input(p0: i64, p1: i32) -> i64;
+pub safe fn context_process_text_input(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-remove-data-model"]
-pub fn context_remove_data_model(p0: i64, p1: i32) -> i64;
+pub safe fn context_remove_data_model(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "context-remove-event-listener"]
-pub fn context_remove_event_listener(p0: i64, p1: i64, p2: i32, p3: i32) -> i64;
+pub safe fn context_remove_event_listener(p0: i64, p1: i64, p2: i32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "create-context"]
-pub fn create_context(p0: i32, p1: i32) -> i32;
+pub safe fn create_context(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-bind-bool"]
-pub fn data_model_bind_bool(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn data_model_bind_bool(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-bind-color"]
-pub fn data_model_bind_color(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
+pub safe fn data_model_bind_color(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32, p6: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-bind-float"]
-pub fn data_model_bind_float(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
+pub safe fn data_model_bind_float(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-bind-int"]
-pub fn data_model_bind_int(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn data_model_bind_int(p0: i64, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-bind-percent"]
-pub fn data_model_bind_percent(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
+pub safe fn data_model_bind_percent(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-bind-pixels"]
-pub fn data_model_bind_pixels(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
+pub safe fn data_model_bind_pixels(p0: i64, p1: f32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-bind-rows"]
-pub fn data_model_bind_rows(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn data_model_bind_rows(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-bind-string"]
-pub fn data_model_bind_string(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn data_model_bind_string(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-set-rows"]
-pub fn data_model_set_rows(p0: i64, p1: i32) -> i64;
+pub safe fn data_model_set_rows(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "data-model-set-string"]
-pub fn data_model_set_string(p0: i64, p1: i32) -> i64;
+pub safe fn data_model_set_string(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "document-append-to-style-sheet"]
-pub fn document_append_to_style_sheet(p0: i64, p1: i32) -> i64;
+pub safe fn document_append_to_style_sheet(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "document-create-element"]
-pub fn document_create_element(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn document_create_element(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "document-create-text-node"]
-pub fn document_create_text_node(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn document_create_text_node(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "document-load-external-script"]
-pub fn document_load_external_script(p0: i64, p1: i32) -> i64;
+pub safe fn document_load_external_script(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "document-load-inline-script"]
-pub fn document_load_inline_script(p0: i64, p1: i32, p2: i32) -> i64;
+pub safe fn document_load_inline_script(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "document-set-title"]
-pub fn document_set_title(p0: i64, p1: i32) -> i64;
+pub safe fn document_set_title(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-are-pseudo-classes-set"]
-pub fn element_are_pseudo_classes_set(p0: i64, p1: i32) -> i64;
+pub safe fn element_are_pseudo_classes_set(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-closest"]
-pub fn element_closest(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn element_closest(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-dispatch-event"]
-pub fn element_dispatch_event(p0: i64, p1: i32) -> i64;
+pub safe fn element_dispatch_event(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-form-submit"]
-pub fn element_form_submit(p0: i64, p1: i32) -> i64;
+pub safe fn element_form_submit(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-get-element-by-id"]
-pub fn element_get_element_by_id(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn element_get_element_by_id(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-get-elements-by-class-name"]
-pub fn element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-get-elements-by-class-name-count"]
-pub fn element_get_elements_by_class_name_count(p0: i64, p1: i32) -> i64;
+pub safe fn element_get_elements_by_class_name_count(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-get-elements-by-tag-name"]
-pub fn element_get_elements_by_tag_name(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn element_get_elements_by_tag_name(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-get-elements-by-tag-name-count"]
-pub fn element_get_elements_by_tag_name_count(p0: i64, p1: i32) -> i64;
+pub safe fn element_get_elements_by_tag_name_count(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-has-attribute"]
-pub fn element_has_attribute(p0: i64, p1: i32) -> i64;
+pub safe fn element_has_attribute(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-is-class-set"]
-pub fn element_is_class_set(p0: i64, p1: i32) -> i64;
+pub safe fn element_is_class_set(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-is-pseudo-class-set"]
-pub fn element_is_pseudo_class_set(p0: i64, p1: i32) -> i64;
+pub safe fn element_is_pseudo_class_set(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-matches"]
-pub fn element_matches(p0: i64, p1: i32) -> i64;
+pub safe fn element_matches(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-query-selector"]
-pub fn element_query_selector(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn element_query_selector(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-query-selector-all"]
-pub fn element_query_selector_all(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn element_query_selector_all(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-query-selector-all-count"]
-pub fn element_query_selector_all_count(p0: i64, p1: i32) -> i64;
+pub safe fn element_query_selector_all_count(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-remove-attribute"]
-pub fn element_remove_attribute(p0: i64, p1: i32) -> i64;
+pub safe fn element_remove_attribute(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-remove-event-listener"]
-pub fn element_remove_event_listener(p0: i64, p1: i64, p2: i32, p3: i32) -> i64;
+pub safe fn element_remove_event_listener(p0: i64, p1: i64, p2: i32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-set-attribute"]
-pub fn element_set_attribute(p0: i64, p1: i32) -> i64;
+pub safe fn element_set_attribute(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-set-class"]
-pub fn element_set_class(p0: i64, p1: i32, p2: i32) -> i64;
+pub safe fn element_set_class(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-set-class-name"]
-pub fn element_set_class_name(p0: i64, p1: i32) -> i64;
+pub safe fn element_set_class_name(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-set-id"]
-pub fn element_set_id(p0: i64, p1: i32) -> i64;
+pub safe fn element_set_id(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-set-inner-rml"]
-pub fn element_set_inner_rml(p0: i64, p1: i32) -> i64;
+pub safe fn element_set_inner_rml(p0: i64, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-set-pseudo-class"]
-pub fn element_set_pseudo_class(p0: i64, p1: i32, p2: i32) -> i64;
+pub safe fn element_set_pseudo_class(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-tab-set-set-panel"]
-pub fn element_tab_set_set_panel(p0: i64, p1: i32, p2: i32) -> i64;
+pub safe fn element_tab_set_set_panel(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-tab-set-set-tab"]
-pub fn element_tab_set_set_tab(p0: i64, p1: i32, p2: i32) -> i64;
+pub safe fn element_tab_set_set_tab(p0: i64, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "event-get-parameter-bool"]
-pub fn event_get_parameter_bool(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn event_get_parameter_bool(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "event-get-parameter-float"]
-pub fn event_get_parameter_float(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn event_get_parameter_float(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "event-get-parameter-int"]
-pub fn event_get_parameter_int(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn event_get_parameter_int(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "event-get-parameter-type"]
-pub fn event_get_parameter_type(p0: i64, p1: i32, p2: i32) -> i32;
+pub safe fn event_get_parameter_type(p0: i64, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "get-context"]
-pub fn get_context(p0: i32, p1: i32) -> i32;
+pub safe fn get_context(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "remove-context-by-name"]
-pub fn remove_context_by_name(p0: i32) -> i64;
+pub safe fn remove_context_by_name(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "set-debug-context-by-name"]
-pub fn set_debug_context_by_name(p0: i32) -> i64;
+pub safe fn set_debug_context_by_name(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "set-mouse-cursor-alias"]
-pub fn set_mouse_cursor_alias(p0: i32) -> i64;
+pub safe fn set_mouse_cursor_alias(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "sol-lua-data-model-set-dirty"]
-pub fn sol_lua_data_model_set_dirty(p0: i64, p1: i32) -> i64;
+pub safe fn sol_lua_data_model_set_dirty(p0: i64, p1: i32) -> i64;
 }
         }
 
@@ -4279,21 +4637,25 @@ pub fn add_translation_string(blob0: &[u8], blob1: &[u8]) -> crate::Result<bool>
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::add_translation_string(descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::add_translation_string(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4307,15 +4669,18 @@ pub fn clear_document_path_requests(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::clear_document_path_requests(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::clear_document_path_requests(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4329,15 +4694,18 @@ pub fn context_activate_theme(p0: i64, p1: i32, blob0: &[u8]) -> crate::Result<b
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::context_activate_theme(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::context_activate_theme(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4352,16 +4720,16 @@ pub fn context_create_data_model(p0: i64, blob0: &[u8], output: &mut [u8]) -> cr
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::context_create_data_model(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::context_create_data_model(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4377,16 +4745,16 @@ pub fn context_create_document(p0: i64, blob0: &[u8], output: &mut [u8]) -> crat
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::context_create_document(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::context_create_document(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4402,16 +4770,16 @@ pub fn context_get_document(p0: i64, blob0: &[u8], output: &mut [u8]) -> crate::
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::context_get_document(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::context_get_document(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4426,15 +4794,18 @@ pub fn context_is_theme_active(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::context_is_theme_active(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::context_is_theme_active(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4449,16 +4820,16 @@ pub fn context_load_document(p0: i64, blob0: &[u8], output: &mut [u8]) -> crate:
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::context_load_document(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::context_load_document(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4474,16 +4845,16 @@ pub fn context_open_data_model(p0: i64, blob0: &[u8], output: &mut [u8]) -> crat
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::context_open_data_model(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::context_open_data_model(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4498,15 +4869,18 @@ pub fn context_process_text_input(p0: i64, blob0: &[u8]) -> crate::Result<bool> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::context_process_text_input(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::context_process_text_input(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4520,15 +4894,18 @@ pub fn context_remove_data_model(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::context_remove_data_model(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::context_remove_data_model(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4542,15 +4919,18 @@ pub fn context_remove_event_listener(p0: i64, p1: i64, p2: i32, blob0: &[u8]) ->
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::context_remove_event_listener(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::context_remove_event_listener(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4565,16 +4945,16 @@ pub fn create_context(blob0: &[u8], output: &mut [u8]) -> crate::Result<()> {
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::create_context(descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::create_context(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4590,16 +4970,16 @@ pub fn data_model_bind_bool(p0: i64, p1: i32, blob0: &[u8], output: &mut [u8]) -
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::data_model_bind_bool(p0, p1, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::data_model_bind_bool(p0, p1, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4615,16 +4995,16 @@ pub fn data_model_bind_color(p0: i64, p1: i32, p2: i32, p3: i32, p4: i32, blob0:
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::data_model_bind_color(p0, p1, p2, p3, p4, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::data_model_bind_color(p0, p1, p2, p3, p4, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4640,16 +5020,16 @@ pub fn data_model_bind_float(p0: i64, p1: f32, blob0: &[u8], output: &mut [u8]) 
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::data_model_bind_float(p0, p1, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::data_model_bind_float(p0, p1, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4665,16 +5045,16 @@ pub fn data_model_bind_int(p0: i64, p1: i32, blob0: &[u8], output: &mut [u8]) ->
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::data_model_bind_int(p0, p1, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::data_model_bind_int(p0, p1, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4690,16 +5070,16 @@ pub fn data_model_bind_percent(p0: i64, p1: f32, blob0: &[u8], output: &mut [u8]
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::data_model_bind_percent(p0, p1, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::data_model_bind_percent(p0, p1, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4715,16 +5095,16 @@ pub fn data_model_bind_pixels(p0: i64, p1: f32, blob0: &[u8], output: &mut [u8])
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::data_model_bind_pixels(p0, p1, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::data_model_bind_pixels(p0, p1, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4740,22 +5120,23 @@ pub fn data_model_bind_rows(p0: i64, blob0: &[u8], blob1: &[u8], output: &mut [u
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::data_model_bind_rows(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::data_model_bind_rows(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4771,22 +5152,23 @@ pub fn data_model_bind_string(p0: i64, blob0: &[u8], blob1: &[u8], output: &mut 
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::data_model_bind_string(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::data_model_bind_string(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4801,15 +5183,18 @@ pub fn data_model_set_rows(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::data_model_set_rows(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::data_model_set_rows(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4823,15 +5208,18 @@ pub fn data_model_set_string(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::data_model_set_string(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::data_model_set_string(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4845,15 +5233,18 @@ pub fn document_append_to_style_sheet(p0: i64, blob0: &[u8]) -> crate::Result<bo
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::document_append_to_style_sheet(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::document_append_to_style_sheet(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4868,16 +5259,16 @@ pub fn document_create_element(p0: i64, blob0: &[u8], output: &mut [u8]) -> crat
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::document_create_element(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::document_create_element(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4893,16 +5284,16 @@ pub fn document_create_text_node(p0: i64, blob0: &[u8], output: &mut [u8]) -> cr
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::document_create_text_node(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::document_create_text_node(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -4917,15 +5308,18 @@ pub fn document_load_external_script(p0: i64, blob0: &[u8]) -> crate::Result<boo
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::document_load_external_script(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::document_load_external_script(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4939,21 +5333,25 @@ pub fn document_load_inline_script(p0: i64, p1: i32, blob0: &[u8], blob1: &[u8])
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::document_load_inline_script(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::document_load_inline_script(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4967,15 +5365,18 @@ pub fn document_set_title(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::document_set_title(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::document_set_title(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -4989,15 +5390,18 @@ pub fn element_are_pseudo_classes_set(p0: i64, blob0: &[u8]) -> crate::Result<bo
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_are_pseudo_classes_set(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_are_pseudo_classes_set(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5012,16 +5416,16 @@ pub fn element_closest(p0: i64, blob0: &[u8], output: &mut [u8]) -> crate::Resul
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::element_closest(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::element_closest(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -5036,15 +5440,18 @@ pub fn element_dispatch_event(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_dispatch_event(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_dispatch_event(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5058,21 +5465,25 @@ pub fn element_form_submit(p0: i64, blob0: &[u8], blob1: &[u8]) -> crate::Result
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_form_submit(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_form_submit(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5087,16 +5498,16 @@ pub fn element_get_element_by_id(p0: i64, blob0: &[u8], output: &mut [u8]) -> cr
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::element_get_element_by_id(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::element_get_element_by_id(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -5114,23 +5525,22 @@ if !output.len().is_multiple_of(8usize) || output.len() / 8usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 8usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::element_get_elements_by_class_name(p0, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 8usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::element_get_elements_by_class_name(p0, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -5146,15 +5556,18 @@ pub fn element_get_elements_by_class_name_count(p0: i64, blob0: &[u8]) -> crate:
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::element_get_elements_by_class_name_count(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::element_get_elements_by_class_name_count(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5171,23 +5584,22 @@ if !output.len().is_multiple_of(8usize) || output.len() / 8usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 8usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::element_get_elements_by_tag_name(p0, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 8usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::element_get_elements_by_tag_name(p0, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -5203,15 +5615,18 @@ pub fn element_get_elements_by_tag_name_count(p0: i64, blob0: &[u8]) -> crate::R
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::element_get_elements_by_tag_name_count(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::element_get_elements_by_tag_name_count(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5225,15 +5640,18 @@ pub fn element_has_attribute(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_has_attribute(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_has_attribute(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5247,15 +5665,18 @@ pub fn element_is_class_set(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_is_class_set(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_is_class_set(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5269,15 +5690,18 @@ pub fn element_is_pseudo_class_set(p0: i64, blob0: &[u8]) -> crate::Result<bool>
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_is_pseudo_class_set(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_is_pseudo_class_set(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5291,15 +5715,18 @@ pub fn element_matches(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_matches(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_matches(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5314,16 +5741,16 @@ pub fn element_query_selector(p0: i64, blob0: &[u8], output: &mut [u8]) -> crate
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::element_query_selector(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::element_query_selector(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -5341,23 +5768,22 @@ if !output.len().is_multiple_of(8usize) || output.len() / 8usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 8usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::element_query_selector_all(p0, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 8usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::element_query_selector_all(p0, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -5373,15 +5799,18 @@ pub fn element_query_selector_all_count(p0: i64, blob0: &[u8]) -> crate::Result<
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::element_query_selector_all_count(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::element_query_selector_all_count(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5395,15 +5824,18 @@ pub fn element_remove_attribute(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_remove_attribute(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_remove_attribute(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5417,15 +5849,18 @@ pub fn element_remove_event_listener(p0: i64, p1: i64, p2: i32, blob0: &[u8]) ->
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_remove_event_listener(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_remove_event_listener(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5439,21 +5874,25 @@ pub fn element_set_attribute(p0: i64, blob0: &[u8], blob1: &[u8]) -> crate::Resu
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_set_attribute(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_set_attribute(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5467,15 +5906,18 @@ pub fn element_set_class(p0: i64, p1: i32, blob0: &[u8]) -> crate::Result<bool> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_set_class(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_set_class(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5489,15 +5931,18 @@ pub fn element_set_class_name(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_set_class_name(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_set_class_name(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5511,15 +5956,18 @@ pub fn element_set_id(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_set_id(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_set_id(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5533,15 +5981,18 @@ pub fn element_set_inner_rml(p0: i64, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_set_inner_rml(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_set_inner_rml(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5555,15 +6006,18 @@ pub fn element_set_pseudo_class(p0: i64, p1: i32, blob0: &[u8]) -> crate::Result
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_set_pseudo_class(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_set_pseudo_class(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5577,15 +6031,18 @@ pub fn element_tab_set_set_panel(p0: i64, p1: i32, blob0: &[u8]) -> crate::Resul
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_tab_set_set_panel(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_tab_set_set_panel(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5599,15 +6056,18 @@ pub fn element_tab_set_set_tab(p0: i64, p1: i32, blob0: &[u8]) -> crate::Result<
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::element_tab_set_set_tab(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::element_tab_set_set_tab(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5622,16 +6082,16 @@ pub fn event_get_parameter_bool(p0: i64, blob0: &[u8], output: &mut [u8]) -> cra
 {
 if output.len() != 8usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::event_get_parameter_bool(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::event_get_parameter_bool(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -5647,16 +6107,16 @@ pub fn event_get_parameter_float(p0: i64, blob0: &[u8], output: &mut [u8]) -> cr
 {
 if output.len() != 8usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::event_get_parameter_float(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::event_get_parameter_float(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -5672,16 +6132,16 @@ pub fn event_get_parameter_int(p0: i64, blob0: &[u8], output: &mut [u8]) -> crat
 {
 if output.len() != 8usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::event_get_parameter_int(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::event_get_parameter_int(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -5697,16 +6157,16 @@ pub fn event_get_parameter_type(p0: i64, blob0: &[u8], output: &mut [u8]) -> cra
 {
 if output.len() != 8usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::event_get_parameter_type(p0, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::event_get_parameter_type(p0, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -5722,16 +6182,16 @@ pub fn get_context(blob0: &[u8], output: &mut [u8]) -> crate::Result<()> {
 {
 if output.len() != 16usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::get_context(descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::get_context(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -5746,15 +6206,18 @@ pub fn remove_context_by_name(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::remove_context_by_name(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::remove_context_by_name(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5768,15 +6231,18 @@ pub fn set_debug_context_by_name(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_debug_context_by_name(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_debug_context_by_name(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5790,21 +6256,25 @@ pub fn set_mouse_cursor_alias(blob0: &[u8], blob1: &[u8]) -> crate::Result<bool>
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_mouse_cursor_alias(descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_mouse_cursor_alias(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5818,15 +6288,18 @@ pub fn sol_lua_data_model_set_dirty(p0: i64, blob0: &[u8]) -> crate::Result<bool
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::sol_lua_data_model_set_dirty(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::sol_lua_data_model_set_dirty(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -5843,142 +6316,142 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "compress-folder"]
-pub fn compress_folder(p0: i32, p1: i32) -> i64;
+pub safe fn compress_folder(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "create-dir"]
-pub fn create_dir(p0: i32) -> i64;
+pub safe fn create_dir(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "download-archive"]
-pub fn download_archive(p0: i32) -> i32;
+pub safe fn download_archive(p0: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "extract-mod-archive-file"]
-pub fn extract_mod_archive_file(p0: i32) -> i64;
+pub safe fn extract_mod_archive_file(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "file-exists"]
-pub fn file_exists(p0: i32) -> i64;
+pub safe fn file_exists(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-file-size"]
-pub fn get_file_size(p0: i32) -> i64;
+pub safe fn get_file_size(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-map-square-texture"]
-pub fn get_map_square_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+pub safe fn get_map_square_texture(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "has-archive"]
-pub fn has_archive(p0: i32) -> i64;
+pub safe fn has_archive(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "is-directory"]
-pub fn is_directory(p0: i32) -> i64;
+pub safe fn is_directory(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "load-file"]
-pub fn load_file(p0: i32, p1: i32) -> i32;
+pub safe fn load_file(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "pack-f32"]
-pub fn pack_f32(p0: i32, p1: i32) -> i32;
+pub safe fn pack_f32(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "pack-s16"]
-pub fn pack_s16(p0: i32, p1: i32) -> i32;
+pub safe fn pack_s16(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "pack-s32"]
-pub fn pack_s32(p0: i32, p1: i32) -> i32;
+pub safe fn pack_s32(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "pack-s8"]
-pub fn pack_s8(p0: i32, p1: i32) -> i32;
+pub safe fn pack_s8(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "pack-u16"]
-pub fn pack_u16(p0: i32, p1: i32) -> i32;
+pub safe fn pack_u16(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "pack-u32"]
-pub fn pack_u32(p0: i32, p1: i32) -> i32;
+pub safe fn pack_u32(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "pack-u8"]
-pub fn pack_u8(p0: i32, p1: i32) -> i32;
+pub safe fn pack_u8(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "read-file"]
-pub fn read_file(p0: i32, p1: i32) -> i32;
+pub safe fn read_file(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "set-map-square-texture"]
-pub fn set_map_square_texture(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_map_square_texture(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "unpack-f32"]
-pub fn unpack_f32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn unpack_f32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "unpack-s16"]
-pub fn unpack_s16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn unpack_s16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "unpack-s32"]
-pub fn unpack_s32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn unpack_s32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "unpack-s8"]
-pub fn unpack_s8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn unpack_s8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "unpack-u16"]
-pub fn unpack_u16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn unpack_u16(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "unpack-u32"]
-pub fn unpack_u32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn unpack_u32(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "unpack-u8"]
-pub fn unpack_u8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn unpack_u8(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "zlib-compress"]
-pub fn zlib_compress(p0: i32, p1: i32) -> i32;
+pub safe fn zlib_compress(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "zlib-decompress"]
-pub fn zlib_decompress(p0: i32, p1: i32) -> i32;
+pub safe fn zlib_decompress(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -5987,33 +6460,39 @@ pub fn compress_folder(p0: i32, blob0: &[u8], blob1: &[u8], blob2: &[u8], blob3:
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 8];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-            let blob2_ptr = blob2.as_ptr() as usize;
-if blob2_ptr > u32::MAX as usize || blob2.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[3] = blob1_len as u32;
+            let (blob2_ptr, blob2_len) =
+match crate::wasm_slice_parts(blob2) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[4] = blob2_ptr as u32;
-descriptor[5] = blob2.len() as u32;
-            let blob3_ptr = blob3.as_ptr() as usize;
-if blob3_ptr > u32::MAX as usize || blob3.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[5] = blob2_len as u32;
+            let (blob3_ptr, blob3_len) =
+match crate::wasm_slice_parts(blob3) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[6] = blob3_ptr as u32;
-descriptor[7] = blob3.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::compress_folder(p0, descriptor_ptr as u32 as i32) })
+descriptor[7] = blob3_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::compress_folder(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6027,15 +6506,18 @@ pub fn create_dir(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::create_dir(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::create_dir(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6049,21 +6531,25 @@ pub fn download_archive(blob0: &[u8], blob1: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::download_archive(descriptor_ptr as u32 as i32) }; if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+let status = raw::download_archive(descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6077,15 +6563,18 @@ pub fn extract_mod_archive_file(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::extract_mod_archive_file(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::extract_mod_archive_file(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6099,15 +6588,18 @@ pub fn file_exists(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::file_exists(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::file_exists(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6121,15 +6613,18 @@ pub fn get_file_size(blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_file_size(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_file_size(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6143,15 +6638,18 @@ pub fn get_map_square_texture(p0: i32, p1: i32, p2: i32, p3: i32, blob0: &[u8]) 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::get_map_square_texture(p0, p1, p2, p3, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::get_map_square_texture(p0, p1, p2, p3, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6165,15 +6663,18 @@ pub fn has_archive(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::has_archive(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::has_archive(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6187,15 +6688,18 @@ pub fn is_directory(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::is_directory(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::is_directory(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6212,29 +6716,29 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::load_file(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::load_file(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6253,23 +6757,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::pack_f32(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::pack_f32(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6288,23 +6791,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::pack_s16(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::pack_s16(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6323,23 +6825,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::pack_s32(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::pack_s32(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6358,23 +6859,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::pack_s8(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::pack_s8(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6393,23 +6893,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::pack_u16(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::pack_u16(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6428,23 +6927,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::pack_u32(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::pack_u32(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6463,23 +6961,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::pack_u8(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::pack_u8(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6498,23 +6995,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::read_file(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::read_file(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6530,15 +7026,18 @@ pub fn set_map_square_texture(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<b
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_map_square_texture(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_map_square_texture(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6555,23 +7054,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::unpack_f32(p0, p1, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::unpack_f32(p0, p1, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6590,23 +7088,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::unpack_s16(p0, p1, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::unpack_s16(p0, p1, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6625,23 +7122,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::unpack_s32(p0, p1, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::unpack_s32(p0, p1, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6660,23 +7156,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::unpack_s8(p0, p1, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::unpack_s8(p0, p1, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6695,23 +7190,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::unpack_u16(p0, p1, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::unpack_u16(p0, p1, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6730,23 +7224,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::unpack_u32(p0, p1, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::unpack_u32(p0, p1, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6765,23 +7258,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::unpack_u8(p0, p1, descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::unpack_u8(p0, p1, descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6800,23 +7292,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::zlib_compress(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::zlib_compress(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6835,23 +7326,22 @@ if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as u
 return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
 }
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let mut output_descriptor = [output_ptr as u32, (output.len() / 4usize) as u32, 0u32];
-let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;
-if output_descriptor_ptr > u32::MAX as usize {
-return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 });
-}
-let status = unsafe { raw::zlib_decompress(descriptor_ptr as u32 as i32, output_descriptor_ptr as u32 as i32) };
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::zlib_decompress(descriptor_ptr, output_descriptor_ptr);
 let required = output_descriptor[2] as usize;
 if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
 }
@@ -6870,37 +7360,37 @@ Err(super::VariableResultError { error: unreachable!(), required: 0 })
             #[link(wasm_import_module = "spring:team-control")]
 unsafe extern "C" {
 #[link_name = "add-team-resource"]
-pub fn add_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn add_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
 unsafe extern "C" {
 #[link_name = "add-team-resource-excess-stats"]
-pub fn add_team_resource_excess_stats(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn add_team_resource_excess_stats(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
 unsafe extern "C" {
 #[link_name = "game-over"]
-pub fn game_over(p0: i32) -> i64;
+pub safe fn game_over(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
 unsafe extern "C" {
 #[link_name = "set-team-resource"]
-pub fn set_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn set_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
 unsafe extern "C" {
 #[link_name = "set-team-share-level"]
-pub fn set_team_share_level(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn set_team_share_level(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
 unsafe extern "C" {
 #[link_name = "share-team-resource"]
-pub fn share_team_resource(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+pub safe fn share_team_resource(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:team-control")]
 unsafe extern "C" {
 #[link_name = "use-team-resource"]
-pub fn use_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn use_team_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
         }
 
@@ -6909,15 +7399,18 @@ pub fn add_team_resource(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<bool> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::add_team_resource(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::add_team_resource(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6931,15 +7424,18 @@ pub fn add_team_resource_excess_stats(p0: i32, p1: f32, blob0: &[u8]) -> crate::
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::add_team_resource_excess_stats(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::add_team_resource_excess_stats(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6953,15 +7449,18 @@ pub fn game_over(blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::game_over(descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::game_over(descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6975,15 +7474,18 @@ pub fn set_team_resource(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<bool> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_team_resource(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_team_resource(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -6997,15 +7499,18 @@ pub fn set_team_share_level(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<boo
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_team_share_level(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_team_share_level(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7019,15 +7524,18 @@ pub fn share_team_resource(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate::Re
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::share_team_resource(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::share_team_resource(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7041,15 +7549,18 @@ pub fn use_team_resource(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<bool> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::use_team_resource(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::use_team_resource(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7066,92 +7577,92 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "add-unit-resource"]
-pub fn add_unit_resource(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn add_unit_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "bugger-off"]
-pub fn bugger_off(p0: f32, p1: i32, p2: i32) -> i64;
+pub safe fn bugger_off(p0: f32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "create-unit"]
-pub fn create_unit(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn create_unit(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "edit-unit-cmd-desc"]
-pub fn edit_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn edit_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "give-order-array-to-unit"]
-pub fn give_order_array_to_unit(p0: i32, p1: i32) -> i64;
+pub safe fn give_order_array_to_unit(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "give-order-array-to-unit-array"]
-pub fn give_order_array_to_unit_array(p0: i32, p1: i32) -> i64;
+pub safe fn give_order_array_to_unit_array(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "give-order-to-unit-array"]
-pub fn give_order_to_unit_array(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+pub safe fn give_order_to_unit_array(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "insert-unit-cmd-desc"]
-pub fn insert_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn insert_unit_cmd_desc(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-build-params"]
-pub fn set_unit_build_params(p0: i32, p1: i32) -> i64;
+pub safe fn set_unit_build_params(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-flanking"]
-pub fn set_unit_flanking(p0: i32, p1: i32) -> i64;
+pub safe fn set_unit_flanking(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-nano-pieces"]
-pub fn set_unit_nano_pieces(p0: i32, p1: i32) -> i64;
+pub safe fn set_unit_nano_pieces(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-resourcing"]
-pub fn set_unit_resourcing(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn set_unit_resourcing(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-sensor-radius"]
-pub fn set_unit_sensor_radius(p0: i32, p1: i32, p2: i32) -> i64;
+pub safe fn set_unit_sensor_radius(p0: i32, p1: i32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-storage"]
-pub fn set_unit_storage(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn set_unit_storage(p0: i32, p1: f32, p2: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-tooltip"]
-pub fn set_unit_tooltip(p0: i32, p1: i32) -> i64;
+pub safe fn set_unit_tooltip(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-weapon-damages"]
-pub fn set_unit_weapon_damages(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+pub safe fn set_unit_weapon_damages(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "set-unit-weapon-state"]
-pub fn set_unit_weapon_state(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+pub safe fn set_unit_weapon_state(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
 #[link_name = "use-unit-resource"]
-pub fn use_unit_resource(p0: i32, p1: f32, p2: i32) -> i64;
+pub safe fn use_unit_resource(p0: i32, p1: f32, p2: i32) -> i64;
 }
         }
 
@@ -7160,15 +7671,18 @@ pub fn add_unit_resource(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<bool> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::add_unit_resource(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::add_unit_resource(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7182,27 +7696,32 @@ pub fn bugger_off(p0: f32, p1: i32, blob0: &[u8], blob1: &[u8], blob2: &[u8]) ->
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 6];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-            let blob2_ptr = blob2.as_ptr() as usize;
-if blob2_ptr > u32::MAX as usize || blob2.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[3] = blob1_len as u32;
+            let (blob2_ptr, blob2_len) =
+match crate::wasm_slice_parts(blob2) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[4] = blob2_ptr as u32;
-descriptor[5] = blob2.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::bugger_off(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[5] = blob2_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::bugger_off(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7216,27 +7735,32 @@ pub fn create_unit(p0: i32, p1: i32, blob0: &[u8], blob1: &[u8], blob2: &[u8]) -
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 6];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-            let blob2_ptr = blob2.as_ptr() as usize;
-if blob2_ptr > u32::MAX as usize || blob2.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[3] = blob1_len as u32;
+            let (blob2_ptr, blob2_len) =
+match crate::wasm_slice_parts(blob2) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[4] = blob2_ptr as u32;
-descriptor[5] = blob2.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::create_unit(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[5] = blob2_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::create_unit(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7250,15 +7774,18 @@ pub fn edit_unit_cmd_desc(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<bool>
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::edit_unit_cmd_desc(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::edit_unit_cmd_desc(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7272,15 +7799,18 @@ pub fn give_order_array_to_unit(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::give_order_array_to_unit(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::give_order_array_to_unit(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7294,21 +7824,25 @@ pub fn give_order_array_to_unit_array(p0: i32, blob0: &[u8], blob1: &[u8]) -> cr
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::give_order_array_to_unit_array(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::give_order_array_to_unit_array(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7322,21 +7856,25 @@ pub fn give_order_to_unit_array(p0: i32, p1: i32, p2: i32, blob0: &[u8], blob1: 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::give_order_to_unit_array(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::give_order_to_unit_array(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7350,15 +7888,18 @@ pub fn insert_unit_cmd_desc(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<boo
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::insert_unit_cmd_desc(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::insert_unit_cmd_desc(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7372,21 +7913,25 @@ pub fn set_unit_build_params(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate::Resu
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_build_params(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_build_params(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7400,21 +7945,25 @@ pub fn set_unit_flanking(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate::Result<b
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_flanking(p0, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_flanking(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7428,15 +7977,18 @@ pub fn set_unit_nano_pieces(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_nano_pieces(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_nano_pieces(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7450,15 +8002,18 @@ pub fn set_unit_resourcing(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<bool
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_resourcing(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_resourcing(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7472,15 +8027,18 @@ pub fn set_unit_sensor_radius(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<i
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::set_unit_sensor_radius(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::set_unit_sensor_radius(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7494,15 +8052,18 @@ pub fn set_unit_storage(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_storage(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_storage(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7516,15 +8077,18 @@ pub fn set_unit_tooltip(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_tooltip(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_tooltip(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7538,15 +8102,18 @@ pub fn set_unit_weapon_damages(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_weapon_damages(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_weapon_damages(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7560,15 +8127,18 @@ pub fn set_unit_weapon_state(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate::
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_unit_weapon_state(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_weapon_state(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7582,15 +8152,18 @@ pub fn use_unit_resource(p0: i32, p1: f32, blob0: &[u8]) -> crate::Result<bool> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::use_unit_resource(p0, p1, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::use_unit_resource(p0, p1, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7607,12 +8180,12 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:feature-control")]
 unsafe extern "C" {
 #[link_name = "create-feature"]
-pub fn create_feature(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+pub safe fn create_feature(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:feature-control")]
 unsafe extern "C" {
 #[link_name = "set-feature-resurrect"]
-pub fn set_feature_resurrect(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+pub safe fn set_feature_resurrect(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
         }
 
@@ -7621,21 +8194,25 @@ pub fn create_feature(p0: i32, p1: i32, p2: i32, blob0: &[u8], blob1: &[u8]) -> 
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 4];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::create_feature(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::create_feature(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7649,15 +8226,18 @@ pub fn set_feature_resurrect(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate::
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_feature_resurrect(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_feature_resurrect(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7674,25 +8254,27 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:terrain-control")]
 unsafe extern "C" {
 #[link_name = "set-terrain-type-data"]
-pub fn set_terrain_type_data(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, p7: i32) -> i64;
+pub safe fn set_terrain_type_data(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, p7: i32) -> i64;
 }
         }
 
         #[inline]
-#[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
-                    pub fn set_terrain_type_data(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, blob0: &[u8]) -> crate::Result<bool> {
+pub fn set_terrain_type_data(p0: i32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32, p6: i32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_terrain_type_data(p0, p1, p2, p3, p4, p5, p6, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_terrain_type_data(p0, p1, p2, p3, p4, p5, p6, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7709,17 +8291,17 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:projectile-control")]
 unsafe extern "C" {
 #[link_name = "set-projectile-ceg"]
-pub fn set_projectile_ceg(p0: i32, p1: i32) -> i64;
+pub safe fn set_projectile_ceg(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:projectile-control")]
 unsafe extern "C" {
 #[link_name = "set-projectile-damages"]
-pub fn set_projectile_damages(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+pub safe fn set_projectile_damages(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:projectile-control")]
 unsafe extern "C" {
 #[link_name = "spawn-projectile"]
-pub fn spawn_projectile(p0: i32, p1: i32) -> i64;
+pub safe fn spawn_projectile(p0: i32, p1: i32) -> i64;
 }
         }
 
@@ -7728,15 +8310,18 @@ pub fn set_projectile_ceg(p0: i32, blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::set_projectile_ceg(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::set_projectile_ceg(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7750,15 +8335,18 @@ pub fn set_projectile_damages(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate:
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_bool(unsafe { raw::set_projectile_damages(p0, p1, p2, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_projectile_damages(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7772,15 +8360,18 @@ pub fn spawn_projectile(p0: i32, blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::spawn_projectile(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::spawn_projectile(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -7797,7 +8388,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:effects-control")]
 unsafe extern "C" {
 #[link_name = "spawn-ceg"]
-pub fn spawn_ceg(p0: f32, p1: f32, p2: f32, p3: i32, p4: i32) -> i32;
+pub safe fn spawn_ceg(p0: f32, p1: f32, p2: f32, p3: i32, p4: i32) -> i32;
 }
         }
 
@@ -7807,28 +8398,30 @@ pub fn spawn_ceg(p0: f32, p1: f32, p2: f32, blob0: &[u8], blob1: &[u8], blob2: &
 {
 if output.len() != 8usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
 let mut descriptor = [0u32; 6];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-            let blob1_ptr = blob1.as_ptr() as usize;
-if blob1_ptr > u32::MAX as usize || blob1.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[2] = blob1_ptr as u32;
-descriptor[3] = blob1.len() as u32;
-            let blob2_ptr = blob2.as_ptr() as usize;
-if blob2_ptr > u32::MAX as usize || blob2.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+descriptor[3] = blob1_len as u32;
+            let (blob2_ptr, blob2_len) =
+match crate::wasm_slice_parts(blob2) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[4] = blob2_ptr as u32;
-descriptor[5] = blob2.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-let output_ptr = output.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-let status = unsafe { raw::spawn_ceg(p0, p1, p2, descriptor_ptr as u32 as i32, output_ptr as u32 as i32) };
+descriptor[5] = blob2_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::spawn_ceg(p0, p1, p2, descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -7846,7 +8439,7 @@ Err(unreachable!())
             #[link(wasm_import_module = "spring:cob-script")]
 unsafe extern "C" {
 #[link_name = "get-cob-script-id"]
-pub fn get_cob_script_id(p0: i32, p1: i32) -> i64;
+pub safe fn get_cob_script_id(p0: i32, p1: i32) -> i64;
 }
         }
 
@@ -7855,15 +8448,18 @@ pub fn get_cob_script_id(p0: i32, blob0: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
-            let blob0_ptr = blob0.as_ptr() as usize;
-if blob0_ptr > u32::MAX as usize || blob0.len() > u32::MAX as usize {
-return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32));
-}
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
 descriptor[0] = blob0_ptr as u32;
-descriptor[1] = blob0.len() as u32;
-let descriptor_ptr = descriptor.as_mut_ptr() as usize;
-if descriptor_ptr > u32::MAX as usize { return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }
-crate::unpack_i32(unsafe { raw::get_cob_script_id(p0, descriptor_ptr as u32 as i32) })
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::get_cob_script_id(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {

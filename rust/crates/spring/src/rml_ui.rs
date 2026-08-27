@@ -1,13 +1,63 @@
-
-
 #[cfg(feature = "alloc")]
-pub use crate::owned::rml_ui::{add_translation_string, clear_document_path_requests, clear_translations, context_activate_theme, context_create_data_model, context_create_document, context_enable_mouse_cursor, context_get_density_independent_pixel_ratio, context_get_dimensions, context_get_document, context_get_element_at_point, context_get_focus_element, context_get_hover_element, context_get_name, context_get_root_element, context_is_mouse_interacting, context_is_theme_active, context_load_document, context_open_data_model, context_process_key_down, context_process_key_up, context_process_mouse_button_down, context_process_mouse_button_up, context_process_mouse_leave, context_process_mouse_move, context_process_mouse_wheel, context_process_text_input, context_pull_document_to_front, context_pull_to_front, context_push_document_to_back, context_remove_data_model, context_remove_event_listener, context_render, context_set_density_independent_pixel_ratio, context_set_dimensions, context_set_pointer_capture, context_take_pointer_capture_delta, context_unload_all_documents, context_unload_document, context_update, create_context, data_model_bind_bool, data_model_bind_color, data_model_bind_float, data_model_bind_int, data_model_bind_percent, data_model_bind_pixels, data_model_bind_rows, data_model_bind_string, data_model_get_bool, data_model_get_color, data_model_get_float, data_model_get_int, data_model_get_percent, data_model_get_pixels, data_model_get_string, data_model_set_bool, data_model_set_color, data_model_set_float, data_model_set_int, data_model_set_percent, data_model_set_pixels, data_model_set_rows, data_model_set_string, document_append_to_style_sheet, document_close, document_create_element, document_create_text_node, document_get_context, document_get_title, document_get_url, document_hide, document_is_modal, document_load_external_script, document_load_inline_script, document_pull_to_front, document_push_to_back, document_reload_style_sheet, document_set_title, document_show, document_update_document, element_append_child, element_are_pseudo_classes_set, element_blur, element_click, element_clone, element_closest, element_dispatch_event, element_focus, element_form_control_input_get_selection, element_form_control_input_select, element_form_control_input_set_selection, element_form_control_select_add, element_form_control_select_remove, element_form_control_select_remove_all, element_form_control_text_area_get_selection, element_form_control_text_area_select, element_form_control_text_area_set_selection, element_form_submit, element_get_active_pseudo_classes, element_get_attribute, element_get_child, element_get_class_name, element_get_element_by_id, element_get_elements_by_class_name, element_get_elements_by_class_name_count, element_get_elements_by_tag_name, element_get_elements_by_tag_name_count, element_get_id, element_get_inner_rml, element_get_rect, element_get_scroll_left, element_get_scroll_top, element_get_tag_name, element_get_value, element_has_attribute, element_has_child_nodes, element_insert_before, element_is_class_set, element_is_point_within_element, element_is_pseudo_class_set, element_is_visible, element_matches, element_process_default_action, element_query_selector, element_query_selector_all, element_query_selector_all_count, element_remove_attribute, element_remove_child, element_remove_event_listener, element_replace_child, element_scroll_into_view, element_set_attribute, element_set_class, element_set_class_name, element_set_id, element_set_inner_rml, element_set_pseudo_class, element_set_scroll_left, element_set_scroll_top, element_tab_set_remove_tab, element_tab_set_set_panel, element_tab_set_set_tab, event_get_current, event_get_current_element, event_get_parameter_bool, event_get_parameter_float, event_get_parameter_int, event_get_parameter_string, event_get_parameter_type, event_get_phase, event_get_target_element, event_get_type, event_is_immediate_propagating, event_is_interruptible, event_is_propagating, event_stop_immediate_propagation, event_stop_propagation, get_context, get_document_path_requests, get_version, is_ready, load_font_face, regiser_event_type, register_event_type, remove_context, remove_context_by_name, set_debug_context, set_debug_context_by_name, set_mouse_cursor_alias, sol_lua_data_model_set_dirty, vector2f_new, vector2i_new};
+pub use crate::owned::rml_ui::{
+    add_translation_string, clear_document_path_requests, clear_translations,
+    context_activate_theme, context_create_data_model, context_create_document,
+    context_enable_mouse_cursor, context_get_density_independent_pixel_ratio,
+    context_get_dimensions, context_get_document, context_get_element_at_point,
+    context_get_focus_element, context_get_hover_element, context_get_name,
+    context_get_root_element, context_is_mouse_interacting, context_is_theme_active,
+    context_load_document, context_open_data_model, context_process_key_down,
+    context_process_key_up, context_process_mouse_button_down, context_process_mouse_button_up,
+    context_process_mouse_leave, context_process_mouse_move, context_process_mouse_wheel,
+    context_process_text_input, context_pull_document_to_front, context_pull_to_front,
+    context_push_document_to_back, context_remove_data_model, context_remove_event_listener,
+    context_render, context_set_density_independent_pixel_ratio, context_set_dimensions,
+    context_set_pointer_capture, context_take_pointer_capture_delta, context_unload_all_documents,
+    context_unload_document, context_update, create_context, data_model_bind_bool,
+    data_model_bind_color, data_model_bind_float, data_model_bind_int, data_model_bind_percent,
+    data_model_bind_pixels, data_model_bind_rows, data_model_bind_string, data_model_get_bool,
+    data_model_get_color, data_model_get_float, data_model_get_int, data_model_get_percent,
+    data_model_get_pixels, data_model_get_string, data_model_set_bool, data_model_set_color,
+    data_model_set_float, data_model_set_int, data_model_set_percent, data_model_set_pixels,
+    data_model_set_rows, data_model_set_string, document_append_to_style_sheet, document_close,
+    document_create_element, document_create_text_node, document_get_context, document_get_title,
+    document_get_url, document_hide, document_is_modal, document_load_external_script,
+    document_load_inline_script, document_pull_to_front, document_push_to_back,
+    document_reload_style_sheet, document_set_title, document_show, document_update_document,
+    element_append_child, element_are_pseudo_classes_set, element_blur, element_click,
+    element_clone, element_closest, element_dispatch_event, element_focus,
+    element_form_control_input_get_selection, element_form_control_input_select,
+    element_form_control_input_set_selection, element_form_control_select_add,
+    element_form_control_select_remove, element_form_control_select_remove_all,
+    element_form_control_text_area_get_selection, element_form_control_text_area_select,
+    element_form_control_text_area_set_selection, element_form_submit,
+    element_get_active_pseudo_classes, element_get_attribute, element_get_child,
+    element_get_class_name, element_get_element_by_id, element_get_elements_by_class_name,
+    element_get_elements_by_class_name_count, element_get_elements_by_tag_name,
+    element_get_elements_by_tag_name_count, element_get_id, element_get_inner_rml,
+    element_get_rect, element_get_scroll_left, element_get_scroll_top, element_get_tag_name,
+    element_get_value, element_has_attribute, element_has_child_nodes, element_insert_before,
+    element_is_class_set, element_is_point_within_element, element_is_pseudo_class_set,
+    element_is_visible, element_matches, element_process_default_action, element_query_selector,
+    element_query_selector_all, element_query_selector_all_count, element_remove_attribute,
+    element_remove_child, element_remove_event_listener, element_replace_child,
+    element_scroll_into_view, element_set_attribute, element_set_class, element_set_class_name,
+    element_set_id, element_set_inner_rml, element_set_pseudo_class, element_set_scroll_left,
+    element_set_scroll_top, element_tab_set_remove_tab, element_tab_set_set_panel,
+    element_tab_set_set_tab, event_get_current, event_get_current_element,
+    event_get_parameter_bool, event_get_parameter_float, event_get_parameter_int,
+    event_get_parameter_string, event_get_parameter_type, event_get_phase,
+    event_get_target_element, event_get_type, event_is_immediate_propagating,
+    event_is_interruptible, event_is_propagating, event_stop_immediate_propagation,
+    event_stop_propagation, get_context, get_document_path_requests, get_version, is_ready,
+    load_font_face, regiser_event_type, register_event_type, remove_context,
+    remove_context_by_name, set_debug_context, set_debug_context_by_name, set_mouse_cursor_alias,
+    sol_lua_data_model_set_dirty, vector2f_new, vector2i_new,
+};
 
 use super::{ApiError, ErrorCode, Result, RetainedCallback};
 
 #[cfg(feature = "alloc")]
-use alloc::ffi::CString;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RmlContextCreateResult {
     pub context_handle: u64,
@@ -20,30 +70,28 @@ pub struct RmlDocumentLoadResult {
     pub success: bool,
 }
 
-/// Create or retrieve an RmlUi context through the engine's borrowed-string
-/// contract. This keeps transport details out of guest code and avoids the
-/// variable-input façade, which is not the ABI shape of this entry point.
+/// Create or retrieve an RmlUi context.
+///
+/// The public façade deliberately uses the owned typed wrapper here.  The
+/// generated borrowed-string entry point has a stricter NUL-termination
+/// contract than `CStr::to_bytes()` can express reliably at the ABI boundary;
+/// using the typed wrapper keeps that transport detail inside the SDK.
 #[cfg(feature = "alloc")]
 pub fn create_rml_context(name: &str) -> Result<RmlContextCreateResult> {
-    let name = CString::new(name).map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-    let output = crate::generated::borrowed::rml_ui::create_context(name.as_c_str())?;
-    let (context_handle, success) = decode_handle_bool(output)?;
+    let output = crate::generated::owned::rml_ui::create_context(name)?;
     Ok(RmlContextCreateResult {
-        context_handle,
-        success,
+        context_handle: output.context_handle,
+        success: output.success,
     })
 }
 
-/// Load a document using the engine's borrowed-string contract.
+/// Load a document using the typed string façade.
 #[cfg(feature = "alloc")]
 pub fn load_rml_document(context_handle: u64, path: &str) -> Result<RmlDocumentLoadResult> {
-    let path = CString::new(path).map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-    let output =
-        crate::generated::borrowed::rml_ui::context_load_document(context_handle, path.as_c_str())?;
-    let (document_handle, success) = decode_handle_bool(output)?;
+    let output = crate::generated::owned::rml_ui::context_load_document(context_handle, path)?;
     Ok(RmlDocumentLoadResult {
-        document_handle,
-        success,
+        document_handle: output.document_handle,
+        success: output.success,
     })
 }
 
@@ -51,36 +99,15 @@ pub fn load_rml_document(context_handle: u64, path: &str) -> Result<RmlDocumentL
 #[cfg(target_arch = "wasm32")]
 pub fn show_rml_document(document_handle: u64) -> Result<bool> {
     let mut options = [0_u8; 16];
-    let packed = unsafe {
-        crate::generated::rml_ui::raw::core_document_show(
-            document_handle as i64,
-            options.as_mut_ptr() as usize as i32,
-        )
-    } as u64;
+    let options_ptr = crate::wasm_output_ptr(&mut options)?;
+    let packed =
+        crate::generated::rml_ui::raw::core_document_show(document_handle as i64, options_ptr)
+            as u64;
     let error_code = (packed >> 32) as i32;
     if error_code != 0 {
         return Err(ApiError::new(error_code));
     }
     Ok((packed as u32) != 0)
-}
-
-#[cfg(feature = "alloc")]
-fn decode_handle_bool(output: [u8; 16]) -> Result<(u64, bool)> {
-    let handle = u64::from_le_bytes(
-        output[0..8]
-            .try_into()
-            .map_err(|_| ApiError::new(ErrorCode::Internal as i32))?,
-    );
-    let success = match u32::from_le_bytes(
-        output[8..12]
-            .try_into()
-            .map_err(|_| ApiError::new(ErrorCode::Internal as i32))?,
-    ) {
-        0 => false,
-        1 => true,
-        _ => return Err(ApiError::new(ErrorCode::Internal as i32)),
-    };
-    Ok((handle, success))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -124,7 +151,7 @@ mod raw {
     #[link(wasm_import_module = "spring:rml-ui")]
     unsafe extern "C" {
         #[link_name = "context-add-event-listener"]
-        pub fn context_add_event_listener(
+        pub safe fn context_add_event_listener(
             context_handle: i64,
             event_ptr: i32,
             event_len: i32,
@@ -135,7 +162,7 @@ mod raw {
             output: i32,
         ) -> i32;
         #[link_name = "element-add-event-listener"]
-        pub fn element_add_event_listener(
+        pub safe fn element_add_event_listener(
             element_handle: i64,
             event_ptr: i32,
             event_len: i32,
@@ -146,7 +173,7 @@ mod raw {
             output: i32,
         ) -> i32;
         #[link_name = "data-model-bind-event"]
-        pub fn data_model_bind_event(
+        pub safe fn data_model_bind_event(
             data_model_handle: i64,
             name_ptr: i32,
             name_len: i32,
@@ -158,17 +185,17 @@ mod raw {
             output: i32,
         ) -> i32;
         #[link_name = "data-model-unbind-event"]
-        pub fn data_model_unbind_event(event_handle: i64) -> i64;
+        pub safe fn data_model_unbind_event(event_handle: i64) -> i64;
         #[link_name = "event-listener-on-attach"]
-        pub fn event_listener_on_attach(listener_handle: i64, element_handle: i64) -> i64;
+        pub safe fn event_listener_on_attach(listener_handle: i64, element_handle: i64) -> i64;
         #[link_name = "event-listener-on-detach"]
-        pub fn event_listener_on_detach(listener_handle: i64, element_handle: i64) -> i64;
+        pub safe fn event_listener_on_detach(listener_handle: i64, element_handle: i64) -> i64;
         #[link_name = "event-listener-process-event"]
-        pub fn event_listener_process_event(listener_handle: i64, event_handle: i64) -> i64;
+        pub safe fn event_listener_process_event(listener_handle: i64, event_handle: i64) -> i64;
         #[link_name = "data-model-current-event"]
-        pub fn data_model_current_event(output: i32) -> i32;
+        pub safe fn data_model_current_event(output: i32) -> i32;
         #[link_name = "data-model-current-value"]
-        pub fn data_model_current_value(
+        pub safe fn data_model_current_value(
             index: i64,
             output: i32,
             string_output: i32,
@@ -180,11 +207,7 @@ mod raw {
 #[cfg(target_arch = "wasm32")]
 #[inline]
 fn bytes_parts(bytes: &[u8]) -> Result<(i32, i32)> {
-    let pointer = bytes.as_ptr() as usize;
-    if pointer > u32::MAX as usize || bytes.len() > u32::MAX as usize {
-        return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-    }
-    Ok((pointer as u32 as i32, bytes.len() as u32 as i32))
+    crate::wasm_slice_parts(bytes)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -196,11 +219,7 @@ fn string_parts(value: &str) -> Result<(i32, i32)> {
 #[cfg(target_arch = "wasm32")]
 #[inline]
 fn output_ptr<T>(value: &mut T) -> Result<i32> {
-    let pointer = value as *mut T as usize;
-    if pointer > u32::MAX as usize {
-        return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
-    }
-    Ok(pointer as u32 as i32)
+    crate::wasm_output_ptr(value)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -234,18 +253,16 @@ pub fn context_add_event_listener(
         let (event_ptr, event_len) = string_parts(event)?;
         let mut output = [0u64; 2];
         let pointer = output_ptr(&mut output)?;
-        let status = unsafe {
-            raw::context_add_event_listener(
-                context_handle as i64,
-                event_ptr,
-                event_len,
-                in_capture_phase as i32,
-                callback.id as i32,
-                callback.user_data as i32,
-                callback.destroy_id as i32,
-                pointer,
-            )
-        };
+        let status = raw::context_add_event_listener(
+            context_handle as i64,
+            event_ptr,
+            event_len,
+            in_capture_phase as i32,
+            callback.id as i32,
+            callback.user_data as i32,
+            callback.destroy_id as i32,
+            pointer,
+        );
         listener_result(status, output)
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -267,18 +284,16 @@ pub fn element_add_event_listener(
         let (event_ptr, event_len) = string_parts(event)?;
         let mut output = [0u64; 2];
         let pointer = output_ptr(&mut output)?;
-        let status = unsafe {
-            raw::element_add_event_listener(
-                element_handle as i64,
-                event_ptr,
-                event_len,
-                in_capture_phase as i32,
-                callback.id as i32,
-                callback.user_data as i32,
-                callback.destroy_id as i32,
-                pointer,
-            )
-        };
+        let status = raw::element_add_event_listener(
+            element_handle as i64,
+            event_ptr,
+            event_len,
+            in_capture_phase as i32,
+            callback.id as i32,
+            callback.user_data as i32,
+            callback.destroy_id as i32,
+            pointer,
+        );
         listener_result(status, output)
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -301,19 +316,17 @@ pub fn data_model_bind_event(
         let (field_types_ptr, _) = bytes_parts(field_types)?;
         let mut output = [0u64; 2];
         let output_pointer = output_ptr(&mut output)?;
-        let status = unsafe {
-            raw::data_model_bind_event(
-                data_model_handle as i64,
-                name_ptr,
-                name_len,
-                callback.id as i32,
-                callback.user_data as i32,
-                callback.destroy_id as i32,
-                field_types_ptr,
-                field_types.len() as i64,
-                output_pointer,
-            )
-        };
+        let status = raw::data_model_bind_event(
+            data_model_handle as i64,
+            name_ptr,
+            name_len,
+            callback.id as i32,
+            callback.user_data as i32,
+            callback.destroy_id as i32,
+            field_types_ptr,
+            field_types.len() as i64,
+            output_pointer,
+        );
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -338,7 +351,7 @@ pub fn data_model_bind_event(
 pub fn data_model_unbind_event(event_handle: u64) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        super::unpack_bool(unsafe { raw::data_model_unbind_event(event_handle as i64) })
+        super::unpack_bool(raw::data_model_unbind_event(event_handle as i64))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -354,9 +367,10 @@ pub fn data_model_unbind_event(event_handle: u64) -> Result<bool> {
 pub fn event_listener_on_attach(listener_handle: u64, element_handle: u64) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        super::unpack_bool(unsafe {
-            raw::event_listener_on_attach(listener_handle as i64, element_handle as i64)
-        })
+        super::unpack_bool(raw::event_listener_on_attach(
+            listener_handle as i64,
+            element_handle as i64,
+        ))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -369,9 +383,10 @@ pub fn event_listener_on_attach(listener_handle: u64, element_handle: u64) -> Re
 pub fn event_listener_on_detach(listener_handle: u64, element_handle: u64) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        super::unpack_bool(unsafe {
-            raw::event_listener_on_detach(listener_handle as i64, element_handle as i64)
-        })
+        super::unpack_bool(raw::event_listener_on_detach(
+            listener_handle as i64,
+            element_handle as i64,
+        ))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -385,9 +400,10 @@ pub fn event_listener_on_detach(listener_handle: u64, element_handle: u64) -> Re
 pub fn event_listener_process_event(listener_handle: u64, event_handle: u64) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        super::unpack_bool(unsafe {
-            raw::event_listener_process_event(listener_handle as i64, event_handle as i64)
-        })
+        super::unpack_bool(raw::event_listener_process_event(
+            listener_handle as i64,
+            event_handle as i64,
+        ))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -402,7 +418,7 @@ pub fn data_model_current_event() -> Result<CurrentDataEvent> {
     {
         let mut output = [0u64; 3];
         let pointer = output_ptr(&mut output)?;
-        let status = unsafe { raw::data_model_current_event(pointer) };
+        let status = raw::data_model_current_event(pointer);
         if status != 0 {
             return Err(ApiError::new(status));
         }
@@ -429,14 +445,12 @@ pub fn data_model_current_value<'a>(
         let output_pointer = output_ptr(&mut output).map_err(DataEventValueError::Api)?;
         let (string_pointer, string_capacity) =
             bytes_parts(string_buffer).map_err(DataEventValueError::Api)?;
-        let status = unsafe {
-            raw::data_model_current_value(
-                index as i64,
-                output_pointer,
-                string_pointer,
-                string_capacity,
-            )
-        };
+        let status = raw::data_model_current_value(
+            index as i64,
+            output_pointer,
+            string_pointer,
+            string_capacity,
+        );
         if status == ErrorCode::BufferOverflow as i32 {
             return Err(DataEventValueError::BufferTooSmall {
                 required: output[5],

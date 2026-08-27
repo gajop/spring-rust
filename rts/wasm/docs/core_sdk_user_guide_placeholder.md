@@ -4,17 +4,17 @@
 
 - Rust toolchain: stable
 - Wasm target: `wasm32-unknown-unknown`
-- Dependency: `spring-wasm-core` with feature `alloc`
+- Dependency: `spring` with feature `alloc`
 - Generated SDK: `rts/wasm/generated/sdk/`
-- Environment projection: `spring_wasm_core::rules_synced`
+- Environment projection: `spring::rules_synced`
 
 ## Quickstart
 
-- `use spring_wasm_core::rules_synced as api;`
+- `use spring::rules_synced as api;`
 - `api::units_info::get_unit_health(unit_id)`
 - Return type: `Result<T>`
 - Error field: `error.code`
-- Guest export: `spring_wasm_core::export_environment_mask!(api::ENVIRONMENT_MASK);`
+- Guest export: `spring::export_environment_mask!(api::ENVIRONMENT_MASK);`
 
 ## Environment model
 

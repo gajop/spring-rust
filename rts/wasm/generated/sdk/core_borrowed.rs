@@ -76,12 +76,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:units-info")]
             unsafe extern "C" {
                 #[link_name = "get-unit-build-params"]
-                pub fn get_unit_build_params(arg0: i32, arg1: i32, arg2: i32) -> i32;
+                pub safe fn get_unit_build_params(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:units-info")]
             unsafe extern "C" {
                 #[link_name = "get-unit-sensor-radius"]
-                pub fn get_unit_sensor_radius(arg0: i32, arg1: i32, arg2: i32) -> i32;
+                pub safe fn get_unit_sensor_radius(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
         }
 
@@ -92,12 +92,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = param_name.as_ptr() as usize;
-            let core_len = param_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(param_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_unit_build_params(unit_id, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_unit_build_params(unit_id, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -115,12 +114,11 @@ pub mod borrowed {
             let mut output = [0u8; 28];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = r#type.as_ptr() as usize;
-            let core_len = r#type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(r#type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_unit_sensor_radius(unit_id, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_unit_sensor_radius(unit_id, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -141,7 +139,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:units-weapons")]
             unsafe extern "C" {
                 #[link_name = "get-unit-weapon-state"]
-                pub fn get_unit_weapon_state(arg0: i32, arg1: i32, arg2: i32, arg3: i32) -> i32;
+                pub safe fn get_unit_weapon_state(arg0: i32, arg1: i32, arg2: i32, arg3: i32) -> i32;
             }
         }
 
@@ -152,12 +150,11 @@ pub mod borrowed {
             let mut output = [0u8; 52];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_unit_weapon_state(unit_id, weapon_num, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_unit_weapon_state(unit_id, weapon_num, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -178,7 +175,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:units-pieces")]
             unsafe extern "C" {
                 #[link_name = "get-model-root-piece"]
-                pub fn get_model_root_piece(arg0: i32) -> i64;
+                pub safe fn get_model_root_piece(arg0: i32) -> i64;
             }
         }
 
@@ -188,12 +185,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = model_name.as_ptr() as usize;
-            let core_len = model_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(model_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_model_root_piece((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_model_root_piece(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -215,12 +211,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:teams")]
             unsafe extern "C" {
                 #[link_name = "get-team-resource-stats"]
-                pub fn get_team_resource_stats(arg0: i32, arg1: i32, arg2: i32) -> i32;
+                pub safe fn get_team_resource_stats(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:teams")]
             unsafe extern "C" {
                 #[link_name = "get-team-resources"]
-                pub fn get_team_resources(arg0: i32, arg1: i32, arg2: i32) -> i32;
+                pub safe fn get_team_resources(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
         }
 
@@ -231,12 +227,11 @@ pub mod borrowed {
             let mut output = [0u8; 72];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource.as_ptr() as usize;
-            let core_len = resource.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_team_resource_stats(team_id, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_team_resource_stats(team_id, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -254,12 +249,11 @@ pub mod borrowed {
             let mut output = [0u8; 72];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource.as_ptr() as usize;
-            let core_len = resource.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_team_resources(team_id, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_team_resources(team_id, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -280,27 +274,27 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:unit-defs")]
             unsafe extern "C" {
                 #[link_name = "get-unit-def-id-by-name"]
-                pub fn get_unit_def_id_by_name(arg0: i32) -> i64;
+                pub safe fn get_unit_def_id_by_name(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-defs")]
             unsafe extern "C" {
                 #[link_name = "get-unit-def-param-bool"]
-                pub fn get_unit_def_param_bool(arg0: i32, arg1: i32) -> i64;
+                pub safe fn get_unit_def_param_bool(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-defs")]
             unsafe extern "C" {
                 #[link_name = "get-unit-def-param-float"]
-                pub fn get_unit_def_param_float(arg0: i32, arg1: i32) -> i64;
+                pub safe fn get_unit_def_param_float(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-defs")]
             unsafe extern "C" {
                 #[link_name = "get-unit-def-param-int"]
-                pub fn get_unit_def_param_int(arg0: i32, arg1: i32) -> i64;
+                pub safe fn get_unit_def_param_int(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-defs")]
             unsafe extern "C" {
                 #[link_name = "get-unit-def-param-type"]
-                pub fn get_unit_def_param_type(arg0: i32) -> i64;
+                pub safe fn get_unit_def_param_type(arg0: i32) -> i64;
             }
         }
 
@@ -310,12 +304,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = unit_def_name.as_ptr() as usize;
-            let core_len = unit_def_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(unit_def_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_unit_def_id_by_name((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_unit_def_id_by_name(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -333,12 +326,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_unit_def_param_bool(unit_def_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_unit_def_param_bool(unit_def_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -356,12 +348,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_unit_def_param_float(unit_def_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_unit_def_param_float(unit_def_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(f32::from_bits(packed as u32))
@@ -379,12 +370,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_unit_def_param_int(unit_def_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_unit_def_param_int(unit_def_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -402,12 +392,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_unit_def_param_type((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_unit_def_param_type(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -429,7 +418,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:feature-defs")]
             unsafe extern "C" {
                 #[link_name = "get-feature-def-id-by-name"]
-                pub fn get_feature_def_id_by_name(arg0: i32) -> i64;
+                pub safe fn get_feature_def_id_by_name(arg0: i32) -> i64;
             }
         }
 
@@ -439,12 +428,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = feature_def_name.as_ptr() as usize;
-            let core_len = feature_def_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(feature_def_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_feature_def_id_by_name((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_feature_def_id_by_name(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -466,7 +454,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:weapon-defs")]
             unsafe extern "C" {
                 #[link_name = "get-weapon-def-id"]
-                pub fn get_weapon_def_id(arg0: i32) -> i64;
+                pub safe fn get_weapon_def_id(arg0: i32) -> i64;
             }
         }
 
@@ -476,12 +464,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = weapon_def_name.as_ptr() as usize;
-            let core_len = weapon_def_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(weapon_def_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_weapon_def_id((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_weapon_def_id(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -503,12 +490,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:math-extra")]
             unsafe extern "C" {
                 #[link_name = "bit-bits"]
-                pub fn bit_bits(arg0: i32) -> i64;
+                pub safe fn bit_bits(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:math-extra")]
             unsafe extern "C" {
                 #[link_name = "diag"]
-                pub fn diag(arg0: i32) -> i64;
+                pub safe fn diag(arg0: i32) -> i64;
             }
         }
 
@@ -518,12 +505,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if bits.is_empty() { 0usize } else { bits.as_ptr() as usize };
-            let core_len = bits.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(bits)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::bit_bits((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::bit_bits(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -541,12 +527,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if values.is_empty() { 0usize } else { values.as_ptr() as usize };
-            let core_len = values.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(values)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::diag((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::diag(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(f32::from_bits(packed as u32))
@@ -568,12 +553,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:encoding")]
             unsafe extern "C" {
                 #[link_name = "is-valid-base64"]
-                pub fn is_valid_base64(arg0: i32) -> i64;
+                pub safe fn is_valid_base64(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:encoding")]
             unsafe extern "C" {
                 #[link_name = "is-valid-base64-url"]
-                pub fn is_valid_base64_url(arg0: i32) -> i64;
+                pub safe fn is_valid_base64_url(arg0: i32) -> i64;
             }
         }
 
@@ -583,12 +568,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::is_valid_base64((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::is_valid_base64(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -606,12 +590,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::is_valid_base64_url((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::is_valid_base64_url(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -633,7 +616,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:path-finder")]
             unsafe extern "C" {
                 #[link_name = "request-path"]
-                pub fn request_path(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn request_path(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
         }
 
@@ -643,17 +626,21 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 36];
             let mut cursor = 0usize;
-            let core_optional = move_def_name.map(|core_value| {
-                let core_bytes = core_value.to_bytes();
-                (core_value.as_ptr() as usize as u32, core_bytes.len() as u32)
-            });
+            let core_optional = match move_def_name {
+                Some(core_value) => {
+                    let (core_ptr, core_len) = crate::wasm_slice_parts(core_value.to_bytes())?;
+                    Some((core_ptr as u32, core_len as u32))
+                }
+                None => None,
+            };
             if !super::__core_borrowed_wire::put_optional_pair(&mut descriptor, &mut cursor, core_optional) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(start_pos.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, start_pos, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(end_pos.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, end_pos, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::request_path(move_def_id as i32, radius, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::request_path(move_def_id as i32, radius, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -675,7 +662,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:input")]
             unsafe extern "C" {
                 #[link_name = "get-key-code"]
-                pub fn get_key_code(arg0: i32) -> i64;
+                pub safe fn get_key_code(arg0: i32) -> i64;
             }
         }
 
@@ -685,12 +672,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key_sym.as_ptr() as usize;
-            let core_len = key_sym.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key_sym.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_key_code((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_key_code(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -712,12 +698,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:debug-input")]
             unsafe extern "C" {
                 #[link_name = "emulate-text-editing"]
-                pub fn emulate_text_editing(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn emulate_text_editing(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:debug-input")]
             unsafe extern "C" {
                 #[link_name = "emulate-text-input"]
-                pub fn emulate_text_input(arg0: i32) -> i64;
+                pub safe fn emulate_text_input(arg0: i32) -> i64;
             }
         }
 
@@ -727,12 +713,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = utf8_text.as_ptr() as usize;
-            let core_len = utf8_text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(utf8_text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::emulate_text_editing(start as i32, length as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::emulate_text_editing(start as i32, length as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -750,12 +735,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = utf8_text.as_ptr() as usize;
-            let core_len = utf8_text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(utf8_text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::emulate_text_input((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::emulate_text_input(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -777,12 +761,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:selection")]
             unsafe extern "C" {
                 #[link_name = "deselect-unit-array"]
-                pub fn deselect_unit_array(arg0: i32) -> i64;
+                pub safe fn deselect_unit_array(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:selection")]
             unsafe extern "C" {
                 #[link_name = "select-unit-array"]
-                pub fn select_unit_array(arg0: i32, arg1: i32) -> i64;
+                pub safe fn select_unit_array(arg0: i32, arg1: i32) -> i64;
             }
         }
 
@@ -792,12 +776,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if unit_i_ds.is_empty() { 0usize } else { unit_i_ds.as_ptr() as usize };
-            let core_len = unit_i_ds.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(unit_i_ds)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::deselect_unit_array((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::deselect_unit_array(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -815,12 +798,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if unit_i_ds.is_empty() { 0usize } else { unit_i_ds.as_ptr() as usize };
-            let core_len = unit_i_ds.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(unit_i_ds)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::select_unit_array(if append { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::select_unit_array(if append { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -842,22 +824,22 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:sound")]
             unsafe extern "C" {
                 #[link_name = "load-sound-def"]
-                pub fn load_sound_def(arg0: i32) -> i64;
+                pub safe fn load_sound_def(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:sound")]
             unsafe extern "C" {
                 #[link_name = "play-sound-file"]
-                pub fn play_sound_file(arg0: f32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn play_sound_file(arg0: f32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:sound")]
             unsafe extern "C" {
                 #[link_name = "play-sound-stream"]
-                pub fn play_sound_stream(arg0: f32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn play_sound_stream(arg0: f32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:sound")]
             unsafe extern "C" {
                 #[link_name = "preload-sound-item"]
-                pub fn preload_sound_item(arg0: i32) -> i64;
+                pub safe fn preload_sound_item(arg0: i32) -> i64;
             }
         }
 
@@ -867,12 +849,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = sound_name.as_ptr() as usize;
-            let core_len = sound_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(sound_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::load_sound_def((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::load_sound_def(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -890,16 +871,15 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 32];
             let mut cursor = 0usize;
-            let core_ptr = sound_file.as_ptr() as usize;
-            let core_len = sound_file.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(sound_file.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(pos.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, pos, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(velocity.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, velocity, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::play_sound_file(volume, channel, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::play_sound_file(volume, channel, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -917,12 +897,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = ogg_file.as_ptr() as usize;
-            let core_len = ogg_file.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ogg_file.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::play_sound_stream(volume, if enqueue { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::play_sound_stream(volume, if enqueue { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -940,12 +919,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = sound_name.as_ptr() as usize;
-            let core_len = sound_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(sound_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::preload_sound_item((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::preload_sound_item(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -967,32 +945,32 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:config")]
             unsafe extern "C" {
                 #[link_name = "get-config-float"]
-                pub fn get_config_float(arg0: i32, arg1: i32) -> i32;
+                pub safe fn get_config_float(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:config")]
             unsafe extern "C" {
                 #[link_name = "get-config-int"]
-                pub fn get_config_int(arg0: i32, arg1: i32) -> i32;
+                pub safe fn get_config_int(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:config")]
             unsafe extern "C" {
                 #[link_name = "set-config-float"]
-                pub fn set_config_float(arg0: f32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn set_config_float(arg0: f32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:config")]
             unsafe extern "C" {
                 #[link_name = "set-config-int"]
-                pub fn set_config_int(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn set_config_int(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:config")]
             unsafe extern "C" {
                 #[link_name = "set-config-string"]
-                pub fn set_config_string(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_config_string(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:config")]
             unsafe extern "C" {
                 #[link_name = "set-log-section-filter-level"]
-                pub fn set_log_section_filter_level(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_log_section_filter_level(arg0: i32, arg1: i32) -> i64;
             }
         }
 
@@ -1003,14 +981,13 @@ pub mod borrowed {
             let mut output = [0u8; 8];
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(default_value.len(), 8usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, default_value, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_config_float((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_config_float(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -1028,14 +1005,13 @@ pub mod borrowed {
             let mut output = [0u8; 8];
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(default_value.len(), 8usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, default_value, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_config_int((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_config_int(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -1052,12 +1028,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_config_float(value, if use_overlay { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_config_float(value, if use_overlay { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1075,12 +1050,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_config_int(value, if use_overlay { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_config_int(value, if use_overlay { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1098,16 +1072,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_config_string(if use_overlay { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_config_string(if use_overlay { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1125,12 +1096,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = section.as_ptr() as usize;
-            let core_len = section.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(section.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_log_section_filter_level(level, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_log_section_filter_level(level, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1152,7 +1122,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:utils")]
             unsafe extern "C" {
                 #[link_name = "get-cegid"]
-                pub fn get_cegid(arg0: i32) -> i64;
+                pub safe fn get_cegid(arg0: i32) -> i64;
             }
         }
 
@@ -1162,12 +1132,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = ceg_name.as_ptr() as usize;
-            let core_len = ceg_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ceg_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_cegid((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_cegid(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -1189,92 +1158,92 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "assign-mouse-cursor"]
-                pub fn assign_mouse_cursor(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn assign_mouse_cursor(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "deselect-unit-map"]
-                pub fn deselect_unit_map(arg0: i32) -> i64;
+                pub safe fn deselect_unit_map(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "draw-unit-commands"]
-                pub fn draw_unit_commands(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn draw_unit_commands(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "load-cmd-colors-config"]
-                pub fn load_cmd_colors_config(arg0: i32) -> i64;
+                pub safe fn load_cmd_colors_config(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "load-ctrl-panel-config"]
-                pub fn load_ctrl_panel_config(arg0: i32) -> i64;
+                pub safe fn load_ctrl_panel_config(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "load-model-textures"]
-                pub fn load_model_textures(arg0: i32) -> i64;
+                pub safe fn load_model_textures(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "replace-mouse-cursor"]
-                pub fn replace_mouse_cursor(arg0: i32, arg1: i32) -> i64;
+                pub safe fn replace_mouse_cursor(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "select-unit-map"]
-                pub fn select_unit_map(arg0: i32, arg1: i32) -> i64;
+                pub safe fn select_unit_map(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-clipboard"]
-                pub fn set_clipboard(arg0: i32) -> i64;
+                pub safe fn set_clipboard(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-map-shading-texture"]
-                pub fn set_map_shading_texture(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_map_shading_texture(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-mouse-cursor"]
-                pub fn set_mouse_cursor(arg0: f32, arg1: i32) -> i64;
+                pub safe fn set_mouse_cursor(arg0: f32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-sky-box-texture"]
-                pub fn set_sky_box_texture(arg0: i32) -> i64;
+                pub safe fn set_sky_box_texture(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-unit-def-icon"]
-                pub fn set_unit_def_icon(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_unit_def_icon(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-unit-def-image"]
-                pub fn set_unit_def_image(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_unit_def_image(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-unit-icon"]
-                pub fn set_unit_icon(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_unit_icon(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-wm-caption"]
-                pub fn set_wm_caption(arg0: i32) -> i64;
+                pub safe fn set_wm_caption(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-wm-icon"]
-                pub fn set_wm_icon(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_wm_icon(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unsynced-ctrl")]
             unsafe extern "C" {
                 #[link_name = "set-water-texture"]
-                pub fn set_water_texture(arg0: i32) -> i64;
+                pub safe fn set_water_texture(arg0: i32) -> i64;
             }
         }
 
@@ -1284,16 +1253,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = command_name.as_ptr() as usize;
-            let core_len = command_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(command_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = cursor_file_name.as_ptr() as usize;
-            let core_len = cursor_file_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(cursor_file_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::assign_mouse_cursor(if overwrite { 1 } else { 0 }, if hot_spot_top_left { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::assign_mouse_cursor(if overwrite { 1 } else { 0 }, if hot_spot_top_left { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1311,12 +1277,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if unit_i_ds.is_empty() { 0usize } else { unit_i_ds.as_ptr() as usize };
-            let core_len = unit_i_ds.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(unit_i_ds)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::deselect_unit_map((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::deselect_unit_map(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1334,12 +1299,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if unit_i_ds.is_empty() { 0usize } else { unit_i_ds.as_ptr() as usize };
-            let core_len = unit_i_ds.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(unit_i_ds)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::draw_unit_commands(if table_or_array { 1 } else { 0 }, queue_draw_depth, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::draw_unit_commands(if table_or_array { 1 } else { 0 }, queue_draw_depth, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1357,12 +1321,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = filename.as_ptr() as usize;
-            let core_len = filename.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(filename.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::load_cmd_colors_config((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::load_cmd_colors_config(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1380,12 +1343,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = filename.as_ptr() as usize;
-            let core_len = filename.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(filename.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::load_ctrl_panel_config((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::load_ctrl_panel_config(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1403,12 +1365,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = model_name.as_ptr() as usize;
-            let core_len = model_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(model_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::load_model_textures((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::load_model_textures(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1426,16 +1387,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = old_cursor_file_name.as_ptr() as usize;
-            let core_len = old_cursor_file_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(old_cursor_file_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = new_cursor_file_name.as_ptr() as usize;
-            let core_len = new_cursor_file_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(new_cursor_file_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::replace_mouse_cursor(if hot_spot_top_left { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::replace_mouse_cursor(if hot_spot_top_left { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1453,12 +1411,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if unit_i_ds.is_empty() { 0usize } else { unit_i_ds.as_ptr() as usize };
-            let core_len = unit_i_ds.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(unit_i_ds)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::select_unit_map(if append { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::select_unit_map(if append { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1476,12 +1433,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_clipboard((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_clipboard(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1499,16 +1455,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = tex_type.as_ptr() as usize;
-            let core_len = tex_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tex_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = tex_name.as_ptr() as usize;
-            let core_len = tex_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tex_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_map_shading_texture(num, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_map_shading_texture(num, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1526,12 +1479,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = cursor_name.as_ptr() as usize;
-            let core_len = cursor_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(cursor_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_mouse_cursor(scale, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_mouse_cursor(scale, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1549,12 +1501,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = tex_name.as_ptr() as usize;
-            let core_len = tex_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tex_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_sky_box_texture((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_sky_box_texture(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1572,12 +1523,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = icon_name.as_ptr() as usize;
-            let core_len = icon_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(icon_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_def_icon(unit_def_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_def_icon(unit_def_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1595,12 +1545,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = image.as_ptr() as usize;
-            let core_len = image.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(image.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_def_image(unit_def_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_def_image(unit_def_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1618,12 +1567,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = icon_name.as_ptr() as usize;
-            let core_len = icon_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(icon_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_icon(unit_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_icon(unit_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1641,16 +1589,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = title.as_ptr() as usize;
-            let core_len = title.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(title.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = title_short.as_ptr() as usize;
-            let core_len = title_short.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(title_short.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_wm_caption((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_wm_caption(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1668,12 +1613,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = icon_file_name.as_ptr() as usize;
-            let core_len = icon_file_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(icon_file_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_wm_icon(if force_resolution { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_wm_icon(if force_resolution { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1691,16 +1635,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = tex_type.as_ptr() as usize;
-            let core_len = tex_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tex_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = tex_name.as_ptr() as usize;
-            let core_len = tex_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tex_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_water_texture((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_water_texture(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -1722,242 +1663,242 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "add-atlas-texture"]
-                pub fn add_atlas_texture(arg0: i32) -> i32;
+                pub safe fn add_atlas_texture(arg0: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "add-fallback-font"]
-                pub fn add_fallback_font(arg0: i32) -> i64;
+                pub safe fn add_fallback_font(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "add-feature-defs-to-submission-vao"]
-                pub fn add_feature_defs_to_submission_vao(arg0: i32, arg1: i32) -> i64;
+                pub safe fn add_feature_defs_to_submission_vao(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "add-features-to-submission-vao"]
-                pub fn add_features_to_submission_vao(arg0: i32, arg1: i32) -> i64;
+                pub safe fn add_features_to_submission_vao(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "add-unit-defs-to-submission-vao"]
-                pub fn add_unit_defs_to_submission_vao(arg0: i32, arg1: i32) -> i64;
+                pub safe fn add_unit_defs_to_submission_vao(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "add-units-to-submission-vao"]
-                pub fn add_units_to_submission_vao(arg0: i32, arg1: i32) -> i64;
+                pub safe fn add_units_to_submission_vao(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "bind-image-texture"]
-                pub fn bind_image_texture(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32) -> i32;
+                pub safe fn bind_image_texture(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "bind-texture"]
-                pub fn bind_texture(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn bind_texture(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "change-texture-params"]
-                pub fn change_texture_params(arg0: i32) -> i32;
+                pub safe fn change_texture_params(arg0: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "copy-to-texture"]
-                pub fn copy_to_texture(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32, arg7: i32, arg8: i32) -> i32;
+                pub safe fn copy_to_texture(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32, arg7: i32, arg8: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "create-shader"]
-                pub fn create_shader(arg0: i32, arg1: i32) -> i32;
+                pub safe fn create_shader(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "delete-texture"]
-                pub fn delete_texture(arg0: i32) -> i64;
+                pub safe fn delete_texture(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "delete-texture-atlas"]
-                pub fn delete_texture_atlas(arg0: i32) -> i64;
+                pub safe fn delete_texture_atlas(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "delete-texture-fbo"]
-                pub fn delete_texture_fbo(arg0: i32) -> i64;
+                pub safe fn delete_texture_fbo(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "finalize-texture-atlas"]
-                pub fn finalize_texture_atlas(arg0: i32) -> i64;
+                pub safe fn finalize_texture_atlas(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "font-get-text-height"]
-                pub fn font_get_text_height(arg0: i32, arg1: f32, arg2: f32, arg3: f32, arg4: i32, arg5: i32) -> i32;
+                pub safe fn font_get_text_height(arg0: i32, arg1: f32, arg2: f32, arg3: f32, arg4: i32, arg5: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "font-get-text-width"]
-                pub fn font_get_text_width(arg0: i32, arg1: f32, arg2: f32, arg3: f32, arg4: i32) -> i64;
+                pub safe fn font_get_text_width(arg0: i32, arg1: f32, arg2: f32, arg3: f32, arg4: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "font-print"]
-                pub fn font_print(arg0: i32, arg1: f32, arg2: f32, arg3: f32, arg4: i32) -> i32;
+                pub safe fn font_print(arg0: i32, arg1: f32, arg2: f32, arg3: f32, arg4: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "font-print-world"]
-                pub fn font_print_world(arg0: i32, arg1: f32, arg2: i32) -> i32;
+                pub safe fn font_print_world(arg0: i32, arg1: f32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "generate-mipmap"]
-                pub fn generate_mipmap(arg0: i32) -> i32;
+                pub safe fn generate_mipmap(arg0: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-atlas-texture"]
-                pub fn get_atlas_texture(arg0: i32, arg1: i32) -> i32;
+                pub safe fn get_atlas_texture(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-fixed-state"]
-                pub fn get_fixed_state(arg0: i32, arg1: i32) -> i32;
+                pub safe fn get_fixed_state(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-global-tex-coords"]
-                pub fn get_global_tex_coords(arg0: i32, arg1: i32) -> i32;
+                pub safe fn get_global_tex_coords(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-subroutine-index"]
-                pub fn get_subroutine_index(arg0: i32, arg1: i32, arg2: i32, arg3: i32) -> i32;
+                pub safe fn get_subroutine_index(arg0: i32, arg1: i32, arg2: i32, arg3: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-text-height"]
-                pub fn get_text_height(arg0: i32, arg1: i32) -> i32;
+                pub safe fn get_text_height(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-text-width"]
-                pub fn get_text_width(arg0: i32) -> i64;
+                pub safe fn get_text_width(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "get-uniform-location"]
-                pub fn get_uniform_location(arg0: i32, arg1: i32) -> i64;
+                pub safe fn get_uniform_location(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "has-extension"]
-                pub fn has_extension(arg0: i32) -> i64;
+                pub safe fn has_extension(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "instance-data-from-feature-defs-vbo"]
-                pub fn instance_data_from_feature_defs_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+                pub safe fn instance_data_from_feature_defs_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "instance-data-from-features-vbo"]
-                pub fn instance_data_from_features_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+                pub safe fn instance_data_from_features_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "instance-data-from-unit-defs-vbo"]
-                pub fn instance_data_from_unit_defs_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+                pub safe fn instance_data_from_unit_defs_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "instance-data-from-units-vbo"]
-                pub fn instance_data_from_units_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+                pub safe fn instance_data_from_units_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "load-font"]
-                pub fn load_font(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
+                pub safe fn load_font(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "matrix-data-from-projectiles-vbo"]
-                pub fn matrix_data_from_projectiles_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+                pub safe fn matrix_data_from_projectiles_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "object-label"]
-                pub fn object_label(arg0: i32, arg1: i32, arg2: i32) -> i32;
+                pub safe fn object_label(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "push-debug-group"]
-                pub fn push_debug_group(arg0: i32, arg1: i32, arg2: i32) -> i32;
+                pub safe fn push_debug_group(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "save-image"]
-                pub fn save_image(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32) -> i64;
+                pub safe fn save_image(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "set-fbo-attachment"]
-                pub fn set_fbo_attachment(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32) -> i32;
+                pub safe fn set_fbo_attachment(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "set-fbo-draw-buffers"]
-                pub fn set_fbo_draw_buffers(arg0: i32, arg1: i32) -> i32;
+                pub safe fn set_fbo_draw_buffers(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "set-feature-buffer-uniforms"]
-                pub fn set_feature_buffer_uniforms(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn set_feature_buffer_uniforms(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "set-unit-buffer-uniforms"]
-                pub fn set_unit_buffer_uniforms(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn set_unit_buffer_uniforms(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "text"]
-                pub fn text(arg0: f32, arg1: f32, arg2: f32, arg3: i32) -> i32;
+                pub safe fn text(arg0: f32, arg1: f32, arg2: f32, arg3: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "texture-info"]
-                pub fn texture_info(arg0: i32, arg1: i32) -> i32;
+                pub safe fn texture_info(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "uniform-array-float"]
-                pub fn uniform_array_float(arg0: i32, arg1: i32) -> i32;
+                pub safe fn uniform_array_float(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "uniform-array-int"]
-                pub fn uniform_array_int(arg0: i32, arg1: i32) -> i32;
+                pub safe fn uniform_array_int(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "uniform-matrix"]
-                pub fn uniform_matrix(arg0: i32, arg1: i32, arg2: i32) -> i32;
+                pub safe fn uniform_matrix(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "upload-texture"]
-                pub fn upload_texture(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32, arg7: i32, arg8: i32, arg9: i32, arg10: i32) -> i32;
+                pub safe fn upload_texture(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32, arg7: i32, arg8: i32, arg9: i32, arg10: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "upload-vbo"]
-                pub fn upload_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32) -> i64;
+                pub safe fn upload_vbo(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32) -> i64;
             }
         }
 
@@ -1967,16 +1908,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = atlas_name.as_ptr() as usize;
-            let core_len = atlas_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(atlas_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = texture_name.as_ptr() as usize;
-            let core_len = texture_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(texture_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::add_atlas_texture((descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::add_atlas_texture(descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -1992,12 +1930,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_fallback_font((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_fallback_font(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -2015,12 +1952,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_feature_defs_to_submission_vao(vao_id as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_feature_defs_to_submission_vao(vao_id as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2038,12 +1974,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_features_to_submission_vao(vao_id as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_features_to_submission_vao(vao_id as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2061,12 +1996,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_unit_defs_to_submission_vao(vao_id as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_unit_defs_to_submission_vao(vao_id as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2084,12 +2018,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_units_to_submission_vao(vao_id as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_units_to_submission_vao(vao_id as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2107,12 +2040,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::bind_image_texture(unit as i32, level, layer, if layered { 1 } else { 0 }, access as i32, format as i32, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::bind_image_texture(unit as i32, level, layer, if layered { 1 } else { 0 }, access as i32, format as i32, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2128,12 +2060,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::bind_texture(tex_num, if enable { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::bind_texture(tex_num, if enable { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -2151,14 +2082,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 64];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(params.len(), 56usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, params, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::change_texture_params((descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::change_texture_params(descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2169,18 +2099,16 @@ pub mod borrowed {
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn copy_to_texture(name: &core::ffi::CStr, xoff: i32, yoff: i32, x: i32, y: i32, width: i32, height: i32, target: u32, level: u32) -> Result<()> {
             #[cfg(target_arch = "wasm32")]
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::copy_to_texture(xoff, yoff, x, y, width, height, target as i32, level as i32, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::copy_to_texture(xoff, yoff, x, y, width, height, target as i32, level as i32, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2191,45 +2119,31 @@ pub mod borrowed {
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn create_shader(definitions: &core::ffi::CStr, vertex: &core::ffi::CStr, tcs: &core::ffi::CStr, tes: &core::ffi::CStr, geometry: &core::ffi::CStr, fragment: &core::ffi::CStr, compute: &core::ffi::CStr, options: &[u8; 24]) -> Result<[u8; 8]> {
             #[cfg(target_arch = "wasm32")]
             {
             let mut output = [0u8; 8];
             let mut descriptor = [0u8; 80];
             let mut cursor = 0usize;
-            let core_ptr = definitions.as_ptr() as usize;
-            let core_len = definitions.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(definitions.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = vertex.as_ptr() as usize;
-            let core_len = vertex.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(vertex.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = tcs.as_ptr() as usize;
-            let core_len = tcs.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tcs.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = tes.as_ptr() as usize;
-            let core_len = tes.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tes.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = geometry.as_ptr() as usize;
-            let core_len = geometry.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(geometry.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = fragment.as_ptr() as usize;
-            let core_len = fragment.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(fragment.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = compute.as_ptr() as usize;
-            let core_len = compute.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(compute.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(options.len(), 24usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, options, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::create_shader((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::create_shader(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -2246,12 +2160,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::delete_texture((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::delete_texture(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -2269,12 +2182,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::delete_texture_atlas((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::delete_texture_atlas(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -2292,12 +2204,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::delete_texture_fbo((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::delete_texture_fbo(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -2315,12 +2226,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::finalize_texture_atlas((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::finalize_texture_atlas(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -2339,16 +2249,13 @@ pub mod borrowed {
             let mut output = [0u8; 12];
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = options.as_ptr() as usize;
-            let core_len = options.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(options.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::font_get_text_height(font_id as i32, x, y, size, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::font_get_text_height(font_id as i32, x, y, size, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -2365,16 +2272,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = options.as_ptr() as usize;
-            let core_len = options.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(options.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::font_get_text_width(font_id as i32, x, y, size, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::font_get_text_width(font_id as i32, x, y, size, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(f32::from_bits(packed as u32))
@@ -2392,16 +2296,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = options.as_ptr() as usize;
-            let core_len = options.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(options.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::font_print(font_id as i32, x, y, size, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::font_print(font_id as i32, x, y, size, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2417,18 +2318,15 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 28];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(pos.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, pos, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = options.as_ptr() as usize;
-            let core_len = options.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(options.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::font_print_world(font_id as i32, size, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::font_print_world(font_id as i32, size, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2444,12 +2342,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::generate_mipmap((descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::generate_mipmap(descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2466,16 +2363,13 @@ pub mod borrowed {
             let mut output = [0u8; 20];
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = atlas_name.as_ptr() as usize;
-            let core_len = atlas_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(atlas_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = texture_name.as_ptr() as usize;
-            let core_len = texture_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(texture_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_atlas_texture((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_atlas_texture(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -2493,12 +2387,11 @@ pub mod borrowed {
             let mut output = [0u8; 172];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = param.as_ptr() as usize;
-            let core_len = param.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(param.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_fixed_state((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_fixed_state(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -2516,12 +2409,11 @@ pub mod borrowed {
             let mut output = [0u8; 20];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_global_tex_coords((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_global_tex_coords(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -2539,12 +2431,11 @@ pub mod borrowed {
             let mut output = [0u8; 8];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_subroutine_index(shader_id as i32, shader_type as i32, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_subroutine_index(shader_id as i32, shader_type as i32, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -2562,12 +2453,11 @@ pub mod borrowed {
             let mut output = [0u8; 12];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_text_height((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_text_height(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -2584,12 +2474,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_text_width((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_text_width(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(f32::from_bits(packed as u32))
@@ -2607,12 +2496,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_uniform_location(shader_id as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_uniform_location(shader_id as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -2630,12 +2518,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::has_extension((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::has_extension(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -2653,12 +2540,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::instance_data_from_feature_defs_vbo(vbo_id as i32, attribute_index, team_id, element_offset, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::instance_data_from_feature_defs_vbo(vbo_id as i32, attribute_index, team_id, element_offset, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2676,12 +2562,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::instance_data_from_features_vbo(vbo_id as i32, attribute_index, team_id, element_offset, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::instance_data_from_features_vbo(vbo_id as i32, attribute_index, team_id, element_offset, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2699,12 +2584,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::instance_data_from_unit_defs_vbo(vbo_id as i32, attribute_index, team_id, element_offset, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::instance_data_from_unit_defs_vbo(vbo_id as i32, attribute_index, team_id, element_offset, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2722,12 +2606,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::instance_data_from_units_vbo(vbo_id as i32, attribute_index, team_id, element_offset, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::instance_data_from_units_vbo(vbo_id as i32, attribute_index, team_id, element_offset, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2745,12 +2628,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = path.as_ptr() as usize;
-            let core_len = path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::load_font(size, outline_width, outline_weight, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::load_font(size, outline_width, outline_weight, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2768,12 +2650,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if ids.is_empty() { 0usize } else { ids.as_ptr() as usize };
-            let core_len = ids.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ids)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::matrix_data_from_projectiles_vbo(vbo_id as i32, attribute_index, team_id, element_offset, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::matrix_data_from_projectiles_vbo(vbo_id as i32, attribute_index, team_id, element_offset, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2791,12 +2672,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = label.as_ptr() as usize;
-            let core_len = label.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(label.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::object_label(identifier as i32, object_id as i32, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::object_label(identifier as i32, object_id as i32, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2812,12 +2692,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = message.as_ptr() as usize;
-            let core_len = message.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(message.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::push_debug_group(id as i32, if source_is_third_party { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::push_debug_group(id as i32, if source_is_third_party { 1 } else { 0 }, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2833,14 +2712,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 20];
             let mut cursor = 0usize;
-            let core_ptr = filename.as_ptr() as usize;
-            let core_len = filename.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(filename.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(options.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, options, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::save_image(x, y, width, height, read_buffer as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::save_image(x, y, width, height, read_buffer as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -2858,12 +2736,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = texture_name.as_ptr() as usize;
-            let core_len = texture_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(texture_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::set_fbo_attachment(fbo_id as i32, attachment as i32, texture_target as i32, mip_level, rbo_id as i32, if use_rbo { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::set_fbo_attachment(fbo_id as i32, attachment as i32, texture_target as i32, mip_level, rbo_id as i32, if use_rbo { 1 } else { 0 }, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2879,12 +2756,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if buffers.is_empty() { 0usize } else { buffers.as_ptr() as usize };
-            let core_len = buffers.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(buffers)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::set_fbo_draw_buffers(fbo_id as i32, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::set_fbo_draw_buffers(fbo_id as i32, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2900,12 +2776,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if values.is_empty() { 0usize } else { values.as_ptr() as usize };
-            let core_len = values.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(values)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_feature_buffer_uniforms(object_id, offset as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_feature_buffer_uniforms(object_id, offset as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2923,12 +2798,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if values.is_empty() { 0usize } else { values.as_ptr() as usize };
-            let core_len = values.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(values)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_buffer_uniforms(object_id, offset as i32, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_buffer_uniforms(object_id, offset as i32, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -2946,16 +2820,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = options.as_ptr() as usize;
-            let core_len = options.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(options.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::text(x, y, size, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::text(x, y, size, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -2972,12 +2843,11 @@ pub mod borrowed {
             let mut output = [0u8; 24];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::texture_info((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::texture_info(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -2994,12 +2864,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if values.is_empty() { 0usize } else { values.as_ptr() as usize };
-            let core_len = values.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(values)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::uniform_array_float(location, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::uniform_array_float(location, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -3015,12 +2884,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if values.is_empty() { 0usize } else { values.as_ptr() as usize };
-            let core_len = values.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(values)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::uniform_array_int(location, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::uniform_array_int(location, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -3036,12 +2904,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if values.is_empty() { 0usize } else { values.as_ptr() as usize };
-            let core_len = values.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(values)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::uniform_matrix(location, if transpose { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::uniform_matrix(location, if transpose { 1 } else { 0 }, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -3052,22 +2919,18 @@ pub mod borrowed {
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn upload_texture(name: &core::ffi::CStr, target: u32, level: i32, xoff: i32, yoff: i32, zoff: i32, width: i32, height: i32, depth: i32, format: u32, pixel_type: u32, data: &[u8]) -> Result<()> {
             #[cfg(target_arch = "wasm32")]
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = if data.is_empty() { 0usize } else { data.as_ptr() as usize };
-            let core_len = data.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(data)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::upload_texture(target as i32, level, xoff, yoff, zoff, width, height, depth, format as i32, pixel_type as i32, (descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::upload_texture(target as i32, level, xoff, yoff, zoff, width, height, depth, format as i32, pixel_type as i32, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -3083,12 +2946,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if data.is_empty() { 0usize } else { data.as_ptr() as usize };
-            let core_len = data.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(data)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::upload_vbo(vbo_id as i32, attribute_index, element_offset, data_start_index, data_finish_index, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::upload_vbo(vbo_id as i32, attribute_index, element_offset, data_start_index, data_finish_index, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -3110,32 +2972,28 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:icons")]
             unsafe extern "C" {
                 #[link_name = "add-unit-icon"]
-                pub fn add_unit_icon(arg0: f32, arg1: f32, arg2: i32, arg3: f32, arg4: f32, arg5: f32, arg6: f32, arg7: i32) -> i64;
+                pub safe fn add_unit_icon(arg0: f32, arg1: f32, arg2: i32, arg3: f32, arg4: f32, arg5: f32, arg6: f32, arg7: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:icons")]
             unsafe extern "C" {
                 #[link_name = "free-unit-icon"]
-                pub fn free_unit_icon(arg0: i32) -> i64;
+                pub safe fn free_unit_icon(arg0: i32) -> i64;
             }
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn add_unit_icon(icon_name: &core::ffi::CStr, tex_file: &core::ffi::CStr, size: f32, distance: f32, radius_adjust: bool, u0: f32, v0: f32, u1: f32, v1: f32) -> Result<bool> {
             #[cfg(target_arch = "wasm32")]
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = icon_name.as_ptr() as usize;
-            let core_len = icon_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(icon_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = tex_file.as_ptr() as usize;
-            let core_len = tex_file.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tex_file.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_unit_icon(size, distance, if radius_adjust { 1 } else { 0 }, u0, v0, u1, v1, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_unit_icon(size, distance, if radius_adjust { 1 } else { 0 }, u0, v0, u1, v1, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3153,12 +3011,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = icon_name.as_ptr() as usize;
-            let core_len = icon_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(icon_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::free_unit_icon((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::free_unit_icon(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3180,12 +3037,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:markers")]
             unsafe extern "C" {
                 #[link_name = "add-world-text"]
-                pub fn add_world_text(arg0: i32) -> i64;
+                pub safe fn add_world_text(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:markers")]
             unsafe extern "C" {
                 #[link_name = "marker-add-point"]
-                pub fn marker_add_point(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn marker_add_point(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
         }
 
@@ -3195,14 +3052,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 20];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(pos.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, pos, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_world_text((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_world_text(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3222,12 +3078,11 @@ pub mod borrowed {
             let mut cursor = 0usize;
             debug_assert_eq!(pos.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, pos, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::marker_add_point(if local_only { 1 } else { 0 }, player_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::marker_add_point(if local_only { 1 } else { 0 }, player_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3249,7 +3104,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:ground-decals")]
             unsafe extern "C" {
                 #[link_name = "set-ground-decal-texture"]
-                pub fn set_ground_decal_texture(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn set_ground_decal_texture(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
         }
 
@@ -3259,12 +3114,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = texture_name.as_ptr() as usize;
-            let core_len = texture_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(texture_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_ground_decal_texture(decal_id as i32, if main_tex { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_ground_decal_texture(decal_id as i32, if main_tex { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3286,32 +3140,32 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:system-control")]
             unsafe extern "C" {
                 #[link_name = "clear-watch-dog-timer"]
-                pub fn clear_watch_dog_timer(arg0: i32, arg1: i32) -> i64;
+                pub safe fn clear_watch_dog_timer(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:system-control")]
             unsafe extern "C" {
                 #[link_name = "reload"]
-                pub fn reload(arg0: i32) -> i64;
+                pub safe fn reload(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:system-control")]
             unsafe extern "C" {
                 #[link_name = "restart"]
-                pub fn restart(arg0: i32) -> i64;
+                pub safe fn restart(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:system-control")]
             unsafe extern "C" {
                 #[link_name = "set-share-level"]
-                pub fn set_share_level(arg0: f32, arg1: i32) -> i64;
+                pub safe fn set_share_level(arg0: f32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:system-control")]
             unsafe extern "C" {
                 #[link_name = "share-resources"]
-                pub fn share_resources(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn share_resources(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:system-control")]
             unsafe extern "C" {
                 #[link_name = "start"]
-                pub fn start(arg0: i32) -> i64;
+                pub safe fn start(arg0: i32) -> i64;
             }
         }
 
@@ -3321,12 +3175,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = thread_name.as_ptr() as usize;
-            let core_len = thread_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(thread_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::clear_watch_dog_timer(if keep_stopped { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::clear_watch_dog_timer(if keep_stopped { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3344,12 +3197,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = start_script.as_ptr() as usize;
-            let core_len = start_script.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(start_script.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::reload((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::reload(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3367,16 +3219,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = cmd_args.as_ptr() as usize;
-            let core_len = cmd_args.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(cmd_args.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = start_script.as_ptr() as usize;
-            let core_len = start_script.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(start_script.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::restart((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::restart(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3394,12 +3243,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource.as_ptr() as usize;
-            let core_len = resource.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_share_level(level, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_share_level(level, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3417,12 +3265,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource.as_ptr() as usize;
-            let core_len = resource.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::share_resources(team_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::share_resources(team_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3440,16 +3287,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = cmd_args.as_ptr() as usize;
-            let core_len = cmd_args.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(cmd_args.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = start_script.as_ptr() as usize;
-            let core_len = start_script.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(start_script.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::start((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::start(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3471,312 +3315,312 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "add-translation-string"]
-                pub fn add_translation_string(arg0: i32) -> i64;
+                pub safe fn add_translation_string(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "clear-document-path-requests"]
-                pub fn clear_document_path_requests(arg0: i32) -> i64;
+                pub safe fn clear_document_path_requests(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-activate-theme"]
-                pub fn context_activate_theme(arg0: i64, arg1: i32, arg2: i32) -> i64;
+                pub safe fn context_activate_theme(arg0: i64, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-create-data-model"]
-                pub fn context_create_data_model(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn context_create_data_model(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-create-document"]
-                pub fn context_create_document(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn context_create_document(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-get-document"]
-                pub fn context_get_document(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn context_get_document(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-is-theme-active"]
-                pub fn context_is_theme_active(arg0: i64, arg1: i32) -> i64;
+                pub safe fn context_is_theme_active(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-load-document"]
-                pub fn context_load_document(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn context_load_document(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-open-data-model"]
-                pub fn context_open_data_model(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn context_open_data_model(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-process-text-input"]
-                pub fn context_process_text_input(arg0: i64, arg1: i32) -> i64;
+                pub safe fn context_process_text_input(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-remove-data-model"]
-                pub fn context_remove_data_model(arg0: i64, arg1: i32) -> i64;
+                pub safe fn context_remove_data_model(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-remove-event-listener"]
-                pub fn context_remove_event_listener(arg0: i64, arg1: i64, arg2: i32, arg3: i32) -> i64;
+                pub safe fn context_remove_event_listener(arg0: i64, arg1: i64, arg2: i32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "create-context"]
-                pub fn create_context(arg0: i32, arg1: i32) -> i32;
+                pub safe fn create_context(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "data-model-bind-bool"]
-                pub fn data_model_bind_bool(arg0: i64, arg1: i32, arg2: i32, arg3: i32) -> i32;
+                pub safe fn data_model_bind_bool(arg0: i64, arg1: i32, arg2: i32, arg3: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "data-model-bind-color"]
-                pub fn data_model_bind_color(arg0: i64, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32) -> i32;
+                pub safe fn data_model_bind_color(arg0: i64, arg1: i32, arg2: i32, arg3: i32, arg4: i32, arg5: i32, arg6: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "data-model-bind-float"]
-                pub fn data_model_bind_float(arg0: i64, arg1: f32, arg2: i32, arg3: i32) -> i32;
+                pub safe fn data_model_bind_float(arg0: i64, arg1: f32, arg2: i32, arg3: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "data-model-bind-int"]
-                pub fn data_model_bind_int(arg0: i64, arg1: i32, arg2: i32, arg3: i32) -> i32;
+                pub safe fn data_model_bind_int(arg0: i64, arg1: i32, arg2: i32, arg3: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "data-model-bind-percent"]
-                pub fn data_model_bind_percent(arg0: i64, arg1: f32, arg2: i32, arg3: i32) -> i32;
+                pub safe fn data_model_bind_percent(arg0: i64, arg1: f32, arg2: i32, arg3: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "data-model-bind-pixels"]
-                pub fn data_model_bind_pixels(arg0: i64, arg1: f32, arg2: i32, arg3: i32) -> i32;
+                pub safe fn data_model_bind_pixels(arg0: i64, arg1: f32, arg2: i32, arg3: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "data-model-bind-string"]
-                pub fn data_model_bind_string(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn data_model_bind_string(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "data-model-set-string"]
-                pub fn data_model_set_string(arg0: i64, arg1: i32) -> i64;
+                pub safe fn data_model_set_string(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "document-append-to-style-sheet"]
-                pub fn document_append_to_style_sheet(arg0: i64, arg1: i32) -> i64;
+                pub safe fn document_append_to_style_sheet(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "document-create-element"]
-                pub fn document_create_element(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn document_create_element(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "document-create-text-node"]
-                pub fn document_create_text_node(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn document_create_text_node(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "document-load-external-script"]
-                pub fn document_load_external_script(arg0: i64, arg1: i32) -> i64;
+                pub safe fn document_load_external_script(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "document-load-inline-script"]
-                pub fn document_load_inline_script(arg0: i64, arg1: i32, arg2: i32) -> i64;
+                pub safe fn document_load_inline_script(arg0: i64, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "document-set-title"]
-                pub fn document_set_title(arg0: i64, arg1: i32) -> i64;
+                pub safe fn document_set_title(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-are-pseudo-classes-set"]
-                pub fn element_are_pseudo_classes_set(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_are_pseudo_classes_set(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-closest"]
-                pub fn element_closest(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn element_closest(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-dispatch-event"]
-                pub fn element_dispatch_event(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_dispatch_event(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-form-submit"]
-                pub fn element_form_submit(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_form_submit(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-get-element-by-id"]
-                pub fn element_get_element_by_id(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn element_get_element_by_id(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-get-elements-by-class-name-count"]
-                pub fn element_get_elements_by_class_name_count(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_get_elements_by_class_name_count(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-get-elements-by-tag-name-count"]
-                pub fn element_get_elements_by_tag_name_count(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_get_elements_by_tag_name_count(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-has-attribute"]
-                pub fn element_has_attribute(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_has_attribute(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-is-class-set"]
-                pub fn element_is_class_set(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_is_class_set(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-is-pseudo-class-set"]
-                pub fn element_is_pseudo_class_set(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_is_pseudo_class_set(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-matches"]
-                pub fn element_matches(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_matches(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-query-selector"]
-                pub fn element_query_selector(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn element_query_selector(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-query-selector-all-count"]
-                pub fn element_query_selector_all_count(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_query_selector_all_count(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-remove-attribute"]
-                pub fn element_remove_attribute(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_remove_attribute(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-remove-event-listener"]
-                pub fn element_remove_event_listener(arg0: i64, arg1: i64, arg2: i32, arg3: i32) -> i64;
+                pub safe fn element_remove_event_listener(arg0: i64, arg1: i64, arg2: i32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-set-attribute"]
-                pub fn element_set_attribute(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_set_attribute(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-set-class"]
-                pub fn element_set_class(arg0: i64, arg1: i32, arg2: i32) -> i64;
+                pub safe fn element_set_class(arg0: i64, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-set-class-name"]
-                pub fn element_set_class_name(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_set_class_name(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-set-id"]
-                pub fn element_set_id(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_set_id(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-set-inner-rml"]
-                pub fn element_set_inner_rml(arg0: i64, arg1: i32) -> i64;
+                pub safe fn element_set_inner_rml(arg0: i64, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-set-pseudo-class"]
-                pub fn element_set_pseudo_class(arg0: i64, arg1: i32, arg2: i32) -> i64;
+                pub safe fn element_set_pseudo_class(arg0: i64, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-tab-set-set-panel"]
-                pub fn element_tab_set_set_panel(arg0: i64, arg1: i32, arg2: i32) -> i64;
+                pub safe fn element_tab_set_set_panel(arg0: i64, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-tab-set-set-tab"]
-                pub fn element_tab_set_set_tab(arg0: i64, arg1: i32, arg2: i32) -> i64;
+                pub safe fn element_tab_set_set_tab(arg0: i64, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "event-get-parameter-bool"]
-                pub fn event_get_parameter_bool(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn event_get_parameter_bool(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "event-get-parameter-float"]
-                pub fn event_get_parameter_float(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn event_get_parameter_float(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "event-get-parameter-int"]
-                pub fn event_get_parameter_int(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn event_get_parameter_int(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "event-get-parameter-type"]
-                pub fn event_get_parameter_type(arg0: i64, arg1: i32, arg2: i32) -> i32;
+                pub safe fn event_get_parameter_type(arg0: i64, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "get-context"]
-                pub fn get_context(arg0: i32, arg1: i32) -> i32;
+                pub safe fn get_context(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "load-font-face"]
-                pub fn load_font_face(arg0: i32, arg1: i32) -> i64;
+                pub safe fn load_font_face(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "regiser-event-type"]
-                pub fn regiser_event_type(arg0: i32) -> i64;
+                pub safe fn regiser_event_type(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "register-event-type"]
-                pub fn register_event_type(arg0: i32) -> i64;
+                pub safe fn register_event_type(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "remove-context-by-name"]
-                pub fn remove_context_by_name(arg0: i32) -> i64;
+                pub safe fn remove_context_by_name(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "set-debug-context-by-name"]
-                pub fn set_debug_context_by_name(arg0: i32) -> i64;
+                pub safe fn set_debug_context_by_name(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "set-mouse-cursor-alias"]
-                pub fn set_mouse_cursor_alias(arg0: i32) -> i64;
+                pub safe fn set_mouse_cursor_alias(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "sol-lua-data-model-set-dirty"]
-                pub fn sol_lua_data_model_set_dirty(arg0: i64, arg1: i32) -> i64;
+                pub safe fn sol_lua_data_model_set_dirty(arg0: i64, arg1: i32) -> i64;
             }
         }
 
@@ -3786,16 +3630,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = translation.as_ptr() as usize;
-            let core_len = translation.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(translation.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_translation_string((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_translation_string(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3813,12 +3654,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = document_path.as_ptr() as usize;
-            let core_len = document_path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(document_path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::clear_document_path_requests((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::clear_document_path_requests(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3836,12 +3676,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::context_activate_theme(context_handle as i64, if value { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::context_activate_theme(context_handle as i64, if value { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3860,12 +3699,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::context_create_data_model(context_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::context_create_data_model(context_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -3883,12 +3721,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = tag.as_ptr() as usize;
-            let core_len = tag.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tag.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::context_create_document(context_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::context_create_document(context_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -3906,12 +3743,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::context_get_document(context_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::context_get_document(context_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -3928,12 +3764,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::context_is_theme_active(context_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::context_is_theme_active(context_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -3952,12 +3787,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = document_path.as_ptr() as usize;
-            let core_len = document_path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(document_path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::context_load_document(context_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::context_load_document(context_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -3975,12 +3809,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::context_open_data_model(context_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::context_open_data_model(context_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -3997,12 +3830,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = text.as_ptr() as usize;
-            let core_len = text.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(text.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::context_process_text_input(context_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::context_process_text_input(context_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4020,12 +3852,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::context_remove_data_model(context_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::context_remove_data_model(context_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4043,12 +3874,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = event.as_ptr() as usize;
-            let core_len = event.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(event.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::context_remove_event_listener(context_handle as i64, event_listener_handle as i64, if in_capture_phase { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::context_remove_event_listener(context_handle as i64, event_listener_handle as i64, if in_capture_phase { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4067,12 +3897,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::create_context((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::create_context(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4090,12 +3919,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::data_model_bind_bool(data_model_handle as i64, if initial_value { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::data_model_bind_bool(data_model_handle as i64, if initial_value { 1 } else { 0 }, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4113,12 +3941,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::data_model_bind_color(data_model_handle as i64, red as i32, green as i32, blue as i32, alpha as i32, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::data_model_bind_color(data_model_handle as i64, red as i32, green as i32, blue as i32, alpha as i32, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4136,12 +3963,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::data_model_bind_float(data_model_handle as i64, initial_value, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::data_model_bind_float(data_model_handle as i64, initial_value, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4159,12 +3985,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::data_model_bind_int(data_model_handle as i64, initial_value, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::data_model_bind_int(data_model_handle as i64, initial_value, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4182,12 +4007,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::data_model_bind_percent(data_model_handle as i64, initial_value, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::data_model_bind_percent(data_model_handle as i64, initial_value, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4205,12 +4029,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::data_model_bind_pixels(data_model_handle as i64, initial_value, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::data_model_bind_pixels(data_model_handle as i64, initial_value, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4228,16 +4051,13 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = initial_value.as_ptr() as usize;
-            let core_len = initial_value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(initial_value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::data_model_bind_string(data_model_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::data_model_bind_string(data_model_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4254,12 +4074,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::data_model_set_string(variable_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::data_model_set_string(variable_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4277,12 +4096,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::document_append_to_style_sheet(document_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::document_append_to_style_sheet(document_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4301,12 +4119,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = tag_name.as_ptr() as usize;
-            let core_len = tag_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tag_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::document_create_element(document_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::document_create_element(document_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4324,12 +4141,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::document_create_text_node(document_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::document_create_text_node(document_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4346,12 +4162,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::document_load_external_script(document_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::document_load_external_script(document_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4369,16 +4184,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = content.as_ptr() as usize;
-            let core_len = content.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(content.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = source_path.as_ptr() as usize;
-            let core_len = source_path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(source_path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::document_load_inline_script(document_handle as i64, source_line, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::document_load_inline_script(document_handle as i64, source_line, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4396,12 +4208,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = title.as_ptr() as usize;
-            let core_len = title.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(title.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::document_set_title(document_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::document_set_title(document_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4419,12 +4230,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_are_pseudo_classes_set(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_are_pseudo_classes_set(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4443,12 +4253,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::element_closest(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::element_closest(element_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4465,12 +4274,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = event.as_ptr() as usize;
-            let core_len = event.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(event.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_dispatch_event(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_dispatch_event(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4488,16 +4296,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_form_submit(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_form_submit(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4516,12 +4321,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::element_get_element_by_id(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::element_get_element_by_id(element_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4538,12 +4342,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_get_elements_by_class_name_count(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_get_elements_by_class_name_count(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -4561,12 +4364,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_get_elements_by_tag_name_count(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_get_elements_by_tag_name_count(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -4584,12 +4386,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_has_attribute(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_has_attribute(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4607,12 +4408,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_is_class_set(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_is_class_set(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4630,12 +4430,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_is_pseudo_class_set(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_is_pseudo_class_set(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4653,12 +4452,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_matches(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_matches(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4677,12 +4475,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::element_query_selector(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::element_query_selector(element_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4699,12 +4496,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_query_selector_all_count(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_query_selector_all_count(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -4722,12 +4518,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_remove_attribute(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_remove_attribute(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4745,12 +4540,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = event.as_ptr() as usize;
-            let core_len = event.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(event.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_remove_event_listener(element_handle as i64, event_listener_handle as i64, if in_capture_phase { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_remove_event_listener(element_handle as i64, event_listener_handle as i64, if in_capture_phase { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4768,16 +4562,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_set_attribute(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_set_attribute(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4795,12 +4586,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_set_class(element_handle as i64, if value { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_set_class(element_handle as i64, if value { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4818,12 +4608,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_set_class_name(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_set_class_name(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4841,12 +4630,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_set_id(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_set_id(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4864,12 +4652,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = value.as_ptr() as usize;
-            let core_len = value.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(value.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_set_inner_rml(element_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_set_inner_rml(element_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4887,12 +4674,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_set_pseudo_class(element_handle as i64, if value { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_set_pseudo_class(element_handle as i64, if value { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4910,12 +4696,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = rml.as_ptr() as usize;
-            let core_len = rml.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(rml.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_tab_set_set_panel(element_handle as i64, index, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_tab_set_set_panel(element_handle as i64, index, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4933,12 +4718,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = rml.as_ptr() as usize;
-            let core_len = rml.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(rml.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::element_tab_set_set_tab(element_handle as i64, index, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::element_tab_set_set_tab(element_handle as i64, index, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -4957,12 +4741,11 @@ pub mod borrowed {
             let mut output = [0u8; 8];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::event_get_parameter_bool(event_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::event_get_parameter_bool(event_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -4980,12 +4763,11 @@ pub mod borrowed {
             let mut output = [0u8; 8];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::event_get_parameter_float(event_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::event_get_parameter_float(event_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -5003,12 +4785,11 @@ pub mod borrowed {
             let mut output = [0u8; 8];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::event_get_parameter_int(event_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::event_get_parameter_int(event_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -5026,12 +4807,11 @@ pub mod borrowed {
             let mut output = [0u8; 8];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::event_get_parameter_type(event_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::event_get_parameter_type(event_handle as i64, descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -5049,12 +4829,11 @@ pub mod borrowed {
             let mut output = [0u8; 16];
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::get_context((descriptor.as_ptr() as usize) as u32 as i32, output.as_mut_ptr() as usize as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::get_context(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -5071,14 +4850,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = file_path.as_ptr() as usize;
-            let core_len = file_path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(file_path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(weight.len(), 8usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, weight, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::load_font_face(if fallback { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::load_font_face(if fallback { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5096,14 +4874,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 24];
             let mut cursor = 0usize;
-            let core_ptr = event_type.as_ptr() as usize;
-            let core_len = event_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(event_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(options.len(), 16usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, options, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::regiser_event_type((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::regiser_event_type(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -5121,14 +4898,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 24];
             let mut cursor = 0usize;
-            let core_ptr = event_type.as_ptr() as usize;
-            let core_len = event_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(event_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(options.len(), 16usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, options, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::register_event_type((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::register_event_type(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -5146,12 +4922,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::remove_context_by_name((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::remove_context_by_name(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5169,12 +4944,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_debug_context_by_name((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_debug_context_by_name(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5192,16 +4966,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = rml_name.as_ptr() as usize;
-            let core_len = rml_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(rml_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = recoil_name.as_ptr() as usize;
-            let core_len = recoil_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(recoil_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_mouse_cursor_alias((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_mouse_cursor_alias(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5219,12 +4990,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = property.as_ptr() as usize;
-            let core_len = property.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(property.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::sol_lua_data_model_set_dirty(data_model_handle as i64, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::sol_lua_data_model_set_dirty(data_model_handle as i64, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5246,52 +5016,52 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "compress-folder"]
-                pub fn compress_folder(arg0: i32, arg1: i32) -> i64;
+                pub safe fn compress_folder(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "create-dir"]
-                pub fn create_dir(arg0: i32) -> i64;
+                pub safe fn create_dir(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "download-archive"]
-                pub fn download_archive(arg0: i32) -> i32;
+                pub safe fn download_archive(arg0: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "extract-mod-archive-file"]
-                pub fn extract_mod_archive_file(arg0: i32) -> i64;
+                pub safe fn extract_mod_archive_file(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "file-exists"]
-                pub fn file_exists(arg0: i32) -> i64;
+                pub safe fn file_exists(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "get-file-size"]
-                pub fn get_file_size(arg0: i32) -> i64;
+                pub safe fn get_file_size(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "get-map-square-texture"]
-                pub fn get_map_square_texture(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+                pub safe fn get_map_square_texture(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "has-archive"]
-                pub fn has_archive(arg0: i32) -> i64;
+                pub safe fn has_archive(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "is-directory"]
-                pub fn is_directory(arg0: i32) -> i64;
+                pub safe fn is_directory(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
                 #[link_name = "set-map-square-texture"]
-                pub fn set_map_square_texture(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn set_map_square_texture(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
         }
 
@@ -5301,24 +5071,17 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 32];
             let mut cursor = 0usize;
-            let core_ptr = folder_path.as_ptr() as usize;
-            let core_len = folder_path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(folder_path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = archive_type.as_ptr() as usize;
-            let core_len = archive_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(archive_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = compressed_file_path.as_ptr() as usize;
-            let core_len = compressed_file_path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(compressed_file_path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = mode.as_ptr() as usize;
-            let core_len = mode.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(mode.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::compress_folder(if include_folder { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::compress_folder(if include_folder { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5336,12 +5099,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = path.as_ptr() as usize;
-            let core_len = path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::create_dir((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::create_dir(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5359,16 +5121,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = filename.as_ptr() as usize;
-            let core_len = filename.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(filename.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = category.as_ptr() as usize;
-            let core_len = category.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(category.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let status = unsafe { raw::download_archive((descriptor.as_ptr() as usize) as u32 as i32) };
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::download_archive(descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
@@ -5384,12 +5143,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = path.as_ptr() as usize;
-            let core_len = path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::extract_mod_archive_file((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::extract_mod_archive_file(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5407,12 +5165,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = path.as_ptr() as usize;
-            let core_len = path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::file_exists((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::file_exists(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5430,12 +5187,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = path.as_ptr() as usize;
-            let core_len = path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_file_size((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_file_size(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(packed as u32)
@@ -5453,12 +5209,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = texture_name.as_ptr() as usize;
-            let core_len = texture_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(texture_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_map_square_texture(tex_square_x, tex_square_y, lod_min, lod_max, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_map_square_texture(tex_square_x, tex_square_y, lod_min, lod_max, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5476,12 +5231,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = archive_name.as_ptr() as usize;
-            let core_len = archive_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(archive_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::has_archive((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::has_archive(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5499,12 +5253,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = path.as_ptr() as usize;
-            let core_len = path.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(path.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::is_directory((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::is_directory(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5522,12 +5275,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = texture_name.as_ptr() as usize;
-            let core_len = texture_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(texture_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_map_square_texture(tex_square_x, tex_square_y, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_map_square_texture(tex_square_x, tex_square_y, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5549,37 +5301,37 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:team-control")]
             unsafe extern "C" {
                 #[link_name = "add-team-resource"]
-                pub fn add_team_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn add_team_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:team-control")]
             unsafe extern "C" {
                 #[link_name = "add-team-resource-excess-stats"]
-                pub fn add_team_resource_excess_stats(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn add_team_resource_excess_stats(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:team-control")]
             unsafe extern "C" {
                 #[link_name = "game-over"]
-                pub fn game_over(arg0: i32) -> i64;
+                pub safe fn game_over(arg0: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:team-control")]
             unsafe extern "C" {
                 #[link_name = "set-team-resource"]
-                pub fn set_team_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn set_team_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:team-control")]
             unsafe extern "C" {
                 #[link_name = "set-team-share-level"]
-                pub fn set_team_share_level(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn set_team_share_level(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:team-control")]
             unsafe extern "C" {
                 #[link_name = "share-team-resource"]
-                pub fn share_team_resource(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
+                pub safe fn share_team_resource(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:team-control")]
             unsafe extern "C" {
                 #[link_name = "use-team-resource"]
-                pub fn use_team_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn use_team_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
         }
 
@@ -5589,12 +5341,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource_type.as_ptr() as usize;
-            let core_len = resource_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_team_resource(team_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_team_resource(team_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5612,12 +5363,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource_type.as_ptr() as usize;
-            let core_len = resource_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_team_resource_excess_stats(team_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_team_resource_excess_stats(team_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5635,12 +5385,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if winning_ally_teams.is_empty() { 0usize } else { winning_ally_teams.as_ptr() as usize };
-            let core_len = winning_ally_teams.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(winning_ally_teams)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::game_over((descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::game_over(descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5658,12 +5407,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource_type.as_ptr() as usize;
-            let core_len = resource_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_team_resource(team_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_team_resource(team_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5681,12 +5429,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource_type.as_ptr() as usize;
-            let core_len = resource_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_team_share_level(team_id, share_level, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_team_share_level(team_id, share_level, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5704,12 +5451,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource_type.as_ptr() as usize;
-            let core_len = resource_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::share_team_resource(team_id, target_team_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::share_team_resource(team_id, target_team_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5727,12 +5473,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource_type.as_ptr() as usize;
-            let core_len = resource_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::use_team_resource(team_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::use_team_resource(team_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5754,67 +5499,67 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "add-unit-resource"]
-                pub fn add_unit_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn add_unit_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "bugger-off"]
-                pub fn bugger_off(arg0: f32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn bugger_off(arg0: f32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "give-order-to-unit-array"]
-                pub fn give_order_to_unit_array(arg0: i32, arg1: i32, arg2: i32, arg3: i32) -> i64;
+                pub safe fn give_order_to_unit_array(arg0: i32, arg1: i32, arg2: i32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-build-params"]
-                pub fn set_unit_build_params(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_unit_build_params(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-flanking"]
-                pub fn set_unit_flanking(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_unit_flanking(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-nano-pieces"]
-                pub fn set_unit_nano_pieces(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_unit_nano_pieces(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-resourcing"]
-                pub fn set_unit_resourcing(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn set_unit_resourcing(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-sensor-radius"]
-                pub fn set_unit_sensor_radius(arg0: i32, arg1: i32, arg2: i32) -> i64;
+                pub safe fn set_unit_sensor_radius(arg0: i32, arg1: i32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-storage"]
-                pub fn set_unit_storage(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn set_unit_storage(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-tooltip"]
-                pub fn set_unit_tooltip(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_unit_tooltip(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-weapon-damages"]
-                pub fn set_unit_weapon_damages(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
+                pub safe fn set_unit_weapon_damages(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "set-unit-weapon-state"]
-                pub fn set_unit_weapon_state(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
+                pub safe fn set_unit_weapon_state(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
                 #[link_name = "use-unit-resource"]
-                pub fn use_unit_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
+                pub safe fn use_unit_resource(arg0: i32, arg1: f32, arg2: i32) -> i64;
             }
         }
 
@@ -5824,12 +5569,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource_type.as_ptr() as usize;
-            let core_len = resource_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::add_unit_resource(unit_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::add_unit_resource(unit_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5851,12 +5595,11 @@ pub mod borrowed {
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, pos, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(options.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, options, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = if exclude_unit_def_i_ds.is_empty() { 0usize } else { exclude_unit_def_i_ds.as_ptr() as usize };
-            let core_len = exclude_unit_def_i_ds.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(exclude_unit_def_i_ds)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::bugger_off(radius, team_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::bugger_off(radius, team_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5874,16 +5617,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 16];
             let mut cursor = 0usize;
-            let core_ptr = if unit_i_ds.is_empty() { 0usize } else { unit_i_ds.as_ptr() as usize };
-            let core_len = unit_i_ds.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(unit_i_ds)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let core_ptr = if params.is_empty() { 0usize } else { params.as_ptr() as usize };
-            let core_len = params.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(params)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::give_order_to_unit_array(cmd_id, options as i32, timeout, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::give_order_to_unit_array(cmd_id, options as i32, timeout, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5901,14 +5641,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 20];
             let mut cursor = 0usize;
-            let core_ptr = param_name.as_ptr() as usize;
-            let core_len = param_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(param_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(value.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, value, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_build_params(unit_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_build_params(unit_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5926,14 +5665,13 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 20];
             let mut cursor = 0usize;
-            let core_ptr = r#type.as_ptr() as usize;
-            let core_len = r#type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(r#type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             debug_assert_eq!(args.len(), 12usize);
             if !super::__core_borrowed_wire::put_fixed(&mut descriptor, &mut cursor, args, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_flanking(unit_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_flanking(unit_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5951,12 +5689,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = if piece_indices.is_empty() { 0usize } else { piece_indices.as_ptr() as usize };
-            let core_len = piece_indices.len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(piece_indices)?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_nano_pieces(unit_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_nano_pieces(unit_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5974,12 +5711,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = r#type.as_ptr() as usize;
-            let core_len = r#type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(r#type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_resourcing(unit_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_resourcing(unit_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -5997,12 +5733,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = sensor_type.as_ptr() as usize;
-            let core_len = sensor_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(sensor_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_sensor_radius(unit_id, radius, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_sensor_radius(unit_id, radius, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -6020,12 +5755,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource.as_ptr() as usize;
-            let core_len = resource.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_storage(unit_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_storage(unit_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -6043,12 +5777,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = tooltip.as_ptr() as usize;
-            let core_len = tooltip.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(tooltip.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_tooltip(unit_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_tooltip(unit_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -6066,12 +5799,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = damage_key.as_ptr() as usize;
-            let core_len = damage_key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(damage_key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_weapon_damages(unit_id, weapon_num, damage_value, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_weapon_damages(unit_id, weapon_num, damage_value, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -6089,12 +5821,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = key.as_ptr() as usize;
-            let core_len = key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_unit_weapon_state(unit_id, weapon_num, value, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_weapon_state(unit_id, weapon_num, value, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -6112,12 +5843,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = resource_type.as_ptr() as usize;
-            let core_len = resource_type.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(resource_type.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::use_unit_resource(unit_id, amount, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::use_unit_resource(unit_id, amount, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -6139,23 +5869,21 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:terrain-control")]
             unsafe extern "C" {
                 #[link_name = "set-terrain-type-data"]
-                pub fn set_terrain_type_data(arg0: i32, arg1: f32, arg2: f32, arg3: f32, arg4: f32, arg5: f32, arg6: i32, arg7: i32) -> i64;
+                pub safe fn set_terrain_type_data(arg0: i32, arg1: f32, arg2: f32, arg3: f32, arg4: f32, arg5: f32, arg6: i32, arg7: i32) -> i64;
             }
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn set_terrain_type_data(type_index: i32, tank_speed: f32, kbot_speed: f32, hover_speed: f32, ship_speed: f32, hardness: f32, receive_tracks: bool, name: &core::ffi::CStr) -> Result<bool> {
             #[cfg(target_arch = "wasm32")]
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = name.as_ptr() as usize;
-            let core_len = name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_terrain_type_data(type_index, tank_speed, kbot_speed, hover_speed, ship_speed, hardness, if receive_tracks { 1 } else { 0 }, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_terrain_type_data(type_index, tank_speed, kbot_speed, hover_speed, ship_speed, hardness, if receive_tracks { 1 } else { 0 }, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -6177,12 +5905,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:projectile-control")]
             unsafe extern "C" {
                 #[link_name = "set-projectile-ceg"]
-                pub fn set_projectile_ceg(arg0: i32, arg1: i32) -> i64;
+                pub safe fn set_projectile_ceg(arg0: i32, arg1: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:projectile-control")]
             unsafe extern "C" {
                 #[link_name = "set-projectile-damages"]
-                pub fn set_projectile_damages(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
+                pub safe fn set_projectile_damages(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
             }
         }
 
@@ -6192,12 +5920,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = ceg_name.as_ptr() as usize;
-            let core_len = ceg_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(ceg_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_projectile_ceg(projectile_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_projectile_ceg(projectile_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)
@@ -6215,12 +5942,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = damage_key.as_ptr() as usize;
-            let core_len = damage_key.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(damage_key.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::set_projectile_damages(projectile_id, unused, damage_value, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_projectile_damages(projectile_id, unused, damage_value, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -6242,7 +5968,7 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:cob-script")]
             unsafe extern "C" {
                 #[link_name = "get-cob-script-id"]
-                pub fn get_cob_script_id(arg0: i32, arg1: i32) -> i64;
+                pub safe fn get_cob_script_id(arg0: i32, arg1: i32) -> i64;
             }
         }
 
@@ -6252,12 +5978,11 @@ pub mod borrowed {
             {
             let mut descriptor = [0u8; 8];
             let mut cursor = 0usize;
-            let core_ptr = func_name.as_ptr() as usize;
-            let core_len = func_name.to_bytes().len();
-            debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);
+            let (core_ptr, core_len) = crate::wasm_slice_parts(func_name.to_bytes())?;
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
-            let packed = unsafe { raw::get_cob_script_id(unit_id, (descriptor.as_ptr() as usize) as u32 as i32) } as u64;
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::get_cob_script_id(unit_id, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) as i32)

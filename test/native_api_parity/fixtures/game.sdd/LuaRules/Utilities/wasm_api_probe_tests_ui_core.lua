@@ -9,6 +9,8 @@ return {
 
 		"get_mouse_cursor",
 
+		"get_mouse_buttons_pressed",
+
 		"is_above_mini_map",
 
 		"get_key_code",
@@ -29,6 +31,20 @@ return {
 
 		"get_current_tooltip",
 
+		"get_console_buffer_count",
+
+		"echo_console_buffer_count",
+
+		"send_message_console_buffer_count",
+
+		"log_console_buffer_count",
+
+		"send_message_to_player_console_buffer_count",
+
+		"send_message_to_ally_team_console_buffer_count",
+
+		"send_message_to_spectators_console_buffer_count",
+
 		"get_units_in_screen_rectangle",
 
 		"get_selected_units",
@@ -36,6 +52,8 @@ return {
 		"get_selected_units_count",
 
 		"get_selected_units_sorted",
+
+		"get_selected_units_counts",
 
 		"get_selected_group",
 
@@ -59,6 +77,8 @@ return {
 
 		"get_group_units_count",
 
+		"get_group_units_counts",
+
 		"ui_visibility_ally_los",
 
 		"ui_visibility_enemy_los",
@@ -79,6 +99,12 @@ return {
 
 		"ui_visibility_radar_view_mid_position",
 
+		"get_group_units_sorted_fixed",
+
+		"get_active_cmd_descs_fixed_count",
+
+		"get_active_cmd_desc_fixed_fields",
+
 	},
 	values = {
 		["is_above_mini_map"] = {
@@ -93,6 +119,39 @@ return {
 		},
 		["get_mouse_start_position"] = {
 			button = 1,
+		},
+		["get_console_buffer_count"] = {
+			maxLines = 3,
+		},
+		["echo_console_buffer_count"] = {
+			message = "native-api-parity-echo",
+			rest = "",
+			maxLines = 8,
+		},
+		["send_message_console_buffer_count"] = {
+			message = "native-api-parity-message",
+			maxLines = 8,
+		},
+		["log_console_buffer_count"] = {
+			section = "native-api-parity",
+			level = 3,
+			levelName = "notice",
+			message = "native-api-parity-log",
+			maxLines = 8,
+		},
+		["send_message_to_player_console_buffer_count"] = {
+			playerID = 0,
+			message = "native-api-parity-player-message",
+			maxLines = 8,
+		},
+		["send_message_to_ally_team_console_buffer_count"] = {
+			allyTeamID = 0,
+			message = "native-api-parity-ally-team-message",
+			maxLines = 8,
+		},
+		["send_message_to_spectators_console_buffer_count"] = {
+			message = "native-api-parity-spectator-message",
+			maxLines = 8,
 		},
 		["get_units_in_screen_rectangle"] = {
 			left = 0,
@@ -128,6 +187,9 @@ return {
 		["get_group_units_count"] = {
 			groupID = 0,
 		},
+		["get_group_units_counts"] = {
+			groupID = 0,
+		},
 		["ui_visibility_radar_state"] = {
 			raw = false,
 		},
@@ -148,6 +210,12 @@ return {
 		},
 		["ui_visibility_radar_view_mid_position"] = {
 			midPos = true,
+		},
+		["get_group_units_sorted_fixed"] = {
+			groupID = 0,
+		},
+		["get_active_cmd_desc_fixed_fields"] = {
+			cmdIndex = 1,
 		},
 	},
 }

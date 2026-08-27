@@ -105,8 +105,19 @@ def core_owned_unsupported() -> frozenset[tuple[str, str]]:
         re.MULTILINE | re.DOTALL,
     )
     function_pattern = re.compile(r"^        pub fn ([A-Za-z0-9_]+)\(", re.MULTILINE)
+    hidden_function_pattern = re.compile(
+        r"(?ms)^        #\[doc\(hidden\)\].*?^        pub fn ([A-Za-z0-9_]+)\("
+    )
     for match in module_pattern.finditer(text):
-        modules[match.group(1)] = set(function_pattern.findall(match.group("body")))
+        body = match.group("body")
+        functions = set(function_pattern.findall(body))
+        # Exact Core ABI forwarding entries are retained as hidden compatibility
+        # escape hatches, but they are not the typed owned façade that parity
+        # probes are meant to exercise.  Selecting one would compile against
+        # its raw pointer/length signature and make the probe generator emit a
+        # semantically unrelated call.
+        functions.difference_update(hidden_function_pattern.findall(body))
+        modules[match.group(1)] = functions
 
     model_functions, _records, _modules, _enums = load_model()
     return frozenset(

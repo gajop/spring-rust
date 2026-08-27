@@ -1,11 +1,14 @@
-
-
 #[cfg(feature = "alloc")]
-pub use crate::owned::units_commands::{find_unit_cmd_desc, get_command_params, get_command_queue, get_factory_bugger_off, get_factory_command_count, get_factory_commands, get_factory_counts, get_full_build_queue, get_real_build_queue, get_unit_cmd_descs, get_unit_current_command, give_order_array_to_unit_map};
+pub use crate::owned::units_commands::{
+    find_unit_cmd_desc, get_command_params, get_command_queue, get_factory_bugger_off,
+    get_factory_command_count, get_factory_commands, get_factory_counts, get_full_build_queue,
+    get_real_build_queue, get_unit_cmd_descs, get_unit_current_command,
+    give_order_array_to_unit_map,
+};
 
 // UnitsCommands portion of the Spring Core-Wasm guest SDK.
 
-use super::{ApiError, ErrorCode, Result};
+use super::{ApiError, ErrorCode, Result, UnitId};
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -36,16 +39,16 @@ mod raw {
     #[link(wasm_import_module = "spring:units-commands")]
     unsafe extern "C" {
         #[link_name = "get-unit-command-count"]
-        pub fn get_unit_command_count(unit_id: i32) -> i64;
+        pub safe fn get_unit_command_count(unit_id: i32) -> i64;
         #[link_name = "get-unit-commands"]
-        pub fn get_unit_commands(
+        pub safe fn get_unit_commands(
             unit_id: i32,
             max_commands: i32,
             output: i32,
             capacity_bytes: i32,
         ) -> i64;
         #[link_name = "give-order"]
-        pub fn give_order(
+        pub safe fn give_order(
             cmd_id: i32,
             params: i32,
             param_count: i32,
@@ -53,7 +56,7 @@ mod raw {
             timeout: i32,
         ) -> i64;
         #[link_name = "give-order-to-unit-map"]
-        pub fn give_order_to_unit_map(
+        pub safe fn give_order_to_unit_map(
             unit_ids: i32,
             unit_count: i32,
             cmd_id: i32,
@@ -66,12 +69,16 @@ mod raw {
 }
 
 #[inline]
-fn decode_fill(packed: i64) -> Result<CommandBufferFill> {
+fn decode_fill(packed: i64, capacity: usize) -> Result<CommandBufferFill> {
     let packed = packed as u64;
     let bytes = packed as u32 as usize;
     let status = (packed >> 32) as u32 as i32;
     if status == 0 {
-        Ok(CommandBufferFill::Complete(bytes))
+        if bytes > capacity {
+            Err(ApiError::new(ErrorCode::Internal as i32))
+        } else {
+            Ok(CommandBufferFill::Complete(bytes))
+        }
     } else if status == ErrorCode::BufferOverflow as i32 {
         Ok(CommandBufferFill::Insufficient { required: bytes })
     } else {
@@ -91,22 +98,16 @@ fn decode_i32(packed: i64) -> Result<i32> {
 }
 
 #[inline]
-fn slice_parts<T>(values: &[T]) -> (i32, i32) {
-    if values.is_empty() {
-        return (0, 0);
-    }
-    let pointer = values.as_ptr() as usize;
-    debug_assert!(pointer <= u32::MAX as usize);
-    debug_assert!(values.len() <= u32::MAX as usize);
-    (pointer as u32 as i32, values.len() as u32 as i32)
+fn slice_parts<T>(values: &[T]) -> Result<(i32, i32)> {
+    super::wasm_slice_parts(values)
 }
 
 #[inline]
-pub fn get_unit_command_count(unit_id: i32) -> Result<u32> {
+pub fn get_unit_command_count(unit_id: impl Into<UnitId>) -> Result<u32> {
+    let unit_id = unit_id.into();
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: generated scalar-only signature.
-        let packed = unsafe { raw::get_unit_command_count(unit_id) } as u64;
+        let packed = raw::get_unit_command_count(unit_id.0) as u64;
         let status = (packed >> 32) as u32 as i32;
         if status == 0 {
             Ok(packed as u32)
@@ -123,25 +124,18 @@ pub fn get_unit_command_count(unit_id: i32) -> Result<u32> {
 
 #[inline]
 pub fn get_unit_commands_into(
-    unit_id: i32,
+    unit_id: impl Into<UnitId>,
     max_commands: u32,
     output: &mut [u8],
 ) -> Result<CommandBufferFill> {
+    let unit_id = unit_id.into();
     #[cfg(target_arch = "wasm32")]
     {
-        let (pointer, capacity) = if output.is_empty() {
-            (0, 0)
-        } else {
-            let pointer = output.as_mut_ptr() as usize;
-            debug_assert!(pointer <= u32::MAX as usize);
-            debug_assert!(output.len() <= u32::MAX as usize);
-            (pointer as u32 as i32, output.len() as u32 as i32)
-        };
-        // SAFETY: host validates the complete output byte range once and writes
-        // the entire nested command representation synchronously.
-        decode_fill(unsafe {
-            raw::get_unit_commands(unit_id, max_commands as i32, pointer, capacity)
-        })
+        let (pointer, capacity) = super::wasm_mut_slice_parts(output)?;
+        decode_fill(
+            raw::get_unit_commands(unit_id.0, max_commands as i32, pointer, capacity),
+            output.len(),
+        )
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -156,12 +150,14 @@ pub fn get_unit_commands_into(
 pub fn give_order(cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        let (params_ptr, param_count) = slice_parts(params);
-        // SAFETY: `params` is a properly aligned Rust f32 slice and the host
-        // validates the full range before borrowing it synchronously.
-        decode_i32(unsafe {
-            raw::give_order(cmd_id, params_ptr, param_count, options as i32, timeout)
-        })
+        let (params_ptr, param_count) = slice_parts(params)?;
+        decode_i32(raw::give_order(
+            cmd_id,
+            params_ptr,
+            param_count,
+            options as i32,
+            timeout,
+        ))
         .map(|value| value != 0)
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -183,21 +179,17 @@ pub fn give_order_to_unit_map(
 ) -> Result<i32> {
     #[cfg(target_arch = "wasm32")]
     {
-        let (unit_ids_ptr, unit_count) = slice_parts(unit_ids);
-        let (params_ptr, param_count) = slice_parts(params);
-        // SAFETY: both Rust slices are naturally aligned and live for the full
-        // synchronous host call; the host validates both ranges independently.
-        decode_i32(unsafe {
-            raw::give_order_to_unit_map(
-                unit_ids_ptr,
-                unit_count,
-                cmd_id,
-                params_ptr,
-                param_count,
-                options as i32,
-                timeout,
-            )
-        })
+        let (unit_ids_ptr, unit_count) = slice_parts(unit_ids)?;
+        let (params_ptr, param_count) = slice_parts(params)?;
+        decode_i32(raw::give_order_to_unit_map(
+            unit_ids_ptr,
+            unit_count,
+            cmd_id,
+            params_ptr,
+            param_count,
+            options as i32,
+            timeout,
+        ))
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -280,7 +272,11 @@ fn parse_commands(bytes: &[u8]) -> Result<Vec<UnitCommand>> {
 }
 
 #[cfg(feature = "alloc")]
-pub fn get_unit_commands(unit_id: i32, max_commands: u32) -> Result<Vec<UnitCommand>> {
+pub fn get_unit_commands(
+    unit_id: impl Into<UnitId>,
+    max_commands: u32,
+) -> Result<Vec<UnitCommand>> {
+    let unit_id = unit_id.into();
     #[cfg(target_arch = "wasm32")]
     {
         let first = get_unit_commands_into(unit_id, max_commands, &mut [])?;

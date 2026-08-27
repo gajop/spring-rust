@@ -548,12 +548,7 @@
             pub value: Float2,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Default)]
-        pub struct Float3 {
-            pub x: f32,
-            pub y: f32,
-            pub z: f32,
-        }
+        pub use crate::Float3;
 
         #[derive(Debug, Clone, PartialEq)]
         pub struct Float3Array {

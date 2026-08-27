@@ -5,14 +5,14 @@ use spring as spring;
 
 // Volatile observables keep the compiler from deleting imported calls while
 // remaining independent of any allocator/WASI implementation.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub static mut CORE_SURFACE_CHECKSUM: u64 = 0;
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub static mut CORE_DRAW_CALLS: u32 = 0;
 
 #[cfg(target_arch = "wasm32")]
 #[link(wasm_import_module = "spring:unit-defs")]
-extern "C" {
+unsafe extern "C" {
     #[link_name = "get-unit-def-name"]
     fn raw_get_unit_def_name(unit_def_id: i32, output: i32, capacity: i32) -> i64;
 }
@@ -29,13 +29,13 @@ fn mix(value: u64) {
 }
 
 fn game_frame(frame: i32) {
-    let unit_id = 0;
+    let unit_id = spring::UnitId::from(0);
 
     if let Ok(value) = spring::get_unit_def_id(unit_id) {
-        mix(value as u32 as u64);
+        mix(i32::from(value) as u32 as u64);
     }
     if let Ok(value) = spring::get_unit_team(unit_id) {
-        mix(value as u32 as u64);
+        mix(i32::from(value) as u32 as u64);
     }
     if let Ok(value) = spring::get_unit_is_dead(unit_id) {
         mix(value as u64);
@@ -71,13 +71,13 @@ fn game_frame(frame: i32) {
             spring::BufferFill::Insufficient { required } => mix(required as u64),
         }
     }
-    if let Ok(fill) = spring::get_team_units_into(0, &mut ids) {
+    if let Ok(fill) = spring::get_team_units_into(spring::TeamId::from(0), &mut ids) {
         match fill {
             spring::BufferFill::Complete(count) => mix((count as u64) << 1),
             spring::BufferFill::Insufficient { required } => mix((required as u64) << 1),
         }
     }
-    if let Ok(fill) = spring::get_units_in_sphere_into([0.0, 0.0, 0.0], 1024.0, -1, &mut ids) {
+    if let Ok(fill) = spring::get_units_in_sphere_into(spring::Float3::ZERO, 1024.0, -1, &mut ids) {
         match fill {
             spring::BufferFill::Complete(count) => mix((count as u64) << 2),
             spring::BufferFill::Insufficient { required } => mix((required as u64) << 2),
@@ -113,54 +113,59 @@ fn update(delta_seconds: f32) {
     mix(delta_seconds.to_bits() as u64);
 }
 
-fn unit_created(unit_id: i32, unit_def_id: i32, unit_team: i32, builder_id: i32) {
-    mix(unit_id as u32 as u64);
-    mix(unit_def_id as u32 as u64);
-    mix(unit_team as u32 as u64);
-    mix(builder_id as u32 as u64);
+fn unit_created(
+    unit_id: spring::UnitId,
+    unit_def_id: spring::DefId,
+    unit_team: spring::TeamId,
+    builder_id: spring::UnitId,
+) {
+    mix(unit_id.0 as u32 as u64);
+    mix(unit_def_id.0 as u32 as u64);
+    mix(unit_team.0 as u32 as u64);
+    mix(builder_id.0 as u32 as u64);
 }
 
 #[allow(clippy::too_many_arguments)]
 fn unit_pre_damaged(
-    unit_id: i32,
-    unit_def_id: i32,
-    unit_team: i32,
+    unit_id: spring::UnitId,
+    unit_def_id: spring::DefId,
+    unit_team: spring::TeamId,
     damage: f32,
     paralyzer: bool,
-    weapon_def_id: i32,
-    projectile_id: i32,
-    attacker_id: i32,
-    attacker_def_id: i32,
-    attacker_team: i32,
+    weapon_def_id: spring::WeaponDefId,
+    projectile_id: spring::ProjectileId,
+    attacker_id: spring::UnitId,
+    attacker_def_id: spring::DefId,
+    attacker_team: spring::TeamId,
 ) -> spring::DamageResult {
-    mix(unit_id as u32 as u64);
-    mix(unit_def_id as u32 as u64);
-    mix(unit_team as u32 as u64);
+    mix(unit_id.0 as u32 as u64);
+    mix(unit_def_id.0 as u32 as u64);
+    mix(unit_team.0 as u32 as u64);
     mix(damage.to_bits() as u64);
     mix(paralyzer as u64);
-    mix(weapon_def_id as u32 as u64);
-    mix(projectile_id as u32 as u64);
-    mix(attacker_id as u32 as u64);
-    mix(attacker_def_id as u32 as u64);
-    mix(attacker_team as u32 as u64);
+    mix(weapon_def_id.0 as u32 as u64);
+    mix(projectile_id.0 as u32 as u64);
+    mix(attacker_id.0 as u32 as u64);
+    mix(attacker_def_id.0 as u32 as u64);
+    mix(attacker_team.0 as u32 as u64);
     spring::DamageResult::unchanged(damage)
 }
 
 fn allow_unit_creation(
-    unit_def_id: i32,
-    builder_id: i32,
-    builder_team: i32,
+    unit_def_id: spring::DefId,
+    builder_id: spring::UnitId,
+    builder_team: spring::TeamId,
     has_build_info: bool,
-    build_pos: [f32; 3],
+    build_pos: spring::Float3,
     build_facing: i32,
 ) -> spring::AllowUnitCreationResult {
-    mix(unit_def_id as u32 as u64);
-    mix(builder_id as u32 as u64);
-    mix(builder_team as u32 as u64);
+    mix(unit_def_id.0 as u32 as u64);
+    mix(builder_id.0 as u32 as u64);
+    mix(builder_team.0 as u32 as u64);
     mix(has_build_info as u64);
-    mix(build_pos[0].to_bits() as u64);
-    mix(build_pos[1].to_bits() as u64);
-    mix(build_pos[2].to_bits() as u64);
+    mix(build_pos.x.to_bits() as u64);
+    mix(build_pos.y.to_bits() as u64);
+    mix(build_pos.z.to_bits() as u64);
     mix(build_facing as u32 as u64);
     spring::AllowUnitCreationResult::ALLOW
 }

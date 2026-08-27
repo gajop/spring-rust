@@ -33,7 +33,7 @@
             #[link(wasm_import_module = "spring:unit-rendering")]
             unsafe extern "C" {
                 #[link_name = "get-features-in-screen-rectangle"]
-                pub fn call(pleft: f32, ptop: f32, pright: f32, pbottom: f32, output: i32) -> i32;
+                pub safe fn call(pleft: f32, ptop: f32, pright: f32, pbottom: f32, output: i32) -> i32;
             }
         }
 
@@ -42,7 +42,7 @@
             #[link(wasm_import_module = "spring:unit-rendering")]
             unsafe extern "C" {
                 #[link_name = "get-units-in-screen-rectangle"]
-                pub fn call(pleft: f32, ptop: f32, pright: f32, pbottom: f32, pallegiance: i32, output: i32) -> i32;
+                pub safe fn call(pleft: f32, ptop: f32, pright: f32, pbottom: f32, pallegiance: i32, output: i32) -> i32;
             }
         }
 
@@ -51,7 +51,7 @@
             #[link(wasm_import_module = "spring:unit-rendering")]
             unsafe extern "C" {
                 #[link_name = "get-visible-units"]
-                pub fn call(pteam_id: i32, pradius: f32, pinclude_icons: i32, output: i32) -> i32;
+                pub safe fn call(pteam_id: i32, pradius: f32, pinclude_icons: i32, output: i32) -> i32;
             }
         }
 
@@ -124,7 +124,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_features_in_screen_rectangle::call(left, top, right, bottom, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_features_in_screen_rectangle::call(left, top, right, bottom, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -134,8 +138,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -264,7 +266,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_units_in_screen_rectangle::call(left, top, right, bottom, allegiance, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_units_in_screen_rectangle::call(left, top, right, bottom, allegiance, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -274,8 +280,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -325,7 +329,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_visible_units::call(team_id, radius, u32::from(include_icons) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_visible_units::call(team_id, radius, u32::from(include_icons) as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -335,8 +343,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }

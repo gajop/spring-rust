@@ -12,6 +12,6 @@ pub use crate::{
 /// Environment-scoped generated surfaces. Keeping these names under the
 /// prelude makes the safe entry point discoverable without flattening APIs
 /// from incompatible execution environments into one namespace.
-pub use crate::generated::{gaia_synced, gaia_unsynced, owned, rules_synced, rules_unsynced, ui};
+pub use crate::generated::{gaia_synced, gaia_unsynced, rules_synced, rules_unsynced, ui};
 
 pub use crate::typed::{UnitScriptCallResult, call_unit_script};

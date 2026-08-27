@@ -310,13 +310,18 @@ def verify_owned_environment_surface(regenerated: Path) -> list[str]:
         "gaia_synced": 4,
         "gaia_unsynced": 8,
         "ui": 16,
+        "menu": 32,
+        "intro": 64,
     }
     findings: list[str] = []
 
     def check_surface(module_name: str, function_name: str, mask: int) -> None:
         owned_body = source_module_body(owned, module_name, "    ")
         if not re.search(
-            rf"^        pub (?:unsafe )?fn {re.escape(function_name)}\(",
+            # Wide Lua-parity functions carry an arity lint whose indentation
+            # is emitted before the declaration. Match the declaration at any
+            # indentation level inside this module shard.
+            rf"^[ \t]+pub (?:unsafe )?fn {re.escape(function_name)}\(",
             owned_body,
             re.MULTILINE,
         ):

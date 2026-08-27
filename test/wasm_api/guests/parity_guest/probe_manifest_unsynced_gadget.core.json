@@ -9,6 +9,7 @@
     "get_local_team_id",
     "get_local_ally_team_id",
     "get_spectating_state",
+    "get_player_roster_count",
     "get_player_statistics",
     "is_replay",
     "get_game_name",
@@ -75,9 +76,9 @@
   "coverage": {
     "source_context": "unsynced_gadget",
     "source_test_count": 283,
-    "selected_count": 68,
+    "selected_count": 69,
     "selected_kind_counts": {
-      "readonly": 51,
+      "readonly": 52,
       "setter_getter": 17
     },
     "selected_ids": [
@@ -87,6 +88,7 @@
       "get_local_team_id",
       "get_local_ally_team_id",
       "get_spectating_state",
+      "get_player_roster_count",
       "get_player_statistics",
       "is_replay",
       "get_game_name",
@@ -158,14 +160,10 @@
         "get_config_int_nil_default",
         "get_config_float_nil_default",
         "get_config_string_nil_default",
-        "get_config_params",
-        "get_log_sections",
         "config_int",
         "config_float",
         "config_string",
-        "get_player_roster_count",
         "get_player_traffic_missing_packet",
-        "get_profiler_record_names_count",
         "get_profiler_time_record_empty",
         "get_last_message_positions_count",
         "get_visible_projectiles",
@@ -177,6 +175,9 @@
         "solve_nurbscurve"
       ],
       "core_policy": [
+        "get_config_params",
+        "get_log_sections",
+        "get_profiler_record_names_count",
         "get_lua_mem_usage",
         "diff_timers",
         "get_timer",

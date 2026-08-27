@@ -61,7 +61,7 @@ fn ensure_started() -> spring::Result<()> {
     if guard.is_some() {
         return Ok(());
     }
-    let units = spring::get_team_units(0)?;
+    let units = spring::get_team_units(spring::TeamId::from(0))?;
     if units.is_empty() {
         return Err(spring::ApiError::new(spring::ErrorCode::NotFound as i32));
     }
@@ -94,10 +94,12 @@ pub fn step() -> spring::Result<bool> {
         let (elapsed, checksum) = timed(|| {
             let mut checksum = 0.0;
             for unit in units.iter().take(unit_limit) {
-                let position = spring::get_unit_position(*unit, false, false)?;
+                let position = spring::get_unit_position(spring::UnitId::from(*unit), false, false)?;
                 checksum += f64::from(position[0] + position[1] + position[2]);
-                let _ = spring::get_unit_health(*unit)?;
-                checksum += f64::from(spring::get_unit_def_id(*unit)?);
+                let _ = spring::get_unit_health(spring::UnitId::from(*unit))?;
+                checksum += f64::from(i32::from(
+                    spring::get_unit_def_id(spring::UnitId::from(*unit))?,
+                ));
             }
             Ok(checksum)
         })?;
@@ -107,7 +109,7 @@ pub fn step() -> spring::Result<bool> {
         let (elapsed, checksum) = timed(|| {
             let mut checksum = 0.0;
             for unit in units.iter().take(area_limit) {
-                let position = spring::get_unit_position(*unit, false, false)?;
+                let position = spring::get_unit_position(spring::UnitId::from(*unit), false, false)?;
                 checksum += owned_cylinder(position[0], position[2], 300.0, -1)?.len() as f64;
             }
             Ok(checksum)
@@ -118,8 +120,8 @@ pub fn step() -> spring::Result<bool> {
         let (elapsed, checksum) = timed(|| {
             let mut checksum = 0.0;
             for (index, unit) in units.iter().take(unit_limit).enumerate() {
-                spring::set_unit_rules_param_f32(*unit, "bench", 1.0, -1)?;
-                let _ = spring::get_unit_rules_param_f32(*unit, "bench")?;
+                spring::set_unit_rules_param_f32(spring::UnitId::from(*unit), "bench", 1.0, -1)?;
+                let _ = spring::get_unit_rules_param_f32(spring::UnitId::from(*unit), "bench")?;
                 checksum += index as f64;
             }
             Ok(checksum)
@@ -130,9 +132,9 @@ pub fn step() -> spring::Result<bool> {
         let (elapsed, checksum) = timed(|| {
             let mut checksum = 0.0;
             for unit in units.iter().take(command_limit) {
-                let position = spring::get_unit_position(*unit, false, false)?;
+                let position = spring::get_unit_position(spring::UnitId::from(*unit), false, false)?;
                 spring::give_order_to_unit(
-                    *unit,
+                    spring::UnitId::from(*unit),
                     10,
                     &[position[0] + 8.0, position[1], position[2] + 8.0],
                     0,

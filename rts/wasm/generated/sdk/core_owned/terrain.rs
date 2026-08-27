@@ -234,7 +234,7 @@
             #[cfg(target_arch = "wasm32")]
             {
                 let mut output = [0u8; 16];
-                let status = unsafe { __core_terrain_ground_extremes::call(output.as_mut_ptr() as usize as u32 as i32) };
+                let status = __core_terrain_ground_extremes::call(crate::wasm_output_ptr(&mut output)?);
                 if status != 0 { return Err(crate::ApiError::new(status)); }
                 Ok(GetGroundExtremesValue {
                     init_min_height: f32::from_le_bytes(output[0..4].try_into().unwrap()),
@@ -252,7 +252,7 @@
             #[link(wasm_import_module = "spring:terrain")]
             unsafe extern "C" {
                 #[link_name = "get-ground-extremes"]
-                pub fn call(output: i32) -> i32;
+                pub safe fn call(output: i32) -> i32;
             }
         }
 
@@ -298,7 +298,7 @@
             #[cfg(target_arch = "wasm32")]
             {
                 let mut output = [0u8; 8];
-                let status = unsafe { __core_terrain_height_map_size::call(output.as_mut_ptr() as usize as u32 as i32) };
+                let status = __core_terrain_height_map_size::call(crate::wasm_output_ptr(&mut output)?);
                 if status != 0 { return Err(crate::ApiError::new(status)); }
                 Ok(GetHeightMapSizeValue {
                     points_x: i32::from_le_bytes(output[0..4].try_into().unwrap()),
@@ -314,7 +314,7 @@
             #[link(wasm_import_module = "spring:terrain")]
             unsafe extern "C" {
                 #[link_name = "get-height-map-size"]
-                pub fn call(output: i32) -> i32;
+                pub safe fn call(output: i32) -> i32;
             }
         }
 
@@ -350,7 +350,7 @@
         pub fn get_water_plane_level(_unused: u8) -> Result<f32> {
             #[cfg(target_arch = "wasm32")]
             {
-                let packed = unsafe { __core_terrain_water_plane_level::call() } as u64;
+                let packed = __core_terrain_water_plane_level::call() as u64;
                 let status = (packed >> 32) as u32 as i32;
                 if status != 0 { return Err(crate::ApiError::new(status)); }
                 Ok(f32::from_bits(packed as u32))
@@ -364,7 +364,7 @@
             #[link(wasm_import_module = "spring:terrain")]
             unsafe extern "C" {
                 #[link_name = "get-water-plane-level"]
-                pub fn call() -> i64;
+                pub safe fn call() -> i64;
             }
         }
 
@@ -372,7 +372,7 @@
         pub fn is_pos_in_map(x: f32, z: f32) -> Result<IsPosInMapValue> {
             #[cfg(target_arch = "wasm32")]
             {
-                let packed = unsafe { __core_terrain_is_pos_in_map::call(x, z) } as u64;
+                let packed = __core_terrain_is_pos_in_map::call(x, z) as u64;
                 let status = (packed >> 32) as u32 as i32;
                 if status != 0 { return Err(crate::ApiError::new(status)); }
                 let flags = packed as u32;
@@ -387,7 +387,7 @@
             #[link(wasm_import_module = "spring:terrain")]
             unsafe extern "C" {
                 #[link_name = "is-pos-in-map"]
-                pub fn call(x: f32, z: f32) -> i64;
+                pub safe fn call(x: f32, z: f32) -> i64;
             }
         }
 

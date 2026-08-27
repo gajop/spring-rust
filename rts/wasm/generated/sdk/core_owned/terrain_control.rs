@@ -166,7 +166,6 @@
         }
 
         #[inline]
-        #[expect(clippy::too_many_arguments, reason = "Core function preserves the corresponding Lua API arity")]
         pub fn set_terrain_type_data(type_index: i32, tank_speed: f32, kbot_speed: f32, hover_speed: f32, ship_speed: f32, hardness: f32, receive_tracks: bool, name: &str) -> Result<bool> {
             let mut __core_string_7_scratch = [0u8; 256];
             let __core_string_7_buf = match super::write_cstr(name, &mut __core_string_7_scratch) {

@@ -3,10 +3,8 @@
 //! Return storage is supplied up front so a mutating COB call is never retried
 //! merely to discover output capacity.
 
-
-
 #[cfg(feature = "alloc")]
-pub use crate::owned::cob_script::{get_cob_script_id};
+pub use crate::owned::cob_script::get_cob_script_id;
 
 use super::{ApiError, ErrorCode, Result};
 
@@ -21,7 +19,7 @@ mod raw {
     #[link(wasm_import_module = "spring:cob-script")]
     unsafe extern "C" {
         #[link_name = "call-cob-script"]
-        pub fn call_cob_script(
+        pub safe fn call_cob_script(
             unit_id: i32,
             func_id: i32,
             func_name_ptr: i32,
@@ -47,41 +45,28 @@ pub fn call_cob_script(
 ) -> Result<CobCallResult> {
     #[cfg(target_arch = "wasm32")]
     {
-        if ret_values.len() < ret_args as usize
-            || func_name.len() > u32::MAX as usize
-            || args.len() > u32::MAX as usize
-            || ret_values.len() > u32::MAX as usize
-        {
+        if ret_values.len() < ret_args as usize {
             return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
         }
 
-        let name_ptr = func_name.as_ptr() as usize;
-        let args_ptr = args.as_ptr() as usize;
-        let ret_values_ptr = ret_values.as_mut_ptr() as usize;
+        let (name_ptr, name_len) = super::wasm_slice_parts(func_name.as_bytes())?;
+        let (args_ptr, args_len) = super::wasm_slice_parts(args)?;
+        let (ret_values_ptr, ret_capacity) = super::wasm_mut_slice_parts(ret_values)?;
         let mut ret_count = 0u32;
-        let ret_count_ptr = (&mut ret_count as *mut u32) as usize;
-        if name_ptr > u32::MAX as usize
-            || args_ptr > u32::MAX as usize
-            || ret_values_ptr > u32::MAX as usize
-            || ret_count_ptr > u32::MAX as usize
-        {
-            return Err(ApiError::new(ErrorCode::OutOfBounds as i32));
-        }
+        let ret_count_ptr = super::wasm_output_ptr(&mut ret_count)?;
 
-        let packed = unsafe {
-            raw::call_cob_script(
-                unit_id,
-                func_id,
-                name_ptr as u32 as i32,
-                func_name.len() as u32 as i32,
-                ret_args as i32,
-                args_ptr as u32 as i32,
-                args.len() as u32 as i32,
-                ret_values_ptr as u32 as i32,
-                ret_values.len() as u32 as i32,
-                ret_count_ptr as u32 as i32,
-            )
-        };
+        let packed = raw::call_cob_script(
+            unit_id,
+            func_id,
+            name_ptr,
+            name_len,
+            ret_args as i32,
+            args_ptr,
+            args_len,
+            ret_values_ptr,
+            ret_capacity,
+            ret_count_ptr,
+        );
         let ret_code = super::unpack_i32(packed)?;
         if ret_count as usize > ret_values.len() {
             return Err(ApiError::new(ErrorCode::Internal as i32));

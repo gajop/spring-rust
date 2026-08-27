@@ -95,7 +95,7 @@ fn render_raw(plan: &render_core_wasm::FunctionPlan) -> String {
         "            #[link(wasm_import_module = \"{module}\")]\n\
                      unsafe extern \"C\" {{\n\
                          #[link_name = \"{name}\"]\n\
-                         pub fn {function_ident}({params}){result};\n\
+                         pub safe fn {function_ident}({params}){result};\n\
                      }}\n",
         module = plan.import_module,
         name = plan.import_name,

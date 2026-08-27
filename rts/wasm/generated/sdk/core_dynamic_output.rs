@@ -12,7 +12,7 @@ pub required: usize,
             #[link(wasm_import_module = "spring:units-query")]
 unsafe extern "C" {
 #[link_name = "get-team-units-sorted"]
-pub fn get_team_units_sorted(p0: i32, p1: i32) -> i32;
+pub safe fn get_team_units_sorted(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -22,26 +22,27 @@ pub fn get_team_units_sorted(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_team_units_sorted(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_team_units_sorted(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -71,7 +72,7 @@ required: 0,
             #[link(wasm_import_module = "spring:units-info")]
 unsafe extern "C" {
 #[link_name = "get-unit-last-attacked-piece"]
-pub fn get_unit_last_attacked_piece(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_last_attacked_piece(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -81,26 +82,27 @@ pub fn get_unit_last_attacked_piece(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_last_attacked_piece(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_last_attacked_piece(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -130,7 +132,7 @@ required: 0,
             #[link(wasm_import_module = "spring:units-weapons")]
 unsafe extern "C" {
 #[link_name = "get-unit-weapon-damages"]
-pub fn get_unit_weapon_damages(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_unit_weapon_damages(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -140,26 +142,27 @@ pub fn get_unit_weapon_damages(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_weapon_damages(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_weapon_damages(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -189,27 +192,27 @@ required: 0,
             #[link(wasm_import_module = "spring:units-commands")]
 unsafe extern "C" {
 #[link_name = "get-command-queue"]
-pub fn get_command_queue(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_command_queue(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
 unsafe extern "C" {
 #[link_name = "get-factory-commands"]
-pub fn get_factory_commands(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_factory_commands(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
 unsafe extern "C" {
 #[link_name = "get-factory-counts"]
-pub fn get_factory_counts(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
+pub safe fn get_factory_counts(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
 unsafe extern "C" {
 #[link_name = "get-unit-cmd-descs"]
-pub fn get_unit_cmd_descs(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_cmd_descs(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
 unsafe extern "C" {
 #[link_name = "get-unit-current-command"]
-pub fn get_unit_current_command(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_unit_current_command(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -219,26 +222,27 @@ pub fn get_command_queue(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_command_queue(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_command_queue(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -266,26 +270,27 @@ pub fn get_factory_commands(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_factory_commands(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_factory_commands(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -313,26 +318,27 @@ pub fn get_factory_counts(p0: i32, p1: i32, p2: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_factory_counts(p0, p1, p2, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_factory_counts(p0, p1, p2, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -360,26 +366,27 @@ pub fn get_unit_cmd_descs(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_cmd_descs(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_cmd_descs(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -407,26 +414,27 @@ pub fn get_unit_current_command(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_current_command(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_current_command(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -456,47 +464,47 @@ required: 0,
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-feature-piece-info"]
-pub fn get_feature_piece_info(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_feature_piece_info(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-feature-piece-list"]
-pub fn get_feature_piece_list(p0: i32, p1: i32) -> i32;
+pub safe fn get_feature_piece_list(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-feature-piece-map"]
-pub fn get_feature_piece_map(p0: i32, p1: i32) -> i32;
+pub safe fn get_feature_piece_map(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-model-piece-list"]
-pub fn get_model_piece_list(p0: i32, p1: i32) -> i32;
+pub safe fn get_model_piece_list(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-model-piece-map"]
-pub fn get_model_piece_map(p0: i32, p1: i32) -> i32;
+pub safe fn get_model_piece_map(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-unit-piece-info"]
-pub fn get_unit_piece_info(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_unit_piece_info(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-unit-piece-list"]
-pub fn get_unit_piece_list(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_piece_list(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-unit-piece-map"]
-pub fn get_unit_piece_map(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_piece_map(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-pieces")]
 unsafe extern "C" {
 #[link_name = "get-unit-script-names"]
-pub fn get_unit_script_names(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_script_names(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -506,26 +514,27 @@ pub fn get_feature_piece_info(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_piece_info(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_piece_info(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -553,26 +562,27 @@ pub fn get_feature_piece_list(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_piece_list(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_piece_list(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -600,26 +610,27 @@ pub fn get_feature_piece_map(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_piece_map(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_piece_map(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -647,26 +658,27 @@ pub fn get_model_piece_list(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_model_piece_list(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_model_piece_list(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -694,26 +706,27 @@ pub fn get_model_piece_map(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_model_piece_map(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_model_piece_map(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -741,26 +754,27 @@ pub fn get_unit_piece_info(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_piece_info(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_piece_info(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -788,26 +802,27 @@ pub fn get_unit_piece_list(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_piece_list(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_piece_list(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -835,26 +850,27 @@ pub fn get_unit_piece_map(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_piece_map(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_piece_map(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -882,26 +898,27 @@ pub fn get_unit_script_names(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_script_names(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_script_names(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -931,22 +948,22 @@ required: 0,
             #[link(wasm_import_module = "spring:teams")]
 unsafe extern "C" {
 #[link_name = "get-ai-info"]
-pub fn get_ai_info(p0: i32, p1: i32) -> i32;
+pub safe fn get_ai_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:teams")]
 unsafe extern "C" {
 #[link_name = "get-ally-team-info"]
-pub fn get_ally_team_info(p0: i32, p1: i32) -> i32;
+pub safe fn get_ally_team_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:teams")]
 unsafe extern "C" {
 #[link_name = "get-player-info"]
-pub fn get_player_info(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_player_info(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:teams")]
 unsafe extern "C" {
 #[link_name = "get-team-info"]
-pub fn get_team_info(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_team_info(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -956,26 +973,27 @@ pub fn get_ai_info(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_ai_info(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_ai_info(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1003,26 +1021,27 @@ pub fn get_ally_team_info(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_ally_team_info(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_ally_team_info(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1050,26 +1069,27 @@ pub fn get_player_info(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_player_info(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_player_info(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1097,26 +1117,27 @@ pub fn get_team_info(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_team_info(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_team_info(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1146,12 +1167,12 @@ required: 0,
             #[link(wasm_import_module = "spring:features")]
 unsafe extern "C" {
 #[link_name = "get-feature-last-attacked-piece"]
-pub fn get_feature_last_attacked_piece(p0: i32, p1: i32) -> i32;
+pub safe fn get_feature_last_attacked_piece(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:features")]
 unsafe extern "C" {
 #[link_name = "get-feature-resurrect"]
-pub fn get_feature_resurrect(p0: i32, p1: i32) -> i32;
+pub safe fn get_feature_resurrect(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -1161,26 +1182,27 @@ pub fn get_feature_last_attacked_piece(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_last_attacked_piece(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_last_attacked_piece(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1208,26 +1230,27 @@ pub fn get_feature_resurrect(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_resurrect(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_resurrect(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1257,12 +1280,12 @@ required: 0,
             #[link(wasm_import_module = "spring:projectiles")]
 unsafe extern "C" {
 #[link_name = "get-piece-projectile-params"]
-pub fn get_piece_projectile_params(p0: i32, p1: i32) -> i32;
+pub safe fn get_piece_projectile_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:projectiles")]
 unsafe extern "C" {
 #[link_name = "get-projectile-damages"]
-pub fn get_projectile_damages(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_projectile_damages(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -1272,26 +1295,27 @@ pub fn get_piece_projectile_params(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_piece_projectile_params(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_piece_projectile_params(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1319,26 +1343,27 @@ pub fn get_projectile_damages(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_projectile_damages(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_projectile_damages(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1368,17 +1393,17 @@ required: 0,
             #[link(wasm_import_module = "spring:unit-defs")]
 unsafe extern "C" {
 #[link_name = "get-unit-def-by-id"]
-pub fn get_unit_def_by_id(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_def_by_id(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
 unsafe extern "C" {
 #[link_name = "get-unit-def-custom-param-keys"]
-pub fn get_unit_def_custom_param_keys(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_def_custom_param_keys(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:unit-defs")]
 unsafe extern "C" {
 #[link_name = "get-unit-def-param-keys"]
-pub fn get_unit_def_param_keys(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_def_param_keys(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -1388,26 +1413,27 @@ pub fn get_unit_def_by_id(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_def_by_id(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_def_by_id(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1435,26 +1461,27 @@ pub fn get_unit_def_custom_param_keys(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_def_custom_param_keys(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_def_custom_param_keys(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1482,26 +1509,27 @@ pub fn get_unit_def_param_keys(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_def_param_keys(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_def_param_keys(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1531,12 +1559,12 @@ required: 0,
             #[link(wasm_import_module = "spring:feature-defs")]
 unsafe extern "C" {
 #[link_name = "get-feature-def-by-id"]
-pub fn get_feature_def_by_id(p0: i32, p1: i32) -> i32;
+pub safe fn get_feature_def_by_id(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:feature-defs")]
 unsafe extern "C" {
 #[link_name = "get-feature-def-custom-param-keys"]
-pub fn get_feature_def_custom_param_keys(p0: i32, p1: i32) -> i32;
+pub safe fn get_feature_def_custom_param_keys(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -1546,26 +1574,27 @@ pub fn get_feature_def_by_id(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_def_by_id(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_def_by_id(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1593,26 +1622,27 @@ pub fn get_feature_def_custom_param_keys(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_def_custom_param_keys(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_def_custom_param_keys(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1642,12 +1672,12 @@ required: 0,
             #[link(wasm_import_module = "spring:weapon-defs")]
 unsafe extern "C" {
 #[link_name = "get-weapon-def-by-id"]
-pub fn get_weapon_def_by_id(p0: i32, p1: i32) -> i32;
+pub safe fn get_weapon_def_by_id(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:weapon-defs")]
 unsafe extern "C" {
 #[link_name = "get-weapon-def-custom-param-keys"]
-pub fn get_weapon_def_custom_param_keys(p0: i32, p1: i32) -> i32;
+pub safe fn get_weapon_def_custom_param_keys(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -1657,26 +1687,27 @@ pub fn get_weapon_def_by_id(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_weapon_def_by_id(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_weapon_def_by_id(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1704,26 +1735,27 @@ pub fn get_weapon_def_custom_param_keys(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_weapon_def_custom_param_keys(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_weapon_def_custom_param_keys(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1753,37 +1785,37 @@ required: 0,
             #[link(wasm_import_module = "spring:game")]
 unsafe extern "C" {
 #[link_name = "get-game-map-info"]
-pub fn get_game_map_info(p0: i32, p1: i32) -> i32;
+pub safe fn get_game_map_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
 unsafe extern "C" {
 #[link_name = "get-game-mod-info"]
-pub fn get_game_mod_info(p0: i32, p1: i32) -> i32;
+pub safe fn get_game_mod_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
 unsafe extern "C" {
 #[link_name = "get-game-setup-info"]
-pub fn get_game_setup_info(p0: i32, p1: i32) -> i32;
+pub safe fn get_game_setup_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
 unsafe extern "C" {
 #[link_name = "get-map-options"]
-pub fn get_map_options(p0: i32, p1: i32) -> i32;
+pub safe fn get_map_options(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
 unsafe extern "C" {
 #[link_name = "get-mod-options"]
-pub fn get_mod_options(p0: i32, p1: i32) -> i32;
+pub safe fn get_mod_options(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
 unsafe extern "C" {
 #[link_name = "get-side-data"]
-pub fn get_side_data(p0: i32, p1: i32) -> i32;
+pub safe fn get_side_data(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:game")]
 unsafe extern "C" {
 #[link_name = "get-side-data-by-index"]
-pub fn get_side_data_by_index(p0: i32, p1: i32) -> i32;
+pub safe fn get_side_data_by_index(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -1793,26 +1825,27 @@ pub fn get_game_map_info(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_game_map_info(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_game_map_info(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1840,26 +1873,27 @@ pub fn get_game_mod_info(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_game_mod_info(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_game_mod_info(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1887,26 +1921,27 @@ pub fn get_game_setup_info(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_game_setup_info(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_game_setup_info(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1934,26 +1969,27 @@ pub fn get_map_options(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_map_options(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_map_options(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1981,26 +2017,27 @@ pub fn get_mod_options(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_mod_options(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_mod_options(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2028,26 +2065,27 @@ pub fn get_side_data(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_side_data(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_side_data(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2075,26 +2113,27 @@ pub fn get_side_data_by_index(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_side_data_by_index(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_side_data_by_index(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2124,7 +2163,7 @@ required: 0,
             #[link(wasm_import_module = "spring:player")]
 unsafe extern "C" {
 #[link_name = "get-player-roster"]
-pub fn get_player_roster(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_player_roster(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -2134,26 +2173,27 @@ pub fn get_player_roster(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_player_roster(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_player_roster(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2183,52 +2223,52 @@ required: 0,
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-feature-rules-param"]
-pub fn get_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-feature-rules-params"]
-pub fn get_feature_rules_params(p0: i32, p1: i32) -> i32;
+pub safe fn get_feature_rules_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-game-rules-param"]
-pub fn get_game_rules_param(p0: i32, p1: i32) -> i32;
+pub safe fn get_game_rules_param(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-game-rules-params"]
-pub fn get_game_rules_params(p0: i32, p1: i32) -> i32;
+pub safe fn get_game_rules_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-player-rules-param"]
-pub fn get_player_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_player_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-player-rules-params"]
-pub fn get_player_rules_params(p0: i32, p1: i32) -> i32;
+pub safe fn get_player_rules_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-team-rules-param"]
-pub fn get_team_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_team_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-team-rules-params"]
-pub fn get_team_rules_params(p0: i32, p1: i32) -> i32;
+pub safe fn get_team_rules_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-unit-rules-param"]
-pub fn get_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rules-params")]
 unsafe extern "C" {
 #[link_name = "get-unit-rules-params"]
-pub fn get_unit_rules_params(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_rules_params(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -2238,26 +2278,27 @@ pub fn get_feature_rules_param(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_rules_param(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_rules_param(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2285,26 +2326,27 @@ pub fn get_feature_rules_params(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_feature_rules_params(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_feature_rules_params(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2332,26 +2374,27 @@ pub fn get_game_rules_param(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_game_rules_param(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_game_rules_param(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2379,26 +2422,27 @@ pub fn get_game_rules_params(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_game_rules_params(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_game_rules_params(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2426,26 +2470,27 @@ pub fn get_player_rules_param(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_player_rules_param(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_player_rules_param(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2473,26 +2518,27 @@ pub fn get_player_rules_params(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_player_rules_params(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_player_rules_params(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2520,26 +2566,27 @@ pub fn get_team_rules_param(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_team_rules_param(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_team_rules_param(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2567,26 +2614,27 @@ pub fn get_team_rules_params(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_team_rules_params(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_team_rules_params(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2614,26 +2662,27 @@ pub fn get_unit_rules_param(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_rules_param(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_rules_param(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2661,26 +2710,27 @@ pub fn get_unit_rules_params(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_rules_params(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_rules_params(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2710,7 +2760,7 @@ required: 0,
             #[link(wasm_import_module = "spring:move-ctrl")]
 unsafe extern "C" {
 #[link_name = "get-unit-move-type-data"]
-pub fn get_unit_move_type_data(p0: i32, p1: i32) -> i32;
+pub safe fn get_unit_move_type_data(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -2720,26 +2770,27 @@ pub fn get_unit_move_type_data(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_unit_move_type_data(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_unit_move_type_data(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2769,12 +2820,12 @@ required: 0,
             #[link(wasm_import_module = "spring:camera")]
 unsafe extern "C" {
 #[link_name = "get-camera-names"]
-pub fn get_camera_names(p0: i32, p1: i32) -> i32;
+pub safe fn get_camera_names(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:camera")]
 unsafe extern "C" {
 #[link_name = "get-camera-state"]
-pub fn get_camera_state(p0: i32, p1: i32) -> i32;
+pub safe fn get_camera_state(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -2784,26 +2835,27 @@ pub fn get_camera_names(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_camera_names(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_camera_names(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2831,26 +2883,27 @@ pub fn get_camera_state(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_camera_state(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_camera_state(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2880,17 +2933,17 @@ required: 0,
             #[link(wasm_import_module = "spring:input")]
 unsafe extern "C" {
 #[link_name = "get-action-hot-keys"]
-pub fn get_action_hot_keys(p0: i32, p1: i32) -> i32;
+pub safe fn get_action_hot_keys(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:input")]
 unsafe extern "C" {
 #[link_name = "get-key-bindings"]
-pub fn get_key_bindings(p0: i32, p1: i32) -> i32;
+pub safe fn get_key_bindings(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:input")]
 unsafe extern "C" {
 #[link_name = "get-mouse-buttons-pressed"]
-pub fn get_mouse_buttons_pressed(p0: i32, p1: i32) -> i32;
+pub safe fn get_mouse_buttons_pressed(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -2900,26 +2953,27 @@ pub fn get_action_hot_keys(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_action_hot_keys(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_action_hot_keys(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2947,26 +3001,27 @@ pub fn get_key_bindings(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_key_bindings(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_key_bindings(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2994,26 +3049,27 @@ pub fn get_mouse_buttons_pressed(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_mouse_buttons_pressed(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_mouse_buttons_pressed(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3043,17 +3099,17 @@ required: 0,
             #[link(wasm_import_module = "spring:selection")]
 unsafe extern "C" {
 #[link_name = "get-group-units-counts"]
-pub fn get_group_units_counts(p0: i32, p1: i32) -> i32;
+pub safe fn get_group_units_counts(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:selection")]
 unsafe extern "C" {
 #[link_name = "get-group-units-sorted"]
-pub fn get_group_units_sorted(p0: i32, p1: i32) -> i32;
+pub safe fn get_group_units_sorted(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:selection")]
 unsafe extern "C" {
 #[link_name = "get-selected-units-counts"]
-pub fn get_selected_units_counts(p0: i32, p1: i32) -> i32;
+pub safe fn get_selected_units_counts(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -3063,26 +3119,27 @@ pub fn get_group_units_counts(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_group_units_counts(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_group_units_counts(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3110,26 +3167,27 @@ pub fn get_group_units_sorted(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_group_units_sorted(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_group_units_sorted(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3157,26 +3215,27 @@ pub fn get_selected_units_counts(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_selected_units_counts(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_selected_units_counts(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3206,7 +3265,7 @@ required: 0,
             #[link(wasm_import_module = "spring:sound")]
 unsafe extern "C" {
 #[link_name = "get-sound-devices"]
-pub fn get_sound_devices(p0: i32, p1: i32) -> i32;
+pub safe fn get_sound_devices(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -3216,26 +3275,27 @@ pub fn get_sound_devices(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_sound_devices(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_sound_devices(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3265,7 +3325,7 @@ required: 0,
             #[link(wasm_import_module = "spring:messages")]
 unsafe extern "C" {
 #[link_name = "get-console-buffer"]
-pub fn get_console_buffer(p0: i32, p1: i32) -> i32;
+pub safe fn get_console_buffer(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -3275,26 +3335,27 @@ pub fn get_console_buffer(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_console_buffer(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_console_buffer(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3324,12 +3385,12 @@ required: 0,
             #[link(wasm_import_module = "spring:config")]
 unsafe extern "C" {
 #[link_name = "get-config-params"]
-pub fn get_config_params(p0: i32, p1: i32) -> i32;
+pub safe fn get_config_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:config")]
 unsafe extern "C" {
 #[link_name = "get-log-sections"]
-pub fn get_log_sections(p0: i32, p1: i32) -> i32;
+pub safe fn get_log_sections(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -3339,26 +3400,27 @@ pub fn get_config_params(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_config_params(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_config_params(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3386,26 +3448,27 @@ pub fn get_log_sections(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_log_sections(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_log_sections(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3435,27 +3498,27 @@ required: 0,
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-active-uniforms"]
-pub fn get_active_uniforms(p0: i32, p1: i32) -> i32;
+pub safe fn get_active_uniforms(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-console-commands"]
-pub fn get_console_commands(p0: i32, p1: i32) -> i32;
+pub safe fn get_console_commands(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-engine-atlas-textures"]
-pub fn get_engine_atlas_textures(p0: i32, p1: i32) -> i32;
+pub safe fn get_engine_atlas_textures(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-engine-texture-names"]
-pub fn get_engine_texture_names(p0: i32, p1: i32) -> i32;
+pub safe fn get_engine_texture_names(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "get-global-tex-names"]
-pub fn get_global_tex_names(p0: i32, p1: i32) -> i32;
+pub safe fn get_global_tex_names(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -3465,26 +3528,27 @@ pub fn get_active_uniforms(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_active_uniforms(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_active_uniforms(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3512,26 +3576,27 @@ pub fn get_console_commands(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_console_commands(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_console_commands(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3559,26 +3624,27 @@ pub fn get_engine_atlas_textures(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_engine_atlas_textures(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_engine_atlas_textures(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3606,26 +3672,27 @@ pub fn get_engine_texture_names(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_engine_texture_names(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_engine_texture_names(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3653,26 +3720,27 @@ pub fn get_global_tex_names(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_global_tex_names(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_global_tex_names(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3702,12 +3770,12 @@ required: 0,
             #[link(wasm_import_module = "spring:icons")]
 unsafe extern "C" {
 #[link_name = "get-all-icon-data-array"]
-pub fn get_all_icon_data_array(p0: i32, p1: i32) -> i32;
+pub safe fn get_all_icon_data_array(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:icons")]
 unsafe extern "C" {
 #[link_name = "get-icon-data"]
-pub fn get_icon_data(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn get_icon_data(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -3717,26 +3785,27 @@ pub fn get_all_icon_data_array(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_all_icon_data_array(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_all_icon_data_array(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3764,26 +3833,27 @@ pub fn get_icon_data(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_icon_data(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_icon_data(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3813,7 +3883,7 @@ required: 0,
             #[link(wasm_import_module = "spring:ground-decals")]
 unsafe extern "C" {
 #[link_name = "get-ground-decal-textures"]
-pub fn get_ground_decal_textures(p0: i32, p1: i32) -> i32;
+pub safe fn get_ground_decal_textures(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -3823,26 +3893,27 @@ pub fn get_ground_decal_textures(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_ground_decal_textures(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_ground_decal_textures(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3872,7 +3943,7 @@ required: 0,
             #[link(wasm_import_module = "spring:profiling")]
 unsafe extern "C" {
 #[link_name = "get-profiler-record-names"]
-pub fn get_profiler_record_names(p0: i32, p1: i32) -> i32;
+pub safe fn get_profiler_record_names(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -3882,26 +3953,27 @@ pub fn get_profiler_record_names(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_profiler_record_names(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_profiler_record_names(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3931,12 +4003,12 @@ required: 0,
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "element-get-active-pseudo-classes"]
-pub fn element_get_active_pseudo_classes(p0: i64, p1: i32) -> i32;
+pub safe fn element_get_active_pseudo_classes(p0: i64, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:rml-ui")]
 unsafe extern "C" {
 #[link_name = "get-document-path-requests"]
-pub fn get_document_path_requests(p0: i32, p1: i32) -> i32;
+pub safe fn get_document_path_requests(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -3946,26 +4018,27 @@ pub fn element_get_active_pseudo_classes(p0: i64, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::element_get_active_pseudo_classes(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::element_get_active_pseudo_classes(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3993,26 +4066,27 @@ pub fn get_document_path_requests(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_document_path_requests(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_document_path_requests(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4042,67 +4116,67 @@ required: 0,
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "dir-list"]
-pub fn dir_list(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn dir_list(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-all-archives"]
-pub fn get_all_archives(p0: i32, p1: i32) -> i32;
+pub safe fn get_all_archives(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-archive-dependencies"]
-pub fn get_archive_dependencies(p0: i32, p1: i32) -> i32;
+pub safe fn get_archive_dependencies(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-archive-info"]
-pub fn get_archive_info(p0: i32, p1: i32) -> i32;
+pub safe fn get_archive_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-archive-replaces"]
-pub fn get_archive_replaces(p0: i32, p1: i32) -> i32;
+pub safe fn get_archive_replaces(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-archives"]
-pub fn get_archives(p0: i32, p1: i32) -> i32;
+pub safe fn get_archives(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-available-a-is"]
-pub fn get_available_a_is(p0: i32, p1: i32) -> i32;
+pub safe fn get_available_a_is(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-file-info"]
-pub fn get_file_info(p0: i32, p1: i32) -> i32;
+pub safe fn get_file_info(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-games"]
-pub fn get_games(p0: i32, p1: i32) -> i32;
+pub safe fn get_games(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-loaded-archives"]
-pub fn get_loaded_archives(p0: i32, p1: i32) -> i32;
+pub safe fn get_loaded_archives(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "get-maps"]
-pub fn get_maps(p0: i32, p1: i32) -> i32;
+pub safe fn get_maps(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "list-dir"]
-pub fn list_dir(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn list_dir(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
 #[link_name = "sub-dirs"]
-pub fn sub_dirs(p0: i32, p1: i32, p2: i32) -> i32;
+pub safe fn sub_dirs(p0: i32, p1: i32, p2: i32) -> i32;
 }
         }
 
@@ -4112,26 +4186,27 @@ pub fn dir_list(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::dir_list(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::dir_list(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4159,26 +4234,27 @@ pub fn get_all_archives(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_all_archives(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_all_archives(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4206,26 +4282,27 @@ pub fn get_archive_dependencies(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_archive_dependencies(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_archive_dependencies(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4253,26 +4330,27 @@ pub fn get_archive_info(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_archive_info(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_archive_info(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4300,26 +4378,27 @@ pub fn get_archive_replaces(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_archive_replaces(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_archive_replaces(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4347,26 +4426,27 @@ pub fn get_archives(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_archives(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_archives(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4394,26 +4474,27 @@ pub fn get_available_a_is(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_available_a_is(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_available_a_is(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4441,26 +4522,27 @@ pub fn get_file_info(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_file_info(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_file_info(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4488,26 +4570,27 @@ pub fn get_games(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_games(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_games(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4535,26 +4618,27 @@ pub fn get_loaded_archives(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_loaded_archives(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_loaded_archives(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4582,26 +4666,27 @@ pub fn get_maps(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_maps(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_maps(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4629,26 +4714,27 @@ pub fn list_dir(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::list_dir(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::list_dir(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4676,26 +4762,27 @@ pub fn sub_dirs(p0: i32, p1: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::sub_dirs(p0, p1, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::sub_dirs(p0, p1, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4725,12 +4812,12 @@ required: 0,
             #[link(wasm_import_module = "spring:unsynced-read")]
 unsafe extern "C" {
 #[link_name = "get-active-cmd-desc"]
-pub fn get_active_cmd_desc(p0: i32, p1: i32) -> i32;
+pub safe fn get_active_cmd_desc(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:unsynced-read")]
 unsafe extern "C" {
 #[link_name = "get-active-cmd-descs"]
-pub fn get_active_cmd_descs(p0: i32, p1: i32) -> i32;
+pub safe fn get_active_cmd_descs(p0: i32, p1: i32) -> i32;
 }
         }
 
@@ -4740,26 +4827,27 @@ pub fn get_active_cmd_desc(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_active_cmd_desc(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_active_cmd_desc(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4787,26 +4875,27 @@ pub fn get_active_cmd_descs(p0: i32, output: &mut [u8])
 {
 #[cfg(target_arch = "wasm32")]
 {
-let output_pointer = output.as_mut_ptr() as usize;
-if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
+}),
+};
 let mut descriptor = [
 output_pointer as u32,
-output.len() as u32,
+output_capacity as u32,
 0u32,
 ];
-let descriptor_pointer = descriptor.as_mut_ptr() as usize;
-if descriptor_pointer > u32::MAX as usize {
-return Err(super::DynamicOutputError {
-error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
 required: 0,
-});
-}
-let status = unsafe { raw::get_active_cmd_descs(p0, descriptor_pointer as u32 as i32) };
+}),
+};
+let status = raw::get_active_cmd_descs(p0, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)

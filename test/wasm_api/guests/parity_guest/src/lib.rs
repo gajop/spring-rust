@@ -422,7 +422,7 @@ impl bindings::Guest for ParityGuest {
 }
 
 #[cfg(not(feature = "core"))]
-bindings::export!(ParityGuest with_types_in bindings);
+export!(ParityGuest with_types_in bindings);
 
 #[cfg(feature = "core")]
 fn core_game_frame(frame: i32) {

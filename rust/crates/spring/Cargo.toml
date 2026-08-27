@@ -10,5 +10,16 @@ default = []
 # variants remain available in pure no_std builds without this feature.
 alloc = []
 
+[dependencies]
+libm = "0.2"
+
+[lints.rust]
+warnings = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+too_many_arguments = "allow"
+
 [lib]
 path = "src/lib.rs"

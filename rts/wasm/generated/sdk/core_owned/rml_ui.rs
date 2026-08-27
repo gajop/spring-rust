@@ -1003,7 +1003,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "context-get-name"]
-                pub fn call(pcontext_handle: i64, output: i32) -> i32;
+                pub safe fn call(pcontext_handle: i64, output: i32) -> i32;
             }
         }
 
@@ -1012,7 +1012,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "document-get-title"]
-                pub fn call(pdocument_handle: i64, output: i32) -> i32;
+                pub safe fn call(pdocument_handle: i64, output: i32) -> i32;
             }
         }
 
@@ -1021,7 +1021,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "document-get-url"]
-                pub fn call(pdocument_handle: i64, output: i32) -> i32;
+                pub safe fn call(pdocument_handle: i64, output: i32) -> i32;
             }
         }
 
@@ -1030,7 +1030,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-get-class-name"]
-                pub fn call(pelement_handle: i64, output: i32) -> i32;
+                pub safe fn call(pelement_handle: i64, output: i32) -> i32;
             }
         }
 
@@ -1039,7 +1039,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-get-id"]
-                pub fn call(pelement_handle: i64, output: i32) -> i32;
+                pub safe fn call(pelement_handle: i64, output: i32) -> i32;
             }
         }
 
@@ -1048,7 +1048,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-get-inner-rml"]
-                pub fn call(pelement_handle: i64, output: i32) -> i32;
+                pub safe fn call(pelement_handle: i64, output: i32) -> i32;
             }
         }
 
@@ -1057,7 +1057,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-get-tag-name"]
-                pub fn call(pelement_handle: i64, output: i32) -> i32;
+                pub safe fn call(pelement_handle: i64, output: i32) -> i32;
             }
         }
 
@@ -1066,7 +1066,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "element-get-value"]
-                pub fn call(pelement_handle: i64, output: i32) -> i32;
+                pub safe fn call(pelement_handle: i64, output: i32) -> i32;
             }
         }
 
@@ -1075,7 +1075,7 @@
             #[link(wasm_import_module = "spring:rml-ui")]
             unsafe extern "C" {
                 #[link_name = "get-version"]
-                pub fn call(punused: i32, output: i32) -> i32;
+                pub safe fn call(punused: i32, output: i32) -> i32;
             }
         }
 
@@ -1611,7 +1611,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_context_get_name::call(context_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_context_get_name::call(context_handle as i64, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -1621,8 +1625,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2147,7 +2149,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_document_get_title::call(document_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_document_get_title::call(document_handle as i64, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2157,8 +2163,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2176,7 +2180,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_document_get_url::call(document_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_document_get_url::call(document_handle as i64, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2186,8 +2194,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2512,7 +2518,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_element_get_class_name::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_element_get_class_name::call(element_handle as i64, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2522,8 +2532,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2619,7 +2627,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_element_get_id::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_element_get_id::call(element_handle as i64, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2629,8 +2641,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2648,7 +2658,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_element_get_inner_rml::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_element_get_inner_rml::call(element_handle as i64, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2658,8 +2672,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2700,7 +2712,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_element_get_tag_name::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_element_get_tag_name::call(element_handle as i64, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2710,8 +2726,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -2729,7 +2743,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_element_get_value::call(element_handle as i64, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_element_get_value::call(element_handle as i64, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -2739,8 +2757,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -3256,7 +3272,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<u8>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_version::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_version::call(unused as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -3266,8 +3286,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, 0);
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }

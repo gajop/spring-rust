@@ -11,10 +11,10 @@ fn memory_snapshot() -> spring::Result<(f64, f64)> {
 }
 
 pub fn run() -> spring::Result<()> {
-    let units = spring::get_team_units(0)?;
-    let unit_id = *units
+    let units = spring::get_team_units(spring::TeamId::from(0))?;
+    let unit_id = spring::UnitId::from(*units
         .first()
-        .ok_or(spring::ApiError::new(spring::ErrorCode::NotFound as i32))?;
+        .ok_or(spring::ApiError::new(spring::ErrorCode::NotFound as i32))?);
 
     let (before_bytes, before_allocs) = memory_snapshot()?;
     let small_start = common::timer_micros()?;
@@ -34,7 +34,7 @@ pub fn run() -> spring::Result<()> {
     let (before_list_bytes, before_list_allocs) = memory_snapshot()?;
     let list_start = common::timer_micros()?;
     for _ in 0..common::count(1_000) {
-        let _ = spring::get_team_units(0);
+        let _ = spring::get_team_units(spring::TeamId::from(0));
     }
     let list_elapsed = common::timer_micros()?.saturating_sub(list_start);
     let (list_bytes, list_allocs) = memory_snapshot()?;
@@ -60,8 +60,9 @@ pub fn run() -> spring::Result<()> {
     for _ in 0..frame_count {
         let start = common::timer_micros()?;
         for unit in units.iter().take(common::count(1_000)) {
-            let _ = spring::get_unit_def_id(*unit);
-            let _ = spring::get_unit_position(*unit, false, false);
+            let unit_id = spring::UnitId::from(*unit);
+            let _ = spring::get_unit_def_id(unit_id);
+            let _ = spring::get_unit_position(unit_id, false, false);
         }
         frame_times.push(common::timer_micros()?.saturating_sub(start) as f64 / 1_000.0);
     }

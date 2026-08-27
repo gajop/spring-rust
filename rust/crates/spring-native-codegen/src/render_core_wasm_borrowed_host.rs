@@ -920,7 +920,7 @@ fn render_rust_raw(function: &FunctionModel, plan: &FunctionPlan, indent: usize)
         .map(|kind| format!(" -> {}", rust_core_type(*kind)))
         .unwrap_or_default();
     format!(
-        "{pad}#[link(wasm_import_module = \"{module}\")]\n{pad}unsafe extern \"C\" {{\n{pad}    #[link_name = \"{name}\"]\n{pad}    pub fn {rust_name}({params}){result};\n{pad}}}\n",
+        "{pad}#[link(wasm_import_module = \"{module}\")]\n{pad}unsafe extern \"C\" {{\n{pad}    #[link_name = \"{name}\"]\n{pad}    pub safe fn {rust_name}({params}){result};\n{pad}}}\n",
         module = plan.import_module,
         name = plan.import_name,
         rust_name = rust_ident(&function.name.to_snake_case()),
@@ -964,13 +964,13 @@ fn render_rust_wrapper(
             field.ty,
             SemanticType::String | SemanticType::Bytes | SemanticType::List { .. }
         ) {
-            let (ptr, len) = rust_borrowed_parts(&field.ty, &name);
+            let borrowed_slice = rust_borrowed_slice(&field.ty, &name);
             descriptor.push_str(&format!(
-                "{pad}    let core_ptr = {ptr};\n{pad}    let core_len = {len};\n{pad}    debug_assert!(core_ptr <= u32::MAX as usize && core_len <= u32::MAX as usize);\n{pad}    if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) {{ return Err(ApiError::new(ErrorCode::Internal as i32)); }}\n"
+                "{pad}    let (core_ptr, core_len) = crate::wasm_slice_parts({borrowed_slice})?;\n{pad}    if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) {{ return Err(ApiError::new(ErrorCode::Internal as i32)); }}\n"
             ));
         } else if optional_borrowed_string(field) {
             descriptor.push_str(&format!(
-                "{pad}    let core_optional = {name}.map(|core_value| {{\n{pad}        let core_bytes = core_value.to_bytes();\n{pad}        (core_value.as_ptr() as usize as u32, core_bytes.len() as u32)\n{pad}    }});\n{pad}    if !super::__core_borrowed_wire::put_optional_pair(&mut descriptor, &mut cursor, core_optional) {{ return Err(ApiError::new(ErrorCode::Internal as i32)); }}\n"
+                "{pad}    let core_optional = match {name} {{\n{pad}        Some(core_value) => {{\n{pad}            let (core_ptr, core_len) = crate::wasm_slice_parts(core_value.to_bytes())?;\n{pad}            Some((core_ptr as u32, core_len as u32))\n{pad}        }}\n{pad}        None => None,\n{pad}    }};\n{pad}    if !super::__core_borrowed_wire::put_optional_pair(&mut descriptor, &mut cursor, core_optional) {{ return Err(ApiError::new(ErrorCode::Internal as i32)); }}\n"
             ));
             continue;
         } else {
@@ -984,7 +984,9 @@ fn render_rust_wrapper(
     descriptor.push_str(&format!(
         "{pad}    if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, {descriptor_alignment}usize) {{ return Err(ApiError::new(ErrorCode::Internal as i32)); }}\n"
     ));
-    let descriptor_ptr = "descriptor.as_ptr() as usize";
+    descriptor.push_str(&format!(
+        "{pad}    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;\n"
+    ));
     let mut raw_args = Vec::new();
     for field in function
         .inputs
@@ -1010,12 +1012,12 @@ fn render_rust_wrapper(
             ));
         }
     }
-    raw_args.push(format!("({descriptor_ptr}) as u32 as i32"));
+    raw_args.push("descriptor_ptr".to_owned());
     if matches!(
         plan.result_strategy,
         ResultStrategy::FixedOutputBuffer { .. }
     ) {
-        raw_args.push("output.as_mut_ptr() as usize as u32 as i32".to_owned());
+        raw_args.push("crate::wasm_output_ptr(&mut output)?".to_owned());
     }
     let raw_call = format!(
         "raw::{}({})",
@@ -1025,14 +1027,14 @@ fn render_rust_wrapper(
 
     let wasm_body = match plan.result_strategy {
         ResultStrategy::Status => format!(
-            "{descriptor}{pad}    let status = unsafe {{ {raw_call} }};\n{pad}    if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }}"
+            "{descriptor}{pad}    let status = {raw_call};\n{pad}    if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }}"
         ),
         ResultStrategy::Packed32 => format!(
-            "{descriptor}{pad}    let packed = unsafe {{ {raw_call} }} as u64;\n{pad}    let status = (packed >> 32) as i32;\n{pad}    if status != 0 {{ return Err(ApiError::new(status)); }}\n{pad}    {}",
+            "{descriptor}{pad}    let packed = {raw_call} as u64;\n{pad}    let status = (packed >> 32) as i32;\n{pad}    if status != 0 {{ return Err(ApiError::new(status)); }}\n{pad}    {}",
             rust_unpack_packed(&function.outputs[0].ty, "packed")
         ),
         ResultStrategy::FixedOutputBuffer { bytes, .. } => format!(
-            "{pad}    let mut output = [0u8; {bytes}];\n{descriptor}{pad}    let status = unsafe {{ {raw_call} }};\n{pad}    if status != 0 {{ return Err(ApiError::new(status)); }}\n{pad}    Ok(output)"
+            "{pad}    let mut output = [0u8; {bytes}];\n{descriptor}{pad}    let status = {raw_call};\n{pad}    if status != 0 {{ return Err(ApiError::new(status)); }}\n{pad}    Ok(output)"
         ),
         _ => unreachable!(),
     };
@@ -1053,14 +1055,8 @@ fn render_rust_wrapper(
 }
 
 fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
-    if count > 7 {
-        format!(
-            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
-            " ".repeat(indent)
-        )
-    } else {
-        String::new()
-    }
+    let _ = (count, indent);
+    String::new()
 }
 
 fn rust_input_type(field: &FieldModel, records: &BTreeMap<String, RecordModel>) -> String {
@@ -1099,16 +1095,10 @@ fn rust_result_type(
     }
 }
 
-fn rust_borrowed_parts(ty: &SemanticType, name: &str) -> (String, String) {
+fn rust_borrowed_slice(ty: &SemanticType, name: &str) -> String {
     match ty {
-        SemanticType::String => (
-            format!("{name}.as_ptr() as usize"),
-            format!("{name}.to_bytes().len()"),
-        ),
-        SemanticType::Bytes | SemanticType::List { .. } => (
-            format!("if {name}.is_empty() {{ 0usize }} else {{ {name}.as_ptr() as usize }}"),
-            format!("{name}.len()"),
-        ),
+        SemanticType::String => format!("{name}.to_bytes()"),
+        SemanticType::Bytes | SemanticType::List { .. } => name.to_owned(),
         _ => unreachable!(),
     }
 }

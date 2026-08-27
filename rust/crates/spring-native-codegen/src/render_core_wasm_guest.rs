@@ -185,6 +185,7 @@ mod __core_wire {
     }
 
     #[inline]
+    #[cfg(feature = "alloc")]
     pub fn bytes(bytes: &[u8], cursor: &mut usize) -> Option<alloc::vec::Vec<u8>> {
         let length = u32(bytes, cursor)? as usize;
         let end = cursor.checked_add(length)?;
@@ -194,6 +195,7 @@ mod __core_wire {
     }
 
     #[inline]
+    #[cfg(feature = "alloc")]
     pub fn string(input: &[u8], cursor: &mut usize) -> Option<alloc::string::String> {
         alloc::string::String::from_utf8(bytes(input, cursor)?).ok()
     }
@@ -397,7 +399,7 @@ fn render_raw_import(
         "{pad}#[link(wasm_import_module = \"{module}\")]\n\
          {pad}unsafe extern \"C\" {{\n\
          {pad}    #[link_name = \"{import_name}\"]\n\
-         {pad}    pub fn {fn_ident}({params}){result};\n\
+         {pad}    pub safe fn {fn_ident}({params}){result};\n\
          {pad}}}\n",
         module = plan.import_module,
         import_name = plan.import_name,
@@ -422,8 +424,7 @@ fn render_direct_wrapper(
              {pad}{arity_lint}pub fn {fn_ident}({params}) -> Result<()> {{\n\
              {pad}    #[cfg(target_arch = \"wasm32\")]\n\
              {pad}    {{\n\
-             {pad}        // SAFETY: generated scalar-only Core signature.\n\
-             {pad}        let status = unsafe {{ raw::{raw_ident}({args}) }};\n\
+             {pad}        let status = raw::{raw_ident}({args});\n\
              {pad}        if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }}\n\
              {pad}    }}\n\
              {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
@@ -443,8 +444,7 @@ fn render_direct_wrapper(
                  {pad}{arity_lint}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
                  {pad}    #[cfg(target_arch = \"wasm32\")]\n\
                  {pad}    {{\n\
-                 {pad}        // SAFETY: generated scalar-only Core signature.\n\
-                 {pad}        let packed = unsafe {{ raw::{raw_ident}({args}) }} as u64;\n\
+                 {pad}        let packed = raw::{raw_ident}({args}) as u64;\n\
                  {pad}        let status = (packed >> 32) as i32;\n\
                  {pad}        if status != 0 {{\n\
                  {pad}            return Err(ApiError::new(status));\n\
@@ -493,12 +493,8 @@ fn render_fixed_output_wrapper(
          {pad}    #[cfg(target_arch = \"wasm32\")]\n\
          {pad}    {{\n\
          {pad}        let mut wire = [0u8; {bytes}];\n\
-         {pad}        let output_pointer_usize = wire.as_mut_ptr() as usize;\n\
-         {pad}        debug_assert!(output_pointer_usize <= u32::MAX as usize);\n\
-         {pad}        let output_pointer = output_pointer_usize as u32 as i32;\n\
-         {pad}        // SAFETY: all semantic arguments are scalar and output_pointer\n\
-         {pad}        // references this live stack buffer for the synchronous import.\n\
-         {pad}        let status = unsafe {{ raw::{raw_ident}({call_args}) }};\n\
+         {pad}        let output_pointer = crate::wasm_output_ptr(&mut wire)?;\n\
+         {pad}        let status = raw::{raw_ident}({call_args});\n\
          {pad}        if status != 0 {{\n\
          {pad}            return Err(ApiError::new(status));\n\
          {pad}        }}\n\
@@ -558,8 +554,7 @@ fn render_fixed_input_wrapper(
         ResultStrategy::Status => (
             "()".to_owned(),
             format!(
-                "{pad}        // SAFETY: fixed inputs are encoded into this live stack buffer.\n\
-                 {pad}        let status = unsafe {{ raw::{raw_ident}({call_prefix}) }};\n\
+                "{pad}        let status = raw::{raw_ident}({call_prefix});\n\
                  {pad}        if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }}\n"
             ),
         ),
@@ -570,8 +565,7 @@ fn render_fixed_input_wrapper(
             (
                 return_ty,
                 format!(
-                    "{pad}        // SAFETY: fixed inputs are encoded into this live stack buffer.\n\
-                     {pad}        let packed = unsafe {{ raw::{raw_ident}({call_prefix}) }} as u64;\n\
+                    "{pad}        let packed = raw::{raw_ident}({call_prefix}) as u64;\n\
                      {pad}        let status = (packed >> 32) as i32;\n\
                      {pad}        if status != 0 {{\n\
                      {pad}            return Err(ApiError::new(status));\n\
@@ -588,11 +582,8 @@ fn render_fixed_input_wrapper(
                 return_ty,
                 format!(
                     "{pad}        let mut output_wire = [0u8; {bytes}];\n\
-                     {pad}        let output_pointer_usize = output_wire.as_mut_ptr() as usize;\n\
-                     {pad}        debug_assert!(output_pointer_usize <= u32::MAX as usize);\n\
-                     {pad}        let output_pointer = output_pointer_usize as u32 as i32;\n\
-                     {pad}        // SAFETY: input/output pointers reference live stack buffers.\n\
-                     {pad}        let status = unsafe {{ raw::{raw_ident}({call_args}) }};\n\
+                     {pad}        let output_pointer = crate::wasm_output_ptr(&mut output_wire)?;\n\
+                     {pad}        let status = raw::{raw_ident}({call_args});\n\
                      {pad}        if status != 0 {{\n\
                      {pad}            return Err(ApiError::new(status));\n\
                      {pad}        }}\n\
@@ -620,9 +611,7 @@ fn render_fixed_input_wrapper(
          {pad}        if !super::__core_wire::finish(&input_wire, &mut input_cursor, {input_alignment}) {{\n\
          {pad}            return Err(ApiError::new(ErrorCode::Internal as i32));\n\
          {pad}        }}\n\
-         {pad}        let input_pointer_usize = input_wire.as_mut_ptr() as usize;\n\
-         {pad}        debug_assert!(input_pointer_usize <= u32::MAX as usize);\n\
-         {pad}        let input_pointer = input_pointer_usize as u32 as i32;\n\
+         {pad}        let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;\n\
          {call_body}\
          {pad}    }}\n\
          {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
@@ -716,14 +705,8 @@ fn decode_packed_value(ty: &SemanticType, value: &str, pad: &str) -> String {
 }
 
 fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
-    if count > 7 {
-        format!(
-            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
-            " ".repeat(indent)
-        )
-    } else {
-        String::new()
-    }
+    let _ = (count, indent);
+    String::new()
 }
 
 fn render_fixed_output_decode(

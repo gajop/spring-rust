@@ -89,7 +89,7 @@ fn render_raw(plan: &render_core_wasm::FunctionPlan) -> String {
         "            #[link(wasm_import_module = \"{module}\")]\n\
                      unsafe extern \"C\" {{\n\
                          #[link_name = \"{name}\"]\n\
-                         pub fn {ident}({params}){result};\n\
+                         pub safe fn {ident}({params}){result};\n\
                      }}\n",
         module = plan.import_module,
         name = plan.import_name,
@@ -132,12 +132,13 @@ fn render_wrapper(
         .enumerate()
         .map(|(index, _)| {
             format!(
-                "            let blob{index}_ptr = blob{index}.as_ptr() as usize;\n\
-                 if blob{index}_ptr > u32::MAX as usize || blob{index}.len() > u32::MAX as usize {{\n\
-                     return {bounds_return};\n\
-                 }}\n\
+                "            let (blob{index}_ptr, blob{index}_len) =\n\
+                 match crate::wasm_slice_parts(blob{index}) {{\n\
+                     Ok(value) => value,\n\
+                     Err(_) => return {bounds_return},\n\
+                 }};\n\
                  descriptor[{word}] = blob{index}_ptr as u32;\n\
-                 descriptor[{len_word}] = blob{index}.len() as u32;\n",
+                 descriptor[{len_word}] = blob{index}_len as u32;\n",
                 bounds_return = bounds_return(plan),
                 word = index * 2,
                 len_word = index * 2 + 1,
@@ -166,8 +167,10 @@ fn render_wrapper(
                      {{\n\
                          let mut descriptor = [0u32; {descriptor_words}];\n\
              {descriptor_fill}\
-                         let descriptor_ptr = descriptor.as_mut_ptr() as usize;\n\
-                         if descriptor_ptr > u32::MAX as usize {{ return {bounds_return}; }}\n\
+                         let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {{\n\
+                             Ok(value) => value,\n\
+                             Err(_) => return {bounds_return},\n\
+                         }};\n\
                          {result_expr}\n\
                      }}\n\
                      #[cfg(not(target_arch = \"wasm32\"))]\n\
@@ -191,8 +194,8 @@ fn render_wrapper(
             params.push("output: &mut [u8]".to_owned());
             let arity_lint = too_many_arguments_attribute(params.len(), 20);
             let mut call_args = direct_args;
-            call_args.push("descriptor_ptr as u32 as i32".to_owned());
-            call_args.push("output_ptr as u32 as i32".to_owned());
+            call_args.push("descriptor_ptr".to_owned());
+            call_args.push("output_ptr".to_owned());
             format!(
                 "        #[inline]\n\
                  {arity_lint}pub fn {ident}({params}) -> crate::Result<()> {{\n\
@@ -201,10 +204,9 @@ fn render_wrapper(
                          if output.len() != {bytes}usize {{ return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }}\n\
                          let mut descriptor = [0u32; {descriptor_words}];\n\
              {descriptor_fill}\
-                         let descriptor_ptr = descriptor.as_mut_ptr() as usize;\n\
-                         let output_ptr = output.as_mut_ptr() as usize;\n\
-                         if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {{ return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)); }}\n\
-                         let status = unsafe {{ raw::{ident}({call_args}) }};\n\
+                         let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;\n\
+                         let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;\n\
+                         let status = raw::{ident}({call_args});\n\
                          if status == 0 {{ Ok(()) }} else {{ Err(crate::ApiError::new(status)) }}\n\
                      }}\n\
                      #[cfg(not(target_arch = \"wasm32\"))]\n\
@@ -233,8 +235,8 @@ fn render_wrapper(
             params.push("output: &mut [u8]".to_owned());
             let arity_lint = too_many_arguments_attribute(params.len(), 20);
             let mut call_args = direct_args;
-            call_args.push("descriptor_ptr as u32 as i32".to_owned());
-            call_args.push("output_descriptor_ptr as u32 as i32".to_owned());
+            call_args.push("descriptor_ptr".to_owned());
+            call_args.push("output_descriptor_ptr".to_owned());
             format!(
                 "        #[inline]\n\
                  {arity_lint}pub fn {ident}({params}) -> core::result::Result<usize, super::VariableResultError> {{\n\
@@ -245,17 +247,15 @@ fn render_wrapper(
                          }}\n\
                          let mut descriptor = [0u32; {descriptor_words}];\n\
              {descriptor_fill}\
-                         let descriptor_ptr = descriptor.as_mut_ptr() as usize;\n\
-                         let output_ptr = output.as_mut_ptr() as usize;\n\
-                         if descriptor_ptr > u32::MAX as usize || output_ptr > u32::MAX as usize {{\n\
-                             return Err(super::VariableResultError {{ error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }});\n\
-                         }}\n\
-                         let mut output_descriptor = [output_ptr as u32, (output.len() / {element_bytes}usize) as u32, 0u32];\n\
-                         let output_descriptor_ptr = output_descriptor.as_mut_ptr() as usize;\n\
-                         if output_descriptor_ptr > u32::MAX as usize {{\n\
-                             return Err(super::VariableResultError {{ error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }});\n\
-                         }}\n\
-                         let status = unsafe {{ raw::{ident}({call_args}) }};\n\
+                         let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)\n\
+                             .map_err(|error| super::VariableResultError {{ error, required: 0 }})?;\n\
+                         let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)\n\
+                             .map_err(|error| super::VariableResultError {{ error, required: 0 }})?;\n\
+                         let output_capacity = output_bytes as usize / {element_bytes}usize;\n\
+                         let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];\n\
+                         let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)\n\
+                             .map_err(|error| super::VariableResultError {{ error, required: 0 }})?;\n\
+                         let status = raw::{ident}({call_args});\n\
                          let required = output_descriptor[2] as usize;\n\
                          if status == 0 {{ Ok(required) }} else {{ Err(super::VariableResultError {{ error: crate::ApiError::new(status), required }}) }}\n\
                      }}\n\
@@ -294,14 +294,8 @@ fn scalar_return_type(
 }
 
 fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
-    if count > 7 {
-        format!(
-            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
-            " ".repeat(indent)
-        )
-    } else {
-        String::new()
-    }
+    let _ = (count, indent);
+    String::new()
 }
 
 fn scalar_result_expr(
@@ -311,8 +305,8 @@ fn scalar_result_expr(
     direct_args: &[String],
 ) -> String {
     let mut args = direct_args.to_vec();
-    args.push("descriptor_ptr as u32 as i32".to_owned());
-    let call = format!("unsafe {{ raw::{ident}({}) }}", args.join(", "));
+    args.push("descriptor_ptr".to_owned());
+    let call = format!("raw::{ident}({})", args.join(", "));
     match plan.result_strategy {
         ResultStrategy::Status => format!(
             "let status = {call}; if status == 0 {{ Ok(()) }} else {{ Err(crate::ApiError::new(status)) }}"
@@ -321,7 +315,9 @@ fn scalar_result_expr(
             SemanticType::Scalar { name } if name == "bool" => {
                 format!("crate::unpack_bool({call})")
             }
-            SemanticType::Scalar { name } if name == "f32" => format!("crate::unpack_f32({call})"),
+            SemanticType::Scalar { name } if name == "f32" => {
+                format!("crate::decode_packed_f32({call})")
+            }
             _ => format!("crate::unpack_i32({call})"),
         },
         _ => unreachable!(),

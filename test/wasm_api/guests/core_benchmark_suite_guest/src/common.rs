@@ -29,6 +29,7 @@ pub fn iterations(default: usize) -> usize {
         .unwrap_or(default)
 }
 
+#[cfg(any(benchmark_context_unsynced, benchmark_context_ui))]
 pub fn count(value: usize) -> usize {
     ((value as f64 * scale()).round() as usize).max(1)
 }
@@ -62,6 +63,7 @@ pub fn send_row(row: &str) {
     let _ = spring::send_lua_rules_msg(&format!("WASM_BENCH|{row}"));
 }
 
+#[cfg(benchmark_context_ui)]
 pub fn send_draw_row(row: &str) {
     let _ = spring::send_lua_ui_msg(&format!("WASM_DRAW|{row}"), "");
 }

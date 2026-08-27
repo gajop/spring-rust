@@ -28,6 +28,8 @@ ENVIRONMENTS = {
     "gaia-synced": 4,
     "gaia-unsynced": 8,
     "ui": 16,
+    "menu": 32,
+    "intro": 64,
 }
 
 SPECIALIZED_CALLINS = {

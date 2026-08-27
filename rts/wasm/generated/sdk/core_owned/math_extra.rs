@@ -222,7 +222,7 @@
             #[link(wasm_import_module = "spring:math-extra")]
             unsafe extern "C" {
                 #[link_name = "normalize"]
-                pub fn call(x: f32, y: f32, z: f32, output: i32) -> i32;
+                pub safe fn call(x: f32, y: f32, z: f32, output: i32) -> i32;
             }
         }
 
@@ -231,18 +231,8 @@
             #[cfg(target_arch = "wasm32")]
             {
                 let mut output = [0.0f32; 4];
-                let pointer = output.as_mut_ptr() as usize;
-                if pointer > u32::MAX as usize {
-                    return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32));
-                }
-                let status = unsafe {
-                    __core_math_extra_normalize::call(
-                        vec.x,
-                        vec.y,
-                        vec.z,
-                        pointer as u32 as i32,
-                    )
-                };
+                let pointer = crate::wasm_output_ptr(&mut output)?;
+                let status = __core_math_extra_normalize::call(vec.x, vec.y, vec.z, pointer);
                 if status != 0 {
                     return Err(crate::ApiError::new(status));
                 }

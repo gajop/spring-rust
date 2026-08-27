@@ -473,7 +473,7 @@
             #[link(wasm_import_module = "spring:features")]
             unsafe extern "C" {
                 #[link_name = "get-all-features"]
-                pub fn call(punused: i32, output: i32) -> i32;
+                pub safe fn call(punused: i32, output: i32) -> i32;
             }
         }
 
@@ -482,7 +482,7 @@
             #[link(wasm_import_module = "spring:features")]
             unsafe extern "C" {
                 #[link_name = "get-features-in-cylinder"]
-                pub fn call(px: f32, pz: f32, pradius: f32, pheight: f32, output: i32) -> i32;
+                pub safe fn call(px: f32, pz: f32, pradius: f32, pheight: f32, output: i32) -> i32;
             }
         }
 
@@ -491,7 +491,7 @@
             #[link(wasm_import_module = "spring:features")]
             unsafe extern "C" {
                 #[link_name = "get-features-in-rectangle"]
-                pub fn call(pmin_x: f32, pmin_z: f32, pmax_x: f32, pmax_z: f32, output: i32) -> i32;
+                pub safe fn call(pmin_x: f32, pmin_z: f32, pmax_x: f32, pmax_z: f32, output: i32) -> i32;
             }
         }
 
@@ -500,7 +500,7 @@
             #[link(wasm_import_module = "spring:features")]
             unsafe extern "C" {
                 #[link_name = "get-render-features"]
-                pub fn call(pdraw_mask: i32, psend_mask: i32, output: i32) -> i32;
+                pub safe fn call(pdraw_mask: i32, psend_mask: i32, output: i32) -> i32;
             }
         }
 
@@ -509,7 +509,7 @@
             #[link(wasm_import_module = "spring:features")]
             unsafe extern "C" {
                 #[link_name = "get-render-features-draw-flag-changed"]
-                pub fn call(psend_mask: i32, output: i32) -> i32;
+                pub safe fn call(psend_mask: i32, output: i32) -> i32;
             }
         }
 
@@ -532,7 +532,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_all_features::call(unused as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_all_features::call(unused as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -542,8 +546,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -776,7 +778,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_features_in_cylinder::call(x, z, radius, height, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_features_in_cylinder::call(x, z, radius, height, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -786,8 +792,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -805,7 +809,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_features_in_rectangle::call(min_x, min_z, max_x, max_z, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_features_in_rectangle::call(min_x, min_z, max_x, max_z, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -815,8 +823,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -850,7 +856,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_render_features::call(draw_mask, u32::from(send_mask) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_render_features::call(draw_mask, u32::from(send_mask) as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -860,8 +870,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }
@@ -879,7 +887,11 @@
                 let mut descriptor = [0u32; 3];
                 let mut output = Vec::<i32>::new();
                 loop {
-                    let status = unsafe { __core_variable_output_get_render_features_draw_flag_changed::call(u32::from(send_mask) as i32, descriptor.as_mut_ptr() as usize as u32 as i32) };
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_get_render_features_draw_flag_changed::call(u32::from(send_mask) as i32, descriptor_ptr);
                     let required = descriptor[2] as usize;
                     if status == 0 {
                         output.truncate(required);
@@ -889,8 +901,6 @@
                         return Err(crate::ApiError::new(status));
                     }
                     output.resize(required, Default::default());
-                    descriptor[0] = output.as_mut_ptr() as usize as u32;
-                    descriptor[1] = output.len() as u32;
                     descriptor[2] = 0;
                 }
             }

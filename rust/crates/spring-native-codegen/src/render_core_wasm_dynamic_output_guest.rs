@@ -92,7 +92,7 @@ fn render_raw(plan: &render_core_wasm::FunctionPlan) -> String {
         "            #[link(wasm_import_module = \"{module}\")]\n\
                      unsafe extern \"C\" {{\n\
                          #[link_name = \"{name}\"]\n\
-                         pub fn {function_ident}({params}){result};\n\
+                         pub safe fn {function_ident}({params}){result};\n\
                      }}\n",
         module = plan.import_module,
         name = plan.import_name,
@@ -140,26 +140,27 @@ fn render_wrapper(plan: &render_core_wasm::FunctionPlan) -> String {
                  {{\n\
                      #[cfg(target_arch = \"wasm32\")]\n\
                      {{\n\
-                         let output_pointer = output.as_mut_ptr() as usize;\n\
-                         if output_pointer > u32::MAX as usize || output.len() > u32::MAX as usize {{\n\
-                             return Err(super::DynamicOutputError {{\n\
-                                 error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),\n\
-                                 required: 0,\n\
-                             }});\n\
-                         }}\n\
+                         let (output_pointer, output_capacity) =\n\
+                             match crate::wasm_mut_slice_parts(output) {{\n\
+                                 Ok(value) => value,\n\
+                                 Err(error) => return Err(super::DynamicOutputError {{\n\
+                                     error,\n\
+                                     required: 0,\n\
+                                 }}),\n\
+                             }};\n\
                          let mut descriptor = [\n\
                              output_pointer as u32,\n\
-                             output.len() as u32,\n\
+                             output_capacity as u32,\n\
                              0u32,\n\
                          ];\n\
-                         let descriptor_pointer = descriptor.as_mut_ptr() as usize;\n\
-                         if descriptor_pointer > u32::MAX as usize {{\n\
-                             return Err(super::DynamicOutputError {{\n\
-                                 error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32),\n\
+                         let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {{\n\
+                             Ok(value) => value,\n\
+                             Err(error) => return Err(super::DynamicOutputError {{\n\
+                                 error,\n\
                                  required: 0,\n\
-                             }});\n\
-                         }}\n\
-                         let status = unsafe {{ raw::{function_ident}({call_prefix}descriptor_pointer as u32 as i32) }};\n\
+                             }}),\n\
+                         }};\n\
+                         let status = raw::{function_ident}({call_prefix}descriptor_pointer);\n\
                          let required = descriptor[2] as usize;\n\
                          if status == 0 {{\n\
                              Ok(required)\n\
@@ -188,14 +189,8 @@ fn render_wrapper(plan: &render_core_wasm::FunctionPlan) -> String {
 }
 
 fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
-    if count > 7 {
-        format!(
-            "#[expect(clippy::too_many_arguments, reason = \"Core function preserves the corresponding Lua API arity\")]\n{}",
-            " ".repeat(indent)
-        )
-    } else {
-        String::new()
-    }
+    let _ = (count, indent);
+    String::new()
 }
 
 fn rust_core_type(ty: CoreType) -> &'static str {
