@@ -39,6 +39,7 @@ inline constexpr std::string_view TerrainControlModule = "spring:terrain-control
 inline constexpr std::string_view SystemControlModule = "spring:system-control";
 inline constexpr std::string_view MathExtraModule = "spring:math-extra";
 inline constexpr std::string_view GfxModule = "spring:gfx";
+inline constexpr std::string_view RmlUiModule = "spring:rml-ui";
 inline constexpr std::string_view ProfilingModule = "spring:profiling";
 inline constexpr std::string_view MessagesModule = "spring:messages";
 inline constexpr std::string_view RulesParamsModule = "spring:rules-params";
@@ -138,6 +139,20 @@ inline constexpr ImportDescriptor kImports[] = {
 	{GfxModule, "unsafe-state", "i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
 	{GfxModule, "create-texture", "i32,i32,i32,i32,i32,i32->i64", UnsyncedEnvironmentMask},
 	{GfxModule, "create-texture-atlas", "i32,i32,i32,i32,i32->i64", UnsyncedEnvironmentMask},
+
+	// RmlUi event transports retain a guest callback across the native call and
+	// are registered by hand in WasmCoreRmlUiBindings.cpp. The generic lowering
+	// cannot describe the retained callback triple, so the generated registry
+	// omits them and these are the only signatures a guest can import.
+	{RmlUiModule, "context-add-event-listener", "i64,i32,i32,i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{RmlUiModule, "element-add-event-listener", "i64,i32,i32,i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{RmlUiModule, "data-model-bind-event", "i64,i32,i32,i32,i32,i32,i32,i64,i32->i32", UnsyncedEnvironmentMask},
+	{RmlUiModule, "data-model-unbind-event", "i64->i64", UnsyncedEnvironmentMask},
+	{RmlUiModule, "data-model-current-event", "i32->i32", UnsyncedEnvironmentMask},
+	{RmlUiModule, "data-model-current-value", "i64,i32,i32,i32->i32", UnsyncedEnvironmentMask},
+	{RmlUiModule, "event-listener-on-attach", "i64,i64->i64", UnsyncedEnvironmentMask},
+	{RmlUiModule, "event-listener-on-detach", "i64,i64->i64", UnsyncedEnvironmentMask},
+	{RmlUiModule, "event-listener-process-event", "i64,i64->i64", UnsyncedEnvironmentMask},
 
 	// Profiling reads are intentionally unsynced-only. GetTimerMicros was
 	// historically marked all-environment despite using spring_now(); allowing a

@@ -171,6 +171,83 @@ def verify_core_import_registries(root: Path, regenerated: Path) -> list[str]:
     ]
 
 
+BINDING_MODULE = re.compile(r'linker,\s*"(spring:[a-z0-9-]+)"')
+BINDING_DEFINE = re.compile(r'Define\(\s*linker,\s*"([a-z0-9-]+)"')
+
+# Imports the handwritten bindings register with the linker but deliberately
+# keep out of the validator registries, so no guest can import them.
+WITHHELD_HANDWRITTEN_IMPORTS = {
+    ("spring:vfs", "use-archive"): (
+        "mounting an archive is capability-sensitive and is withheld from the "
+        "production Core import registry"
+    ),
+}
+
+
+def verify_core_import_reachability(root: Path, regenerated: Path) -> list[str]:
+    """Fail when a handwritten binding registers an import no guest can use.
+
+    `WasmCoreRmlUiBindings.cpp` and its siblings define their imports directly
+    on the linker, but the validator resolves names through `kImports` and the
+    generated registry. A name defined in one place and absent from both links
+    fine and then fails module validation with "unknown or unavailable Core Wasm
+    import", so the binding is dead code that only surfaces when a guest tries
+    to use it. The generated registry cannot cover these: it deliberately emits
+    only generic transports, and a retained-callback signature has no generic
+    lowering to emit.
+    """
+    bindings_dir = root / "rts" / "WasmInterface" / "core" / "bindings"
+    if not bindings_dir.is_dir():
+        return [f"missing Core bindings directory: {bindings_dir}"]
+
+    handwritten_path = (
+        root / "rts" / "WasmInterface" / "core" / "host" / "WasmCoreRegistry.h"
+    )
+    generated_path = regenerated / "WasmCoreGeneratedRegistry.h"
+    if not handwritten_path.is_file():
+        return [f"missing handwritten Core import registry: {handwritten_path}"]
+    if not generated_path.is_file():
+        return [f"missing regenerated Core import registry: {generated_path}"]
+
+    handwritten_text = handwritten_path.read_text(encoding="utf-8")
+    modules = dict(HANDWRITTEN_MODULE_ALIAS.findall(handwritten_text))
+    known = {
+        (modules[alias], name)
+        for alias, name, _ in HANDWRITTEN_IMPORT.findall(handwritten_text)
+        if alias in modules
+    }
+    known.update(
+        (module, name)
+        for module, name, _ in GENERATED_IMPORT.findall(
+            generated_path.read_text(encoding="utf-8")
+        )
+    )
+
+    findings: list[str] = []
+    for source in sorted(bindings_dir.glob("*.cpp")):
+        text = source.read_text(encoding="utf-8")
+        candidates = sorted(set(BINDING_MODULE.findall(text)))
+        if not candidates:
+            continue
+        for name in sorted(set(BINDING_DEFINE.findall(text))):
+            resolved = [module for module in candidates if (module, name) in known]
+            if resolved:
+                continue
+            withheld = [
+                module
+                for module in candidates
+                if (module, name) in WITHHELD_HANDWRITTEN_IMPORTS
+            ]
+            if withheld:
+                continue
+            findings.append(
+                f"{source.name} registers {'|'.join(candidates)}.{name} with the linker, "
+                "but neither WasmCoreRegistry.h nor the generated registry resolves it; "
+                "guests importing it are rejected as unknown or unavailable"
+            )
+    return findings
+
+
 def verify_core_callin_ordinals(regenerated: Path) -> list[str]:
     registry_path = regenerated / "WasmCallinRegistry.h"
     if not registry_path.is_file():
@@ -424,6 +501,12 @@ def main() -> int:
         if registry_findings:
             print("Core import registries disagree:", file=sys.stderr)
             print("\n".join(registry_findings), file=sys.stderr)
+            return 1
+
+        reachability_findings = verify_core_import_reachability(root, regenerated)
+        if reachability_findings:
+            print("Core imports are unreachable from guests:", file=sys.stderr)
+            print("\n".join(reachability_findings), file=sys.stderr)
             return 1
 
         # This consumes only freshly generated metadata. It is a cheap way to
