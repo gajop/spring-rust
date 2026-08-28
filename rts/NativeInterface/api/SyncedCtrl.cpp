@@ -2037,6 +2037,16 @@ static void NativeSetUnitPieceCollisionVolumeData(const SetUnitPieceCollisionVol
 	result->success = true;
 }
 
+// Weapon numbers on the native surface follow the Lua convention
+// (LUA_WEAPON_BASE_INDEX): 1 selects the unit's first weapon. Anything below 1
+// resolves to a negative index, which each caller reads as "no specific weapon"
+// the way Lua does. UnitsWeapons.cpp::GetLuaWeapon applies the same rule to the
+// reader callouts.
+static int LuaWeaponIndex(int32_t luaWeaponNum)
+{
+	return static_cast<int>(luaWeaponNum) - LUA_WEAPON_BASE_INDEX;
+}
+
 static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetResult* result)
 {
 	bufferPos = 0;
@@ -2063,12 +2073,13 @@ static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetRe
 	const float3 targetPos(query->target.pos.x, query->target.pos.y, query->target.pos.z);
 
 	if (query->target.isGroundTarget) {
-		if (query->weaponNum < 0) {
+		const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+		if (weaponIndex < 0) {
 			result->success = unit->AttackGround(targetPos, query->options.userTarget, query->options.manualFire);
-		} else if (static_cast<size_t>(query->weaponNum) < unit->weapons.size()) {
+		} else if (static_cast<size_t>(weaponIndex) < unit->weapons.size()) {
 			SWeaponTarget trg(targetPos, query->options.userTarget);
 			trg.isManualFire = query->options.manualFire;
-			result->success = unit->weapons[query->weaponNum]->Attack(trg);
+			result->success = unit->weapons[weaponIndex]->Attack(trg);
 		}
 		return;
 	}
@@ -2085,12 +2096,13 @@ static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetRe
 		return;
 	}
 
-	if (query->weaponNum < 0) {
+	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	if (weaponIndex < 0) {
 		result->success = unit->AttackUnit(target, query->options.userTarget, query->options.manualFire);
-	} else if (static_cast<size_t>(query->weaponNum) < unit->weapons.size()) {
+	} else if (static_cast<size_t>(weaponIndex) < unit->weapons.size()) {
 		SWeaponTarget trg(target, query->options.userTarget);
 		trg.isManualFire = query->options.manualFire;
-		result->success = unit->weapons[query->weaponNum]->Attack(trg);
+		result->success = unit->weapons[weaponIndex]->Attack(trg);
 	}
 }
 
@@ -2113,8 +2125,9 @@ static void NativeSetUnitShieldState(const SetUnitShieldStateQuery* query, SetUn
 
 	CPlasmaRepulser* shield = static_cast<CPlasmaRepulser*>(unit->shieldWeapon);
 
-	if (query->weaponNum >= 0 && static_cast<size_t>(query->weaponNum) < unit->weapons.size()) {
-		shield = dynamic_cast<CPlasmaRepulser*>(unit->weapons[query->weaponNum]);
+	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	if (weaponIndex >= 0 && static_cast<size_t>(weaponIndex) < unit->weapons.size()) {
+		shield = dynamic_cast<CPlasmaRepulser*>(unit->weapons[weaponIndex]);
 	}
 
 	if (shield == nullptr) {
@@ -2150,8 +2163,9 @@ static void NativeSetUnitShieldRechargeDelay(const SetUnitShieldRechargeDelayQue
 
 	CPlasmaRepulser* shield = static_cast<CPlasmaRepulser*>(unit->shieldWeapon);
 
-	if (query->weaponNum >= 0 && static_cast<size_t>(query->weaponNum) < unit->weapons.size()) {
-		shield = dynamic_cast<CPlasmaRepulser*>(unit->weapons[query->weaponNum]);
+	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	if (weaponIndex >= 0 && static_cast<size_t>(weaponIndex) < unit->weapons.size()) {
+		shield = dynamic_cast<CPlasmaRepulser*>(unit->weapons[weaponIndex]);
 	}
 
 	if (shield == nullptr) {
@@ -2681,13 +2695,13 @@ static void NativeSetUnitWeaponState(const SetUnitWeaponStateQuery* query, SetUn
 		return;
 	}
 
-	const size_t weaponNum = static_cast<size_t>(query->weaponNum);
-	if (weaponNum >= unit->weapons.size()) {
+	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
 		return;
 	}
 
-	CWeapon* weapon = unit->weapons[weaponNum];
+	CWeapon* weapon = unit->weapons[weaponIndex];
 	if (query->key == nullptr) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Key is null");
 		return;
@@ -2716,13 +2730,13 @@ static void NativeUnitWeaponFire(const UnitWeaponFireQuery* query, UnitWeaponFir
 		return;
 	}
 
-	const size_t weaponNum = static_cast<size_t>(query->weaponNum);
-	if (weaponNum >= unit->weapons.size()) {
+	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
 		return;
 	}
 
-	unit->weapons[weaponNum]->Fire(false);
+	unit->weapons[weaponIndex]->Fire(false);
 	result->success = true;
 }
 
@@ -2743,13 +2757,13 @@ static void NativeUnitWeaponHoldFire(const UnitWeaponHoldFireQuery* query, UnitW
 		return;
 	}
 
-	const size_t weaponNum = static_cast<size_t>(query->weaponNum);
-	if (weaponNum >= unit->weapons.size()) {
+	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
 		return;
 	}
 
-	unit->weapons[weaponNum]->DropCurrentTarget();
+	unit->weapons[weaponIndex]->DropCurrentTarget();
 	result->success = true;
 }
 
@@ -2925,12 +2939,12 @@ static void NativeSetUnitWeaponDamages(const SetUnitWeaponDamagesQuery* query, S
 		// "selfDestruct"
 		damages = DynDamageArray::GetMutable(unit->selfdExpDamages);
 	} else {
-		const size_t weaponNum = static_cast<size_t>(query->weaponNum);
-		if (weaponNum >= unit->weapons.size()) {
+		const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+		if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
 			return;
 		}
-		damages = DynDamageArray::GetMutable(unit->weapons[weaponNum]->damages);
+		damages = DynDamageArray::GetMutable(unit->weapons[weaponIndex]->damages);
 	}
 
 	if (damages == nullptr) {

@@ -357,14 +357,14 @@ struct SetUnitTargetQuery {
 	int32_t unitID;
 	UnitTargetRef target;
 	SetUnitTargetOptions options;
-	int32_t weaponNum;          // -1 for all weapons
+	int32_t weaponNum;          // 1-indexed as in Lua; below 1 for all weapons
 };
 struct SetUnitTargetResult { const Error* error; bool success; };
 
 // Unit shield queries
 struct SetUnitShieldStateQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // -1 for default shield
+	int32_t weaponNum;          // 1-indexed as in Lua; below 1 for default shield
 	bool enabled;
 	float power;
 };
@@ -372,7 +372,7 @@ struct SetUnitShieldStateResult { const Error* error; bool success; };
 
 struct SetUnitShieldRechargeDelayQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // -1 for default shield
+	int32_t weaponNum;          // 1-indexed as in Lua; below 1 for default shield
 	float rechargeDelay;        // seconds, -1 to use default
 };
 struct SetUnitShieldRechargeDelayResult { const Error* error; bool success; };
@@ -466,7 +466,7 @@ struct SetUnitCrashingResult { const Error* error; bool stateChanged; };
 // Unit weapon control queries
 struct SetUnitWeaponStateQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // 0-indexed
+	int32_t weaponNum;          // 1-indexed as in Lua
 	const char* key;
 	float value;
 };
@@ -474,13 +474,13 @@ struct SetUnitWeaponStateResult { const Error* error; bool success; };
 
 struct UnitWeaponFireQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // 0-indexed
+	int32_t weaponNum;          // 1-indexed as in Lua
 };
 struct UnitWeaponFireResult { const Error* error; bool success; };
 
 struct UnitWeaponHoldFireQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // 0-indexed
+	int32_t weaponNum;          // 1-indexed as in Lua
 };
 struct UnitWeaponHoldFireResult { const Error* error; bool success; };
 
@@ -510,7 +510,7 @@ struct SetUnitPosErrorParamsResult { const Error* error; bool success; };
 // Unit weapon damages query
 struct SetUnitWeaponDamagesQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // 0-indexed, -1 for "explode", -2 for "selfDestruct"
+	int32_t weaponNum;          // 1-indexed as in Lua, -1 for "explode", -2 for "selfDestruct"
 	const char* damageKey;      // damage type key (e.g., "paralyzeDamageTime", armor type index)
 	float damageValue;
 };
