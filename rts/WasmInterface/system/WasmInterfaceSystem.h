@@ -48,6 +48,10 @@ public:
 	// except to build a diagnostic message.
 	static bool DispatchActiveCoreCallin(WasmCoreCallin callin, const void* query,
 		bool synced, void* nativeResult, bool& handled, std::string& error);
+	// Per-owner dispatch. Mirrors how each Lua handle receives every event and
+	// runs only its own state: one client, its own modules, exactly once.
+	bool DispatchOwnCoreCallin(WasmCoreCallin callin, const void* query,
+		bool synced, void* nativeResult, bool& handled, std::string& error);
 	struct CoreCallinInvocation {
 		WasmEnvironment environment;
 		const void* query = nullptr;

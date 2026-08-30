@@ -128,7 +128,7 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(WasmCoreCallin callin,
 	if (m_wasmSystem != nullptr) {
 		bool coreHandled = false;
 		std::string coreError;
-		if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
+		if (!m_wasmSystem->DispatchOwnCoreCallin(
 				callin, query, synced, nativeResult, coreHandled, coreError)) {
 			if (!coreError.empty()) {
 				LOG_L(L_ERROR, "Core Wasm callin %s failed: %s",

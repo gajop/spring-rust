@@ -148,9 +148,23 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(WasmCoreCallin callin,
 	const void* query, bool synced, void* nativeResult, bool& handled,
 	std::string& error)
 {
+	// Fallback for call sites that have no owning system in hand (standalone
+	// environment updates, defs parsing). Event clients must use the instance
+	// form so each one only ever drives its own modules.
 	handled = false;
 	WasmInterfaceSystem* system = ActiveCoreSystem();
-	if (system == nullptr || system->coreModules.empty())
+	if (system == nullptr)
+		return true;
+	return system->DispatchOwnCoreCallin(callin, query, synced, nativeResult, handled, error);
+}
+
+bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
+	const void* query, bool synced, void* nativeResult, bool& handled,
+	std::string& error)
+{
+	handled = false;
+	WasmInterfaceSystem* system = this;
+	if (system->coreModules.empty())
 		return true;
 	if (callin == WasmCoreCallin::Invalid)
 		return true;
