@@ -48,6 +48,22 @@ the engine adapter must guarantee death-script settlement even if the Rust
 handler is missing or traps. Engine-visible completion cannot rely on guest
 unwinding or Rust `Drop`.
 
+## Engine pointers do not cross the portable Rust API
+
+Several `CUnitScript` virtuals use engine pointers as C++ implementation details,
+including transport methods taking `const CUnit*`, `AimShieldWeapon` taking a
+`CPlasmaRepulser*`, and targeting methods taking `const CUnit*`.
+
+These pointers must be normalized by the C++ adapter before dispatch. The public
+Rust API should use stable values such as `UnitId`, `WeaponId`, or another typed
+handle, identically for WasmCUS and NativeCUS. NativeCUS should not expose raw
+engine pointers merely because it could.
+
+Likewise, C++ in/out references become explicit values in the Rust ABI. For
+example `HitByWeapon(..., float& inoutDamage)` should enter Rust with the current
+damage and synchronously return the replacement damage (or an equivalent typed
+result), rather than exposing a reference across the boundary.
+
 ## Per-instance routing
 
 Normal Wasm callins are module-wide events. Unit scripts are different:
@@ -71,7 +87,7 @@ identity and a generated mask describing which standard entry points the script
 provides. Unimplemented entry points should be rejected/skipped engine-side
 without entering the guest.
 
-## Keep the C++ adapter small
+## Keep the C++ adapter small and backend-neutral
 
 `CUnit` stores its script object in the fixed inline `usMemBuffer`, sized around
 the existing unit-script subclasses. A Rust-backed `CUnitScript` adapter should
@@ -81,6 +97,11 @@ task state belongs in the owning Rust module.
 
 Growing the adapter should not require growing per-unit storage for every game,
 including games that do not use Rust CUS.
+
+The adapter should be backend-neutral from its first implementation. WasmCUS may
+be implemented first, but the C++ object should target a Rust-CUS backend
+interface rather than depend directly on Wasmtime-specific state. NativeCUS then
+implements the same adapter-facing contract instead of requiring a retrofit.
 
 ## Reuse current Wasm runtime infrastructure
 
@@ -94,6 +115,52 @@ WasmCUS should reuse the current `rust-wip` infrastructure for:
 - module dispatch/runtime lifetime.
 
 It should not create another Wasmtime runtime beside `WasmInterfaceSystem`.
+
+## Initialization and `Create`
+
+LUS provides an important precedent for attachment ordering. The framework first
+constructs the per-unit environment, registers the callin table with
+`Spring.UnitScript.CreateScript`, registers its own unit bookkeeping, and only
+then starts `script.Create` as a thread. `CLuaUnitScript::Create()` itself is a
+no-op.
+
+Rust CUS should make this ownership explicit rather than waiting for an engine
+callin that may arrive too early or not at all:
+
+1. synchronously construct/register the Rust script instance during attachment
+   (for example the provisional `fn new(&mut InitCtx) -> Self`);
+2. make the instance visible to routing/scheduling;
+3. if the script defines suspendable startup work, start that as a normal named
+   CUS task after attachment is complete.
+
+The exact names are provisional; the ordering is not.
+
+## Synchronous re-entrancy fallback
+
+Core Wasm cannot recursively enter an already-running Wasmtime store. A
+synchronous engine request that re-enters the same CUS runtime therefore cannot
+be queued or suspended: the engine needs a result immediately.
+
+The adapter should define neutral per-method fallback behavior from the first
+slice and use the same logical policy for NativeCUS where practical, so backend
+choice does not alter gameplay semantics. Baseline fallbacks matching existing
+LUS failure/missing-handler behavior are:
+
+| Method | Fallback |
+| --- | --- |
+| `QueryWeapon` | `-1` / no piece |
+| `AimFromWeapon` | `-1` / no piece |
+| `QueryTransport` | `-1` / no piece |
+| `QueryNanoPiece` | `-1` / no piece |
+| `QueryBuildInfo` | `-1` / no piece |
+| `QueryLandingPads` | empty result |
+| `BlockShot` | `false` |
+| `TargetWeight` | `1.0` |
+| `HitByWeapon` / `WorldHitByWeapon` | leave damage unchanged |
+
+This table is a CUS adapter contract for an unavailable synchronous dispatch. It
+should not be confused with LUS's `default_return_values` table, which is also
+used when particular weapon handlers are absent.
 
 ## Animation
 

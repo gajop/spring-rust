@@ -59,10 +59,17 @@ impl UnitScript for Tank {
 }
 ```
 
+`new` above represents synchronous construction during CUS attachment. It is not
+an engine `Create` callin. If a script needs LUS-style suspendable `Create`
+behavior, that startup work should be a named task started by CUS only after the
+instance has been fully attached and registered.
+
 Important properties:
 
 - state is a normal Rust struct;
 - synchronous engine queries stay synchronous;
 - only waits/sleeps require async;
 - animation interpolation remains engine-side;
+- initialization ordering is owned by CUS attachment, not an engine `Create`
+  callback;
 - the same source is intended to compile for WasmCUS and NativeCUS.

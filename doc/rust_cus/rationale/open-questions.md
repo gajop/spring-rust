@@ -20,7 +20,10 @@ Lua/event terminology.
 ## Named task/spawn API
 
 The public decision is settled: `spawn` refers to a known/named CUS task, not an
-arbitrary opaque `Future` value. Still open:
+arbitrary opaque `Future` value. LUS-compatible ordering is also settled: the
+child starts immediately and inherits the spawning task's signal mask.
+
+Still open:
 
 - exact syntax for naming/constructing the task;
 - whether spawn returns a typed handle;
@@ -29,19 +32,22 @@ arbitrary opaque `Future` value. Still open:
 The last item is an internal representation choice and should be benchmarked,
 not exposed in game source.
 
-## Signals/cancellation
+## Signal API spelling
 
-Need to define:
+The behavior is no longer open: numeric masks use bit intersection, a spawned
+task inherits its parent's mask (top-level starts at zero), signalling cancels
+matching sleeping/waiting tasks, and a running task survives its own signal.
 
-- signal-mask inheritance;
-- how tasks are grouped;
-- cancellation timing;
-- exact guest-internal destructor behavior;
-- compatibility with LUS/COB edge cases.
+Still open are only API-shape details such as:
 
-Normal future cancellation may run Rust `Drop` for guest-internal cleanup, but
-engine-visible settlement must have an engine-side guarantee and cannot depend
-on guest unwinding.
+- exact Rust mask/identifier types;
+- whether non-bitmask identifiers are exposed at all;
+- task-handle ergonomics;
+- how much guest-internal `Drop` behavior is documented beyond ordinary Rust
+  cancellation semantics.
+
+Engine-visible settlement remains engine-guaranteed and cannot depend on guest
+unwinding.
 
 ## Custom entry-point registry
 
@@ -59,6 +65,10 @@ CUS can follow the existing structural LUS model: the owning synced game module
 explicitly attaches/replaces the unit's `CUnitScript` implementation. The exact
 registration/callout spelling and lifetime bookkeeping remain implementation
 questions; a new unit-def backend format is not required for V1.
+
+Initialization ordering is settled: construct/register the instance as part of
+attachment, then start any suspendable startup task only after attachment and
+scheduler bookkeeping are complete.
 
 ## Durable save/load requirements
 

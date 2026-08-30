@@ -32,6 +32,9 @@ async fn walk(&mut self, ctx: &mut UnitCtx) {
 }
 ```
 
+`ctx.next_frame()` above is the direct Rust expression of LUS `Sleep(0)`, whose
+framework semantics are a minimum one-frame sleep.
+
 ## Aiming
 
 ```rust
@@ -59,6 +62,10 @@ async fn aim_weapon(
 }
 ```
 
+CUS `spawn` should preserve LUS `StartThread` ordering: the child starts
+immediately and runs until its first suspension or completion before this task
+continues. It also inherits this task's current signal mask.
+
 ## Game-specific API
 
 The original `BlockShot` calls Zero-K's overkill-prevention logic. Rust CUS
@@ -70,11 +77,13 @@ fn block_shot(
     ctx: &mut UnitCtx,
     weapon: WeaponId,
     target: UnitId,
+    user_target: bool,
 ) -> bool {
     crate::overkill::check_block(
         ctx.unit(),
         target,
         weapon,
+        user_target,
         130.0,
     )
 }

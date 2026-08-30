@@ -77,6 +77,43 @@ appropriate, provided stale unit-ID reuse/generation is handled correctly.
 Exact choices such as timer-wheel size, intrusive lists, slab layout, and wake
 queues should be left to profiling.
 
+## First implementation slice
+
+The first end-to-end script should exercise the risky paths rather than only
+prove attachment. A small fixture or partial real port should include at least:
+
+- attachment and synchronous construction;
+- one engine-side animation plus `wait_for_turn` or `wait_for_move`;
+- one synchronous query such as `QueryWeapon`;
+- one named spawned task;
+- signal-mask inheritance/cancellation;
+- a millisecond sleep / next-frame yield;
+- one same-module game-specific Rust call.
+
+A Zero-K `amphraid`-like slice is a good fit because it naturally contains most
+of these behaviors.
+
+## Behavioural parity testing
+
+Performance benchmarks are not sufficient: they will not catch a wrong sleep
+conversion, task ordering, signal mask rule, or missing `userTarget` argument.
+
+Alongside the benchmark suite, port at least one existing LUS script and compare
+observable behavior between LUS and Rust CUS under the same engine inputs. The
+parity checklist should cover:
+
+- piece destinations and animation completion ordering;
+- `Sleep(0)` and millisecond sleep wake frames;
+- `StartThread`/`spawn` immediate-start ordering;
+- signal-mask inheritance and cancellation;
+- synchronous query/targeting return values;
+- aim-ready publication timing;
+- `Killed` completion/wreck result;
+- custom game-to-script and script-to-game calls.
+
+The test does not need to compare implementation internals. It should compare
+engine-visible state and call ordering.
+
 ## Measurements to require
 
 At minimum compare:

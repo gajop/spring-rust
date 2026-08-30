@@ -28,6 +28,7 @@ fn block_shot(
     ctx: &mut UnitCtx,
     _weapon: WeaponId,
     target: UnitId,
+    _user_target: bool,
 ) -> bool {
     crate::overkill::should_block(ctx.unit(), target, 130.0)
 }
@@ -98,3 +99,9 @@ Core Wasm cannot recursively enter an already-running Wasmtime store. Same-Rust
 calls inside the active module do not create that problem; cross-runtime calls
 may. Any API that crosses such a boundary must choose direct host data, queued
 commands, or another non-recursive design deliberately.
+
+For engine->CUS methods whose result is consumed synchronously, queuing is not
+an option. If dispatch would recursively enter the active runtime, the C++
+adapter uses the method-specific neutral fallback defined in
+[Engine integration](engine-integration.md) rather than recursively entering the
+store or pretending the request can complete later.

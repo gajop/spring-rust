@@ -38,6 +38,23 @@ Other ordinary Rust futures are not prohibited in V1. They simply do not gain a
 promise that an eventual persistent-task backend can serialize or reconstruct
 them automatically.
 
+## Sleep conversion
+
+For LUS-compatible millisecond sleeps, preserve the current framework's exact
+conversion:
+
+```text
+frames = max(1, floor(milliseconds / 33))
+```
+
+The divisor is the literal `33`, not `30` and not a value derived from
+`GAME_SPEED`. In particular, `Sleep(0)` resumes on the next frame. Rust
+`ctx.sleep(Duration)` should use this conversion when expressing LUS-style
+millisecond sleeps so ports do not silently change animation timing.
+
+Frame-native operations such as `ctx.next_frame()` remain explicit and do not
+need to round-trip through milliseconds.
+
 ## Engine animation remains engine-side
 
 `CUnitScript` already owns animation interpolation and completion tracking.
@@ -72,18 +89,34 @@ stored as a boxed rustc future initially; later codegen may represent the same
 task inline or as an explicit generated enum/state machine without changing the
 game source.
 
+For LUS-compatible semantics, `spawn` starts the child immediately: the child
+runs until its first suspension or completion before the spawning task
+continues. This ordering is observable and should not be replaced by an
+unspecified later-frame enqueue.
+
 ## Signals and cancellation
 
-Signals should cancel matching CUS tasks. With ordinary futures, normal
-cancellation can mean dropping the owned future, which may run Rust destructors.
-That is suitable for guest-internal cleanup.
+V1 signal behavior should match LUS for ported scripts:
+
+- a numeric signal cancels suspended tasks whose numeric signal mask intersects
+  it (`task_mask & signal != 0`);
+- if non-bitmask signal identifiers are supported, they match by equality;
+- a spawned task inherits the spawning task's signal mask; a top-level task
+  starts with mask `0`;
+- signalling removes matching tasks that are currently sleeping/waiting;
+- the currently running task is not killed by its own `signal()` call.
+
+With ordinary futures, cancelling a suspended task can mean dropping the owned
+future, which may run Rust destructors. That is suitable for guest-internal
+cleanup.
 
 Engine-visible settlement must not depend on Rust `Drop`: a Wasm trap provides
 no reliable guest unwind point. Lifecycle obligations such as completing
 `Killed` therefore need an engine-side fallback/guarantee.
 
-Exact compatibility details such as signal-mask inheritance and thread identity
-can be refined during implementation.
+The exact Rust types used for signal masks/identities and task handles remain API
+details; the ordering and cancellation behavior above are compatibility
+semantics.
 
 ## Frame scheduling
 
