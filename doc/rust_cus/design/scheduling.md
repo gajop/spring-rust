@@ -20,7 +20,7 @@ It does not need a general-purpose async runtime such as Tokio.
 
 ## CUS suspension primitives
 
-The supported semantic suspension points should be CUS-owned operations:
+CUS-owned engine waits include:
 
 ```rust
 ctx.sleep(duration).await;
@@ -30,11 +30,13 @@ ctx.next_frame().await;
 ```
 
 These correspond closely to LUS/COB operations and are sufficient for the
-common animation/state-machine workload.
+common animation/state-machine workload. They are also the suspension operations
+whose engine meaning CUS owns and which a future durable backend can reasonably
+lower into explicit saved state.
 
-Arbitrary futures may be technically possible in V1, but games should not rely
-on arbitrary future graphs being persistable later. CUS-owned suspension points
-form the forward-compatible subset.
+Other ordinary Rust futures are not prohibited in V1. They simply do not gain a
+promise that an eventual persistent-task backend can serialize or reconstruct
+them automatically.
 
 ## Engine animation remains engine-side
 
@@ -43,6 +45,10 @@ Rust scripts should issue engine animation commands and suspend until the
 engine reports completion rather than reimplement interpolation in Rust.
 
 This preserves existing behavior and avoids unnecessary per-frame crossings.
+The current engine already separates multithreaded animation interpolation from
+a deterministic single-threaded animation-completion pass; script wakeups belong
+on the script side of that deterministic boundary, not in the MT interpolation
+work.
 
 ## Concurrent tasks
 
@@ -54,22 +60,38 @@ CUS needs an equivalent of LUS/COB script threads for patterns such as:
 - independent weapon aiming tasks;
 - generated animation playback.
 
-The exact spawn API is not fixed. A likely constraint is that spawned tasks are
-CUS-owned and identifiable, rather than accepting every possible external
-executor/future composition pattern.
+Spawned tasks should be known/named CUS tasks rather than arbitrary opaque
+future values supplied to `spawn`. Conceptually:
+
+```rust
+ctx.spawn(Self::restore_after_delay, 5.seconds());
+```
+
+This is a public-API decision, not a V1 storage decision. A named task may be
+stored as a boxed rustc future initially; later codegen may represent the same
+task inline or as an explicit generated enum/state machine without changing the
+game source.
 
 ## Signals and cancellation
 
-Signals should cancel matching CUS tasks. With ordinary futures, cancellation
-naturally means dropping the owned future.
+Signals should cancel matching CUS tasks. With ordinary futures, normal
+cancellation can mean dropping the owned future, which may run Rust destructors.
+That is suitable for guest-internal cleanup.
 
-Exact compatibility details — signal-mask inheritance, destructor behavior,
-thread identity, and interaction with synchronous engine requests — should be
-verified during implementation against COB/LUS behavior. They are not blocking
-the architecture.
+Engine-visible settlement must not depend on Rust `Drop`: a Wasm trap provides
+no reliable guest unwind point. Lifecycle obligations such as completing
+`Killed` therefore need an engine-side fallback/guarantee.
+
+Exact compatibility details such as signal-mask inheritance and thread identity
+can be refined during implementation.
 
 ## Frame scheduling
 
 The synced game module already receives `GameFrame` and already has a synced
-Wasm execution budget in the current branch. CUS scheduling should reuse that
-frame/budget model rather than add a second module-level frame call.
+Wasm execution budget in the current branch. CUS should reuse that module-level
+scheduling/budget path rather than introduce a per-unit tick.
+
+Due timers, queued task wakeups, and other batchable scheduler work should be
+drained for the module as a whole. Immediate synchronous unit-script requests
+remain direct per-instance calls; sleeping tasks must not cause one guest
+crossing per unit per frame.

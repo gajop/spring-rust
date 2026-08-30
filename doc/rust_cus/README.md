@@ -1,8 +1,8 @@
 # Rust CUS
 
 Rust CUS is a proposed Rust implementation of Spring's existing `CUnitScript`
-abstraction. It is intended to let games write unit scripts in Rust while
-preserving the engine-side unit-script model used by COB and LUS.
+abstraction. `CUS` is shorthand introduced by these documents for this
+`CUnitScript`-based unit-script model; it is not an existing engine acronym.
 
 The proposal has two equally important parts:
 
@@ -25,9 +25,16 @@ because that is where the Rust interface is currently being developed.
 - The same Rust source should compile for **WasmCUS and NativeCUS**.
 - Game-facing Spring crates should expose the same API on both backends.
 - V1 uses ordinary stable Rust `async`/`Future`s for suspendable script work.
-- Save/load of suspended Rust execution is not a V1 requirement, but the
-  authoring model must leave a path to proc-macro-generated durable state later
-  without requiring games to rewrite their unit scripts.
+- Spawned CUS threads/tasks are **named CUS tasks** known to the script/macro;
+  the public API does not accept an arbitrary opaque future as a spawned task.
+  Their internal storage may still change from boxed futures to generated/inline
+  task state without changing game source.
+- Ordinary Rust futures are not otherwise forbidden. CUS-provided waits such as
+  sleep and animation waits are the suspension operations with stable engine
+  semantics and the path a future durable backend is expected to understand.
+- Save/load of suspended Rust execution is not a V1 requirement. The authoring
+  style should remain usable if durable proc-macro lowering is added later,
+  although code using non-durable state across suspension may need local cleanup.
 - COB and LUS remain valid backends. Rust CUS is designed for coexistence and
   migration, not mandatory replacement.
 
@@ -55,7 +62,7 @@ impl UnitScript for AmphRaid {
 ```
 
 The exact trait names and attributes above are provisional. `#[cus]` is used in
-these documents rather than `#[callin]`; "callin" already carries Lua-specific
+these documents rather than `#[callin]`; "callin" already carries Lua/event
 meaning in the Spring ecosystem.
 
 ## Reading order
