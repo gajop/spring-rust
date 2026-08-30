@@ -110,6 +110,11 @@ With ordinary futures, cancelling a suspended task can mean dropping the owned
 future, which may run Rust destructors. That is suitable for guest-internal
 cleanup.
 
+Cancellation must remain order-independent for synced correctness. If dropping
+or otherwise cancelling tasks can produce observable synced effects, the task
+iteration order itself becomes part of the deterministic contract and must be
+explicitly defined rather than inherited from an unordered container.
+
 Engine-visible settlement must not depend on Rust `Drop`: a Wasm trap provides
 no reliable guest unwind point. Lifecycle obligations such as completing
 `Killed` therefore need an engine-side fallback/guarantee.
