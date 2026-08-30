@@ -323,7 +323,7 @@ wasm_trap_t* CoreDynamicInput_units_info_get_unit_sensor_radius(void* environmen
     WireReader typeReader(typeWire);
     std::string typeStorage;
     { std::uint32_t coreLength = 0; if (!typeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!typeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } typeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.type = typeStorage.data(); }
-    if (!typeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!typeReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 28u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -380,7 +380,7 @@ wasm_trap_t* CoreDynamicInput_units_weapons_get_unit_weapon_state(void* environm
     WireReader keyReader(keyWire);
     std::string keyStorage;
     { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!keyReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[3].i32);
     if (!state->memory.Contains(output, 52u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -442,7 +442,7 @@ wasm_trap_t* CoreDynamicInput_units_commands_get_command_params(void* environmen
     CoreOwned_CommandFFI commandOwner;
     if (!commandOwner.Decode(state, commandReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.command = &commandOwner.value;
-    if (!commandReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!commandReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -493,33 +493,33 @@ wasm_trap_t* CoreDynamicInput_units_commands_give_order_array_to_unit_map(void* 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GiveOrderArrayToUnitMapQuery query{};
     std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
-    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitIDsWire;
-    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitIDsReader(unitIDsWire);
     std::vector<std::int32_t> unitIDsStorage;
-    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.unitCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!unitIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.unitCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t commandsPointer = 0, commandsBytes = 0;
-    if (!inputControl.U32(commandsPointer) || !inputControl.U32(commandsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(commandsPointer) || !inputControl.U32(commandsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(commandsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> commandsWire;
-    if (!state->memory.View(commandsPointer, commandsBytes, commandsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(commandsPointer, commandsBytes, commandsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader commandsReader(commandsWire);
     std::vector<CoreOwned_CommandFFI> commandsOwners;
     std::vector<CommandFFI> commandsValues;
-    { std::uint32_t coreCount = 0; if (!commandsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } commandsOwners.resize(coreCount); commandsValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!commandsOwners[coreIndex].Decode(state, commandsReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } commandsValues[coreIndex] = commandsOwners[coreIndex].value; } query.commands = commandsValues.empty() ? nullptr : commandsValues.data(); if (!AssignDynamicCount(coreCount, query.commandCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!commandsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreCount = 0; if (!commandsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } commandsOwners.resize(coreCount); commandsValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!commandsOwners[coreIndex].Decode(state, commandsReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } commandsValues[coreIndex] = commandsOwners[coreIndex].value; } query.commands = commandsValues.empty() ? nullptr : commandsValues.data(); if (!AssignDynamicCount(coreCount, query.commandCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!commandsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GiveOrderArrayToUnitMapResult result{};
     state->native->unitsCommands->GiveOrderArrayToUnitMap(&query, &result);
@@ -546,20 +546,20 @@ wasm_trap_t* CoreDynamicInput_units_pieces_get_model_root_piece(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetModelRootPieceQuery query{};
     std::uint32_t modelNamePointer = 0, modelNameBytes = 0;
-    if (!inputControl.U32(modelNamePointer) || !inputControl.U32(modelNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(modelNamePointer) || !inputControl.U32(modelNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(modelNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> modelNameWire;
-    if (!state->memory.View(modelNamePointer, modelNameBytes, modelNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(modelNamePointer, modelNameBytes, modelNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader modelNameReader(modelNameWire);
     std::string modelNameStorage;
-    { std::uint32_t coreLength = 0; if (!modelNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modelNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modelNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.modelName = modelNameStorage.data(); }
-    if (!modelNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!modelNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modelNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } modelNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.modelName = modelNameStorage.data(); }
+    if (!modelNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetModelRootPieceResult result{};
     state->native->unitsPieces->GetModelRootPiece(&query, &result);
@@ -599,7 +599,7 @@ wasm_trap_t* CoreDynamicInput_teams_get_team_resource_stats(void* environment, w
     WireReader resourceReader(resourceWire);
     std::string resourceStorage;
     { std::uint32_t coreLength = 0; if (!resourceReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resource = resourceStorage.data(); }
-    if (!resourceReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!resourceReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 72u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -666,7 +666,7 @@ wasm_trap_t* CoreDynamicInput_teams_get_team_resources(void* environment, wasmti
     WireReader resourceReader(resourceWire);
     std::string resourceStorage;
     { std::uint32_t coreLength = 0; if (!resourceReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resource = resourceStorage.data(); }
-    if (!resourceReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!resourceReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 72u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -733,7 +733,7 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_custom_param(void* environm
     WireReader keyReader(keyWire);
     std::string keyStorage;
     { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!keyReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -782,20 +782,20 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_id_by_name(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetUnitDefIDByNameQuery query{};
     std::uint32_t unitDefNamePointer = 0, unitDefNameBytes = 0;
-    if (!inputControl.U32(unitDefNamePointer) || !inputControl.U32(unitDefNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitDefNamePointer) || !inputControl.U32(unitDefNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitDefNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitDefNameWire;
-    if (!state->memory.View(unitDefNamePointer, unitDefNameBytes, unitDefNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitDefNamePointer, unitDefNameBytes, unitDefNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitDefNameReader(unitDefNameWire);
     std::string unitDefNameStorage;
-    { std::uint32_t coreLength = 0; if (!unitDefNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!unitDefNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitDefNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.unitDefName = unitDefNameStorage.data(); }
-    if (!unitDefNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!unitDefNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!unitDefNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitDefNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.unitDefName = unitDefNameStorage.data(); }
+    if (!unitDefNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetUnitDefIDByNameResult result{};
     state->native->unitDefs->GetUnitDefIDByName(&query, &result);
@@ -822,21 +822,21 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_bool(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetUnitDefParamBoolQuery query{};
     query.unitDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitDefID)>>>(slots[0].i32);
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetUnitDefParamBoolResult result{};
     state->native->unitDefs->GetUnitDefParamBool(&query, &result);
@@ -863,21 +863,21 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_float(void* environme
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetUnitDefParamFloatQuery query{};
     query.unitDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitDefID)>>>(slots[0].i32);
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetUnitDefParamFloatResult result{};
     state->native->unitDefs->GetUnitDefParamFloat(&query, &result);
@@ -904,21 +904,21 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_int(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetUnitDefParamIntQuery query{};
     query.unitDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitDefID)>>>(slots[0].i32);
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetUnitDefParamIntResult result{};
     state->native->unitDefs->GetUnitDefParamInt(&query, &result);
@@ -958,7 +958,7 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_string(void* environm
     WireReader keyReader(keyWire);
     std::string keyStorage;
     { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!keyReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -1007,20 +1007,20 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_type(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetUnitDefParamTypeQuery query{};
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetUnitDefParamTypeResult result{};
     state->native->unitDefs->GetUnitDefParamType(&query, &result);
@@ -1060,7 +1060,7 @@ wasm_trap_t* CoreDynamicInput_feature_defs_get_feature_def_custom_param(void* en
     WireReader keyReader(keyWire);
     std::string keyStorage;
     { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!keyReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -1109,20 +1109,20 @@ wasm_trap_t* CoreDynamicInput_feature_defs_get_feature_def_id_by_name(void* envi
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetFeatureDefIDByNameQuery query{};
     std::uint32_t featureDefNamePointer = 0, featureDefNameBytes = 0;
-    if (!inputControl.U32(featureDefNamePointer) || !inputControl.U32(featureDefNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(featureDefNamePointer) || !inputControl.U32(featureDefNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(featureDefNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> featureDefNameWire;
-    if (!state->memory.View(featureDefNamePointer, featureDefNameBytes, featureDefNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(featureDefNamePointer, featureDefNameBytes, featureDefNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader featureDefNameReader(featureDefNameWire);
     std::string featureDefNameStorage;
-    { std::uint32_t coreLength = 0; if (!featureDefNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!featureDefNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } featureDefNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.featureDefName = featureDefNameStorage.data(); }
-    if (!featureDefNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!featureDefNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!featureDefNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } featureDefNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.featureDefName = featureDefNameStorage.data(); }
+    if (!featureDefNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetFeatureDefIDByNameResult result{};
     state->native->featureDefs->GetFeatureDefIDByName(&query, &result);
@@ -1162,7 +1162,7 @@ wasm_trap_t* CoreDynamicInput_weapon_defs_get_weapon_def_custom_param(void* envi
     WireReader keyReader(keyWire);
     std::string keyStorage;
     { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!keyReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -1211,20 +1211,20 @@ wasm_trap_t* CoreDynamicInput_weapon_defs_get_weapon_def_id(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetWeaponDefIDQuery query{};
     std::uint32_t weaponDefNamePointer = 0, weaponDefNameBytes = 0;
-    if (!inputControl.U32(weaponDefNamePointer) || !inputControl.U32(weaponDefNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(weaponDefNamePointer) || !inputControl.U32(weaponDefNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(weaponDefNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> weaponDefNameWire;
-    if (!state->memory.View(weaponDefNamePointer, weaponDefNameBytes, weaponDefNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(weaponDefNamePointer, weaponDefNameBytes, weaponDefNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader weaponDefNameReader(weaponDefNameWire);
     std::string weaponDefNameStorage;
-    { std::uint32_t coreLength = 0; if (!weaponDefNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!weaponDefNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } weaponDefNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.weaponDefName = weaponDefNameStorage.data(); }
-    if (!weaponDefNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!weaponDefNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!weaponDefNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } weaponDefNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.weaponDefName = weaponDefNameStorage.data(); }
+    if (!weaponDefNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetWeaponDefIDResult result{};
     state->native->weaponDefs->GetWeaponDefID(&query, &result);
@@ -1251,23 +1251,23 @@ wasm_trap_t* CoreDynamicInput_math_extra_bit_bits(void* environment, wasmtime_ca
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     BitBitsQuery query{};
     std::uint32_t bitsPointer = 0, bitsBytes = 0;
-    if (!inputControl.U32(bitsPointer) || !inputControl.U32(bitsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(bitsPointer) || !inputControl.U32(bitsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(bitsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> bitsWire;
-    if (!state->memory.View(bitsPointer, bitsBytes, bitsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(bitsPointer, bitsBytes, bitsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader bitsReader(bitsWire);
     std::vector<std::uint32_t> bitsStorage;
-    { std::uint32_t coreCount = 0; if (!bitsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } bitsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!bitsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } bitsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!bitsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } bitsStorage.push_back(item); } query.bits = bitsStorage.empty() ? nullptr : bitsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!bitsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } bitsStorage.push_back(item); } query.bits = bitsStorage.empty() ? nullptr : bitsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!bitsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     BitBitsResult result{};
     state->native->mathExtra->BitBits(&query, &result);
@@ -1294,23 +1294,23 @@ wasm_trap_t* CoreDynamicInput_math_extra_diag(void* environment, wasmtime_caller
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     DiagQuery query{};
     std::uint32_t valuesPointer = 0, valuesBytes = 0;
-    if (!inputControl.U32(valuesPointer) || !inputControl.U32(valuesBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuesPointer) || !inputControl.U32(valuesBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valuesBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valuesWire;
-    if (!state->memory.View(valuesPointer, valuesBytes, valuesWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuesPointer, valuesBytes, valuesWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valuesReader(valuesWire);
     std::vector<float> valuesStorage;
-    { std::uint32_t coreCount = 0; if (!valuesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!valuesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valuesStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
                 if (!valuesReader.F32(item)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!valuesReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     DiagResult result{};
     state->native->mathExtra->Diag(&query, &result);
@@ -1349,7 +1349,7 @@ wasm_trap_t* CoreDynamicInput_encoding_decode_base64(void* environment, wasmtime
     WireReader textReader(textWire);
     std::string textStorage;
     { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -1412,7 +1412,7 @@ wasm_trap_t* CoreDynamicInput_encoding_decode_base64_url(void* environment, wasm
     WireReader textReader(textWire);
     std::string textStorage;
     { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -1478,7 +1478,7 @@ wasm_trap_t* CoreDynamicInput_encoding_encode_base64(void* environment, wasmtime
                 { std::uint32_t coreRaw = 0; if (!textReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.push_back(item); } query.text = textStorage.empty() ? nullptr : textStorage.data(); if (!AssignDynamicCount(coreCount, query.textLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.stripPadding = slots[0].i32 != 0;
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
@@ -1543,7 +1543,7 @@ wasm_trap_t* CoreDynamicInput_encoding_encode_base64_url(void* environment, wasm
                 { std::uint32_t coreRaw = 0; if (!textReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.push_back(item); } query.text = textStorage.empty() ? nullptr : textStorage.data(); if (!AssignDynamicCount(coreCount, query.textLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -1592,20 +1592,20 @@ wasm_trap_t* CoreDynamicInput_encoding_is_valid_base64(void* environment, wasmti
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     IsValidBase64Query query{};
     std::uint32_t textPointer = 0, textBytes = 0;
-    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textWire;
-    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textReader(textWire);
     std::string textStorage;
-    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
+    if (!textReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     IsValidBase64Result result{};
     state->native->encoding->IsValidBase64(&query, &result);
@@ -1632,20 +1632,20 @@ wasm_trap_t* CoreDynamicInput_encoding_is_valid_base64_url(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     IsValidBase64UrlQuery query{};
     std::uint32_t textPointer = 0, textBytes = 0;
-    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textWire;
-    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textReader(textWire);
     std::string textStorage;
-    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
+    if (!textReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     IsValidBase64UrlResult result{};
     state->native->encoding->IsValidBase64Url(&query, &result);
@@ -1672,32 +1672,32 @@ wasm_trap_t* CoreDynamicInput_rules_params_set_feature_rules_param(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetFeatureRulesParamQuery query{};
     query.featureID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.featureID)>>>(slots[0].i32);
     std::uint32_t paramNamePointer = 0, paramNameBytes = 0;
-    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(paramNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> paramNameWire;
-    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader paramNameReader(paramNameWire);
     std::string paramNameStorage;
-    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
-    if (!paramNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
+    if (!paramNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     CoreOwned_RulesParamValue valueOwner;
-    if (!valueOwner.Decode(state, valueReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueOwner.Decode(state, valueReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = valueOwner.value;
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.los = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.los)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetFeatureRulesParamResult result{};
     state->native->rulesParams->SetFeatureRulesParam(&query, &result);
@@ -1724,31 +1724,31 @@ wasm_trap_t* CoreDynamicInput_rules_params_set_game_rules_param(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetGameRulesParamQuery query{};
     std::uint32_t paramNamePointer = 0, paramNameBytes = 0;
-    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(paramNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> paramNameWire;
-    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader paramNameReader(paramNameWire);
     std::string paramNameStorage;
-    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
-    if (!paramNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
+    if (!paramNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     CoreOwned_RulesParamValue valueOwner;
-    if (!valueOwner.Decode(state, valueReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueOwner.Decode(state, valueReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = valueOwner.value;
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.los = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.los)>>>(slots[0].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetGameRulesParamResult result{};
     state->native->rulesParams->SetGameRulesParam(&query, &result);
@@ -1775,32 +1775,32 @@ wasm_trap_t* CoreDynamicInput_rules_params_set_player_rules_param(void* environm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetPlayerRulesParamQuery query{};
     query.playerID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.playerID)>>>(slots[0].i32);
     std::uint32_t paramNamePointer = 0, paramNameBytes = 0;
-    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(paramNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> paramNameWire;
-    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader paramNameReader(paramNameWire);
     std::string paramNameStorage;
-    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
-    if (!paramNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
+    if (!paramNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     CoreOwned_RulesParamValue valueOwner;
-    if (!valueOwner.Decode(state, valueReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueOwner.Decode(state, valueReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = valueOwner.value;
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.los = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.los)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetPlayerRulesParamResult result{};
     state->native->rulesParams->SetPlayerRulesParam(&query, &result);
@@ -1827,32 +1827,32 @@ wasm_trap_t* CoreDynamicInput_rules_params_set_team_rules_param(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetTeamRulesParamQuery query{};
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
     std::uint32_t paramNamePointer = 0, paramNameBytes = 0;
-    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(paramNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> paramNameWire;
-    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader paramNameReader(paramNameWire);
     std::string paramNameStorage;
-    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
-    if (!paramNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
+    if (!paramNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     CoreOwned_RulesParamValue valueOwner;
-    if (!valueOwner.Decode(state, valueReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueOwner.Decode(state, valueReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = valueOwner.value;
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.los = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.los)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetTeamRulesParamResult result{};
     state->native->rulesParams->SetTeamRulesParam(&query, &result);
@@ -1879,32 +1879,32 @@ wasm_trap_t* CoreDynamicInput_rules_params_set_unit_rules_param(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitRulesParamQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t paramNamePointer = 0, paramNameBytes = 0;
-    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(paramNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> paramNameWire;
-    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader paramNameReader(paramNameWire);
     std::string paramNameStorage;
-    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
-    if (!paramNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
+    if (!paramNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     CoreOwned_RulesParamValue valueOwner;
-    if (!valueOwner.Decode(state, valueReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueOwner.Decode(state, valueReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = valueOwner.value;
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.los = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.los)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitRulesParamResult result{};
     state->native->rulesParams->SetUnitRulesParam(&query, &result);
@@ -1931,24 +1931,24 @@ wasm_trap_t* CoreDynamicInput_camera_set_camera_state(void* environment, wasmtim
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetCameraStateQuery query{};
     std::uint32_t statePointer = 0, stateBytes = 0;
-    if (!inputControl.U32(statePointer) || !inputControl.U32(stateBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(statePointer) || !inputControl.U32(stateBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(stateBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> stateWire;
-    if (!state->memory.View(statePointer, stateBytes, stateWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(statePointer, stateBytes, stateWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader stateReader(stateWire);
     CoreOwned_CameraState stateOwner;
-    if (!stateOwner.Decode(state, stateReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!stateOwner.Decode(state, stateReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.state = stateOwner.value;
-    if (!stateReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!stateReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.transitionTime = slots[0].f32;
     query.transitionTimeFactor = slots[1].f32;
     query.transitionTimeExponent = slots[2].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetCameraStateResult result{};
     state->native->cameraApi->SetCameraState(&query, &result);
@@ -1975,20 +1975,20 @@ wasm_trap_t* CoreDynamicInput_input_get_key_code(void* environment, wasmtime_cal
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetKeyCodeQuery query{};
     std::uint32_t keySymPointer = 0, keySymBytes = 0;
-    if (!inputControl.U32(keySymPointer) || !inputControl.U32(keySymBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keySymPointer) || !inputControl.U32(keySymBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keySymBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keySymWire;
-    if (!state->memory.View(keySymPointer, keySymBytes, keySymWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keySymPointer, keySymBytes, keySymWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keySymReader(keySymWire);
     std::string keySymStorage;
-    { std::uint32_t coreLength = 0; if (!keySymReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keySymReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keySymStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.keySym = keySymStorage.data(); }
-    if (!keySymReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keySymReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keySymReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keySymStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.keySym = keySymStorage.data(); }
+    if (!keySymReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetKeyCodeResult result{};
     state->native->input->GetKeyCode(&query, &result);
@@ -2027,7 +2027,7 @@ wasm_trap_t* CoreDynamicInput_input_get_key_from_scan_symbol(void* environment, 
     WireReader scanSymbolReader(scanSymbolWire);
     std::string scanSymbolStorage;
     { std::uint32_t coreLength = 0; if (!scanSymbolReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!scanSymbolReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } scanSymbolStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.scanSymbol = scanSymbolStorage.data(); }
-    if (!scanSymbolReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!scanSymbolReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -2091,7 +2091,7 @@ wasm_trap_t* CoreDynamicInput_input_get_mouse_buttons_pressed(void* environment,
                 { std::int32_t coreRaw = 0; if (!buttonsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } buttonsStorage.push_back(item); } query.buttons = buttonsStorage.empty() ? nullptr : buttonsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!buttonsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!buttonsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -2142,22 +2142,22 @@ wasm_trap_t* CoreDynamicInput_debug_input_emulate_text_editing(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     EmulateTextEditingQuery query{};
     std::uint32_t utf8TextPointer = 0, utf8TextBytes = 0;
-    if (!inputControl.U32(utf8TextPointer) || !inputControl.U32(utf8TextBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(utf8TextPointer) || !inputControl.U32(utf8TextBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(utf8TextBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> utf8TextWire;
-    if (!state->memory.View(utf8TextPointer, utf8TextBytes, utf8TextWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(utf8TextPointer, utf8TextBytes, utf8TextWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader utf8TextReader(utf8TextWire);
     std::string utf8TextStorage;
-    { std::uint32_t coreLength = 0; if (!utf8TextReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!utf8TextReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } utf8TextStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.utf8Text = utf8TextStorage.data(); }
-    if (!utf8TextReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!utf8TextReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!utf8TextReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } utf8TextStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.utf8Text = utf8TextStorage.data(); }
+    if (!utf8TextReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.start = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.start)>>>(slots[0].i32);
     query.length = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.length)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     EmulateTextEditingResult result{};
     state->native->debugInput->EmulateTextEditing(&query, &result);
@@ -2184,20 +2184,20 @@ wasm_trap_t* CoreDynamicInput_debug_input_emulate_text_input(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     EmulateTextInputQuery query{};
     std::uint32_t utf8TextPointer = 0, utf8TextBytes = 0;
-    if (!inputControl.U32(utf8TextPointer) || !inputControl.U32(utf8TextBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(utf8TextPointer) || !inputControl.U32(utf8TextBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(utf8TextBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> utf8TextWire;
-    if (!state->memory.View(utf8TextPointer, utf8TextBytes, utf8TextWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(utf8TextPointer, utf8TextBytes, utf8TextWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader utf8TextReader(utf8TextWire);
     std::string utf8TextStorage;
-    { std::uint32_t coreLength = 0; if (!utf8TextReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!utf8TextReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } utf8TextStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.utf8Text = utf8TextStorage.data(); }
-    if (!utf8TextReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!utf8TextReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!utf8TextReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } utf8TextStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.utf8Text = utf8TextStorage.data(); }
+    if (!utf8TextReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     EmulateTextInputResult result{};
     state->native->debugInput->EmulateTextInput(&query, &result);
@@ -2224,23 +2224,23 @@ wasm_trap_t* CoreDynamicInput_selection_deselect_unit_array(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     DeselectUnitArrayQuery query{};
     std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
-    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitIDsWire;
-    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitIDsReader(unitIDsWire);
     std::vector<std::int32_t> unitIDsStorage;
-    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!unitIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     DeselectUnitArrayResult result{};
     state->native->selection->DeselectUnitArray(&query, &result);
@@ -2267,24 +2267,24 @@ wasm_trap_t* CoreDynamicInput_selection_select_unit_array(void* environment, was
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SelectUnitArrayQuery query{};
     std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
-    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitIDsWire;
-    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitIDsReader(unitIDsWire);
     std::vector<std::int32_t> unitIDsStorage;
-    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!unitIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.append = slots[0].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SelectUnitArrayResult result{};
     state->native->selection->SelectUnitArray(&query, &result);
@@ -2311,20 +2311,20 @@ wasm_trap_t* CoreDynamicInput_sound_load_sound_def(void* environment, wasmtime_c
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     LoadSoundDefQuery query{};
     std::uint32_t soundNamePointer = 0, soundNameBytes = 0;
-    if (!inputControl.U32(soundNamePointer) || !inputControl.U32(soundNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(soundNamePointer) || !inputControl.U32(soundNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(soundNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> soundNameWire;
-    if (!state->memory.View(soundNamePointer, soundNameBytes, soundNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(soundNamePointer, soundNameBytes, soundNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader soundNameReader(soundNameWire);
     std::string soundNameStorage;
-    { std::uint32_t coreLength = 0; if (!soundNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!soundNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } soundNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.soundName = soundNameStorage.data(); }
-    if (!soundNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!soundNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!soundNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } soundNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.soundName = soundNameStorage.data(); }
+    if (!soundNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     LoadSoundDefResult result{};
     state->native->soundApi->LoadSoundDef(&query, &result);
@@ -2351,25 +2351,25 @@ wasm_trap_t* CoreDynamicInput_sound_play_sound_file(void* environment, wasmtime_
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 24u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 24u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     PlaySoundFileQuery query{};
     std::uint32_t soundFilePointer = 0, soundFileBytes = 0;
-    if (!inputControl.U32(soundFilePointer) || !inputControl.U32(soundFileBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(soundFilePointer) || !inputControl.U32(soundFileBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(soundFileBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> soundFileWire;
-    if (!state->memory.View(soundFilePointer, soundFileBytes, soundFileWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(soundFilePointer, soundFileBytes, soundFileWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader soundFileReader(soundFileWire);
     std::string soundFileStorage;
-    { std::uint32_t coreLength = 0; if (!soundFileReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!soundFileReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } soundFileStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.soundFile = soundFileStorage.data(); }
-    if (!soundFileReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!soundFileReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!soundFileReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } soundFileStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.soundFile = soundFileStorage.data(); }
+    if (!soundFileReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.volume = slots[0].f32;
     std::uint32_t posPointer = 0, posBytes = 0;
-    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(posBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> posWire;
-    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader posReader(posWire);
     const bool posOk = [&]() -> bool {
         if (!posReader.F32(query.pos.x)) return false;
@@ -2378,13 +2378,13 @@ wasm_trap_t* CoreDynamicInput_sound_play_sound_file(void* environment, wasmtime_
         if (!posReader.Align(4u)) return false;
         return true;
     }();
-    if (!posOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!posReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!posOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!posReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t velocityPointer = 0, velocityBytes = 0;
-    if (!inputControl.U32(velocityPointer) || !inputControl.U32(velocityBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(velocityPointer) || !inputControl.U32(velocityBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(velocityBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> velocityWire;
-    if (!state->memory.View(velocityPointer, velocityBytes, velocityWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(velocityPointer, velocityBytes, velocityWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader velocityReader(velocityWire);
     const bool velocityOk = [&]() -> bool {
         if (!velocityReader.F32(query.velocity.x)) return false;
@@ -2393,10 +2393,10 @@ wasm_trap_t* CoreDynamicInput_sound_play_sound_file(void* environment, wasmtime_
         if (!velocityReader.Align(4u)) return false;
         return true;
     }();
-    if (!velocityOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!velocityReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!velocityOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!velocityReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.channel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.channel)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     PlaySoundFileResult result{};
     state->native->soundApi->PlaySoundFile(&query, &result);
@@ -2423,22 +2423,22 @@ wasm_trap_t* CoreDynamicInput_sound_play_sound_stream(void* environment, wasmtim
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     PlaySoundStreamQuery query{};
     std::uint32_t oggFilePointer = 0, oggFileBytes = 0;
-    if (!inputControl.U32(oggFilePointer) || !inputControl.U32(oggFileBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(oggFilePointer) || !inputControl.U32(oggFileBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(oggFileBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> oggFileWire;
-    if (!state->memory.View(oggFilePointer, oggFileBytes, oggFileWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(oggFilePointer, oggFileBytes, oggFileWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader oggFileReader(oggFileWire);
     std::string oggFileStorage;
-    { std::uint32_t coreLength = 0; if (!oggFileReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!oggFileReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } oggFileStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.oggFile = oggFileStorage.data(); }
-    if (!oggFileReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!oggFileReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!oggFileReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } oggFileStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.oggFile = oggFileStorage.data(); }
+    if (!oggFileReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.volume = slots[0].f32;
     query.enqueue = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     PlaySoundStreamResult result{};
     state->native->soundApi->PlaySoundStream(&query, &result);
@@ -2465,20 +2465,20 @@ wasm_trap_t* CoreDynamicInput_sound_preload_sound_item(void* environment, wasmti
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     PreloadSoundItemQuery query{};
     std::uint32_t soundNamePointer = 0, soundNameBytes = 0;
-    if (!inputControl.U32(soundNamePointer) || !inputControl.U32(soundNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(soundNamePointer) || !inputControl.U32(soundNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(soundNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> soundNameWire;
-    if (!state->memory.View(soundNamePointer, soundNameBytes, soundNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(soundNamePointer, soundNameBytes, soundNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader soundNameReader(soundNameWire);
     std::string soundNameStorage;
-    { std::uint32_t coreLength = 0; if (!soundNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!soundNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } soundNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.soundName = soundNameStorage.data(); }
-    if (!soundNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!soundNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!soundNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } soundNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.soundName = soundNameStorage.data(); }
+    if (!soundNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     PreloadSoundItemResult result{};
     state->native->soundApi->PreloadSoundItem(&query, &result);
@@ -2505,21 +2505,21 @@ wasm_trap_t* CoreDynamicInput_sound_set_sound_effect_params(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetSoundEffectParamsQuery query{};
     std::uint32_t paramsPointer = 0, paramsBytes = 0;
-    if (!inputControl.U32(paramsPointer) || !inputControl.U32(paramsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(paramsPointer) || !inputControl.U32(paramsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(paramsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> paramsWire;
-    if (!state->memory.View(paramsPointer, paramsBytes, paramsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(paramsPointer, paramsBytes, paramsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader paramsReader(paramsWire);
     CoreOwned_SoundEffectParams paramsOwner;
-    if (!paramsOwner.Decode(state, paramsReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!paramsOwner.Decode(state, paramsReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.params = paramsOwner.value;
-    if (!paramsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!paramsReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetSoundEffectParamsResult result{};
     state->native->soundApi->SetSoundEffectParams(&query, &result);
@@ -2546,22 +2546,22 @@ wasm_trap_t* CoreDynamicInput_config_set_config_float(void* environment, wasmtim
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetConfigFloatQuery query{};
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = slots[0].f32;
     query.useOverlay = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetConfigFloatResult result{};
     state->native->config->SetConfigFloat(&query, &result);
@@ -2588,22 +2588,22 @@ wasm_trap_t* CoreDynamicInput_config_set_config_int(void* environment, wasmtime_
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetConfigIntQuery query{};
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
     query.useOverlay = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetConfigIntResult result{};
     state->native->config->SetConfigInt(&query, &result);
@@ -2630,30 +2630,30 @@ wasm_trap_t* CoreDynamicInput_config_set_config_string(void* environment, wasmti
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetConfigStringQuery query{};
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.useOverlay = slots[0].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetConfigStringResult result{};
     state->native->config->SetConfigString(&query, &result);
@@ -2680,21 +2680,21 @@ wasm_trap_t* CoreDynamicInput_config_set_log_section_filter_level(void* environm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetLogSectionFilterLevelQuery query{};
     std::uint32_t sectionPointer = 0, sectionBytes = 0;
-    if (!inputControl.U32(sectionPointer) || !inputControl.U32(sectionBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(sectionPointer) || !inputControl.U32(sectionBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(sectionBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> sectionWire;
-    if (!state->memory.View(sectionPointer, sectionBytes, sectionWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(sectionPointer, sectionBytes, sectionWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader sectionReader(sectionWire);
     std::string sectionStorage;
-    { std::uint32_t coreLength = 0; if (!sectionReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!sectionReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } sectionStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.section = sectionStorage.data(); }
-    if (!sectionReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!sectionReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!sectionReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } sectionStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.section = sectionStorage.data(); }
+    if (!sectionReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.level = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.level)>>>(slots[0].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetLogSectionFilterLevelResult result{};
     state->native->config->SetLogSectionFilterLevel(&query, &result);
@@ -2739,7 +2739,7 @@ wasm_trap_t* CoreDynamicInput_tracing_trace_ray_between_positions(void* environm
         return true;
     }();
     if (!startOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!startReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!startReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t endPointer = 0, endBytes = 0;
     if (!inputControl.U32(endPointer) || !inputControl.U32(endBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(endBytes)) return Trap(budgetError);
@@ -2754,7 +2754,7 @@ wasm_trap_t* CoreDynamicInput_tracing_trace_ray_between_positions(void* environm
         return true;
     }();
     if (!endOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!endReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!endReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t typePointer = 0, typeBytes = 0;
     if (!inputControl.U32(typePointer) || !inputControl.U32(typeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(typeBytes)) return Trap(budgetError);
@@ -2763,7 +2763,7 @@ wasm_trap_t* CoreDynamicInput_tracing_trace_ray_between_positions(void* environm
     WireReader typeReader(typeWire);
     std::string typeStorage;
     { std::uint32_t coreLength = 0; if (!typeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!typeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } typeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.type = typeStorage.data(); }
-    if (!typeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!typeReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -2817,20 +2817,20 @@ wasm_trap_t* CoreDynamicInput_utils_get_cegid(void* environment, wasmtime_caller
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetCEGIDQuery query{};
     std::uint32_t cegNamePointer = 0, cegNameBytes = 0;
-    if (!inputControl.U32(cegNamePointer) || !inputControl.U32(cegNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cegNamePointer) || !inputControl.U32(cegNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cegNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cegNameWire;
-    if (!state->memory.View(cegNamePointer, cegNameBytes, cegNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cegNamePointer, cegNameBytes, cegNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cegNameReader(cegNameWire);
     std::string cegNameStorage;
-    { std::uint32_t coreLength = 0; if (!cegNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cegNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } cegNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cegName = cegNameStorage.data(); }
-    if (!cegNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!cegNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cegNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } cegNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cegName = cegNameStorage.data(); }
+    if (!cegNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetCEGIDResult result{};
     state->native->utils->GetCEGID(&query, &result);
@@ -2857,31 +2857,31 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_assign_mouse_cursor(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     AssignMouseCursorQuery query{};
     std::uint32_t commandNamePointer = 0, commandNameBytes = 0;
-    if (!inputControl.U32(commandNamePointer) || !inputControl.U32(commandNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(commandNamePointer) || !inputControl.U32(commandNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(commandNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> commandNameWire;
-    if (!state->memory.View(commandNamePointer, commandNameBytes, commandNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(commandNamePointer, commandNameBytes, commandNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader commandNameReader(commandNameWire);
     std::string commandNameStorage;
-    { std::uint32_t coreLength = 0; if (!commandNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!commandNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } commandNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.commandName = commandNameStorage.data(); }
-    if (!commandNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!commandNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!commandNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } commandNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.commandName = commandNameStorage.data(); }
+    if (!commandNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t cursorFileNamePointer = 0, cursorFileNameBytes = 0;
-    if (!inputControl.U32(cursorFileNamePointer) || !inputControl.U32(cursorFileNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cursorFileNamePointer) || !inputControl.U32(cursorFileNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cursorFileNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cursorFileNameWire;
-    if (!state->memory.View(cursorFileNamePointer, cursorFileNameBytes, cursorFileNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cursorFileNamePointer, cursorFileNameBytes, cursorFileNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cursorFileNameReader(cursorFileNameWire);
     std::string cursorFileNameStorage;
-    { std::uint32_t coreLength = 0; if (!cursorFileNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cursorFileNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } cursorFileNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cursorFileName = cursorFileNameStorage.data(); }
-    if (!cursorFileNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!cursorFileNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cursorFileNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } cursorFileNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cursorFileName = cursorFileNameStorage.data(); }
+    if (!cursorFileNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.overwrite = slots[0].i32 != 0;
     query.hotSpotTopLeft = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     AssignMouseCursorResult result{};
     state->native->unsyncedCtrl->AssignMouseCursor(&query, &result);
@@ -2908,23 +2908,23 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_deselect_unit_map(void* environment,
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     DeselectUnitMapQuery query{};
     std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
-    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitIDsWire;
-    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitIDsReader(unitIDsWire);
     std::vector<std::int32_t> unitIDsStorage;
-    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!unitIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     DeselectUnitMapResult result{};
     state->native->unsyncedCtrl->DeselectUnitMap(&query, &result);
@@ -2951,25 +2951,25 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_draw_unit_commands(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     DrawUnitCommandsQuery query{};
     std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
-    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitIDsWire;
-    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitIDsReader(unitIDsWire);
     std::vector<std::int32_t> unitIDsStorage;
-    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!unitIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.tableOrArray = slots[0].i32 != 0;
     query.queueDrawDepth = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.queueDrawDepth)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     DrawUnitCommandsResult result{};
     state->native->unsyncedCtrl->DrawUnitCommands(&query, &result);
@@ -3008,7 +3008,7 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_get_water_texture(void* environment,
     WireReader texTypeReader(texTypeWire);
     std::string texTypeStorage;
     { std::uint32_t coreLength = 0; if (!texTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texType = texTypeStorage.data(); }
-    if (!texTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!texTypeReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -3057,20 +3057,20 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_load_cmd_colors_config(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     LoadCmdColorsConfigQuery query{};
     std::uint32_t filenamePointer = 0, filenameBytes = 0;
-    if (!inputControl.U32(filenamePointer) || !inputControl.U32(filenameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(filenamePointer) || !inputControl.U32(filenameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(filenameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> filenameWire;
-    if (!state->memory.View(filenamePointer, filenameBytes, filenameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(filenamePointer, filenameBytes, filenameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader filenameReader(filenameWire);
     std::string filenameStorage;
-    { std::uint32_t coreLength = 0; if (!filenameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!filenameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } filenameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.filename = filenameStorage.data(); }
-    if (!filenameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!filenameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!filenameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } filenameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.filename = filenameStorage.data(); }
+    if (!filenameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     LoadCmdColorsConfigResult result{};
     state->native->unsyncedCtrl->LoadCmdColorsConfig(&query, &result);
@@ -3097,20 +3097,20 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_load_ctrl_panel_config(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     LoadCtrlPanelConfigQuery query{};
     std::uint32_t filenamePointer = 0, filenameBytes = 0;
-    if (!inputControl.U32(filenamePointer) || !inputControl.U32(filenameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(filenamePointer) || !inputControl.U32(filenameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(filenameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> filenameWire;
-    if (!state->memory.View(filenamePointer, filenameBytes, filenameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(filenamePointer, filenameBytes, filenameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader filenameReader(filenameWire);
     std::string filenameStorage;
-    { std::uint32_t coreLength = 0; if (!filenameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!filenameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } filenameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.filename = filenameStorage.data(); }
-    if (!filenameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!filenameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!filenameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } filenameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.filename = filenameStorage.data(); }
+    if (!filenameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     LoadCtrlPanelConfigResult result{};
     state->native->unsyncedCtrl->LoadCtrlPanelConfig(&query, &result);
@@ -3137,20 +3137,20 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_load_model_textures(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     LoadModelTexturesQuery query{};
     std::uint32_t modelNamePointer = 0, modelNameBytes = 0;
-    if (!inputControl.U32(modelNamePointer) || !inputControl.U32(modelNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(modelNamePointer) || !inputControl.U32(modelNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(modelNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> modelNameWire;
-    if (!state->memory.View(modelNamePointer, modelNameBytes, modelNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(modelNamePointer, modelNameBytes, modelNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader modelNameReader(modelNameWire);
     std::string modelNameStorage;
-    { std::uint32_t coreLength = 0; if (!modelNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modelNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modelNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.modelName = modelNameStorage.data(); }
-    if (!modelNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!modelNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modelNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } modelNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.modelName = modelNameStorage.data(); }
+    if (!modelNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     LoadModelTexturesResult result{};
     state->native->unsyncedCtrl->LoadModelTextures(&query, &result);
@@ -3177,30 +3177,30 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_replace_mouse_cursor(void* environme
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     ReplaceMouseCursorQuery query{};
     std::uint32_t oldCursorFileNamePointer = 0, oldCursorFileNameBytes = 0;
-    if (!inputControl.U32(oldCursorFileNamePointer) || !inputControl.U32(oldCursorFileNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(oldCursorFileNamePointer) || !inputControl.U32(oldCursorFileNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(oldCursorFileNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> oldCursorFileNameWire;
-    if (!state->memory.View(oldCursorFileNamePointer, oldCursorFileNameBytes, oldCursorFileNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(oldCursorFileNamePointer, oldCursorFileNameBytes, oldCursorFileNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader oldCursorFileNameReader(oldCursorFileNameWire);
     std::string oldCursorFileNameStorage;
-    { std::uint32_t coreLength = 0; if (!oldCursorFileNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!oldCursorFileNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } oldCursorFileNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.oldCursorFileName = oldCursorFileNameStorage.data(); }
-    if (!oldCursorFileNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!oldCursorFileNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!oldCursorFileNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } oldCursorFileNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.oldCursorFileName = oldCursorFileNameStorage.data(); }
+    if (!oldCursorFileNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t newCursorFileNamePointer = 0, newCursorFileNameBytes = 0;
-    if (!inputControl.U32(newCursorFileNamePointer) || !inputControl.U32(newCursorFileNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(newCursorFileNamePointer) || !inputControl.U32(newCursorFileNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(newCursorFileNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> newCursorFileNameWire;
-    if (!state->memory.View(newCursorFileNamePointer, newCursorFileNameBytes, newCursorFileNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(newCursorFileNamePointer, newCursorFileNameBytes, newCursorFileNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader newCursorFileNameReader(newCursorFileNameWire);
     std::string newCursorFileNameStorage;
-    { std::uint32_t coreLength = 0; if (!newCursorFileNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!newCursorFileNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } newCursorFileNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.newCursorFileName = newCursorFileNameStorage.data(); }
-    if (!newCursorFileNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!newCursorFileNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!newCursorFileNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } newCursorFileNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.newCursorFileName = newCursorFileNameStorage.data(); }
+    if (!newCursorFileNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.hotSpotTopLeft = slots[0].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     ReplaceMouseCursorResult result{};
     state->native->unsyncedCtrl->ReplaceMouseCursor(&query, &result);
@@ -3227,24 +3227,24 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_select_unit_map(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SelectUnitMapQuery query{};
     std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
-    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitIDsWire;
-    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitIDsReader(unitIDsWire);
     std::vector<std::int32_t> unitIDsStorage;
-    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!unitIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.append = slots[0].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SelectUnitMapResult result{};
     state->native->unsyncedCtrl->SelectUnitMap(&query, &result);
@@ -3271,20 +3271,20 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_clipboard(void* environment, was
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetClipboardQuery query{};
     std::uint32_t textPointer = 0, textBytes = 0;
-    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textWire;
-    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textReader(textWire);
     std::string textStorage;
-    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
+    if (!textReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetClipboardResult result{};
     state->native->unsyncedCtrl->SetClipboard(&query, &result);
@@ -3311,26 +3311,26 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_custom_command_draw_data(void* e
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetCustomCommandDrawDataQuery query{};
     query.cmdID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.cmdID)>>>(slots[0].i32);
     std::uint32_t cmdReferencePointer = 0, cmdReferenceBytes = 0;
-    if (!inputControl.U32(cmdReferencePointer) || !inputControl.U32(cmdReferenceBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cmdReferencePointer) || !inputControl.U32(cmdReferenceBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cmdReferenceBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cmdReferenceWire;
-    if (!state->memory.View(cmdReferencePointer, cmdReferenceBytes, cmdReferenceWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cmdReferencePointer, cmdReferenceBytes, cmdReferenceWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cmdReferenceReader(cmdReferenceWire);
     CoreOwned_DefRef cmdReferenceOwner;
-    if (!cmdReferenceOwner.Decode(state, cmdReferenceReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!cmdReferenceOwner.Decode(state, cmdReferenceReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.cmdReference = cmdReferenceOwner.value;
-    if (!cmdReferenceReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!cmdReferenceReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t colorPointer = 0, colorBytes = 0;
-    if (!inputControl.U32(colorPointer) || !inputControl.U32(colorBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(colorPointer) || !inputControl.U32(colorBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(colorBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> colorWire;
-    if (!state->memory.View(colorPointer, colorBytes, colorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(colorPointer, colorBytes, colorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader colorReader(colorWire);
     const bool colorOk = [&]() -> bool {
         if (!colorReader.F32(query.color.x)) return false;
@@ -3340,10 +3340,10 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_custom_command_draw_data(void* e
         if (!colorReader.Align(4u)) return false;
         return true;
     }();
-    if (!colorOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!colorReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!colorOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!colorReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.showArea = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetCustomCommandDrawDataResult result{};
     state->native->unsyncedCtrl->SetCustomCommandDrawData(&query, &result);
@@ -3370,40 +3370,40 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_dolly_camera_curve(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetDollyCameraCurveQuery query{};
     query.degree = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.degree)>>>(slots[0].i32);
     std::uint32_t controlPointsPointer = 0, controlPointsBytes = 0;
-    if (!inputControl.U32(controlPointsPointer) || !inputControl.U32(controlPointsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(controlPointsPointer) || !inputControl.U32(controlPointsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(controlPointsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> controlPointsWire;
-    if (!state->memory.View(controlPointsPointer, controlPointsBytes, controlPointsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(controlPointsPointer, controlPointsBytes, controlPointsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader controlPointsReader(controlPointsWire);
     std::vector<Float4> controlPointsStorage;
-    { std::uint32_t coreCount = 0; if (!controlPointsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } controlPointsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { Float4 item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!controlPointsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } controlPointsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { Float4 item{}; bool coreItemOk = [&]() -> bool {
                 if (!controlPointsReader.F32(item.x)) return false;
                 if (!controlPointsReader.F32(item.y)) return false;
                 if (!controlPointsReader.F32(item.z)) return false;
                 if (!controlPointsReader.F32(item.w)) return false;
                 if (!controlPointsReader.Align(4u)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } controlPointsStorage.push_back(item); } query.controlPoints = controlPointsStorage.empty() ? nullptr : controlPointsStorage.data(); if (!AssignDynamicCount(coreCount, query.controlPointsCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!controlPointsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } controlPointsStorage.push_back(item); } query.controlPoints = controlPointsStorage.empty() ? nullptr : controlPointsStorage.data(); if (!AssignDynamicCount(coreCount, query.controlPointsCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!controlPointsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t knotsPointer = 0, knotsBytes = 0;
-    if (!inputControl.U32(knotsPointer) || !inputControl.U32(knotsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(knotsPointer) || !inputControl.U32(knotsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(knotsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> knotsWire;
-    if (!state->memory.View(knotsPointer, knotsBytes, knotsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(knotsPointer, knotsBytes, knotsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader knotsReader(knotsWire);
     std::vector<float> knotsStorage;
-    { std::uint32_t coreCount = 0; if (!knotsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } knotsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!knotsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } knotsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
                 if (!knotsReader.F32(item)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } knotsStorage.push_back(item); } query.knots = knotsStorage.empty() ? nullptr : knotsStorage.data(); if (!AssignDynamicCount(coreCount, query.knotsCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!knotsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } knotsStorage.push_back(item); } query.knots = knotsStorage.empty() ? nullptr : knotsStorage.data(); if (!AssignDynamicCount(coreCount, query.knotsCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!knotsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetDollyCameraCurveResult result{};
     state->native->unsyncedCtrl->SetDollyCameraCurve(&query, &result);
@@ -3430,40 +3430,40 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_dolly_camera_look_curve(void* en
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetDollyCameraLookCurveQuery query{};
     query.degree = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.degree)>>>(slots[0].i32);
     std::uint32_t controlPointsPointer = 0, controlPointsBytes = 0;
-    if (!inputControl.U32(controlPointsPointer) || !inputControl.U32(controlPointsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(controlPointsPointer) || !inputControl.U32(controlPointsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(controlPointsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> controlPointsWire;
-    if (!state->memory.View(controlPointsPointer, controlPointsBytes, controlPointsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(controlPointsPointer, controlPointsBytes, controlPointsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader controlPointsReader(controlPointsWire);
     std::vector<Float4> controlPointsStorage;
-    { std::uint32_t coreCount = 0; if (!controlPointsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } controlPointsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { Float4 item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!controlPointsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } controlPointsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { Float4 item{}; bool coreItemOk = [&]() -> bool {
                 if (!controlPointsReader.F32(item.x)) return false;
                 if (!controlPointsReader.F32(item.y)) return false;
                 if (!controlPointsReader.F32(item.z)) return false;
                 if (!controlPointsReader.F32(item.w)) return false;
                 if (!controlPointsReader.Align(4u)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } controlPointsStorage.push_back(item); } query.controlPoints = controlPointsStorage.empty() ? nullptr : controlPointsStorage.data(); if (!AssignDynamicCount(coreCount, query.controlPointsCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!controlPointsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } controlPointsStorage.push_back(item); } query.controlPoints = controlPointsStorage.empty() ? nullptr : controlPointsStorage.data(); if (!AssignDynamicCount(coreCount, query.controlPointsCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!controlPointsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t knotsPointer = 0, knotsBytes = 0;
-    if (!inputControl.U32(knotsPointer) || !inputControl.U32(knotsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(knotsPointer) || !inputControl.U32(knotsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(knotsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> knotsWire;
-    if (!state->memory.View(knotsPointer, knotsBytes, knotsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(knotsPointer, knotsBytes, knotsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader knotsReader(knotsWire);
     std::vector<float> knotsStorage;
-    { std::uint32_t coreCount = 0; if (!knotsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } knotsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!knotsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } knotsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
                 if (!knotsReader.F32(item)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } knotsStorage.push_back(item); } query.knots = knotsStorage.empty() ? nullptr : knotsStorage.data(); if (!AssignDynamicCount(coreCount, query.knotsCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!knotsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } knotsStorage.push_back(item); } query.knots = knotsStorage.empty() ? nullptr : knotsStorage.data(); if (!AssignDynamicCount(coreCount, query.knotsCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!knotsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetDollyCameraLookCurveResult result{};
     state->native->unsyncedCtrl->SetDollyCameraLookCurve(&query, &result);
@@ -3490,30 +3490,30 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_map_shading_texture(void* enviro
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetMapShadingTextureQuery query{};
     std::uint32_t texTypePointer = 0, texTypeBytes = 0;
-    if (!inputControl.U32(texTypePointer) || !inputControl.U32(texTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(texTypePointer) || !inputControl.U32(texTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(texTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> texTypeWire;
-    if (!state->memory.View(texTypePointer, texTypeBytes, texTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(texTypePointer, texTypeBytes, texTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader texTypeReader(texTypeWire);
     std::string texTypeStorage;
-    { std::uint32_t coreLength = 0; if (!texTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texType = texTypeStorage.data(); }
-    if (!texTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!texTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } texTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texType = texTypeStorage.data(); }
+    if (!texTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t texNamePointer = 0, texNameBytes = 0;
-    if (!inputControl.U32(texNamePointer) || !inputControl.U32(texNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(texNamePointer) || !inputControl.U32(texNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(texNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> texNameWire;
-    if (!state->memory.View(texNamePointer, texNameBytes, texNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(texNamePointer, texNameBytes, texNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader texNameReader(texNameWire);
     std::string texNameStorage;
-    { std::uint32_t coreLength = 0; if (!texNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texName = texNameStorage.data(); }
-    if (!texNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!texNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } texNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texName = texNameStorage.data(); }
+    if (!texNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.num = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.num)>>>(slots[0].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetMapShadingTextureResult result{};
     state->native->unsyncedCtrl->SetMapShadingTexture(&query, &result);
@@ -3540,21 +3540,21 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_mouse_cursor(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetMouseCursorQuery query{};
     std::uint32_t cursorNamePointer = 0, cursorNameBytes = 0;
-    if (!inputControl.U32(cursorNamePointer) || !inputControl.U32(cursorNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cursorNamePointer) || !inputControl.U32(cursorNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cursorNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cursorNameWire;
-    if (!state->memory.View(cursorNamePointer, cursorNameBytes, cursorNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cursorNamePointer, cursorNameBytes, cursorNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cursorNameReader(cursorNameWire);
     std::string cursorNameStorage;
-    { std::uint32_t coreLength = 0; if (!cursorNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cursorNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } cursorNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cursorName = cursorNameStorage.data(); }
-    if (!cursorNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!cursorNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cursorNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } cursorNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cursorName = cursorNameStorage.data(); }
+    if (!cursorNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.scale = slots[0].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetMouseCursorResult result{};
     state->native->unsyncedCtrl->SetMouseCursor(&query, &result);
@@ -3581,20 +3581,20 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_sky_box_texture(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetSkyBoxTextureQuery query{};
     std::uint32_t texNamePointer = 0, texNameBytes = 0;
-    if (!inputControl.U32(texNamePointer) || !inputControl.U32(texNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(texNamePointer) || !inputControl.U32(texNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(texNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> texNameWire;
-    if (!state->memory.View(texNamePointer, texNameBytes, texNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(texNamePointer, texNameBytes, texNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader texNameReader(texNameWire);
     std::string texNameStorage;
-    { std::uint32_t coreLength = 0; if (!texNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texName = texNameStorage.data(); }
-    if (!texNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!texNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } texNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texName = texNameStorage.data(); }
+    if (!texNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetSkyBoxTextureResult result{};
     state->native->unsyncedCtrl->SetSkyBoxTexture(&query, &result);
@@ -3621,21 +3621,21 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_unit_def_icon(void* environment,
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitDefIconQuery query{};
     query.unitDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitDefID)>>>(slots[0].i32);
     std::uint32_t iconNamePointer = 0, iconNameBytes = 0;
-    if (!inputControl.U32(iconNamePointer) || !inputControl.U32(iconNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(iconNamePointer) || !inputControl.U32(iconNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(iconNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> iconNameWire;
-    if (!state->memory.View(iconNamePointer, iconNameBytes, iconNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(iconNamePointer, iconNameBytes, iconNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader iconNameReader(iconNameWire);
     std::string iconNameStorage;
-    { std::uint32_t coreLength = 0; if (!iconNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } iconNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconName = iconNameStorage.data(); }
-    if (!iconNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!iconNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } iconNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconName = iconNameStorage.data(); }
+    if (!iconNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitDefIconResult result{};
     state->native->unsyncedCtrl->SetUnitDefIcon(&query, &result);
@@ -3662,21 +3662,21 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_unit_def_image(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitDefImageQuery query{};
     query.unitDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitDefID)>>>(slots[0].i32);
     std::uint32_t imagePointer = 0, imageBytes = 0;
-    if (!inputControl.U32(imagePointer) || !inputControl.U32(imageBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(imagePointer) || !inputControl.U32(imageBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(imageBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> imageWire;
-    if (!state->memory.View(imagePointer, imageBytes, imageWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(imagePointer, imageBytes, imageWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader imageReader(imageWire);
     std::string imageStorage;
-    { std::uint32_t coreLength = 0; if (!imageReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!imageReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } imageStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.image = imageStorage.data(); }
-    if (!imageReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!imageReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!imageReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } imageStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.image = imageStorage.data(); }
+    if (!imageReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitDefImageResult result{};
     state->native->unsyncedCtrl->SetUnitDefImage(&query, &result);
@@ -3703,21 +3703,21 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_unit_icon(void* environment, was
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitIconQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t iconNamePointer = 0, iconNameBytes = 0;
-    if (!inputControl.U32(iconNamePointer) || !inputControl.U32(iconNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(iconNamePointer) || !inputControl.U32(iconNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(iconNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> iconNameWire;
-    if (!state->memory.View(iconNamePointer, iconNameBytes, iconNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(iconNamePointer, iconNameBytes, iconNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader iconNameReader(iconNameWire);
     std::string iconNameStorage;
-    { std::uint32_t coreLength = 0; if (!iconNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } iconNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconName = iconNameStorage.data(); }
-    if (!iconNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!iconNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } iconNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconName = iconNameStorage.data(); }
+    if (!iconNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitIconResult result{};
     state->native->unsyncedCtrl->SetUnitIcon(&query, &result);
@@ -3744,29 +3744,29 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_wm_caption(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetWMCaptionQuery query{};
     std::uint32_t titlePointer = 0, titleBytes = 0;
-    if (!inputControl.U32(titlePointer) || !inputControl.U32(titleBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(titlePointer) || !inputControl.U32(titleBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(titleBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> titleWire;
-    if (!state->memory.View(titlePointer, titleBytes, titleWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(titlePointer, titleBytes, titleWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader titleReader(titleWire);
     std::string titleStorage;
-    { std::uint32_t coreLength = 0; if (!titleReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!titleReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } titleStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.title = titleStorage.data(); }
-    if (!titleReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!titleReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!titleReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } titleStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.title = titleStorage.data(); }
+    if (!titleReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t titleShortPointer = 0, titleShortBytes = 0;
-    if (!inputControl.U32(titleShortPointer) || !inputControl.U32(titleShortBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(titleShortPointer) || !inputControl.U32(titleShortBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(titleShortBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> titleShortWire;
-    if (!state->memory.View(titleShortPointer, titleShortBytes, titleShortWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(titleShortPointer, titleShortBytes, titleShortWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader titleShortReader(titleShortWire);
     std::string titleShortStorage;
-    { std::uint32_t coreLength = 0; if (!titleShortReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!titleShortReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } titleShortStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.titleShort = titleShortStorage.data(); }
-    if (!titleShortReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!titleShortReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!titleShortReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } titleShortStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.titleShort = titleShortStorage.data(); }
+    if (!titleShortReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetWMCaptionResult result{};
     state->native->unsyncedCtrl->SetWMCaption(&query, &result);
@@ -3793,21 +3793,21 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_wm_icon(void* environment, wasmt
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetWMIconQuery query{};
     std::uint32_t iconFileNamePointer = 0, iconFileNameBytes = 0;
-    if (!inputControl.U32(iconFileNamePointer) || !inputControl.U32(iconFileNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(iconFileNamePointer) || !inputControl.U32(iconFileNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(iconFileNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> iconFileNameWire;
-    if (!state->memory.View(iconFileNamePointer, iconFileNameBytes, iconFileNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(iconFileNamePointer, iconFileNameBytes, iconFileNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader iconFileNameReader(iconFileNameWire);
     std::string iconFileNameStorage;
-    { std::uint32_t coreLength = 0; if (!iconFileNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconFileNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } iconFileNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconFileName = iconFileNameStorage.data(); }
-    if (!iconFileNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!iconFileNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconFileNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } iconFileNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconFileName = iconFileNameStorage.data(); }
+    if (!iconFileNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.forceResolution = slots[0].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetWMIconResult result{};
     state->native->unsyncedCtrl->SetWMIcon(&query, &result);
@@ -3834,29 +3834,29 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_water_texture(void* environment,
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetWaterTextureQuery query{};
     std::uint32_t texTypePointer = 0, texTypeBytes = 0;
-    if (!inputControl.U32(texTypePointer) || !inputControl.U32(texTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(texTypePointer) || !inputControl.U32(texTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(texTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> texTypeWire;
-    if (!state->memory.View(texTypePointer, texTypeBytes, texTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(texTypePointer, texTypeBytes, texTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader texTypeReader(texTypeWire);
     std::string texTypeStorage;
-    { std::uint32_t coreLength = 0; if (!texTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texType = texTypeStorage.data(); }
-    if (!texTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!texTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } texTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texType = texTypeStorage.data(); }
+    if (!texTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t texNamePointer = 0, texNameBytes = 0;
-    if (!inputControl.U32(texNamePointer) || !inputControl.U32(texNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(texNamePointer) || !inputControl.U32(texNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(texNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> texNameWire;
-    if (!state->memory.View(texNamePointer, texNameBytes, texNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(texNamePointer, texNameBytes, texNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader texNameReader(texNameWire);
     std::string texNameStorage;
-    { std::uint32_t coreLength = 0; if (!texNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texName = texNameStorage.data(); }
-    if (!texNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!texNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } texNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texName = texNameStorage.data(); }
+    if (!texNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetWaterTextureResult result{};
     state->native->unsyncedCtrl->SetWaterTexture(&query, &result);
@@ -3895,7 +3895,7 @@ wasm_trap_t* CoreDynamicInput_gfx_add_atlas_texture(void* environment, wasmtime_
     WireReader atlasNameReader(atlasNameWire);
     std::string atlasNameStorage;
     { std::uint32_t coreLength = 0; if (!atlasNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!atlasNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } atlasNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.atlasName = atlasNameStorage.data(); }
-    if (!atlasNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!atlasNameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t textureNamePointer = 0, textureNameBytes = 0;
     if (!inputControl.U32(textureNamePointer) || !inputControl.U32(textureNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(textureNameBytes)) return Trap(budgetError);
@@ -3904,7 +3904,7 @@ wasm_trap_t* CoreDynamicInput_gfx_add_atlas_texture(void* environment, wasmtime_
     WireReader textureNameReader(textureNameWire);
     std::string textureNameStorage;
     { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
-    if (!textureNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textureNameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -3932,20 +3932,20 @@ wasm_trap_t* CoreDynamicInput_gfx_add_fallback_font(void* environment, wasmtime_
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxStringQuery query{};
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxBoolResult result{};
     state->native->gfx->AddFallbackFont(&query, &result);
@@ -3972,24 +3972,24 @@ wasm_trap_t* CoreDynamicInput_gfx_add_feature_defs_to_submission_vao(void* envir
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVAOSubmissionQuery query{};
     query.vaoID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vaoID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->AddFeatureDefsToSubmissionVAO(&query, &result);
@@ -4016,24 +4016,24 @@ wasm_trap_t* CoreDynamicInput_gfx_add_features_to_submission_vao(void* environme
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVAOSubmissionQuery query{};
     query.vaoID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vaoID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->AddFeaturesToSubmissionVAO(&query, &result);
@@ -4060,24 +4060,24 @@ wasm_trap_t* CoreDynamicInput_gfx_add_unit_defs_to_submission_vao(void* environm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVAOSubmissionQuery query{};
     query.vaoID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vaoID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->AddUnitDefsToSubmissionVAO(&query, &result);
@@ -4104,24 +4104,24 @@ wasm_trap_t* CoreDynamicInput_gfx_add_units_to_submission_vao(void* environment,
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVAOSubmissionQuery query{};
     query.vaoID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vaoID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->AddUnitsToSubmissionVAO(&query, &result);
@@ -4161,7 +4161,7 @@ wasm_trap_t* CoreDynamicInput_gfx_bind_image_texture(void* environment, wasmtime
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.level = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.level)>>>(slots[1].i32);
     query.layer = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.layer)>>>(slots[2].i32);
     query.layered = slots[3].i32 != 0;
@@ -4194,22 +4194,22 @@ wasm_trap_t* CoreDynamicInput_gfx_bind_texture(void* environment, wasmtime_calle
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxTextureBindQuery query{};
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.texNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.texNum)>>>(slots[0].i32);
     query.enable = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxBoolResult result{};
     state->native->gfx->BindTexture(&query, &result);
@@ -4248,7 +4248,7 @@ wasm_trap_t* CoreDynamicInput_gfx_change_texture_params(void* environment, wasmt
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t paramsPointer = 0, paramsBytes = 0;
     if (!inputControl.U32(paramsPointer) || !inputControl.U32(paramsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(paramsBytes)) return Trap(budgetError);
@@ -4274,7 +4274,7 @@ wasm_trap_t* CoreDynamicInput_gfx_change_texture_params(void* environment, wasmt
         return true;
     }();
     if (!paramsOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!paramsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!paramsReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -4314,7 +4314,7 @@ wasm_trap_t* CoreDynamicInput_gfx_copy_to_texture(void* environment, wasmtime_ca
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.xoff = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.xoff)>>>(slots[0].i32);
     query.yoff = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.yoff)>>>(slots[1].i32);
     query.x = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.x)>>>(slots[2].i32);
@@ -4364,7 +4364,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_fbo(void* environment, wasmtime_caller_
     std::vector<CoreOwned_GfxFBOAttachment> attachmentsOwners;
     std::vector<GfxFBOAttachment> attachmentsValues;
     { std::uint32_t coreCount = 0; if (!attachmentsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } attachmentsOwners.resize(coreCount); attachmentsValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!attachmentsOwners[coreIndex].Decode(state, attachmentsReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } attachmentsValues[coreIndex] = attachmentsOwners[coreIndex].value; } query.attachments = attachmentsValues.empty() ? nullptr : attachmentsValues.data(); if (!AssignDynamicCount(coreCount, query.attachmentCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!attachmentsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!attachmentsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t drawBuffersPointer = 0, drawBuffersBytes = 0;
     if (!inputControl.U32(drawBuffersPointer) || !inputControl.U32(drawBuffersBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(drawBuffersBytes)) return Trap(budgetError);
@@ -4376,7 +4376,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_fbo(void* environment, wasmtime_caller_
                 { std::uint32_t coreRaw = 0; if (!drawBuffersReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } drawBuffersStorage.push_back(item); } query.drawBuffers = drawBuffersStorage.empty() ? nullptr : drawBuffersStorage.data(); if (!AssignDynamicCount(coreCount, query.drawBufferCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!drawBuffersReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!drawBuffersReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.readBuffer = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.readBuffer)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[3].i32);
@@ -4426,7 +4426,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_shader(void* environment, wasmtime_call
     WireReader definitionsReader(definitionsWire);
     std::string definitionsStorage;
     { std::uint32_t coreLength = 0; if (!definitionsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!definitionsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } definitionsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.definitions = definitionsStorage.data(); }
-    if (!definitionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!definitionsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t vertexPointer = 0, vertexBytes = 0;
     if (!inputControl.U32(vertexPointer) || !inputControl.U32(vertexBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(vertexBytes)) return Trap(budgetError);
@@ -4435,7 +4435,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_shader(void* environment, wasmtime_call
     WireReader vertexReader(vertexWire);
     std::string vertexStorage;
     { std::uint32_t coreLength = 0; if (!vertexReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!vertexReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } vertexStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.vertex = vertexStorage.data(); }
-    if (!vertexReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!vertexReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t tcsPointer = 0, tcsBytes = 0;
     if (!inputControl.U32(tcsPointer) || !inputControl.U32(tcsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(tcsBytes)) return Trap(budgetError);
@@ -4444,7 +4444,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_shader(void* environment, wasmtime_call
     WireReader tcsReader(tcsWire);
     std::string tcsStorage;
     { std::uint32_t coreLength = 0; if (!tcsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!tcsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } tcsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.tcs = tcsStorage.data(); }
-    if (!tcsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!tcsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t tesPointer = 0, tesBytes = 0;
     if (!inputControl.U32(tesPointer) || !inputControl.U32(tesBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(tesBytes)) return Trap(budgetError);
@@ -4453,7 +4453,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_shader(void* environment, wasmtime_call
     WireReader tesReader(tesWire);
     std::string tesStorage;
     { std::uint32_t coreLength = 0; if (!tesReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!tesReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } tesStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.tes = tesStorage.data(); }
-    if (!tesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!tesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t geometryPointer = 0, geometryBytes = 0;
     if (!inputControl.U32(geometryPointer) || !inputControl.U32(geometryBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(geometryBytes)) return Trap(budgetError);
@@ -4462,7 +4462,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_shader(void* environment, wasmtime_call
     WireReader geometryReader(geometryWire);
     std::string geometryStorage;
     { std::uint32_t coreLength = 0; if (!geometryReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!geometryReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } geometryStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.geometry = geometryStorage.data(); }
-    if (!geometryReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!geometryReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t fragmentPointer = 0, fragmentBytes = 0;
     if (!inputControl.U32(fragmentPointer) || !inputControl.U32(fragmentBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(fragmentBytes)) return Trap(budgetError);
@@ -4471,7 +4471,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_shader(void* environment, wasmtime_call
     WireReader fragmentReader(fragmentWire);
     std::string fragmentStorage;
     { std::uint32_t coreLength = 0; if (!fragmentReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!fragmentReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } fragmentStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.fragment = fragmentStorage.data(); }
-    if (!fragmentReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!fragmentReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t computePointer = 0, computeBytes = 0;
     if (!inputControl.U32(computePointer) || !inputControl.U32(computeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(computeBytes)) return Trap(budgetError);
@@ -4480,7 +4480,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_shader(void* environment, wasmtime_call
     WireReader computeReader(computeWire);
     std::string computeStorage;
     { std::uint32_t coreLength = 0; if (!computeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!computeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } computeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.compute = computeStorage.data(); }
-    if (!computeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!computeReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t optionsPointer = 0, optionsBytes = 0;
     if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(optionsBytes)) return Trap(budgetError);
@@ -4498,7 +4498,7 @@ wasm_trap_t* CoreDynamicInput_gfx_create_shader(void* environment, wasmtime_call
         return true;
     }();
     if (!optionsOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!optionsReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
     if (!state->memory.Contains(output, 8u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -4560,7 +4560,7 @@ wasm_trap_t* CoreDynamicInput_gfx_define_vbo(void* environment, wasmtime_caller_
                 if (!attributesReader.Align(4u)) return false;
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } attributesStorage.push_back(item); } query.attributes = attributesStorage.empty() ? nullptr : attributesStorage.data(); if (!AssignDynamicCount(coreCount, query.attributeCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!attributesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!attributesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -4588,20 +4588,20 @@ wasm_trap_t* CoreDynamicInput_gfx_delete_texture(void* environment, wasmtime_cal
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxTextureNameQuery query{};
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxBoolResult result{};
     state->native->gfx->DeleteTexture(&query, &result);
@@ -4628,20 +4628,20 @@ wasm_trap_t* CoreDynamicInput_gfx_delete_texture_atlas(void* environment, wasmti
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxTextureNameQuery query{};
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxBoolResult result{};
     state->native->gfx->DeleteTextureAtlas(&query, &result);
@@ -4668,20 +4668,20 @@ wasm_trap_t* CoreDynamicInput_gfx_delete_texture_fbo(void* environment, wasmtime
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxTextureNameQuery query{};
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxBoolResult result{};
     state->native->gfx->DeleteTextureFBO(&query, &result);
@@ -4708,20 +4708,20 @@ wasm_trap_t* CoreDynamicInput_gfx_finalize_texture_atlas(void* environment, wasm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxTextureNameQuery query{};
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxBoolResult result{};
     state->native->gfx->FinalizeTextureAtlas(&query, &result);
@@ -4761,7 +4761,7 @@ wasm_trap_t* CoreDynamicInput_gfx_font_get_text_height(void* environment, wasmti
     WireReader textReader(textWire);
     std::string textStorage;
     { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.x = slots[1].f32;
     query.y = slots[2].f32;
     query.size = slots[3].f32;
@@ -4773,7 +4773,7 @@ wasm_trap_t* CoreDynamicInput_gfx_font_get_text_height(void* environment, wasmti
     WireReader optionsReader(optionsWire);
     std::string optionsStorage;
     { std::uint32_t coreLength = 0; if (!optionsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!optionsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } optionsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.options = optionsStorage.data(); }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!optionsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[5].i32);
     if (!state->memory.Contains(output, 12u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -4811,33 +4811,33 @@ wasm_trap_t* CoreDynamicInput_gfx_font_get_text_width(void* environment, wasmtim
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxFontTextQuery query{};
     query.fontID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.fontID)>>>(slots[0].i32);
     std::uint32_t textPointer = 0, textBytes = 0;
-    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textWire;
-    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textReader(textWire);
     std::string textStorage;
-    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
+    if (!textReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.x = slots[1].f32;
     query.y = slots[2].f32;
     query.size = slots[3].f32;
     std::uint32_t optionsPointer = 0, optionsBytes = 0;
-    if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(optionsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> optionsWire;
-    if (!state->memory.View(optionsPointer, optionsBytes, optionsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(optionsPointer, optionsBytes, optionsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader optionsReader(optionsWire);
     std::string optionsStorage;
-    { std::uint32_t coreLength = 0; if (!optionsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!optionsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } optionsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.options = optionsStorage.data(); }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!optionsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!optionsReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } optionsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.options = optionsStorage.data(); }
+    if (!optionsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxFloatResult result{};
     state->native->gfx->FontGetTextWidth(&query, &result);
@@ -4877,7 +4877,7 @@ wasm_trap_t* CoreDynamicInput_gfx_font_print(void* environment, wasmtime_caller_
     WireReader textReader(textWire);
     std::string textStorage;
     { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.x = slots[1].f32;
     query.y = slots[2].f32;
     query.size = slots[3].f32;
@@ -4889,7 +4889,7 @@ wasm_trap_t* CoreDynamicInput_gfx_font_print(void* environment, wasmtime_caller_
     WireReader optionsReader(optionsWire);
     std::string optionsStorage;
     { std::uint32_t coreLength = 0; if (!optionsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!optionsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } optionsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.options = optionsStorage.data(); }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!optionsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -4930,7 +4930,7 @@ wasm_trap_t* CoreDynamicInput_gfx_font_print_world(void* environment, wasmtime_c
     WireReader textReader(textWire);
     std::string textStorage;
     { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t posPointer = 0, posBytes = 0;
     if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(posBytes)) return Trap(budgetError);
@@ -4945,7 +4945,7 @@ wasm_trap_t* CoreDynamicInput_gfx_font_print_world(void* environment, wasmtime_c
         return true;
     }();
     if (!posOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!posReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!posReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.size = slots[1].f32;
     std::uint32_t optionsPointer = 0, optionsBytes = 0;
     if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
@@ -4955,7 +4955,7 @@ wasm_trap_t* CoreDynamicInput_gfx_font_print_world(void* environment, wasmtime_c
     WireReader optionsReader(optionsWire);
     std::string optionsStorage;
     { std::uint32_t coreLength = 0; if (!optionsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!optionsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } optionsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.options = optionsStorage.data(); }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!optionsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -4995,7 +4995,7 @@ wasm_trap_t* CoreDynamicInput_gfx_generate_mipmap(void* environment, wasmtime_ca
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -5035,7 +5035,7 @@ wasm_trap_t* CoreDynamicInput_gfx_get_atlas_texture(void* environment, wasmtime_
     WireReader atlasNameReader(atlasNameWire);
     std::string atlasNameStorage;
     { std::uint32_t coreLength = 0; if (!atlasNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!atlasNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } atlasNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.atlasName = atlasNameStorage.data(); }
-    if (!atlasNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!atlasNameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t textureNamePointer = 0, textureNameBytes = 0;
     if (!inputControl.U32(textureNamePointer) || !inputControl.U32(textureNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(textureNameBytes)) return Trap(budgetError);
@@ -5044,7 +5044,7 @@ wasm_trap_t* CoreDynamicInput_gfx_get_atlas_texture(void* environment, wasmtime_
     WireReader textureNameReader(textureNameWire);
     std::string textureNameStorage;
     { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
-    if (!textureNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textureNameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
     if (!state->memory.Contains(output, 20u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -5096,7 +5096,7 @@ wasm_trap_t* CoreDynamicInput_gfx_get_fixed_state(void* environment, wasmtime_ca
     WireReader paramReader(paramWire);
     std::string paramStorage;
     { std::uint32_t coreLength = 0; if (!paramReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.param = paramStorage.data(); }
-    if (!paramReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!paramReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
     if (!state->memory.Contains(output, 172u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -5155,7 +5155,7 @@ wasm_trap_t* CoreDynamicInput_gfx_get_global_tex_coords(void* environment, wasmt
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
     if (!state->memory.Contains(output, 20u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -5209,7 +5209,7 @@ wasm_trap_t* CoreDynamicInput_gfx_get_subroutine_index(void* environment, wasmti
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[3].i32);
     if (!state->memory.Contains(output, 8u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -5258,7 +5258,7 @@ wasm_trap_t* CoreDynamicInput_gfx_get_text_height(void* environment, wasmtime_ca
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
     if (!state->memory.Contains(output, 12u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -5296,20 +5296,20 @@ wasm_trap_t* CoreDynamicInput_gfx_get_text_width(void* environment, wasmtime_cal
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxStringQuery query{};
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxFloatResult result{};
     state->native->gfx->GetTextWidth(&query, &result);
@@ -5336,21 +5336,21 @@ wasm_trap_t* CoreDynamicInput_gfx_get_uniform_location(void* environment, wasmti
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxUniformLocationQuery query{};
     query.shaderID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.shaderID)>>>(slots[0].i32);
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUniformLocationResult result{};
     state->native->gfx->GetUniformLocation(&query, &result);
@@ -5377,20 +5377,20 @@ wasm_trap_t* CoreDynamicInput_gfx_has_extension(void* environment, wasmtime_call
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxStringQuery query{};
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxBoolResult result{};
     state->native->gfx->HasExtension(&query, &result);
@@ -5417,27 +5417,27 @@ wasm_trap_t* CoreDynamicInput_gfx_instance_data_from_feature_defs_vbo(void* envi
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVBOInstanceDataQuery query{};
     query.vboID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vboID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.attributeIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.attributeIndex)>>>(slots[1].i32);
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[2].i32);
     query.elementOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementOffset)>>>(slots[3].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->InstanceDataFromFeatureDefsVBO(&query, &result);
@@ -5464,27 +5464,27 @@ wasm_trap_t* CoreDynamicInput_gfx_instance_data_from_features_vbo(void* environm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVBOInstanceDataQuery query{};
     query.vboID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vboID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.attributeIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.attributeIndex)>>>(slots[1].i32);
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[2].i32);
     query.elementOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementOffset)>>>(slots[3].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->InstanceDataFromFeaturesVBO(&query, &result);
@@ -5511,27 +5511,27 @@ wasm_trap_t* CoreDynamicInput_gfx_instance_data_from_unit_defs_vbo(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVBOInstanceDataQuery query{};
     query.vboID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vboID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.attributeIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.attributeIndex)>>>(slots[1].i32);
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[2].i32);
     query.elementOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementOffset)>>>(slots[3].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->InstanceDataFromUnitDefsVBO(&query, &result);
@@ -5558,27 +5558,27 @@ wasm_trap_t* CoreDynamicInput_gfx_instance_data_from_units_vbo(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVBOInstanceDataQuery query{};
     query.vboID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vboID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.attributeIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.attributeIndex)>>>(slots[1].i32);
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[2].i32);
     query.elementOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementOffset)>>>(slots[3].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->InstanceDataFromUnitsVBO(&query, &result);
@@ -5605,23 +5605,23 @@ wasm_trap_t* CoreDynamicInput_gfx_load_font(void* environment, wasmtime_caller_t
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxLoadFontQuery query{};
     std::uint32_t pathPointer = 0, pathBytes = 0;
-    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(pathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> pathWire;
-    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader pathReader(pathWire);
     std::string pathStorage;
-    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.size = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.size)>>>(slots[0].i32);
     query.outlineWidth = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.outlineWidth)>>>(slots[1].i32);
     query.outlineWeight = slots[2].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxFontResult result{};
     state->native->gfx->LoadFont(&query, &result);
@@ -5648,27 +5648,27 @@ wasm_trap_t* CoreDynamicInput_gfx_matrix_data_from_projectiles_vbo(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVBOInstanceDataQuery query{};
     query.vboID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vboID)>>>(slots[0].i32);
     std::uint32_t idsPointer = 0, idsBytes = 0;
-    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(idsPointer) || !inputControl.U32(idsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(idsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> idsWire;
-    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(idsPointer, idsBytes, idsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader idsReader(idsWire);
     std::vector<std::uint32_t> idsStorage;
-    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!idsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::uint32_t coreRaw = 0; if (!idsReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!idsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } idsStorage.push_back(item); } query.ids = idsStorage.empty() ? nullptr : idsStorage.data(); if (!AssignDynamicCount(coreCount, query.idCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!idsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.attributeIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.attributeIndex)>>>(slots[1].i32);
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[2].i32);
     query.elementOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementOffset)>>>(slots[3].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxUIntResult result{};
     state->native->gfx->MatrixDataFromProjectilesVBO(&query, &result);
@@ -5709,7 +5709,7 @@ wasm_trap_t* CoreDynamicInput_gfx_object_label(void* environment, wasmtime_calle
     WireReader labelReader(labelWire);
     std::string labelStorage;
     { std::uint32_t coreLength = 0; if (!labelReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!labelReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } labelStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.label = labelStorage.data(); }
-    if (!labelReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!labelReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -5750,7 +5750,7 @@ wasm_trap_t* CoreDynamicInput_gfx_push_debug_group(void* environment, wasmtime_c
     WireReader messageReader(messageWire);
     std::string messageStorage;
     { std::uint32_t coreLength = 0; if (!messageReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!messageReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } messageStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.message = messageStorage.data(); }
-    if (!messageReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!messageReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.sourceIsThirdParty = slots[1].i32 != 0;
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
@@ -5779,7 +5779,7 @@ wasm_trap_t* CoreDynamicInput_gfx_save_image(void* environment, wasmtime_caller_
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[5].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxSaveImageQuery query{};
@@ -5788,19 +5788,19 @@ wasm_trap_t* CoreDynamicInput_gfx_save_image(void* environment, wasmtime_caller_
     query.width = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.width)>>>(slots[2].i32);
     query.height = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.height)>>>(slots[3].i32);
     std::uint32_t filenamePointer = 0, filenameBytes = 0;
-    if (!inputControl.U32(filenamePointer) || !inputControl.U32(filenameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(filenamePointer) || !inputControl.U32(filenameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(filenameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> filenameWire;
-    if (!state->memory.View(filenamePointer, filenameBytes, filenameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(filenamePointer, filenameBytes, filenameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader filenameReader(filenameWire);
     std::string filenameStorage;
-    { std::uint32_t coreLength = 0; if (!filenameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!filenameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } filenameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.filename = filenameStorage.data(); }
-    if (!filenameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!filenameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!filenameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } filenameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.filename = filenameStorage.data(); }
+    if (!filenameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t optionsPointer = 0, optionsBytes = 0;
-    if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(optionsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> optionsWire;
-    if (!state->memory.View(optionsPointer, optionsBytes, optionsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(optionsPointer, optionsBytes, optionsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader optionsReader(optionsWire);
     const bool optionsOk = [&]() -> bool {
         if (!optionsReader.Bool(query.options.alpha)) return false;
@@ -5809,10 +5809,10 @@ wasm_trap_t* CoreDynamicInput_gfx_save_image(void* environment, wasmtime_caller_
         if (!optionsReader.Align(4u)) return false;
         return true;
     }();
-    if (!optionsOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!optionsOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!optionsReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.readBuffer = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.readBuffer)>>>(slots[4].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxBoolResult result{};
     state->native->gfx->SaveImage(&query, &result);
@@ -5853,7 +5853,7 @@ wasm_trap_t* CoreDynamicInput_gfx_set_fbo_attachment(void* environment, wasmtime
     WireReader textureNameReader(textureNameWire);
     std::string textureNameStorage;
     { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
-    if (!textureNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textureNameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.textureTarget = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.textureTarget)>>>(slots[2].i32);
     query.mipLevel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.mipLevel)>>>(slots[3].i32);
     query.rboID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.rboID)>>>(slots[4].i32);
@@ -5901,7 +5901,7 @@ wasm_trap_t* CoreDynamicInput_gfx_set_fbo_draw_buffers(void* environment, wasmti
                 { std::uint32_t coreRaw = 0; if (!buffersReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } buffersStorage.push_back(item); } query.buffers = buffersStorage.empty() ? nullptr : buffersStorage.data(); if (!AssignDynamicCount(coreCount, query.bufferCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!buffersReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!buffersReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -5929,25 +5929,25 @@ wasm_trap_t* CoreDynamicInput_gfx_set_feature_buffer_uniforms(void* environment,
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxObjectBufferUniformsQuery query{};
     query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[0].i32);
     std::uint32_t valuesPointer = 0, valuesBytes = 0;
-    if (!inputControl.U32(valuesPointer) || !inputControl.U32(valuesBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuesPointer) || !inputControl.U32(valuesBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valuesBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valuesWire;
-    if (!state->memory.View(valuesPointer, valuesBytes, valuesWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuesPointer, valuesBytes, valuesWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valuesReader(valuesWire);
     std::vector<float> valuesStorage;
-    { std::uint32_t coreCount = 0; if (!valuesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!valuesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valuesStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
                 if (!valuesReader.F32(item)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!valuesReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.offset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.offset)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxObjectBufferUniformsResult result{};
     state->native->gfx->SetFeatureBufferUniforms(&query, &result);
@@ -5974,25 +5974,25 @@ wasm_trap_t* CoreDynamicInput_gfx_set_unit_buffer_uniforms(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxObjectBufferUniformsQuery query{};
     query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[0].i32);
     std::uint32_t valuesPointer = 0, valuesBytes = 0;
-    if (!inputControl.U32(valuesPointer) || !inputControl.U32(valuesBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuesPointer) || !inputControl.U32(valuesBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valuesBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valuesWire;
-    if (!state->memory.View(valuesPointer, valuesBytes, valuesWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuesPointer, valuesBytes, valuesWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valuesReader(valuesWire);
     std::vector<float> valuesStorage;
-    { std::uint32_t coreCount = 0; if (!valuesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!valuesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valuesStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
                 if (!valuesReader.F32(item)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!valuesReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.offset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.offset)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxObjectBufferUniformsResult result{};
     state->native->gfx->SetUnitBufferUniforms(&query, &result);
@@ -6051,7 +6051,7 @@ wasm_trap_t* CoreDynamicInput_gfx_shape(void* environment, wasmtime_caller_t* ca
                 if (!verticesReader.Align(4u)) return false;
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } verticesStorage.push_back(item); } query.vertices = verticesStorage.empty() ? nullptr : verticesStorage.data(); if (!AssignDynamicCount(coreCount, query.vertexCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!verticesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!verticesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -6091,7 +6091,7 @@ wasm_trap_t* CoreDynamicInput_gfx_text(void* environment, wasmtime_caller_t* cal
     WireReader textReader(textWire);
     std::string textStorage;
     { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!textReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.x = slots[0].f32;
     query.y = slots[1].f32;
     query.size = slots[2].f32;
@@ -6103,7 +6103,7 @@ wasm_trap_t* CoreDynamicInput_gfx_text(void* environment, wasmtime_caller_t* cal
     WireReader optionsReader(optionsWire);
     std::string optionsStorage;
     { std::uint32_t coreLength = 0; if (!optionsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!optionsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } optionsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.options = optionsStorage.data(); }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!optionsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -6143,7 +6143,7 @@ wasm_trap_t* CoreDynamicInput_gfx_texture_info(void* environment, wasmtime_calle
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
     if (!state->memory.Contains(output, 24u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -6200,7 +6200,7 @@ wasm_trap_t* CoreDynamicInput_gfx_uniform_array_float(void* environment, wasmtim
                 if (!valuesReader.F32(item)) return false;
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -6244,7 +6244,7 @@ wasm_trap_t* CoreDynamicInput_gfx_uniform_array_int(void* environment, wasmtime_
                 { std::int32_t coreRaw = 0; if (!valuesReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -6288,7 +6288,7 @@ wasm_trap_t* CoreDynamicInput_gfx_uniform_matrix(void* environment, wasmtime_cal
                 if (!valuesReader.F32(item)) return false;
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.transpose = slots[1].i32 != 0;
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
@@ -6329,7 +6329,7 @@ wasm_trap_t* CoreDynamicInput_gfx_upload_texture(void* environment, wasmtime_cal
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.target = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.target)>>>(slots[0].i32);
     query.level = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.level)>>>(slots[1].i32);
     query.xoff = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.xoff)>>>(slots[2].i32);
@@ -6351,7 +6351,7 @@ wasm_trap_t* CoreDynamicInput_gfx_upload_texture(void* environment, wasmtime_cal
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -6379,28 +6379,28 @@ wasm_trap_t* CoreDynamicInput_gfx_upload_vbo(void* environment, wasmtime_caller_
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[5].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GfxVBOUploadQuery query{};
     query.vboID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vboID)>>>(slots[0].i32);
     std::uint32_t dataPointer = 0, dataBytes = 0;
-    if (!inputControl.U32(dataPointer) || !inputControl.U32(dataBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(dataPointer) || !inputControl.U32(dataBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(dataBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> dataWire;
-    if (!state->memory.View(dataPointer, dataBytes, dataWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataPointer, dataBytes, dataWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader dataReader(dataWire);
     std::vector<float> dataStorage;
-    { std::uint32_t coreCount = 0; if (!dataReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!dataReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } dataStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
                 if (!dataReader.F32(item)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!dataReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.attributeIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.attributeIndex)>>>(slots[1].i32);
     query.elementOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementOffset)>>>(slots[2].i32);
     query.dataStartIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.dataStartIndex)>>>(slots[3].i32);
     query.dataFinishIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.dataFinishIndex)>>>(slots[4].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GfxVBOUploadResult result{};
     state->native->gfx->UploadVBO(&query, &result);
@@ -6427,28 +6427,28 @@ wasm_trap_t* CoreDynamicInput_icons_add_unit_icon(void* environment, wasmtime_ca
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[7].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     AddUnitIconQuery query{};
     std::uint32_t iconNamePointer = 0, iconNameBytes = 0;
-    if (!inputControl.U32(iconNamePointer) || !inputControl.U32(iconNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(iconNamePointer) || !inputControl.U32(iconNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(iconNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> iconNameWire;
-    if (!state->memory.View(iconNamePointer, iconNameBytes, iconNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(iconNamePointer, iconNameBytes, iconNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader iconNameReader(iconNameWire);
     std::string iconNameStorage;
-    { std::uint32_t coreLength = 0; if (!iconNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } iconNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconName = iconNameStorage.data(); }
-    if (!iconNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!iconNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } iconNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconName = iconNameStorage.data(); }
+    if (!iconNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t texFilePointer = 0, texFileBytes = 0;
-    if (!inputControl.U32(texFilePointer) || !inputControl.U32(texFileBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(texFilePointer) || !inputControl.U32(texFileBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(texFileBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> texFileWire;
-    if (!state->memory.View(texFilePointer, texFileBytes, texFileWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(texFilePointer, texFileBytes, texFileWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader texFileReader(texFileWire);
     std::string texFileStorage;
-    { std::uint32_t coreLength = 0; if (!texFileReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texFileReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texFileStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texFile = texFileStorage.data(); }
-    if (!texFileReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!texFileReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texFileReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } texFileStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.texFile = texFileStorage.data(); }
+    if (!texFileReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.size = slots[0].f32;
     query.distance = slots[1].f32;
     query.radiusAdjust = slots[2].i32 != 0;
@@ -6456,7 +6456,7 @@ wasm_trap_t* CoreDynamicInput_icons_add_unit_icon(void* environment, wasmtime_ca
     query.v0 = slots[4].f32;
     query.u1 = slots[5].f32;
     query.v1 = slots[6].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     AddUnitIconResult result{};
     state->native->icons->AddUnitIcon(&query, &result);
@@ -6483,20 +6483,20 @@ wasm_trap_t* CoreDynamicInput_icons_free_unit_icon(void* environment, wasmtime_c
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     FreeUnitIconQuery query{};
     std::uint32_t iconNamePointer = 0, iconNameBytes = 0;
-    if (!inputControl.U32(iconNamePointer) || !inputControl.U32(iconNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(iconNamePointer) || !inputControl.U32(iconNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(iconNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> iconNameWire;
-    if (!state->memory.View(iconNamePointer, iconNameBytes, iconNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(iconNamePointer, iconNameBytes, iconNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader iconNameReader(iconNameWire);
     std::string iconNameStorage;
-    { std::uint32_t coreLength = 0; if (!iconNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } iconNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconName = iconNameStorage.data(); }
-    if (!iconNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!iconNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } iconNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.iconName = iconNameStorage.data(); }
+    if (!iconNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     FreeUnitIconResult result{};
     state->native->icons->FreeUnitIcon(&query, &result);
@@ -6523,24 +6523,24 @@ wasm_trap_t* CoreDynamicInput_markers_add_world_text(void* environment, wasmtime
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     AddWorldTextQuery query{};
     std::uint32_t textPointer = 0, textBytes = 0;
-    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textWire;
-    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textReader(textWire);
     std::string textStorage;
-    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
+    if (!textReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t posPointer = 0, posBytes = 0;
-    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(posBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> posWire;
-    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader posReader(posWire);
     const bool posOk = [&]() -> bool {
         if (!posReader.F32(query.pos.x)) return false;
@@ -6549,9 +6549,9 @@ wasm_trap_t* CoreDynamicInput_markers_add_world_text(void* environment, wasmtime
         if (!posReader.Align(4u)) return false;
         return true;
     }();
-    if (!posOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!posReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!posOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!posReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     AddWorldTextResult result{};
     state->native->markers->AddWorldText(&query, &result);
@@ -6578,15 +6578,15 @@ wasm_trap_t* CoreDynamicInput_markers_marker_add_point(void* environment, wasmti
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     MarkerAddPointQuery query{};
     std::uint32_t posPointer = 0, posBytes = 0;
-    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(posBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> posWire;
-    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader posReader(posWire);
     const bool posOk = [&]() -> bool {
         if (!posReader.F32(query.pos.x)) return false;
@@ -6595,20 +6595,20 @@ wasm_trap_t* CoreDynamicInput_markers_marker_add_point(void* environment, wasmti
         if (!posReader.Align(4u)) return false;
         return true;
     }();
-    if (!posOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!posReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!posOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!posReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t textPointer = 0, textBytes = 0;
-    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textWire;
-    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textReader(textWire);
     std::string textStorage;
-    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
+    if (!textReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.localOnly = slots[0].i32 != 0;
     query.playerID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.playerID)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     MarkerAddPointResult result{};
     state->native->markers->MarkerAddPoint(&query, &result);
@@ -6635,22 +6635,22 @@ wasm_trap_t* CoreDynamicInput_ground_decals_set_ground_decal_texture(void* envir
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetGroundDecalTextureQuery query{};
     query.decalID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.decalID)>>>(slots[0].i32);
     std::uint32_t textureNamePointer = 0, textureNameBytes = 0;
-    if (!inputControl.U32(textureNamePointer) || !inputControl.U32(textureNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textureNamePointer) || !inputControl.U32(textureNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textureNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textureNameWire;
-    if (!state->memory.View(textureNamePointer, textureNameBytes, textureNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textureNamePointer, textureNameBytes, textureNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textureNameReader(textureNameWire);
     std::string textureNameStorage;
-    { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
-    if (!textureNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
+    if (!textureNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.mainTex = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetGroundDecalTextureResult result{};
     state->native->groundDecals->SetGroundDecalTexture(&query, &result);
@@ -6677,21 +6677,21 @@ wasm_trap_t* CoreDynamicInput_system_control_clear_watch_dog_timer(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     ClearWatchDogTimerQuery query{};
     std::uint32_t threadNamePointer = 0, threadNameBytes = 0;
-    if (!inputControl.U32(threadNamePointer) || !inputControl.U32(threadNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(threadNamePointer) || !inputControl.U32(threadNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(threadNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> threadNameWire;
-    if (!state->memory.View(threadNamePointer, threadNameBytes, threadNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(threadNamePointer, threadNameBytes, threadNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader threadNameReader(threadNameWire);
     std::string threadNameStorage;
-    { std::uint32_t coreLength = 0; if (!threadNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!threadNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } threadNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.threadName = threadNameStorage.data(); }
-    if (!threadNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!threadNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!threadNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } threadNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.threadName = threadNameStorage.data(); }
+    if (!threadNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.keepStopped = slots[0].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     ClearWatchDogTimerResult result{};
     state->native->systemControl->ClearWatchDogTimer(&query, &result);
@@ -6718,20 +6718,20 @@ wasm_trap_t* CoreDynamicInput_system_control_reload(void* environment, wasmtime_
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     ReloadQuery query{};
     std::uint32_t startScriptPointer = 0, startScriptBytes = 0;
-    if (!inputControl.U32(startScriptPointer) || !inputControl.U32(startScriptBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(startScriptPointer) || !inputControl.U32(startScriptBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(startScriptBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> startScriptWire;
-    if (!state->memory.View(startScriptPointer, startScriptBytes, startScriptWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(startScriptPointer, startScriptBytes, startScriptWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader startScriptReader(startScriptWire);
     std::string startScriptStorage;
-    { std::uint32_t coreLength = 0; if (!startScriptReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!startScriptReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } startScriptStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.startScript = startScriptStorage.data(); }
-    if (!startScriptReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!startScriptReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!startScriptReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } startScriptStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.startScript = startScriptStorage.data(); }
+    if (!startScriptReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     ReloadResult result{};
     state->native->systemControl->Reload(&query, &result);
@@ -6758,29 +6758,29 @@ wasm_trap_t* CoreDynamicInput_system_control_restart(void* environment, wasmtime
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RestartQuery query{};
     std::uint32_t cmdArgsPointer = 0, cmdArgsBytes = 0;
-    if (!inputControl.U32(cmdArgsPointer) || !inputControl.U32(cmdArgsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cmdArgsPointer) || !inputControl.U32(cmdArgsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cmdArgsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cmdArgsWire;
-    if (!state->memory.View(cmdArgsPointer, cmdArgsBytes, cmdArgsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cmdArgsPointer, cmdArgsBytes, cmdArgsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cmdArgsReader(cmdArgsWire);
     std::string cmdArgsStorage;
-    { std::uint32_t coreLength = 0; if (!cmdArgsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cmdArgsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } cmdArgsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cmdArgs = cmdArgsStorage.data(); }
-    if (!cmdArgsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!cmdArgsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cmdArgsReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } cmdArgsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cmdArgs = cmdArgsStorage.data(); }
+    if (!cmdArgsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t startScriptPointer = 0, startScriptBytes = 0;
-    if (!inputControl.U32(startScriptPointer) || !inputControl.U32(startScriptBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(startScriptPointer) || !inputControl.U32(startScriptBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(startScriptBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> startScriptWire;
-    if (!state->memory.View(startScriptPointer, startScriptBytes, startScriptWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(startScriptPointer, startScriptBytes, startScriptWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader startScriptReader(startScriptWire);
     std::string startScriptStorage;
-    { std::uint32_t coreLength = 0; if (!startScriptReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!startScriptReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } startScriptStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.startScript = startScriptStorage.data(); }
-    if (!startScriptReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!startScriptReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!startScriptReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } startScriptStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.startScript = startScriptStorage.data(); }
+    if (!startScriptReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RestartResult result{};
     state->native->systemControl->Restart(&query, &result);
@@ -6807,21 +6807,21 @@ wasm_trap_t* CoreDynamicInput_system_control_set_share_level(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetShareLevelQuery query{};
     std::uint32_t resourcePointer = 0, resourceBytes = 0;
-    if (!inputControl.U32(resourcePointer) || !inputControl.U32(resourceBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourcePointer) || !inputControl.U32(resourceBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceWire;
-    if (!state->memory.View(resourcePointer, resourceBytes, resourceWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourcePointer, resourceBytes, resourceWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceReader(resourceWire);
     std::string resourceStorage;
-    { std::uint32_t coreLength = 0; if (!resourceReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resource = resourceStorage.data(); }
-    if (!resourceReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resource = resourceStorage.data(); }
+    if (!resourceReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.level = slots[0].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetShareLevelResult result{};
     state->native->systemControl->SetShareLevel(&query, &result);
@@ -6848,22 +6848,22 @@ wasm_trap_t* CoreDynamicInput_system_control_share_resources(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     ShareResourcesQuery query{};
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
     std::uint32_t resourcePointer = 0, resourceBytes = 0;
-    if (!inputControl.U32(resourcePointer) || !inputControl.U32(resourceBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourcePointer) || !inputControl.U32(resourceBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceWire;
-    if (!state->memory.View(resourcePointer, resourceBytes, resourceWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourcePointer, resourceBytes, resourceWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceReader(resourceWire);
     std::string resourceStorage;
-    { std::uint32_t coreLength = 0; if (!resourceReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resource = resourceStorage.data(); }
-    if (!resourceReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resource = resourceStorage.data(); }
+    if (!resourceReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     ShareResourcesResult result{};
     state->native->systemControl->ShareResources(&query, &result);
@@ -6890,29 +6890,29 @@ wasm_trap_t* CoreDynamicInput_system_control_start(void* environment, wasmtime_c
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     StartQuery query{};
     std::uint32_t cmdArgsPointer = 0, cmdArgsBytes = 0;
-    if (!inputControl.U32(cmdArgsPointer) || !inputControl.U32(cmdArgsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cmdArgsPointer) || !inputControl.U32(cmdArgsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cmdArgsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cmdArgsWire;
-    if (!state->memory.View(cmdArgsPointer, cmdArgsBytes, cmdArgsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cmdArgsPointer, cmdArgsBytes, cmdArgsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cmdArgsReader(cmdArgsWire);
     std::string cmdArgsStorage;
-    { std::uint32_t coreLength = 0; if (!cmdArgsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cmdArgsReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } cmdArgsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cmdArgs = cmdArgsStorage.data(); }
-    if (!cmdArgsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!cmdArgsReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cmdArgsReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } cmdArgsStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cmdArgs = cmdArgsStorage.data(); }
+    if (!cmdArgsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t startScriptPointer = 0, startScriptBytes = 0;
-    if (!inputControl.U32(startScriptPointer) || !inputControl.U32(startScriptBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(startScriptPointer) || !inputControl.U32(startScriptBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(startScriptBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> startScriptWire;
-    if (!state->memory.View(startScriptPointer, startScriptBytes, startScriptWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(startScriptPointer, startScriptBytes, startScriptWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader startScriptReader(startScriptWire);
     std::string startScriptStorage;
-    { std::uint32_t coreLength = 0; if (!startScriptReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!startScriptReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } startScriptStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.startScript = startScriptStorage.data(); }
-    if (!startScriptReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!startScriptReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!startScriptReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } startScriptStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.startScript = startScriptStorage.data(); }
+    if (!startScriptReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     StartResult result{};
     state->native->systemControl->Start(&query, &result);
@@ -6939,29 +6939,29 @@ wasm_trap_t* CoreDynamicInput_rml_ui_add_translation_string(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlAddTranslationStringQuery query{};
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t translationPointer = 0, translationBytes = 0;
-    if (!inputControl.U32(translationPointer) || !inputControl.U32(translationBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(translationPointer) || !inputControl.U32(translationBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(translationBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> translationWire;
-    if (!state->memory.View(translationPointer, translationBytes, translationWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(translationPointer, translationBytes, translationWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader translationReader(translationWire);
     std::string translationStorage;
-    { std::uint32_t coreLength = 0; if (!translationReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!translationReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } translationStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.translation = translationStorage.data(); }
-    if (!translationReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!translationReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!translationReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } translationStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.translation = translationStorage.data(); }
+    if (!translationReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlAddTranslationStringResult result{};
     state->native->rmlUi->AddTranslationString(&query, &result);
@@ -6988,20 +6988,20 @@ wasm_trap_t* CoreDynamicInput_rml_ui_clear_document_path_requests(void* environm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlClearDocumentPathRequestsQuery query{};
     std::uint32_t documentPathPointer = 0, documentPathBytes = 0;
-    if (!inputControl.U32(documentPathPointer) || !inputControl.U32(documentPathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(documentPathPointer) || !inputControl.U32(documentPathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(documentPathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> documentPathWire;
-    if (!state->memory.View(documentPathPointer, documentPathBytes, documentPathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(documentPathPointer, documentPathBytes, documentPathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader documentPathReader(documentPathWire);
     std::string documentPathStorage;
-    { std::uint32_t coreLength = 0; if (!documentPathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!documentPathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } documentPathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.documentPath = documentPathStorage.data(); }
-    if (!documentPathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!documentPathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!documentPathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } documentPathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.documentPath = documentPathStorage.data(); }
+    if (!documentPathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlClearDocumentPathRequestsResult result{};
     state->native->rmlUi->ClearDocumentPathRequests(&query, &result);
@@ -7028,22 +7028,22 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_activate_theme(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlContextStringBoolQuery query{};
     query.contextHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.contextHandle)>>>(slots[0].i64);
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlContextBoolResult result{};
     state->native->rmlUi->ContextActivateTheme(&query, &result);
@@ -7083,7 +7083,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_create_data_model(void* environment
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -7133,7 +7133,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_create_document(void* environment, 
     WireReader tagReader(tagWire);
     std::string tagStorage;
     { std::uint32_t coreLength = 0; if (!tagReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!tagReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } tagStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.tag = tagStorage.data(); }
-    if (!tagReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!tagReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -7183,7 +7183,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_get_document(void* environment, was
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -7220,21 +7220,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_is_theme_active(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlContextStringQuery query{};
     query.contextHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.contextHandle)>>>(slots[0].i64);
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlContextBoolResult result{};
     state->native->rmlUi->ContextIsThemeActive(&query, &result);
@@ -7274,7 +7274,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_load_document(void* environment, wa
     WireReader documentPathReader(documentPathWire);
     std::string documentPathStorage;
     { std::uint32_t coreLength = 0; if (!documentPathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!documentPathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } documentPathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.documentPath = documentPathStorage.data(); }
-    if (!documentPathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!documentPathReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -7324,7 +7324,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_open_data_model(void* environment, 
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -7361,21 +7361,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_process_text_input(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlContextTextInputQuery query{};
     query.contextHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.contextHandle)>>>(slots[0].i64);
     std::uint32_t textPointer = 0, textBytes = 0;
-    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textPointer) || !inputControl.U32(textBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textWire;
-    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textPointer, textBytes, textWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textReader(textWire);
     std::string textStorage;
-    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
-    if (!textReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.text = textStorage.data(); }
+    if (!textReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlContextBoolResult result{};
     state->native->rmlUi->ContextProcessTextInput(&query, &result);
@@ -7402,21 +7402,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_remove_data_model(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlContextStringQuery query{};
     query.contextHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.contextHandle)>>>(slots[0].i64);
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlContextBoolResult result{};
     state->native->rmlUi->ContextRemoveDataModel(&query, &result);
@@ -7443,23 +7443,23 @@ wasm_trap_t* CoreDynamicInput_rml_ui_context_remove_event_listener(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlContextEventListenerRemoveQuery query{};
     query.contextHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.contextHandle)>>>(slots[0].i64);
     query.eventListenerHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.eventListenerHandle)>>>(slots[1].i64);
     std::uint32_t eventPointer = 0, eventBytes = 0;
-    if (!inputControl.U32(eventPointer) || !inputControl.U32(eventBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(eventPointer) || !inputControl.U32(eventBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(eventBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> eventWire;
-    if (!state->memory.View(eventPointer, eventBytes, eventWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(eventPointer, eventBytes, eventWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader eventReader(eventWire);
     std::string eventStorage;
-    { std::uint32_t coreLength = 0; if (!eventReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!eventReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } eventStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.event = eventStorage.data(); }
-    if (!eventReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!eventReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!eventReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } eventStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.event = eventStorage.data(); }
+    if (!eventReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.inCapturePhase = slots[2].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ContextRemoveEventListener(&query, &result);
@@ -7498,7 +7498,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_create_context(void* environment, wasmtime_
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -7548,7 +7548,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_bool(void* environment, was
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.initialValue = slots[1].i32 != 0;
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[3].i32);
@@ -7599,7 +7599,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_color(void* environment, wa
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.red = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.red)>>>(slots[1].i32);
     query.green = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.green)>>>(slots[2].i32);
     query.blue = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.blue)>>>(slots[3].i32);
@@ -7653,7 +7653,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_float(void* environment, wa
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.initialValue = slots[1].f32;
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[3].i32);
@@ -7704,7 +7704,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_int(void* environment, wasm
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.initialValue = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.initialValue)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[3].i32);
@@ -7755,7 +7755,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_percent(void* environment, 
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.initialValue = slots[1].f32;
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[3].i32);
@@ -7806,7 +7806,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_pixels(void* environment, w
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.initialValue = slots[1].f32;
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[3].i32);
@@ -7857,7 +7857,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_rows(void* environment, was
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t fieldsPointer = 0, fieldsBytes = 0;
     if (!inputControl.U32(fieldsPointer) || !inputControl.U32(fieldsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(fieldsBytes)) return Trap(budgetError);
@@ -7867,7 +7867,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_rows(void* environment, was
     std::vector<CoreOwned_RmlDataFieldDef> fieldsOwners;
     std::vector<RmlDataFieldDef> fieldsValues;
     { std::uint32_t coreCount = 0; if (!fieldsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } fieldsOwners.resize(coreCount); fieldsValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!fieldsOwners[coreIndex].Decode(state, fieldsReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } fieldsValues[coreIndex] = fieldsOwners[coreIndex].value; } query.fields = fieldsValues.empty() ? nullptr : fieldsValues.data(); if (!AssignDynamicCount(coreCount, query.fieldCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!fieldsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!fieldsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -7917,7 +7917,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_string(void* environment, w
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t initialValuePointer = 0, initialValueBytes = 0;
     if (!inputControl.U32(initialValuePointer) || !inputControl.U32(initialValueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(initialValueBytes)) return Trap(budgetError);
@@ -7926,7 +7926,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_bind_string(void* environment, w
     WireReader initialValueReader(initialValueWire);
     std::string initialValueStorage;
     { std::uint32_t coreLength = 0; if (!initialValueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!initialValueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } initialValueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.initialValue = initialValueStorage.data(); }
-    if (!initialValueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!initialValueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -7963,22 +7963,22 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_set_rows(void* environment, wasm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlDataModelSetRowsQuery query{};
     query.rowsHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.rowsHandle)>>>(slots[0].i64);
     std::uint32_t valuesPointer = 0, valuesBytes = 0;
-    if (!inputControl.U32(valuesPointer) || !inputControl.U32(valuesBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuesPointer) || !inputControl.U32(valuesBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valuesBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valuesWire;
-    if (!state->memory.View(valuesPointer, valuesBytes, valuesWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuesPointer, valuesBytes, valuesWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valuesReader(valuesWire);
     std::vector<CoreOwned_RmlDataValue> valuesOwners;
     std::vector<RmlDataValue> valuesValues;
-    { std::uint32_t coreCount = 0; if (!valuesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesOwners.resize(coreCount); valuesValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!valuesOwners[coreIndex].Decode(state, valuesReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesValues[coreIndex] = valuesOwners[coreIndex].value; } query.values = valuesValues.empty() ? nullptr : valuesValues.data(); if (!AssignDynamicCount(coreCount, query.rowCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreCount = 0; if (!valuesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valuesOwners.resize(coreCount); valuesValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!valuesOwners[coreIndex].Decode(state, valuesReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valuesValues[coreIndex] = valuesOwners[coreIndex].value; } query.values = valuesValues.empty() ? nullptr : valuesValues.data(); if (!AssignDynamicCount(coreCount, query.rowCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!valuesReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->DataModelSetRows(&query, &result);
@@ -8005,21 +8005,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_data_model_set_string(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlDataModelVariableStringQuery query{};
     query.variableHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.variableHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->DataModelSetString(&query, &result);
@@ -8046,21 +8046,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_document_append_to_style_sheet(void* enviro
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlDocumentStringQuery query{};
     query.documentHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.documentHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlDocumentBoolResult result{};
     state->native->rmlUi->DocumentAppendToStyleSheet(&query, &result);
@@ -8100,7 +8100,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_document_create_element(void* environment, 
     WireReader tagNameReader(tagNameWire);
     std::string tagNameStorage;
     { std::uint32_t coreLength = 0; if (!tagNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!tagNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } tagNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.tagName = tagNameStorage.data(); }
-    if (!tagNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!tagNameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -8150,7 +8150,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_document_create_text_node(void* environment
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -8187,21 +8187,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_document_load_external_script(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlDocumentStringQuery query{};
     query.documentHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.documentHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlDocumentBoolResult result{};
     state->native->rmlUi->DocumentLoadExternalScript(&query, &result);
@@ -8228,31 +8228,31 @@ wasm_trap_t* CoreDynamicInput_rml_ui_document_load_inline_script(void* environme
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlDocumentInlineScriptQuery query{};
     query.documentHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.documentHandle)>>>(slots[0].i64);
     std::uint32_t contentPointer = 0, contentBytes = 0;
-    if (!inputControl.U32(contentPointer) || !inputControl.U32(contentBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(contentPointer) || !inputControl.U32(contentBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(contentBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> contentWire;
-    if (!state->memory.View(contentPointer, contentBytes, contentWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(contentPointer, contentBytes, contentWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader contentReader(contentWire);
     std::string contentStorage;
-    { std::uint32_t coreLength = 0; if (!contentReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!contentReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } contentStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.content = contentStorage.data(); }
-    if (!contentReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!contentReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!contentReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } contentStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.content = contentStorage.data(); }
+    if (!contentReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t sourcePathPointer = 0, sourcePathBytes = 0;
-    if (!inputControl.U32(sourcePathPointer) || !inputControl.U32(sourcePathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(sourcePathPointer) || !inputControl.U32(sourcePathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(sourcePathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> sourcePathWire;
-    if (!state->memory.View(sourcePathPointer, sourcePathBytes, sourcePathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(sourcePathPointer, sourcePathBytes, sourcePathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader sourcePathReader(sourcePathWire);
     std::string sourcePathStorage;
-    { std::uint32_t coreLength = 0; if (!sourcePathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!sourcePathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } sourcePathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.sourcePath = sourcePathStorage.data(); }
-    if (!sourcePathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!sourcePathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!sourcePathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } sourcePathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.sourcePath = sourcePathStorage.data(); }
+    if (!sourcePathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.sourceLine = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.sourceLine)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlDocumentBoolResult result{};
     state->native->rmlUi->DocumentLoadInlineScript(&query, &result);
@@ -8279,21 +8279,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_document_set_title(void* environment, wasmt
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlDocumentSetTitleQuery query{};
     query.documentHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.documentHandle)>>>(slots[0].i64);
     std::uint32_t titlePointer = 0, titleBytes = 0;
-    if (!inputControl.U32(titlePointer) || !inputControl.U32(titleBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(titlePointer) || !inputControl.U32(titleBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(titleBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> titleWire;
-    if (!state->memory.View(titlePointer, titleBytes, titleWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(titlePointer, titleBytes, titleWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader titleReader(titleWire);
     std::string titleStorage;
-    { std::uint32_t coreLength = 0; if (!titleReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!titleReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } titleStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.title = titleStorage.data(); }
-    if (!titleReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!titleReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!titleReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } titleStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.title = titleStorage.data(); }
+    if (!titleReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlDocumentBoolResult result{};
     state->native->rmlUi->DocumentSetTitle(&query, &result);
@@ -8320,21 +8320,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_are_pseudo_classes_set(void* enviro
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementArePseudoClassesSet(&query, &result);
@@ -8374,7 +8374,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_closest(void* environment, wasmtime
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -8411,21 +8411,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_dispatch_event(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementDispatchEventQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t eventPointer = 0, eventBytes = 0;
-    if (!inputControl.U32(eventPointer) || !inputControl.U32(eventBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(eventPointer) || !inputControl.U32(eventBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(eventBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> eventWire;
-    if (!state->memory.View(eventPointer, eventBytes, eventWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(eventPointer, eventBytes, eventWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader eventReader(eventWire);
     std::string eventStorage;
-    { std::uint32_t coreLength = 0; if (!eventReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!eventReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } eventStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.event = eventStorage.data(); }
-    if (!eventReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!eventReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!eventReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } eventStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.event = eventStorage.data(); }
+    if (!eventReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementDispatchEvent(&query, &result);
@@ -8452,30 +8452,30 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_form_submit(void* environment, wasm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementFormSubmitQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementFormSubmit(&query, &result);
@@ -8515,7 +8515,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_element_by_id(void* environment
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -8565,7 +8565,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_elements_by_class_name(void* en
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -8616,21 +8616,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_elements_by_class_name_count(vo
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementGetIntResult result{};
     state->native->rmlUi->ElementGetElementsByClassNameCount(&query, &result);
@@ -8670,7 +8670,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_elements_by_tag_name(void* envi
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -8721,21 +8721,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_elements_by_tag_name_count(void
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementGetIntResult result{};
     state->native->rmlUi->ElementGetElementsByTagNameCount(&query, &result);
@@ -8762,21 +8762,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_has_attribute(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementHasAttribute(&query, &result);
@@ -8803,21 +8803,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_is_class_set(void* environment, was
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementIsClassSet(&query, &result);
@@ -8844,21 +8844,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_is_pseudo_class_set(void* environme
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementIsPseudoClassSet(&query, &result);
@@ -8885,21 +8885,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_matches(void* environment, wasmtime
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementMatches(&query, &result);
@@ -8939,7 +8939,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_query_selector(void* environment, w
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -8989,7 +8989,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_query_selector_all(void* environmen
     WireReader valueReader(valueWire);
     std::string valueStorage;
     { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -9040,21 +9040,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_query_selector_all_count(void* envi
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementGetIntResult result{};
     state->native->rmlUi->ElementQuerySelectorAllCount(&query, &result);
@@ -9081,21 +9081,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_remove_attribute(void* environment,
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementGetByStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementRemoveAttribute(&query, &result);
@@ -9122,23 +9122,23 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_remove_event_listener(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementEventListenerRemoveQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     query.eventListenerHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.eventListenerHandle)>>>(slots[1].i64);
     std::uint32_t eventPointer = 0, eventBytes = 0;
-    if (!inputControl.U32(eventPointer) || !inputControl.U32(eventBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(eventPointer) || !inputControl.U32(eventBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(eventBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> eventWire;
-    if (!state->memory.View(eventPointer, eventBytes, eventWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(eventPointer, eventBytes, eventWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader eventReader(eventWire);
     std::string eventStorage;
-    { std::uint32_t coreLength = 0; if (!eventReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!eventReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } eventStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.event = eventStorage.data(); }
-    if (!eventReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!eventReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!eventReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } eventStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.event = eventStorage.data(); }
+    if (!eventReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.inCapturePhase = slots[2].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementRemoveEventListener(&query, &result);
@@ -9165,30 +9165,30 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_set_attribute(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementSetAttributeQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementSetAttribute(&query, &result);
@@ -9215,22 +9215,22 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_set_class(void* environment, wasmti
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementStringBoolQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementSetClass(&query, &result);
@@ -9257,21 +9257,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_set_class_name(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementSetStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementSetClassName(&query, &result);
@@ -9298,21 +9298,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_set_id(void* environment, wasmtime_
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementSetStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementSetId(&query, &result);
@@ -9339,21 +9339,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_set_inner_rml(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementSetStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     std::string valueStorage;
-    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!valueReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } valueStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.value = valueStorage.data(); }
+    if (!valueReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementSetInnerRml(&query, &result);
@@ -9380,22 +9380,22 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_set_pseudo_class(void* environment,
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementStringBoolQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = slots[1].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementSetPseudoClass(&query, &result);
@@ -9422,22 +9422,22 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_tab_set_set_panel(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementTabSetIndexStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     query.index = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.index)>>>(slots[1].i32);
     std::uint32_t rmlPointer = 0, rmlBytes = 0;
-    if (!inputControl.U32(rmlPointer) || !inputControl.U32(rmlBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(rmlPointer) || !inputControl.U32(rmlBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(rmlBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> rmlWire;
-    if (!state->memory.View(rmlPointer, rmlBytes, rmlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(rmlPointer, rmlBytes, rmlWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader rmlReader(rmlWire);
     std::string rmlStorage;
-    { std::uint32_t coreLength = 0; if (!rmlReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rmlReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } rmlStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.rml = rmlStorage.data(); }
-    if (!rmlReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!rmlReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rmlReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } rmlStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.rml = rmlStorage.data(); }
+    if (!rmlReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementTabSetSetPanel(&query, &result);
@@ -9464,22 +9464,22 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_tab_set_set_tab(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlElementTabSetIndexStringQuery query{};
     query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
     query.index = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.index)>>>(slots[1].i32);
     std::uint32_t rmlPointer = 0, rmlBytes = 0;
-    if (!inputControl.U32(rmlPointer) || !inputControl.U32(rmlBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(rmlPointer) || !inputControl.U32(rmlBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(rmlBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> rmlWire;
-    if (!state->memory.View(rmlPointer, rmlBytes, rmlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(rmlPointer, rmlBytes, rmlWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader rmlReader(rmlWire);
     std::string rmlStorage;
-    { std::uint32_t coreLength = 0; if (!rmlReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rmlReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } rmlStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.rml = rmlStorage.data(); }
-    if (!rmlReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!rmlReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rmlReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } rmlStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.rml = rmlStorage.data(); }
+    if (!rmlReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->ElementTabSetSetTab(&query, &result);
@@ -9519,7 +9519,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_event_get_parameter_bool(void* environment,
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 8u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -9569,7 +9569,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_event_get_parameter_float(void* environment
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 8u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -9619,7 +9619,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_event_get_parameter_int(void* environment, 
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 8u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -9669,7 +9669,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_event_get_parameter_type(void* environment,
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
     if (!state->memory.Contains(output, 8u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -9718,7 +9718,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_get_context(void* environment, wasmtime_cal
     WireReader nameReader(nameWire);
     std::string nameStorage;
     { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
     if (!state->memory.Contains(output, 16u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
@@ -9755,20 +9755,20 @@ wasm_trap_t* CoreDynamicInput_rml_ui_remove_context_by_name(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlRemoveContextByNameQuery query{};
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlRemoveContextByNameResult result{};
     state->native->rmlUi->RemoveContextByName(&query, &result);
@@ -9795,20 +9795,20 @@ wasm_trap_t* CoreDynamicInput_rml_ui_set_debug_context_by_name(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlSetDebugContextByNameQuery query{};
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlSetDebugContextByNameResult result{};
     state->native->rmlUi->SetDebugContextByName(&query, &result);
@@ -9835,29 +9835,29 @@ wasm_trap_t* CoreDynamicInput_rml_ui_set_mouse_cursor_alias(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlSetMouseCursorAliasQuery query{};
     std::uint32_t rmlNamePointer = 0, rmlNameBytes = 0;
-    if (!inputControl.U32(rmlNamePointer) || !inputControl.U32(rmlNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(rmlNamePointer) || !inputControl.U32(rmlNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(rmlNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> rmlNameWire;
-    if (!state->memory.View(rmlNamePointer, rmlNameBytes, rmlNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(rmlNamePointer, rmlNameBytes, rmlNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader rmlNameReader(rmlNameWire);
     std::string rmlNameStorage;
-    { std::uint32_t coreLength = 0; if (!rmlNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rmlNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } rmlNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.rmlName = rmlNameStorage.data(); }
-    if (!rmlNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!rmlNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rmlNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } rmlNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.rmlName = rmlNameStorage.data(); }
+    if (!rmlNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t recoilNamePointer = 0, recoilNameBytes = 0;
-    if (!inputControl.U32(recoilNamePointer) || !inputControl.U32(recoilNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(recoilNamePointer) || !inputControl.U32(recoilNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(recoilNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> recoilNameWire;
-    if (!state->memory.View(recoilNamePointer, recoilNameBytes, recoilNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(recoilNamePointer, recoilNameBytes, recoilNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader recoilNameReader(recoilNameWire);
     std::string recoilNameStorage;
-    { std::uint32_t coreLength = 0; if (!recoilNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!recoilNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } recoilNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.recoilName = recoilNameStorage.data(); }
-    if (!recoilNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!recoilNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!recoilNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } recoilNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.recoilName = recoilNameStorage.data(); }
+    if (!recoilNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlSetMouseCursorAliasResult result{};
     state->native->rmlUi->SetMouseCursorAlias(&query, &result);
@@ -9884,21 +9884,21 @@ wasm_trap_t* CoreDynamicInput_rml_ui_sol_lua_data_model_set_dirty(void* environm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     RmlSolLuaDataModelSetDirtyQuery query{};
     query.dataModelHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.dataModelHandle)>>>(slots[0].i64);
     std::uint32_t propertyPointer = 0, propertyBytes = 0;
-    if (!inputControl.U32(propertyPointer) || !inputControl.U32(propertyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(propertyPointer) || !inputControl.U32(propertyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(propertyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> propertyWire;
-    if (!state->memory.View(propertyPointer, propertyBytes, propertyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(propertyPointer, propertyBytes, propertyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader propertyReader(propertyWire);
     std::string propertyStorage;
-    { std::uint32_t coreLength = 0; if (!propertyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!propertyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } propertyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.property = propertyStorage.data(); }
-    if (!propertyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!propertyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!propertyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } propertyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.property = propertyStorage.data(); }
+    if (!propertyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     RmlElementBoolResult result{};
     state->native->rmlUi->SolLuaDataModelSetDirty(&query, &result);
@@ -9940,7 +9940,7 @@ wasm_trap_t* CoreDynamicInput_vfs_calculate_hash(void* environment, wasmtime_cal
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.hashType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.hashType)>>>(slots[0].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
@@ -9990,48 +9990,48 @@ wasm_trap_t* CoreDynamicInput_vfs_compress_folder(void* environment, wasmtime_ca
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 32u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 32u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     CompressFolderQuery query{};
     std::uint32_t folderPathPointer = 0, folderPathBytes = 0;
-    if (!inputControl.U32(folderPathPointer) || !inputControl.U32(folderPathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(folderPathPointer) || !inputControl.U32(folderPathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(folderPathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> folderPathWire;
-    if (!state->memory.View(folderPathPointer, folderPathBytes, folderPathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(folderPathPointer, folderPathBytes, folderPathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader folderPathReader(folderPathWire);
     std::string folderPathStorage;
-    { std::uint32_t coreLength = 0; if (!folderPathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!folderPathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } folderPathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.folderPath = folderPathStorage.data(); }
-    if (!folderPathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!folderPathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!folderPathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } folderPathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.folderPath = folderPathStorage.data(); }
+    if (!folderPathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t archiveTypePointer = 0, archiveTypeBytes = 0;
-    if (!inputControl.U32(archiveTypePointer) || !inputControl.U32(archiveTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(archiveTypePointer) || !inputControl.U32(archiveTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(archiveTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> archiveTypeWire;
-    if (!state->memory.View(archiveTypePointer, archiveTypeBytes, archiveTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(archiveTypePointer, archiveTypeBytes, archiveTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader archiveTypeReader(archiveTypeWire);
     std::string archiveTypeStorage;
-    { std::uint32_t coreLength = 0; if (!archiveTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.archiveType = archiveTypeStorage.data(); }
-    if (!archiveTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!archiveTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } archiveTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.archiveType = archiveTypeStorage.data(); }
+    if (!archiveTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t compressedFilePathPointer = 0, compressedFilePathBytes = 0;
-    if (!inputControl.U32(compressedFilePathPointer) || !inputControl.U32(compressedFilePathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(compressedFilePathPointer) || !inputControl.U32(compressedFilePathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(compressedFilePathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> compressedFilePathWire;
-    if (!state->memory.View(compressedFilePathPointer, compressedFilePathBytes, compressedFilePathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(compressedFilePathPointer, compressedFilePathBytes, compressedFilePathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader compressedFilePathReader(compressedFilePathWire);
     std::string compressedFilePathStorage;
-    { std::uint32_t coreLength = 0; if (!compressedFilePathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!compressedFilePathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } compressedFilePathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.compressedFilePath = compressedFilePathStorage.data(); }
-    if (!compressedFilePathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!compressedFilePathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!compressedFilePathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } compressedFilePathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.compressedFilePath = compressedFilePathStorage.data(); }
+    if (!compressedFilePathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.includeFolder = slots[0].i32 != 0;
     std::uint32_t modePointer = 0, modeBytes = 0;
-    if (!inputControl.U32(modePointer) || !inputControl.U32(modeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(modePointer) || !inputControl.U32(modeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(modeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> modeWire;
-    if (!state->memory.View(modePointer, modeBytes, modeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(modePointer, modeBytes, modeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader modeReader(modeWire);
     std::string modeStorage;
-    { std::uint32_t coreLength = 0; if (!modeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.mode = modeStorage.data(); }
-    if (!modeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!modeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } modeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.mode = modeStorage.data(); }
+    if (!modeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     CompressFolderResult result{};
     state->native->vfs->CompressFolder(&query, &result);
@@ -10058,20 +10058,20 @@ wasm_trap_t* CoreDynamicInput_vfs_create_dir(void* environment, wasmtime_caller_
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     CreateDirQuery query{};
     std::uint32_t pathPointer = 0, pathBytes = 0;
-    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(pathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> pathWire;
-    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader pathReader(pathWire);
     std::string pathStorage;
-    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     CreateDirResult result{};
     state->native->vfs->CreateDir(&query, &result);
@@ -10110,7 +10110,7 @@ wasm_trap_t* CoreDynamicInput_vfs_download_archive(void* environment, wasmtime_c
     WireReader filenameReader(filenameWire);
     std::string filenameStorage;
     { std::uint32_t coreLength = 0; if (!filenameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!filenameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } filenameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.filename = filenameStorage.data(); }
-    if (!filenameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!filenameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t categoryPointer = 0, categoryBytes = 0;
     if (!inputControl.U32(categoryPointer) || !inputControl.U32(categoryBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(categoryBytes)) return Trap(budgetError);
@@ -10119,7 +10119,7 @@ wasm_trap_t* CoreDynamicInput_vfs_download_archive(void* environment, wasmtime_c
     WireReader categoryReader(categoryWire);
     std::string categoryStorage;
     { std::uint32_t coreLength = 0; if (!categoryReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!categoryReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } categoryStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.category = categoryStorage.data(); }
-    if (!categoryReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!categoryReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     DownloadArchiveResult result{};
@@ -10147,20 +10147,20 @@ wasm_trap_t* CoreDynamicInput_vfs_extract_mod_archive_file(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     ExtractModArchiveFileQuery query{};
     std::uint32_t pathPointer = 0, pathBytes = 0;
-    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(pathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> pathWire;
-    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader pathReader(pathWire);
     std::string pathStorage;
-    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     ExtractModArchiveFileResult result{};
     state->native->vfs->ExtractModArchiveFile(&query, &result);
@@ -10187,20 +10187,20 @@ wasm_trap_t* CoreDynamicInput_vfs_file_exists(void* environment, wasmtime_caller
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     FileExistsQuery query{};
     std::uint32_t pathPointer = 0, pathBytes = 0;
-    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(pathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> pathWire;
-    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader pathReader(pathWire);
     std::string pathStorage;
-    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     FileExistsResult result{};
     state->native->vfs->FileExists(&query, &result);
@@ -10239,7 +10239,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_archive_containing_file(void* environment,
     WireReader pathReader(pathWire);
     std::string pathStorage;
     { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!pathReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t modePointer = 0, modeBytes = 0;
     if (!inputControl.U32(modePointer) || !inputControl.U32(modeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(modeBytes)) return Trap(budgetError);
@@ -10248,7 +10248,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_archive_containing_file(void* environment,
     WireReader modeReader(modeWire);
     std::string modeStorage;
     { std::uint32_t coreLength = 0; if (!modeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.mode = modeStorage.data(); }
-    if (!modeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!modeReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -10309,7 +10309,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_archive_path(void* environment, wasmtime_c
     WireReader archiveNameReader(archiveNameWire);
     std::string archiveNameStorage;
     { std::uint32_t coreLength = 0; if (!archiveNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.archiveName = archiveNameStorage.data(); }
-    if (!archiveNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!archiveNameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -10370,7 +10370,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_file_absolute_path(void* environment, wasm
     WireReader pathReader(pathWire);
     std::string pathStorage;
     { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!pathReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t modePointer = 0, modeBytes = 0;
     if (!inputControl.U32(modePointer) || !inputControl.U32(modeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(modeBytes)) return Trap(budgetError);
@@ -10379,7 +10379,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_file_absolute_path(void* environment, wasm
     WireReader modeReader(modeWire);
     std::string modeStorage;
     { std::uint32_t coreLength = 0; if (!modeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.mode = modeStorage.data(); }
-    if (!modeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!modeReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -10428,20 +10428,20 @@ wasm_trap_t* CoreDynamicInput_vfs_get_file_size(void* environment, wasmtime_call
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetFileSizeQuery query{};
     std::uint32_t pathPointer = 0, pathBytes = 0;
-    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(pathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> pathWire;
-    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader pathReader(pathWire);
     std::string pathStorage;
-    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetFileSizeResult result{};
     state->native->vfs->GetFileSize(&query, &result);
@@ -10468,7 +10468,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_map_square_texture(void* environment, wasm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetMapSquareTextureQuery query{};
@@ -10476,16 +10476,16 @@ wasm_trap_t* CoreDynamicInput_vfs_get_map_square_texture(void* environment, wasm
     query.texSquareY = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.texSquareY)>>>(slots[1].i32);
     query.lodMin = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodMin)>>>(slots[2].i32);
     std::uint32_t textureNamePointer = 0, textureNameBytes = 0;
-    if (!inputControl.U32(textureNamePointer) || !inputControl.U32(textureNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textureNamePointer) || !inputControl.U32(textureNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textureNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textureNameWire;
-    if (!state->memory.View(textureNamePointer, textureNameBytes, textureNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textureNamePointer, textureNameBytes, textureNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textureNameReader(textureNameWire);
     std::string textureNameStorage;
-    { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
-    if (!textureNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
+    if (!textureNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.lodMax = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodMax)>>>(slots[3].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetMapSquareTextureResult result{};
     state->native->vfs->GetMapSquareTexture(&query, &result);
@@ -10524,7 +10524,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_name_from_rapid_tag(void* environment, was
     WireReader rapidTagReader(rapidTagWire);
     std::string rapidTagStorage;
     { std::uint32_t coreLength = 0; if (!rapidTagReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rapidTagReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } rapidTagStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.rapidTag = rapidTagStorage.data(); }
-    if (!rapidTagReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!rapidTagReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -10573,20 +10573,20 @@ wasm_trap_t* CoreDynamicInput_vfs_has_archive(void* environment, wasmtime_caller
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     HasArchiveQuery query{};
     std::uint32_t archiveNamePointer = 0, archiveNameBytes = 0;
-    if (!inputControl.U32(archiveNamePointer) || !inputControl.U32(archiveNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(archiveNamePointer) || !inputControl.U32(archiveNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(archiveNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> archiveNameWire;
-    if (!state->memory.View(archiveNamePointer, archiveNameBytes, archiveNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(archiveNamePointer, archiveNameBytes, archiveNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader archiveNameReader(archiveNameWire);
     std::string archiveNameStorage;
-    { std::uint32_t coreLength = 0; if (!archiveNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.archiveName = archiveNameStorage.data(); }
-    if (!archiveNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!archiveNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } archiveNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.archiveName = archiveNameStorage.data(); }
+    if (!archiveNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     HasArchiveResult result{};
     state->native->vfs->HasArchive(&query, &result);
@@ -10613,20 +10613,20 @@ wasm_trap_t* CoreDynamicInput_vfs_is_directory(void* environment, wasmtime_calle
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     IsDirectoryQuery query{};
     std::uint32_t pathPointer = 0, pathBytes = 0;
-    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(pathBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> pathWire;
-    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader pathReader(pathWire);
     std::string pathStorage;
-    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     IsDirectoryResult result{};
     state->native->vfs->IsDirectory(&query, &result);
@@ -10665,7 +10665,7 @@ wasm_trap_t* CoreDynamicInput_vfs_load_file(void* environment, wasmtime_caller_t
     WireReader pathReader(pathWire);
     std::string pathStorage;
     { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!pathReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t modePointer = 0, modeBytes = 0;
     if (!inputControl.U32(modePointer) || !inputControl.U32(modeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(modeBytes)) return Trap(budgetError);
@@ -10674,7 +10674,7 @@ wasm_trap_t* CoreDynamicInput_vfs_load_file(void* environment, wasmtime_caller_t
     WireReader modeReader(modeWire);
     std::string modeStorage;
     { std::uint32_t coreLength = 0; if (!modeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.mode = modeStorage.data(); }
-    if (!modeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!modeReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -10740,7 +10740,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_f32(void* environment, wasmtime_caller_t*
                 if (!valuesReader.F32(item)) return false;
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -10806,7 +10806,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s16(void* environment, wasmtime_caller_t*
                 { std::int32_t coreRaw = 0; if (!valuesReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -10872,7 +10872,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s32(void* environment, wasmtime_caller_t*
                 { std::int32_t coreRaw = 0; if (!valuesReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -10938,7 +10938,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s8(void* environment, wasmtime_caller_t* 
                 { std::int32_t coreRaw = 0; if (!valuesReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -11004,7 +11004,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u16(void* environment, wasmtime_caller_t*
                 { std::uint32_t coreRaw = 0; if (!valuesReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -11070,7 +11070,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u32(void* environment, wasmtime_caller_t*
                 { std::uint32_t coreRaw = 0; if (!valuesReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -11136,7 +11136,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u8(void* environment, wasmtime_caller_t* 
                 { std::uint32_t coreRaw = 0; if (!valuesReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!valuesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -11199,7 +11199,7 @@ wasm_trap_t* CoreDynamicInput_vfs_read_file(void* environment, wasmtime_caller_t
     WireReader pathReader(pathWire);
     std::string pathStorage;
     { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!pathReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -11262,7 +11262,7 @@ wasm_trap_t* CoreDynamicInput_vfs_read_file_as_string(void* environment, wasmtim
     WireReader pathReader(pathWire);
     std::string pathStorage;
     { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
-    if (!pathReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!pathReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -11311,22 +11311,22 @@ wasm_trap_t* CoreDynamicInput_vfs_set_map_square_texture(void* environment, wasm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetMapSquareTextureQuery query{};
     query.texSquareX = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.texSquareX)>>>(slots[0].i32);
     query.texSquareY = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.texSquareY)>>>(slots[1].i32);
     std::uint32_t textureNamePointer = 0, textureNameBytes = 0;
-    if (!inputControl.U32(textureNamePointer) || !inputControl.U32(textureNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(textureNamePointer) || !inputControl.U32(textureNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(textureNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> textureNameWire;
-    if (!state->memory.View(textureNamePointer, textureNameBytes, textureNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textureNamePointer, textureNameBytes, textureNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader textureNameReader(textureNameWire);
     std::string textureNameStorage;
-    { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
-    if (!textureNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!textureNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textureNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } textureNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.textureName = textureNameStorage.data(); }
+    if (!textureNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetMapSquareTextureResult result{};
     state->native->vfs->SetMapSquareTexture(&query, &result);
@@ -11368,7 +11368,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_f32(void* environment, wasmtime_caller_
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
@@ -11436,7 +11436,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s16(void* environment, wasmtime_caller_
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
@@ -11504,7 +11504,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s32(void* environment, wasmtime_caller_
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
@@ -11572,7 +11572,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s8(void* environment, wasmtime_caller_t
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
@@ -11640,7 +11640,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u16(void* environment, wasmtime_caller_
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
@@ -11708,7 +11708,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u32(void* environment, wasmtime_caller_
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
@@ -11776,7 +11776,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u8(void* environment, wasmtime_caller_t
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
@@ -11844,7 +11844,7 @@ wasm_trap_t* CoreDynamicInput_vfs_zlib_compress(void* environment, wasmtime_call
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -11910,7 +11910,7 @@ wasm_trap_t* CoreDynamicInput_vfs_zlib_decompress(void* environment, wasmtime_ca
                 { std::uint32_t coreRaw = 0; if (!dataReader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } dataStorage.push_back(item); } query.data = dataStorage.empty() ? nullptr : dataStorage.data(); if (!AssignDynamicCount(coreCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!dataReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dataReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<std::uint8_t> outputControlWire;
@@ -11961,22 +11961,22 @@ wasm_trap_t* CoreDynamicInput_team_control_add_team_resource(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     AddTeamResourceQuery query{};
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
     std::uint32_t resourceTypePointer = 0, resourceTypeBytes = 0;
-    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceTypeWire;
-    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceTypeReader(resourceTypeWire);
     std::string resourceTypeStorage;
-    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
-    if (!resourceTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
+    if (!resourceTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     AddTeamResourceResult result{};
     state->native->syncedCtrl->team->AddTeamResource(&query, &result);
@@ -12003,22 +12003,22 @@ wasm_trap_t* CoreDynamicInput_team_control_add_team_resource_excess_stats(void* 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     AddTeamResourceExcessStatsQuery query{};
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
     std::uint32_t resourceTypePointer = 0, resourceTypeBytes = 0;
-    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceTypeWire;
-    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceTypeReader(resourceTypeWire);
     std::string resourceTypeStorage;
-    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
-    if (!resourceTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
+    if (!resourceTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     AddTeamResourceExcessStatsResult result{};
     state->native->syncedCtrl->team->AddTeamResourceExcessStats(&query, &result);
@@ -12045,23 +12045,23 @@ wasm_trap_t* CoreDynamicInput_team_control_game_over(void* environment, wasmtime
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GameOverQuery query{};
     std::uint32_t winningAllyTeamsPointer = 0, winningAllyTeamsBytes = 0;
-    if (!inputControl.U32(winningAllyTeamsPointer) || !inputControl.U32(winningAllyTeamsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(winningAllyTeamsPointer) || !inputControl.U32(winningAllyTeamsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(winningAllyTeamsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> winningAllyTeamsWire;
-    if (!state->memory.View(winningAllyTeamsPointer, winningAllyTeamsBytes, winningAllyTeamsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(winningAllyTeamsPointer, winningAllyTeamsBytes, winningAllyTeamsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader winningAllyTeamsReader(winningAllyTeamsWire);
     std::vector<std::int32_t> winningAllyTeamsStorage;
-    { std::uint32_t coreCount = 0; if (!winningAllyTeamsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } winningAllyTeamsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!winningAllyTeamsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } winningAllyTeamsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!winningAllyTeamsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } winningAllyTeamsStorage.push_back(item); } query.winningAllyTeams = winningAllyTeamsStorage.empty() ? nullptr : winningAllyTeamsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!winningAllyTeamsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } winningAllyTeamsStorage.push_back(item); } query.winningAllyTeams = winningAllyTeamsStorage.empty() ? nullptr : winningAllyTeamsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!winningAllyTeamsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GameOverResult result{};
     state->native->syncedCtrl->team->GameOver(&query, &result);
@@ -12088,22 +12088,22 @@ wasm_trap_t* CoreDynamicInput_team_control_set_team_resource(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetTeamResourceQuery query{};
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
     std::uint32_t resourceTypePointer = 0, resourceTypeBytes = 0;
-    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceTypeWire;
-    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceTypeReader(resourceTypeWire);
     std::string resourceTypeStorage;
-    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
-    if (!resourceTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
+    if (!resourceTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetTeamResourceResult result{};
     state->native->syncedCtrl->team->SetTeamResource(&query, &result);
@@ -12130,22 +12130,22 @@ wasm_trap_t* CoreDynamicInput_team_control_set_team_share_level(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetTeamShareLevelQuery query{};
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
     std::uint32_t resourceTypePointer = 0, resourceTypeBytes = 0;
-    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceTypeWire;
-    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceTypeReader(resourceTypeWire);
     std::string resourceTypeStorage;
-    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
-    if (!resourceTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
+    if (!resourceTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.shareLevel = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetTeamShareLevelResult result{};
     state->native->syncedCtrl->team->SetTeamShareLevel(&query, &result);
@@ -12172,23 +12172,23 @@ wasm_trap_t* CoreDynamicInput_team_control_share_team_resource(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     ShareTeamResourceQuery query{};
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
     query.targetTeamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.targetTeamID)>>>(slots[1].i32);
     std::uint32_t resourceTypePointer = 0, resourceTypeBytes = 0;
-    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceTypeWire;
-    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceTypeReader(resourceTypeWire);
     std::string resourceTypeStorage;
-    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
-    if (!resourceTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
+    if (!resourceTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[2].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     ShareTeamResourceResult result{};
     state->native->syncedCtrl->team->ShareTeamResource(&query, &result);
@@ -12215,22 +12215,22 @@ wasm_trap_t* CoreDynamicInput_team_control_use_team_resource(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     UseTeamResourceQuery query{};
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[0].i32);
     std::uint32_t resourceTypePointer = 0, resourceTypeBytes = 0;
-    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceTypeWire;
-    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceTypeReader(resourceTypeWire);
     std::string resourceTypeStorage;
-    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
-    if (!resourceTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
+    if (!resourceTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     UseTeamResourceResult result{};
     state->native->syncedCtrl->team->UseTeamResource(&query, &result);
@@ -12257,22 +12257,22 @@ wasm_trap_t* CoreDynamicInput_unit_control_add_unit_resource(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     AddUnitResourceQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t resourceTypePointer = 0, resourceTypeBytes = 0;
-    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceTypeWire;
-    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceTypeReader(resourceTypeWire);
     std::string resourceTypeStorage;
-    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
-    if (!resourceTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
+    if (!resourceTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     AddUnitResourceResult result{};
     state->native->syncedCtrl->unit->AddUnitResource(&query, &result);
@@ -12299,15 +12299,15 @@ wasm_trap_t* CoreDynamicInput_unit_control_bugger_off(void* environment, wasmtim
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 24u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 24u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     BuggerOffQuery query{};
     std::uint32_t posPointer = 0, posBytes = 0;
-    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(posBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> posWire;
-    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader posReader(posWire);
     const bool posOk = [&]() -> bool {
         if (!posReader.F32(query.pos.x)) return false;
@@ -12316,15 +12316,15 @@ wasm_trap_t* CoreDynamicInput_unit_control_bugger_off(void* environment, wasmtim
         if (!posReader.Align(4u)) return false;
         return true;
     }();
-    if (!posOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!posReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!posOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!posReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.radius = slots[0].f32;
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[1].i32);
     std::uint32_t optionsPointer = 0, optionsBytes = 0;
-    if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(optionsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> optionsWire;
-    if (!state->memory.View(optionsPointer, optionsBytes, optionsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(optionsPointer, optionsBytes, optionsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader optionsReader(optionsWire);
     const bool optionsOk = [&]() -> bool {
         if (!optionsReader.Bool(query.options.spherical)) return false;
@@ -12333,21 +12333,21 @@ wasm_trap_t* CoreDynamicInput_unit_control_bugger_off(void* environment, wasmtim
         if (!optionsReader.Align(4u)) return false;
         return true;
     }();
-    if (!optionsOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!optionsOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!optionsReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t excludeUnitDefIDsPointer = 0, excludeUnitDefIDsBytes = 0;
-    if (!inputControl.U32(excludeUnitDefIDsPointer) || !inputControl.U32(excludeUnitDefIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(excludeUnitDefIDsPointer) || !inputControl.U32(excludeUnitDefIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(excludeUnitDefIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> excludeUnitDefIDsWire;
-    if (!state->memory.View(excludeUnitDefIDsPointer, excludeUnitDefIDsBytes, excludeUnitDefIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(excludeUnitDefIDsPointer, excludeUnitDefIDsBytes, excludeUnitDefIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader excludeUnitDefIDsReader(excludeUnitDefIDsWire);
     std::vector<std::int32_t> excludeUnitDefIDsStorage;
-    { std::uint32_t coreCount = 0; if (!excludeUnitDefIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } excludeUnitDefIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!excludeUnitDefIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } excludeUnitDefIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!excludeUnitDefIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } excludeUnitDefIDsStorage.push_back(item); } query.excludeUnitDefIDs = excludeUnitDefIDsStorage.empty() ? nullptr : excludeUnitDefIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.excludeUnitDefCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!excludeUnitDefIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } excludeUnitDefIDsStorage.push_back(item); } query.excludeUnitDefIDs = excludeUnitDefIDsStorage.empty() ? nullptr : excludeUnitDefIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.excludeUnitDefCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!excludeUnitDefIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     BuggerOffResult result{};
     state->native->syncedCtrl->unit->BuggerOff(&query, &result);
@@ -12374,25 +12374,25 @@ wasm_trap_t* CoreDynamicInput_unit_control_create_unit(void* environment, wasmti
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 24u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 24u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     CreateUnitQuery query{};
     std::uint32_t unitDefPointer = 0, unitDefBytes = 0;
-    if (!inputControl.U32(unitDefPointer) || !inputControl.U32(unitDefBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitDefPointer) || !inputControl.U32(unitDefBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitDefBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitDefWire;
-    if (!state->memory.View(unitDefPointer, unitDefBytes, unitDefWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitDefPointer, unitDefBytes, unitDefWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitDefReader(unitDefWire);
     CoreOwned_DefRef unitDefOwner;
-    if (!unitDefOwner.Decode(state, unitDefReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!unitDefOwner.Decode(state, unitDefReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.unitDef = unitDefOwner.value;
-    if (!unitDefReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!unitDefReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t posPointer = 0, posBytes = 0;
-    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(posBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> posWire;
-    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader posReader(posWire);
     const bool posOk = [&]() -> bool {
         if (!posReader.F32(query.pos.x)) return false;
@@ -12401,15 +12401,15 @@ wasm_trap_t* CoreDynamicInput_unit_control_create_unit(void* environment, wasmti
         if (!posReader.Align(4u)) return false;
         return true;
     }();
-    if (!posOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!posReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!posOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!posReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.facing = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.facing)>>>(slots[0].i32);
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[1].i32);
     std::uint32_t optionsPointer = 0, optionsBytes = 0;
-    if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(optionsPointer) || !inputControl.U32(optionsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(optionsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> optionsWire;
-    if (!state->memory.View(optionsPointer, optionsBytes, optionsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(optionsPointer, optionsBytes, optionsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader optionsReader(optionsWire);
     const bool optionsOk = [&]() -> bool {
         if (!optionsReader.Bool(query.options.build)) return false;
@@ -12419,9 +12419,9 @@ wasm_trap_t* CoreDynamicInput_unit_control_create_unit(void* environment, wasmti
         if (!optionsReader.Align(4u)) return false;
         return true;
     }();
-    if (!optionsOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!optionsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!optionsOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!optionsReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     CreateUnitResult result{};
     state->native->syncedCtrl->unit->CreateUnit(&query, &result);
@@ -12448,23 +12448,23 @@ wasm_trap_t* CoreDynamicInput_unit_control_edit_unit_cmd_desc(void* environment,
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     EditUnitCmdDescQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     query.cmdDescIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.cmdDescIndex)>>>(slots[1].i32);
     std::uint32_t cmdDescPointer = 0, cmdDescBytes = 0;
-    if (!inputControl.U32(cmdDescPointer) || !inputControl.U32(cmdDescBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cmdDescPointer) || !inputControl.U32(cmdDescBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cmdDescBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cmdDescWire;
-    if (!state->memory.View(cmdDescPointer, cmdDescBytes, cmdDescWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cmdDescPointer, cmdDescBytes, cmdDescWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cmdDescReader(cmdDescWire);
     CoreOwned_NativeCommandDescription cmdDescOwner;
-    if (!cmdDescOwner.Decode(state, cmdDescReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!cmdDescOwner.Decode(state, cmdDescReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.cmdDesc = &cmdDescOwner.value;
-    if (!cmdDescReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!cmdDescReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     EditUnitCmdDescResult result{};
     state->native->syncedCtrl->unit->EditUnitCmdDesc(&query, &result);
@@ -12491,22 +12491,22 @@ wasm_trap_t* CoreDynamicInput_unit_control_give_order_array_to_unit(void* enviro
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GiveOrderArrayToUnitQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t commandsPointer = 0, commandsBytes = 0;
-    if (!inputControl.U32(commandsPointer) || !inputControl.U32(commandsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(commandsPointer) || !inputControl.U32(commandsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(commandsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> commandsWire;
-    if (!state->memory.View(commandsPointer, commandsBytes, commandsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(commandsPointer, commandsBytes, commandsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader commandsReader(commandsWire);
     std::vector<CoreOwned_NativeCommand> commandsOwners;
     std::vector<NativeCommand> commandsValues;
-    { std::uint32_t coreCount = 0; if (!commandsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } commandsOwners.resize(coreCount); commandsValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!commandsOwners[coreIndex].Decode(state, commandsReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } commandsValues[coreIndex] = commandsOwners[coreIndex].value; } query.commands = commandsValues.empty() ? nullptr : commandsValues.data(); if (!AssignDynamicCount(coreCount, query.commandCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!commandsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreCount = 0; if (!commandsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } commandsOwners.resize(coreCount); commandsValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!commandsOwners[coreIndex].Decode(state, commandsReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } commandsValues[coreIndex] = commandsOwners[coreIndex].value; } query.commands = commandsValues.empty() ? nullptr : commandsValues.data(); if (!AssignDynamicCount(coreCount, query.commandCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!commandsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GiveOrderArrayToUnitResult result{};
     state->native->syncedCtrl->unit->GiveOrderArrayToUnit(&query, &result);
@@ -12533,34 +12533,34 @@ wasm_trap_t* CoreDynamicInput_unit_control_give_order_array_to_unit_array(void* 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GiveOrderArrayToUnitArrayQuery query{};
     std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
-    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitIDsWire;
-    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitIDsReader(unitIDsWire);
     std::vector<std::int32_t> unitIDsStorage;
-    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.unitCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!unitIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.unitCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t commandsPointer = 0, commandsBytes = 0;
-    if (!inputControl.U32(commandsPointer) || !inputControl.U32(commandsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(commandsPointer) || !inputControl.U32(commandsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(commandsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> commandsWire;
-    if (!state->memory.View(commandsPointer, commandsBytes, commandsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(commandsPointer, commandsBytes, commandsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader commandsReader(commandsWire);
     std::vector<CoreOwned_NativeCommand> commandsOwners;
     std::vector<NativeCommand> commandsValues;
-    { std::uint32_t coreCount = 0; if (!commandsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } commandsOwners.resize(coreCount); commandsValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!commandsOwners[coreIndex].Decode(state, commandsReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } commandsValues[coreIndex] = commandsOwners[coreIndex].value; } query.commands = commandsValues.empty() ? nullptr : commandsValues.data(); if (!AssignDynamicCount(coreCount, query.commandCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!commandsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreCount = 0; if (!commandsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } commandsOwners.resize(coreCount); commandsValues.resize(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { if (!commandsOwners[coreIndex].Decode(state, commandsReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } commandsValues[coreIndex] = commandsOwners[coreIndex].value; } query.commands = commandsValues.empty() ? nullptr : commandsValues.data(); if (!AssignDynamicCount(coreCount, query.commandCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!commandsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.pairwise = slots[0].i32 != 0;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GiveOrderArrayToUnitArrayResult result{};
     state->native->syncedCtrl->unit->GiveOrderArrayToUnitArray(&query, &result);
@@ -12587,38 +12587,38 @@ wasm_trap_t* CoreDynamicInput_unit_control_give_order_to_unit_array(void* enviro
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GiveOrderToUnitArrayQuery query{};
     std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
-    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitIDsWire;
-    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitIDsReader(unitIDsWire);
     std::vector<std::int32_t> unitIDsStorage;
-    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!unitIDsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.cmdID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.cmdID)>>>(slots[0].i32);
     std::uint32_t paramsPointer = 0, paramsBytes = 0;
-    if (!inputControl.U32(paramsPointer) || !inputControl.U32(paramsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(paramsPointer) || !inputControl.U32(paramsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(paramsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> paramsWire;
-    if (!state->memory.View(paramsPointer, paramsBytes, paramsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(paramsPointer, paramsBytes, paramsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader paramsReader(paramsWire);
     std::vector<float> paramsStorage;
-    { std::uint32_t coreCount = 0; if (!paramsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!paramsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } paramsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
                 if (!paramsReader.F32(item)) return false;
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramsStorage.push_back(item); } query.params = paramsStorage.empty() ? nullptr : paramsStorage.data(); if (!AssignDynamicCount(coreCount, query.paramCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!paramsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } paramsStorage.push_back(item); } query.params = paramsStorage.empty() ? nullptr : paramsStorage.data(); if (!AssignDynamicCount(coreCount, query.paramCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!paramsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.options = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options)>>>(slots[1].i32);
     query.timeout = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.timeout)>>>(slots[2].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GiveOrderToUnitArrayResult result{};
     state->native->syncedCtrl->unit->GiveOrderToUnitArray(&query, &result);
@@ -12645,23 +12645,23 @@ wasm_trap_t* CoreDynamicInput_unit_control_insert_unit_cmd_desc(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     InsertUnitCmdDescQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     query.cmdDescIndex = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.cmdDescIndex)>>>(slots[1].i32);
     std::uint32_t cmdDescPointer = 0, cmdDescBytes = 0;
-    if (!inputControl.U32(cmdDescPointer) || !inputControl.U32(cmdDescBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cmdDescPointer) || !inputControl.U32(cmdDescBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cmdDescBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cmdDescWire;
-    if (!state->memory.View(cmdDescPointer, cmdDescBytes, cmdDescWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cmdDescPointer, cmdDescBytes, cmdDescWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cmdDescReader(cmdDescWire);
     CoreOwned_NativeCommandDescription cmdDescOwner;
-    if (!cmdDescOwner.Decode(state, cmdDescReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!cmdDescOwner.Decode(state, cmdDescReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.cmdDesc = &cmdDescOwner.value;
-    if (!cmdDescReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!cmdDescReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     InsertUnitCmdDescResult result{};
     state->native->syncedCtrl->unit->InsertUnitCmdDesc(&query, &result);
@@ -12688,25 +12688,25 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_build_params(void* environme
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitBuildParamsQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t paramNamePointer = 0, paramNameBytes = 0;
-    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(paramNamePointer) || !inputControl.U32(paramNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(paramNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> paramNameWire;
-    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(paramNamePointer, paramNameBytes, paramNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader paramNameReader(paramNameWire);
     std::string paramNameStorage;
-    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
-    if (!paramNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!paramNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } paramNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.paramName = paramNameStorage.data(); }
+    if (!paramNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t valuePointer = 0, valueBytes = 0;
-    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(valuePointer) || !inputControl.U32(valueBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(valueBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> valueWire;
-    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuePointer, valueBytes, valueWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader valueReader(valueWire);
     const bool valueOk = [&]() -> bool {
         if (!valueReader.F32(query.value.number)) return false;
@@ -12715,9 +12715,9 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_build_params(void* environme
         if (!valueReader.Align(4u)) return false;
         return true;
     }();
-    if (!valueOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!valueReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valueOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!valueReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitBuildParamsResult result{};
     state->native->syncedCtrl->unit->SetUnitBuildParams(&query, &result);
@@ -12744,25 +12744,25 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_flanking(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitFlankingQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t typePointer = 0, typeBytes = 0;
-    if (!inputControl.U32(typePointer) || !inputControl.U32(typeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(typePointer) || !inputControl.U32(typeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(typeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> typeWire;
-    if (!state->memory.View(typePointer, typeBytes, typeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(typePointer, typeBytes, typeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader typeReader(typeWire);
     std::string typeStorage;
-    { std::uint32_t coreLength = 0; if (!typeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!typeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } typeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.type = typeStorage.data(); }
-    if (!typeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!typeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!typeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } typeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.type = typeStorage.data(); }
+    if (!typeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t argsPointer = 0, argsBytes = 0;
-    if (!inputControl.U32(argsPointer) || !inputControl.U32(argsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(argsPointer) || !inputControl.U32(argsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(argsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> argsWire;
-    if (!state->memory.View(argsPointer, argsBytes, argsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(argsPointer, argsBytes, argsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader argsReader(argsWire);
     const bool argsOk = [&]() -> bool {
         if (!argsReader.F32(query.args.x)) return false;
@@ -12771,9 +12771,9 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_flanking(void* environment, 
         if (!argsReader.Align(4u)) return false;
         return true;
     }();
-    if (!argsOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!argsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!argsOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!argsReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitFlankingResult result{};
     state->native->syncedCtrl->unit->SetUnitFlanking(&query, &result);
@@ -12800,24 +12800,24 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_nano_pieces(void* environmen
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitNanoPiecesQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t pieceIndicesPointer = 0, pieceIndicesBytes = 0;
-    if (!inputControl.U32(pieceIndicesPointer) || !inputControl.U32(pieceIndicesBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(pieceIndicesPointer) || !inputControl.U32(pieceIndicesBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(pieceIndicesBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> pieceIndicesWire;
-    if (!state->memory.View(pieceIndicesPointer, pieceIndicesBytes, pieceIndicesWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(pieceIndicesPointer, pieceIndicesBytes, pieceIndicesWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader pieceIndicesReader(pieceIndicesWire);
     std::vector<std::int32_t> pieceIndicesStorage;
-    { std::uint32_t coreCount = 0; if (!pieceIndicesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pieceIndicesStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+    { std::uint32_t coreCount = 0; if (!pieceIndicesReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } pieceIndicesStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
                 { std::int32_t coreRaw = 0; if (!pieceIndicesReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
                 return true;
-            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pieceIndicesStorage.push_back(item); } query.pieceIndices = pieceIndicesStorage.empty() ? nullptr : pieceIndicesStorage.data(); if (!AssignDynamicCount(coreCount, query.pieceCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
-    if (!pieceIndicesReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } pieceIndicesStorage.push_back(item); } query.pieceIndices = pieceIndicesStorage.empty() ? nullptr : pieceIndicesStorage.data(); if (!AssignDynamicCount(coreCount, query.pieceCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!pieceIndicesReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitNanoPiecesResult result{};
     state->native->syncedCtrl->unit->SetUnitNanoPieces(&query, &result);
@@ -12844,22 +12844,22 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_resourcing(void* environment
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitResourcingQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t typePointer = 0, typeBytes = 0;
-    if (!inputControl.U32(typePointer) || !inputControl.U32(typeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(typePointer) || !inputControl.U32(typeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(typeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> typeWire;
-    if (!state->memory.View(typePointer, typeBytes, typeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(typePointer, typeBytes, typeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader typeReader(typeWire);
     std::string typeStorage;
-    { std::uint32_t coreLength = 0; if (!typeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!typeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } typeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.type = typeStorage.data(); }
-    if (!typeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!typeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!typeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } typeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.type = typeStorage.data(); }
+    if (!typeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitResourcingResult result{};
     state->native->syncedCtrl->unit->SetUnitResourcing(&query, &result);
@@ -12886,22 +12886,22 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_sensor_radius(void* environm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitSensorRadiusQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t sensorTypePointer = 0, sensorTypeBytes = 0;
-    if (!inputControl.U32(sensorTypePointer) || !inputControl.U32(sensorTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(sensorTypePointer) || !inputControl.U32(sensorTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(sensorTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> sensorTypeWire;
-    if (!state->memory.View(sensorTypePointer, sensorTypeBytes, sensorTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(sensorTypePointer, sensorTypeBytes, sensorTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader sensorTypeReader(sensorTypeWire);
     std::string sensorTypeStorage;
-    { std::uint32_t coreLength = 0; if (!sensorTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!sensorTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } sensorTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.sensorType = sensorTypeStorage.data(); }
-    if (!sensorTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!sensorTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!sensorTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } sensorTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.sensorType = sensorTypeStorage.data(); }
+    if (!sensorTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.radius = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.radius)>>>(slots[1].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitSensorRadiusResult result{};
     state->native->syncedCtrl->unit->SetUnitSensorRadius(&query, &result);
@@ -12928,22 +12928,22 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_storage(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitStorageQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t resourcePointer = 0, resourceBytes = 0;
-    if (!inputControl.U32(resourcePointer) || !inputControl.U32(resourceBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourcePointer) || !inputControl.U32(resourceBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceWire;
-    if (!state->memory.View(resourcePointer, resourceBytes, resourceWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourcePointer, resourceBytes, resourceWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceReader(resourceWire);
     std::string resourceStorage;
-    { std::uint32_t coreLength = 0; if (!resourceReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resource = resourceStorage.data(); }
-    if (!resourceReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resource = resourceStorage.data(); }
+    if (!resourceReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitStorageResult result{};
     state->native->syncedCtrl->unit->SetUnitStorage(&query, &result);
@@ -12970,21 +12970,21 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_tooltip(void* environment, w
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitTooltipQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t tooltipPointer = 0, tooltipBytes = 0;
-    if (!inputControl.U32(tooltipPointer) || !inputControl.U32(tooltipBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(tooltipPointer) || !inputControl.U32(tooltipBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(tooltipBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> tooltipWire;
-    if (!state->memory.View(tooltipPointer, tooltipBytes, tooltipWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(tooltipPointer, tooltipBytes, tooltipWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader tooltipReader(tooltipWire);
     std::string tooltipStorage;
-    { std::uint32_t coreLength = 0; if (!tooltipReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!tooltipReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } tooltipStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.tooltip = tooltipStorage.data(); }
-    if (!tooltipReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!tooltipReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!tooltipReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } tooltipStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.tooltip = tooltipStorage.data(); }
+    if (!tooltipReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitTooltipResult result{};
     state->native->syncedCtrl->unit->SetUnitTooltip(&query, &result);
@@ -13011,23 +13011,23 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_weapon_damages(void* environ
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitWeaponDamagesQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
     std::uint32_t damageKeyPointer = 0, damageKeyBytes = 0;
-    if (!inputControl.U32(damageKeyPointer) || !inputControl.U32(damageKeyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(damageKeyPointer) || !inputControl.U32(damageKeyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(damageKeyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> damageKeyWire;
-    if (!state->memory.View(damageKeyPointer, damageKeyBytes, damageKeyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(damageKeyPointer, damageKeyBytes, damageKeyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader damageKeyReader(damageKeyWire);
     std::string damageKeyStorage;
-    { std::uint32_t coreLength = 0; if (!damageKeyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!damageKeyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } damageKeyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.damageKey = damageKeyStorage.data(); }
-    if (!damageKeyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!damageKeyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!damageKeyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } damageKeyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.damageKey = damageKeyStorage.data(); }
+    if (!damageKeyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.damageValue = slots[2].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitWeaponDamagesResult result{};
     state->native->syncedCtrl->unit->SetUnitWeaponDamages(&query, &result);
@@ -13054,23 +13054,23 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_weapon_state(void* environme
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetUnitWeaponStateQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
     std::uint32_t keyPointer = 0, keyBytes = 0;
-    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(keyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> keyWire;
-    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader keyReader(keyWire);
     std::string keyStorage;
-    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
-    if (!keyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.value = slots[2].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetUnitWeaponStateResult result{};
     state->native->syncedCtrl->unit->SetUnitWeaponState(&query, &result);
@@ -13097,22 +13097,22 @@ wasm_trap_t* CoreDynamicInput_unit_control_use_unit_resource(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     UseUnitResourceQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t resourceTypePointer = 0, resourceTypeBytes = 0;
-    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(resourceTypePointer) || !inputControl.U32(resourceTypeBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(resourceTypeBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> resourceTypeWire;
-    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(resourceTypePointer, resourceTypeBytes, resourceTypeWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader resourceTypeReader(resourceTypeWire);
     std::string resourceTypeStorage;
-    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
-    if (!resourceTypeReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!resourceTypeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!resourceTypeReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } resourceTypeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.resourceType = resourceTypeStorage.data(); }
+    if (!resourceTypeReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.amount = slots[1].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     UseUnitResourceResult result{};
     state->native->syncedCtrl->unit->UseUnitResource(&query, &result);
@@ -13139,25 +13139,25 @@ wasm_trap_t* CoreDynamicInput_feature_control_create_feature(void* environment, 
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     CreateFeatureQuery query{};
     std::uint32_t featureDefPointer = 0, featureDefBytes = 0;
-    if (!inputControl.U32(featureDefPointer) || !inputControl.U32(featureDefBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(featureDefPointer) || !inputControl.U32(featureDefBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(featureDefBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> featureDefWire;
-    if (!state->memory.View(featureDefPointer, featureDefBytes, featureDefWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(featureDefPointer, featureDefBytes, featureDefWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader featureDefReader(featureDefWire);
     CoreOwned_DefRef featureDefOwner;
-    if (!featureDefOwner.Decode(state, featureDefReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!featureDefOwner.Decode(state, featureDefReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.featureDef = featureDefOwner.value;
-    if (!featureDefReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!featureDefReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     std::uint32_t posPointer = 0, posBytes = 0;
-    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(posBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> posWire;
-    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(posPointer, posBytes, posWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader posReader(posWire);
     const bool posOk = [&]() -> bool {
         if (!posReader.F32(query.pos.x)) return false;
@@ -13166,12 +13166,12 @@ wasm_trap_t* CoreDynamicInput_feature_control_create_feature(void* environment, 
         if (!posReader.Align(4u)) return false;
         return true;
     }();
-    if (!posOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!posReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!posOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!posReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.facing = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.facing)>>>(slots[0].i32);
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[1].i32);
     query.featureID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.featureID)>>>(slots[2].i32);
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     CreateFeatureResult result{};
     state->native->syncedCtrl->feature->CreateFeature(&query, &result);
@@ -13198,24 +13198,24 @@ wasm_trap_t* CoreDynamicInput_feature_control_set_feature_resurrect(void* enviro
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetFeatureResurrectQuery query{};
     query.featureID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.featureID)>>>(slots[0].i32);
     std::uint32_t unitDefPointer = 0, unitDefBytes = 0;
-    if (!inputControl.U32(unitDefPointer) || !inputControl.U32(unitDefBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(unitDefPointer) || !inputControl.U32(unitDefBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(unitDefBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> unitDefWire;
-    if (!state->memory.View(unitDefPointer, unitDefBytes, unitDefWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(unitDefPointer, unitDefBytes, unitDefWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader unitDefReader(unitDefWire);
     CoreOwned_DefRef unitDefOwner;
-    if (!unitDefOwner.Decode(state, unitDefReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!unitDefOwner.Decode(state, unitDefReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.unitDef = unitDefOwner.value;
-    if (!unitDefReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!unitDefReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.facing = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.facing)>>>(slots[1].i32);
     query.progress = slots[2].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetFeatureResurrectResult result{};
     state->native->syncedCtrl->feature->SetFeatureResurrect(&query, &result);
@@ -13242,7 +13242,7 @@ wasm_trap_t* CoreDynamicInput_terrain_control_set_terrain_type_data(void* enviro
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[7].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetTerrainTypeDataQuery query{};
@@ -13254,15 +13254,15 @@ wasm_trap_t* CoreDynamicInput_terrain_control_set_terrain_type_data(void* enviro
     query.hardness = slots[5].f32;
     query.receiveTracks = slots[6].i32 != 0;
     std::uint32_t namePointer = 0, nameBytes = 0;
-    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(nameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> nameWire;
-    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader nameReader(nameWire);
     std::string nameStorage;
-    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
-    if (!nameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetTerrainTypeDataResult result{};
     state->native->syncedCtrl->terrain->SetTerrainTypeData(&query, &result);
@@ -13289,21 +13289,21 @@ wasm_trap_t* CoreDynamicInput_projectile_control_set_projectile_ceg(void* enviro
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetProjectileCEGQuery query{};
     query.projectileID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.projectileID)>>>(slots[0].i32);
     std::uint32_t cegNamePointer = 0, cegNameBytes = 0;
-    if (!inputControl.U32(cegNamePointer) || !inputControl.U32(cegNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(cegNamePointer) || !inputControl.U32(cegNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(cegNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> cegNameWire;
-    if (!state->memory.View(cegNamePointer, cegNameBytes, cegNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(cegNamePointer, cegNameBytes, cegNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader cegNameReader(cegNameWire);
     std::string cegNameStorage;
-    { std::uint32_t coreLength = 0; if (!cegNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cegNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } cegNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cegName = cegNameStorage.data(); }
-    if (!cegNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!cegNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!cegNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } cegNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.cegName = cegNameStorage.data(); }
+    if (!cegNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetProjectileCEGResult result{};
     state->native->syncedCtrl->projectile->SetProjectileCEG(&query, &result);
@@ -13330,23 +13330,23 @@ wasm_trap_t* CoreDynamicInput_projectile_control_set_projectile_damages(void* en
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SetProjectileDamagesQuery query{};
     query.projectileID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.projectileID)>>>(slots[0].i32);
     query.unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unused)>>>(slots[1].i32);
     std::uint32_t damageKeyPointer = 0, damageKeyBytes = 0;
-    if (!inputControl.U32(damageKeyPointer) || !inputControl.U32(damageKeyBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(damageKeyPointer) || !inputControl.U32(damageKeyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(damageKeyBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> damageKeyWire;
-    if (!state->memory.View(damageKeyPointer, damageKeyBytes, damageKeyWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(damageKeyPointer, damageKeyBytes, damageKeyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader damageKeyReader(damageKeyWire);
     std::string damageKeyStorage;
-    { std::uint32_t coreLength = 0; if (!damageKeyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!damageKeyReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } damageKeyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.damageKey = damageKeyStorage.data(); }
-    if (!damageKeyReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!damageKeyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!damageKeyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } damageKeyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.damageKey = damageKeyStorage.data(); }
+    if (!damageKeyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.damageValue = slots[2].f32;
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SetProjectileDamagesResult result{};
     state->native->syncedCtrl->projectile->SetProjectileDamages(&query, &result);
@@ -13373,22 +13373,22 @@ wasm_trap_t* CoreDynamicInput_projectile_control_spawn_projectile(void* environm
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     SpawnProjectileQuery query{};
     query.weaponDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponDefID)>>>(slots[0].i32);
     std::uint32_t projectileParamsPointer = 0, projectileParamsBytes = 0;
-    if (!inputControl.U32(projectileParamsPointer) || !inputControl.U32(projectileParamsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(projectileParamsPointer) || !inputControl.U32(projectileParamsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(projectileParamsBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> projectileParamsWire;
-    if (!state->memory.View(projectileParamsPointer, projectileParamsBytes, projectileParamsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(projectileParamsPointer, projectileParamsBytes, projectileParamsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader projectileParamsReader(projectileParamsWire);
     CoreOwned_NativeProjectileParams projectileParamsOwner;
-    if (!projectileParamsOwner.Decode(state, projectileParamsReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!projectileParamsOwner.Decode(state, projectileParamsReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     query.projectileParams = projectileParamsOwner.value;
-    if (!projectileParamsReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!projectileParamsReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     SpawnProjectileResult result{};
     state->native->syncedCtrl->projectile->SpawnProjectile(&query, &result);
@@ -13428,7 +13428,7 @@ wasm_trap_t* CoreDynamicInput_effects_control_spawn_ceg(void* environment, wasmt
     CoreOwned_DefRef cegOwner;
     if (!cegOwner.Decode(state, cegReader)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.ceg = cegOwner.value;
-    if (!cegReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!cegReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t posPointer = 0, posBytes = 0;
     if (!inputControl.U32(posPointer) || !inputControl.U32(posBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(posBytes)) return Trap(budgetError);
@@ -13443,7 +13443,7 @@ wasm_trap_t* CoreDynamicInput_effects_control_spawn_ceg(void* environment, wasmt
         return true;
     }();
     if (!posOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!posReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!posReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t dirPointer = 0, dirBytes = 0;
     if (!inputControl.U32(dirPointer) || !inputControl.U32(dirBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!guard.Charge(dirBytes)) return Trap(budgetError);
@@ -13458,7 +13458,7 @@ wasm_trap_t* CoreDynamicInput_effects_control_spawn_ceg(void* environment, wasmt
         return true;
     }();
     if (!dirOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!dirReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!dirReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.radius = slots[0].f32;
     query.damage = slots[1].f32;
     query.dmgMod = slots[2].f32;
@@ -13498,21 +13498,21 @@ wasm_trap_t* CoreDynamicInput_cob_script_get_cob_script_id(void* environment, wa
 
     const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
-    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
 
     GetCOBScriptIDQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     std::uint32_t funcNamePointer = 0, funcNameBytes = 0;
-    if (!inputControl.U32(funcNamePointer) || !inputControl.U32(funcNameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.U32(funcNamePointer) || !inputControl.U32(funcNameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!guard.Charge(funcNameBytes)) return Trap(budgetError);
     std::span<const std::uint8_t> funcNameWire;
-    if (!state->memory.View(funcNamePointer, funcNameBytes, funcNameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(funcNamePointer, funcNameBytes, funcNameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
     WireReader funcNameReader(funcNameWire);
     std::string funcNameStorage;
-    { std::uint32_t coreLength = 0; if (!funcNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!funcNameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } funcNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.funcName = funcNameStorage.data(); }
-    if (!funcNameReader.Finish(1)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    { std::uint32_t coreLength = 0; if (!funcNameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!funcNameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } funcNameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.funcName = funcNameStorage.data(); }
+    if (!funcNameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
 
     GetCOBScriptIDResult result{};
     state->native->syncedCtrl->cobScript->GetCOBScriptID(&query, &result);

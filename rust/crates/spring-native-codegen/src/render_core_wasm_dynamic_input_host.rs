@@ -485,8 +485,10 @@ fn render_callback(
             "    std::uint32_t {stem}Pointer = 0, {stem}Bytes = 0;\n    if (!inputControl.U32({stem}Pointer) || !inputControl.U32({stem}Bytes)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n    if (!guard.Charge({stem}Bytes)) return Trap(budgetError);\n    std::span<const std::uint8_t> {stem}Wire;\n    if (!state->memory.View({stem}Pointer, {stem}Bytes, {stem}Wire)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    WireReader {stem}Reader({stem}Wire);\n",
         ));
         body.push_str(&render_top_input(field, records, &stem));
+        let trailing =
+            render_core_wasm_owned_guest::di_blob_trailing_alignment(&field.ty, records);
         body.push_str(&format!(
-            "    if (!{stem}Reader.Finish(1)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n"
+            "    if (!{stem}Reader.Finish({trailing}u)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n"
         ));
     }
     body.push_str("    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }\n");
@@ -506,7 +508,40 @@ fn render_callback(
     ));
     body.push_str(&render_result(function, plan, records));
     body.push_str("}\n");
+    if matches!(plan.result_strategy, ResultStrategy::Packed32) {
+        body = repack_status_returns(&body);
+    }
     body
+}
+
+/// Rewrite bail-out assignments for callouts whose success value is a packed
+/// `i64` (value in the low half, status in the high half).
+///
+/// Every `slots[0].i32 = ...` in a `Packed32` body is an early failure: the
+/// success path is emitted by `render_result` as a single `slots[0].i64` store.
+/// Writing only the low half leaves the status half holding whatever the caller
+/// passed in that slot, so guests decode the failure as a successful call whose
+/// return value happens to be the status code.
+fn repack_status_returns(body: &str) -> String {
+    let mut output = String::with_capacity(body.len());
+    let mut rest = body;
+    const PREFIX: &str = "slots[0].i32 = ";
+    while let Some(start) = rest.find(PREFIX) {
+        let (head, tail) = rest.split_at(start);
+        output.push_str(head);
+        let value_start = &tail[PREFIX.len()..];
+        let Some(end) = value_start.find(';') else {
+            output.push_str(tail);
+            return output;
+        };
+        let value = &value_start[..end];
+        output.push_str(&format!(
+            "slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, {value}))"
+        ));
+        rest = &value_start[end..];
+    }
+    output.push_str(rest);
+    output
 }
 
 fn render_top_input(

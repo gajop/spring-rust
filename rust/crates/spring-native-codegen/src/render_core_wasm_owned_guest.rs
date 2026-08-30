@@ -2687,6 +2687,25 @@ fn di_render_element_decode(
     format!("                            __result.push({decode});\n")
 }
 
+/// Trailing alignment the guest applies to a top-level dynamic-input blob.
+///
+/// `di_render_blob_encode` pads only record blobs, and only up to the record's
+/// natural wire alignment. Host readers must finish at the same boundary or a
+/// blob whose last field is a variable-length string is rejected whenever its
+/// length is not already a multiple of that alignment.
+pub(crate) fn di_blob_trailing_alignment(
+    ty: &SemanticType,
+    records: &BTreeMap<String, RecordModel>,
+) -> u32 {
+    match ty {
+        SemanticType::Record { .. } => {
+            let (_, alignment) = di_fixed_wire_layout(ty, records).unwrap_or((0, 4));
+            alignment.max(1)
+        }
+        _ => 1,
+    }
+}
+
 fn di_fixed_wire_layout(
     ty: &SemanticType,
     records: &BTreeMap<String, RecordModel>,
