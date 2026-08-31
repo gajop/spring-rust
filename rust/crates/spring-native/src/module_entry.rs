@@ -114,6 +114,27 @@ where
     }
 }
 
+/// Catch a panic for an FFI callback which has a non-void value in addition
+/// to its error channel.
+pub fn catch_panic_result<T, F>(f: F) -> Result<T, crate::Error>
+where
+    F: FnOnce() -> Result<T, crate::Error> + std::panic::UnwindSafe,
+{
+    match std::panic::catch_unwind(f) {
+        Ok(result) => result,
+        Err(panic_info) => {
+            let message = if let Some(s) = panic_info.downcast_ref::<&str>() {
+                format!("Panic: {}", s)
+            } else if let Some(s) = panic_info.downcast_ref::<String>() {
+                format!("Panic: {}", s)
+            } else {
+                "Panic: unknown cause".to_string()
+            };
+            Err(crate::Error::new(1, message))
+        }
+    }
+}
+
 /// Decode a Lua-provided native-module message.
 ///
 /// Lua strings are length-prefixed and may contain embedded NUL bytes, so this
@@ -758,6 +779,195 @@ macro_rules! export_module {
                 // unloading the native shared object.
             }
         }
+
+        #[unsafe(no_mangle)]
+        pub unsafe extern "C" fn RustCUSInvoke(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::CusInvokeQuery,
+            result: *mut $crate::sys::CusInvokeResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                (*result).error = std::ptr::null();
+                (*result).handled = 0;
+                let callback = $crate::module_entry::catch_panic_result(
+                    std::panic::AssertUnwindSafe(|| {
+                        let q = &*query;
+                        let float_arguments: &[f32] = if q.floatCount == 0 {
+                            &[]
+                        } else if q.floatArguments.is_null() {
+                            return Err($crate::Error::new(1, "Null CUS float argument pointer"));
+                        } else {
+                            std::slice::from_raw_parts(q.floatArguments, q.floatCount as usize)
+                        };
+                        let integer_arguments: &[i32] = if q.integerCount == 0 {
+                            &[]
+                        } else if q.integerArguments.is_null() {
+                            return Err($crate::Error::new(1, "Null CUS integer argument pointer"));
+                        } else {
+                            std::slice::from_raw_parts(q.integerArguments, q.integerCount as usize)
+                        };
+                        let int_values: &mut [i32] = if (*result).intCapacity == 0 {
+                            &mut []
+                        } else if (*result).intValues.is_null() {
+                            return Err($crate::Error::new(1, "Null CUS integer result pointer"));
+                        } else {
+                            std::slice::from_raw_parts_mut(
+                                (*result).intValues,
+                                (*result).intCapacity as usize,
+                            )
+                        };
+                        let mut call_result = $crate::cus::NativeCusCallResult {
+                            int_value: (*result).intValue,
+                            float_value: (*result).floatValue,
+                            bool_value: false,
+                            complete: false,
+                            int_count: 0,
+                            int_values,
+                        };
+                        let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                        let handled = data.module().cus_invoke(
+                            q.instanceID,
+                            q.call,
+                            float_arguments,
+                            integer_arguments,
+                            &mut call_result,
+                        )?;
+                        (*result).intValue = call_result.int_value;
+                        (*result).floatValue = call_result.float_value;
+                        (*result).boolValue = call_result.bool_value as u8;
+                        (*result).complete = call_result.complete as u8;
+                        if call_result.int_count > call_result.int_values.len() {
+                            return Err($crate::Error::new(
+                                1,
+                                "CUS integer result exceeds capacity",
+                            ));
+                        }
+                        (*result).intCount = call_result.int_count as u32;
+                        Ok(handled)
+                    }),
+                );
+                match callback {
+                    Ok(handled) => (*result).handled = handled as u8,
+                    Err(error) => {
+                        (*result).error = $crate::module_entry::result_to_error_ptr(Err(error));
+                    }
+                }
+            }
+        }
+
+        #[unsafe(no_mangle)]
+        pub unsafe extern "C" fn RustCUSCallNamed(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::CusNamedQuery,
+            result: *mut $crate::sys::CusNamedResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                (*result).error = std::ptr::null();
+                (*result).handled = 0;
+                (*result).functionFound = 0;
+                (*result).returnCount = 0;
+                let callback = $crate::module_entry::catch_panic_result(
+                    std::panic::AssertUnwindSafe(|| {
+                        let q = &*query;
+                        let function_name = $crate::cstr_to_str!(q.functionName)?;
+                        let arguments: &[f32] = if q.argumentCount == 0 {
+                            &[]
+                        } else if q.arguments.is_null() {
+                            return Err($crate::Error::new(1, "Null CUS named argument pointer"));
+                        } else {
+                            std::slice::from_raw_parts(q.arguments, q.argumentCount as usize)
+                        };
+                        let return_values: &mut [f32] = if q.returnCapacity == 0 {
+                            &mut []
+                        } else if q.returnValues.is_null() {
+                            return Err($crate::Error::new(1, "Null CUS named result pointer"));
+                        } else {
+                            std::slice::from_raw_parts_mut(
+                                q.returnValues,
+                                q.returnCapacity as usize,
+                            )
+                        };
+                        let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                        let mut found = false;
+                        let count = data.module().cus_call_named(
+                            q.instanceID,
+                            function_name,
+                            arguments,
+                            return_values,
+                            &mut found,
+                        )?;
+                        if let Some(count) = count {
+                            if count > return_values.len() {
+                                return Err($crate::Error::new(1, "CUS named result exceeds capacity"));
+                            }
+                            Ok(Some((count, found)))
+                        } else {
+                            Ok(None)
+                        }
+                    }),
+                );
+                match callback {
+                    Ok(Some((count, found))) => {
+                        (*result).handled = 1;
+                        (*result).functionFound = found as u8;
+                        (*result).returnCount = count as u32;
+                    }
+                    Ok(None) => {}
+                    Err(error) => {
+                        (*result).error = $crate::module_entry::result_to_error_ptr(Err(error));
+                    }
+                }
+            }
+        }
+
+        #[unsafe(no_mangle)]
+        pub unsafe extern "C" fn RustCUSTick(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::CusTickQuery,
+            result: *mut $crate::sys::CusTickResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                (*result).error = $crate::module_entry::catch_panic_ffi(
+                    std::panic::AssertUnwindSafe(|| {
+                        data.module().cus_tick((*query).frame)
+                    }),
+                );
+            }
+        }
+
+        #[unsafe(no_mangle)]
+        pub unsafe extern "C" fn RustCUSDetach(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::CusDetachQuery,
+            result: *mut $crate::sys::CusDetachResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                (*result).error = $crate::module_entry::catch_panic_ffi(
+                    std::panic::AssertUnwindSafe(|| {
+                        data.module().cus_detach((*query).instanceID)
+                    }),
+                );
+            }
+        }
+
         export_update_callback!(Update, update);
         export_screen_callback!(DrawScreen, draw_screen);
         export_simple_callback!(

@@ -5,11 +5,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include "NativeInterface/WasmUiVisibility.h"
+#include "Sim/Units/Scripts/NativeUnitScript.h"
 #include "System/BenchmarkCallins.h"
 #include "WasmCoreCallinId.h"
 #include "WasmCoreDispatchPlan.h"
@@ -23,7 +25,7 @@ struct NativeInterface;
 // Wasmtime store/linker/instance. Production dispatch keeps the host object
 // behind a stable pointer owned by the static registry; vector reallocation
 // moves unique_ptrs, not the pointed-to host.
-class WasmCoreHost {
+class WasmCoreHost : public NativeUnitScriptBackend {
 public:
 	static bool Enabled();
 	static bool Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
@@ -123,11 +125,29 @@ public:
 	static bool FuelRemaining(std::string_view moduleName, std::uint64_t& fuel,
 		std::string& error);
 
+	// NativeUnitScriptBackend implementation for CUS instances owned by this
+	// Core guest. The module-level scheduler is ticked after engine animation
+	// interpolation, through CUnitScriptEngine.
+	bool Invoke(std::uint32_t instanceId, NativeUnitScriptCall call,
+		std::span<const float> floatArgs, std::span<const std::int32_t> intArgs,
+		NativeUnitScriptCallResult& result) override;
+	bool CallNamed(std::uint32_t instanceId, const char* functionName,
+		std::span<const float> args, std::span<float> retValues,
+		std::uint32_t& retCount, bool& found) override;
+	void Detach(std::uint32_t instanceId) override;
+	void Tick(std::uint32_t frame) override;
+	void StartCreate(CNativeUnitScript* script) override;
+
 	~WasmCoreHost();
 	WasmCoreHost(const WasmCoreHost&) = delete;
 	WasmCoreHost& operator=(const WasmCoreHost&) = delete;
 
 private:
+	struct PendingCusCreate {
+		std::int32_t unitId;
+		std::uint32_t instanceId;
+	};
+
 	struct Backend;
 	WasmCoreHost(std::string moduleName, WasmEnvironment environment,
 		std::unique_ptr<Backend> backend);
@@ -141,8 +161,14 @@ private:
 	bool ResetBudgetImpl(std::string& error);
 	bool FuelRemainingImpl(std::uint64_t& fuel, std::string& error) const;
 	void Fault(std::string reason);
+	void FlushCusCreates();
+	void DropPendingCusCreates();
+	bool CallCus(std::uint32_t instanceId, NativeUnitScriptCall call,
+		std::span<const float> floatArgs, std::span<const std::int32_t> intArgs,
+		NativeUnitScriptCallResult& result);
 
 	std::string moduleName;
 	WasmEnvironment environment;
 	std::unique_ptr<Backend> backend;
+	std::vector<PendingCusCreate> pendingCusCreates;
 };

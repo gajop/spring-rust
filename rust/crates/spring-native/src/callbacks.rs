@@ -1769,6 +1769,46 @@ pub trait NativeModule: Sized {
     fn shutdown(&mut self) -> Result<(), Error> {
         Ok(())
     }
+
+    // ========================================================================
+    // Rust CUS transport
+    // ========================================================================
+
+    /// Dispatch a standard CUS call for a module-owned instance. Returning
+    /// `Ok(false)` keeps the adapter on the engine's neutral fallback path.
+    fn cus_invoke(
+        &mut self,
+        _instance_id: u32,
+        _call: u32,
+        _float_arguments: &[f32],
+        _integer_arguments: &[i32],
+        _result: &mut crate::cus::NativeCusCallResult<'_>,
+    ) -> Result<bool, Error> {
+        Ok(false)
+    }
+
+    /// Dispatch a backend-neutral named call. The returned count is copied
+    /// from the borrowed output buffer into the C ABI result.
+    fn cus_call_named(
+        &mut self,
+        _instance_id: u32,
+        _function_name: &str,
+        _arguments: &[f32],
+        _return_values: &mut [f32],
+        _found: &mut bool,
+    ) -> Result<Option<usize>, Error> {
+        Ok(None)
+    }
+
+    /// Advance all module-owned CUS instances after engine animations update.
+    fn cus_tick(&mut self, _frame: u32) -> Result<(), Error> {
+        Ok(())
+    }
+
+    /// Drop a module-owned instance after the engine adapter is detached.
+    fn cus_detach(&mut self, _instance_id: u32) -> Result<(), Error> {
+        Ok(())
+    }
 }
 
 /// Type-safe wrapper for module data passed through the C FFI boundary.

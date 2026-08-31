@@ -236,7 +236,7 @@ void CFeatureDefHandler::LoadFeatureDefsFromMap()
 	for (int i = 0, n = readMap->GetNumFeatureTypes(); i < n; ++i) {
 		const std::string& name = StringToLower(readMap->GetFeatureTypeName(i));
 
-		if (GetFeatureDef(name, false) != nullptr)
+		if (name.empty() || GetFeatureDef(name, false) != nullptr)
 			continue;
 
 		if (name.find(treeDefName) != string::npos) {

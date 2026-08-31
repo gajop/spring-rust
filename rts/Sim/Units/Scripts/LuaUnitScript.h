@@ -1,7 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifndef LUAUNITSCRIPT_H
-#define LUAUNITSCRIPT_H
+#pragma once
 
 #include "UnitScript.h"
 #include "NullUnitScript.h"
@@ -82,7 +81,7 @@ public:
 	// Numeric subset of Spring.UnitScript.CallAsUnit for native/WASM callers.
 	// The function name is resolved in this unit's Lua script environment.
 	bool CallFunctionByName(const char* functionName, const float* args, uint32_t argCount,
-		float* retValues, uint32_t retCapacity, uint32_t& retCount, bool& found);
+		float* retValues, uint32_t retCapacity, uint32_t& retCount, bool& found) override;
 
 	bool HasBlockShot(int weaponNum) const override;
 	bool HasTargetWeight(int weaponNum) const override;
@@ -200,5 +199,3 @@ private:
 
 	static int GetActiveUnitID(lua_State* L);
 };
-
-#endif

@@ -492,7 +492,7 @@ static void NativeGetUnitPiecePosition(const GetUnitPiecePositionQuery* query, G
 	}
 
 	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum - 1);
-	float3 pos = piece->GetAbsolutePos();
+	float3 pos = unit->GetObjectSpacePos(piece->GetAbsolutePos());
 
 	result->position.x = pos.x;
 	result->position.y = pos.y;
@@ -521,7 +521,7 @@ static void NativeGetUnitPieceDirection(const GetUnitPieceDirectionQuery* query,
 	}
 
 	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum - 1);
-	const float3& dir = piece->GetDirection();
+	const float3 dir = unit->GetObjectSpaceVec(piece->GetDirection());
 
 	result->direction.x = dir.x;
 	result->direction.y = dir.y;
@@ -586,7 +586,7 @@ static void NativeGetFeaturePiecePosition(const GetFeaturePiecePositionQuery* qu
 	}
 
 	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum - 1);
-	float3 pos = piece->GetAbsolutePos();
+	float3 pos = feature->GetObjectSpacePos(piece->GetAbsolutePos());
 
 	result->position.x = pos.x;
 	result->position.y = pos.y;

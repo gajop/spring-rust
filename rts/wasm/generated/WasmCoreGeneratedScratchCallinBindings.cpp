@@ -226,14 +226,14 @@ bool GeneratedScratchCallinBindings::Bind(wasmtime_context_t* context,
             return false;
         anyPresent = anyPresent || exports[147].Present();
     }
-
     if (!anyPresent)
         return true;
 
-    const wasm_valkind_t i64Result[] = {WASM_I64};
+    const wasm_valkind_t scratchResults[] = {WASM_I64};
     if (!scratchInfo.Resolve(context, instance, "spring:callin/scratch-info",
             std::char_traits<char>::length("spring:callin/scratch-info"),
-            std::span<const wasm_valkind_t>{}, i64Result, false, error))
+            std::span<const wasm_valkind_t>{},
+            std::span<const wasm_valkind_t>{scratchResults, 1}, false, error))
         return false;
 
     wasmtime_val_raw_t slot{};
@@ -260,7 +260,6 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
 {
     if (!Has(ordinal))
         return true;
-    bool& scratchInUse = VariableCallinScratchInUse();
     if (scratchInUse) {
         error = "nested generated Core variable callin would overwrite guest scratch";
         return false;

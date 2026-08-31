@@ -3,6 +3,11 @@
 #include "WasmCoreBindings.h"
 
 #include "System/BenchmarkCallins.h"
+#include "Sim/Units/Scripts/UnitScriptFactory.h"
+#include "Sim/Units/Scripts/UnitScript.h"
+#include "Sim/Units/Scripts/NativeUnitScript.h"
+#include "Sim/Units/Unit.h"
+#include "Sim/Units/UnitHandler.h"
 
 #include <array>
 #include <bit>
@@ -328,6 +333,114 @@ bool ResolveRaw(RawExport& target, wasmtime_context_t* context,
 		params, results, true, error);
 }
 
+wasm_trap_t* CusAttach(void* environment, wasmtime_caller_t*,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || slots == nullptr || slotCount != 4)
+		return Trap("CUS attach ABI signature mismatch");
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 5, budgetError);
+	// The attach path is only entered from a synced guest. Keep the result
+	// packed so invalid IDs become ordinary API errors instead of Wasm traps.
+	const auto fail = [&slots](std::int32_t status) {
+		slots[0].i64 = static_cast<std::int64_t>(PackI32(0, status));
+	};
+	if (!budgetGuard.Ok()) {
+		fail(static_cast<std::int32_t>(Status::Internal));
+		return nullptr;
+	}
+	if (state->cusBackend == nullptr) {
+		fail(static_cast<std::int32_t>(Status::NotAvailable));
+		return nullptr;
+	}
+	const int unitID = slots[0].i32;
+	const std::uint32_t instanceID = static_cast<std::uint32_t>(slots[1].i32);
+	const std::uint64_t capabilities =
+		static_cast<std::uint64_t>(static_cast<std::uint32_t>(slots[2].i32)) |
+		(static_cast<std::uint64_t>(static_cast<std::uint32_t>(slots[3].i32)) << 32);
+	CUnit* unit = unitID >= 0 ? unitHandler.GetUnit(static_cast<unsigned int>(unitID)) : nullptr;
+	if (unit == nullptr) {
+		fail(static_cast<std::int32_t>(Status::InvalidId));
+		return nullptr;
+	}
+	CUnitScript* script = CUnitScriptFactory::AttachCusScript(
+		unit, state->cusBackend, instanceID, capabilities);
+	if (script == nullptr) {
+		fail(static_cast<std::int32_t>(Status::OperationFailed));
+		return nullptr;
+	}
+	state->cusBackend->StartCreate(static_cast<CNativeUnitScript*>(script));
+	slots[0].i64 = static_cast<std::int64_t>(PackI32(1, 0));
+	return nullptr;
+}
+
+wasm_trap_t*CusOperation(void* environment, wasmtime_caller_t*,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || slots == nullptr || slotCount != 10)
+		return Trap("CUS operation ABI signature mismatch");
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 3, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
+	if (state->native == nullptr || state->native->cus == nullptr ||
+		state->native->cus->Operation == nullptr) {
+		slots[0].i64 = static_cast<std::int64_t>(PackI32(0,
+			static_cast<std::int32_t>(Status::NotAvailable)));
+		return nullptr;
+	}
+	CusOperationQuery query = {
+		.unitID = slots[0].i32,
+		.instanceID = static_cast<std::uint32_t>(slots[1].i32),
+		.operation = static_cast<std::uint32_t>(slots[2].i32),
+		.piece = slots[3].i32,
+		.axis = slots[4].i32,
+		.target = slots[5].i32,
+		.value = slots[6].i32,
+		.first = slots[7].f32,
+		.second = slots[8].f32,
+		.third = slots[9].f32,
+	};
+	CusOperationResult result{};
+	state->native->cus->Operation(&query, &result);
+	const std::int32_t status = result.error != nullptr ? result.error->code
+		: (result.completed != 0 ? 0 : static_cast<std::int32_t>(Status::OperationFailed));
+	slots[0].i64 = static_cast<std::int64_t>(PackI32(result.value, status));
+	return nullptr;
+}
+
+wasm_trap_t* CusAnimationActive(void* environment, wasmtime_caller_t*,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || slots == nullptr || slotCount != 5)
+		return Trap("CUS animation ABI signature mismatch");
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 2, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
+	if (state->native == nullptr || state->native->cus == nullptr ||
+		state->native->cus->AnimationActive == nullptr) {
+		slots[0].i64 = static_cast<std::int64_t>(PackI32(0,
+			static_cast<std::int32_t>(Status::NotAvailable)));
+		return nullptr;
+	}
+	const CusAnimationQuery query = {
+		.unitID = slots[0].i32,
+		.instanceID = static_cast<std::uint32_t>(slots[1].i32),
+		.animation = static_cast<std::uint32_t>(slots[2].i32),
+		.piece = slots[3].i32,
+		.axis = slots[4].i32,
+	};
+	CusAnimationResult result{};
+	state->native->cus->AnimationActive(&query, &result);
+	const std::int32_t status = result.error != nullptr ? result.error->code : 0;
+	slots[0].i64 = static_cast<std::int64_t>(PackI32(result.active != 0, status));
+	return nullptr;
+}
+
 } // namespace
 
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error)
@@ -363,6 +476,30 @@ bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::strin
 				MakeFuncType(params, 2, results, 1), GetUnitVelocity, state, error) ||
 			!DefineUnchecked(linker, "spring:units-info", "get-unit-health",
 				MakeFuncType(params, 2, results, 1), GetUnitHealth, state, error))
+			return false;
+	}
+	{
+		const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+		const wasm_valkind_t results[] = {WASM_I64};
+		if (!DefineUnchecked(linker, "spring:cus", "attach",
+				MakeFuncType(params, 4, results, 1), CusAttach, state, error))
+			return false;
+	}
+	{
+		const wasm_valkind_t params[] = {
+			WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32,
+			WASM_I32, WASM_I32, WASM_F32, WASM_F32, WASM_F32,
+		};
+		const wasm_valkind_t results[] = {WASM_I64};
+		if (!DefineUnchecked(linker, "spring:cus", "operation",
+				MakeFuncType(params, 10, results, 1),CusOperation, state, error))
+			return false;
+	}
+	{
+		const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+		const wasm_valkind_t results[] = {WASM_I64};
+		if (!DefineUnchecked(linker, "spring:cus", "animation-active",
+				MakeFuncType(params, 5, results, 1), CusAnimationActive, state, error))
 			return false;
 	}
 

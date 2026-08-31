@@ -46,6 +46,7 @@ inline constexpr std::string_view RulesParamsModule = "spring:rules-params";
 inline constexpr std::string_view TerrainModule = "spring:terrain";
 inline constexpr std::string_view ConfigModule = "spring:config";
 inline constexpr std::string_view BenchmarkModule = "spring:benchmark";
+inline constexpr std::string_view CusModule = "spring:cus";
 // Nondeterministic by design and available to synced guests; see
 // WasmCoreDesyncBindings.cpp.
 inline constexpr std::string_view DesyncModule = "spring:desync";
@@ -111,6 +112,9 @@ inline constexpr ImportDescriptor kImports[] = {
 	{UnitsCommandsModule, "give-order", "i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 	{UnitsCommandsModule, "give-order-to-unit-map", "i32,i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 	{CobScriptModule, "call-cob-script", "i32,i32,i32,i32,i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
+	{CusModule, "attach", "i32,i32,i32,i32->i64", SyncedEnvironmentMask},
+	{CusModule, "operation", "i32,i32,i32,i32,i32,i32,i32,f32,f32,f32->i64", SyncedEnvironmentMask},
+	{CusModule, "animation-active", "i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 
 	// Reviewed flat list<string> result. The descriptor table and packed bytes
 	// are guest-owned; Core never materializes vector<string> or one allocation

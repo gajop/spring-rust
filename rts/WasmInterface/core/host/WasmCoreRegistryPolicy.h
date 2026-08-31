@@ -57,7 +57,7 @@ inline std::uint32_t HandwrittenEnvironmentMask(
 	// Core-WASM API consistent with that contract so synced guests can report
 	// deterministic state transitions without routing diagnostics through a
 	// game-specific message gadget.
-	if (name == "log")
+	if (name == "log" || name == "echo")
 		return sourceMask;
 
 	return sourceMask & UnsyncedEnvironmentMask;

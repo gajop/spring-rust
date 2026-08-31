@@ -77,7 +77,6 @@
 #include "System/creg/STL_Map.h"
 #include "System/Log/ILog.h"
 #include "Sim/Units/Scripts/CobInstance.h"
-#include "Sim/Units/Scripts/LuaUnitScript.h"
 #include "Sim/Units/Scripts/NullUnitScript.h"
 
 namespace {
@@ -6475,16 +6474,10 @@ static void NativeCallUnitScript(const CallUnitScriptQuery* query, CallUnitScrip
 		return;
 	}
 
-	CLuaUnitScript* script = dynamic_cast<CLuaUnitScript*>(unit->script);
-	if (script == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not running a Lua unit script");
-		return;
-	}
-
 	unitScriptReturnValues.resize(query->retCapacity);
 	uint32_t retCount = 0;
 	bool found = false;
-	const bool success = script->CallFunctionByName(
+	const bool success = unit->script->CallFunctionByName(
 		query->functionName,
 		query->args,
 		query->argCount,

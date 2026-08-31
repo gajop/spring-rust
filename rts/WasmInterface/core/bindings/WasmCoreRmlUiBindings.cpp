@@ -21,6 +21,7 @@ using generated::Trap;
 
 struct RetainedCallbackContext {
 	HostState* state = nullptr;
+	std::weak_ptr<bool> hostAlive{};
 	std::uint32_t callbackID = 0;
 	std::uint32_t userData = 0;
 	std::uint32_t destroyCallbackID = 0;
@@ -33,9 +34,13 @@ void InvokeRetainedCallback(void* data)
 	auto* callback = static_cast<RetainedCallbackContext*>(data);
 	if (callback == nullptr || callback->state == nullptr)
 		return;
-	std::string error;
-	generated::DispatchRetainedCallback(*callback->state,
-		callback->callbackID, callback->userData, error);
+	if (auto alive = callback->hostAlive.lock()) {
+		if (*alive) {
+			std::string error;
+			generated::DispatchRetainedCallback(*callback->state,
+				callback->callbackID, callback->userData, error);
+		}
+	}
 }
 
 void InvokeRetainedDataCallback(void* data, const RmlDataEventArgs* arguments)
@@ -43,12 +48,16 @@ void InvokeRetainedDataCallback(void* data, const RmlDataEventArgs* arguments)
 	auto* callback = static_cast<RetainedCallbackContext*>(data);
 	if (callback == nullptr || callback->state == nullptr)
 		return;
-	const RmlDataEventArgs* previous = currentDataEvent;
-	currentDataEvent = arguments;
-	std::string error;
-	generated::DispatchRetainedCallback(*callback->state,
-		callback->callbackID, callback->userData, error);
-	currentDataEvent = previous;
+	if (auto alive = callback->hostAlive.lock()) {
+		if (*alive) {
+			const RmlDataEventArgs* previous = currentDataEvent;
+			currentDataEvent = arguments;
+			std::string error;
+			generated::DispatchRetainedCallback(*callback->state,
+				callback->callbackID, callback->userData, error);
+			currentDataEvent = previous;
+		}
+	}
 }
 
 void DestroyRetainedCallback(void* data)
@@ -56,10 +65,12 @@ void DestroyRetainedCallback(void* data)
 	auto* callback = static_cast<RetainedCallbackContext*>(data);
 	if (callback == nullptr)
 		return;
-	if (callback->state != nullptr && callback->destroyCallbackID != 0) {
-		std::string error;
-		generated::DispatchRetainedCallback(*callback->state,
-			callback->destroyCallbackID, callback->userData, error);
+	if (auto alive = callback->hostAlive.lock()) {
+		if (*alive && callback->state != nullptr && callback->destroyCallbackID != 0) {
+			std::string error;
+			generated::DispatchRetainedCallback(*callback->state,
+				callback->destroyCallbackID, callback->userData, error);
+		}
 	}
 	delete callback;
 }
@@ -104,6 +115,7 @@ wasm_trap_t* AddEventListener(HostState* state, wasmtime_caller_t* caller,
 
 	auto* callback = new RetainedCallbackContext{
 		state,
+		state != nullptr ? state->alive : std::weak_ptr<bool>{},
 		static_cast<std::uint32_t>(slots[4].i32),
 		static_cast<std::uint32_t>(slots[5].i32),
 		static_cast<std::uint32_t>(slots[6].i32),
@@ -199,6 +211,7 @@ wasm_trap_t* DataModelBindEvent(void* environment, wasmtime_caller_t* caller,
 
 	auto* callback = new RetainedCallbackContext{
 		state,
+		state != nullptr ? state->alive : std::weak_ptr<bool>{},
 		static_cast<std::uint32_t>(slots[3].i32),
 		static_cast<std::uint32_t>(slots[4].i32),
 		static_cast<std::uint32_t>(slots[5].i32),

@@ -17,6 +17,11 @@
 #include "NativeModulePath.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Game/GameSetup.h"
+#include "Sim/Units/Scripts/UnitScriptFactory.h"
+#include "Sim/Units/Scripts/NativeUnitScript.h"
+#include "Sim/Units/Scripts/UnitScriptEngine.h"
+#include "Sim/Units/Unit.h"
+#include "Sim/Units/UnitHandler.h"
 #include "WasmInterface/system/WasmInterfaceSystem.h"
 
 #include "Rml/Backends/RmlUi_Backend.h"
@@ -165,6 +170,7 @@ public:
 		nativeInterface.cameraApi = &CAMERA_API;
 		nativeInterface.input = &INPUT_API;
 		nativeInterface.debugInput = &DEBUG_INPUT_API;
+		nativeInterface.cus = &CUS_API;
 		nativeInterface.display = &DISPLAY_API;
 		nativeInterface.selection = &SELECTION_API;
 		nativeInterface.vfs = &VFS_API;
@@ -197,6 +203,12 @@ public:
 	}
 
 	void UnloadEventClients() {
+		if (unitScriptEngine != nullptr) {
+			if (eventClient)
+				unitScriptEngine->RemoveCusBackend(eventClient->CusBackend());
+			for (auto& client : benchmarkEventClients)
+				unitScriptEngine->RemoveCusBackend(client->CusBackend());
+		}
 		for (auto& client : benchmarkEventClients)
 			eventHandler.RemoveClient(client.get());
 		if (eventClient)
@@ -280,6 +292,8 @@ public:
 		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, sharedLib.get(), wasmSystem.get());
 		eventClient->LoadSymbols();
 		eventClient->Initialize();
+		if (unitScriptEngine != nullptr)
+			unitScriptEngine->AddCusBackend(eventClient->CusBackend());
 		eventHandler.AddClient(eventClient.get());
 
 		// The normal native integration has one module instance. The benchmark
@@ -300,6 +314,8 @@ public:
 				&nativeInterface, sharedLib.get(), wasmSystem.get());
 			client->LoadSymbols();
 			client->Initialize();
+			if (unitScriptEngine != nullptr)
+				unitScriptEngine->AddCusBackend(client->CusBackend());
 			eventHandler.AddClient(client.get());
 			benchmarkEventClients.push_back(std::move(client));
 		}
@@ -314,6 +330,8 @@ public:
 		// stream without changing the native module loading contract.
 		eventClient = std::make_unique<NativeInterfaceEventClient>(
 			&nativeInterface, nullptr, wasmSystem.get());
+		if (unitScriptEngine != nullptr)
+			unitScriptEngine->AddCusBackend(eventClient->CusBackend());
 		eventHandler.AddClient(eventClient.get());
 	}
 
@@ -370,6 +388,15 @@ void NativeInterfaceSystem::Reload() {
 
 void NativeInterfaceSystem::Update() {
 	pImpl->Update();
+}
+
+void NativeInterfaceSystem::Tick(std::uint32_t frame)
+{
+	if (pImpl->eventClient)
+		pImpl->eventClient->Tick(frame);
+	for (auto& client : pImpl->benchmarkEventClients)
+		client->Tick(frame);
+	pImpl->wasmSystem->Tick(frame);
 }
 
 bool NativeInterfaceSystem::KeyPress(int keyCode, int scanCode, bool isRepeat) {
@@ -517,4 +544,21 @@ void NativeInterfaceSystem::UnloadAllWasmModules() {
 
 WasmInterfaceSystem* NativeInterfaceSystem::GetWasmInterfaceSystem() {
 	return pImpl->wasmSystem.get();
+}
+
+bool NativeInterfaceSystem::AttachCusScript(int unitID, std::uint32_t instanceID,
+	std::uint64_t capabilities)
+{
+	if (pImpl->eventClient == nullptr)
+		return false;
+	CUnit* unit = unitID >= 0 ? unitHandler.GetUnit(static_cast<unsigned int>(unitID)) : nullptr;
+	if (unit == nullptr)
+		return false;
+
+	CUnitScript* script = CUnitScriptFactory::AttachCusScript(
+		unit, pImpl->eventClient->CusBackend(), instanceID, capabilities);
+	if (script == nullptr)
+		return false;
+	script->Create();
+	return true;
 }

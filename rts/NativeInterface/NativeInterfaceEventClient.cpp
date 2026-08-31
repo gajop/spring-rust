@@ -2,6 +2,7 @@
 
 #include "NativeInterfaceEventClient.h"
 
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -52,6 +53,18 @@
 			#SymbolName);                                                                          \
 		if (m_##SymbolName##FuncPtr == nullptr)                                                   \
 			LOG_L(L_ERROR, "Failed to load native module symbol " #SymbolName);                     \
+	}
+
+#define LOAD_OPTIONAL_SYMBOL(SymbolName)                                                      \
+	{                                                                                           \
+		m_##SymbolName##FuncPtr = m_sharedLib != nullptr                                       \
+			? m_sharedLib->FindAddressTyped<fptr::SymbolName##FuncPtr>(#SymbolName) : nullptr;    \
+	}
+
+#define LOAD_OPTIONAL_SYMBOL_NAMED(MemberName, SymbolName)                                    \
+	{                                                                                           \
+		m_##MemberName##FuncPtr = m_sharedLib != nullptr                                       \
+			? m_sharedLib->FindAddressTyped<fptr::MemberName##FuncPtr>(SymbolName) : nullptr;     \
 	}
 
 namespace {
@@ -358,6 +371,104 @@ void NativeInterfaceEventClient::LoadSymbols() {
 	LOAD_SYMBOL(StockpileChanged);
 	LOAD_SYMBOL(CollectGarbage);
 	LOAD_SYMBOL(Pong);
+	LOAD_OPTIONAL_SYMBOL_NAMED(CusInvoke, "RustCUSInvoke");
+	LOAD_OPTIONAL_SYMBOL_NAMED(CusCallNamed, "RustCUSCallNamed");
+	LOAD_OPTIONAL_SYMBOL_NAMED(CusTick, "RustCUSTick");
+	LOAD_OPTIONAL_SYMBOL_NAMED(CusDetach, "RustCUSDetach");
+}
+
+bool NativeInterfaceEventClient::Invoke(uint32_t instanceId, NativeUnitScriptCall call,
+	std::span<const float> floatArgs, std::span<const int32_t> intArgs,
+	NativeUnitScriptCallResult& result)
+{
+	result = {};
+	if (m_CusInvokeFuncPtr == nullptr || m_moduleData == nullptr)
+		return false;
+
+	result.intValue = -1;
+	result.floatValue = 1.0f;
+	std::array<int32_t, 256> intValues{};
+	CusInvokeQuery query = {
+		.instanceID = instanceId,
+		.call = static_cast<uint32_t>(call),
+		.floatArguments = floatArgs.data(),
+		.floatCount = static_cast<uint32_t>(floatArgs.size()),
+		.integerArguments = intArgs.data(),
+		.integerCount = static_cast<uint32_t>(intArgs.size()),
+	};
+	CusInvokeResult nativeResult = {
+		.error = nullptr,
+		.handled = 0,
+		.intValue = result.intValue,
+		.floatValue = result.floatValue,
+		.boolValue = 0,
+		.complete = 0,
+		.intValues = intValues.data(),
+		.intCapacity = static_cast<uint32_t>(intValues.size()),
+		.intCount = 0,
+		.returnValues = nullptr,
+		.returnCapacity = 0,
+		.returnCount = 0,
+		.functionFound = 0,
+	};
+	m_CusInvokeFuncPtr(m_nativeInterface, m_moduleData, &query, &nativeResult);
+	if (nativeResult.error != nullptr || nativeResult.handled == 0 ||
+		nativeResult.intCount > intValues.size())
+		return false;
+
+	result.intValue = nativeResult.intValue;
+	result.floatValue = nativeResult.floatValue;
+	result.boolValue = nativeResult.boolValue != 0;
+	result.complete = nativeResult.complete != 0;
+	result.intValues.assign(intValues.begin(), intValues.begin() + nativeResult.intCount);
+	return true;
+}
+
+bool NativeInterfaceEventClient::CallNamed(uint32_t instanceId, const char* functionName,
+	std::span<const float> args, std::span<float> retValues, uint32_t& retCount, bool& found)
+{
+	retCount = 0;
+	found = false;
+	if (m_CusCallNamedFuncPtr == nullptr || m_moduleData == nullptr || functionName == nullptr)
+		return false;
+
+	CusNamedQuery query = {
+		.instanceID = instanceId,
+		.functionName = functionName,
+		.arguments = args.data(),
+		.argumentCount = static_cast<uint32_t>(args.size()),
+		.returnValues = retValues.data(),
+		.returnCapacity = static_cast<uint32_t>(retValues.size()),
+	};
+	CusNamedResult result = {};
+	m_CusCallNamedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	if (result.error != nullptr || result.handled == 0 || result.returnCount > retValues.size())
+		return false;
+	retCount = result.returnCount;
+	found = result.functionFound != 0;
+	return true;
+}
+
+void NativeInterfaceEventClient::Detach(uint32_t instanceId)
+{
+	if (m_CusDetachFuncPtr == nullptr || m_moduleData == nullptr)
+		return;
+	const CusDetachQuery query = {.instanceID = instanceId};
+	CusDetachResult result = {};
+	m_CusDetachFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	if (result.error != nullptr)
+		LOG_L(L_ERROR, "CUS detach failed: %s", result.error->message);
+}
+
+void NativeInterfaceEventClient::Tick(uint32_t frame)
+{
+	if (m_CusTickFuncPtr == nullptr || m_moduleData == nullptr)
+		return;
+	const CusTickQuery query = {.frame = frame};
+	CusTickResult result = {};
+	m_CusTickFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	if (result.error != nullptr)
+		LOG_L(L_ERROR, "CUS tick failed: %s", result.error->message);
 }
 
 void* NativeInterfaceEventClient::Initialize() {

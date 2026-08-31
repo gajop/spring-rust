@@ -32,6 +32,9 @@ public:
 	// Called by CGame after eventHandler.Update(), when native callbacks have
 	// returned and it is safe to unload a module.
 	void Update();
+	// Advance native and Core-Wasm CUS schedulers once per deterministic
+	// simulation frame.
+	void Tick(std::uint32_t frame);
 	// Give a native module first refusal on keyboard input before RmlUi performs
 	// focus traversal. Returning true consumes the event.
 	bool KeyPress(int keyCode, int scanCode, bool isRepeat);
@@ -60,6 +63,11 @@ public:
 	bool UnloadWasmModule(const std::string& moduleName);
 	void UnloadAllWasmModules();
 	WasmInterfaceSystem* GetWasmInterfaceSystem();
+
+	// Attach the active native module's CUS instance to an engine unit.  The
+	// module must register its instance before calling this entry point; the
+	// host creates the adapter and invokes its Create callin synchronously.
+	bool AttachCusScript(int unitID, std::uint32_t instanceID, std::uint64_t capabilities);
 
 public:
 	static NativeInterfaceSystem* s_instance;

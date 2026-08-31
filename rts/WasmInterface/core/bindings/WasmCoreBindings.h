@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 #include "NativeInterface/NativeInterface.h"
@@ -10,12 +11,15 @@
 #include "WasmEnvironment.h"
 #include "WasmResources.h"
 
+class NativeUnitScriptBackend;
+
 namespace recoil::wasm::core {
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 
 struct HostState {
 	NativeInterface* native = nullptr;
+	NativeUnitScriptBackend* cusBackend = nullptr;
 	Memory memory;
 	WasmExecutionBudget* budget = nullptr;
 	WasmEnvironment environment = WasmEnvironment::RulesSynced;
@@ -24,6 +28,13 @@ struct HostState {
 	wasmtime_context_t* context = nullptr;
 	wasmtime_func_t callbackDispatch{};
 	bool callbackDispatchBound = false;
+	std::shared_ptr<bool> alive = std::make_shared<bool>(true);
+
+	~HostState() {
+		if (alive) {
+			*alive = false;
+		}
+	}
 };
 
 #if __has_include("../wasm/generated/WasmCoreGeneratedBindings.h")
@@ -143,9 +154,11 @@ public:
 	explicit InstanceBindings(NativeInterface* nativeInterface,
 		WasmExecutionBudget* executionBudget = nullptr, bool fixedMemory = false,
 		WasmEnvironment environment = WasmEnvironment::RulesSynced,
-		std::uint32_t maxValueNodes = 1u << 20)
+		std::uint32_t maxValueNodes = 1u << 20,
+		NativeUnitScriptBackend* cusBackend = nullptr)
 	{
 		host.native = nativeInterface;
+		host.cusBackend = cusBackend;
 		host.budget = executionBudget;
 		host.fixedMemory = fixedMemory;
 		host.environment = environment;

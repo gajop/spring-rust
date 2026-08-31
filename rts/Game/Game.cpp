@@ -1825,6 +1825,8 @@ void CGame::SimFrame() {
 
 			unitHandler.UpdatePostAnimation();
 		}
+		if (nativeInterfaceSystem != nullptr)
+			nativeInterfaceSystem->Tick(gs->frameNum);
 		envResHandler.Update();
 		losHandler->Update();
 		// dead ghosts have to be updated in sim, after los,

@@ -30,6 +30,7 @@
 #include "NativeInterface/api/Projectiles.h"
 #include "NativeInterface/api/RulesParams.h"
 #include "NativeInterface/api/RmlUi.h"
+#include "NativeInterface/api/Cus.h"
 #include "NativeInterface/api/Selection.h"
 #include "NativeInterface/api/Sound.h"
 #include "NativeInterface/api/SyncedCtrl.h"
@@ -128,6 +129,7 @@ struct NativeInterface {
 	const ProfilingApi* profiling;
 	const GfxApi* gfx;
 	const DebugInputApi* debugInput;
+	const CusApi* cus;
 };
 
 #ifdef __cplusplus

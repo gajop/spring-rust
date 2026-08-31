@@ -1,3 +1,4 @@
+pub use crate::cus::{NativeCus, NativeCusCallResult, NativeCusEngine};
 /// Prelude module for common types and traits when building Spring native modules.
 ///
 /// # Example
@@ -24,6 +25,7 @@ pub use crate::{
     module_entry::{result_to_error_ptr, setup_panic_handler},
     sys,
 };
+pub use spring::cus;
 
 // Re-export commonly used macros
 pub use crate::{bytes_to_slice, cstr_to_str, export_module, impl_callback};

@@ -6,6 +6,7 @@
 #include "CobInstance.h"
 #include "LuaUnitScript.h"
 #include "NullUnitScript.h"
+#include "NativeUnitScript.h"
 
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitDef.h"
@@ -19,6 +20,7 @@ void CUnitScriptFactory::InitStatic()
 {
 	static_assert(sizeof(CLuaUnitScript) >= sizeof(CCobInstance   ), "");
 	static_assert(sizeof(CLuaUnitScript) >= sizeof(CNullUnitScript), "");
+	static_assert(sizeof(CLuaUnitScript) >= sizeof(CNativeUnitScript), "");
 
 	CCobUnitScriptNames::InitScriptNames();
 	CLuaUnitScriptNames::InitScriptNames();
@@ -60,3 +62,27 @@ CUnitScript* CUnitScriptFactory::CreateLuaScript(CUnit* unit, lua_State* L)
 	return (new (unit->usMemBuffer) CLuaUnitScript(L, unit));
 }
 
+CUnitScript* CUnitScriptFactory::CreateCusScript(CUnit* unit, NativeUnitScriptBackend* backend,
+	uint32_t instanceId, uint64_t capabilities)
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	static_assert(sizeof(CNativeUnitScript) <= sizeof(unit->usMemBuffer), "");
+	auto* script = new (unit->usMemBuffer) CNativeUnitScript(unit, backend, instanceId, capabilities);
+	if (backend != nullptr)
+		backend->Attach(instanceId, script);
+	return script;
+}
+
+CUnitScript* CUnitScriptFactory::AttachCusScript(CUnit* unit, NativeUnitScriptBackend* backend,
+	uint32_t instanceId, uint64_t capabilities)
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	if (unit == nullptr)
+		return nullptr;
+
+	// Attachment is deliberately explicit: the caller registers the instance
+	// with its module before invoking Create(), which is the first startup task.
+	unit->DeleteScript();
+	unit->script = CreateCusScript(unit, backend, instanceId, capabilities);
+	return unit->script;
+}

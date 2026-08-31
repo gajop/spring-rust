@@ -153,16 +153,24 @@ bool RmlSDLRecoil::EventTextInput(Rml::Context* context, const std::string& text
 
 bool RmlSDLRecoil::EventMouseMove(Rml::Context* context, Sint32 x, Sint32 y)
 {
+	if (context == nullptr)
+		return false;
 	return context->ProcessMouseMove(x, y, GetKeyModifierState());
 }
 
 bool RmlSDLRecoil::EventMousePress(Rml::Context* context, Sint32 x, Sint32 y, Sint32 button)
 {
+	if (context == nullptr)
+		return false;
+	context->ProcessMouseMove(x, y, GetKeyModifierState());
 	return context->ProcessMouseButtonDown(ConvertMouseButton(button), GetKeyModifierState());
 };
 
 bool RmlSDLRecoil::EventMouseRelease(Rml::Context* context, Sint32 x, Sint32 y, Sint32 button)
 {
+	if (context == nullptr)
+		return false;
+	context->ProcessMouseMove(x, y, GetKeyModifierState());
 	return context->ProcessMouseButtonUp(ConvertMouseButton(button), GetKeyModifierState());
 };
 

@@ -140,6 +140,7 @@ pub use callbacks::{GameSetupPlayerState, KeyAction, ViewGeometry};
 mod camera;
 mod config;
 pub mod constants;
+pub mod cus;
 mod debug_input;
 pub mod module_entry;
 
@@ -236,6 +237,9 @@ mod utils;
 mod vfs;
 mod weapon_defs;
 
+/// Shared game-facing unit-script API.  Native modules use the same CUS
+/// types as Core-Wasm modules; this crate only supplies the native transport
+/// and event façade around them.
 pub use callbacks::{ModuleData, NativeModule};
 pub use camera::Camera;
 pub use config::{Config, ConfigParameter, ConfigValueType};

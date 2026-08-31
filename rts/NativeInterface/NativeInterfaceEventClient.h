@@ -10,6 +10,7 @@
 
 #include "NativeInterface.h"
 #include "NativeInterface/api/Callins.h"
+#include "Sim/Units/Scripts/NativeUnitScript.h"
 #include "System/EventClient.h"
 #include "WasmInterface/core/host/WasmCoreCallinId.h"
 
@@ -207,6 +208,10 @@ namespace fptr {
 	using WorldTooltipFuncPtr = void(*)(NativeInterface*, void*, const WorldTooltipQuery*, StringCallinResult*);
 	using GameSetupFuncPtr = void(*)(NativeInterface*, void*, const GameSetupQuery*, GameSetupResult*);
 	using PongFuncPtr = void(*)(NativeInterface*, void*, const PongQuery*, PongResult*);
+	using CusInvokeFuncPtr = void(*)(NativeInterface*, void*, const CusInvokeQuery*, CusInvokeResult*);
+	using CusCallNamedFuncPtr = void(*)(NativeInterface*, void*, const CusNamedQuery*, CusNamedResult*);
+	using CusTickFuncPtr = void(*)(NativeInterface*, void*, const CusTickQuery*, CusTickResult*);
+	using CusDetachFuncPtr = void(*)(NativeInterface*, void*, const CusDetachQuery*, CusDetachResult*);
 }
 
 /**
@@ -220,7 +225,7 @@ namespace fptr {
  *
  * Does NOT handle DLL loading - receives handle from NativeInterfaceSystem
  */
-class NativeInterfaceEventClient : public CEventClient {
+class NativeInterfaceEventClient : public CEventClient, public NativeUnitScriptBackend {
 public:
 	NativeInterfaceEventClient(NativeInterface* nativeInterface, SharedLib* sharedLib,
 		WasmInterfaceSystem* wasmSystem = nullptr);
@@ -421,6 +426,20 @@ public:
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
 	void HandleLuaCall(const char* msg, size_t msgLength, bool synced);
 
+	// NativeUnitScriptBackend implementation.  These methods are intentionally
+	// independent of the ordinary event callback fan-out: a CUS instance is
+	// routed by its instance ID to this module's state.
+	bool Invoke(uint32_t instanceId, NativeUnitScriptCall call,
+		std::span<const float> floatArgs, std::span<const int32_t> intArgs,
+		NativeUnitScriptCallResult& result) override;
+	bool CallNamed(uint32_t instanceId, const char* functionName,
+		std::span<const float> args, std::span<float> retValues,
+		uint32_t& retCount, bool& found) override;
+	void Detach(uint32_t instanceId) override;
+	void Tick(uint32_t frame) override;
+
+	NativeUnitScriptBackend* CusBackend() { return this; }
+
 private:
 	// Dispatch a native query to the Core guest set. `nativeResult`, when
 	// supplied, points at the generated native result struct for result-bearing
@@ -605,4 +624,8 @@ private:
 	fptr::StockpileChangedFuncPtr m_StockpileChangedFuncPtr = nullptr;
 	fptr::CollectGarbageFuncPtr m_CollectGarbageFuncPtr = nullptr;
 	fptr::PongFuncPtr m_PongFuncPtr = nullptr;
+	fptr::CusInvokeFuncPtr m_CusInvokeFuncPtr = nullptr;
+	fptr::CusCallNamedFuncPtr m_CusCallNamedFuncPtr = nullptr;
+	fptr::CusTickFuncPtr m_CusTickFuncPtr = nullptr;
+	fptr::CusDetachFuncPtr m_CusDetachFuncPtr = nullptr;
 };

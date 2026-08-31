@@ -4,13 +4,17 @@
 
 #include "UnitScriptEngine.h"
 
+#include <algorithm>
+
 #include "CobEngine.h"
 #include "CobFileHandler.h"
+#include "NativeUnitScript.h"
 #include "UnitScript.h"
 #include "UnitScriptFactory.h"
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Units/UnitHandler.h"
+#include "Sim/Misc/GlobalSynced.h"
 #include "System/ContainerUtil.h"
 #include "System/HashSpec.h"
 #include "System/SafeUtil.h"
@@ -35,7 +39,8 @@ CR_REG_METADATA(CUnitScriptEngine, (
 	CR_MEMBER(animating),
 
 	// always null when saving
-	CR_IGNORED(currentScript)
+	CR_IGNORED(currentScript),
+	CR_IGNORED(cusBackends)
 ))
 
 
@@ -124,6 +129,68 @@ void CUnitScriptEngine::RemoveInstance(CUnitScript* instance)
 	spring::VectorErase(animating, instance);
 }
 
+void CUnitScriptEngine::SetCusBackend(NativeUnitScriptBackend* backend)
+{
+	// Kept for callers which own a single legacy backend.  New module owners
+	// use AddCusBackend so native and Core-Wasm modules can coexist.
+	if (cusBackends.size() == 1 && cusBackends.front() == backend)
+		return;
+	while (!cusBackends.empty()) {
+		auto* existing = cusBackends.front();
+		if (existing == backend)
+			break;
+		RemoveCusBackend(existing);
+	}
+	if (backend != nullptr)
+		AddCusBackend(backend);
+}
+
+void CUnitScriptEngine::AddCusBackend(NativeUnitScriptBackend* backend)
+{
+	if (backend == nullptr || std::find(cusBackends.begin(), cusBackends.end(), backend) !=
+		cusBackends.end())
+		return;
+	cusBackends.push_back(backend);
+}
+
+void CUnitScriptEngine::RemoveCusBackend(NativeUnitScriptBackend* backend)
+{
+	if (backend == nullptr)
+		return;
+	for (unsigned int i = 0; i < unitHandler.MaxUnits(); ++i) {
+		CUnit* unit = unitHandler.GetUnit(i);
+		if (unit == nullptr || unit->script == nullptr)
+			continue;
+		if (unit->script->IsCusScript())
+			static_cast<CNativeUnitScript*>(unit->script)->DetachBackend(backend);
+	}
+	cusBackends.erase(std::remove(cusBackends.begin(), cusBackends.end(), backend),
+		cusBackends.end());
+}
+
+void CUnitScriptEngine::CancelCusBackend(NativeUnitScriptBackend* backend)
+{
+	if (backend == nullptr)
+		return;
+	for (unsigned int i = 0; i < unitHandler.MaxUnits(); ++i) {
+		CUnit* unit = unitHandler.GetUnit(i);
+		if (unit == nullptr || unit->script == nullptr)
+			continue;
+		if (unit->script->IsCusScript()) {
+			auto* script = static_cast<CNativeUnitScript*>(unit->script);
+			if (script->UsesBackend(backend))
+				script->CancelPendingKilled();
+		}
+	}
+}
+
+void CUnitScriptEngine::Kill()
+{
+	animating.clear();
+	while (!cusBackends.empty())
+		RemoveCusBackend(cusBackends.back());
+}
+
 void CUnitScriptEngine::Tick(int deltaTime)
 {
 	SCOPED_TIMER("CUnitScriptEngine::Tick");
@@ -161,4 +228,10 @@ void CUnitScriptEngine::Tick(int deltaTime)
 	}
 
 	cobEngine->RunDeferredCallins();
+
+	// CUS tasks are module-scheduled at the deterministic GameFrame
+	// boundary.  This is one backend call per module, not one Wasm transition
+	// per idle unit.
+	for (auto* backend : cusBackends)
+		backend->Tick(gs->frameNum);
 }

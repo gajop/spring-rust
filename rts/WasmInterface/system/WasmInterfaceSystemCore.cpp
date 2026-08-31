@@ -12,6 +12,7 @@
 #include "WasmCoreDispatchPlan.h"
 #include "WasmCoreUiCallinFilter.h"
 #include "WasmCoreHost.h"
+#include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "WasmCoreUiCallinFilter.h"
 #include "wasm/generated/WasmCallinRegistry.h"
 
@@ -348,6 +349,12 @@ bool WasmInterfaceSystem::ResetBudgetWindow(bool synced, std::string& error)
 
 void WasmInterfaceSystem::RemoveFaultedUnsyncedModules()
 {
+	if (unitScriptEngine != nullptr) {
+		for (const CoreModuleRecord& module : coreModules) {
+			if (WasmCoreHost::ModuleFaulted(module.descriptor.name))
+				unitScriptEngine->RemoveCusBackend(module.host);
+		}
+	}
 	if (WasmCoreHost::RemoveFaultedUnsynced() == 0)
 		return;
 	coreModules.erase(std::remove_if(coreModules.begin(), coreModules.end(),

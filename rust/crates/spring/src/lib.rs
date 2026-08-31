@@ -10,6 +10,40 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+/// Portable Rust implementation of the engine's unit-script model.
+///
+/// The module is available on both wasm and native targets.  Its engine
+/// operations are supplied through [`cus::UnitEngine`], keeping game code
+/// independent of the transport used by the host.
+#[cfg(feature = "alloc")]
+pub mod cus;
+
+// Keep the exported Core-CUS ABI macro type-checked in the same target build
+// used by game modules. This catches changes to the guest-side scratch ABI
+// without creating a runnable example binary for a no_std crate.
+#[cfg(all(feature = "alloc", target_arch = "wasm32", test))]
+mod core_cus_export_compile_test {
+    use super::cus::core_module::{CoreCusCallResult, CoreCusModule};
+
+    #[derive(Default)]
+    struct ExampleModule;
+
+    impl CoreCusModule for ExampleModule {
+        fn cus_invoke(
+            &mut self,
+            _instance_id: u32,
+            _call: u32,
+            _float_arguments: &[f32],
+            _integer_arguments: &[i32],
+            _result: &mut CoreCusCallResult<'_>,
+        ) -> bool {
+            false
+        }
+    }
+
+    crate::export_core_cus!(ExampleModule);
+}
+
 #[cfg(target_arch = "wasm32")]
 mod benchmark;
 #[cfg(target_arch = "wasm32")]

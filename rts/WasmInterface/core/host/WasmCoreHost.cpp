@@ -4,11 +4,16 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
+#include <cstring>
 #include <memory>
+#include <limits>
 #include <utility>
 
 #include "NativeInterface/NativeInterface.h"
 #include "NativeInterface/api/Callins.h"
+#include "Sim/Units/Unit.h"
+#include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "WasmCoreAbi.h"
 #include "WasmCoreBindings.h"
 #include "WasmCoreValidation.h"
@@ -67,6 +72,20 @@ constexpr std::size_t CALLIN_HASH_CAPACITY = CallinHashCapacity();
 static_assert((CALLIN_HASH_CAPACITY & (CALLIN_HASH_CAPACITY - 1u)) == 0u);
 static_assert(CALLIN_COUNT < (1u << 16));
 
+constexpr std::uint32_t CUS_FLOAT_ARGUMENTS_OFFSET = 0;
+constexpr std::uint32_t CUS_INTEGER_ARGUMENTS_OFFSET = 1024;
+constexpr std::uint32_t CUS_NAME_OFFSET = 2048;
+constexpr std::uint32_t CUS_RESULT_OFFSET = 4096;
+constexpr std::uint32_t CUS_MAX_ARGUMENTS = 256;
+constexpr std::uint32_t CUS_MAX_RESULTS = 64;
+constexpr std::uint32_t CUS_RESULT_INT_VALUES_OFFSET = 20;
+constexpr std::uint32_t CUS_RESULT_HANDLED_OFFSET = 536;
+constexpr std::uint32_t CUS_RESULT_BYTES = CUS_RESULT_HANDLED_OFFSET + 4;
+constexpr std::uint32_t CUS_NAMED_RESULT_HANDLED_OFFSET = 264;
+constexpr std::uint32_t CUS_NAMED_RESULT_BYTES = CUS_NAMED_RESULT_HANDLED_OFFSET + 4;
+constexpr std::uint32_t CUS_BUFFER_BYTES = 16 * 1024;
+constexpr std::size_t CUS_MAX_CREATE_FLUSHES = 1024;
+
 struct CallinHashSlot {
 	std::uint64_t hash = 0;
 	std::uint16_t ordinal = 0;
@@ -110,18 +129,19 @@ std::uint16_t ResolveCallinOrdinal(std::string_view name)
 
 struct WasmCoreHost::Backend {
 	Backend(NativeInterface* nativeInterface, const WasmRuntime& runtime,
-		WasmEnvironment environment)
+		WasmEnvironment environment, NativeUnitScriptBackend* cusBackend)
 		: runtime(&runtime)
 		, hot{false, WasmExecutionBudget(runtime.Config().instructionFuel,
 			runtime.Config().hostWorkLimit, runtime.Config().resultBytesLimit)}
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 		, bindings(nativeInterface, &hot.budget,
 			WasmEnvironmentMatrix::Policy(environment).synced, environment,
-			runtime.Config().maxValueNodes)
+			runtime.Config().maxValueNodes, cusBackend)
 #endif
 	{
 		(void)nativeInterface;
 		(void)environment;
+		(void)cusBackend;
 	}
 
 	~Backend()
@@ -158,6 +178,18 @@ struct WasmCoreHost::Backend {
 	wasmtime_instance_t instance{};
 #endif
 	std::string faultReason;
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	recoil::wasm::core::RawExport cusInit;
+	recoil::wasm::core::RawExport cusInvoke;
+	recoil::wasm::core::RawExport cusCallNamed;
+	recoil::wasm::core::RawExport cusDetach;
+	recoil::wasm::core::RawExport cusTick;
+	recoil::wasm::core::RawExport cusBuffer;
+	recoil::wasm::core::RawExport cusBufferSize;
+	std::uint32_t cusBufferPointer = 0;
+	std::uint32_t cusBufferBytes = 0;
+	bool hasCus = false;
+#endif
 };
 
 WasmCoreHost::WasmCoreHost(std::string moduleName, WasmEnvironment environment,
@@ -168,7 +200,15 @@ WasmCoreHost::WasmCoreHost(std::string moduleName, WasmEnvironment environment,
 {
 }
 
-WasmCoreHost::~WasmCoreHost() = default;
+WasmCoreHost::~WasmCoreHost()
+{
+	// The host owns the backend object, so every script must stop referring to
+	// it before the backend member is destroyed. This also covers direct host
+	// registry teardown paths which do not pass through WasmInterfaceSystem.
+	if (unitScriptEngine != nullptr)
+		unitScriptEngine->RemoveCusBackend(this);
+	pendingCusCreates.clear();
+}
 
 WasmCoreHost* WasmCoreHost::Find(std::string_view moduleName)
 {
@@ -219,7 +259,9 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		return false;
 	}
 
-	auto backend = std::make_unique<Backend>(nativeInterface, runtime, environment);
+	auto host = std::unique_ptr<WasmCoreHost>(
+		new WasmCoreHost(std::move(moduleName), environment, nullptr));
+	auto backend = std::make_unique<Backend>(nativeInterface, runtime, environment, host.get());
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	auto* engine = static_cast<wasm_engine_t*>(runtime.BackendEngine());
@@ -322,6 +364,91 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		return false;
 	}
 #endif
+	// CUS is an optional Core-Wasm extension. A module opts in by
+	// exporting the dispatcher; once it does, the scratch buffer and init
+	// exports form one indivisible ABI so a partially implemented transport
+	// cannot attach a script and fail later during a simulation frame.
+	{
+		const wasm_valkind_t i32Result[] = {WASM_I32};
+		const wasm_valkind_t oneI32[] = {WASM_I32};
+		const wasm_valkind_t sevenI32[] = {
+			WASM_I32, WASM_I32, WASM_I32, WASM_I32,
+			WASM_I32, WASM_I32, WASM_I32,
+		};
+		const wasm_valkind_t sixI32[] = {
+			WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32,
+		};
+		if (!backend->cusInit.Resolve(context, backend->instance,
+				"SPRING_CUS_INIT", 15, {},
+				std::span<const wasm_valkind_t>(i32Result, 1), true, error) ||
+			!backend->cusBuffer.Resolve(context, backend->instance,
+				"SPRING_CUS_BUFFER", 17, {},
+				std::span<const wasm_valkind_t>(i32Result, 1), true, error) ||
+			!backend->cusBufferSize.Resolve(context, backend->instance,
+				"SPRING_CUS_BUFFER_SIZE", 22, {},
+				std::span<const wasm_valkind_t>(i32Result, 1), true, error) ||
+			!backend->cusInvoke.Resolve(context, backend->instance,
+				"SPRING_CUS_INVOKE", 17,
+				std::span<const wasm_valkind_t>(sevenI32, 7),
+				std::span<const wasm_valkind_t>(i32Result, 1), true, error) ||
+			!backend->cusCallNamed.Resolve(context, backend->instance,
+				"SPRING_CUS_CALL_NAMED", 21,
+				std::span<const wasm_valkind_t>(sixI32, 6),
+				std::span<const wasm_valkind_t>(i32Result, 1), true, error) ||
+			!backend->cusTick.Resolve(context, backend->instance,
+				"SPRING_CUS_TICK", 15,
+				std::span<const wasm_valkind_t>(oneI32, 1), {}, true, error) ||
+			!backend->cusDetach.Resolve(context, backend->instance,
+				"SPRING_CUS_DETACH", 17,
+				std::span<const wasm_valkind_t>(oneI32, 1), {}, true, error))
+			return false;
+
+		const bool hasTransport = backend->cusInvoke.Present() ||
+			backend->cusCallNamed.Present() || backend->cusTick.Present() ||
+			backend->cusDetach.Present();
+		if (hasTransport) {
+			if (!backend->cusInit.Present() || !backend->cusBuffer.Present() ||
+				!backend->cusBufferSize.Present()) {
+				error = "Core Wasm CUS exports are incomplete; expected init, buffer, "
+					"buffer-size, and dispatcher exports";
+				return false;
+			}
+
+			std::array<wasmtime_val_raw_t, 1> slots{};
+			if (!backend->cusInit.Call(context, slots.data(), slots.size(), error)) {
+				error = "Core Wasm CUS initialization failed: " + error;
+				return false;
+			}
+			if (slots[0].i32 != 0) {
+				error = "Core Wasm CUS initialization returned status " +
+					std::to_string(slots[0].i32);
+				return false;
+			}
+			if (!backend->cusBuffer.Call(context, slots.data(), slots.size(), error)) {
+				error = "Core Wasm CUS buffer export failed: " + error;
+				return false;
+			}
+			const std::int32_t bufferPointer = slots[0].i32;
+			if (bufferPointer < 0) {
+				error = "Core Wasm CUS buffer pointer is negative";
+				return false;
+			}
+			if (!backend->cusBufferSize.Call(context, slots.data(), slots.size(), error)) {
+				error = "Core Wasm CUS buffer-size export failed: " + error;
+				return false;
+			}
+			const std::int32_t bufferBytes = slots[0].i32;
+			if (bufferBytes < static_cast<std::int32_t>(CUS_BUFFER_BYTES) ||
+				!backend->bindings.Host().memory.Contains(static_cast<std::uint32_t>(bufferPointer),
+					CUS_BUFFER_BYTES)) {
+				error = "Core Wasm CUS scratch buffer is smaller than the required 16 KiB";
+				return false;
+			}
+			backend->cusBufferPointer = static_cast<std::uint32_t>(bufferPointer);
+			backend->cusBufferBytes = static_cast<std::uint32_t>(bufferBytes);
+			backend->hasCus = true;
+		}
+	}
 	// Resolve export presence once. Callin dispatch is a hot path, while the
 	// module's export set is immutable for its lifetime.
 	auto markCallin = [&backend](std::uint16_t ordinal, bool present) {
@@ -359,9 +486,10 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 	return false;
 #endif
 
-	Unload(moduleName);
-	Hosts().emplace_back(new WasmCoreHost(std::move(moduleName), environment,
-		std::move(backend)));
+	Unload(host->moduleName);
+	host->backend = std::move(backend);
+	host->FlushCusCreates();
+	Hosts().push_back(std::move(host));
 	// Resolve the dispatch plans once, now, so no callin ever pays for it.
 	Hosts().back()->BuildDispatchPlans();
 	return true;
@@ -418,6 +546,9 @@ void WasmCoreHost::Fault(std::string reason)
 		return;
 	backend->hot.faulted = true;
 	backend->faultReason = reason.empty() ? "Core Wasm module faulted" : std::move(reason);
+	DropPendingCusCreates();
+	if (unitScriptEngine != nullptr)
+		unitScriptEngine->CancelCusBackend(this);
 	if (!WasmEnvironmentMatrix::Policy(environment).synced)
 		++PendingUnsyncedFaultCount();
 }
@@ -545,9 +676,347 @@ bool WasmCoreHost::HasCallin(WasmCoreCallin callin) const
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 namespace {
+bool WriteCusFloats(recoil::wasm::core::Memory& memory, std::uint32_t offset,
+	std::span<const float> values);
+std::uint32_t ReadCusU32(std::span<const std::uint8_t> bytes, std::size_t offset);
+}
+#endif
+
+bool WasmCoreHost::CallCus(std::uint32_t instanceId, NativeUnitScriptCall call,
+	std::span<const float> floatArgs, std::span<const std::int32_t> intArgs,
+	NativeUnitScriptCallResult& result)
+{
+	result = {};
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (backend == nullptr || !backend->hasCus || !backend->cusInvoke.Present() ||
+		backend->hot.faulted || floatArgs.size() > CUS_MAX_ARGUMENTS ||
+		intArgs.size() > CUS_MAX_ARGUMENTS)
+		return false;
+
+	WasmExecutionBudget& budget = backend->hot.budget;
+	if (!budget.ChargeHost(1)) {
+		Fault("Core Wasm CUS host-work budget exhausted");
+		return false;
+	}
+	if (!budget.EnterCallback(true)) {
+		// Re-entry rejection is a neutral compatibility result. The enclosing
+		// guest callback remains valid and will flush any queued Create when it
+		// returns; this is not a module fault.
+		return false;
+	}
+	struct CallbackScope {
+		WasmExecutionBudget& budget;
+		~CallbackScope() { budget.LeaveCallback(); }
+	} callbackScope{budget};
+
+	const std::uint32_t buffer = backend->cusBufferPointer;
+	auto& memory = backend->bindings.Host().memory;
+	if (!WriteCusFloats(memory, buffer + CUS_FLOAT_ARGUMENTS_OFFSET, floatArgs) ||
+		!memory.WriteI32SliceLE(buffer + CUS_INTEGER_ARGUMENTS_OFFSET, intArgs)) {
+		Fault("Core Wasm CUS argument buffer write failed");
+		return false;
+	}
+	std::array<std::uint8_t, CUS_RESULT_BYTES> output{};
+	if (!memory.Write(buffer + CUS_RESULT_OFFSET, output.data(), output.size())) {
+		Fault("Core Wasm CUS result buffer write failed");
+		return false;
+	}
+
+	std::array<wasmtime_val_raw_t, 7> slots{};
+	slots[0].i32 = static_cast<std::int32_t>(instanceId);
+	slots[1].i32 = static_cast<std::int32_t>(call);
+	slots[2].i32 = static_cast<std::int32_t>(buffer + CUS_FLOAT_ARGUMENTS_OFFSET);
+	slots[3].i32 = static_cast<std::int32_t>(floatArgs.size());
+	slots[4].i32 = static_cast<std::int32_t>(buffer + CUS_INTEGER_ARGUMENTS_OFFSET);
+	slots[5].i32 = static_cast<std::int32_t>(intArgs.size());
+	slots[6].i32 = static_cast<std::int32_t>(buffer + CUS_RESULT_OFFSET);
+	std::string error;
+	if (!backend->cusInvoke.Call(wasmtime_store_context(backend->store), slots.data(),
+			slots.size(), error)) {
+		Fault("Core Wasm CUS invoke failed: " + error);
+		return false;
+	}
+	if (slots[0].i32 != 0) {
+		Fault("Core Wasm CUS invoke returned status " + std::to_string(slots[0].i32));
+		return false;
+	}
+
+	std::array<std::uint8_t, CUS_RESULT_BYTES> resultBytes{};
+	if (!memory.Read(buffer + CUS_RESULT_OFFSET, resultBytes.data(), resultBytes.size())) {
+		Fault("Core Wasm CUS result buffer read failed");
+		return false;
+	}
+	const std::uint32_t handled =
+		static_cast<std::uint32_t>(resultBytes[CUS_RESULT_HANDLED_OFFSET]) |
+		(static_cast<std::uint32_t>(resultBytes[CUS_RESULT_HANDLED_OFFSET + 1]) << 8) |
+		(static_cast<std::uint32_t>(resultBytes[CUS_RESULT_HANDLED_OFFSET + 2]) << 16) |
+		(static_cast<std::uint32_t>(resultBytes[CUS_RESULT_HANDLED_OFFSET + 3]) << 24);
+	if (handled == 0) {
+		FlushCusCreates();
+		return false;
+	}
+	const std::uint32_t count = ReadCusU32(
+		std::span<const std::uint8_t>(resultBytes.data(), resultBytes.size()), 16);
+	if (count > CUS_MAX_RESULTS) {
+		Fault("Core Wasm CUS returned too many integer values");
+		return false;
+	}
+	result.intValue = static_cast<std::int32_t>(ReadCusU32(
+		std::span<const std::uint8_t>(resultBytes.data(), resultBytes.size()), 0));
+	result.floatValue = std::bit_cast<float>(ReadCusU32(
+		std::span<const std::uint8_t>(resultBytes.data(), resultBytes.size()), 4));
+	result.boolValue = ReadCusU32(
+		std::span<const std::uint8_t>(resultBytes.data(), resultBytes.size()), 8) != 0;
+	result.complete = ReadCusU32(
+		std::span<const std::uint8_t>(resultBytes.data(), resultBytes.size()), 12) != 0;
+	std::array<std::int32_t, CUS_MAX_RESULTS> values{};
+	if (!memory.ReadI32SliceLE(buffer + CUS_RESULT_OFFSET + CUS_RESULT_INT_VALUES_OFFSET,
+		std::span<std::int32_t>(values.data(), count))) {
+		Fault("Core Wasm CUS integer result read failed");
+		return false;
+	}
+	result.intValues.assign(values.begin(), values.begin() + count);
+	FlushCusCreates();
+	return true;
+#else
+	(void)instanceId;
+	(void)call;
+	(void)floatArgs;
+	(void)intArgs;
+	(void)result;
+	return false;
+#endif
+}
+
+bool WasmCoreHost::Invoke(std::uint32_t instanceId, NativeUnitScriptCall call,
+	std::span<const float> floatArgs, std::span<const std::int32_t> intArgs,
+	NativeUnitScriptCallResult& result)
+{
+	return CallCus(instanceId, call, floatArgs, intArgs, result);
+}
+
+bool WasmCoreHost::CallNamed(std::uint32_t instanceId, const char* functionName,
+	std::span<const float> args, std::span<float> retValues, std::uint32_t& retCount,
+	bool& found)
+{
+	retCount = 0;
+	found = false;
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (backend == nullptr || !backend->hasCus || !backend->cusCallNamed.Present() ||
+		backend->hot.faulted || functionName == nullptr || args.size() > CUS_MAX_ARGUMENTS ||
+		retValues.size() > CUS_MAX_RESULTS)
+		return false;
+	const std::size_t nameLength = std::strlen(functionName);
+	if (nameLength > CUS_BUFFER_BYTES - CUS_NAME_OFFSET ||
+		nameLength > std::numeric_limits<std::uint32_t>::max())
+		return false;
+
+	WasmExecutionBudget& budget = backend->hot.budget;
+	if (!budget.ChargeHost(1)) {
+		Fault("Core Wasm CUS host-work budget exhausted");
+		return false;
+	}
+	if (!budget.EnterCallback(true)) {
+		// See CallCus: callback re-entry is a neutral unavailable result.
+		return false;
+	}
+	struct CallbackScope {
+		WasmExecutionBudget& budget;
+		~CallbackScope() { budget.LeaveCallback(); }
+	} callbackScope{budget};
+
+	const std::uint32_t buffer = backend->cusBufferPointer;
+	auto& memory = backend->bindings.Host().memory;
+	if (!WriteCusFloats(memory, buffer + CUS_FLOAT_ARGUMENTS_OFFSET, args) ||
+		!memory.Write(buffer + CUS_NAME_OFFSET, functionName, nameLength)) {
+		Fault("Core Wasm CUS named-call argument write failed");
+		return false;
+	}
+	std::array<std::uint8_t, CUS_NAMED_RESULT_BYTES> output{};
+	if (!memory.Write(buffer + CUS_RESULT_OFFSET, output.data(), output.size())) {
+		Fault("Core Wasm CUS named-call result write failed");
+		return false;
+	}
+
+	std::array<wasmtime_val_raw_t, 6> slots{};
+	slots[0].i32 = static_cast<std::int32_t>(instanceId);
+	slots[1].i32 = static_cast<std::int32_t>(buffer + CUS_NAME_OFFSET);
+	slots[2].i32 = static_cast<std::int32_t>(nameLength);
+	slots[3].i32 = static_cast<std::int32_t>(buffer + CUS_FLOAT_ARGUMENTS_OFFSET);
+	slots[4].i32 = static_cast<std::int32_t>(args.size());
+	slots[5].i32 = static_cast<std::int32_t>(buffer + CUS_RESULT_OFFSET);
+	std::string error;
+	if (!backend->cusCallNamed.Call(wasmtime_store_context(backend->store), slots.data(),
+			slots.size(), error)) {
+		Fault("Core Wasm CUS named call failed: " + error);
+		return false;
+	}
+	if (slots[0].i32 != 0) {
+		Fault("Core Wasm CUS named call returned status " +
+			std::to_string(slots[0].i32));
+		return false;
+	}
+	std::array<std::uint8_t, CUS_NAMED_RESULT_BYTES> resultBytes{};
+	if (!memory.Read(buffer + CUS_RESULT_OFFSET, resultBytes.data(), resultBytes.size())) {
+		Fault("Core Wasm CUS named-call result read failed");
+		return false;
+	}
+	const auto bytes = std::span<const std::uint8_t>(resultBytes.data(), resultBytes.size());
+	const std::uint32_t handled = ReadCusU32(bytes, CUS_NAMED_RESULT_HANDLED_OFFSET);
+	if (handled == 0) {
+		FlushCusCreates();
+		return false;
+	}
+	const std::uint32_t count = ReadCusU32(bytes, 0);
+	if (count > CUS_MAX_RESULTS || count > retValues.size()) {
+		Fault("Core Wasm CUS named call returned too many values");
+		return false;
+	}
+	const std::uint32_t foundValue = ReadCusU32(bytes, 4);
+	if (foundValue > 1) {
+		Fault("Core Wasm CUS named call returned an invalid found flag");
+		return false;
+	}
+	if (!memory.ReadF32SliceLE(buffer + CUS_RESULT_OFFSET + 8,
+		retValues.first(count))) {
+		Fault("Core Wasm CUS named-call values read failed");
+		return false;
+	}
+	retCount = count;
+	found = foundValue != 0;
+	FlushCusCreates();
+	return true;
+#else
+	(void)instanceId;
+	(void)functionName;
+	(void)args;
+	(void)retValues;
+	return false;
+#endif
+}
+
+void WasmCoreHost::Detach(std::uint32_t instanceId)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (backend == nullptr || !backend->hasCus || !backend->cusDetach.Present() ||
+		backend->hot.faulted)
+		return;
+	std::array<wasmtime_val_raw_t, 1> slots{};
+	slots[0].i32 = static_cast<std::int32_t>(instanceId);
+	std::string error;
+	if (!backend->cusDetach.Call(wasmtime_store_context(backend->store), slots.data(),
+		slots.size(), error))
+		Fault("Core Wasm CUS detach failed: " + error);
+#else
+	(void)instanceId;
+#endif
+}
+
+void WasmCoreHost::Tick(std::uint32_t frame)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (backend == nullptr || !backend->hasCus || !backend->cusTick.Present() ||
+		backend->hot.faulted)
+		return;
+	WasmExecutionBudget& budget = backend->hot.budget;
+	if (!budget.ChargeHost(1)) {
+		Fault("Core Wasm CUS tick budget rejected call");
+		return;
+	}
+	if (!budget.EnterCallback(true)) {
+		// Re-entry rejection is a neutral no-op. The active outer callback owns
+		// the store and will flush any queued Create when it returns.
+		return;
+	}
+	struct CallbackScope {
+		WasmExecutionBudget& budget;
+		~CallbackScope() { budget.LeaveCallback(); }
+	} callbackScope{budget};
+	std::array<wasmtime_val_raw_t, 1> slots{};
+	slots[0].i32 = static_cast<std::int32_t>(frame);
+	std::string error;
+	const bool success = backend->cusTick.Call(wasmtime_store_context(backend->store),
+		slots.data(), slots.size(), error);
+	if (!success)
+		Fault("Core Wasm CUS tick failed: " + error);
+	else
+		FlushCusCreates();
+#else
+	(void)frame;
+#endif
+}
+
+void WasmCoreHost::StartCreate(CNativeUnitScript* script)
+{
+	if (script == nullptr || script->GetUnit() == nullptr)
+		return;
+	pendingCusCreates.push_back({
+		.unitId = script->GetUnit()->id,
+		.instanceId = script->GetInstanceId(),
+	});
+}
+
+void WasmCoreHost::FlushCusCreates()
+{
+	std::size_t flushed = 0;
+	while (!pendingCusCreates.empty()) {
+		if (flushed >= CUS_MAX_CREATE_FLUSHES) {
+			Fault("Core Wasm CUS Create queue exceeded its per-dispatch limit");
+			return;
+		}
+
+		std::vector<PendingCusCreate> creates;
+		creates.swap(pendingCusCreates);
+		for (const PendingCusCreate& create : creates) {
+			if (CNativeUnitScript* script = FindNativeUnitScript(create.unitId, create.instanceId);
+				script != nullptr)
+				script->Create();
+			++flushed;
+		}
+	}
+}
+
+void WasmCoreHost::DropPendingCusCreates()
+{
+	std::vector<PendingCusCreate> creates;
+	creates.swap(pendingCusCreates);
+	for (const PendingCusCreate& create : creates) {
+		if (CNativeUnitScript* script = FindNativeUnitScript(create.unitId, create.instanceId);
+			script != nullptr)
+			script->DetachBackend(this);
+	}
+}
+
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+namespace {
 
 using recoil::wasm::core::HotGuestState;
 using recoil::wasm::core::WasmCoreDispatchPlan;
+
+bool WriteCusFloats(recoil::wasm::core::Memory& memory, std::uint32_t offset,
+	std::span<const float> values)
+{
+	if (values.size() > CUS_MAX_ARGUMENTS)
+		return false;
+	std::array<std::uint8_t, CUS_MAX_ARGUMENTS * sizeof(float)> wire{};
+	for (std::size_t index = 0; index < values.size(); ++index) {
+		const std::uint32_t bits = std::bit_cast<std::uint32_t>(values[index]);
+		std::uint8_t* item = wire.data() + index * sizeof(float);
+		item[0] = static_cast<std::uint8_t>(bits);
+		item[1] = static_cast<std::uint8_t>(bits >> 8);
+		item[2] = static_cast<std::uint8_t>(bits >> 16);
+		item[3] = static_cast<std::uint8_t>(bits >> 24);
+	}
+	return memory.Write(offset, wire.data(), values.size() * sizeof(float));
+}
+
+std::uint32_t ReadCusU32(std::span<const std::uint8_t> bytes, std::size_t offset)
+{
+	return static_cast<std::uint32_t>(bytes[offset]) |
+		(static_cast<std::uint32_t>(bytes[offset + 1]) << 8) |
+		(static_cast<std::uint32_t>(bytes[offset + 2]) << 16) |
+		(static_cast<std::uint32_t>(bytes[offset + 3]) << 24);
+}
 
 // One unchecked host->guest call through the function cached in the plan. This
 // is the only place a Core callin enters Wasmtime.
@@ -933,7 +1402,10 @@ bool WasmCoreHost::Dispatch(const recoil::wasm::core::WasmCoreDispatchPlan* plan
 	const void* query, void* result, std::string& error)
 {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	return recoil::wasm::core::DispatchPlan(plan, query, result, error);
+	const bool success = recoil::wasm::core::DispatchPlan(plan, query, result, error);
+	if (plan != nullptr && plan->host != nullptr)
+		plan->host->FlushCusCreates();
+	return success;
 #else
 	(void)plan;
 	(void)query;

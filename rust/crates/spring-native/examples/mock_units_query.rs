@@ -117,6 +117,7 @@ fn main() {
         profiling: empty_api!(sys::ProfilingApi),
         gfx: empty_api!(sys::GfxApi),
         debugInput: empty_api!(sys::DebugInputApi),
+        cus: std::ptr::null(),
     };
 
     let iface = unsafe { NativeInterfaceRef::from_ptr(&native_interface) }.expect("interface ptr");

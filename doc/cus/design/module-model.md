@@ -80,3 +80,12 @@ Keeping CUS inside the game module gives:
 - simple native parity;
 - freedom to factor reusable game crates normally;
 - a clear distinction between CUS scheduling and module/event dispatch.
+
+## Runtime source layout
+
+The portable runtime is kept in `rust/crates/spring/src/cus/`. `mod.rs` is a
+thin compatibility surface that re-exports the public API. Value types,
+engine operations, scheduling, script behavior, instance ownership, registry
+ownership, and the native/Core-Wasm transports live in their corresponding
+focused modules. This keeps transport changes from obscuring scheduler
+invariants while preserving the single `spring::cus` API used by game code.

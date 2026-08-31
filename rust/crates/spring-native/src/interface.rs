@@ -239,8 +239,14 @@ impl NativeInterfaceRef {
         }
     }
 
+    /// Return the borrowed C ABI pointer for a backend-specific extension.
+    /// The engine owns the pointed-to interface for the module lifetime.
     pub fn as_ptr(&self) -> *const sys::NativeInterface {
         self.raw.as_ptr()
+    }
+
+    pub fn cus(&self) -> crate::cus::NativeCus {
+        crate::cus::NativeCus::new(*self)
     }
 
     pub fn units_query(&self) -> UnitsQuery<'_> {

@@ -8,6 +8,7 @@
 
 #include "NativeInterface/NativeInterface.h"
 #include "NativeInterface/api/Callins.h"
+#include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "System/Log/ILog.h"
 #include "WasmCoreHost.h"
 
@@ -90,6 +91,8 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 		WasmCoreHost::Unload(module.descriptor.name);
 		return false;
 	}
+	if (unitScriptEngine != nullptr)
+		unitScriptEngine->AddCusBackend(module.host);
 	coreModules.push_back(std::move(module));
 	std::stable_sort(coreModules.begin(), coreModules.end(),
 		[](const CoreModuleRecord& left, const CoreModuleRecord& right) {
@@ -183,6 +186,8 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 		});
 	if (iter == coreModules.end())
 		return false;
+	if (unitScriptEngine != nullptr)
+		unitScriptEngine->RemoveCusBackend(iter->host);
 	coreModules.erase(iter);
 	WasmCoreHost::Unload(moduleName);
 	InvalidateSubscribers();
@@ -191,8 +196,11 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 
 void WasmInterfaceSystem::UnloadAll()
 {
-	for (const CoreModuleRecord& module : coreModules)
+	for (const CoreModuleRecord& module : coreModules) {
+		if (unitScriptEngine != nullptr)
+			unitScriptEngine->RemoveCusBackend(module.host);
 		WasmCoreHost::Unload(module.descriptor.name);
+	}
 	coreModules.clear();
 	InvalidateSubscribers();
 }
@@ -202,6 +210,14 @@ void WasmInterfaceSystem::Update()
 	if (WasmCoreHost::PendingUnsyncedFaults() == 0)
 		return;
 	RemoveFaultedUnsyncedModules();
+}
+
+void WasmInterfaceSystem::Tick(std::uint32_t frame)
+{
+	for (const CoreModuleRecord& module : coreModules) {
+		if (module.host != nullptr)
+			module.host->Tick(frame);
+	}
 }
 
 bool WasmInterfaceSystem::DispatchSyncedMessage(std::string_view message, std::string& error)

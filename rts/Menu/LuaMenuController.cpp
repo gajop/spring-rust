@@ -67,6 +67,7 @@ bool CLuaMenuController::Reset()
 	vfsHandler->FreeLock();
 
 	mouse->ReloadCursors();
+	ReloadWasmMenu();
 	return true;
 }
 

@@ -127,8 +127,9 @@ struct COBScriptApi {
 };
 
 // Numeric subset of Spring.UnitScript.CallAsUnit. The function name is
-// resolved in the target Lua unit-script environment. Arguments and return
-// values are variable-length arrays owned by the API call.
+// resolved by the target unit-script backend (Lua, CUS, or another
+// backend). Arguments and return values are variable-length arrays owned by
+// the API call.
 struct CallUnitScriptQuery {
 	int32_t unitID;
 	const char* functionName;

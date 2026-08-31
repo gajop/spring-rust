@@ -2,8 +2,7 @@
 
 /* heavily based on CobEngine.h */
 
-#ifndef UNIT_SCRIPT_ENGINE_H
-#define UNIT_SCRIPT_ENGINE_H
+#pragma once
 
 #include <vector>
 
@@ -12,6 +11,7 @@
 struct UnitDef;
 class CUnit;
 class CUnitScript;
+class NativeUnitScriptBackend;
 
 
 class CUnitScriptEngine
@@ -24,9 +24,13 @@ public:
 	void ReloadScripts(const UnitDef* udef);
 
 	void Tick(int deltaTime);
+	void SetCusBackend(NativeUnitScriptBackend* backend);
+	void AddCusBackend(NativeUnitScriptBackend* backend);
+	void RemoveCusBackend(NativeUnitScriptBackend* backend);
+	void CancelCusBackend(NativeUnitScriptBackend* backend);
 
 	void Init() { animating.reserve(256); }
-	void Kill() { animating.clear(); }
+	void Kill();
 
 	const auto& GetAnimating() const { return animating; }
 
@@ -34,10 +38,9 @@ public:
 	static void KillStatic();
 private:
 	CUnitScript* currentScript = nullptr;
+	std::vector<NativeUnitScriptBackend*> cusBackends;
 
 	std::vector<CUnitScript*> animating;
 };
 
 extern CUnitScriptEngine* unitScriptEngine;
-
-#endif // UNIT_SCRIPT_ENGINE_H

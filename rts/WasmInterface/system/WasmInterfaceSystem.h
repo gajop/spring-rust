@@ -42,6 +42,10 @@ public:
 	bool UnloadModule(std::string_view moduleName);
 	void UnloadAll();
 	void Update();
+	// Advance every synced Core guest exactly once at the simulation frame
+	// boundary. This is separate from Update(), which runs on the unsynced
+	// render/update path and cannot drive deterministic CUS tasks.
+	void Tick(std::uint32_t frame);
 
 	// Dispatch is keyed by the numeric callin id, which every engine call site
 	// knows at compile time. No layer below this point looks at an event name

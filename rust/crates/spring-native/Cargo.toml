@@ -6,6 +6,7 @@ description = "Safe Rust façade over Spring's NativeInterface"
 license = "GPL-2.0-or-later"
 
 [dependencies]
+spring = { path = "../spring", features = ["alloc"] }
 spring-native-sys = { path = "../spring-native-sys" }
 
 [dev-dependencies]

@@ -1,0 +1,12 @@
+[package]
+name = "rust-cus-e2e-native"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+spring = { path = "../../../../rust/crates/spring", features = ["alloc"] }
+spring-native = { path = "../../../../rust/crates/spring-native" }

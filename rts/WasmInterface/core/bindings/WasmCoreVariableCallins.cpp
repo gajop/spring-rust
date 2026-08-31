@@ -158,7 +158,6 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 		error = "Core AddConsoleLine export is unavailable";
 		return false;
 	}
-	bool& scratchInUse = VariableCallinScratchInUse();
 	if (scratchInUse) {
 		error = "nested Core variable callin would overwrite guest scratch";
 		return false;
@@ -213,7 +212,6 @@ bool VariableCallinBindings::CommandNotify(wasmtime_context_t* context,
 		error = "Core CommandNotify export is unavailable";
 		return false;
 	}
-	bool& scratchInUse = VariableCallinScratchInUse();
 	if (scratchInUse) {
 		error = "nested Core variable callin would overwrite guest scratch";
 		return false;

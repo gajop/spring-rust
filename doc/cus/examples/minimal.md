@@ -3,6 +3,9 @@
 The exact API names are provisional. This example shows the intended authoring
 shape rather than a frozen SDK.
 
+For the currently implemented stable runtime surface (which does not require
+the illustrative `#[cus]` generator), see [the V1 implementation note](../implementation.md).
+
 ```rust
 use spring::cus::prelude::*;
 

@@ -14,6 +14,11 @@ The proposal has two equally important parts:
 CUS is not Wasm-only. These documents live beside the current Rust/Wasm work
 because that is where the Rust interface is currently being developed.
 
+The portable V1 runtime, backend-neutral C++ adapter, and concrete NativeCUS
+and Core-Wasm transport paths are implemented in this repository. The
+attachment, dispatch, and module ABI are recorded in [the implementation
+note](implementation.md).
+
 ## Core decisions
 
 - A game's CUS scripts live in the **same synced Rust module** as the rest of
@@ -65,6 +70,10 @@ The exact trait names and attributes above are provisional. `#[cus]` is used in
 these documents rather than `#[callin]`; "callin" already carries Lua/event
 meaning in the Spring ecosystem.
 
+The concrete V1 slice uses the stable `spring::cus` traits and
+`TaskDefinition` API directly; the `#[cus]` spelling above remains a planned
+authoring/code-generation layer and is not required by the runtime.
+
 ## Reading order
 
 Start with:
@@ -74,6 +83,7 @@ Start with:
 - [Module model](design/module-model.md)
 - [Game API integration](design/game-api.md)
 - [Portable Spring Rust SDK](sdk/portable-spring-rust.md)
+- [Concrete V1 implementation](implementation.md)
 
 Then:
 

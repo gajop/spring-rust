@@ -54,6 +54,7 @@ private:
 	RawExport commandNotify;
 	std::uint32_t scratchOffset = 0;
 	std::uint32_t scratchCapacity = 0;
+	mutable bool scratchInUse = false;
 };
 
 #endif

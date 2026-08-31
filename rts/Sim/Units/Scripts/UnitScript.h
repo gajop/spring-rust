@@ -2,8 +2,7 @@
 
 /* heavily based on CobInstance.h */
 
-#ifndef UNIT_SCRIPT_H
-#define UNIT_SCRIPT_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -110,6 +109,7 @@ public:
 public:
 	CUnitScript(CUnit* unit);
 	virtual ~CUnitScript();
+	virtual bool IsCusScript() const { return false; }
 
 	bool IsBusy() const { return busy; }
 
@@ -218,9 +218,18 @@ public:
 	virtual bool  BlockShot(int weaponNum, const CUnit* targetUnit, bool userTarget) = 0; // returns whether shot should be blocked
 	virtual float TargetWeight(int weaponNum, const CUnit* targetUnit) = 0; // returns target weight
 	virtual void AnimFinished(AnimType type, int piece, int axis) = 0;
+
+	// Backend-neutral named call surface used by native and Core-Wasm scripts.
+	// Legacy Lua overrides this; other script backends may implement it without
+	// exposing their internal representation to NativeInterface callers.
+	virtual bool CallFunctionByName(const char* functionName, const float* args, uint32_t argCount,
+		float* retValues, uint32_t retCapacity, uint32_t& retCount, bool& found)
+	{
+		found = false;
+		retCount = 0;
+		return false;
+	}
 public:
 	const auto& GetLiveAnims() const { return anims; }
 	const auto& GetDoneAnims() const { return doneAnims; }
 };
-
-#endif // UNIT_SCRIPT_H
