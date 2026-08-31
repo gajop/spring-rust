@@ -1638,9 +1638,7 @@ fn convert_to_core(
             if converted == "value" {
                 expression.to_owned()
             } else {
-                format!(
-                    "match {expression} {{ Some(value) => Some({converted}), None => None }}"
-                )
+                format!("match {expression} {{ Some(value) => Some({converted}), None => None }}")
             }
         }
         _ => expression.to_owned(),
@@ -1708,9 +1706,7 @@ fn convert_from_core(
             if converted == "value" {
                 expression.to_owned()
             } else {
-                format!(
-                    "match {expression} {{ Some(value) => Some({converted}), None => None }}"
-                )
+                format!("match {expression} {{ Some(value) => Some({converted}), None => None }}")
             }
         }
         _ => expression.to_owned(),

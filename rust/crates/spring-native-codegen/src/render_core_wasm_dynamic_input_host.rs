@@ -485,8 +485,7 @@ fn render_callback(
             "    std::uint32_t {stem}Pointer = 0, {stem}Bytes = 0;\n    if (!inputControl.U32({stem}Pointer) || !inputControl.U32({stem}Bytes)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n    if (!guard.Charge({stem}Bytes)) return Trap(budgetError);\n    std::span<const std::uint8_t> {stem}Wire;\n    if (!state->memory.View({stem}Pointer, {stem}Bytes, {stem}Wire)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    WireReader {stem}Reader({stem}Wire);\n",
         ));
         body.push_str(&render_top_input(field, records, &stem));
-        let trailing =
-            render_core_wasm_owned_guest::di_blob_trailing_alignment(&field.ty, records);
+        let trailing = render_core_wasm_owned_guest::di_blob_trailing_alignment(&field.ty, records);
         body.push_str(&format!(
             "    if (!{stem}Reader.Finish({trailing}u)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n"
         ));
@@ -691,7 +690,9 @@ fn render_result(
             ));
             output
         }
-        ResultStrategy::VariableOutputBuffer if matches!(function.outputs[0].ty, SemanticType::String) => {
+        ResultStrategy::VariableOutputBuffer
+            if matches!(function.outputs[0].ty, SemanticType::String) =>
+        {
             let field_name = &function.outputs[0].name;
             format!(
                 "    if (errorCode != 0) {{ slots[0].i32 = errorCode; return nullptr; }}\n    const std::size_t requiredSize = result.{field_name} == nullptr ? 0u : std::char_traits<char>::length(result.{field_name});\n    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);\n    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap(\"dynamic-input output descriptor changed unexpectedly\");\n    if (outputCapacity < required) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!CheckResultBytes(state, requiredSize)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!guard.Charge(requiredSize)) return Trap(budgetError);\n    if (required != 0) {{\n        std::span<std::uint8_t> outputWire;\n        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap(\"dynamic-input output range changed unexpectedly\");\n        std::memcpy(outputWire.data(), result.{field_name}, requiredSize);\n    }}\n    slots[0].i32 = 0;\n    return nullptr;\n",

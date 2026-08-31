@@ -798,11 +798,12 @@ fn decode_fixed_value(
             )
         }
         SemanticType::Option { inner } => {
-            let present = format!(
-                "super::__core_wire::boolean(&{wire}, &mut {cursor}).ok_or({internal})?"
-            );
+            let present =
+                format!("super::__core_wire::boolean(&{wire}, &mut {cursor}).ok_or({internal})?");
             let payload = decode_fixed_value(inner, records, wire, cursor);
-            format!("{{ let core_present = {present}; let core_value = {payload}; if core_present {{ Some(core_value) }} else {{ None }} }}")
+            format!(
+                "{{ let core_present = {present}; let core_value = {payload}; if core_present {{ Some(core_value) }} else {{ None }} }}"
+            )
         }
         _ => unreachable!(),
     }
