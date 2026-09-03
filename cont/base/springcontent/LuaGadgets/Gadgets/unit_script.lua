@@ -256,7 +256,12 @@ local function WakeUp(thread, ...)
 	local good, err = co_resume(co, ...)
 	if (not good) then
 		Spring.Log(section, LOG.ERROR, err)
-		Spring.Log(section, LOG.ERROR, debug.traceback(co))
+		-- The synced sandbox unloads the debug library, so debug.traceback is
+		-- only there under /devmode.  Calling it unconditionally raised a
+		-- second error inside the handler and hid the one we just logged.
+		if debug and debug.traceback then
+			Spring.Log(section, LOG.ERROR, debug.traceback(co))
+		end
 		RunOnError(thread)
 	end
 end

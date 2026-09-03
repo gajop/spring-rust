@@ -1,5 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 #include <cassert>
@@ -42,6 +44,8 @@
 #include "System/SpringMath.h"
 #include "System/SafeUtil.h"
 #include "System/StringHash.h"
+#include "System/Platform/CrashHandler.h"
+#include "System/Platform/Threading.h"
 
 #include "System/Misc/TracyDefs.h"
 
@@ -944,6 +948,17 @@ bool CCustomExplosionGenerator::Load(CExplosionGeneratorHandler* handler, const 
 	if (!expTable.IsValid()) {
 		// not a fatal error: any calls to Explosion will just return early
 		LOG_L(L_WARNING, "[CCEG::%s] table for CEG \"%s\" invalid (parse errors?)", __func__, tag);
+
+		// A tag that is nothing but digits is not a CEG somebody forgot to
+		// define: it is a caller handing us a number where a name belongs,
+		// e.g. Spring.SpawnCEG(3) - lua_isstring accepts numbers, so the
+		// mistake reaches us silently as "3".  The name on its own identifies
+		// nothing, so print where the request came from.
+		if (tag[0] != 0 && std::all_of(tag, tag + strlen(tag), [](char c) { return c >= '0' && c <= '9'; })) {
+			LOG_L(L_WARNING, "[CCEG::%s] \"%s\" is numeric, so a caller passed a number instead of a CEG name", __func__, tag);
+			CrashHandler::Stacktrace(Threading::GetCurrentThread(), "CEG", LOG_LEVEL_WARNING);
+		}
+
 		return false;
 	}
 
