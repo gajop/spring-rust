@@ -59,8 +59,13 @@ static const char* CopyString(const std::string& str) {
 }
 
 static void ResetParamValue(RulesParamValue& value) {
+	// Every member is cleared, not just the tagged one: the members no longer
+	// alias, and a generated encoder may serialise stringValue whatever `type`
+	// says, so it has to be a valid pointer rather than whatever was on the stack.
 	value.type = RULESPARAM_TYPE_BOOL;
 	value.boolValue = false;
+	value.floatValue = 0.0f;
+	value.stringValue = "";
 }
 
 // Helper to convert LuaRulesParams::Param to RulesParamValue

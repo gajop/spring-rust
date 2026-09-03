@@ -1225,9 +1225,11 @@ GetModelPieceListQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modelNameInputBytes;
-    if (!state->memory.View(modelNameInputPointer, modelNameInputCount, modelNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modelNameInputStorage(reinterpret_cast<const char*>(modelNameInputBytes.data()), modelNameInputBytes.size());
+    std::span<const std::uint8_t> modelNameInputWire;
+    if (!state->memory.View(modelNameInputPointer, modelNameInputCount, modelNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modelNameInputReader(modelNameInputWire);
+    std::string modelNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!modelNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modelNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modelNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.modelName = modelNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1332,9 +1334,11 @@ GetModelPieceMapQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modelNameInputBytes;
-    if (!state->memory.View(modelNameInputPointer, modelNameInputCount, modelNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modelNameInputStorage(reinterpret_cast<const char*>(modelNameInputBytes.data()), modelNameInputBytes.size());
+    std::span<const std::uint8_t> modelNameInputWire;
+    if (!state->memory.View(modelNameInputPointer, modelNameInputCount, modelNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modelNameInputReader(modelNameInputWire);
+    std::string modelNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!modelNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modelNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modelNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.modelName = modelNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2489,9 +2493,11 @@ GetProjectileDamagesQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> tagInputBytes;
-    if (!state->memory.View(tagInputPointer, tagInputCount, tagInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string tagInputStorage(reinterpret_cast<const char*>(tagInputBytes.data()), tagInputBytes.size());
+    std::span<const std::uint8_t> tagInputWire;
+    if (!state->memory.View(tagInputPointer, tagInputCount, tagInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader tagInputReader(tagInputWire);
+    std::string tagInputStorage;
+    { std::uint32_t coreLength = 0; if (!tagInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!tagInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } tagInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.tag = tagInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -3822,9 +3828,11 @@ GetSideDataQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> sideNameInputBytes;
-    if (!state->memory.View(sideNameInputPointer, sideNameInputCount, sideNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string sideNameInputStorage(reinterpret_cast<const char*>(sideNameInputBytes.data()), sideNameInputBytes.size());
+    std::span<const std::uint8_t> sideNameInputWire;
+    if (!state->memory.View(sideNameInputPointer, sideNameInputCount, sideNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader sideNameInputReader(sideNameInputWire);
+    std::string sideNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!sideNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!sideNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } sideNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.sideName = sideNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4130,9 +4138,11 @@ GetFeatureRulesParamQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> paramNameInputBytes;
-    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string paramNameInputStorage(reinterpret_cast<const char*>(paramNameInputBytes.data()), paramNameInputBytes.size());
+    std::span<const std::uint8_t> paramNameInputWire;
+    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader paramNameInputReader(paramNameInputWire);
+    std::string paramNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!paramNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.paramName = paramNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4321,9 +4331,11 @@ GetGameRulesParamQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> paramNameInputBytes;
-    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string paramNameInputStorage(reinterpret_cast<const char*>(paramNameInputBytes.data()), paramNameInputBytes.size());
+    std::span<const std::uint8_t> paramNameInputWire;
+    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader paramNameInputReader(paramNameInputWire);
+    std::string paramNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!paramNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.paramName = paramNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4513,9 +4525,11 @@ GetPlayerRulesParamQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> paramNameInputBytes;
-    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string paramNameInputStorage(reinterpret_cast<const char*>(paramNameInputBytes.data()), paramNameInputBytes.size());
+    std::span<const std::uint8_t> paramNameInputWire;
+    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader paramNameInputReader(paramNameInputWire);
+    std::string paramNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!paramNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.paramName = paramNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4705,9 +4719,11 @@ GetTeamRulesParamQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> paramNameInputBytes;
-    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string paramNameInputStorage(reinterpret_cast<const char*>(paramNameInputBytes.data()), paramNameInputBytes.size());
+    std::span<const std::uint8_t> paramNameInputWire;
+    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader paramNameInputReader(paramNameInputWire);
+    std::string paramNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!paramNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.paramName = paramNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4897,9 +4913,11 @@ GetUnitRulesParamQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> paramNameInputBytes;
-    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string paramNameInputStorage(reinterpret_cast<const char*>(paramNameInputBytes.data()), paramNameInputBytes.size());
+    std::span<const std::uint8_t> paramNameInputWire;
+    if (!state->memory.View(paramNameInputPointer, paramNameInputCount, paramNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader paramNameInputReader(paramNameInputWire);
+    std::string paramNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!paramNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!paramNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } paramNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.paramName = paramNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -5370,9 +5388,11 @@ GetActionHotKeysQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> actionInputBytes;
-    if (!state->memory.View(actionInputPointer, actionInputCount, actionInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string actionInputStorage(reinterpret_cast<const char*>(actionInputBytes.data()), actionInputBytes.size());
+    std::span<const std::uint8_t> actionInputWire;
+    if (!state->memory.View(actionInputPointer, actionInputCount, actionInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader actionInputReader(actionInputWire);
+    std::string actionInputStorage;
+    { std::uint32_t coreLength = 0; if (!actionInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!actionInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } actionInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.action = actionInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -5477,9 +5497,11 @@ GetKeyBindingsQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keySet1InputBytes;
-    if (!state->memory.View(keySet1InputPointer, keySet1InputCount, keySet1InputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keySet1InputStorage(reinterpret_cast<const char*>(keySet1InputBytes.data()), keySet1InputBytes.size());
+    std::span<const std::uint8_t> keySet1InputWire;
+    if (!state->memory.View(keySet1InputPointer, keySet1InputCount, keySet1InputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keySet1InputReader(keySet1InputWire);
+    std::string keySet1InputStorage;
+    { std::uint32_t coreLength = 0; if (!keySet1InputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keySet1InputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keySet1InputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.keySet1 = keySet1InputStorage.c_str();
     std::uint32_t keySet2InputPointer = 0;
     std::uint32_t keySet2InputCount = 0;
@@ -5487,9 +5509,11 @@ GetKeyBindingsQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keySet2InputBytes;
-    if (!state->memory.View(keySet2InputPointer, keySet2InputCount, keySet2InputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keySet2InputStorage(reinterpret_cast<const char*>(keySet2InputBytes.data()), keySet2InputBytes.size());
+    std::span<const std::uint8_t> keySet2InputWire;
+    if (!state->memory.View(keySet2InputPointer, keySet2InputCount, keySet2InputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keySet2InputReader(keySet2InputWire);
+    std::string keySet2InputStorage;
+    { std::uint32_t coreLength = 0; if (!keySet2InputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keySet2InputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keySet2InputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.keySet2 = keySet2InputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -6556,9 +6580,11 @@ GfxTextureNameQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> nameInputBytes;
-    if (!state->memory.View(nameInputPointer, nameInputCount, nameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string nameInputStorage(reinterpret_cast<const char*>(nameInputBytes.data()), nameInputBytes.size());
+    std::span<const std::uint8_t> nameInputWire;
+    if (!state->memory.View(nameInputPointer, nameInputCount, nameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader nameInputReader(nameInputWire);
+    std::string nameInputStorage;
+    { std::uint32_t coreLength = 0; if (!nameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.name = nameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -6940,9 +6966,11 @@ GetIconDataQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> iconNameInputBytes;
-    if (!state->memory.View(iconNameInputPointer, iconNameInputCount, iconNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string iconNameInputStorage(reinterpret_cast<const char*>(iconNameInputBytes.data()), iconNameInputBytes.size());
+    std::span<const std::uint8_t> iconNameInputWire;
+    if (!state->memory.View(iconNameInputPointer, iconNameInputCount, iconNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader iconNameInputReader(iconNameInputWire);
+    std::string iconNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!iconNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!iconNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } iconNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.iconName = iconNameInputStorage.c_str();
     query.fullData = slots[0].i32 != 0;
     if (!reader.Finish(4u)) {
@@ -7339,9 +7367,11 @@ RmlGetDocumentPathRequestsQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> documentPathInputBytes;
-    if (!state->memory.View(documentPathInputPointer, documentPathInputCount, documentPathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string documentPathInputStorage(reinterpret_cast<const char*>(documentPathInputBytes.data()), documentPathInputBytes.size());
+    std::span<const std::uint8_t> documentPathInputWire;
+    if (!state->memory.View(documentPathInputPointer, documentPathInputCount, documentPathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader documentPathInputReader(documentPathInputWire);
+    std::string documentPathInputStorage;
+    { std::uint32_t coreLength = 0; if (!documentPathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!documentPathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } documentPathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.documentPath = documentPathInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -7446,9 +7476,11 @@ ListDirQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     std::uint32_t patternInputPointer = 0;
     std::uint32_t patternInputCount = 0;
@@ -7456,9 +7488,11 @@ ListDirQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> patternInputBytes;
-    if (!state->memory.View(patternInputPointer, patternInputCount, patternInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string patternInputStorage(reinterpret_cast<const char*>(patternInputBytes.data()), patternInputBytes.size());
+    std::span<const std::uint8_t> patternInputWire;
+    if (!state->memory.View(patternInputPointer, patternInputCount, patternInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader patternInputReader(patternInputWire);
+    std::string patternInputStorage;
+    { std::uint32_t coreLength = 0; if (!patternInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!patternInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } patternInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.pattern = patternInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -7466,9 +7500,11 @@ ListDirQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     query.recursive = slots[0].i32 != 0;
     if (!reader.Finish(4u)) {
@@ -7662,9 +7698,11 @@ GetArchiveDependenciesQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> archiveNameInputBytes;
-    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string archiveNameInputStorage(reinterpret_cast<const char*>(archiveNameInputBytes.data()), archiveNameInputBytes.size());
+    std::span<const std::uint8_t> archiveNameInputWire;
+    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader archiveNameInputReader(archiveNameInputWire);
+    std::string archiveNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!archiveNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.archiveName = archiveNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -7769,9 +7807,11 @@ GetArchiveInfoQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> archiveNameInputBytes;
-    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string archiveNameInputStorage(reinterpret_cast<const char*>(archiveNameInputBytes.data()), archiveNameInputBytes.size());
+    std::span<const std::uint8_t> archiveNameInputWire;
+    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader archiveNameInputReader(archiveNameInputWire);
+    std::string archiveNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!archiveNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.archiveName = archiveNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -7891,9 +7931,11 @@ GetArchiveReplacesQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> archiveNameInputBytes;
-    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string archiveNameInputStorage(reinterpret_cast<const char*>(archiveNameInputBytes.data()), archiveNameInputBytes.size());
+    std::span<const std::uint8_t> archiveNameInputWire;
+    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader archiveNameInputReader(archiveNameInputWire);
+    std::string archiveNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!archiveNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.archiveName = archiveNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -8085,9 +8127,11 @@ GetAvailableAIsQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> gameArchiveNameInputBytes;
-    if (!state->memory.View(gameArchiveNameInputPointer, gameArchiveNameInputCount, gameArchiveNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string gameArchiveNameInputStorage(reinterpret_cast<const char*>(gameArchiveNameInputBytes.data()), gameArchiveNameInputBytes.size());
+    std::span<const std::uint8_t> gameArchiveNameInputWire;
+    if (!state->memory.View(gameArchiveNameInputPointer, gameArchiveNameInputCount, gameArchiveNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader gameArchiveNameInputReader(gameArchiveNameInputWire);
+    std::string gameArchiveNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!gameArchiveNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!gameArchiveNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } gameArchiveNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.gameArchiveName = gameArchiveNameInputStorage.c_str();
     std::uint32_t mapArchiveNameInputPointer = 0;
     std::uint32_t mapArchiveNameInputCount = 0;
@@ -8095,9 +8139,11 @@ GetAvailableAIsQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> mapArchiveNameInputBytes;
-    if (!state->memory.View(mapArchiveNameInputPointer, mapArchiveNameInputCount, mapArchiveNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string mapArchiveNameInputStorage(reinterpret_cast<const char*>(mapArchiveNameInputBytes.data()), mapArchiveNameInputBytes.size());
+    std::span<const std::uint8_t> mapArchiveNameInputWire;
+    if (!state->memory.View(mapArchiveNameInputPointer, mapArchiveNameInputCount, mapArchiveNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader mapArchiveNameInputReader(mapArchiveNameInputWire);
+    std::string mapArchiveNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!mapArchiveNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!mapArchiveNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } mapArchiveNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mapArchiveName = mapArchiveNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -8209,9 +8255,11 @@ GetFileInfoQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -8573,9 +8621,11 @@ ListDirQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     std::uint32_t patternInputPointer = 0;
     std::uint32_t patternInputCount = 0;
@@ -8583,9 +8633,11 @@ ListDirQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> patternInputBytes;
-    if (!state->memory.View(patternInputPointer, patternInputCount, patternInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string patternInputStorage(reinterpret_cast<const char*>(patternInputBytes.data()), patternInputBytes.size());
+    std::span<const std::uint8_t> patternInputWire;
+    if (!state->memory.View(patternInputPointer, patternInputCount, patternInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader patternInputReader(patternInputWire);
+    std::string patternInputStorage;
+    { std::uint32_t coreLength = 0; if (!patternInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!patternInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } patternInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.pattern = patternInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -8593,9 +8645,11 @@ ListDirQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     query.recursive = slots[0].i32 != 0;
     if (!reader.Finish(4u)) {
@@ -8702,9 +8756,11 @@ SubDirsQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     std::uint32_t patternInputPointer = 0;
     std::uint32_t patternInputCount = 0;
@@ -8712,9 +8768,11 @@ SubDirsQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> patternInputBytes;
-    if (!state->memory.View(patternInputPointer, patternInputCount, patternInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string patternInputStorage(reinterpret_cast<const char*>(patternInputBytes.data()), patternInputBytes.size());
+    std::span<const std::uint8_t> patternInputWire;
+    if (!state->memory.View(patternInputPointer, patternInputCount, patternInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader patternInputReader(patternInputWire);
+    std::string patternInputStorage;
+    { std::uint32_t coreLength = 0; if (!patternInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!patternInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } patternInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.pattern = patternInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -8722,9 +8780,11 @@ SubDirsQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     query.recursive = slots[0].i32 != 0;
     if (!reader.Finish(4u)) {

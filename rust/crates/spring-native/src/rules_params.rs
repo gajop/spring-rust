@@ -31,30 +31,21 @@ impl<'a> RulesParams<'a> {
 impl RulesParamValue {
     pub(crate) fn from_sys(value: sys::RulesParamValue) -> Self {
         match value.type_ {
-            sys::RulesParamType_RULESPARAM_TYPE_BOOL => {
-                // SAFETY: the native API tags this union value as BOOL.
-                RulesParamValue::Bool(unsafe { value.__bindgen_anon_1.boolValue })
-            }
+            sys::RulesParamType_RULESPARAM_TYPE_BOOL => RulesParamValue::Bool(value.boolValue),
             sys::RulesParamType_RULESPARAM_TYPE_STRING => {
-                // SAFETY: the native API tags this union value as STRING.
-                let ptr = unsafe { value.__bindgen_anon_1.stringValue };
-                if ptr.is_null() {
+                if value.stringValue.is_null() {
                     RulesParamValue::String(String::new())
                 } else {
                     // SAFETY: rules-param strings are returned as NUL-terminated
                     // C strings valid for the duration of the call.
                     RulesParamValue::String(
-                        unsafe { CStr::from_ptr(ptr) }
+                        unsafe { CStr::from_ptr(value.stringValue) }
                             .to_string_lossy()
                             .into_owned(),
                     )
                 }
             }
-            _ => {
-                // SAFETY: FLOAT uses this union arm; unknown tags fall back to
-                // the same numeric representation for forward compatibility.
-                RulesParamValue::Float(unsafe { value.__bindgen_anon_1.floatValue })
-            }
+            _ => RulesParamValue::Float(value.floatValue),
         }
     }
 
@@ -62,15 +53,15 @@ impl RulesParamValue {
         Ok(match self {
             RulesParamValue::Bool(value) => SysRulesParamValue {
                 value: sys::RulesParamValue {
-                    type_: sys::RulesParamType_RULESPARAM_TYPE_BOOL,
-                    __bindgen_anon_1: sys::RulesParamValue__bindgen_ty_1 { boolValue: *value },
+                    boolValue: *value,
+                    ..empty_sys(sys::RulesParamType_RULESPARAM_TYPE_BOOL)
                 },
                 _string: None,
             },
             RulesParamValue::Float(value) => SysRulesParamValue {
                 value: sys::RulesParamValue {
-                    type_: sys::RulesParamType_RULESPARAM_TYPE_FLOAT,
-                    __bindgen_anon_1: sys::RulesParamValue__bindgen_ty_1 { floatValue: *value },
+                    floatValue: *value,
+                    ..empty_sys(sys::RulesParamType_RULESPARAM_TYPE_FLOAT)
                 },
                 _string: None,
             },
@@ -79,15 +70,22 @@ impl RulesParamValue {
                     .map_err(|_| Error::invalid_argument("rules-param string value"))?;
                 SysRulesParamValue {
                     value: sys::RulesParamValue {
-                        type_: sys::RulesParamType_RULESPARAM_TYPE_STRING,
-                        __bindgen_anon_1: sys::RulesParamValue__bindgen_ty_1 {
-                            stringValue: string.as_ptr(),
-                        },
+                        stringValue: string.as_ptr(),
+                        ..empty_sys(sys::RulesParamType_RULESPARAM_TYPE_STRING)
                     },
                     _string: Some(string),
                 }
             }
         })
+    }
+}
+
+fn empty_sys(type_: sys::RulesParamType) -> sys::RulesParamValue {
+    sys::RulesParamValue {
+        type_,
+        boolValue: false,
+        floatValue: 0.0,
+        stringValue: std::ptr::null(),
     }
 }
 

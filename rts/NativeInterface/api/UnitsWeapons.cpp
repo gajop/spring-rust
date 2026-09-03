@@ -4,6 +4,7 @@
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Weapons/Weapon.h"
 #include "Sim/Weapons/WeaponDef.h"
+#include "Sim/Misc/GlobalConstants.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "System/float3.h"
 
@@ -88,6 +89,8 @@ static void NativeGetUnitWeaponState(const GetUnitWeaponStateQuery* query, GetUn
 		return;
 	}
 
+	// The whole state struct is returned at once, so the key only selects a field
+	// on the guest side.
 	(void)query->key;
 
 	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
@@ -96,7 +99,10 @@ static void NativeGetUnitWeaponState(const GetUnitWeaponStateQuery* query, GetUn
 		return;
 	}
 
-	result->state.reloadTime = weapon->weaponDef->reload;
+	// The live reload, not weaponDef->reload: SetUnitWeaponState writes
+	// weapon->reloadTime, so reading the def value made every write look lost.
+	// Stored in frames, reported in seconds, matching Spring.GetUnitWeaponState.
+	result->state.reloadTime = weapon->reloadTime * INV_GAME_SPEED;
 	result->state.reloadFrame = weapon->reloadStatus;
 	result->state.range = weapon->range;
 	result->state.projectileSpeed = weapon->projectileSpeed;

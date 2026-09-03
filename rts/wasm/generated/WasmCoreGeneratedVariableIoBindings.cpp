@@ -106,9 +106,11 @@ wasm_trap_t* CoreVariableIo_unit_defs_get_unit_def_custom_param(void* environmen
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -178,9 +180,11 @@ wasm_trap_t* CoreVariableIo_unit_defs_get_unit_def_param_string(void* environmen
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -250,9 +254,11 @@ wasm_trap_t* CoreVariableIo_feature_defs_get_feature_def_custom_param(void* envi
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -322,9 +328,11 @@ wasm_trap_t* CoreVariableIo_weapon_defs_get_weapon_def_custom_param(void* enviro
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -393,9 +401,11 @@ wasm_trap_t* CoreVariableIo_game_get_map_option(void* environment, wasmtime_call
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -468,9 +478,11 @@ wasm_trap_t* CoreVariableIo_game_get_mod_option(void* environment, wasmtime_call
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -544,9 +556,11 @@ wasm_trap_t* CoreVariableIo_encoding_decode_base64(void* environment, wasmtime_c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> textInputBytes;
-    if (!state->memory.View(textInputPointer, textInputCount, textInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string textInputStorage(reinterpret_cast<const char*>(textInputBytes.data()), textInputBytes.size());
+    std::span<const std::uint8_t> textInputWire;
+    if (!state->memory.View(textInputPointer, textInputCount, textInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader textInputReader(textInputWire);
+    std::string textInputStorage;
+    { std::uint32_t coreLength = 0; if (!textInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.text = textInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -625,9 +639,11 @@ wasm_trap_t* CoreVariableIo_encoding_decode_base64_url(void* environment, wasmti
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> textInputBytes;
-    if (!state->memory.View(textInputPointer, textInputCount, textInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string textInputStorage(reinterpret_cast<const char*>(textInputBytes.data()), textInputBytes.size());
+    std::span<const std::uint8_t> textInputWire;
+    if (!state->memory.View(textInputPointer, textInputCount, textInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader textInputReader(textInputWire);
+    std::string textInputStorage;
+    { std::uint32_t coreLength = 0; if (!textInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.text = textInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -870,9 +886,11 @@ wasm_trap_t* CoreVariableIo_input_get_key_from_scan_symbol(void* environment, wa
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> scanSymbolInputBytes;
-    if (!state->memory.View(scanSymbolInputPointer, scanSymbolInputCount, scanSymbolInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string scanSymbolInputStorage(reinterpret_cast<const char*>(scanSymbolInputBytes.data()), scanSymbolInputBytes.size());
+    std::span<const std::uint8_t> scanSymbolInputWire;
+    if (!state->memory.View(scanSymbolInputPointer, scanSymbolInputCount, scanSymbolInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader scanSymbolInputReader(scanSymbolInputWire);
+    std::string scanSymbolInputStorage;
+    { std::uint32_t coreLength = 0; if (!scanSymbolInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!scanSymbolInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } scanSymbolInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.scanSymbol = scanSymbolInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -941,9 +959,11 @@ wasm_trap_t* CoreVariableIo_config_get_config_string(void* environment, wasmtime
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     bool defaultValueInputPresent = false;
     std::uint32_t defaultValueInputPointer = 0;
@@ -1040,9 +1060,11 @@ wasm_trap_t* CoreVariableIo_tracing_trace_ray_between_positions(void* environmen
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> typeInputBytes;
-    if (!state->memory.View(typeInputPointer, typeInputCount, typeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string typeInputStorage(reinterpret_cast<const char*>(typeInputBytes.data()), typeInputBytes.size());
+    std::span<const std::uint8_t> typeInputWire;
+    if (!state->memory.View(typeInputPointer, typeInputCount, typeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader typeInputReader(typeInputWire);
+    std::string typeInputStorage;
+    { std::uint32_t coreLength = 0; if (!typeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!typeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } typeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.type = typeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1136,9 +1158,11 @@ wasm_trap_t* CoreVariableIo_tracing_trace_ray_in_direction(void* environment, wa
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> typeInputBytes;
-    if (!state->memory.View(typeInputPointer, typeInputCount, typeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string typeInputStorage(reinterpret_cast<const char*>(typeInputBytes.data()), typeInputBytes.size());
+    std::span<const std::uint8_t> typeInputWire;
+    if (!state->memory.View(typeInputPointer, typeInputCount, typeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader typeInputReader(typeInputWire);
+    std::string typeInputStorage;
+    { std::uint32_t coreLength = 0; if (!typeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!typeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } typeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.type = typeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1218,9 +1242,11 @@ wasm_trap_t* CoreVariableIo_unsynced_ctrl_get_water_texture(void* environment, w
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> texTypeInputBytes;
-    if (!state->memory.View(texTypeInputPointer, texTypeInputCount, texTypeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string texTypeInputStorage(reinterpret_cast<const char*>(texTypeInputBytes.data()), texTypeInputBytes.size());
+    std::span<const std::uint8_t> texTypeInputWire;
+    if (!state->memory.View(texTypeInputPointer, texTypeInputCount, texTypeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader texTypeInputReader(texTypeInputWire);
+    std::string texTypeInputStorage;
+    { std::uint32_t coreLength = 0; if (!texTypeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!texTypeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } texTypeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.texType = texTypeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1290,9 +1316,11 @@ wasm_trap_t* CoreVariableIo_gfx_font_wrap_text(void* environment, wasmtime_calle
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> textInputBytes;
-    if (!state->memory.View(textInputPointer, textInputCount, textInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string textInputStorage(reinterpret_cast<const char*>(textInputBytes.data()), textInputBytes.size());
+    std::span<const std::uint8_t> textInputWire;
+    if (!state->memory.View(textInputPointer, textInputCount, textInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader textInputReader(textInputWire);
+    std::string textInputStorage;
+    { std::uint32_t coreLength = 0; if (!textInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!textInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } textInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.text = textInputStorage.c_str();
     query.maxWidth = slots[1].f32;
     query.maxHeight = slots[2].f32;
@@ -1368,9 +1396,11 @@ wasm_trap_t* CoreVariableIo_gfx_get_atmosphere(void* environment, wasmtime_calle
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -1378,9 +1408,11 @@ wasm_trap_t* CoreVariableIo_gfx_get_atmosphere(void* environment, wasmtime_calle
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1463,9 +1495,11 @@ wasm_trap_t* CoreVariableIo_gfx_get_map_rendering(void* environment, wasmtime_ca
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -1473,9 +1507,11 @@ wasm_trap_t* CoreVariableIo_gfx_get_map_rendering(void* environment, wasmtime_ca
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1558,9 +1594,11 @@ wasm_trap_t* CoreVariableIo_gfx_get_sun(void* environment, wasmtime_caller_t* ca
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -1568,9 +1606,11 @@ wasm_trap_t* CoreVariableIo_gfx_get_sun(void* environment, wasmtime_caller_t* ca
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1653,9 +1693,11 @@ wasm_trap_t* CoreVariableIo_gfx_get_water_rendering(void* environment, wasmtime_
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> keyInputBytes;
-    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string keyInputStorage(reinterpret_cast<const char*>(keyInputBytes.data()), keyInputBytes.size());
+    std::span<const std::uint8_t> keyInputWire;
+    if (!state->memory.View(keyInputPointer, keyInputCount, keyInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader keyInputReader(keyInputWire);
+    std::string keyInputStorage;
+    { std::uint32_t coreLength = 0; if (!keyInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } keyInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.key = keyInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -1663,9 +1705,11 @@ wasm_trap_t* CoreVariableIo_gfx_get_water_rendering(void* environment, wasmtime_
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1749,9 +1793,11 @@ wasm_trap_t* CoreVariableIo_profiling_get_profiler_time_record(void* environment
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> nameInputBytes;
-    if (!state->memory.View(nameInputPointer, nameInputCount, nameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string nameInputStorage(reinterpret_cast<const char*>(nameInputBytes.data()), nameInputBytes.size());
+    std::span<const std::uint8_t> nameInputWire;
+    if (!state->memory.View(nameInputPointer, nameInputCount, nameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader nameInputReader(nameInputWire);
+    std::string nameInputStorage;
+    { std::uint32_t coreLength = 0; if (!nameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.name = nameInputStorage.c_str();
     query.includeFrameData = slots[0].i32 != 0;
     if (!reader.Finish(4u)) {
@@ -1844,9 +1890,11 @@ wasm_trap_t* CoreVariableIo_rml_ui_element_get_attribute(void* environment, wasm
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> nameInputBytes;
-    if (!state->memory.View(nameInputPointer, nameInputCount, nameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string nameInputStorage(reinterpret_cast<const char*>(nameInputBytes.data()), nameInputBytes.size());
+    std::span<const std::uint8_t> nameInputWire;
+    if (!state->memory.View(nameInputPointer, nameInputCount, nameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader nameInputReader(nameInputWire);
+    std::string nameInputStorage;
+    { std::uint32_t coreLength = 0; if (!nameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.name = nameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1921,9 +1969,11 @@ wasm_trap_t* CoreVariableIo_rml_ui_element_get_elements_by_class_name(void* envi
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> valueInputBytes;
-    if (!state->memory.View(valueInputPointer, valueInputCount, valueInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string valueInputStorage(reinterpret_cast<const char*>(valueInputBytes.data()), valueInputBytes.size());
+    std::span<const std::uint8_t> valueInputWire;
+    if (!state->memory.View(valueInputPointer, valueInputCount, valueInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader valueInputReader(valueInputWire);
+    std::string valueInputStorage;
+    { std::uint32_t coreLength = 0; if (!valueInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.value = valueInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2008,9 +2058,11 @@ wasm_trap_t* CoreVariableIo_rml_ui_element_get_elements_by_tag_name(void* enviro
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> valueInputBytes;
-    if (!state->memory.View(valueInputPointer, valueInputCount, valueInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string valueInputStorage(reinterpret_cast<const char*>(valueInputBytes.data()), valueInputBytes.size());
+    std::span<const std::uint8_t> valueInputWire;
+    if (!state->memory.View(valueInputPointer, valueInputCount, valueInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader valueInputReader(valueInputWire);
+    std::string valueInputStorage;
+    { std::uint32_t coreLength = 0; if (!valueInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.value = valueInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2095,9 +2147,11 @@ wasm_trap_t* CoreVariableIo_rml_ui_element_query_selector_all(void* environment,
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> valueInputBytes;
-    if (!state->memory.View(valueInputPointer, valueInputCount, valueInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string valueInputStorage(reinterpret_cast<const char*>(valueInputBytes.data()), valueInputBytes.size());
+    std::span<const std::uint8_t> valueInputWire;
+    if (!state->memory.View(valueInputPointer, valueInputCount, valueInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader valueInputReader(valueInputWire);
+    std::string valueInputStorage;
+    { std::uint32_t coreLength = 0; if (!valueInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!valueInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valueInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.value = valueInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2181,9 +2235,11 @@ wasm_trap_t* CoreVariableIo_rml_ui_event_get_parameter_string(void* environment,
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> nameInputBytes;
-    if (!state->memory.View(nameInputPointer, nameInputCount, nameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string nameInputStorage(reinterpret_cast<const char*>(nameInputBytes.data()), nameInputBytes.size());
+    std::span<const std::uint8_t> nameInputWire;
+    if (!state->memory.View(nameInputPointer, nameInputCount, nameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader nameInputReader(nameInputWire);
+    std::string nameInputStorage;
+    { std::uint32_t coreLength = 0; if (!nameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.name = nameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2349,9 +2405,11 @@ wasm_trap_t* CoreVariableIo_vfs_get_archive_checksum(void* environment, wasmtime
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> archiveNameInputBytes;
-    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string archiveNameInputStorage(reinterpret_cast<const char*>(archiveNameInputBytes.data()), archiveNameInputBytes.size());
+    std::span<const std::uint8_t> archiveNameInputWire;
+    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader archiveNameInputReader(archiveNameInputWire);
+    std::string archiveNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!archiveNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.archiveName = archiveNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2427,9 +2485,11 @@ wasm_trap_t* CoreVariableIo_vfs_get_archive_containing_file(void* environment, w
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -2437,9 +2497,11 @@ wasm_trap_t* CoreVariableIo_vfs_get_archive_containing_file(void* environment, w
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2508,9 +2570,11 @@ wasm_trap_t* CoreVariableIo_vfs_get_archive_path(void* environment, wasmtime_cal
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> archiveNameInputBytes;
-    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string archiveNameInputStorage(reinterpret_cast<const char*>(archiveNameInputBytes.data()), archiveNameInputBytes.size());
+    std::span<const std::uint8_t> archiveNameInputWire;
+    if (!state->memory.View(archiveNameInputPointer, archiveNameInputCount, archiveNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader archiveNameInputReader(archiveNameInputWire);
+    std::string archiveNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!archiveNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!archiveNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } archiveNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.archiveName = archiveNameInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2579,9 +2643,11 @@ wasm_trap_t* CoreVariableIo_vfs_get_file_absolute_path(void* environment, wasmti
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -2589,9 +2655,11 @@ wasm_trap_t* CoreVariableIo_vfs_get_file_absolute_path(void* environment, wasmti
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2660,9 +2728,11 @@ wasm_trap_t* CoreVariableIo_vfs_get_name_from_rapid_tag(void* environment, wasmt
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> rapidTagInputBytes;
-    if (!state->memory.View(rapidTagInputPointer, rapidTagInputCount, rapidTagInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string rapidTagInputStorage(reinterpret_cast<const char*>(rapidTagInputBytes.data()), rapidTagInputBytes.size());
+    std::span<const std::uint8_t> rapidTagInputWire;
+    if (!state->memory.View(rapidTagInputPointer, rapidTagInputCount, rapidTagInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader rapidTagInputReader(rapidTagInputWire);
+    std::string rapidTagInputStorage;
+    { std::uint32_t coreLength = 0; if (!rapidTagInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!rapidTagInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } rapidTagInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.rapidTag = rapidTagInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2732,9 +2802,11 @@ wasm_trap_t* CoreVariableIo_vfs_load_file(void* environment, wasmtime_caller_t* 
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     std::uint32_t modeInputPointer = 0;
     std::uint32_t modeInputCount = 0;
@@ -2742,9 +2814,11 @@ wasm_trap_t* CoreVariableIo_vfs_load_file(void* environment, wasmtime_caller_t* 
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> modeInputBytes;
-    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string modeInputStorage(reinterpret_cast<const char*>(modeInputBytes.data()), modeInputBytes.size());
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.mode = modeInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -3458,9 +3532,11 @@ wasm_trap_t* CoreVariableIo_vfs_read_file(void* environment, wasmtime_caller_t* 
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -3538,9 +3614,11 @@ wasm_trap_t* CoreVariableIo_vfs_read_file_as_string(void* environment, wasmtime_
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> pathInputBytes;
-    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string pathInputStorage(reinterpret_cast<const char*>(pathInputBytes.data()), pathInputBytes.size());
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.path = pathInputStorage.c_str();
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4589,9 +4667,11 @@ wasm_trap_t* CoreVariableIo_unit_script_call_unit_script(void* environment, wasm
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    std::span<const std::uint8_t> functionNameInputBytes;
-    if (!state->memory.View(functionNameInputPointer, functionNameInputCount, functionNameInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-    std::string functionNameInputStorage(reinterpret_cast<const char*>(functionNameInputBytes.data()), functionNameInputBytes.size());
+    std::span<const std::uint8_t> functionNameInputWire;
+    if (!state->memory.View(functionNameInputPointer, functionNameInputCount, functionNameInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader functionNameInputReader(functionNameInputWire);
+    std::string functionNameInputStorage;
+    { std::uint32_t coreLength = 0; if (!functionNameInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!functionNameInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } functionNameInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
     query.functionName = functionNameInputStorage.c_str();
     std::uint32_t argsInputPointer = 0;
     std::uint32_t argsInputCount = 0;

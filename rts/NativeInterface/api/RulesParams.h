@@ -40,14 +40,19 @@ enum RulesParamType {
 	RULESPARAM_TYPE_STRING = 2
 };
 
-// Parameter value (tagged union)
+// Parameter value, tagged by `type`.
+//
+// Deliberately not a C union.  The API model that drives binding generation has
+// no way to express one, so a generated decoder fills every member in turn and
+// the last write clobbers the earlier ones; the value read back through
+// `type` was then whatever aliased it.  Only the member selected by `type`
+// carries meaning, so the members are kept separate and the extra eight bytes
+// are the price of a representation the generator can round-trip.
 struct RulesParamValue {
 	RulesParamType type;
-	union {
-		bool boolValue;
-		float floatValue;
-		const char* stringValue;
-	};
+	bool boolValue;
+	float floatValue;
+	const char* stringValue;
 };
 
 // Queries

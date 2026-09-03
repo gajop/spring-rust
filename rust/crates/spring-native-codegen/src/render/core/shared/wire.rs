@@ -239,8 +239,13 @@ pub(crate) fn render_input_variable(
         "    std::uint32_t {stem}InputPointer = 0;\n    std::uint32_t {stem}InputCount = 0;\n    if (!reader.U32({stem}InputPointer) || !reader.U32({stem}InputCount)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);\n        return nullptr;\n    }}\n"
     );
     match &field.ty {
+        // The descriptor pair locates the blob; the string inside it is
+        // length-prefixed, exactly as the guest owned wrappers encode it and as
+        // the dynamic-input host bindings decode it. Reading the blob as raw
+        // bytes instead swallowed the four-byte prefix into the value, so every
+        // lookup keyed on the string missed.
         SemanticType::String => output.push_str(&format!(
-            "    std::span<const std::uint8_t> {stem}InputBytes;\n    if (!state->memory.View({stem}InputPointer, {stem}InputCount, {stem}InputBytes)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    std::string {stem}InputStorage(reinterpret_cast<const char*>({stem}InputBytes.data()), {stem}InputBytes.size());\n    query.{field_name} = {stem}InputStorage.c_str();\n",
+            "    std::span<const std::uint8_t> {stem}InputWire;\n    if (!state->memory.View({stem}InputPointer, {stem}InputCount, {stem}InputWire)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    WireReader {stem}InputReader({stem}InputWire);\n    std::string {stem}InputStorage;\n    {{ std::uint32_t coreLength = 0; if (!{stem}InputReader.U32(coreLength)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} std::span<const std::uint8_t> coreBytes; if (!{stem}InputReader.Bytes(coreLength, coreBytes)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }} {stem}InputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }}\n    query.{field_name} = {stem}InputStorage.c_str();\n",
             field_name = field.name,
         )),
         SemanticType::Bytes => {
