@@ -154,6 +154,15 @@ bool WasmInterfaceSystem::LoadManifests(const std::vector<WasmManifestSource>& s
 
 	std::vector<std::string> loaded;
 	for (const auto& declaration : declarations) {
+		// A world that is disabled in this build is skipped, not an error: a
+		// headless build has no `ui` world, and a game whose manifest lists a UI
+		// module is still perfectly loadable there without it.
+		if (!WasmEnvironmentMatrix::IsRuntimeEnabled(declaration.environment)) {
+			LOG("Skipping Wasm module %s: the %s world is disabled in this build",
+				declaration.name.c_str(),
+				WasmEnvironmentMatrix::Name(declaration.environment));
+			continue;
+		}
 		std::vector<std::uint8_t> bytes;
 		if (!bytesProvider(declaration.archive, declaration.path, bytes, error)) {
 			for (const auto& name : loaded)
