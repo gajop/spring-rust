@@ -115,6 +115,19 @@ if [[ -n "$UNSYNCED_SUBMODULES" ]]; then
   fi
 fi
 
+# The container build compiles C++ only, so a change to the rts/NativeInterface
+# headers can leave the Rust crates uncompilable and still finish green; that
+# only surfaces later in CI or in a downstream native module. Check them here,
+# before the long build, where those headers change.
+if [[ -z "${SKIP_RUST_CHECK:-}" ]]; then
+  if command -v cargo >/dev/null 2>&1; then
+    ./docker-build-v2/check-rust.sh
+  else
+    echo "WARNING: cargo not found, skipping the Rust crate checks."
+    echo "Set SKIP_RUST_CHECK=1 to silence this warning."
+  fi
+fi
+
 mkdir -p build-$PLATFORM .cache/ccache-$PLATFORM
 
 # Build container image selection, allow overriding.
