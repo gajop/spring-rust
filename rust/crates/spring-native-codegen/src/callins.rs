@@ -87,6 +87,11 @@ pub fn parse(path: &Path) -> Result<Vec<CallinModel>> {
                 name: fields[0].to_string(),
                 target: fields[1].to_string(),
             }),
+            // Declared on the native event client but served by a hand-written
+            // ABI rather than the generated callin wire, so there is nothing to
+            // generate. Listed only so `validate_names` can tell a deliberate
+            // omission from a forgotten one.
+            "NATIVE" if fields.len() == 1 => {}
             _ => {
                 return Err(anyhow!(
                     "{}:{}: malformed {} entry ({} fields)",
@@ -178,11 +183,26 @@ pub fn parse(path: &Path) -> Result<Vec<CallinModel>> {
     Ok(resolved)
 }
 
+/// Names the inventory deliberately does not generate: they reach a guest
+/// through a hand-written ABI instead of the generated callin wire.
+fn parse_native_only(path: &Path) -> Result<BTreeSet<String>> {
+    let text = std::fs::read_to_string(path)
+        .with_context(|| format!("failed to read callin inventory {}", path.display()))?;
+    Ok(text
+        .lines()
+        .filter_map(|line| {
+            let body = line.trim().strip_prefix("NATIVE(")?.strip_suffix(')')?;
+            Some(body.trim().to_string())
+        })
+        .collect())
+}
+
 /// Check that a callin inventory covers every native function-pointer name.
 /// This is intentionally a separate check because aliases are the one place
 /// where a source name may not have its own query/result declaration.
 pub fn validate_names(path: &Path, native_header: &Path) -> Result<()> {
     let inventory = parse(path)?;
+    let native_only = parse_native_only(path)?;
     let text = std::fs::read_to_string(native_header)
         .with_context(|| format!("failed to read {}", native_header.display()))?;
     let declared = text
@@ -194,7 +214,7 @@ pub fn validate_names(path: &Path, native_header: &Path) -> Result<()> {
             Some(name.to_string())
         })
         .collect::<BTreeSet<_>>();
-    let mut inventory_names = BTreeSet::new();
+    let mut inventory_names = native_only;
     for callin in &inventory {
         inventory_names.insert(callin.name.clone());
         inventory_names.extend(callin.aliases.iter().cloned());

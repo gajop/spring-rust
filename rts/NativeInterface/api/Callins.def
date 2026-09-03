@@ -4,6 +4,12 @@
 #
 # CALLIN(name, query, result, environments, aggregation, flags)
 # ALIAS(name, canonical-name)
+# NATIVE(name)
+#
+# NATIVE names are declared on the native event client but are not generated
+# callins: they reach a guest through a hand-written ABI instead of the callin
+# wire. They are listed so the inventory check can tell a deliberate omission
+# from a forgotten one.
 #
 # Environments are a pipe-separated subset of rules-synced, rules-unsynced,
 # gaia-synced, gaia-unsynced, ui and menu. UI dispatch is filtered by the native
@@ -64,6 +70,15 @@ ALIAS(UnitLeftWater, UnitMovementClassEvent)
 ALIAS(UnitMoveFailed, UnitMoveEvent)
 ALIAS(UnitMoved, UnitMoveEvent)
 ALIAS(UnsyncedHeightMapUpdate, RectChanged)
+# Custom unit scripts. The engine reaches a CUS guest through the dedicated
+# SPRING_CUS_* exports and a shared scratch buffer (see WasmCoreHost::CallCus),
+# because per-piece script invocation is far too hot for the generic
+# query/result wire. Nothing here is generated.
+NATIVE(CusInvoke)
+NATIVE(CusCallNamed)
+NATIVE(CusTick)
+NATIVE(CusDetach)
+
 CALLIN(ActiveCommandChanged, ActiveCommandChangedQuery, ActiveCommandChangedResult, rules-synced|rules-unsynced|gaia-synced|gaia-unsynced|ui, ignore, none)
 CALLIN(AddConsoleLine, AddConsoleLineQuery, BoolCallinResult, rules-synced|rules-unsynced|gaia-synced|gaia-unsynced|ui|menu, or-true, none)
 CALLIN(AllowBuilderHoldFire, AllowBuilderHoldFireQuery, BoolCallinResult, rules-synced|gaia-synced, and-false, none)
