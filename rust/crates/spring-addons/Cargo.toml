@@ -1,0 +1,18 @@
+[package]
+name = "spring-addons"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+spring = { path = "../spring", features = ["alloc"] }
+
+[lints.rust]
+warnings = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+too_many_arguments = "allow"
+
+[lib]
+path = "src/lib.rs"

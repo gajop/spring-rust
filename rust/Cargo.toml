@@ -6,4 +6,4 @@ members = [
     "crates/spring-native",
 ]
 resolver = "2"
-exclude = ["crates/spring"]
+exclude = ["crates/spring", "crates/spring-addons"]
