@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2024"
 publish = false
 
+[features]
+default = ["std"]
+# Enables the engine-logging panic hook, which needs `std::panic::set_hook`.
+std = []
+
 [dependencies]
 spring = { path = "../spring", features = ["alloc"] }
 

@@ -1,7 +1,11 @@
 use alloc::boxed::Box;
+use alloc::collections::BTreeMap;
+use alloc::rc::Rc;
 use alloc::vec::Vec;
+use core::cell::{Cell, RefCell};
 
 use crate::event::{EventResult, KeyEvent, ViewGeometry};
+use crate::runtime::{AddonContext, AddonRuntime};
 
 pub trait Widget<G = ()> {
     fn name(&self) -> &'static str;
@@ -10,23 +14,22 @@ pub trait Widget<G = ()> {
         true
     }
 
-    fn init(&mut self, _global: &mut G) {}
-    fn shutdown(&mut self, _global: &mut G) {}
+    fn init(&self, _ctx: &AddonContext<'_, G>) {}
+    fn shutdown(&self, _ctx: &AddonContext<'_, G>) {}
 
-    fn update(&mut self, _global: &mut G, _dt: f32) {}
-    fn draw_screen(&mut self, _global: &mut G, _width: i32, _height: i32) {}
-    fn draw_world(&mut self, _global: &mut G) {}
+    fn update(&self, _ctx: &AddonContext<'_, G>, _dt: f32) {}
+    fn draw_screen(&self, _ctx: &AddonContext<'_, G>, _width: i32, _height: i32) {}
+    fn draw_world(&self, _ctx: &AddonContext<'_, G>) {}
 
-    fn key_press(&mut self, _global: &mut G, _event: &KeyEvent<'_>) -> EventResult {
+    fn key_press(&self, _ctx: &AddonContext<'_, G>, _event: &KeyEvent<'_>) -> EventResult {
         EventResult::Ignored
     }
-    fn key_release(&mut self, _global: &mut G, _event: &KeyEvent<'_>) -> EventResult {
+    fn key_release(&self, _ctx: &AddonContext<'_, G>, _event: &KeyEvent<'_>) -> EventResult {
         EventResult::Ignored
     }
-
     fn mouse_move(
-        &mut self,
-        _global: &mut G,
+        &self,
+        _ctx: &AddonContext<'_, G>,
         _x: i32,
         _y: i32,
         _dx: i32,
@@ -35,34 +38,42 @@ pub trait Widget<G = ()> {
     ) -> EventResult {
         EventResult::Ignored
     }
-    fn mouse_press(&mut self, _global: &mut G, _x: i32, _y: i32, _button: i32) -> EventResult {
+    fn mouse_press(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _x: i32,
+        _y: i32,
+        _button: i32,
+    ) -> EventResult {
         EventResult::Ignored
     }
-    fn mouse_release(&mut self, _global: &mut G, _x: i32, _y: i32, _button: i32) -> EventResult {
+    fn mouse_release(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _x: i32,
+        _y: i32,
+        _button: i32,
+    ) -> EventResult {
         EventResult::Ignored
     }
 
-    fn draw_world_pre_unit(&mut self, _global: &mut G) {}
-    fn draw_world_refraction(&mut self, _global: &mut G) {}
-    fn draw_screen_effects(&mut self, _global: &mut G, _view_width: i32, _view_height: i32) {}
-
-    /// Return `Handled` to take over drawing this unit and suppress the engine's
-    /// own draw.
-    fn draw_unit(&mut self, _global: &mut G, _unit_id: i32, _draw_mode: i32) -> EventResult {
+    fn draw_world_pre_unit(&self, _ctx: &AddonContext<'_, G>) {}
+    fn draw_world_refraction(&self, _ctx: &AddonContext<'_, G>) {}
+    fn draw_screen_effects(&self, _ctx: &AddonContext<'_, G>, _view_width: i32, _view_height: i32) {
+    }
+    fn draw_unit(&self, _ctx: &AddonContext<'_, G>, _unit_id: i32, _draw_mode: i32) -> EventResult {
         EventResult::Ignored
     }
-
-    fn view_resize(&mut self, _global: &mut G, _geometry: &ViewGeometry) {}
-
-    fn game_over(&mut self, _global: &mut G, _winning_ally_teams: &[u8]) {}
-
-    fn recv_from_synced(&mut self, _global: &mut G, _message: &[u8]) {}
+    fn view_resize(&self, _ctx: &AddonContext<'_, G>, _geometry: &ViewGeometry) {}
+    fn game_over(&self, _ctx: &AddonContext<'_, G>, _winning_ally_teams: &[u8]) {}
+    fn recv_from_synced(&self, _ctx: &AddonContext<'_, G>, _message: &[u8]) {}
 }
 
 pub struct WidgetHandler<G> {
     pub global: G,
     widgets: Vec<Box<dyn Widget<G>>>,
-    enabled: Vec<bool>,
+    enabled: Vec<Cell<bool>>,
+    runtime: AddonRuntime<G>,
 }
 
 impl<G> WidgetHandler<G> {
@@ -71,199 +82,231 @@ impl<G> WidgetHandler<G> {
             global,
             widgets: Vec::new(),
             enabled: Vec::new(),
+            runtime: AddonRuntime::new(),
         }
     }
 
     pub fn add(&mut self, widget: Box<dyn Widget<G>>) {
         let is_enabled = widget.is_enabled();
         self.widgets.push(widget);
-        self.enabled.push(is_enabled);
+        self.enabled.push(Cell::new(is_enabled));
     }
 
-    pub fn init(&mut self) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.init(&mut self.global);
-            }
-        }
+    #[inline]
+    pub fn global(&self) -> &G {
+        &self.global
     }
 
-    pub fn set_enabled(&mut self, name: &str, enabled: bool) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if widget.name() == name {
-                if self.enabled[i] != enabled {
-                    self.enabled[i] = enabled;
-                    if enabled {
-                        widget.init(&mut self.global);
-                    } else {
-                        widget.shutdown(&mut self.global);
-                    }
+    pub fn with_context<R>(&self, f: impl FnOnce(&AddonContext<'_, G>) -> R) -> R {
+        self.runtime.callin("external", &self.global, f)
+    }
+
+    fn dispatch<R>(&self, callin: &'static str, f: impl FnOnce(&AddonContext<'_, G>) -> R) -> R {
+        self.runtime.callin(callin, &self.global, f)
+    }
+
+    pub fn init(&self) {
+        self.dispatch("Init", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.init(ctx);
                 }
-                break;
             }
-        }
+        });
+    }
+
+    pub fn set_enabled(&self, name: &str, enabled: bool) {
+        self.dispatch("SetEnabled", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if widget.name() == name {
+                    if self.enabled[i].replace(enabled) != enabled {
+                        if enabled {
+                            widget.init(ctx);
+                        } else {
+                            widget.shutdown(ctx);
+                        }
+                    }
+                    break;
+                }
+            }
+        });
     }
 
     pub fn is_widget_enabled(&self, name: &str) -> bool {
-        for (i, widget) in self.widgets.iter().enumerate() {
-            if widget.name() == name {
-                return self.enabled[i];
-            }
-        }
-        false
+        self.widgets
+            .iter()
+            .enumerate()
+            .find_map(|(i, widget)| (widget.name() == name).then(|| self.enabled[i].get()))
+            .unwrap_or(false)
     }
 
-    pub fn update(&mut self, dt: f32) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.update(&mut self.global, dt);
+    pub fn update(&self, dt: f32) {
+        self.dispatch("Update", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.update(ctx, dt);
+                }
             }
-        }
+        });
     }
 
-    pub fn draw_screen(&mut self, width: i32, height: i32) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.draw_screen(&mut self.global, width, height);
+    pub fn draw_screen(&self, width: i32, height: i32) {
+        self.dispatch("DrawScreen", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.draw_screen(ctx, width, height);
+                }
             }
-        }
+        });
     }
 
-    pub fn draw_world(&mut self) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.draw_world(&mut self.global);
+    pub fn draw_world(&self) {
+        self.dispatch("DrawWorld", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.draw_world(ctx);
+                }
             }
-        }
+        });
     }
 
-    pub fn key_press(&mut self, event: &KeyEvent<'_>) -> bool {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] && widget.key_press(&mut self.global, event).is_handled() {
-                return true;
+    pub fn key_press(&self, event: &KeyEvent<'_>) -> bool {
+        self.dispatch("KeyPress", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() && widget.key_press(ctx, event).is_handled() {
+                    return true;
+                }
             }
-        }
-        false
+            false
+        })
     }
 
-    pub fn key_release(&mut self, event: &KeyEvent<'_>) -> bool {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] && widget.key_release(&mut self.global, event).is_handled() {
-                return true;
+    pub fn key_release(&self, event: &KeyEvent<'_>) -> bool {
+        self.dispatch("KeyRelease", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() && widget.key_release(ctx, event).is_handled() {
+                    return true;
+                }
             }
-        }
-        false
+            false
+        })
     }
 
-    pub fn mouse_move(&mut self, x: i32, y: i32, dx: i32, dy: i32, button: i32) -> bool {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i]
-                && widget
-                    .mouse_move(&mut self.global, x, y, dx, dy, button)
-                    .is_handled()
-            {
-                return true;
+    pub fn mouse_move(&self, x: i32, y: i32, dx: i32, dy: i32, button: i32) -> bool {
+        self.dispatch("MouseMove", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get()
+                    && widget.mouse_move(ctx, x, y, dx, dy, button).is_handled()
+                {
+                    return true;
+                }
             }
-        }
-        false
+            false
+        })
     }
 
-    pub fn mouse_press(&mut self, x: i32, y: i32, button: i32) -> bool {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i]
-                && widget
-                    .mouse_press(&mut self.global, x, y, button)
-                    .is_handled()
-            {
-                return true;
+    pub fn mouse_press(&self, x: i32, y: i32, button: i32) -> bool {
+        self.dispatch("MousePress", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() && widget.mouse_press(ctx, x, y, button).is_handled() {
+                    return true;
+                }
             }
-        }
-        false
+            false
+        })
     }
 
-    pub fn mouse_release(&mut self, x: i32, y: i32, button: i32) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i]
-                && widget
-                    .mouse_release(&mut self.global, x, y, button)
-                    .is_handled()
-            {
-                return;
+    pub fn mouse_release(&self, x: i32, y: i32, button: i32) {
+        self.dispatch("MouseRelease", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() && widget.mouse_release(ctx, x, y, button).is_handled() {
+                    return;
+                }
             }
-        }
+        });
     }
 
-    pub fn draw_world_pre_unit(&mut self) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.draw_world_pre_unit(&mut self.global);
+    pub fn draw_world_pre_unit(&self) {
+        self.dispatch("DrawWorldPreUnit", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.draw_world_pre_unit(ctx);
+                }
             }
-        }
+        });
     }
 
-    pub fn draw_world_refraction(&mut self) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.draw_world_refraction(&mut self.global);
+    pub fn draw_world_refraction(&self) {
+        self.dispatch("DrawWorldRefraction", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.draw_world_refraction(ctx);
+                }
             }
-        }
+        });
     }
 
-    pub fn draw_screen_effects(&mut self, view_width: i32, view_height: i32) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.draw_screen_effects(&mut self.global, view_width, view_height);
+    pub fn draw_screen_effects(&self, view_width: i32, view_height: i32) {
+        self.dispatch("DrawScreenEffects", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.draw_screen_effects(ctx, view_width, view_height);
+                }
             }
-        }
+        });
     }
 
-    /// First widget to claim the unit wins, matching the Lua handler, which
-    /// stops at the first `DrawUnit` returning true.
-    pub fn draw_unit(&mut self, unit_id: i32, draw_mode: i32) -> bool {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i]
-                && widget
-                    .draw_unit(&mut self.global, unit_id, draw_mode)
-                    .is_handled()
-            {
-                return true;
+    pub fn draw_unit(&self, unit_id: i32, draw_mode: i32) -> bool {
+        self.dispatch("DrawUnit", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() && widget.draw_unit(ctx, unit_id, draw_mode).is_handled() {
+                    return true;
+                }
             }
-        }
-        false
+            false
+        })
     }
 
-    pub fn view_resize(&mut self, geometry: &ViewGeometry) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.view_resize(&mut self.global, geometry);
+    pub fn view_resize(&self, geometry: &ViewGeometry) {
+        self.dispatch("ViewResize", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.view_resize(ctx, geometry);
+                }
             }
-        }
+        });
     }
 
-    pub fn game_over(&mut self, winning_ally_teams: &[u8]) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.game_over(&mut self.global, winning_ally_teams);
+    pub fn game_over(&self, winning_ally_teams: &[u8]) {
+        self.dispatch("GameOver", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.game_over(ctx, winning_ally_teams);
+                }
             }
-        }
+        });
     }
 
-    pub fn recv_from_synced(&mut self, message: &[u8]) {
-        for (i, widget) in self.widgets.iter_mut().enumerate() {
-            if self.enabled[i] {
-                widget.recv_from_synced(&mut self.global, message);
+    pub fn recv_from_synced(&self, message: &[u8]) {
+        self.dispatch("RecvFromSynced", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.recv_from_synced(ctx, message);
+                }
             }
-        }
+        });
     }
 }
 
-/// High bit of a callback ID, set by the engine to signal that the retained
-/// callback has been destroyed and the guest-side closure can be dropped.
 const DESTROY_BIT: u32 = 0x8000_0000;
+type UiCallback<G> = Rc<RefCell<Box<dyn FnMut(&G)>>>;
 
+/// Retained UI callbacks use per-callback runtime borrowing rather than one
+/// registry-wide mutable borrow. Different callbacks may therefore re-enter
+/// each other; recursively invoking the same `FnMut` still fails loudly.
 pub struct UiCallbackRegistry<G> {
-    next_id: u32,
-    callbacks: alloc::collections::BTreeMap<u32, Box<dyn FnMut(&mut G)>>,
+    next_id: Cell<u32>,
+    callbacks: RefCell<BTreeMap<u32, UiCallback<G>>>,
 }
 
 impl<G> Default for UiCallbackRegistry<G> {
@@ -275,44 +318,45 @@ impl<G> Default for UiCallbackRegistry<G> {
 impl<G> UiCallbackRegistry<G> {
     pub const fn new() -> Self {
         Self {
-            next_id: 0x1000,
-            callbacks: alloc::collections::BTreeMap::new(),
+            next_id: Cell::new(0x1000),
+            callbacks: RefCell::new(BTreeMap::new()),
         }
     }
 
     pub fn register(
-        &mut self,
-        callback: impl FnMut(&mut G) + 'static,
+        &self,
+        callback: impl FnMut(&G) + 'static,
     ) -> spring::callback::RetainedCallback {
-        let id = self.next_id;
-        self.next_id += 1;
+        let id = self.next_id.get();
+        self.next_id.set(id + 1);
         debug_assert!(
             id & DESTROY_BIT == 0,
             "callback id space exhausted; ids must stay below the destroy bit"
         );
         let destroy_id = id | DESTROY_BIT;
-        self.callbacks.insert(id, Box::new(callback));
+        self.callbacks
+            .borrow_mut()
+            .insert(id, Rc::new(RefCell::new(Box::new(callback))));
         spring::callback::RetainedCallback::new(id, 0, destroy_id)
     }
 
-    /// Drop a callback that was registered but never handed to the engine.
-    ///
-    /// Registration allocates an entry that is normally released when the engine
-    /// fires `destroy_id`. If binding the callback fails, the engine never learns
-    /// about it and never fires that destroy, so the caller must release it here
-    /// or the entry leaks for the lifetime of the process.
-    pub fn unregister(&mut self, callback: spring::callback::RetainedCallback) {
-        self.callbacks.remove(&(callback.id & !DESTROY_BIT));
+    pub fn unregister(&self, callback: spring::callback::RetainedCallback) {
+        self.callbacks
+            .borrow_mut()
+            .remove(&(callback.id & !DESTROY_BIT));
     }
 
-    pub fn dispatch(&mut self, global: &mut G, callback_id: u32, _user_data: u32) -> bool {
+    pub fn dispatch(&self, global: &G, callback_id: u32, _user_data: u32) -> bool {
         if callback_id & DESTROY_BIT != 0 {
-            let id = callback_id & !DESTROY_BIT;
-            self.callbacks.remove(&id);
+            self.callbacks
+                .borrow_mut()
+                .remove(&(callback_id & !DESTROY_BIT));
             return true;
         }
-        if let Some(cb) = self.callbacks.get_mut(&callback_id) {
-            cb(global);
+
+        let callback = self.callbacks.borrow().get(&callback_id).cloned();
+        if let Some(callback) = callback {
+            callback.borrow_mut()(global);
             true
         } else {
             false
@@ -320,8 +364,6 @@ impl<G> UiCallbackRegistry<G> {
     }
 }
 
-/// Report a callback ID that no registered closure and no game-level handler
-/// claimed. A mis-bound RmlUi event is otherwise completely silent.
 pub fn warn_unhandled_callback(callback_id: u32) {
     let mut buffer = [0u8; 8];
     for (index, slot) in buffer.iter_mut().enumerate() {

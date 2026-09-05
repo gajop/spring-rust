@@ -32,17 +32,6 @@ struct BenchmarkScope {
 	spring::benchmark_callins::Token token;
 };
 
-struct ScratchScope {
-	explicit ScratchScope(bool& inUse)
-		: inUse(inUse)
-	{
-		inUse = true;
-	}
-	~ScratchScope() { inUse = false; }
-
-	bool& inUse;
-};
-
 bool AddSize(std::size_t& value, std::size_t amount)
 {
 	if (amount > std::numeric_limits<std::size_t>::max() - value)
@@ -80,13 +69,49 @@ bool ResolveOptional(RawExport& target, wasmtime_context_t* context,
 
 } // namespace
 
-bool& VariableCallinScratchInUse()
+VariableCallinScratchState& VariableCallinScratch()
 {
-	// Callins execute synchronously on an engine thread. A thread-local guard is
+	// Callins execute synchronously on an engine thread. The state is
 	// intentionally broader than one module instance so hand-written and
-	// generated serializers cannot overwrite each other's scratch during reentry.
-	static thread_local bool inUse = false;
-	return inUse;
+	// generated serializers cannot overwrite each other's scratch during
+	// reentry.
+	static thread_local VariableCallinScratchState state;
+	return state;
+}
+
+ScratchReentryScope::ScratchReentryScope(Memory& memory, std::uint32_t offset)
+	: memory(memory)
+	, offset(offset)
+	, previousInUse(VariableCallinScratch().inUse)
+	, previousUsed(VariableCallinScratch().used)
+{
+	if (previousInUse && previousUsed > 0) {
+		std::span<const std::uint8_t> live;
+		if (memory.View(offset, previousUsed, live))
+			saved.assign(live.begin(), live.end());
+	}
+
+	VariableCallinScratchState& state = VariableCallinScratch();
+	state.inUse = true;
+	state.used = 0;
+}
+
+ScratchReentryScope::~ScratchReentryScope()
+{
+	if (!saved.empty()) {
+		std::span<std::uint8_t> live;
+		if (memory.MutableView(offset, saved.size(), live))
+			std::memcpy(live.data(), saved.data(), saved.size());
+	}
+
+	VariableCallinScratchState& state = VariableCallinScratch();
+	state.inUse = previousInUse;
+	state.used = previousUsed;
+}
+
+void ScratchReentryScope::SetUsed(std::size_t used)
+{
+	VariableCallinScratch().used = static_cast<std::uint32_t>(used);
 }
 
 bool VariableCallinBindings::Bind(wasmtime_context_t* context,
@@ -158,11 +183,7 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 		error = "Core AddConsoleLine export is unavailable";
 		return false;
 	}
-	if (scratchInUse) {
-		error = "nested Core variable callin would overwrite guest scratch";
-		return false;
-	}
-	ScratchScope scratchScope(scratchInUse);
+	ScratchReentryScope scratchScope(memory, scratchOffset);
 	BenchmarkScope benchmark("AddConsoleLine");
 	const std::string_view message = query.message == nullptr
 		? std::string_view{}
@@ -200,6 +221,7 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 	if (!section.empty())
 		std::memcpy(scratch.data() + sectionOffset, section.data(), section.size());
 
+	scratchScope.SetUsed(required);
 	return CallBool(context, addConsoleLine, static_cast<std::uint32_t>(required),
 		result, error);
 }
@@ -212,11 +234,7 @@ bool VariableCallinBindings::CommandNotify(wasmtime_context_t* context,
 		error = "Core CommandNotify export is unavailable";
 		return false;
 	}
-	if (scratchInUse) {
-		error = "nested Core variable callin would overwrite guest scratch";
-		return false;
-	}
-	ScratchScope scratchScope(scratchInUse);
+	ScratchReentryScope scratchScope(memory, scratchOffset);
 	BenchmarkScope benchmark("CommandNotify");
 	const NativeCallinCommand& command = query.command;
 	if (command.numParams != 0 && command.params == nullptr) {
@@ -262,6 +280,7 @@ bool VariableCallinBindings::CommandNotify(wasmtime_context_t* context,
 				command.params[index]);
 	}
 
+	scratchScope.SetUsed(required);
 	return CallBool(context, commandNotify, static_cast<std::uint32_t>(required),
 		result, error);
 }

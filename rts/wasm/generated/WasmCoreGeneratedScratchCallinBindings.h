@@ -29,7 +29,6 @@ private:
     std::uint32_t scratchOffset = 0;
     std::uint32_t scratchCapacity = 0;
     bool anyPresent = false;
-    mutable bool scratchInUse = false;
 };
 
 } // namespace recoil::wasm::core::generated

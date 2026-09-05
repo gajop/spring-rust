@@ -411,15 +411,20 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 	}
 
 	bool haveResult = false;
+	// An AND folds from true and an OR folds from false. The caller's result
+	// struct is an out-parameter it initialized to false, not a seed, so it
+	// must not become the identity: seeding an AND from it makes every module
+	// result irrelevant and the callin always returns false. Lua folds these
+	// from the identity too (ControlIterateDefTrue / ControlIterateDefFalse).
+	const bool foldsFromIdentity = aggregation == CoreAggregation::AndFalse ||
+		aggregation == CoreAggregation::OrTrue;
 	BoolCallinResult boolDefault = {
 		.error = nullptr,
 		.value = aggregation == CoreAggregation::AndFalse,
 	};
-	if (nativeResult != nullptr && resultKind == CoreResultKind::Bool)
+	if (nativeResult != nullptr && resultKind == CoreResultKind::Bool && !foldsFromIdentity)
 		boolDefault = *static_cast<const BoolCallinResult*>(nativeResult);
 	BoolCallinResult boolAggregate = boolDefault;
-	if (aggregation == CoreAggregation::AndFalse && nativeResult == nullptr)
-		boolAggregate.value = true;
 
 	IntCallinResult intDefault = {
 		.error = nullptr,

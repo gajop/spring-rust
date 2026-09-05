@@ -17,12 +17,6 @@
 namespace recoil::wasm::core::generated {
 namespace {
 
-struct ScratchScope {
-    explicit ScratchScope(bool& active) : active(active) { active = true; }
-    ~ScratchScope() { active = false; }
-    bool& active;
-};
-
 bool ResolveOptional(RawExport& target, wasmtime_context_t* context,
     const wasmtime_instance_t& instance, const char* name,
     std::span<const wasm_valkind_t> params, std::span<const wasm_valkind_t> results,
@@ -260,11 +254,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
 {
     if (!Has(ordinal))
         return true;
-    if (scratchInUse) {
-        error = "nested generated Core variable callin would overwrite guest scratch";
-        return false;
-    }
-    ScratchScope scratchScope(scratchInUse);
+    ScratchReentryScope scratchScope(memory, scratchOffset);
     std::span<std::uint8_t> scratch;
     if (!memory.MutableView(scratchOffset, scratchCapacity, scratch)) {
         error = "generated Core callin scratch range became invalid";
@@ -283,6 +273,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[2].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -299,6 +290,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[3].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -323,6 +315,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[6].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -342,6 +335,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[11].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -362,6 +356,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[12].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -388,6 +383,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[30].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -407,6 +403,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[36].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -424,6 +421,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[41].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -437,6 +435,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[67].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -450,6 +449,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[68].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -479,6 +479,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[72].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -492,6 +493,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[76].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -508,6 +510,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[77].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -545,6 +548,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[80].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -586,6 +590,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[81].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -605,6 +610,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[84].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -628,6 +634,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[85].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -646,6 +653,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[106].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -675,6 +683,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[108].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -694,6 +703,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[141].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -711,6 +721,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[142].Call(context, &slot, 1, error)) return false;
             if (result != nullptr) {
                 auto* typedResult = static_cast<BoolCallinResult*>(result);
@@ -737,6 +748,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[146].Call(context, &slot, 1, error)) return false;
             return true;
         }
@@ -761,6 +773,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
             wasmtime_val_raw_t slot{};
             slot.i32 = static_cast<std::int32_t>(used);
+            scratchScope.SetUsed(used);
             if (!exports[147].Call(context, &slot, 1, error)) return false;
             return true;
         }

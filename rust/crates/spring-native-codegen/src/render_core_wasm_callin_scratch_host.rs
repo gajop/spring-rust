@@ -44,7 +44,6 @@ private:
     std::uint32_t scratchOffset = 0;
     std::uint32_t scratchCapacity = 0;
     bool anyPresent = false;
-    mutable bool scratchInUse = false;
 }};
 
 }} // namespace recoil::wasm::core::generated
@@ -82,12 +81,6 @@ pub(super) fn render_cpp(model: &ApiModel) -> String {
 
 namespace recoil::wasm::core::generated {{
 namespace {{
-
-struct ScratchScope {{
-    explicit ScratchScope(bool& active) : active(active) {{ active = true; }}
-    ~ScratchScope() {{ active = false; }}
-    bool& active;
-}};
 
 bool ResolveOptional(RawExport& target, wasmtime_context_t* context,
     const wasmtime_instance_t& instance, const char* name,
@@ -165,11 +158,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
 {{
     if (!Has(ordinal))
         return true;
-    if (scratchInUse) {{
-        error = "nested generated Core variable callin would overwrite guest scratch";
-        return false;
-    }}
-    ScratchScope scratchScope(scratchInUse);
+    ScratchReentryScope scratchScope(memory, scratchOffset);
     std::span<std::uint8_t> scratch;
     if (!memory.MutableView(scratchOffset, scratchCapacity, scratch)) {{
         error = "generated Core callin scratch range became invalid";
@@ -241,7 +230,7 @@ fn render_case(callin: &ScratchCallin<'_>, records: &BTreeMap<String, RecordMode
         3,
     ));
     body.push_str(
-        "            const std::size_t used = writer.Offset();\n            if (used > std::numeric_limits<std::uint32_t>::max()) { error = \"generated Core callin scratch payload exceeds u32\"; return false; }\n            if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = \"generated Core callin scratch host-work budget exhausted\"; return false; }\n            wasmtime_val_raw_t slot{};\n            slot.i32 = static_cast<std::int32_t>(used);\n",
+        "            const std::size_t used = writer.Offset();\n            if (used > std::numeric_limits<std::uint32_t>::max()) { error = \"generated Core callin scratch payload exceeds u32\"; return false; }\n            if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = \"generated Core callin scratch host-work budget exhausted\"; return false; }\n            wasmtime_val_raw_t slot{};\n            slot.i32 = static_cast<std::int32_t>(used);\n            scratchScope.SetUsed(used);\n",
     );
     body.push_str(&format!(
         "            if (!exports[{ordinal}].Call(context, &slot, 1, error)) return false;\n",

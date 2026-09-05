@@ -84,59 +84,17 @@ pub struct UnitDestroyedEvent {
     pub weapon_def_id: i32,
 }
 
-#[derive(Clone, Debug)]
-pub enum PendingRulesEvent {
-    UnitCreated {
-        unit: i32,
-        def: i32,
-        team: i32,
-        builder: i32,
-    },
-    UnitDestroyed(UnitDestroyedEvent),
-    ProjectileCreated {
-        projectile_id: i32,
-        owner_id: i32,
-        weapon_def_id: i32,
-    },
-    ProjectileDestroyed {
-        projectile_id: i32,
-        owner_id: i32,
-        weapon_def_id: i32,
-    },
-    GameOver {
-        winning_ally_teams: alloc::vec::Vec<u8>,
-    },
-    Explosion {
-        weapon_def_id: i32,
-        pos: (f32, f32, f32),
-        owner_id: i32,
-        projectile_id: i32,
-    },
-    LuaMsg {
-        player_id: i32,
-        script: i32,
-        mode: i32,
-        data: alloc::vec::Vec<u8>,
-    },
-}
-
-/// Screen/window/view geometry delivered by `ViewResize`.
-///
-/// Bundled into a struct because the raw callin carries sixteen positional
-/// `i32`s, which is unreadable at every call site.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct ViewGeometry {
     pub screen_size: (i32, i32),
     pub screen_pos: (i32, i32),
     pub window_size: (i32, i32),
     pub window_pos: (i32, i32),
-    /// Border insets, in `(top, left, bottom, right)` order.
     pub window_border: (i32, i32, i32, i32),
     pub view_size: (i32, i32),
     pub view_pos: (i32, i32),
 }
 
-/// A unit command, as delivered by `AllowCommand` and `UnitCmdDone`.
 pub struct CommandEvent<'a> {
     pub unit_id: i32,
     pub unit_def_id: i32,
@@ -147,8 +105,6 @@ pub struct CommandEvent<'a> {
     pub command_tag: u32,
     pub command_options: u8,
     pub command_params: &'a [f32],
-    /// Player that issued the command. `None` for `UnitCmdDone`, which does not
-    /// report an issuer.
     pub player_num: Option<i32>,
     pub from_synced: bool,
     pub from_lua: bool,
