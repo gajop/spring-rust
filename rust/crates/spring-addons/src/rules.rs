@@ -148,7 +148,7 @@ impl<G> GadgetHandler<G> {
         self.gadgets
             .iter()
             .enumerate()
-            .find_map(|(i, gadget)| (gadget.name() == name).then(|| self.enabled[i].get()))
+            .find_map(|(i, gadget)| (gadget.name() == name).then_some(self.enabled[i].get()))
             .unwrap_or(false)
     }
 
