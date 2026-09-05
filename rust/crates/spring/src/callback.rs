@@ -40,10 +40,17 @@ pub const SYNC_CLOSURE_CALLBACK_ID: u32 = 0x4342_5359; // 'CBSY'
 struct SyncClosureNode {
     invoke: unsafe fn(*mut ()),
     data: *mut (),
-    #[allow(dead_code)]
-    prev: *mut (),
+    /// Set while `invoke` is executing, so a re-entrant dispatch targeting this
+    /// same node declines instead of aliasing the closure (see
+    /// `dispatch_sync_closure`).
+    running: bool,
 }
 
+/// Top of the active `with_sync_closure` stack.
+///
+/// This is a plain `static`, not a thread-local: the guest is single-threaded
+/// wasm32. If the guest ever gains threads this must become thread-local, since
+/// two threads would otherwise share one stack of nodes.
 static CURRENT_SYNC_NODE: AtomicPtr<()> = AtomicPtr::new(core::ptr::null_mut());
 
 unsafe fn sync_trampoline<F: FnMut()>(data: *mut ()) {
@@ -61,7 +68,7 @@ pub fn with_sync_closure<F: FnMut(), R>(mut f: F, run: impl FnOnce(SyncCallback)
     let mut node = SyncClosureNode {
         invoke: sync_trampoline::<F>,
         data: &mut f as *mut F as *mut (),
-        prev,
+        running: false,
     };
     CURRENT_SYNC_NODE.store(
         &mut node as *mut SyncClosureNode as *mut (),
@@ -79,16 +86,31 @@ pub fn with_sync_closure<F: FnMut(), R>(mut f: F, run: impl FnOnce(SyncCallback)
 }
 
 /// Invoked by `spring:callback/dispatch` when `callback_id == SYNC_CLOSURE_CALLBACK_ID`.
+///
+/// Returns `false` when there is no active closure, or when the top closure is
+/// already running and the host has re-entered it: invoking it again would
+/// create a second `&mut F` aliasing the first.
 #[inline]
 pub fn dispatch_sync_closure() -> bool {
     let ptr = CURRENT_SYNC_NODE.load(Ordering::Acquire);
     if ptr.is_null() {
         return false;
     }
-    // SAFETY: The node is alive on the stack frame of `with_sync_closure`
-    // which invoked the host call that synchronously entered this dispatch.
-    let node = unsafe { &mut *(ptr as *mut SyncClosureNode) };
-    unsafe { (node.invoke)(node.data) };
+    let node = ptr as *mut SyncClosureNode;
+    // SAFETY: The node is alive on the stack frame of `with_sync_closure` which
+    // invoked the host call that synchronously entered this dispatch. Fields are
+    // read through raw pointers so that no reference to the node is held across
+    // `invoke`, which may re-enter this function.
+    unsafe {
+        if core::ptr::addr_of!((*node).running).read() {
+            return false;
+        }
+        core::ptr::addr_of_mut!((*node).running).write(true);
+        let invoke = core::ptr::addr_of!((*node).invoke).read();
+        let data = core::ptr::addr_of!((*node).data).read();
+        invoke(data);
+        core::ptr::addr_of_mut!((*node).running).write(false);
+    }
     true
 }
 

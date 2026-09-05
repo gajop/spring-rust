@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 
-use crate::event::{EventResult, KeyEvent};
+use crate::event::{EventResult, KeyEvent, ViewGeometry};
 
 pub trait Widget<G = ()> {
     fn name(&self) -> &'static str;
@@ -41,6 +41,20 @@ pub trait Widget<G = ()> {
     fn mouse_release(&mut self, _global: &mut G, _x: i32, _y: i32, _button: i32) -> EventResult {
         EventResult::Ignored
     }
+
+    fn draw_world_pre_unit(&mut self, _global: &mut G) {}
+    fn draw_world_refraction(&mut self, _global: &mut G) {}
+    fn draw_screen_effects(&mut self, _global: &mut G, _view_width: i32, _view_height: i32) {}
+
+    /// Return `Handled` to take over drawing this unit and suppress the engine's
+    /// own draw.
+    fn draw_unit(&mut self, _global: &mut G, _unit_id: i32, _draw_mode: i32) -> EventResult {
+        EventResult::Ignored
+    }
+
+    fn view_resize(&mut self, _global: &mut G, _geometry: &ViewGeometry) {}
+
+    fn game_over(&mut self, _global: &mut G, _winning_ally_teams: &[u8]) {}
 
     fn recv_from_synced(&mut self, _global: &mut G, _message: &[u8]) {}
 }
@@ -179,6 +193,61 @@ impl<G> WidgetHandler<G> {
         }
     }
 
+    pub fn draw_world_pre_unit(&mut self) {
+        for (i, widget) in self.widgets.iter_mut().enumerate() {
+            if self.enabled[i] {
+                widget.draw_world_pre_unit(&mut self.global);
+            }
+        }
+    }
+
+    pub fn draw_world_refraction(&mut self) {
+        for (i, widget) in self.widgets.iter_mut().enumerate() {
+            if self.enabled[i] {
+                widget.draw_world_refraction(&mut self.global);
+            }
+        }
+    }
+
+    pub fn draw_screen_effects(&mut self, view_width: i32, view_height: i32) {
+        for (i, widget) in self.widgets.iter_mut().enumerate() {
+            if self.enabled[i] {
+                widget.draw_screen_effects(&mut self.global, view_width, view_height);
+            }
+        }
+    }
+
+    /// First widget to claim the unit wins, matching the Lua handler, which
+    /// stops at the first `DrawUnit` returning true.
+    pub fn draw_unit(&mut self, unit_id: i32, draw_mode: i32) -> bool {
+        for (i, widget) in self.widgets.iter_mut().enumerate() {
+            if self.enabled[i]
+                && widget
+                    .draw_unit(&mut self.global, unit_id, draw_mode)
+                    .is_handled()
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn view_resize(&mut self, geometry: &ViewGeometry) {
+        for (i, widget) in self.widgets.iter_mut().enumerate() {
+            if self.enabled[i] {
+                widget.view_resize(&mut self.global, geometry);
+            }
+        }
+    }
+
+    pub fn game_over(&mut self, winning_ally_teams: &[u8]) {
+        for (i, widget) in self.widgets.iter_mut().enumerate() {
+            if self.enabled[i] {
+                widget.game_over(&mut self.global, winning_ally_teams);
+            }
+        }
+    }
+
     pub fn recv_from_synced(&mut self, message: &[u8]) {
         for (i, widget) in self.widgets.iter_mut().enumerate() {
             if self.enabled[i] {
@@ -187,6 +256,10 @@ impl<G> WidgetHandler<G> {
         }
     }
 }
+
+/// High bit of a callback ID, set by the engine to signal that the retained
+/// callback has been destroyed and the guest-side closure can be dropped.
+const DESTROY_BIT: u32 = 0x8000_0000;
 
 pub struct UiCallbackRegistry<G> {
     next_id: u32,
@@ -213,15 +286,28 @@ impl<G> UiCallbackRegistry<G> {
     ) -> spring::callback::RetainedCallback {
         let id = self.next_id;
         self.next_id += 1;
-        // The high bit 0x8000_0000 marks a destroy callback ID.
-        let destroy_id = id | 0x8000_0000;
+        debug_assert!(
+            id & DESTROY_BIT == 0,
+            "callback id space exhausted; ids must stay below the destroy bit"
+        );
+        let destroy_id = id | DESTROY_BIT;
         self.callbacks.insert(id, Box::new(callback));
         spring::callback::RetainedCallback::new(id, 0, destroy_id)
     }
 
+    /// Drop a callback that was registered but never handed to the engine.
+    ///
+    /// Registration allocates an entry that is normally released when the engine
+    /// fires `destroy_id`. If binding the callback fails, the engine never learns
+    /// about it and never fires that destroy, so the caller must release it here
+    /// or the entry leaks for the lifetime of the process.
+    pub fn unregister(&mut self, callback: spring::callback::RetainedCallback) {
+        self.callbacks.remove(&(callback.id & !DESTROY_BIT));
+    }
+
     pub fn dispatch(&mut self, global: &mut G, callback_id: u32, _user_data: u32) -> bool {
-        if callback_id & 0x8000_0000 != 0 {
-            let id = callback_id & !0x8000_0000;
+        if callback_id & DESTROY_BIT != 0 {
+            let id = callback_id & !DESTROY_BIT;
             self.callbacks.remove(&id);
             return true;
         }
@@ -232,4 +318,21 @@ impl<G> UiCallbackRegistry<G> {
             false
         }
     }
+}
+
+/// Report a callback ID that no registered closure and no game-level handler
+/// claimed. A mis-bound RmlUi event is otherwise completely silent.
+pub fn warn_unhandled_callback(callback_id: u32) {
+    let mut buffer = [0u8; 8];
+    for (index, slot) in buffer.iter_mut().enumerate() {
+        let nibble = (callback_id >> (28 - index * 4)) & 0xf;
+        *slot = match nibble {
+            0..=9 => b'0' + nibble as u8,
+            value => b'a' + (value - 10) as u8,
+        };
+    }
+    let hex = core::str::from_utf8(&buffer).unwrap_or("????????");
+    let mut message = alloc::string::String::from("unhandled UI callback id 0x");
+    message.push_str(hex);
+    let _ = spring::log("spring-addons", 40, &message);
 }

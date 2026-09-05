@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 
-pub use crate::event::{PendingRulesEvent, UnitDestroyedEvent, UnitPreDamagedEvent};
+pub use crate::event::{CommandEvent, PendingRulesEvent, UnitDestroyedEvent, UnitPreDamagedEvent};
 
 pub trait Gadget<G = ()> {
     fn name(&self) -> &'static str;
@@ -50,6 +50,25 @@ pub trait Gadget<G = ()> {
         _projectile_id: i32,
     ) -> bool {
         false
+    }
+
+    fn projectile_destroyed(
+        &mut self,
+        _global: &mut G,
+        _projectile_id: i32,
+        _owner_id: i32,
+        _weapon_def_id: i32,
+    ) {
+    }
+
+    fn game_over(&mut self, _global: &mut G, _winning_ally_teams: &[u8]) {}
+
+    fn unit_cmd_done(&mut self, _global: &mut G, _event: &CommandEvent<'_>) {}
+
+    /// Return `false` to veto the command. The first gadget to veto wins and the
+    /// remaining gadgets are not consulted, matching the Lua handler.
+    fn allow_command(&mut self, _global: &mut G, _event: &CommandEvent<'_>) -> bool {
+        true
     }
 }
 
@@ -219,6 +238,46 @@ impl<G> GadgetHandler<G> {
         handled
     }
 
+    pub fn projectile_destroyed(&mut self, projectile_id: i32, owner_id: i32, weapon_def_id: i32) {
+        for (i, gadget) in self.gadgets.iter_mut().enumerate() {
+            if self.enabled[i] {
+                gadget.projectile_destroyed(
+                    &mut self.global,
+                    projectile_id,
+                    owner_id,
+                    weapon_def_id,
+                );
+            }
+        }
+    }
+
+    pub fn game_over(&mut self, winning_ally_teams: &[u8]) {
+        for (i, gadget) in self.gadgets.iter_mut().enumerate() {
+            if self.enabled[i] {
+                gadget.game_over(&mut self.global, winning_ally_teams);
+            }
+        }
+    }
+
+    pub fn unit_cmd_done(&mut self, event: &CommandEvent<'_>) {
+        for (i, gadget) in self.gadgets.iter_mut().enumerate() {
+            if self.enabled[i] {
+                gadget.unit_cmd_done(&mut self.global, event);
+            }
+        }
+    }
+
+    /// Stops at the first veto: a gadget that denies a command shadows the rest,
+    /// so later gadgets must not observe a command that was already refused.
+    pub fn allow_command(&mut self, event: &CommandEvent<'_>) -> bool {
+        for (i, gadget) in self.gadgets.iter_mut().enumerate() {
+            if self.enabled[i] && !gadget.allow_command(&mut self.global, event) {
+                return false;
+            }
+        }
+        true
+    }
+
     pub fn dispatch_pending_event(&mut self, event: PendingRulesEvent) {
         match event {
             PendingRulesEvent::UnitCreated {
@@ -239,6 +298,16 @@ impl<G> GadgetHandler<G> {
             } => {
                 self.projectile_created(projectile_id, owner_id, weapon_def_id);
             }
+            PendingRulesEvent::ProjectileDestroyed {
+                projectile_id,
+                owner_id,
+                weapon_def_id,
+            } => {
+                self.projectile_destroyed(projectile_id, owner_id, weapon_def_id);
+            }
+            PendingRulesEvent::GameOver { winning_ally_teams } => {
+                self.game_over(&winning_ally_teams);
+            }
             PendingRulesEvent::Explosion {
                 weapon_def_id,
                 pos,
@@ -257,4 +326,25 @@ impl<G> GadgetHandler<G> {
             }
         }
     }
+}
+
+/// Report, once, that a re-entrant `UnitPreDamaged` could not reach the gadget
+/// chain and the incoming damage was passed through unchanged.
+///
+/// A game whose gadgets modify damage *and* which triggers damage from inside
+/// another call-in must pass `reentrant_unit_pre_damaged:` to
+/// `export_rules_gadgets!`; otherwise its damage rules are silently skipped.
+pub fn warn_reentrant_damage_dropped() {
+    use core::sync::atomic::{AtomicBool, Ordering};
+    static REPORTED: AtomicBool = AtomicBool::new(false);
+    if REPORTED.swap(true, Ordering::Relaxed) {
+        return;
+    }
+    let _ = spring::log(
+        "spring-addons",
+        40,
+        "re-entrant UnitPreDamaged could not reach the gadgets; damage passed \
+         through unchanged. Set `reentrant_unit_pre_damaged:` on \
+         export_rules_gadgets! if this game modifies damage.",
+    );
 }

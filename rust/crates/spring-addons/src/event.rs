@@ -98,6 +98,14 @@ pub enum PendingRulesEvent {
         owner_id: i32,
         weapon_def_id: i32,
     },
+    ProjectileDestroyed {
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    },
+    GameOver {
+        winning_ally_teams: alloc::vec::Vec<u8>,
+    },
     Explosion {
         weapon_def_id: i32,
         pos: (f32, f32, f32),
@@ -110,4 +118,38 @@ pub enum PendingRulesEvent {
         mode: i32,
         data: alloc::vec::Vec<u8>,
     },
+}
+
+/// Screen/window/view geometry delivered by `ViewResize`.
+///
+/// Bundled into a struct because the raw callin carries sixteen positional
+/// `i32`s, which is unreadable at every call site.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ViewGeometry {
+    pub screen_size: (i32, i32),
+    pub screen_pos: (i32, i32),
+    pub window_size: (i32, i32),
+    pub window_pos: (i32, i32),
+    /// Border insets, in `(top, left, bottom, right)` order.
+    pub window_border: (i32, i32, i32, i32),
+    pub view_size: (i32, i32),
+    pub view_pos: (i32, i32),
+}
+
+/// A unit command, as delivered by `AllowCommand` and `UnitCmdDone`.
+pub struct CommandEvent<'a> {
+    pub unit_id: i32,
+    pub unit_def_id: i32,
+    pub unit_team: i32,
+    pub command_id: i32,
+    pub command_time_out: i32,
+    pub command_page_index: u32,
+    pub command_tag: u32,
+    pub command_options: u8,
+    pub command_params: &'a [f32],
+    /// Player that issued the command. `None` for `UnitCmdDone`, which does not
+    /// report an issuer.
+    pub player_num: Option<i32>,
+    pub from_synced: bool,
+    pub from_lua: bool,
 }
