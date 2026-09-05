@@ -105,9 +105,11 @@ It is **not** a solution for an immediate-result callin whose answer depends on 
 
 ## Callin exports
 
-The main widget/gadget export macros export the callins represented by their addon traits. The old per-callin opt-in export macros are retained only as migration no-ops; games no longer need them.
+Phase 1 deliberately exports every callin represented by the widget/gadget traits. Game code should only implement trait methods; it should not maintain a second manual list of exported callins.
 
-`reentrant_unit_pre_damaged:` is also obsolete. Re-entrant `UnitPreDamaged` uses the same gadget chain as a top-level `UnitPreDamaged`.
+This may cause extra engine-to-Wasm traffic for callins whose trait methods use their defaults. A later phase can optimize this by deriving the implemented callin set at compile time, for example from a proc macro on the addon implementation, and exporting only the union needed by the registered addons.
+
+The old per-callin export macros are removed. `reentrant_unit_pre_damaged:` is also removed; re-entrant `UnitPreDamaged` uses the same gadget chain as a top-level `UnitPreDamaged`.
 
 ## Guarantees and non-guarantees
 
