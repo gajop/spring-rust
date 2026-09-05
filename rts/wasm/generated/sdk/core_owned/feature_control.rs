@@ -120,7 +120,7 @@
 
         #[inline]
         pub fn set_feature_piece_matrix(feature_id: i32, piece_index: i32, matrix: &[f32]) -> Result<bool> {
-            let value = crate::generated::feature_control::set_feature_piece_matrix(feature_id, piece_index, matrix.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
+            let value = crate::generated::feature_control::set_feature_piece_matrix(feature_id, piece_index, { let __values = &matrix[..]; if __values.len() > 16 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 16]; __array[..__values.len()].copy_from_slice(__values); __array })?;
             Ok(value)
         }
 

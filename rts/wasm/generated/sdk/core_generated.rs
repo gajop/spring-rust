@@ -11492,6 +11492,8 @@ pub mod gfx {
         pub apply_transform: bool,
         pub do_raw_draw: bool,
         pub no_lua_call: bool,
+        pub has_lua_mat_lod: bool,
+        pub lua_mat_lod: i32,
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
@@ -11531,6 +11533,8 @@ pub mod gfx {
         pub do_raw_draw: bool,
         pub no_lua_call: bool,
         pub full_model: bool,
+        pub has_lua_mat_lod: bool,
+        pub lua_mat_lod: i32,
     }
 
     #[cfg(target_arch = "wasm32")]
@@ -13235,11 +13239,13 @@ pub mod gfx {
     pub fn feature(feature_id: i32, options: GfxFeatureDrawOptions) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            let mut input_wire = [0u8; 12];
+            let mut input_wire = [0u8; 20];
             let mut input_cursor = 0usize;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.apply_transform).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.do_raw_draw).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.no_lua_call).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.has_lua_mat_lod).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, options.lua_mat_lod).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
@@ -13315,11 +13321,13 @@ pub mod gfx {
     pub fn feature_raw(feature_id: i32, options: GfxFeatureDrawOptions) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            let mut input_wire = [0u8; 12];
+            let mut input_wire = [0u8; 20];
             let mut input_cursor = 0usize;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.apply_transform).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.do_raw_draw).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.no_lua_call).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.has_lua_mat_lod).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, options.lua_mat_lod).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
@@ -14913,12 +14921,14 @@ pub mod gfx {
     pub fn unit(unit_id: i32, options: GfxUnitDrawOptions) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            let mut input_wire = [0u8; 16];
+            let mut input_wire = [0u8; 24];
             let mut input_cursor = 0usize;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.apply_transform).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.do_raw_draw).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.no_lua_call).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.full_model).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.has_lua_mat_lod).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, options.lua_mat_lod).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
@@ -14994,12 +15004,14 @@ pub mod gfx {
     pub fn unit_raw(unit_id: i32, options: GfxUnitDrawOptions) -> Result<()> {
         #[cfg(target_arch = "wasm32")]
         {
-            let mut input_wire = [0u8; 16];
+            let mut input_wire = [0u8; 24];
             let mut input_cursor = 0usize;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.apply_transform).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.do_raw_draw).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.no_lua_call).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.full_model).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, options.has_lua_mat_lod).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_i32(&mut input_wire, &mut input_cursor, options.lua_mat_lod).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
             if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));

@@ -108,4 +108,54 @@ impl<'a> MoveCtrl<'a> {
         }
     }
 
+    pub fn set_move_type_numeric(&self, unit_id: i32, field: sys::MoveTypeNumericField, value: f32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetMoveTypeNumericQuery {
+                unitID: unit_id,
+                field,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::SetMoveTypeNumericResult>::zeroed();
+            let func = self.api.SetMoveTypeNumeric.expect("SetMoveTypeNumeric function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_move_type_boolean(&self, unit_id: i32, field: sys::MoveTypeBooleanField, value: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetMoveTypeBooleanQuery {
+                unitID: unit_id,
+                field,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::SetMoveTypeBooleanResult>::zeroed();
+            let func = self.api.SetMoveTypeBoolean.expect("SetMoveTypeBoolean function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_no_blocking(&self, unit_id: i32, no_blocking: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetNoBlockingQuery {
+                unitID: unit_id,
+                noBlocking: no_blocking,
+            };
+            let mut result = MaybeUninit::<sys::SetNoBlockingResult>::zeroed();
+            let func = self.api.SetNoBlocking.expect("SetNoBlocking function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
 }

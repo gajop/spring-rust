@@ -12,6 +12,48 @@ fn append_generated(contents: &mut String, path: &PathBuf, description: &str) {
     contents.push('\n');
 }
 
+/// Mirror the engine's `SPRING_GL_CONSTANTS` X-macro list as Rust `u32`
+/// constants. Parsing the header keeps a single source of truth: the engine
+/// build static_asserts every `GLC_*` entry against the real `GL_*`, so guests
+/// never hand-copy a hex literal.
+fn generate_gl_constants(header: &PathBuf) -> String {
+    println!("cargo:rerun-if-changed={}", header.display());
+    let source = fs::read_to_string(header).expect("read NativeInterface Constants.h");
+    let list_start = source
+        .find("#define SPRING_GL_CONSTANTS(X)")
+        .expect("locate SPRING_GL_CONSTANTS in Constants.h");
+
+    let mut contents = String::from(
+        "// Generated from `rts/NativeInterface/api/Constants.h` by build.rs. Do not edit.\n\n",
+    );
+    let mut seen = std::collections::BTreeSet::new();
+    for line in source[list_start..].lines().skip(1) {
+        let line = line.trim();
+        let Some(rest) = line.strip_prefix("X(") else {
+            break;
+        };
+        let (name, value) = rest
+            .split_once(',')
+            .expect("malformed SPRING_GL_CONSTANTS entry");
+        let name = name.trim();
+        let value = value
+            .trim_end_matches('\\')
+            .trim()
+            .trim_end_matches(')')
+            .trim()
+            // C unsigned-literal suffix; Rust spells it `u32`.
+            .trim_end_matches('u');
+        if seen.insert(name.to_string()) {
+            contents.push_str(&format!("pub const {name}: u32 = {value}u32;\n"));
+        }
+    }
+    assert!(
+        seen.contains("TEXTURE_2D"),
+        "SPRING_GL_CONSTANTS parse produced no usable entries"
+    );
+    contents
+}
+
 fn main() {
     let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let generated_dir = manifest.join("../../../rts/wasm/generated/sdk");
@@ -89,4 +131,9 @@ fn main() {
     );
 
     fs::write(&output, contents).expect("write combined generated Core Rust SDK");
+
+    let gl_output = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("gl_generated.rs");
+    let gl_contents =
+        generate_gl_constants(&manifest.join("../../../rts/NativeInterface/api/Constants.h"));
+    fs::write(&gl_output, gl_contents).expect("write generated GL constants");
 }

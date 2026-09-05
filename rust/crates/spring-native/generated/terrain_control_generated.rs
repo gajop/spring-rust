@@ -124,7 +124,6 @@ impl<'a> TerrainControl<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_terrain_type_data(&self, type_index: i32, tank_speed: f32, kbot_speed: f32, hover_speed: f32, ship_speed: f32, hardness: f32, receive_tracks: bool, name: &str) -> Result<bool, Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;

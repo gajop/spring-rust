@@ -46,7 +46,12 @@ def main() -> int:
 
     output = max(candidates, key=generated_mtime)
     snapshot = root / "rust" / "crates" / "spring-native" / "generated"
-    source_files = [path for path in sorted(output.iterdir()) if path.is_file()]
+    # version.rs is read from Common.h on every build, so it is never snapshotted.
+    source_files = [
+        path
+        for path in sorted(output.iterdir())
+        if path.is_file() and path.name != "version.rs"
+    ]
 
     if args.check:
         expected = {

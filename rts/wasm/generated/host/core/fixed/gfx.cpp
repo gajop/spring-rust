@@ -1612,7 +1612,7 @@ wasm_trap_t* Core_gfx_feature(void* environment, wasmtime_caller_t* caller,
         return Trap(memoryError);
     const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputWire;
-    if (!state->memory.View(input, 12u, inputWire)) {
+    if (!state->memory.View(input, 20u, inputWire)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
         return nullptr;
     }
@@ -1623,6 +1623,8 @@ wasm_trap_t* Core_gfx_feature(void* environment, wasmtime_caller_t* caller,
     if (!reader.Bool(query.options.applyTransform)) return Trap("generated Core wire underflow");
     if (!reader.Bool(query.options.doRawDraw)) return Trap("generated Core wire underflow");
     if (!reader.Bool(query.options.noLuaCall)) return Trap("generated Core wire underflow");
+    if (!reader.Bool(query.options.hasLuaMatLOD)) return Trap("generated Core wire underflow");
+    { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap("generated Core wire underflow"); query.options.luaMatLOD = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options.luaMatLOD)>>>(coreRaw); }
     if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -1764,7 +1766,7 @@ wasm_trap_t* Core_gfx_feature_raw(void* environment, wasmtime_caller_t* caller,
         return Trap(memoryError);
     const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputWire;
-    if (!state->memory.View(input, 12u, inputWire)) {
+    if (!state->memory.View(input, 20u, inputWire)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
         return nullptr;
     }
@@ -1775,6 +1777,8 @@ wasm_trap_t* Core_gfx_feature_raw(void* environment, wasmtime_caller_t* caller,
     if (!reader.Bool(query.options.applyTransform)) return Trap("generated Core wire underflow");
     if (!reader.Bool(query.options.doRawDraw)) return Trap("generated Core wire underflow");
     if (!reader.Bool(query.options.noLuaCall)) return Trap("generated Core wire underflow");
+    if (!reader.Bool(query.options.hasLuaMatLOD)) return Trap("generated Core wire underflow");
+    { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap("generated Core wire underflow"); query.options.luaMatLOD = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options.luaMatLOD)>>>(coreRaw); }
     if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4801,7 +4805,7 @@ wasm_trap_t* Core_gfx_unit(void* environment, wasmtime_caller_t* caller,
         return Trap(memoryError);
     const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputWire;
-    if (!state->memory.View(input, 16u, inputWire)) {
+    if (!state->memory.View(input, 24u, inputWire)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
         return nullptr;
     }
@@ -4813,6 +4817,8 @@ wasm_trap_t* Core_gfx_unit(void* environment, wasmtime_caller_t* caller,
     if (!reader.Bool(query.options.doRawDraw)) return Trap("generated Core wire underflow");
     if (!reader.Bool(query.options.noLuaCall)) return Trap("generated Core wire underflow");
     if (!reader.Bool(query.options.fullModel)) return Trap("generated Core wire underflow");
+    if (!reader.Bool(query.options.hasLuaMatLOD)) return Trap("generated Core wire underflow");
+    { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap("generated Core wire underflow"); query.options.luaMatLOD = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options.luaMatLOD)>>>(coreRaw); }
     if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4954,7 +4960,7 @@ wasm_trap_t* Core_gfx_unit_raw(void* environment, wasmtime_caller_t* caller,
         return Trap(memoryError);
     const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
     std::span<const std::uint8_t> inputWire;
-    if (!state->memory.View(input, 16u, inputWire)) {
+    if (!state->memory.View(input, 24u, inputWire)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
         return nullptr;
     }
@@ -4966,6 +4972,8 @@ wasm_trap_t* Core_gfx_unit_raw(void* environment, wasmtime_caller_t* caller,
     if (!reader.Bool(query.options.doRawDraw)) return Trap("generated Core wire underflow");
     if (!reader.Bool(query.options.noLuaCall)) return Trap("generated Core wire underflow");
     if (!reader.Bool(query.options.fullModel)) return Trap("generated Core wire underflow");
+    if (!reader.Bool(query.options.hasLuaMatLOD)) return Trap("generated Core wire underflow");
+    { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap("generated Core wire underflow"); query.options.luaMatLOD = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options.luaMatLOD)>>>(coreRaw); }
     if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);

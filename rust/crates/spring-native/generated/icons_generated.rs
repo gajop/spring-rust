@@ -1,5 +1,4 @@
 impl<'a> Icons<'a> {
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn add_unit_icon(&self, icon_name: &str, tex_file: &str, size: f32, distance: f32, radius_adjust: bool, u0: f32, v0: f32, u1: f32, v1: f32) -> Result<bool, Error> {
         unsafe {
             let icon_name_cstr = std::ffi::CString::new(icon_name).map_err(|_| Error::invalid_argument("icon_name"))?;

@@ -44,6 +44,7 @@
 #include "Rendering/Models/ModelsMemStorage.h"
 #include "Rendering/Models/VertexData.hpp"
 #include "Rendering/ModelsDataUploader.h"
+#include "Rendering/LuaObjectDrawer.h"
 #include "Rendering/ShadowHandler.h"
 #include "Rendering/Textures/3DOTextureHandler.h"
 #include "Rendering/Textures/Bitmap.h"
@@ -4924,6 +4925,33 @@ static void MultObjectPieceMatrix(const CSolidObject* obj, int32_t pieceID, GfxE
 		glMultMatrixf(lmp->GetModelSpaceMatrix());
 }
 
+// Mirror of LuaOpenGL.cpp's GLObjectDrawWithLuaMat: decide whether the draw
+// below should use the object's Lua-assigned material, and pick the LOD it
+// draws at. `hasLuaMatLOD == false` matches an omitted Lua argument (auto LOD),
+// a non-negative LOD selects one explicitly, and a negative LOD forces the
+// void-material path.
+static bool ObjectDrawWithLuaMat(CSolidObject* obj, LuaObjType objType, bool hasLuaMatLOD, int32_t luaMatLOD)
+{
+	LuaObjectMaterialData* lmd = obj->GetLuaMaterialData();
+
+	if (!lmd->Enabled())
+		return false;
+
+	if (!hasLuaMatLOD) {
+		// calculate new LOD level
+		lmd->UpdateCurrentLOD(objType, camera->ProjectedDistance(obj->pos), LuaObjectDrawer::GetDrawPassOpaqueMat());
+		return true;
+	}
+
+	// set new LOD level manually
+	if (luaMatLOD >= 0) {
+		lmd->SetCurrentLOD(std::min(lmd->GetLODCount() - 1, static_cast<unsigned int>(luaMatLOD)));
+		return true;
+	}
+
+	return false;
+}
+
 static void UnitCommon(const GfxUnitDrawQuery* query, bool applyTransform, bool defaultNoLuaCall, GfxEmptyResult* result)
 {
 	result->error = nullptr;
@@ -4933,7 +4961,16 @@ static void UnitCommon(const GfxUnitDrawQuery* query, bool applyTransform, bool 
 		return;
 	}
 
+	const bool useLuaMat = ObjectDrawWithLuaMat(unit, LUAOBJ_UNIT, query->options.hasLuaMatLOD, query->options.luaMatLOD);
+
 	glPushAttrib(GL_ENABLE_BIT);
+
+	if (!useLuaMat) {
+		// "scoped" draw; this prevents any Lua-assigned
+		// material(s) from being used by the call below
+		(unit->GetLuaMaterialData())->PushLODCount(0);
+	}
+
 	if (query->options.doRawDraw) {
 		if (applyTransform) {
 			unitDrawer->DrawUnitTrans(unit, 0, 0, query->options.fullModel, query->options.noLuaCall);
@@ -4947,6 +4984,11 @@ static void UnitCommon(const GfxUnitDrawQuery* query, bool applyTransform, bool 
 			unitDrawer->DrawIndividualNoTrans(unit, query->options.noLuaCall || defaultNoLuaCall);
 		}
 	}
+
+	if (!useLuaMat) {
+		(unit->GetLuaMaterialData())->PopLODCount();
+	}
+
 	glPopAttrib();
 }
 
@@ -5009,7 +5051,16 @@ static void FeatureCommon(const GfxFeatureDrawQuery* query, bool applyTransform,
 		return;
 	}
 
+	const bool useLuaMat = ObjectDrawWithLuaMat(feature, LUAOBJ_FEATURE, query->options.hasLuaMatLOD, query->options.luaMatLOD);
+
 	glPushAttrib(GL_ENABLE_BIT);
+
+	if (!useLuaMat) {
+		// "scoped" draw; this prevents any Lua-assigned
+		// material(s) from being used by the call below
+		(feature->GetLuaMaterialData())->PushLODCount(0);
+	}
+
 	if (query->options.doRawDraw) {
 		if (applyTransform) {
 			featureDrawer->DrawFeatureTrans(feature, 0, 0, false, query->options.noLuaCall);
@@ -5023,6 +5074,11 @@ static void FeatureCommon(const GfxFeatureDrawQuery* query, bool applyTransform,
 			featureDrawer->DrawIndividualNoTrans(feature, query->options.noLuaCall || defaultNoLuaCall);
 		}
 	}
+
+	if (!useLuaMat) {
+		(feature->GetLuaMaterialData())->PopLODCount();
+	}
+
 	glPopAttrib();
 }
 

@@ -13,16 +13,22 @@ fn main() {
     let include_dir = project_root.join("rts/NativeInterface/api");
     let include_root = project_root.join("rts");
     let includes = vec![include_dir.clone(), include_root.clone()];
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+
+    // The version the host checks a module against is read from the headers on
+    // every build, snapshot or not: a snapshotted copy would keep declaring the
+    // version of whichever headers it was captured from.
+    write_api_version(&project_root, &out_dir);
 
     // Normal module builds consume the committed deterministic snapshot. A
     // maintainer/CI regeneration explicitly opts into libclang with
     // SPRING_NATIVE_REGENERATE=1, keeping downstream builds independent of a
     // host libclang installation.
+    println!("cargo:rerun-if-env-changed=SPRING_NATIVE_REGENERATE");
     let snapshot_dir = manifest_dir.join("generated");
     if env::var_os("SPRING_NATIVE_REGENERATE").is_none()
         && snapshot_dir.join("manifest.json").exists()
     {
-        let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
         for entry in fs::read_dir(&snapshot_dir).expect("read native snapshot") {
             let entry = entry.expect("native snapshot entry");
             if matches!(
@@ -97,7 +103,6 @@ fn main() {
     }
     println!("cargo:rerun-if-changed={}", include_dir.display());
 
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let codegen = spring_native_codegen::CodeGenerator::with_repository_root(&project_root)
         .unwrap_or_else(|error| panic!("initialize code generator: {error}"));
 
@@ -208,8 +213,9 @@ fn main() {
         unit_rendering_code,
     )
     .unwrap_or_else(|e| panic!("write unit_rendering: {}", e));
+}
 
-    // Extract and generate API version constants
+fn write_api_version(project_root: &std::path::Path, out_dir: &std::path::Path) {
     let common_header = project_root.join("rts/NativeInterface/api/Common.h");
     println!("cargo:rerun-if-changed={}", common_header.display());
 
@@ -222,17 +228,16 @@ fn main() {
 /// Major version of the Native API this module was built against.
 ///
 /// Major version MUST match between host and module for compatibility.
-pub const NATIVE_API_VERSION_MAJOR: u32 = {};
+pub const NATIVE_API_VERSION_MAJOR: u32 = {major};
 
 /// Minor version of the Native API this module was built against.
 ///
 /// Module can require a minimum minor version from the host.
-pub const NATIVE_API_VERSION_MINOR: u32 = {};
+pub const NATIVE_API_VERSION_MINOR: u32 = {minor};
 
 /// Patch version of the Native API this module was built against.
-pub const NATIVE_API_VERSION_PATCH: u32 = {};
-"#,
-        major, minor, patch
+pub const NATIVE_API_VERSION_PATCH: u32 = {patch};
+"#
     );
 
     fs::write(out_dir.join("version.rs"), version_code)

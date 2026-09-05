@@ -151,6 +151,32 @@ mod version {
 
 // Re-export version constants
 pub use version::{NATIVE_API_VERSION_MAJOR, NATIVE_API_VERSION_MINOR, NATIVE_API_VERSION_PATCH};
+
+#[cfg(test)]
+mod version_tests {
+    #[test]
+    fn constants_match_common_header() {
+        let header = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../rts/NativeInterface/api/Common.h");
+        let text = std::fs::read_to_string(&header).expect("read Common.h");
+        let marker = "#define NATIVE_API_CURRENT_VERSION NATIVE_API_VERSION(";
+        let start = text.find(marker).expect("NATIVE_API_CURRENT_VERSION") + marker.len();
+        let end = start + text[start..].find(')').expect("closing paren");
+        let header_version: Vec<u32> = text[start..end]
+            .split(',')
+            .map(|part| part.trim().parse().expect("version component"))
+            .collect();
+        assert_eq!(
+            header_version,
+            vec![
+                super::NATIVE_API_VERSION_MAJOR,
+                super::NATIVE_API_VERSION_MINOR,
+                super::NATIVE_API_VERSION_PATCH,
+            ],
+            "the exported API version drifted from Common.h"
+        );
+    }
+}
 mod display;
 mod encoding;
 mod error;

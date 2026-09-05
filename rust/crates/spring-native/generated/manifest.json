@@ -30,8 +30,8 @@
     },
     {
       "name": "effects_control_generated.rs",
-      "sha256": "12069d0a9427ef27ee7f07d09fbe8c641444fc3650ca15e0f5c2351f07953484",
-      "bytes": 2456
+      "sha256": "34c9cf8fc24857992ed75158d66934cb309356667237f5db7f30406c5c2302bb",
+      "bytes": 2344
     },
     {
       "name": "encoding_generated.rs",
@@ -40,8 +40,8 @@
     },
     {
       "name": "feature_control_generated.rs",
-      "sha256": "648a108e5f5c368a5fa819254f363c038d9481c01feda9c49f2a136740c05086",
-      "bytes": 25013
+      "sha256": "0d7c9f3f518cd46d319d6d677b8aa45302c1398d6ad81d9bafb27769a2fcbcc1",
+      "bytes": 24789
     },
     {
       "name": "feature_defs_generated.rs",
@@ -65,18 +65,18 @@
     },
     {
       "name": "gfx_generated.rs",
-      "sha256": "0ed78dc3b0420201e89c90088de13a3f0d39d5007fb45b97edbbae8be14e5b3f",
-      "bytes": 171495
+      "sha256": "50360efb898b55493a7fdc36314abe59ca18a333bfd709341ed1b1d64bcc2954",
+      "bytes": 170963
     },
     {
       "name": "ground_decals_generated.rs",
-      "sha256": "a7d16cfb27e71520364fc43529512160ae78961bcdbe5be811508423ede8aea7",
-      "bytes": 26031
+      "sha256": "35e6c8f4328af8652d7d35f32819c7aff66f51feeb07019f038bfe0b78014716",
+      "bytes": 25919
     },
     {
       "name": "icons_generated.rs",
-      "sha256": "267eea2139239af35b04955e0fe26b7479556e2889b2074d296db21777ea5c87",
-      "bytes": 4952
+      "sha256": "27a9c15cc878e91690cfcb11803c0a8ff6aabc873ef6a26df0e3d97cd35f7993",
+      "bytes": 4840
     },
     {
       "name": "input_generated.rs",
@@ -120,8 +120,8 @@
     },
     {
       "name": "move_ctrl_generated.rs",
-      "sha256": "3b529b77e49992082c93c3538dbfaac7f96868c288db67a9a6ff7cf96069340b",
-      "bytes": 4539
+      "sha256": "cbc39ba3c50da41576a2309e299c439eff46504d353b7b4a7c47311ddc22ccd7",
+      "bytes": 6570
     },
     {
       "name": "path_finder_generated.rs",
@@ -180,8 +180,8 @@
     },
     {
       "name": "system_control_generated.rs",
-      "sha256": "b54841cbc4a6f325b0e013a964a8d3e54531ae8e48e2ad642bed3ac0aadfdf82",
-      "bytes": 16992
+      "sha256": "f466eacf9688e67b141ddc46c20b40303a9b553ed0536f649652622fc72c780e",
+      "bytes": 16880
     },
     {
       "name": "team_control_generated.rs",
@@ -195,8 +195,8 @@
     },
     {
       "name": "terrain_control_generated.rs",
-      "sha256": "f556d85482173f9f8186188c73c90bccd33f8cf0a9e553bad04c473dc1bd3141",
-      "bytes": 17935
+      "sha256": "0c8b2adf891ca8087fb1b9cae7b2fbf97d2fe7525919e8b0a6607c92d3e2299f",
+      "bytes": 17823
     },
     {
       "name": "terrain_generated.rs",
@@ -210,8 +210,8 @@
     },
     {
       "name": "unit_control_generated.rs",
-      "sha256": "2f4f6659010919dca2027aabb7c301872e211c088b3b240b290def7cd0faa8ec",
-      "bytes": 68226
+      "sha256": "8f1abeb8245ec5d9ccc0b1aa5335b56719ec56f4777a040524a99a71410d0a51",
+      "bytes": 68002
     },
     {
       "name": "unit_defs_generated.rs",
@@ -240,8 +240,8 @@
     },
     {
       "name": "units_query_generated.rs",
-      "sha256": "e2946c3fe6bf0c0dd9cbc9ce19f510b409695b9cf524e13ae85cc095bdd5b815",
-      "bytes": 19220
+      "sha256": "ee7acc48f02babd4b368cc7820ae002bb20f96dcacb4fbcb89de81e41a77fb5c",
+      "bytes": 19108
     },
     {
       "name": "units_weapons_generated.rs",
@@ -250,8 +250,8 @@
     },
     {
       "name": "unsynced_ctrl_generated.rs",
-      "sha256": "3c80a3bfc995a86f7265ceffdfa7b7de151befb622e9dd3b8bc6615bfa1aeb02",
-      "bytes": 58999
+      "sha256": "c02006d06a7440dccabe99d862b9ef64f54eeabbe3d5ac3453f52a32492b7ed7",
+      "bytes": 59634
     },
     {
       "name": "unsynced_read_generated.rs",
@@ -262,11 +262,6 @@
       "name": "utils_generated.rs",
       "sha256": "ae670b8852f99892a53ce3d8c999fb8800a4de2946426b4685809c2b20fad9e9",
       "bytes": 5522
-    },
-    {
-      "name": "version.rs",
-      "sha256": "2e62c4fd2079a8b8265805aeb15f859b02e1d18d39df180e52ac8b5132f20bca",
-      "bytes": 545
     },
     {
       "name": "vfs_generated.rs",

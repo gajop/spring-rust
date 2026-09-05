@@ -1403,4 +1403,20 @@ impl<'a> UnsyncedCtrl<'a> {
         }
     }
 
+    pub fn set_unit_lua_draw(&self, unit_id: i32, lua_draw: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetUnitLuaDrawQuery {
+                unitID: unit_id,
+                luaDraw: lua_draw,
+            };
+            let mut result = MaybeUninit::<sys::SetUnitLuaDrawResult>::zeroed();
+            let func = self.api.SetUnitLuaDraw.expect("SetUnitLuaDraw function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
 }

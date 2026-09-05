@@ -62,6 +62,8 @@ pub struct GfxFeatureDrawOptions {
     pub apply_transform: bool,
     pub do_raw_draw: bool,
     pub no_lua_call: bool,
+    pub has_lua_mat_lod: bool,
+    pub lua_mat_lod: i32,
 }
 
 impl From<GfxFeatureDrawOptions> for sys::GfxFeatureDrawOptions {
@@ -70,6 +72,8 @@ impl From<GfxFeatureDrawOptions> for sys::GfxFeatureDrawOptions {
             applyTransform: options.apply_transform,
             doRawDraw: options.do_raw_draw,
             noLuaCall: options.no_lua_call,
+            hasLuaMatLOD: options.has_lua_mat_lod,
+            luaMatLOD: options.lua_mat_lod,
         }
     }
 }
@@ -174,6 +178,8 @@ pub struct GfxUnitDrawOptions {
     pub do_raw_draw: bool,
     pub no_lua_call: bool,
     pub full_model: bool,
+    pub has_lua_mat_lod: bool,
+    pub lua_mat_lod: i32,
 }
 
 impl From<GfxUnitDrawOptions> for sys::GfxUnitDrawOptions {
@@ -183,6 +189,8 @@ impl From<GfxUnitDrawOptions> for sys::GfxUnitDrawOptions {
             doRawDraw: options.do_raw_draw,
             noLuaCall: options.no_lua_call,
             fullModel: options.full_model,
+            hasLuaMatLOD: options.has_lua_mat_lod,
+            luaMatLOD: options.lua_mat_lod,
         }
     }
 }
@@ -559,6 +567,19 @@ impl<'a> Gfx<'a> {
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.Culling.expect("Culling function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, ())
+        }
+    }
+
+    pub fn cull_face(&self, face: sys::GfxCullFace) -> Result<(), Error> {
+        unsafe {
+            let query = sys::GfxCullFaceQuery {
+                face,
+            };
+            let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
+            let func = self.api.CullFace.expect("CullFace function pointer must be initialized");
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();
             Error::result_or(result.error, ())
@@ -1230,7 +1251,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn create_shader(&self, definitions: &str, vertex: &str, tcs: &str, tes: &str, geometry: &str, fragment: &str, compute: &str, options: GfxCreateShaderOptions) -> Result<(u32, u32), Error> {
         unsafe {
             let definitions_cstr = std::ffi::CString::new(definitions).map_err(|_| Error::invalid_argument("definitions"))?;
@@ -1769,7 +1789,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn copy_to_texture(&self, name: &str, xoff: i32, yoff: i32, x: i32, y: i32, width: i32, height: i32, target: u32, level: u32) -> Result<(), Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
@@ -1792,7 +1811,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn upload_texture(&self, name: &str, target: u32, level: i32, xoff: i32, yoff: i32, zoff: i32, width: i32, height: i32, depth: i32, format: u32, pixel_type: u32, data: &[u8]) -> Result<(), Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
@@ -1833,7 +1851,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn bind_image_texture(&self, unit: u32, name: &str, level: i32, layer: i32, layered: bool, access: u32, format: u32) -> Result<(), Error> {
         unsafe {
             let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
@@ -1957,7 +1974,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_fboattachment(&self, fbo_id: u32, attachment: u32, texture_name: &str, texture_target: u32, mip_level: i32, rbo_id: u32, use_rbo: bool) -> Result<(), Error> {
         unsafe {
             let texture_name_cstr = std::ffi::CString::new(texture_name).map_err(|_| Error::invalid_argument("texture_name"))?;
@@ -2079,7 +2095,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn blit_fbo(&self, src_fboid: u32, dst_fboid: u32, x0_src: i32, y0_src: i32, x1_src: i32, y1_src: i32, x0_dst: i32, y0_dst: i32, x1_dst: i32, y1_dst: i32, mask: u32, filter: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxBlitFBOQuery {
@@ -2212,7 +2227,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn draw_elements_vao(&self, vao_id: u32, mode: u32, draw_count: i32, base_index: i32, instance_count: i32, base_vertex: i32, base_instance: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxVAODrawElementsQuery {
@@ -2372,7 +2386,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn define_vbo(&self, vbo_id: u32, elements_count: i32, element_array: bool, index_type: u32, use_default_attributes: bool, default_attribute_count: u32, attributes: &[sys::GfxVBOAttributeOptions]) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxVBODefineQuery {
@@ -2811,7 +2824,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn save_image(&self, x: i32, y: i32, width: i32, height: i32, filename: &str, options: GfxSaveImageOptions, read_buffer: u32) -> Result<bool, Error> {
         unsafe {
             let filename_cstr = std::ffi::CString::new(filename).map_err(|_| Error::invalid_argument("filename"))?;
@@ -3442,7 +3454,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn draw_ground_circle(&self, pos: sys::Float3, radius: f32, resolution: i32, ballistic: bool, slope: f32, gravity: f32, weapon_def_id: i32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxGroundCircleQuery {
@@ -3462,7 +3473,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn draw_ground_quad(&self, x0: f32, z0: f32, x1: f32, z1: f32, use_tex_coords: bool, tu0: f32, tv0: f32, tu1: f32, tv1: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxGroundQuadQuery {
@@ -4171,7 +4181,6 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn tex_rect(&self, x1: f32, y1: f32, x2: f32, y2: f32, s1: f32, t1: f32, s2: f32, t2: f32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxTexRectQuery {

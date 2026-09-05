@@ -368,9 +368,9 @@ struct GfxGroundQuadQuery { float x0; float z0; float x1; float z1; bool useTexC
 struct GfxMiniMapConfigQuery { int32_t px; int32_t py; int32_t sx; int32_t sy; };
 struct GfxFixedStateQuery { const char* param; };
 struct GfxFixedStateResult { const Error* error; bool bools[8]; uint32_t boolCount; int32_t ints[16]; uint32_t intCount; float floats[16]; uint32_t floatCount; };
-struct GfxUnitDrawOptions { bool applyTransform; bool doRawDraw; bool noLuaCall; bool fullModel; };
+struct GfxUnitDrawOptions { bool applyTransform; bool doRawDraw; bool noLuaCall; bool fullModel; bool hasLuaMatLOD; int32_t luaMatLOD; };
 struct GfxUnitDrawQuery { int32_t unitID; GfxUnitDrawOptions options; };
-struct GfxFeatureDrawOptions { bool applyTransform; bool doRawDraw; bool noLuaCall; };
+struct GfxFeatureDrawOptions { bool applyTransform; bool doRawDraw; bool noLuaCall; bool hasLuaMatLOD; int32_t luaMatLOD; };
 struct GfxFeatureDrawQuery { int32_t featureID; GfxFeatureDrawOptions options; };
 struct GfxObjectTextureStateQuery { int32_t objectID; bool push; };
 struct GfxObjectShapeOptions { bool rawState; bool toScreen; bool opaque; };

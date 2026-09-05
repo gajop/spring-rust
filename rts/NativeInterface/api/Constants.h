@@ -207,6 +207,11 @@ enum GameConstant {
 	X(NOTEQUAL                       , 0x00000205u) \
 	X(GEQUAL                         , 0x00000206u) \
 	X(ALWAYS                         , 0x00000207u) \
+	X(KEEP                           , 0x00001E00u) \
+	X(INCR                           , 0x00001E02u) \
+	X(DECR                           , 0x00001E03u) \
+	X(INCR_WRAP                      , 0x00008507u) \
+	X(DECR_WRAP                      , 0x00008508u) \
 	X(CLEAR                          , 0x00001500u) \
 	X(AND                            , 0x00001501u) \
 	X(AND_REVERSE                    , 0x00001502u) \

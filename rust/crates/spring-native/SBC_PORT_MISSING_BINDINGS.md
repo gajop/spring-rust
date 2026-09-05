@@ -1142,3 +1142,70 @@ RmlUi's attribute map lookup before the call returns to Lua.
 directly through sol2. Route the Lua method through a wrapper that takes owned
 `Rml::String` values before entering RmlUi, so Lua/sol temporary conversion
 lifetime cannot leak into RmlUi's attribute-map mutation path.
+
+## Native API: still open after the RulesParams ABI crash (2026-09-04)
+
+Reported by SBC (Rust port). One item is fixed in this tree, one is a design
+question for the engine.
+
+### What happened
+
+`SetObjectParamCommand` with a string rules param segfaulted the engine in
+`NativeSetFeatureRulesParam` (`rts/NativeInterface/api/RulesParams.cpp:579`).
+Under `-DUSE_ASAN=ON` + gdb the query was:
+
+```
+$1 = {featureID = 24792, paramName = 0x... "label",
+      value = {type = RULESPARAM_TYPE_STRING, boolValue = 32,
+               floatValue = 1.39e-40, stringValue = 0x1}, los = 0}
+```
+
+`stringValue = 0x1` is the caller's `los` (1) read one field early: the module
+wrote the 16-byte `RulesParamValue` (`type` + union at offset 8), the host read
+the 24-byte tagged struct `3670dfa9a5` introduced. The module was stale, built
+against pre-`3670dfa9a5` headers, and nothing rejected it — the host logged
+`Module API version: 1.5.0, Host API version: 1.9.0` and loaded it.
+
+### Fixed here
+
+`rust/crates/spring-native/build.rs` now extracts the version from `Common.h` on
+every build, snapshot or not, and `snapshot_native.py` no longer captures
+`version.rs`. Before this, a module built through the committed snapshot always
+declared 1.5.0 — the version the snapshot happened to be taken at — so the
+host's check could never see a mismatch, whichever headers the module was built
+against. `spring-native`'s `version_tests::constants_match_common_header` keeps
+them together, and `build.rs` now emits
+`cargo:rerun-if-env-changed=SPRING_NATIVE_REGENERATE`.
+
+### Still open: an ABI break shipped as a minor bump
+
+`NativeInterfaceSystem.cpp` accepts a module whose major matches and whose minor
+is `<=` the host's. That is right for additive changes, but `3670dfa9a5` changed
+the *size and field offsets* of an existing struct in 1.9.0, so every module
+built for 1.5–1.8 is admitted into a host it cannot talk to. Bumping the major
+for that change is the minimum fix; it depends on maintainer discipline, which
+is what failed here.
+
+Two ways to make divergence self-detecting instead:
+
+1. **Runtime layout hash.** The module exports `NativeModuleAbiHash` next to
+   `NativeModuleApiVersion`, folded at compile time from `size_of`/`align_of`/
+   `offset_of!` over the bindgen structs it was built with; the host compares it
+   to the same hash computed from its own headers and refuses on mismatch. This
+   catches any layout change, bump or no bump. It needs the C++ side of the hash
+   generated from the same model that drives the Rust codegen, since the list of
+   structs must not be maintained twice.
+2. **Build-time digest.** Codegen hashes the API surface it parsed into a
+   committed lock file; `check-rust.sh`/CI fails when the digest changes and
+   `NATIVE_API_CURRENT_VERSION` does not. Cheaper, catches it in review rather
+   than at load, and keeps the runtime check purely numeric.
+
+### SBC side
+
+- `just test-integration` depends on `build-native`, so the suite cannot boot a
+  plugin older than the headers it was built from; `just rebuild-native` forces
+  the build script to re-read the headers.
+- `tools/smoke/test_native_plugin.py::test_plugin_api_version_matches_engine`
+  fails the smoke run when the logged module and host versions differ.
+- `feature_rules_roundtrip` now asserts the string and bool rules-param
+  *values*, not just that the keys exist.

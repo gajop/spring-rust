@@ -404,7 +404,6 @@ impl<'a> GroundDecals<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_ground_decal_quad_pos_and_height(&self, decal_id: u32, pos_tlx: f32, pos_tly: f32, pos_trx: f32, pos_try: f32, pos_brx: f32, pos_bry: f32, pos_blx: f32, pos_bly: f32, proj_cube_height: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetGroundDecalQuadPosAndHeightQuery {

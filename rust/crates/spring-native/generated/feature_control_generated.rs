@@ -141,7 +141,6 @@ impl<'a> FeatureControl<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_feature_resources(&self, feature_id: i32, metal: f32, energy: f32, reclaim_time: f32, reclaim_left: f32, feature_def_metal: f32, feature_def_energy: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetFeatureResourcesQuery {
@@ -559,7 +558,6 @@ impl<'a> FeatureControl<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_feature_piece_collision_volume_data(&self, feature_id: i32, piece_index: i32, enable: bool, scales: sys::Float3, offsets: sys::Float3, volume_type: i32, primary_axis: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetFeaturePieceCollisionVolumeDataQuery {

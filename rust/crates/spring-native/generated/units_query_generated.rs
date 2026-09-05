@@ -232,7 +232,6 @@ impl<'a> UnitsQuery<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn get_units_in_box(&self, xmin: f32, ymin: f32, zmin: f32, xmax: f32, ymax: f32, zmax: f32, allegiance: i32) -> Result<Vec<i32>, Error> {
         unsafe {
             let query = sys::GetUnitsInBoxQuery {

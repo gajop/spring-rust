@@ -26,7 +26,6 @@ impl<'a> SystemControl<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn garbage_collect_ctrl(&self, iters_per_batch: i32, num_steps_per_iter: i32, min_steps_per_iter: i32, max_steps_per_iter: i32, min_loop_run_time: f32, max_loop_run_time: f32, base_run_time_mult: f32, base_mem_load_mult: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::GarbageCollectCtrlQuery {

@@ -786,7 +786,6 @@ impl<'a> UnitControl<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_unit_build_speed(&self, unit_id: i32, build_speed: f32, repair_speed: f32, reclaim_speed: f32, resurrect_speed: f32, capture_speed: f32, terraform_speed: f32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetUnitBuildSpeedQuery {
@@ -848,7 +847,6 @@ impl<'a> UnitControl<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn set_unit_piece_collision_volume_data(&self, unit_id: i32, piece_index: i32, enable: bool, scales: sys::Float3, offsets: sys::Float3, volume_type: i32, primary_axis: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetUnitPieceCollisionVolumeDataQuery {

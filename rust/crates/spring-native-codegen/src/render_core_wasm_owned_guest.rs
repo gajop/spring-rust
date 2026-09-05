@@ -1630,9 +1630,32 @@ fn convert_to_core(
                 .join(", ");
             format!("crate::generated::{module_ident}::{name} {{ {fields} }}")
         }
-        SemanticType::FixedArray { .. } => format!(
-            "{expression}.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?"
-        ),
+        SemanticType::FixedArray { element, length } => {
+            // The C side pairs a fixed-width array with a separate count, so the
+            // width is a capacity and a caller may legitimately fill less of it:
+            // glUniform1i goes through `int32_t values[4]` with count 1.  An
+            // exact-length conversion rejected every one of those, which is how
+            // scalar int and vec2 float uniforms came back InvalidArgument and
+            // silently stayed at zero.  Pad instead, and only refuse a slice
+            // that does not fit.
+            let element_type = rust_type(element, records, enums);
+            if matches!(
+                element_type.as_str(),
+                "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" | "u64" | "f32" | "f64"
+            ) {
+                format!(
+                    "{{ let __values = &{expression}[..]; \
+                     if __values.len() > {length} {{ return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }} \
+                     let mut __array = [0 as {element_type}; {length}]; \
+                     __array[..__values.len()].copy_from_slice(__values); \
+                     __array }}"
+                )
+            } else {
+                format!(
+                    "{expression}.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?"
+                )
+            }
+        }
         SemanticType::Option { inner } => {
             let converted = convert_to_core(inner, "value", records, enums, module_ident);
             if converted == "value" {

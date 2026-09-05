@@ -411,6 +411,8 @@
             pub apply_transform: bool,
             pub do_raw_draw: bool,
             pub no_lua_call: bool,
+            pub has_lua_mat_lod: bool,
+            pub lua_mat_lod: i32,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -1181,6 +1183,8 @@
             pub do_raw_draw: bool,
             pub no_lua_call: bool,
             pub full_model: bool,
+            pub has_lua_mat_lod: bool,
+            pub lua_mat_lod: i32,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -1898,13 +1902,13 @@
 
         #[inline]
         pub fn clear(bits: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::clear(bits, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::clear(bits, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
         #[inline]
         pub fn clear_attachment_fbo(target: u32, attachment: u32, values: &[f32], count: u32) -> Result<bool> {
-            let value = crate::generated::gfx::clear_attachment_fbo(target, attachment, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            let value = crate::generated::gfx::clear_attachment_fbo(target, attachment, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(value)
         }
 
@@ -1934,7 +1938,7 @@
 
         #[inline]
         pub fn clip_plane(plane: u32, equation: &[f32]) -> Result<()> {
-            crate::generated::gfx::clip_plane(plane, equation.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
+            crate::generated::gfx::clip_plane(plane, { let __values = &equation[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array })?;
             Ok(())
         }
 
@@ -2287,7 +2291,7 @@
 
         #[inline]
         pub fn feature(feature_id: i32, options: GfxFeatureDrawOptions) -> Result<()> {
-            crate::generated::gfx::feature(feature_id, crate::generated::gfx::GfxFeatureDrawOptions { apply_transform: options.apply_transform, do_raw_draw: options.do_raw_draw, no_lua_call: options.no_lua_call })?;
+            crate::generated::gfx::feature(feature_id, crate::generated::gfx::GfxFeatureDrawOptions { apply_transform: options.apply_transform, do_raw_draw: options.do_raw_draw, no_lua_call: options.no_lua_call, has_lua_mat_lod: options.has_lua_mat_lod, lua_mat_lod: options.lua_mat_lod })?;
             Ok(())
         }
 
@@ -2317,7 +2321,7 @@
 
         #[inline]
         pub fn feature_raw(feature_id: i32, options: GfxFeatureDrawOptions) -> Result<()> {
-            crate::generated::gfx::feature_raw(feature_id, crate::generated::gfx::GfxFeatureDrawOptions { apply_transform: options.apply_transform, do_raw_draw: options.do_raw_draw, no_lua_call: options.no_lua_call })?;
+            crate::generated::gfx::feature_raw(feature_id, crate::generated::gfx::GfxFeatureDrawOptions { apply_transform: options.apply_transform, do_raw_draw: options.do_raw_draw, no_lua_call: options.no_lua_call, has_lua_mat_lod: options.has_lua_mat_lod, lua_mat_lod: options.lua_mat_lod })?;
             Ok(())
         }
 
@@ -3057,7 +3061,7 @@
 
         #[inline]
         pub fn light(light: i32, options: GfxLightOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::light(light, crate::generated::gfx::GfxLightOptions { set_state: options.set_state, state: options.state }, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::light(light, crate::generated::gfx::GfxLightOptions { set_state: options.set_state, state: options.state }, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3097,7 +3101,7 @@
 
         #[inline]
         pub fn load_matrix(values: &[f32]) -> Result<()> {
-            crate::generated::gfx::load_matrix(values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
+            crate::generated::gfx::load_matrix({ let __values = &values[..]; if __values.len() > 16 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 16]; __array[..__values.len()].copy_from_slice(__values); __array })?;
             Ok(())
         }
 
@@ -3109,7 +3113,7 @@
 
         #[inline]
         pub fn material(pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::material(pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::material(pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3138,7 +3142,7 @@
 
         #[inline]
         pub fn mult_matrix(values: &[f32]) -> Result<()> {
-            crate::generated::gfx::mult_matrix(values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?)?;
+            crate::generated::gfx::mult_matrix({ let __values = &values[..]; if __values.len() > 16 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 16]; __array[..__values.len()].copy_from_slice(__values); __array })?;
             Ok(())
         }
 
@@ -3150,13 +3154,13 @@
 
         #[inline]
         pub fn multi_tex_env(tex_num: i32, target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::multi_tex_env(tex_num, target, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::multi_tex_env(tex_num, target, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
         #[inline]
         pub fn multi_tex_gen(tex_num: i32, target: u32, options: GfxMultiTexGenOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::multi_tex_gen(tex_num, target, crate::generated::gfx::GfxMultiTexGenOptions { set_state: options.set_state, state: options.state }, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::multi_tex_gen(tex_num, target, crate::generated::gfx::GfxMultiTexGenOptions { set_state: options.set_state, state: options.state }, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3184,7 +3188,7 @@
 
         #[inline]
         pub fn point_parameter(pname: u32, value: f32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::point_parameter(pname, value, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::point_parameter(pname, value, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3414,7 +3418,7 @@
 
         #[inline]
         pub fn set_tesselation_shader_parameter(param: u32, value: i32, values: &[f32], value_count: u32, use_float_array: bool) -> Result<()> {
-            crate::generated::gfx::set_tesselation_shader_parameter(param, value, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, value_count, use_float_array)?;
+            crate::generated::gfx::set_tesselation_shader_parameter(param, value, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, value_count, use_float_array)?;
             Ok(())
         }
 
@@ -3503,13 +3507,13 @@
 
         #[inline]
         pub fn tex_env(target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::tex_env(target, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::tex_env(target, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
         #[inline]
         pub fn tex_gen(target: u32, options: GfxTexGenOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::tex_gen(target, crate::generated::gfx::GfxTexGenOptions { set_state: options.set_state, state: options.state }, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::tex_gen(target, crate::generated::gfx::GfxTexGenOptions { set_state: options.set_state, state: options.state }, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3536,7 +3540,7 @@
 
         #[inline]
         pub fn text_env(target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::text_env(target, pname, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::text_env(target, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3570,7 +3574,7 @@
 
         #[inline]
         pub fn uniform(location: i32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::uniform(location, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::uniform(location, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3586,7 +3590,7 @@
 
         #[inline]
         pub fn uniform_int(location: i32, values: &[i32], count: u32) -> Result<()> {
-            crate::generated::gfx::uniform_int(location, values.to_vec().try_into().map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?, count)?;
+            crate::generated::gfx::uniform_int(location, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as i32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3603,7 +3607,7 @@
 
         #[inline]
         pub fn unit(unit_id: i32, options: GfxUnitDrawOptions) -> Result<()> {
-            crate::generated::gfx::unit(unit_id, crate::generated::gfx::GfxUnitDrawOptions { apply_transform: options.apply_transform, do_raw_draw: options.do_raw_draw, no_lua_call: options.no_lua_call, full_model: options.full_model })?;
+            crate::generated::gfx::unit(unit_id, crate::generated::gfx::GfxUnitDrawOptions { apply_transform: options.apply_transform, do_raw_draw: options.do_raw_draw, no_lua_call: options.no_lua_call, full_model: options.full_model, has_lua_mat_lod: options.has_lua_mat_lod, lua_mat_lod: options.lua_mat_lod })?;
             Ok(())
         }
 
@@ -3633,7 +3637,7 @@
 
         #[inline]
         pub fn unit_raw(unit_id: i32, options: GfxUnitDrawOptions) -> Result<()> {
-            crate::generated::gfx::unit_raw(unit_id, crate::generated::gfx::GfxUnitDrawOptions { apply_transform: options.apply_transform, do_raw_draw: options.do_raw_draw, no_lua_call: options.no_lua_call, full_model: options.full_model })?;
+            crate::generated::gfx::unit_raw(unit_id, crate::generated::gfx::GfxUnitDrawOptions { apply_transform: options.apply_transform, do_raw_draw: options.do_raw_draw, no_lua_call: options.no_lua_call, full_model: options.full_model, has_lua_mat_lod: options.has_lua_mat_lod, lua_mat_lod: options.lua_mat_lod })?;
             Ok(())
         }
 

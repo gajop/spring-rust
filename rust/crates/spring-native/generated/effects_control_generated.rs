@@ -38,7 +38,6 @@ impl<'a> EffectsControl<'a> {
         }
     }
 
-    #[expect(clippy::too_many_arguments, reason = "NativeInterface preserves the corresponding Lua API arity")]
     pub fn spawn_sfx(&self, unit_id: i32, sfx_id: i32, pos: sys::Float3, dir: sys::Float3, radius: f32, damage: f32, absolute: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::SpawnSFXQuery {

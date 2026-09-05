@@ -2356,16 +2356,23 @@ impl NativeApiParity {
             }};
         }
 
+        // The Lua side of this check calls gl.Unit/gl.Feature without a LOD
+        // argument, so leave has_lua_mat_lod false to match: the draw then
+        // auto-selects the object's Lua-material LOD exactly as Lua does.
         let unit_options = |apply_transform, do_raw_draw| spring_native::GfxUnitDrawOptions {
             apply_transform,
             do_raw_draw,
             no_lua_call: true,
             full_model: true,
+            has_lua_mat_lod: false,
+            lua_mat_lod: 0,
         };
         let feature_options = |apply_transform, do_raw_draw| spring_native::GfxFeatureDrawOptions {
             apply_transform,
             do_raw_draw,
             no_lua_call: true,
+            has_lua_mat_lod: false,
+            lua_mat_lod: 0,
         };
         let shape_options = spring_native::GfxObjectShapeOptions {
             raw_state: true,
