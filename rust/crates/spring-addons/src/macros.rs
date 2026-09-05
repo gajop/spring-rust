@@ -305,18 +305,6 @@ macro_rules! export_rules_gadgets {
         );
         $crate::__impl_rules_exports!($state_type, $setup_fn);
     };
-    (
-        state: $state_type:ty,
-        setup: $setup_fn:path,
-        scratch: $scratch_size:expr,
-        reentrant_unit_pre_damaged: $obsolete:path $(,)?
-    ) => {
-        $crate::export_rules_gadgets! {
-            state: $state_type,
-            setup: $setup_fn,
-            scratch: $scratch_size,
-        }
-    };
 }
 
 #[macro_export]
@@ -511,30 +499,6 @@ macro_rules! __impl_rules_exports {
         $crate::reexports::export_allow_command!(__spring_addon_allow_command);
     };
 }
-
-// The main widget/gadget macros export these callins now. Keep the previous
-// opt-in macros as migration no-ops so existing modules do not create duplicate
-// exports while they remove the old declarations.
-#[macro_export]
-macro_rules! export_widget_draw_world_pre_unit { () => {}; }
-#[macro_export]
-macro_rules! export_widget_draw_world_refraction { () => {}; }
-#[macro_export]
-macro_rules! export_widget_draw_screen_effects { () => {}; }
-#[macro_export]
-macro_rules! export_widget_draw_unit { () => {}; }
-#[macro_export]
-macro_rules! export_widget_game_over { () => {}; }
-#[macro_export]
-macro_rules! export_widget_view_resize { () => {}; }
-#[macro_export]
-macro_rules! export_gadget_projectile_destroyed { () => {}; }
-#[macro_export]
-macro_rules! export_gadget_game_over { () => {}; }
-#[macro_export]
-macro_rules! export_gadget_unit_cmd_done { () => {}; }
-#[macro_export]
-macro_rules! export_gadget_allow_command { () => {}; }
 
 #[macro_export]
 macro_rules! export_rules_unsynced_addons {
