@@ -8,21 +8,7 @@
 
 use alloc::format;
 
-const SECTION: &str = "spring-addons";
-
-/// Spring's `LOG_LEVEL_ERROR`.
-const ERROR: i32 = 50;
-
-/// Write a line to the engine log at error level.
-///
-/// Deliberately infallible: this runs on paths that are already failing, so a
-/// failed log must never itself panic.
-pub fn log_error(message: &str) {
-    #[cfg(target_arch = "wasm32")]
-    let _ = spring::log(SECTION, ERROR, message);
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = message;
-}
+use crate::log;
 
 /// Report a borrow conflict and then panic with the same text.
 ///
@@ -31,12 +17,13 @@ pub fn log_error(message: &str) {
 #[cold]
 #[inline(never)]
 pub fn borrow_conflict(what: &str, detail: &str) -> ! {
-    let message = format!(
-        "{what} {detail} Active callins (outermost first): {:?}. A Spring callout made by an \
-         outer callin re-entered the guest while that callin still held the borrow.",
-        crate::runtime::active_callins()
-    );
-    log_error(&message);
+    let message = crate::runtime::with_active_callins(|callins| {
+        format!(
+            "{what} {detail} Active callins (outermost first): {callins:?}. A Spring callout made \
+             by an outer callin re-entered the guest while that callin still held the borrow."
+        )
+    });
+    log::error(&message);
     panic!("{message}");
 }
 
@@ -54,10 +41,11 @@ pub fn install_panic_hook() {
         }
         let previous = std::panic::take_hook();
         std::panic::set_hook(std::boxed::Box::new(move |info| {
-            log_error(&format!(
-                "guest panic: {info}\n  active callins (outermost first): {:?}",
-                crate::runtime::active_callins()
-            ));
+            crate::runtime::with_active_callins(|callins| {
+                log::error(&format!(
+                    "guest panic: {info}\n  active callins (outermost first): {callins:?}"
+                ));
+            });
             previous(info);
         }));
     }

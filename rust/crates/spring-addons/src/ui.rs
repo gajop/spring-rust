@@ -376,5 +376,5 @@ pub fn warn_unhandled_callback(callback_id: u32) {
     let hex = core::str::from_utf8(&buffer).unwrap_or("????????");
     let mut message = alloc::string::String::from("unhandled UI callback id 0x");
     message.push_str(hex);
-    let _ = spring::log("spring-addons", 40, &message);
+    crate::log::warning(&message);
 }

@@ -46,7 +46,12 @@ mod core_cus_export_compile_test {
 
 #[cfg(target_arch = "wasm32")]
 mod benchmark;
-#[cfg(target_arch = "wasm32")]
+/// Callback identifiers and the synchronous-closure trampoline.
+///
+/// Deliberately not gated on wasm32: it is plain data plus a stack of closure
+/// nodes, with no host imports of its own. Keeping it available on the host
+/// lets crates built on top of the SDK (spring-addons) compile and run their
+/// unit tests natively.
 pub mod callback;
 #[cfg(target_arch = "wasm32")]
 mod cob_script;
@@ -94,7 +99,6 @@ pub mod units_query_borrowed;
 pub mod vfs;
 #[cfg(target_arch = "wasm32")]
 pub use benchmark::*;
-#[cfg(target_arch = "wasm32")]
 pub use callback::*;
 #[cfg(target_arch = "wasm32")]
 pub use cob_script::*;

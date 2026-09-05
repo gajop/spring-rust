@@ -7,6 +7,7 @@ extern crate alloc;
 extern crate std;
 
 pub mod event;
+pub mod log;
 pub mod macros;
 pub mod panic;
 pub mod rules;
@@ -19,8 +20,8 @@ pub mod reexports {
 }
 
 pub use event::{CommandEvent, EventResult, KeyEvent, ViewGeometry};
-pub use panic::{install_panic_hook, log_error};
+pub use panic::{borrow_conflict, install_panic_hook};
 pub use rules::{Gadget, GadgetHandler, UnitDestroyedEvent, UnitPreDamagedEvent};
-pub use runtime::{AddonContext, AddonRuntime, Resource, Resources, active_callins};
+pub use runtime::{AddonContext, AddonRuntime, Resource, Resources, with_active_callins};
 pub use ui::{Widget, WidgetHandler};
 pub use unsynced::{UnsyncedAddon, UnsyncedHandler};

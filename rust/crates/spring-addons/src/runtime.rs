@@ -6,46 +6,122 @@ use core::cell::{Cell, Ref, RefCell, RefMut};
 
 /// Names of the addon callins currently on the stack, outermost first.
 ///
-/// Wasm guests are single-threaded and callins are strictly nested, so a plain
-/// static is enough. It exists so a resource borrow conflict can name the outer
-/// callin that holds the borrow and the nested callin that wanted it.
+/// It exists so a resource borrow conflict can name the outer callin that holds
+/// the borrow and the nested callin that wanted it.
 mod callin_stack {
+    /// Deeper nesting than this is not recorded. Real callin stacks are two or
+    /// three deep; the cap only bounds the diagnostic.
     const DEPTH: usize = 16;
 
-    static mut NAMES: [&str; DEPTH] = [""; DEPTH];
-    static mut LEN: usize = 0;
+    #[derive(Clone, Copy)]
+    pub struct Stack {
+        names: [&'static str; DEPTH],
+        len: usize,
+    }
 
-    pub fn push(name: &'static str) {
-        unsafe {
-            if LEN < DEPTH {
-                NAMES[LEN] = name;
+    impl Stack {
+        const fn new() -> Self {
+            Self {
+                names: [""; DEPTH],
+                len: 0,
             }
-            LEN += 1;
+        }
+
+        fn push(&mut self, name: &'static str) {
+            if self.len < DEPTH {
+                self.names[self.len] = name;
+            }
+            self.len = self.len.saturating_add(1);
+        }
+
+        fn pop(&mut self) {
+            self.len = self.len.saturating_sub(1);
+        }
+
+        fn active(&self) -> &[&'static str] {
+            let len = if self.len > DEPTH { DEPTH } else { self.len };
+            &self.names[..len]
         }
     }
 
-    pub fn pop() {
-        unsafe {
-            LEN = LEN.saturating_sub(1);
+    #[cfg(feature = "std")]
+    mod storage {
+        use super::Stack;
+        use core::cell::Cell;
+
+        std::thread_local! {
+            static STACK: Cell<Stack> = const { Cell::new(Stack::new()) };
+        }
+
+        pub fn update(f: impl FnOnce(&mut Stack)) {
+            STACK.with(|cell| {
+                let mut stack = cell.get();
+                f(&mut stack);
+                cell.set(stack);
+            });
+        }
+
+        pub fn snapshot() -> Stack {
+            STACK.with(Cell::get)
         }
     }
 
-    pub fn active() -> &'static [&'static str] {
-        unsafe {
-            let len = if LEN > DEPTH { DEPTH } else { LEN };
-            &*core::ptr::addr_of!(NAMES[..len])
+    /// Without `std` there is no thread-local, so this falls back to a plain
+    /// static. That is sound for a wasm guest, which is single-threaded.
+    #[cfg(not(feature = "std"))]
+    mod storage {
+        use super::Stack;
+
+        static mut STACK: Stack = Stack::new();
+
+        pub fn update(f: impl FnOnce(&mut Stack)) {
+            unsafe { f(&mut *core::ptr::addr_of_mut!(STACK)) }
         }
+
+        pub fn snapshot() -> Stack {
+            unsafe { *core::ptr::addr_of!(STACK) }
+        }
+    }
+
+    /// Records `name` for as long as the guard lives.
+    ///
+    /// A guard rather than paired calls because a panic inside a callin must
+    /// still unwind the stack: on the host that panic is caught by tests, and
+    /// leaving the entry behind would misattribute every later diagnostic.
+    pub struct Entry;
+
+    impl Entry {
+        pub fn push(name: &'static str) -> Self {
+            storage::update(|stack| stack.push(name));
+            Self
+        }
+    }
+
+    impl Drop for Entry {
+        fn drop(&mut self) {
+            storage::update(Stack::pop);
+        }
+    }
+
+    pub fn with_active<R>(f: impl FnOnce(&[&'static str]) -> R) -> R {
+        // Snapshot first: `f` formats a diagnostic and may itself panic, and
+        // the panic hook reads this same stack.
+        let stack = storage::snapshot();
+        f(stack.active())
     }
 }
 
-/// The addon callins currently executing, outermost first.
+/// Run `f` with the addon callins currently executing, outermost first.
 ///
 /// During a top-level `GameFrame` this is `["GameFrame"]`. If a Spring callout
 /// made from that callin re-enters the guest it becomes, for example,
 /// `["GameFrame", "UnitDestroyed"]`.
-pub fn active_callins() -> &'static [&'static str] {
-    callin_stack::active()
+pub fn with_active_callins<R>(f: impl FnOnce(&[&'static str]) -> R) -> R {
+    callin_stack::with_active(f)
 }
+
+/// Work deferred out of a callin, to run once the outermost one returns.
+type DelayedAction<G> = Box<dyn FnOnce(&G)>;
 
 /// Per-handler execution state shared by all addon callins.
 ///
@@ -53,7 +129,7 @@ pub fn active_callins() -> &'static [&'static str] {
 /// Nested callins can enqueue more actions; they are appended to the same FIFO
 /// queue and drained by the outermost dispatcher.
 pub struct AddonRuntime<G> {
-    delayed: RefCell<VecDeque<Box<dyn FnOnce(&G)>>>,
+    delayed: RefCell<VecDeque<DelayedAction<G>>>,
     depth: Cell<usize>,
     flushing: Cell<bool>,
 }
@@ -86,22 +162,24 @@ impl<G> AddonRuntime<G> {
         global: &G,
         f: impl FnOnce(&AddonContext<'_, G>) -> R,
     ) -> R {
-        callin_stack::push(name);
-        self.depth.set(self.depth.get() + 1);
-        let ctx = self.context(global);
-        let result = f(&ctx);
-        let depth = self.depth.get() - 1;
-        self.depth.set(depth);
-        callin_stack::pop();
+        let depth = {
+            let _entry = callin_stack::Entry::push(name);
+            self.depth.set(self.depth.get() + 1);
+            let ctx = self.context(global);
+            let result = f(&ctx);
+            let depth = self.depth.get() - 1;
+            self.depth.set(depth);
+            (result, depth)
+        };
+        let (result, depth) = depth;
         if depth == 0 {
-            callin_stack::push("delayed");
+            let _entry = callin_stack::Entry::push("delayed");
             self.flush(global);
-            callin_stack::pop();
         }
         result
     }
 
-    fn delay(&self, f: Box<dyn FnOnce(&G)>) {
+    fn delay(&self, f: DelayedAction<G>) {
         self.delayed.borrow_mut().push_back(f);
     }
 
@@ -383,6 +461,45 @@ mod tests {
         let second = resources.access::<u64>();
         *first += *second as u32;
         assert_eq!(*first, 3);
+    }
+
+    #[test]
+    fn resource_borrows_are_independent() {
+        struct Units(u32);
+        struct Economy(u32);
+
+        let units = Resource::new(Units(1));
+        let economy = Resource::new(Economy(2));
+
+        let mut units = units.access_mut();
+        let economy = economy.access();
+        units.0 += economy.0;
+        assert_eq!(units.0, 3);
+    }
+
+    #[test]
+    fn conflicting_resource_borrow_reports_the_active_callins() {
+        struct Units;
+
+        let runtime = AddonRuntime::new();
+        let units = Resource::new(Units);
+
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            runtime.callin("GameFrame", &(), |_| {
+                let _held = units.access_mut();
+                runtime.callin("UnitCreated", &(), |_| {
+                    let _conflict = units.access();
+                });
+            });
+        }));
+
+        let payload = result.expect_err("a conflicting borrow must panic");
+        let message = payload
+            .downcast_ref::<alloc::string::String>()
+            .expect("panic payload should be the formatted message");
+        assert!(message.contains("Units"), "{message}");
+        assert!(message.contains("GameFrame"), "{message}");
+        assert!(message.contains("UnitCreated"), "{message}");
     }
 
     #[test]
