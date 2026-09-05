@@ -14,7 +14,7 @@ pub mod reexports {
     pub use spring::*;
 }
 
-pub use event::{CommandEvent, EventResult, KeyEvent, PendingRulesEvent, ViewGeometry};
+pub use event::{CommandEvent, EventResult, KeyEvent, ViewGeometry};
 pub use rules::{Gadget, GadgetHandler, UnitDestroyedEvent, UnitPreDamagedEvent};
 pub use runtime::{AddonContext, Resources};
 pub use ui::{Widget, WidgetHandler};
