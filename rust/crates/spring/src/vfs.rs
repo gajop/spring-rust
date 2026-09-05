@@ -28,7 +28,15 @@ mod raw {
 }
 
 #[inline]
-pub fn use_archive(archive: &str, callback: SyncCallback) -> Result<bool> {
+pub fn use_archive(
+    archive: &str,
+    callback: impl crate::callback::SyncHandler<bool>,
+) -> Result<bool> {
+    callback.run_sync(|cb| use_archive_callback(archive, cb))
+}
+
+#[inline]
+pub fn use_archive_callback(archive: &str, callback: SyncCallback) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
         let (pointer, length) = super::wasm_slice_parts(archive.as_bytes())?;

@@ -23,7 +23,15 @@ mod raw {
 }
 
 #[inline]
-pub fn call_as_team(team_id: i32, callback: SyncCallback) -> Result<bool> {
+pub fn call_as_team(
+    team_id: i32,
+    callback: impl crate::callback::SyncHandler<bool>,
+) -> Result<bool> {
+    callback.run_sync(|cb| call_as_team_callback(team_id, cb))
+}
+
+#[inline]
+pub fn call_as_team_callback(team_id: i32, callback: SyncCallback) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
         super::unpack_bool(raw::call_as_team(

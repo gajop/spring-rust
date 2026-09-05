@@ -25,9 +25,14 @@ mod raw {
 }
 
 macro_rules! sync_callback_import {
-    ($name:ident, $raw:ident) => {
+    ($name:ident, $raw:ident, $cb_name:ident) => {
         #[inline]
-        pub fn $name(callback: SyncCallback) -> Result<bool> {
+        pub fn $name(callback: impl crate::callback::SyncHandler<bool>) -> Result<bool> {
+            callback.run_sync($cb_name)
+        }
+
+        #[inline]
+        pub fn $cb_name(callback: SyncCallback) -> Result<bool> {
             #[cfg(target_arch = "wasm32")]
             {
                 return super::unpack_bool(raw::$raw(
@@ -44,6 +49,18 @@ macro_rules! sync_callback_import {
     };
 }
 
-sync_callback_import!(set_height_map_func, set_height_map_func);
-sync_callback_import!(set_original_height_map_func, set_original_height_map_func);
-sync_callback_import!(set_smooth_mesh_func, set_smooth_mesh_func);
+sync_callback_import!(
+    set_height_map_func,
+    set_height_map_func,
+    set_height_map_func_callback
+);
+sync_callback_import!(
+    set_original_height_map_func,
+    set_original_height_map_func,
+    set_original_height_map_func_callback
+);
+sync_callback_import!(
+    set_smooth_mesh_func,
+    set_smooth_mesh_func,
+    set_smooth_mesh_func_callback
+);

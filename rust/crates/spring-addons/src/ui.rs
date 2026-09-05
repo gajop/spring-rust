@@ -187,3 +187,49 @@ impl<G> WidgetHandler<G> {
         }
     }
 }
+
+pub struct UiCallbackRegistry<G> {
+    next_id: u32,
+    callbacks: alloc::collections::BTreeMap<u32, Box<dyn FnMut(&mut G)>>,
+}
+
+impl<G> Default for UiCallbackRegistry<G> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<G> UiCallbackRegistry<G> {
+    pub const fn new() -> Self {
+        Self {
+            next_id: 0x1000,
+            callbacks: alloc::collections::BTreeMap::new(),
+        }
+    }
+
+    pub fn register(
+        &mut self,
+        callback: impl FnMut(&mut G) + 'static,
+    ) -> spring::callback::RetainedCallback {
+        let id = self.next_id;
+        self.next_id += 1;
+        // The high bit 0x8000_0000 marks a destroy callback ID.
+        let destroy_id = id | 0x8000_0000;
+        self.callbacks.insert(id, Box::new(callback));
+        spring::callback::RetainedCallback::new(id, 0, destroy_id)
+    }
+
+    pub fn dispatch(&mut self, global: &mut G, callback_id: u32, _user_data: u32) -> bool {
+        if callback_id & 0x8000_0000 != 0 {
+            let id = callback_id & !0x8000_0000;
+            self.callbacks.remove(&id);
+            return true;
+        }
+        if let Some(cb) = self.callbacks.get_mut(&callback_id) {
+            cb(global);
+            true
+        } else {
+            false
+        }
+    }
+}

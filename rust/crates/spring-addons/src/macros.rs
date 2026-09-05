@@ -34,6 +34,22 @@ macro_rules! export_ui_widgets {
         state: $state_type:ty,
         setup: $setup_fn:path,
         scratch: $scratch_size:expr,
+        callbacks: None $(,)?
+    ) => {
+        $crate::reexports::export_callin_scratch!($scratch_size);
+        $crate::reexports::export_environment_mask!($crate::reexports::ui::ENVIRONMENT_MASK);
+        $crate::reexports::export_callback_dispatch!(__spring_addon_callback_dispatch);
+
+        fn __default_ui_callback(_global: Option<&mut $state_type>, _id: u32, _data: u32) -> bool {
+            false
+        }
+
+        $crate::__impl_ui_exports!($state_type, $setup_fn, __default_ui_callback);
+    };
+    (
+        state: $state_type:ty,
+        setup: $setup_fn:path,
+        scratch: $scratch_size:expr,
         callbacks: $callbacks_fn:path $(,)?
     ) => {
         $crate::reexports::export_callin_scratch!($scratch_size);
@@ -41,21 +57,6 @@ macro_rules! export_ui_widgets {
         $crate::reexports::export_callback_dispatch!(__spring_addon_callback_dispatch);
 
         $crate::__impl_ui_exports!($state_type, $setup_fn, $callbacks_fn);
-    };
-    (
-        state: $state_type:ty,
-        setup: $setup_fn:path,
-        scratch: $scratch_size:expr,
-        callbacks: None $(,)?
-    ) => {
-        $crate::reexports::export_callin_scratch!($scratch_size);
-        $crate::reexports::export_environment_mask!($crate::reexports::ui::ENVIRONMENT_MASK);
-
-        fn __default_ui_callback(_global: Option<&mut $state_type>, _id: u32, _data: u32) -> bool {
-            true
-        }
-
-        $crate::__impl_ui_exports!($state_type, $setup_fn, __default_ui_callback);
     };
 }
 
@@ -70,6 +71,16 @@ macro_rules! __impl_ui_exports {
             static PENDING_CALLBACKS: ::core::cell::RefCell<::alloc::vec::Vec<(u32, u32)>> = const {
                 ::core::cell::RefCell::new(::alloc::vec::Vec::new())
             };
+            static CALLBACK_REGISTRY: ::core::cell::RefCell<$crate::ui::UiCallbackRegistry<$state_type>> = const {
+                ::core::cell::RefCell::new($crate::ui::UiCallbackRegistry::new())
+            };
+        }
+
+        #[allow(dead_code)]
+        pub fn register_callback(
+            f: impl FnMut(&mut $state_type) + 'static,
+        ) -> $crate::reexports::callback::RetainedCallback {
+            CALLBACK_REGISTRY.with(|reg| reg.borrow_mut().register(f))
         }
 
         fn __with_widget_handler<R>(
@@ -91,7 +102,12 @@ macro_rules! __impl_ui_exports {
                         break;
                     }
                     for (id, data) in pending {
-                        $callbacks_fn(Some(&mut handler.global), id, data);
+                        let handled = CALLBACK_REGISTRY.with(|reg| {
+                            reg.borrow_mut().dispatch(&mut handler.global, id, data)
+                        });
+                        if !handled {
+                            $callbacks_fn(Some(&mut handler.global), id, data);
+                        }
                     }
                 }
                 result
@@ -117,7 +133,12 @@ macro_rules! __impl_ui_exports {
                         break;
                     }
                     for (id, data) in pending {
-                        $callbacks_fn(Some(&mut handler.global), id, data);
+                        let handled = CALLBACK_REGISTRY.with(|reg| {
+                            reg.borrow_mut().dispatch(&mut handler.global, id, data)
+                        });
+                        if !handled {
+                            $callbacks_fn(Some(&mut handler.global), id, data);
+                        }
                     }
                 }
                 Some(result)
@@ -127,7 +148,14 @@ macro_rules! __impl_ui_exports {
         #[allow(dead_code)]
         fn __spring_addon_callback_dispatch(callback_id: u32, user_data: u32) {
             let handled = __try_with_widget_handler(|handler| {
-                $callbacks_fn(Some(&mut handler.global), callback_id, user_data)
+                let handled = CALLBACK_REGISTRY.with(|reg| {
+                    reg.borrow_mut().dispatch(&mut handler.global, callback_id, user_data)
+                });
+                if handled {
+                    true
+                } else {
+                    $callbacks_fn(Some(&mut handler.global), callback_id, user_data)
+                }
             });
             if handled != Some(true) {
                 if !$callbacks_fn(None, callback_id, user_data) {

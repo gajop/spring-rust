@@ -135,6 +135,14 @@ pub use units_query_borrowed::*;
 #[cfg(target_arch = "wasm32")]
 pub use vfs::*;
 
+/// OpenGL enumerants, generated from the engine's `Constants.h`.
+///
+/// Use these instead of hand-written hex literals: `gl::TEXTURE_2D`,
+/// `gl::COLOR_BUFFER_BIT`, and so on, matching the Lua `GL.*` table.
+pub mod gl {
+    include!(concat!(env!("OUT_DIR"), "/gl_generated.rs"));
+}
+
 /// Generated production-fast Core imports and direct wrappers. This stays
 /// namespaced so specialized hand-written hot APIs remain the normal surface.
 #[cfg(target_arch = "wasm32")]
@@ -710,7 +718,7 @@ mod public_api_tests {
     #[test]
     fn canonical_module_paths_keep_typed_signatures() {
         let _: fn(&str, f32, f32, f32, &str) -> Result<()> = crate::gfx::text;
-        let _: fn(u32, SyncCallback) -> Result<()> = crate::gfx::begin_end;
+        let _: fn(u32, SyncCallback) -> Result<()> = crate::gfx::begin_end_callback;
         let _: fn(&crate::camera::CameraState, f32, f32, f32) -> Result<bool> =
             crate::camera::set_camera_state;
         let _: fn(i32, f32) -> Result<bool> = crate::move_ctrl::set_ground_move_type_max_speed;
