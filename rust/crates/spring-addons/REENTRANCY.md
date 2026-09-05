@@ -15,12 +15,11 @@ The classic model intentionally stays close to Lua semantics:
 
 `Resources` is the provided typed resource container:
 
-```rust
+```rust,ignore
 use spring_addons::{GadgetHandler, Resources};
 
 #[derive(Default)]
 struct Units { /* ... */ }
-
 #[derive(Default)]
 struct Economy { /* ... */ }
 
@@ -33,9 +32,9 @@ fn setup(handler: &mut GadgetHandler<Global>) {
 }
 ```
 
-A callin can borrow only what it needs:
+A callin borrows only the resource it needs:
 
-```rust
+```rust,ignore
 fn game_frame(&self, ctx: &spring_addons::AddonContext<'_, Global>, _frame: i32) {
     let mut units = ctx.global().access_mut::<Units>();
     // mutate Units
@@ -52,7 +51,7 @@ Games do not have to use `Resources`. A custom `Global` may expose its own `acce
 
 The closure receives the shared global:
 
-```rust
+```rust,ignore
 ctx.delay(move |global| {
     // state access, Spring callouts, or arbitrary game logic
 });
@@ -62,9 +61,9 @@ ctx.delay(move |global| {
 
 ### Pattern 1: defer callouts
 
-If game logic can compute what should happen before entering Spring, capture that result and issue the callout after the active callin stack unwinds:
+If game logic can compute what should happen before entering Spring, capture the result and issue the callout after the active callin stack unwinds:
 
-```rust
+```rust,ignore
 fn game_frame(&self, ctx: &spring_addons::AddonContext<'_, Global>, _frame: i32) {
     let unit_id = {
         let mut units = ctx.global().access_mut::<Units>();
@@ -86,7 +85,7 @@ A delayed block is not magically non-re-entrant. If it borrows a resource and th
 
 A nested callin may need to update state that the outer callin is already using. If that work does not contribute to an immediate return value, schedule the state update instead:
 
-```rust
+```rust,ignore
 fn unit_destroyed(
     &self,
     ctx: &spring_addons::AddonContext<'_, Global>,
