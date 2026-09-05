@@ -80,26 +80,6 @@ pub struct UnitDestroyedEvent {
     pub weapon_def_id: i32,
 }
 
-/// Legacy event envelope kept for source compatibility. `spring-addons` no
-/// longer automatically queues engine callins when dispatch is re-entrant;
-/// games should use [`crate::AddonContext::delay`] explicitly when deferral is
-/// semantically valid.
-#[derive(Clone, Debug)]
-pub enum PendingRulesEvent {
-    UnitCreated { unit: i32, def: i32, team: i32, builder: i32 },
-    UnitDestroyed(UnitDestroyedEvent),
-    ProjectileCreated { projectile_id: i32, owner_id: i32, weapon_def_id: i32 },
-    ProjectileDestroyed { projectile_id: i32, owner_id: i32, weapon_def_id: i32 },
-    GameOver { winning_ally_teams: alloc::vec::Vec<u8> },
-    Explosion {
-        weapon_def_id: i32,
-        pos: (f32, f32, f32),
-        owner_id: i32,
-        projectile_id: i32,
-    },
-    LuaMsg { player_id: i32, script: i32, mode: i32, data: alloc::vec::Vec<u8> },
-}
-
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct ViewGeometry {
     pub screen_size: (i32, i32),
