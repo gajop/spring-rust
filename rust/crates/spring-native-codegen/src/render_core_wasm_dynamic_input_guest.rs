@@ -236,6 +236,22 @@ fn render_wrapper(
                 _ => unreachable!(),
             };
             params.push("output: &mut [u8]".to_owned());
+            // A one-byte element makes the divisibility test and the division
+            // trivial, and emitting them anyway trips clippy::identity_op in
+            // the generated crate.
+            let capacity_guard = if element_bytes == 1 {
+                "if output.len() > u32::MAX as usize {".to_owned()
+            } else {
+                format!(
+                    "if !output.len().is_multiple_of({element_bytes}usize) \
+                     || output.len() / {element_bytes}usize > u32::MAX as usize {{"
+                )
+            };
+            let output_capacity = if element_bytes == 1 {
+                "output_bytes as usize".to_owned()
+            } else {
+                format!("output_bytes as usize / {element_bytes}usize")
+            };
             let arity_lint = too_many_arguments_attribute(params.len(), 20);
             let mut call_args = direct_args;
             call_args.push("descriptor_ptr".to_owned());
@@ -245,7 +261,7 @@ fn render_wrapper(
                  {arity_lint}pub fn {ident}({params}) -> core::result::Result<usize, super::VariableResultError> {{\n\
                      #[cfg(target_arch = \"wasm32\")]\n\
                      {{\n\
-                         if !output.len().is_multiple_of({element_bytes}usize) || output.len() / {element_bytes}usize > u32::MAX as usize {{\n\
+                         {capacity_guard}\n\
                              return Err(super::VariableResultError {{ error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 }});\n\
                          }}\n\
                          let mut descriptor = [0u32; {descriptor_words}];\n\
@@ -254,7 +270,7 @@ fn render_wrapper(
                              .map_err(|error| super::VariableResultError {{ error, required: 0 }})?;\n\
                          let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)\n\
                              .map_err(|error| super::VariableResultError {{ error, required: 0 }})?;\n\
-                         let output_capacity = output_bytes as usize / {element_bytes}usize;\n\
+                         let output_capacity = {output_capacity};\n\
                          let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];\n\
                          let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)\n\
                              .map_err(|error| super::VariableResultError {{ error, required: 0 }})?;\n\
@@ -270,7 +286,8 @@ fn render_wrapper(
                  }}\n",
                 ident = ident,
                 params = params.join(", "),
-                element_bytes = element_bytes,
+                capacity_guard = capacity_guard,
+                output_capacity = output_capacity,
                 descriptor_words = descriptor_words,
                 descriptor_fill = descriptor_fill,
                 call_args = call_args.join(", "),
