@@ -170,7 +170,9 @@ inline bool ResolveCallback(HostState& state, wasmtime_caller_t* caller,
 	constexpr char exportName[] = "spring:callback/dispatch";
 	wasmtime_extern_t item{};
 	if (!wasmtime_caller_export_get(caller, exportName, sizeof(exportName) - 1, &item)) {
-		error = "Core Wasm callback requires export spring:callback/dispatch";
+		error = "Core Wasm callback requires export spring:callback/dispatch: this "
+			"callout runs a guest callback, so the module has to export a dispatcher "
+			"(spring::export_callback_dispatch! in the Rust SDK)";
 		return false;
 	}
 	if (item.kind != WASMTIME_EXTERN_FUNC) {
@@ -255,6 +257,9 @@ inline bool DispatchRetainedCallback(HostState& state, std::uint32_t callbackID,
 struct CallbackContext {
 	HostState* state = nullptr;
 	wasmtime_caller_t* caller = nullptr;
+	/// The callout that is asking for the callback, prefixed onto any failure so
+	/// the log names the call the guest made rather than only the export it lacks.
+	const char* import = nullptr;
 	std::uint32_t callbackID = 0;
 	std::uint32_t userData = 0;
 	bool success = true;
@@ -268,6 +273,8 @@ inline void InvokeCallback(void* data)
 		return;
 	context->success = DispatchCallback(*context->state, context->caller,
 		context->callbackID, context->userData, context->error);
+	if (!context->success && context->import != nullptr)
+		context->error = std::string(context->import) + ": " + context->error;
 }
 
 } // namespace recoil::wasm::core::generated

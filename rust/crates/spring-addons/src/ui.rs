@@ -363,18 +363,3 @@ impl<G> UiCallbackRegistry<G> {
         }
     }
 }
-
-pub fn warn_unhandled_callback(callback_id: u32) {
-    let mut buffer = [0u8; 8];
-    for (index, slot) in buffer.iter_mut().enumerate() {
-        let nibble = (callback_id >> (28 - index * 4)) & 0xf;
-        *slot = match nibble {
-            0..=9 => b'0' + nibble as u8,
-            value => b'a' + (value - 10) as u8,
-        };
-    }
-    let hex = core::str::from_utf8(&buffer).unwrap_or("????????");
-    let mut message = alloc::string::String::from("unhandled UI callback id 0x");
-    message.push_str(hex);
-    crate::log::warning(&message);
-}

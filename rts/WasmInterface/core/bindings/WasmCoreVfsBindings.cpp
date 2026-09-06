@@ -46,6 +46,7 @@ wasm_trap_t* UseArchive(void* environment, wasmtime_caller_t* caller,
 	CallbackContext callback{};
 	callback.state = state;
 	callback.caller = caller;
+	callback.import = "spring:vfs/use-archive";
 	callback.callbackID = static_cast<std::uint32_t>(slots[2].i32);
 	callback.userData = static_cast<std::uint32_t>(slots[3].i32);
 	UseArchiveQuery query{archive.c_str(), InvokeCallback, &callback};

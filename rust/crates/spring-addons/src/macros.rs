@@ -90,7 +90,7 @@ macro_rules! __impl_ui_exports {
                     let handled = CALLBACK_REGISTRY
                         .with(|registry| registry.dispatch(ctx.global(), callback_id, user_data));
                     if !handled {
-                        $crate::ui::warn_unhandled_callback(callback_id);
+                        $crate::log::warn_unhandled_callback(callback_id);
                     }
                 });
             });
@@ -277,6 +277,17 @@ macro_rules! export_rules_gadgets {
         $crate::reexports::export_environment_mask!(
             $crate::reexports::rules_synced::ENVIRONMENT_MASK
         );
+
+        // Every environment must export the dispatcher: it is what runs the
+        // synchronous closure passed to callouts such as
+        // `gfx::render_to_texture`. Only the UI environment also keeps a
+        // registry of retained callbacks, so anything reaching this handler
+        // (the closure case having already been served) is unexpected.
+        #[allow(dead_code)]
+        fn __spring_addon_callback_dispatch(callback_id: u32, _user_data: u32) {
+            $crate::log::warn_unhandled_callback(callback_id);
+        }
+        $crate::reexports::export_callback_dispatch!(__spring_addon_callback_dispatch);
         $crate::__impl_rules_exports!($state_type, $setup_fn);
     };
 }
@@ -494,6 +505,17 @@ macro_rules! __impl_unsynced_exports {
         $crate::reexports::export_environment_mask!(
             $crate::reexports::rules_unsynced::ENVIRONMENT_MASK
         );
+
+        // Every environment must export the dispatcher: it is what runs the
+        // synchronous closure passed to callouts such as
+        // `gfx::render_to_texture`. Only the UI environment also keeps a
+        // registry of retained callbacks, so anything reaching this handler
+        // (the closure case having already been served) is unexpected.
+        #[allow(dead_code)]
+        fn __spring_addon_callback_dispatch(callback_id: u32, _user_data: u32) {
+            $crate::log::warn_unhandled_callback(callback_id);
+        }
+        $crate::reexports::export_callback_dispatch!(__spring_addon_callback_dispatch);
         thread_local! {
             static HANDLER: ::core::cell::OnceCell<$crate::unsynced::UnsyncedHandler<$state_type>> = const {
                 ::core::cell::OnceCell::new()

@@ -22,11 +22,12 @@ std::int32_t NativeErrorCode(const Error* error)
 	return error == nullptr ? 0 : error->code;
 }
 
-void InitCallback(CallbackContext& callback, HostState* state,
+void InitCallback(CallbackContext& callback, const char* import, HostState* state,
 	wasmtime_caller_t* caller, std::int32_t callbackID, std::int32_t userData)
 {
 	callback.state = state;
 	callback.caller = caller;
+	callback.import = import;
 	callback.callbackID = static_cast<std::uint32_t>(callbackID);
 	callback.userData = static_cast<std::uint32_t>(userData);
 }
@@ -75,7 +76,7 @@ wasm_trap_t* BeginEnd(void* environment, wasmtime_caller_t* caller,
 		return Trap(guard.Error());
 
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[1].i32, slots[2].i32);
+	InitCallback(callback, "spring:gfx/begin-end", state, caller, slots[1].i32, slots[2].i32);
 	GfxBeginEndQuery query{
 		static_cast<std::uint32_t>(slots[0].i32),
 		InvokeCallback,
@@ -103,7 +104,7 @@ wasm_trap_t* ActiveFBO(void* environment, wasmtime_caller_t* caller,
 		return Trap(guard.Error());
 
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[3].i32, slots[4].i32);
+	InitCallback(callback, "spring:gfx/active-fbo", state, caller, slots[3].i32, slots[4].i32);
 	GfxActiveFBOQuery query{
 		static_cast<std::uint32_t>(slots[0].i32),
 		static_cast<std::uint32_t>(slots[1].i32),
@@ -133,7 +134,7 @@ wasm_trap_t* ActiveShader(void* environment, wasmtime_caller_t* caller,
 		return Trap(guard.Error());
 
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[1].i32, slots[2].i32);
+	InitCallback(callback, "spring:gfx/active-shader", state, caller, slots[1].i32, slots[2].i32);
 	GfxActiveShaderQuery query{
 		static_cast<std::uint32_t>(slots[0].i32),
 		InvokeCallback,
@@ -161,7 +162,7 @@ wasm_trap_t* CreateList(void* environment, wasmtime_caller_t* caller,
 		return Trap(guard.Error());
 
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[0].i32, slots[1].i32);
+	InitCallback(callback, "spring:gfx/create-list", state, caller, slots[0].i32, slots[1].i32);
 	GfxCallbackQuery query{InvokeCallback, &callback};
 	GfxUIntResult result{};
 	state->native->gfx->CreateList(&query, &result);
@@ -185,7 +186,7 @@ wasm_trap_t* DrawFuncAtUnit(void* environment, wasmtime_caller_t* caller,
 		return Trap(guard.Error());
 
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[2].i32, slots[3].i32);
+	InitCallback(callback, "spring:gfx/draw-func-at-unit", state, caller, slots[2].i32, slots[3].i32);
 	GfxDrawFuncAtUnitQuery query{
 		slots[0].i32,
 		slots[1].i32 != 0,
@@ -214,7 +215,7 @@ wasm_trap_t* PushPopMatrix(void* environment, wasmtime_caller_t* caller,
 		return Trap(guard.Error());
 
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[0].i32, slots[1].i32);
+	InitCallback(callback, "spring:gfx/push-pop-matrix", state, caller, slots[0].i32, slots[1].i32);
 	GfxCallbackQuery query{InvokeCallback, &callback};
 	GfxEmptyResult result{};
 	state->native->gfx->PushPopMatrix(&query, &result);
@@ -248,7 +249,7 @@ wasm_trap_t* RenderToTexture(void* environment, wasmtime_caller_t* caller,
 		return nullptr;
 	}
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[2].i32, slots[3].i32);
+	InitCallback(callback, "spring:gfx/render-to-texture", state, caller, slots[2].i32, slots[3].i32);
 	GfxRenderToTextureQuery query{name.c_str(), InvokeCallback, &callback};
 	GfxEmptyResult result{};
 	state->native->gfx->RenderToTexture(&query, &result);
@@ -272,7 +273,7 @@ wasm_trap_t* RunQuery(void* environment, wasmtime_caller_t* caller,
 		return Trap(guard.Error());
 
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[1].i32, slots[2].i32);
+	InitCallback(callback, "spring:gfx/run-query", state, caller, slots[1].i32, slots[2].i32);
 	GfxRunQueryQuery query{
 		static_cast<std::uint32_t>(slots[0].i32),
 		InvokeCallback,
@@ -300,7 +301,7 @@ wasm_trap_t* UnsafeState(void* environment, wasmtime_caller_t* caller,
 		return Trap(guard.Error());
 
 	CallbackContext callback{};
-	InitCallback(callback, state, caller, slots[2].i32, slots[3].i32);
+	InitCallback(callback, "spring:gfx/unsafe-state", state, caller, slots[2].i32, slots[3].i32);
 	GfxUnsafeStateQuery query{
 		static_cast<std::uint32_t>(slots[0].i32),
 		slots[1].i32 != 0,

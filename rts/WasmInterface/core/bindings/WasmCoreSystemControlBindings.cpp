@@ -38,6 +38,7 @@ wasm_trap_t* CallAsTeam(void* environment, wasmtime_caller_t* caller,
 	CallbackContext callback{};
 	callback.state = state;
 	callback.caller = caller;
+	callback.import = "spring:system-control/call-as-team";
 	callback.callbackID = static_cast<std::uint32_t>(slots[1].i32);
 	callback.userData = static_cast<std::uint32_t>(slots[2].i32);
 

@@ -69,7 +69,7 @@ wasm_trap_t* LevelHeightMap(void* environment, wasmtime_caller_t*,
 template<typename Query, typename Result>
 wasm_trap_t* InvokeTerrainCallbackImport(HostState* state, wasmtime_caller_t* caller,
 	wasmtime_val_raw_t* slots, std::size_t slotCount,
-	void (*nativeFunction)(const Query*, Result*), std::string_view name)
+	void (*nativeFunction)(const Query*, Result*), const char* name)
 {
 	if (state == nullptr || nativeFunction == nullptr)
 		return Trap(std::string(name) + " Core binding is unavailable");
@@ -82,6 +82,7 @@ wasm_trap_t* InvokeTerrainCallbackImport(HostState* state, wasmtime_caller_t* ca
 	CallbackContext callback{};
 	callback.state = state;
 	callback.caller = caller;
+	callback.import = name;
 	callback.callbackID = static_cast<std::uint32_t>(slots[0].i32);
 	callback.userData = static_cast<std::uint32_t>(slots[1].i32);
 	Query query{InvokeCallback, &callback};
@@ -103,7 +104,7 @@ wasm_trap_t* SetHeightMapFunc(void* environment, wasmtime_caller_t* caller,
 		return Trap("SetHeightMapFunc Core binding is unavailable");
 	return InvokeTerrainCallbackImport<SetHeightMapFuncQuery, SetHeightMapFuncResult>(
 		state, caller, slots, slotCount,
-		state->native->syncedCtrl->terrain->SetHeightMapFunc, "SetHeightMapFunc");
+		state->native->syncedCtrl->terrain->SetHeightMapFunc, "spring:terrain-control/set-height-map-func");
 }
 
 wasm_trap_t* SetOriginalHeightMapFunc(void* environment, wasmtime_caller_t* caller,
@@ -115,7 +116,7 @@ wasm_trap_t* SetOriginalHeightMapFunc(void* environment, wasmtime_caller_t* call
 		return Trap("SetOriginalHeightMapFunc Core binding is unavailable");
 	return InvokeTerrainCallbackImport<SetOriginalHeightMapFuncQuery, SetOriginalHeightMapFuncResult>(
 		state, caller, slots, slotCount,
-		state->native->syncedCtrl->terrain->SetOriginalHeightMapFunc, "SetOriginalHeightMapFunc");
+		state->native->syncedCtrl->terrain->SetOriginalHeightMapFunc, "spring:terrain-control/set-original-height-map-func");
 }
 
 wasm_trap_t* SetSmoothMeshFunc(void* environment, wasmtime_caller_t* caller,
@@ -127,7 +128,7 @@ wasm_trap_t* SetSmoothMeshFunc(void* environment, wasmtime_caller_t* caller,
 		return Trap("SetSmoothMeshFunc Core binding is unavailable");
 	return InvokeTerrainCallbackImport<SetSmoothMeshFuncQuery, SetSmoothMeshFuncResult>(
 		state, caller, slots, slotCount,
-		state->native->syncedCtrl->terrain->SetSmoothMeshFunc, "SetSmoothMeshFunc");
+		state->native->syncedCtrl->terrain->SetSmoothMeshFunc, "spring:terrain-control/set-smooth-mesh-func");
 }
 
 bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
