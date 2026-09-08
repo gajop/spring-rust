@@ -129,7 +129,8 @@ private:
 		std::uint32_t reachable, std::span<const WasmEnvironment> primary,
 		bool& handled, std::string& error);
 	bool ResetBudgetWindow(bool synced, std::string& error);
-	void RemoveFaultedUnsyncedModules();
+	void RemoveFaultedModules();
+	void RemoveFaultedUnsyncedModules() { RemoveFaultedModules(); }
 
 	class CoreDispatchRegistration {
 	public:

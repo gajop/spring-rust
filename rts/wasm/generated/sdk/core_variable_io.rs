@@ -5,6 +5,7 @@ pub mod variable_io {
     pub mod unit_script {
         use core::convert::TryFrom;
         use alloc::vec;
+        use alloc::vec::Vec;
 
         #[cfg(target_arch = "wasm32")]
         mod raw {
@@ -29,8 +30,11 @@ pub mod variable_io {
         ) -> crate::Result<crate::generated::owned::unit_script::CallUnitScriptValue> {
             let ret_capacity = i32::try_from(ret_capacity)
                 .map_err(|_| crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32))?;
+            let mut function_name_wire = Vec::with_capacity(4 + function_name.len());
+            function_name_wire.extend_from_slice(&(function_name.len() as u32).to_le_bytes());
+            function_name_wire.extend_from_slice(function_name.as_bytes());
             let (function_name_pointer, function_name_length) =
-                crate::wasm_slice_parts(function_name.as_bytes())?;
+                crate::wasm_slice_parts(&function_name_wire)?;
             let (args_pointer, args_length) = crate::wasm_slice_parts(args)?;
             let mut input = [
                 function_name_pointer as u32,

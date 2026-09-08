@@ -13,6 +13,7 @@
 #include "WasmCoreUiCallinFilter.h"
 #include "WasmCoreHost.h"
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
+#include "System/Log/ILog.h"
 #include "WasmCoreUiCallinFilter.h"
 #include "wasm/generated/WasmCallinRegistry.h"
 
@@ -50,6 +51,8 @@ bool DispatchCoreModule(const recoil::wasm::core::WasmCoreDispatchPlan* plan,
 		return true;
 	}
 	spring::benchmark_callins::End(dispatchStage);
+	if (error.empty())
+		return false;
 	// Only the failure path pays for building a message.
 	error = "Core Wasm callin " + std::string(CallinName(callin)) + " failed in module " +
 		std::string(WasmCoreHost::ModuleName(
@@ -95,6 +98,8 @@ void WasmInterfaceSystem::CoreSubscriberIndex::Rebuild(
 				WasmCoreHost* host = module.host != nullptr
 					? module.host
 					: WasmCoreHost::ModuleHandle(module.descriptor.name);
+				if (host == nullptr || WasmCoreHost::ModuleFaulted(module.descriptor.name))
+					continue;
 				const auto* plan = WasmCoreHost::ModulePlan(host, callin);
 				if (plan == nullptr)
 					continue;
@@ -225,8 +230,8 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 		bool success = system->DispatchIgnoredCallin(callin, route, query, reachable,
 			synced ? syncedEnvironments : unsyncedEnvironments, handled, error);
 		spring::benchmark_callins::End(aggregationStage);
-		if (!synced && WasmCoreHost::PendingUnsyncedFaults() != 0)
-			system->RemoveFaultedUnsyncedModules();
+		if (WasmCoreHost::PendingFaults() != 0)
+			system->RemoveFaultedModules();
 		return success;
 	}
 
@@ -270,8 +275,8 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 	spring::benchmark_callins::End(aggregationStage);
 
 	// Faults are rare. Only pay for the sweep when one actually happened.
-	if (!synced && WasmCoreHost::PendingUnsyncedFaults() != 0)
-		system->RemoveFaultedUnsyncedModules();
+	if (WasmCoreHost::PendingFaults() != 0)
+		system->RemoveFaultedModules();
 	return success;
 }
 
@@ -338,8 +343,7 @@ bool WasmInterfaceSystem::ResetBudgetWindow(bool synced, std::string& error)
 			module.host = WasmCoreHost::ModuleHandle(module.descriptor.name);
 		std::string resetError;
 		if (!WasmCoreHost::ResetBudget(module.host, resetError)) {
-			error = "Core Wasm budget reset failed in module " +
-				module.descriptor.name + ": " + resetError;
+			error = "Core Wasm budget reset failed for module " + module.descriptor.name + ": " + resetError;
 			WasmCoreHost::FaultModule(module.descriptor.name, error);
 			return false;
 		}
@@ -347,7 +351,7 @@ bool WasmInterfaceSystem::ResetBudgetWindow(bool synced, std::string& error)
 	return true;
 }
 
-void WasmInterfaceSystem::RemoveFaultedUnsyncedModules()
+void WasmInterfaceSystem::RemoveFaultedModules()
 {
 	if (unitScriptEngine != nullptr) {
 		for (const CoreModuleRecord& module : coreModules) {
@@ -355,7 +359,13 @@ void WasmInterfaceSystem::RemoveFaultedUnsyncedModules()
 				unitScriptEngine->RemoveCusBackend(module.host);
 		}
 	}
-	if (WasmCoreHost::RemoveFaultedUnsynced() == 0)
+	for (const CoreModuleRecord& module : coreModules) {
+		if (WasmCoreHost::ModuleFaulted(module.descriptor.name)) {
+			LOG_L(L_WARNING, "Core Wasm module %s was deregistered due to fault",
+				module.descriptor.name.c_str());
+		}
+	}
+	if (WasmCoreHost::RemoveFaulted() == 0)
 		return;
 	coreModules.erase(std::remove_if(coreModules.begin(), coreModules.end(),
 		[](const CoreModuleRecord& module) {

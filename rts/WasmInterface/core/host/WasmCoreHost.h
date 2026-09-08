@@ -115,11 +115,13 @@ public:
 
 	static bool FaultModule(std::string_view moduleName, std::string reason);
 
-	// Faults are rare, so the sweep is flag-gated: an unsynced fault bumps this
+	// Faults are rare, so the sweep is flag-gated: a fault bumps this
 	// counter and the next dispatch or Update() pays for the scan. Without a
 	// pending fault the sweep must not touch the host registry at all.
-	static std::size_t PendingUnsyncedFaults();
-	static std::size_t RemoveFaultedUnsynced();
+	static std::size_t PendingFaults();
+	static std::size_t RemoveFaulted();
+	static std::size_t PendingUnsyncedFaults() { return PendingFaults(); }
+	static std::size_t RemoveFaultedUnsynced() { return RemoveFaulted(); }
 
 	static bool ResetBudget(std::string_view moduleName, std::string& error);
 	static bool FuelRemaining(std::string_view moduleName, std::uint64_t& fuel,
@@ -153,7 +155,8 @@ private:
 		std::unique_ptr<Backend> backend);
 
 	static WasmCoreHost* Find(std::string_view moduleName);
-	static void RecountPendingUnsyncedFaults();
+	static void RecountPendingFaults();
+	static void RecountPendingUnsyncedFaults() { RecountPendingFaults(); }
 	bool HasCallin(WasmCoreCallin callin) const;
 	const recoil::wasm::core::WasmCoreDispatchPlan* PlanFor(WasmCoreCallin callin) const;
 	void BuildDispatchPlans();

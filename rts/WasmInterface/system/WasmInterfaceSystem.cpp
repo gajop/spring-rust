@@ -216,9 +216,9 @@ void WasmInterfaceSystem::UnloadAll()
 
 void WasmInterfaceSystem::Update()
 {
-	if (WasmCoreHost::PendingUnsyncedFaults() == 0)
+	if (WasmCoreHost::PendingFaults() == 0)
 		return;
-	RemoveFaultedUnsyncedModules();
+	RemoveFaultedModules();
 }
 
 void WasmInterfaceSystem::Tick(std::uint32_t frame)

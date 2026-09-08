@@ -32,9 +32,9 @@
 
 namespace {
 
-// Bumped when an unsynced guest faults and cleared by the sweep that removes
+// Bumped when a guest faults and cleared by the sweep that removes
 // it. Dispatch reads this instead of scanning the registry every call.
-std::size_t& PendingUnsyncedFaultCount()
+std::size_t& PendingFaultCount()
 {
 	static std::size_t pending = 0;
 	return pending;
@@ -503,13 +503,13 @@ void WasmCoreHost::Unload(std::string_view moduleName)
 	}), hosts.end());
 	// Unloading may have taken a faulted guest with it. Leaving the pending
 	// count high would put the fault sweep back on every dispatch.
-	RecountPendingUnsyncedFaults();
+	RecountPendingFaults();
 }
 
 void WasmCoreHost::UnloadAll()
 {
 	Hosts().clear();
-	PendingUnsyncedFaultCount() = 0;
+	PendingFaultCount() = 0;
 }
 
 std::string_view WasmCoreHost::ModuleName(const WasmCoreHost* host)
@@ -549,8 +549,7 @@ void WasmCoreHost::Fault(std::string reason)
 	DropPendingCusCreates();
 	if (unitScriptEngine != nullptr)
 		unitScriptEngine->CancelCusBackend(this);
-	if (!WasmEnvironmentMatrix::Policy(environment).synced)
-		++PendingUnsyncedFaultCount();
+	++PendingFaultCount();
 }
 
 bool WasmCoreHost::FaultModule(std::string_view moduleName, std::string reason)
@@ -562,34 +561,32 @@ bool WasmCoreHost::FaultModule(std::string_view moduleName, std::string reason)
 	return true;
 }
 
-void WasmCoreHost::RecountPendingUnsyncedFaults()
+void WasmCoreHost::RecountPendingFaults()
 {
 	std::size_t pending = 0;
 	for (const auto& host : Hosts()) {
-		if (host != nullptr && host->backend != nullptr && host->backend->hot.faulted &&
-			!WasmEnvironmentMatrix::Policy(host->environment).synced)
+		if (host != nullptr && host->backend != nullptr && host->backend->hot.faulted)
 			++pending;
 	}
-	PendingUnsyncedFaultCount() = pending;
+	PendingFaultCount() = pending;
 }
 
-std::size_t WasmCoreHost::PendingUnsyncedFaults()
+std::size_t WasmCoreHost::PendingFaults()
 {
-	return PendingUnsyncedFaultCount();
+	return PendingFaultCount();
 }
 
-std::size_t WasmCoreHost::RemoveFaultedUnsynced()
+std::size_t WasmCoreHost::RemoveFaulted()
 {
 	// Callers poll this on the dispatch path, so a run with no faults must not
 	// touch the registry at all.
-	if (PendingUnsyncedFaultCount() == 0)
+	if (PendingFaultCount() == 0)
 		return 0;
-	PendingUnsyncedFaultCount() = 0;
+	PendingFaultCount() = 0;
 	auto& hosts = Hosts();
 	const std::size_t before = hosts.size();
 	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [](const auto& host) {
-		return host != nullptr && host->backend != nullptr && host->backend->hot.faulted &&
-			!WasmEnvironmentMatrix::Policy(host->environment).synced;
+		return host != nullptr && host->backend != nullptr && host->backend->hot.faulted;
 	}), hosts.end());
 	return before - hosts.size();
 }
@@ -1366,7 +1363,7 @@ bool DispatchPlanRejected(const WasmCoreDispatchPlan* plan, std::string& error)
 		error = "Core Wasm dispatch plan is null";
 		return false;
 	}
-	error = WasmCoreHost::FaultReason(plan->host);
+	error.clear();
 	return false;
 }
 
