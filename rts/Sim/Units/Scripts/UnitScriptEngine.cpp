@@ -197,6 +197,12 @@ void CUnitScriptEngine::Tick(int deltaTime)
 
 	cobEngine->Tick(deltaTime);
 
+	// Core-Wasm CUS tasks share the Lua unit-script animation model. Run their
+	// resumed commands after simulation callbacks have been delivered but before
+	// the engine integrates active piece animations for this frame.
+	for (auto* backend : cusBackends)
+		backend->Tick(gs->frameNum);
+
 	// tick all (COB or LUS) script instances that have registered themselves as animating
 	{
 		ZoneScopedN("CUnitScriptEngine::Tick(MT)");
@@ -229,9 +235,4 @@ void CUnitScriptEngine::Tick(int deltaTime)
 
 	cobEngine->RunDeferredCallins();
 
-	// CUS tasks are module-scheduled at the deterministic GameFrame
-	// boundary.  This is one backend call per module, not one Wasm transition
-	// per idle unit.
-	for (auto* backend : cusBackends)
-		backend->Tick(gs->frameNum);
 }
