@@ -8,6 +8,7 @@
 #include "Lua/LuaInputReceiver.h"
 #include "Lua/LuaMenu.h"
 #include "NativeInterface/api/Callins.h"
+#include "Rml/Backends/RmlUi_Backend.h"
 #include "System/Config/ConfigHandler.h"
 #include "System/EventHandler.h"
 #include "System/FileSystem/VFSHandler.h"
@@ -38,7 +39,6 @@ CLuaMenuController::CLuaMenuController(const std::string& menuName)
 
 	Reset();
 	CLuaMenu::LoadFreeHandler();
-	InitWasmMenu();
 }
 
 CLuaMenuController::~CLuaMenuController()
@@ -67,6 +67,7 @@ bool CLuaMenuController::Reset()
 	vfsHandler->FreeLock();
 
 	mouse->ReloadCursors();
+	RmlGui::SetMenuActive(true);
 	ReloadWasmMenu();
 	return true;
 }
@@ -81,6 +82,7 @@ bool CLuaMenuController::Activate(const std::string& msg)
 
 	assert(Valid());
 	activeController = luaMenuController;
+	RmlGui::SetMenuActive(true);
 
 	mouse->ShowMouse();
 	if (luaMenu != nullptr)
@@ -113,6 +115,7 @@ bool CLuaMenuController::Update()
 	eventHandler.Update();
 	if (m_wasmEnv)
 		m_wasmEnv->Update();
+	RmlGui::Update();
 	// calls IsAbove
 	mouse->GetCurrentTooltip();
 
@@ -139,6 +142,7 @@ bool CLuaMenuController::Draw()
 
 		eventHandler.DrawGenesis();
 		eventHandler.DrawScreen();
+		RmlGui::RenderFrame();
 		mouse->DrawCursor();
 		eventHandler.DrawScreenPost();
 
@@ -153,18 +157,24 @@ bool CLuaMenuController::Draw()
 
 int CLuaMenuController::KeyReleased(int keyCode, int scanCode)
 {
+	if (RmlGui::ProcessKeyReleased(keyCode, scanCode))
+		return 0;
 	luaInputReceiver->KeyReleased(keyCode, scanCode);
 	return 0;
 }
 
 int CLuaMenuController::KeyPressed(int keyCode, int scanCode, bool isRepeat)
 {
+	if (RmlGui::ProcessKeyPressed(keyCode, scanCode, isRepeat))
+		return 0;
 	luaInputReceiver->KeyPressed(keyCode, scanCode, isRepeat);
 	return 0;
 }
 
 int CLuaMenuController::TextInput(const std::string& utf8Text)
 {
+	if (RmlGui::ProcessTextInput(utf8Text))
+		return 0;
 	eventHandler.TextInput(utf8Text);
 	return 0;
 }
@@ -181,8 +191,10 @@ int CLuaMenuController::TextEditing(const std::string& utf8Text, unsigned int st
 void CLuaMenuController::InitWasmMenu()
 {
 	m_wasmEnv = WasmStandaloneEnvironment::Create();
-	m_wasmEnv->LoadManifest("WasmMenu/manifest.json");
-	m_wasmEnv->TryLoadNativeDLL("WasmMenu/NativeMenu");
+	// Prefer the native menu when both package forms are present. Loading both
+	// would dispatch every menu event twice and create duplicate Rml contexts.
+	if (!m_wasmEnv->TryLoadNativeDLL("WasmMenu/NativeMenu"))
+		m_wasmEnv->LoadManifest("WasmMenu/manifest.json");
 	m_wasmEnv->EnsureEventClient();
 }
 
@@ -194,13 +206,18 @@ void CLuaMenuController::ReloadWasmMenu()
 
 bool CLuaMenuController::HasWasmMenu() const
 {
-	return m_wasmEnv && m_wasmEnv->HasModules(WasmEnvironment::Menu);
+	return m_wasmEnv && (m_wasmEnv->HasModules(WasmEnvironment::Menu) ||
+		m_wasmEnv->HasNativeModule());
 }
 
 void CLuaMenuController::DispatchWasmActivateMenu(const std::string& msg)
 {
-	if (!HasWasmMenu())
+	if (!m_wasmEnv)
 		return;
+	if (!m_wasmEnv->HasModules(WasmEnvironment::Menu)) {
+		m_wasmEnv->ActivateMenu(msg);
+		return;
+	}
 	ActivateMenuQuery query = {
 		.message = msg.c_str(),
 		.messageLength = static_cast<uint32_t>(msg.size()),
@@ -216,8 +233,12 @@ void CLuaMenuController::DispatchWasmActivateMenu(const std::string& msg)
 
 void CLuaMenuController::DispatchWasmActivateGame()
 {
-	if (!HasWasmMenu())
+	if (!m_wasmEnv)
 		return;
+	if (!m_wasmEnv->HasModules(WasmEnvironment::Menu)) {
+		m_wasmEnv->ActivateGame();
+		return;
+	}
 	SimpleCallinQuery query = {};
 	bool handled = false;
 	std::string error;
@@ -230,7 +251,7 @@ void CLuaMenuController::DispatchWasmActivateGame()
 
 bool CLuaMenuController::WasmAllowDraw()
 {
-	if (!HasWasmMenu())
+	if (!m_wasmEnv || !m_wasmEnv->HasModules(WasmEnvironment::Menu))
 		return true;
 	SimpleCallinQuery query = {};
 	BoolCallinResult result = {.error = nullptr, .value = true};

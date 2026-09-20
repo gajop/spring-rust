@@ -79,6 +79,9 @@ private:
 		WasmCoreHost* host = nullptr;
 	};
 
+	void ProcessDeferredRmlCleanup();
+	void ShutdownAndClearModule(CoreModuleRecord& module);
+
 	// Which guests receive a given callin changes only when a module is loaded,
 	// unloaded or dropped after a fault. Resolving it per dispatch meant walking
 	// every module for every event; it is precomputed here instead and rebuilt
@@ -146,6 +149,7 @@ private:
 	std::unique_ptr<WasmRuntime> runtime;
 	NativeInterface* nativeInterface = nullptr;
 	std::vector<CoreModuleRecord> coreModules;
+	std::vector<void*> deferredRmlOwners;
 	CoreSubscriberIndex coreSubscribers;
 	bool coreSubscribersDirty = true;
 	CoreDispatchRegistration coreDispatchRegistration{this};

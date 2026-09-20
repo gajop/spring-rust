@@ -31,6 +31,7 @@
 #include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Sim/Weapons/Weapon.h"
 #include "System/Log/ILog.h"
+#include "System/Misc/TracyDefs.h"
 #include "System/BenchmarkCallins.h"
 #include "WasmInterface/core/host/WasmCoreCallinPolicy.h"
 #include "System/Input/KeyInput.h"
@@ -40,6 +41,7 @@
 #include "System/float3.h"
 #include "WasmInterface/system/WasmInterfaceSystem.h"
 #include "NativeInterface/WasmUiVisibility.h"
+#include "Rml/Backends/RmlUi_Backend.h"
 
 #include <SDL_keyboard.h>
 #include <SDL_keycode.h>
@@ -122,20 +124,52 @@ namespace {
 	private:
 		bool synced;
 	};
+
+	class ScopedNativeContextOwner {
+	public:
+		explicit ScopedNativeContextOwner(const NativeInterfaceEventClient& client)
+			: previousOwner(RmlGui::GetCurrentContextOwner())
+			, previousMenuPhase(RmlGui::IsCurrentContextMenuPhase())
+		{
+			RmlGui::SetCurrentContextOwner(client.ContextOwner(), client.IsMenuModule());
+		}
+
+		~ScopedNativeContextOwner()
+		{
+			RmlGui::SetCurrentContextOwner(previousOwner, previousMenuPhase);
+		}
+
+	private:
+		void* previousOwner;
+		bool previousMenuPhase;
+	};
 }
 
+#define INVOKE_NATIVE(Function, ...) \
+	do { \
+		RECOIL_DETAILED_TRACY_ZONE; \
+		ScopedNativeContextOwner ownerScope(*this); \
+		(Function)(__VA_ARGS__); \
+	} while (false)
+
 NativeInterfaceEventClient::NativeInterfaceEventClient(NativeInterface* nativeInterface,
-	SharedLib* sharedLib, WasmInterfaceSystem* wasmSystem)
+	SharedLib* sharedLib, WasmInterfaceSystem* wasmSystem, bool menuModule)
 	: CEventClient("[NativeInterfaceEventClient]", 23253, false)
 	, m_nativeInterface(nativeInterface)
 	, m_sharedLib(sharedLib)
 	, m_wasmSystem(wasmSystem)
+	, m_menuModule(menuModule)
 {
 }
 
 bool NativeInterfaceEventClient::DispatchWasmCallin(WasmCoreCallin callin,
 	const void* query, bool synced, void* nativeResult)
 {
+	RECOIL_DETAILED_TRACY_ZONE;
+#if defined(RECOIL_DETAILED_TRACY_ZONING) && defined(TRACY_ENABLE)
+	const auto callinName = recoil::wasm::core::CallinName(callin);
+	ZoneNameVF(___recoil_detailed_tracy_zone, "Wasm::%.*s", static_cast<int>(callinName.size()), callinName.data());
+#endif
 	// Core is the sole Wasm transport. Supported Core callins run before the
 	// native module callback so the two implementations can contribute results.
 	if (m_wasmSystem != nullptr) {
@@ -210,6 +244,8 @@ void NativeInterfaceEventClient::LoadSymbols() {
 	LOG("Loading symbols from native module...");
 
 	LOAD_SYMBOL(InitializeNativeModule);
+	LOAD_OPTIONAL_SYMBOL(ActivateMenu);
+	LOAD_OPTIONAL_SYMBOL(ActivateGame);
 	LOAD_SYMBOL(Load);
 	LOAD_SYMBOL(DownloadFailed);
 	LOAD_SYMBOL(DownloadFinished);
@@ -377,6 +413,33 @@ void NativeInterfaceEventClient::LoadSymbols() {
 	LOAD_OPTIONAL_SYMBOL_NAMED(CusDetach, "RustCUSDetach");
 }
 
+void NativeInterfaceEventClient::ActivateMenu(const std::string& message)
+{
+	if (m_ActivateMenuFuncPtr == nullptr || !m_initialized)
+		return;
+
+	const ActivateMenuQuery query = {
+		.message = message.c_str(),
+		.messageLength = static_cast<uint32_t>(message.size()),
+	};
+	ActivateMenuResult result = {};
+	INVOKE_NATIVE(m_ActivateMenuFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
+	if (result.error != nullptr)
+		LOG_L(L_ERROR, "Native menu ActivateMenu failed: %s", result.error->message);
+}
+
+void NativeInterfaceEventClient::ActivateGame()
+{
+	if (m_ActivateGameFuncPtr == nullptr || !m_initialized)
+		return;
+
+	const SimpleCallinQuery query = {};
+	SimpleCallinResult result = {};
+	INVOKE_NATIVE(m_ActivateGameFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
+	if (result.error != nullptr)
+		LOG_L(L_ERROR, "Native menu ActivateGame failed: %s", result.error->message);
+}
+
 bool NativeInterfaceEventClient::Invoke(uint32_t instanceId, NativeUnitScriptCall call,
 	std::span<const float> floatArgs, std::span<const int32_t> intArgs,
 	NativeUnitScriptCallResult& result)
@@ -411,7 +474,7 @@ bool NativeInterfaceEventClient::Invoke(uint32_t instanceId, NativeUnitScriptCal
 		.returnCount = 0,
 		.functionFound = 0,
 	};
-	m_CusInvokeFuncPtr(m_nativeInterface, m_moduleData, &query, &nativeResult);
+	INVOKE_NATIVE(m_CusInvokeFuncPtr, m_nativeInterface, m_moduleData, &query, &nativeResult);
 	if (nativeResult.error != nullptr || nativeResult.handled == 0 ||
 		nativeResult.intCount > intValues.size())
 		return false;
@@ -441,7 +504,7 @@ bool NativeInterfaceEventClient::CallNamed(uint32_t instanceId, const char* func
 		.returnCapacity = static_cast<uint32_t>(retValues.size()),
 	};
 	CusNamedResult result = {};
-	m_CusCallNamedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_CusCallNamedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	if (result.error != nullptr || result.handled == 0 || result.returnCount > retValues.size())
 		return false;
 	retCount = result.returnCount;
@@ -455,7 +518,7 @@ void NativeInterfaceEventClient::Detach(uint32_t instanceId)
 		return;
 	const CusDetachQuery query = {.instanceID = instanceId};
 	CusDetachResult result = {};
-	m_CusDetachFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_CusDetachFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	if (result.error != nullptr)
 		LOG_L(L_ERROR, "CUS detach failed: %s", result.error->message);
 }
@@ -466,7 +529,7 @@ void NativeInterfaceEventClient::Tick(uint32_t frame)
 		return;
 	const CusTickQuery query = {.frame = frame};
 	CusTickResult result = {};
-	m_CusTickFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_CusTickFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	if (result.error != nullptr)
 		LOG_L(L_ERROR, "CUS tick failed: %s", result.error->message);
 }
@@ -487,7 +550,7 @@ void* NativeInterfaceEventClient::Initialize() {
 
 	InitializeNativeModuleResult result = {};
 
-	m_InitializeNativeModuleFuncPtr(m_nativeInterface, &query, &result);
+	INVOKE_NATIVE(m_InitializeNativeModuleFuncPtr, m_nativeInterface, &query, &result);
 
 	if (result.error != nullptr) {
 		LOG_L(L_ERROR, "Failed to initialize native module: %s", result.error->message);
@@ -510,7 +573,7 @@ void NativeInterfaceEventClient::Shutdown() {
 	if (m_ShutdownFuncPtr != nullptr) {
 		ShutdownQuery query = {};
 		ShutdownResult result = {};
-		m_ShutdownFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_ShutdownFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		if (result.error != nullptr)
 			LOG_L(L_ERROR, "Native module shutdown failed: %s", result.error->message);
 	}
@@ -558,7 +621,7 @@ void NativeInterfaceEventClient::Load(IArchive* archive) {
 	DispatchWasmCallin(CoreCallinOf("Load"), &query, true);
 	if (m_LoadFuncPtr) {
 		ArchiveCallinResult result = {};
-		m_LoadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_LoadFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -567,7 +630,7 @@ void NativeInterfaceEventClient::GamePreload() {
 	DispatchWasmCallin(CoreCallinOf("GamePreload"), &query, true);
 	if (m_GamePreloadFuncPtr) {
 		GamePreloadResult result = {};
-		m_GamePreloadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GamePreloadFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -576,7 +639,7 @@ void NativeInterfaceEventClient::GameStart() {
 	DispatchWasmCallin(CoreCallinOf("GameStart"), &query, true);
 	if (m_GameStartFuncPtr) {
 		GameStartResult result = {};
-		m_GameStartFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GameStartFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -588,7 +651,7 @@ void NativeInterfaceEventClient::GameOver(const std::vector<unsigned char>& winn
 	DispatchWasmCallin(CoreCallinOf("GameOver"), &query, true);
 	if (m_GameOverFuncPtr) {
 		GameOverEventResult result = {};
-		m_GameOverFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GameOverFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -607,7 +670,7 @@ void NativeInterfaceEventClient::GameFrame(int gameFrame) {
 		const auto nativeToken = spring::benchmark_callins::Begin(
 			"native", spring::benchmark_callins::GameFrameTestName());
 		GameFrameResult result = {};
-		m_GameFrameFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GameFrameFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		spring::benchmark_callins::End(nativeToken);
 	}
 	spring::benchmark_callins::End(nativeToken);
@@ -618,7 +681,7 @@ void NativeInterfaceEventClient::GameFramePost(int gameFrame) {
 	DispatchWasmCallin(CoreCallinOf("GameFramePost"), &query, true);
 	if (m_GameFramePostFuncPtr) {
 		GameFramePostResult result = {};
-		m_GameFramePostFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GameFramePostFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -632,7 +695,7 @@ void NativeInterfaceEventClient::Update() {
 	if (m_UpdateFuncPtr) {
 		const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_update");
 		UpdateResult result = {};
-		m_UpdateFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UpdateFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		spring::benchmark_callins::End(nativeToken);
 	}
 }
@@ -645,7 +708,7 @@ void NativeInterfaceEventClient::DrawScreen() {
 	DispatchWasmCallin(CoreCallinOf("DrawScreen"), &query, false);
 	if (m_DrawScreenFuncPtr) {
 		DrawScreenResult result = {};
-		m_DrawScreenFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DrawScreenFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -663,7 +726,7 @@ void NativeInterfaceEventClient::DrawScreen() {
 			const auto nativeToken = spring::benchmark_callins::Begin(              \
 				"native", spring::benchmark_callins::EventTestName(#EventName));      \
 			SimpleCallinResult result = {};                                         \
-			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
+			INVOKE_NATIVE(m_##EventName##FuncPtr, m_nativeInterface, m_moduleData, &query, &result); \
 			spring::benchmark_callins::End(nativeToken);                            \
 		}                                                                          \
 	}
@@ -698,7 +761,7 @@ DISPATCH_SIMPLE_CALLIN(DrawShadowFeaturesLua)
 		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                              \
 		if (m_##EventName##FuncPtr) {                                               \
 			DrawScreenResult result = {};                                              \
-			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result);  \
+			INVOKE_NATIVE(m_##EventName##FuncPtr, m_nativeInterface, m_moduleData, &query, &result);  \
 		}                                                                            \
 	}
 
@@ -716,7 +779,7 @@ DISPATCH_SCREEN_CALLIN(DrawScreenPost)
 		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                              \
 		if (m_##EventName##FuncPtr) {                                               \
 			SimpleCallinResult result = {};                                            \
-			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result);  \
+			INVOKE_NATIVE(m_##EventName##FuncPtr, m_nativeInterface, m_moduleData, &query, &result);  \
 		}                                                                            \
 	}
 
@@ -736,7 +799,7 @@ bool NativeInterfaceEventClient::DrawUnit(const CUnit* unit) {
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_DrawUnitFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_DrawUnitFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -751,7 +814,7 @@ bool NativeInterfaceEventClient::DrawFeature(const CFeature* feature) {
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_DrawFeatureFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_DrawFeatureFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -767,7 +830,7 @@ bool NativeInterfaceEventClient::DrawShield(const CUnit* unit, const CWeapon* we
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_DrawShieldFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_DrawShieldFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -782,7 +845,7 @@ bool NativeInterfaceEventClient::DrawProjectile(const CProjectile* projectile) {
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_DrawProjectileFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_DrawProjectileFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -797,7 +860,7 @@ bool NativeInterfaceEventClient::DrawMaterial(const LuaMaterial* material) {
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_DrawMaterialFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_DrawMaterialFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -811,7 +874,7 @@ void NativeInterfaceEventClient::DrawWorldPreParticles(bool drawAboveWater, bool
 	DispatchWasmCallin(CoreCallinOf("DrawWorldPreParticles"), &query, false);
 	if (m_DrawWorldPreParticlesFuncPtr) {
 		DrawWorldPreParticlesResult result = {};
-		m_DrawWorldPreParticlesFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DrawWorldPreParticlesFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -828,7 +891,7 @@ void NativeInterfaceEventClient::DrawBuildSquare(int unitDefID, int x, int z, in
 	DispatchWasmCallin(CoreCallinOf("DrawBuildSquare"), &query, false);
 	if (m_DrawBuildSquareFuncPtr) {
 		DrawBuildSquareResult result = {};
-		m_DrawBuildSquareFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DrawBuildSquareFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -842,7 +905,7 @@ void NativeInterfaceEventClient::DrawBuildSquare(int unitDefID, int x, int z, in
 		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                           \
 		if (m_##EventName##FuncPtr) {                                             \
 			DrawObjectsLuaResult result = {};                                        \
-			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
+			INVOKE_NATIVE(m_##EventName##FuncPtr, m_nativeInterface, m_moduleData, &query, &result); \
 		}                                                                          \
 	}
 
@@ -860,7 +923,7 @@ DISPATCH_DRAW_OBJECTS_LUA(DrawOpaqueFeaturesLua)
 		DispatchWasmCallin(CoreCallinOf(#EventName), &query, false);                           \
 		if (m_##EventName##FuncPtr) {                                             \
 			DrawAlphaObjectsLuaResult result = {};                                   \
-			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
+			INVOKE_NATIVE(m_##EventName##FuncPtr, m_nativeInterface, m_moduleData, &query, &result); \
 		}                                                                          \
 	}
 
@@ -877,7 +940,7 @@ void NativeInterfaceEventClient::GamePaused(int playerID, bool paused) {
 	DispatchWasmCallin(CoreCallinOf("GamePaused"), &query, true);
 	if (m_GamePausedFuncPtr) {
 		GamePausedResult result = {};
-		m_GamePausedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GamePausedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -889,7 +952,7 @@ void NativeInterfaceEventClient::GameID(const unsigned char* gameID, unsigned in
 	DispatchWasmCallin(CoreCallinOf("GameID"), &query, true);
 	if (m_GameIDFuncPtr) {
 		GameIDResult result = {};
-		m_GameIDFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GameIDFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -898,7 +961,7 @@ void NativeInterfaceEventClient::TeamDied(int teamID) {
 	DispatchWasmCallin(CoreCallinOf("TeamDied"), &query, true);
 	if (m_TeamDiedFuncPtr) {
 		TeamDiedResult result = {};
-		m_TeamDiedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_TeamDiedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -907,7 +970,7 @@ void NativeInterfaceEventClient::TeamChanged(int teamID) {
 	DispatchWasmCallin(CoreCallinOf("TeamChanged"), &query, true);
 	if (m_TeamChangedFuncPtr) {
 		TeamChangedResult result = {};
-		m_TeamChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_TeamChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -916,7 +979,7 @@ void NativeInterfaceEventClient::PlayerChanged(int playerID) {
 	DispatchWasmCallin(CoreCallinOf("PlayerChanged"), &query, true);
 	if (m_PlayerChangedFuncPtr) {
 		PlayerChangedResult result = {};
-		m_PlayerChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_PlayerChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -925,7 +988,7 @@ void NativeInterfaceEventClient::PlayerAdded(int playerID) {
 	DispatchWasmCallin(CoreCallinOf("PlayerAdded"), &query, true);
 	if (m_PlayerAddedFuncPtr) {
 		PlayerAddedResult result = {};
-		m_PlayerAddedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_PlayerAddedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -937,7 +1000,7 @@ void NativeInterfaceEventClient::PlayerRemoved(int playerID, int reason) {
 	DispatchWasmCallin(CoreCallinOf("PlayerRemoved"), &query, true);
 	if (m_PlayerRemovedFuncPtr) {
 		PlayerRemovedResult result = {};
-		m_PlayerRemovedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_PlayerRemovedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -954,7 +1017,7 @@ void NativeInterfaceEventClient::UnitCreated(const CUnit* unit, const CUnit* bui
 	if (m_UnitCreatedFuncPtr) {
 		const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_unitcreated");
 		UnitCreatedResult result = {};
-		m_UnitCreatedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitCreatedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		spring::benchmark_callins::End(nativeToken);
 	}
 }
@@ -968,7 +1031,7 @@ void NativeInterfaceEventClient::UnitFinished(const CUnit* unit) {
 	DispatchWasmCallin(CoreCallinOf("UnitFinished"), &query, true);
 	if (m_UnitFinishedFuncPtr) {
 		UnitFinishedResult result = {};
-		m_UnitFinishedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitFinishedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -981,7 +1044,7 @@ void NativeInterfaceEventClient::UnitReverseBuilt(const CUnit* unit) {
 	DispatchWasmCallin(CoreCallinOf("UnitReverseBuilt"), &query, true);
 	if (m_UnitReverseBuiltFuncPtr) {
 		UnitReverseBuiltResult result = {};
-		m_UnitReverseBuiltFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitReverseBuiltFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -997,7 +1060,7 @@ void NativeInterfaceEventClient::UnitConstructionDecayed(const CUnit* unit, floa
 	DispatchWasmCallin(CoreCallinOf("UnitConstructionDecayed"), &query, true);
 	if (m_UnitConstructionDecayedFuncPtr) {
 		UnitConstructionDecayedResult result = {};
-		m_UnitConstructionDecayedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitConstructionDecayedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1013,7 +1076,7 @@ void NativeInterfaceEventClient::UnitFromFactory(const CUnit* unit, const CUnit*
 	DispatchWasmCallin(CoreCallinOf("UnitFromFactory"), &query, true);
 	if (m_UnitFromFactoryFuncPtr) {
 		UnitFromFactoryResult result = {};
-		m_UnitFromFactoryFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitFromFactoryFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1030,7 +1093,7 @@ void NativeInterfaceEventClient::UnitDestroyed(const CUnit* unit, const CUnit* a
 	DispatchWasmCallin(CoreCallinOf("UnitDestroyed"), &query, true);
 	if (m_UnitDestroyedFuncPtr) {
 		UnitDestroyedResult result = {};
-		m_UnitDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitDestroyedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1044,7 +1107,7 @@ void NativeInterfaceEventClient::UnitTaken(const CUnit* unit, int oldTeam, int n
 	DispatchWasmCallin(CoreCallinOf("UnitTaken"), &query, true);
 	if (m_UnitTakenFuncPtr) {
 		UnitTakenResult result = {};
-		m_UnitTakenFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitTakenFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1058,7 +1121,7 @@ void NativeInterfaceEventClient::UnitGiven(const CUnit* unit, int oldTeam, int n
 	DispatchWasmCallin(CoreCallinOf("UnitGiven"), &query, true);
 	if (m_UnitGivenFuncPtr) {
 		UnitGivenResult result = {};
-		m_UnitGivenFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitGivenFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1071,7 +1134,7 @@ void NativeInterfaceEventClient::UnitIdle(const CUnit* unit) {
 	DispatchWasmCallin(CoreCallinOf("UnitIdle"), &query, true);
 	if (m_UnitIdleFuncPtr) {
 		UnitIdleResult result = {};
-		m_UnitIdleFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitIdleFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1088,7 +1151,7 @@ void NativeInterfaceEventClient::UnitCommand(const CUnit* unit, const Command& c
 	DispatchWasmCallin(CoreCallinOf("UnitCommand"), &query, fromSynced);
 	if (m_UnitCommandFuncPtr) {
 		UnitCommandResult result = {};
-		m_UnitCommandFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitCommandFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1105,7 +1168,7 @@ bool NativeInterfaceEventClient::CommandFallback(const CUnit* unit, const Comman
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_CommandFallbackFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_CommandFallbackFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1125,7 +1188,7 @@ bool NativeInterfaceEventClient::AllowCommand(const CUnit* unit, const Command& 
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowCommandFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowCommandFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1150,7 +1213,7 @@ std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDe
 
 	const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_allowunitcreation");
 	AllowUnitCreationResult result = {.allow = true, .dropOrder = true};
-	m_AllowUnitCreationFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitCreationFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	spring::benchmark_callins::End(nativeToken);
 	return {result.allow, result.dropOrder};
 }
@@ -1169,7 +1232,7 @@ bool NativeInterfaceEventClient::AllowUnitTransfer(const CUnit* unit, int newTea
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowUnitTransferFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitTransferFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1187,7 +1250,7 @@ bool NativeInterfaceEventClient::AllowUnitBuildStep(const CUnit* builder, const 
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowUnitBuildStepFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitBuildStepFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1205,7 +1268,7 @@ bool NativeInterfaceEventClient::AllowUnitCaptureStep(const CUnit* builder, cons
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowUnitCaptureStepFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitCaptureStepFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1224,7 +1287,7 @@ bool NativeInterfaceEventClient::AllowUnitTransport(const CUnit* transporter, co
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowUnitTransportFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitTransportFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1247,7 +1310,7 @@ bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter
 		return hasWasmValue ? wasmValue : allowed;
 
 	BoolCallinResult result = {.value = allowed};
-	m_AllowUnitTransportLoadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitTransportLoadFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1270,7 +1333,7 @@ bool NativeInterfaceEventClient::AllowUnitTransportUnload(const CUnit* transport
 		return hasWasmValue ? wasmValue : allowed;
 
 	BoolCallinResult result = {.value = allowed};
-	m_AllowUnitTransportUnloadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitTransportUnloadFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1286,7 +1349,7 @@ bool NativeInterfaceEventClient::AllowUnitCloak(const CUnit* unit, const CUnit* 
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowUnitCloakFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitCloakFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1304,7 +1367,7 @@ bool NativeInterfaceEventClient::AllowUnitDecloak(const CUnit* unit, const CSoli
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowUnitDecloakFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitDecloakFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1320,7 +1383,7 @@ bool NativeInterfaceEventClient::AllowUnitKamikaze(const CUnit* unit, const CUni
 		return hasWasmValue ? wasmValue : allowed;
 
 	BoolCallinResult result = {.value = allowed};
-	m_AllowUnitKamikazeFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowUnitKamikazeFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1334,7 +1397,7 @@ void NativeInterfaceEventClient::UnitCmdDone(const CUnit* unit, const Command& c
 	DispatchWasmCallin(CoreCallinOf("UnitCmdDone"), &query, true);
 	if (m_UnitCmdDoneFuncPtr) {
 		UnitCmdDoneResult result = {};
-		m_UnitCmdDoneFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitCmdDoneFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1354,7 +1417,7 @@ void NativeInterfaceEventClient::UnitDamaged(const CUnit* unit, const CUnit* att
 	DispatchWasmCallin(CoreCallinOf("UnitDamaged"), &query, true);
 	if (m_UnitDamagedFuncPtr) {
 		UnitDamagedResult result = {};
-		m_UnitDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitDamagedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1367,7 +1430,7 @@ void NativeInterfaceEventClient::UnitHarvestStorageFull(const CUnit* unit) {
 	DispatchWasmCallin(CoreCallinOf("UnitHarvestStorageFull"), &query, true);
 	if (m_UnitHarvestStorageFullFuncPtr) {
 		UnitHarvestStorageFullResult result = {};
-		m_UnitHarvestStorageFullFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitHarvestStorageFullFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1382,7 +1445,7 @@ void NativeInterfaceEventClient::UnitSeismicPing(const CUnit* unit, int allyTeam
 	DispatchWasmCallin(CoreCallinOf("UnitSeismicPing"), &query, true);
 	if (m_UnitSeismicPingFuncPtr) {
 		UnitSeismicPingResult result = {};
-		m_UnitSeismicPingFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitSeismicPingFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1397,7 +1460,7 @@ void NativeInterfaceEventClient::UnitSeismicPing(const CUnit* unit, int allyTeam
 		DispatchWasmCallin(CoreCallinOf(#EventName), &query, true);                              \
 		if (m_##EventName##FuncPtr) {                                             \
 			UnitLosEventResult result = {};                                        \
-			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
+			INVOKE_NATIVE(m_##EventName##FuncPtr, m_nativeInterface, m_moduleData, &query, &result); \
 		}                                                                          \
 	}
 
@@ -1418,7 +1481,7 @@ DISPATCH_UNIT_LOS_EVENT(UnitLeftLos)
 		DispatchWasmCallin(CoreCallinOf(#EventName), &query, true);                              \
 		if (m_##EventName##FuncPtr) {                                             \
 			UnitMovementClassEventResult result = {};                             \
-			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
+			INVOKE_NATIVE(m_##EventName##FuncPtr, m_nativeInterface, m_moduleData, &query, &result); \
 		}                                                                          \
 	}
 
@@ -1441,7 +1504,7 @@ void NativeInterfaceEventClient::UnitStunned(const CUnit* unit, bool stunned) {
 	DispatchWasmCallin(CoreCallinOf("UnitStunned"), &query, true);
 	if (m_UnitStunnedFuncPtr) {
 		UnitStunnedResult result = {};
-		m_UnitStunnedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitStunnedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1456,7 +1519,7 @@ void NativeInterfaceEventClient::UnitExperience(const CUnit* unit, float oldExpe
 	DispatchWasmCallin(CoreCallinOf("UnitExperience"), &query, true);
 	if (m_UnitExperienceFuncPtr) {
 		UnitExperienceResult result = {};
-		m_UnitExperienceFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitExperienceFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1471,7 +1534,7 @@ void NativeInterfaceEventClient::UnitLoaded(const CUnit* unit, const CUnit* tran
 	DispatchWasmCallin(CoreCallinOf("UnitLoaded"), &query, true);
 	if (m_UnitLoadedFuncPtr) {
 		UnitLoadedResult result = {};
-		m_UnitLoadedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitLoadedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1486,7 +1549,7 @@ void NativeInterfaceEventClient::UnitUnloaded(const CUnit* unit, const CUnit* tr
 	DispatchWasmCallin(CoreCallinOf("UnitUnloaded"), &query, true);
 	if (m_UnitUnloadedFuncPtr) {
 		UnitUnloadedResult result = {};
-		m_UnitUnloadedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitUnloadedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1499,7 +1562,7 @@ void NativeInterfaceEventClient::UnitCloaked(const CUnit* unit) {
 	DispatchWasmCallin(CoreCallinOf("UnitCloaked"), &query, true);
 	if (m_UnitCloakedFuncPtr) {
 		UnitCloakEventResult result = {};
-		m_UnitCloakedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitCloakedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1512,7 +1575,7 @@ void NativeInterfaceEventClient::UnitDecloaked(const CUnit* unit) {
 	DispatchWasmCallin(CoreCallinOf("UnitDecloaked"), &query, true);
 	if (m_UnitDecloakedFuncPtr) {
 		UnitCloakEventResult result = {};
-		m_UnitDecloakedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitDecloakedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1526,7 +1589,7 @@ void NativeInterfaceEventClient::UnitDecloaked(const CUnit* unit) {
 		DispatchWasmCallin(CoreCallinOf(#EventName), &query, true);                              \
 		if (m_##EventName##FuncPtr) {                                             \
 			UnitMoveEventResult result = {};                                      \
-			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
+			INVOKE_NATIVE(m_##EventName##FuncPtr, m_nativeInterface, m_moduleData, &query, &result); \
 		}                                                                          \
 	}
 
@@ -1545,7 +1608,7 @@ bool NativeInterfaceEventClient::UnitUnitCollision(const CUnit* collider, const 
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("UnitUnitCollision"), &query, true, wasmValue);
 	if (m_UnitUnitCollisionFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_UnitUnitCollisionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitUnitCollisionFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -1560,7 +1623,7 @@ bool NativeInterfaceEventClient::UnitFeatureCollision(const CUnit* collider, con
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("UnitFeatureCollision"), &query, true, wasmValue);
 	if (m_UnitFeatureCollisionFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_UnitFeatureCollisionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnitFeatureCollisionFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -1575,7 +1638,7 @@ void NativeInterfaceEventClient::RenderUnitDestroyed(const CUnit* unit) {
 	DispatchWasmCallin(CoreCallinOf("RenderUnitDestroyed"), &query, false);
 	if (m_RenderUnitDestroyedFuncPtr) {
 		RenderUnitDestroyedResult result = {};
-		m_RenderUnitDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_RenderUnitDestroyedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1587,7 +1650,7 @@ void NativeInterfaceEventClient::FeatureCreated(const CFeature* feature) {
 	DispatchWasmCallin(CoreCallinOf("FeatureCreated"), &query, true);
 	if (m_FeatureCreatedFuncPtr) {
 		FeatureCreatedResult result = {};
-		m_FeatureCreatedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_FeatureCreatedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1599,7 +1662,7 @@ void NativeInterfaceEventClient::FeatureDestroyed(const CFeature* feature) {
 	DispatchWasmCallin(CoreCallinOf("FeatureDestroyed"), &query, true);
 	if (m_FeatureDestroyedFuncPtr) {
 		FeatureDestroyedResult result = {};
-		m_FeatureDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_FeatureDestroyedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1618,7 +1681,7 @@ void NativeInterfaceEventClient::FeatureDamaged(const CFeature* feature, const C
 	DispatchWasmCallin(CoreCallinOf("FeatureDamaged"), &query, true);
 	if (m_FeatureDamagedFuncPtr) {
 		FeatureDamagedResult result = {};
-		m_FeatureDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_FeatureDamagedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1634,7 +1697,7 @@ bool NativeInterfaceEventClient::AllowFeatureCreation(const FeatureDef* featureD
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowFeatureCreationFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowFeatureCreationFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1652,7 +1715,7 @@ bool NativeInterfaceEventClient::AllowFeatureBuildStep(const CUnit* builder, con
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowFeatureBuildStepFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowFeatureBuildStepFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1668,7 +1731,7 @@ bool NativeInterfaceEventClient::AllowResourceLevel(int teamID, const std::strin
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowResourceLevelFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowResourceLevelFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1685,7 +1748,7 @@ bool NativeInterfaceEventClient::AllowResourceTransfer(int oldTeam, int newTeam,
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowResourceTransferFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowResourceTransferFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1709,7 +1772,7 @@ bool NativeInterfaceEventClient::ResourceExcess(const std::map<int, SResourcePac
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_ResourceExcessFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_ResourceExcessFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1726,7 +1789,7 @@ bool NativeInterfaceEventClient::AllowDirectUnitControl(int playerID, const CUni
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowDirectUnitControlFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowDirectUnitControlFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1742,7 +1805,7 @@ bool NativeInterfaceEventClient::AllowBuilderHoldFire(const CUnit* unit, int act
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowBuilderHoldFireFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowBuilderHoldFireFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1760,7 +1823,7 @@ bool NativeInterfaceEventClient::AllowStartPosition(int playerID, int teamID, un
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowStartPositionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowStartPositionFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value && (!hasWasmValue || wasmValue);
 }
 
@@ -1779,7 +1842,7 @@ bool NativeInterfaceEventClient::TerraformComplete(const CUnit* unit, const CUni
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_TerraformCompleteFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_TerraformCompleteFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1796,7 +1859,7 @@ bool NativeInterfaceEventClient::MoveCtrlNotify(const CUnit* unit, int data) {
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_MoveCtrlNotifyFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_MoveCtrlNotifyFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1808,7 +1871,7 @@ void NativeInterfaceEventClient::FeatureMoved(const CFeature* feature, const flo
 	DispatchWasmCallin(CoreCallinOf("FeatureMoved"), &query, true);
 	if (m_FeatureMovedFuncPtr) {
 		FeatureMovedResult result = {};
-		m_FeatureMovedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_FeatureMovedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1823,7 +1886,7 @@ void NativeInterfaceEventClient::ProjectileCreated(const CProjectile* proj) {
 	DispatchWasmCallin(CoreCallinOf("ProjectileCreated"), &query, true);
 	if (m_ProjectileCreatedFuncPtr) {
 		ProjectileEventResult result = {};
-		m_ProjectileCreatedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_ProjectileCreatedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1838,7 +1901,7 @@ void NativeInterfaceEventClient::ProjectileDestroyed(const CProjectile* proj) {
 	DispatchWasmCallin(CoreCallinOf("ProjectileDestroyed"), &query, true);
 	if (m_ProjectileDestroyedFuncPtr) {
 		ProjectileEventResult result = {};
-		m_ProjectileDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_ProjectileDestroyedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -1858,7 +1921,7 @@ bool NativeInterfaceEventClient::Explosion(int weaponID, const WeaponDef* weapon
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("Explosion"), &query, true, wasmValue);
 	if (m_ExplosionFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_ExplosionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_ExplosionFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -1877,7 +1940,7 @@ int NativeInterfaceEventClient::AllowWeaponTargetCheck(unsigned int attackerID, 
 		return hasWasmValue ? wasmValue : -1;
 
 	IntCallinResult result = {.value = -1};
-	m_AllowWeaponTargetCheckFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowWeaponTargetCheckFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return hasWasmValue && wasmValue != -1 ? wasmValue : result.value;
 }
 
@@ -1908,7 +1971,7 @@ bool NativeInterfaceEventClient::AllowWeaponTarget(unsigned int attackerID, unsi
 		.allowed = true,
 		.targetPriority = query.targetPriority,
 	};
-	m_AllowWeaponTargetFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowWeaponTargetFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	if (targetPriority != nullptr)
 		*targetPriority = result.targetPriority;
 	return result.allowed;
@@ -1926,7 +1989,7 @@ bool NativeInterfaceEventClient::AllowWeaponInterceptTarget(const CUnit* interce
 		return hasWasmValue ? wasmValue : true;
 
 	BoolCallinResult result = {.value = true};
-	m_AllowWeaponInterceptTargetFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_AllowWeaponInterceptTargetFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -1967,7 +2030,7 @@ bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* 
 		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
 		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
 	};
-	m_UnitPreDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_UnitPreDamagedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	spring::benchmark_callins::End(nativeToken);
 	if (newDamage != nullptr)
 		*newDamage = result.newDamage;
@@ -2009,7 +2072,7 @@ bool NativeInterfaceEventClient::FeaturePreDamaged(const CFeature* feature, cons
 		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
 		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
 	};
-	m_FeaturePreDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_FeaturePreDamagedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	if (newDamage != nullptr)
 		*newDamage = result.newDamage;
 	if (impulseMult != nullptr)
@@ -2038,7 +2101,7 @@ bool NativeInterfaceEventClient::ShieldPreDamaged(const CProjectile* projectile,
 		return hasWasmValue && wasmValue;
 
 	BoolCallinResult result = {.value = false};
-	m_ShieldPreDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_ShieldPreDamagedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	return result.value || (hasWasmValue && wasmValue);
 }
 
@@ -2050,7 +2113,7 @@ void NativeInterfaceEventClient::DownloadFailed(int ID, int errorID) {
 	DispatchWasmCallin(CoreCallinOf("DownloadFailed"), &query, false);
 	if (m_DownloadFailedFuncPtr) {
 		DownloadFailedResult result = {};
-		m_DownloadFailedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DownloadFailedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2059,7 +2122,7 @@ void NativeInterfaceEventClient::DownloadFinished(int ID) {
 	DispatchWasmCallin(CoreCallinOf("DownloadFinished"), &query, false);
 	if (m_DownloadFinishedFuncPtr) {
 		DownloadFinishedResult result = {};
-		m_DownloadFinishedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DownloadFinishedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2072,7 +2135,7 @@ void NativeInterfaceEventClient::DownloadProgress(int ID, long downloaded, long 
 	DispatchWasmCallin(CoreCallinOf("DownloadProgress"), &query, false);
 	if (m_DownloadProgressFuncPtr) {
 		DownloadProgressResult result = {};
-		m_DownloadProgressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DownloadProgressFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2085,7 +2148,7 @@ void NativeInterfaceEventClient::DownloadQueued(int ID, const std::string& archi
 	DispatchWasmCallin(CoreCallinOf("DownloadQueued"), &query, false);
 	if (m_DownloadQueuedFuncPtr) {
 		DownloadQueuedResult result = {};
-		m_DownloadQueuedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DownloadQueuedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2094,7 +2157,7 @@ void NativeInterfaceEventClient::DownloadStarted(int ID) {
 	DispatchWasmCallin(CoreCallinOf("DownloadStarted"), &query, false);
 	if (m_DownloadStartedFuncPtr) {
 		DownloadStartedResult result = {};
-		m_DownloadStartedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DownloadStartedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2103,7 +2166,7 @@ void NativeInterfaceEventClient::Save(zipFile archive) {
 	DispatchWasmCallin(CoreCallinOf("Save"), &query, false);
 	if (m_SaveFuncPtr) {
 		ArchiveCallinResult result = {};
-		m_SaveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_SaveFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2114,7 +2177,7 @@ void NativeInterfaceEventClient::LastMessagePosition(const float3& pos) {
 	DispatchWasmCallin(CoreCallinOf("LastMessagePosition"), &query, false);
 	if (m_LastMessagePositionFuncPtr) {
 		LastMessagePositionResult result = {};
-		m_LastMessagePositionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_LastMessagePositionFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2128,7 +2191,7 @@ void NativeInterfaceEventClient::UnsyncedHeightMapUpdate(const SRectangle& rect)
 	DispatchWasmCallin(CoreCallinOf("UnsyncedHeightMapUpdate"), &query, false);
 	if (m_UnsyncedHeightMapUpdateFuncPtr) {
 		RectChangedResult result = {};
-		m_UnsyncedHeightMapUpdateFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_UnsyncedHeightMapUpdateFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2138,7 +2201,7 @@ bool NativeInterfaceEventClient::KeyMapChanged() {
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("KeyMapChanged"), &query, false, wasmValue);
 	if (m_KeyMapChangedFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_KeyMapChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_KeyMapChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2179,7 +2242,7 @@ bool NativeInterfaceEventClient::KeyPress(int keyCode, int scanCode, bool isRepe
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("KeyPress"), &query, false, wasmValue);
 	if (m_KeyPressFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_KeyPressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_KeyPressFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2219,7 +2282,7 @@ bool NativeInterfaceEventClient::KeyRelease(int keyCode, int scanCode) {
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("KeyRelease"), &query, false, wasmValue);
 	if (m_KeyReleaseFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_KeyReleaseFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_KeyReleaseFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2231,7 +2294,7 @@ bool NativeInterfaceEventClient::TextInput(const std::string& utf8) {
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("TextInput"), &query, false, wasmValue);
 	if (m_TextInputFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_TextInputFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_TextInputFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2243,7 +2306,7 @@ bool NativeInterfaceEventClient::TextEditing(const std::string& utf8, unsigned i
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("TextEditing"), &query, false, wasmValue);
 	if (m_TextEditingFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_TextEditingFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_TextEditingFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2262,7 +2325,7 @@ bool NativeInterfaceEventClient::MouseMove(int x, int y, int dx, int dy, int but
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MouseMove"), &query, false, wasmValue);
 	if (m_MouseMoveFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_MouseMoveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_MouseMoveFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2275,7 +2338,7 @@ bool NativeInterfaceEventClient::MousePress(int x, int y, int button) {
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MousePress"), &query, false, wasmValue);
 	if (m_MousePressFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_MousePressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_MousePressFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2287,7 +2350,7 @@ void NativeInterfaceEventClient::MouseRelease(int x, int y, int button) {
 	DispatchWasmCallin(CoreCallinOf("MouseRelease"), &query, false);
 	if (m_MouseReleaseFuncPtr) {
 		MouseReleaseResult result = {};
-		m_MouseReleaseFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_MouseReleaseFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2297,7 +2360,7 @@ bool NativeInterfaceEventClient::MouseWheel(bool up, float value) {
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MouseWheel"), &query, false, wasmValue);
 	if (m_MouseWheelFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_MouseWheelFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_MouseWheelFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2310,7 +2373,7 @@ bool NativeInterfaceEventClient::IsAbove(int x, int y) {
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("IsAbove"), &query, false, wasmValue);
 	if (m_IsAboveFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_IsAboveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_IsAboveFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2323,7 +2386,7 @@ std::string NativeInterfaceEventClient::GetTooltip(int x, int y) {
 	const bool hasWasmValue = DispatchWasmStringCallin(CoreCallinOf("GetTooltip"), &query, false, wasmValue);
 	if (m_GetTooltipFuncPtr) {
 		StringCallinResult result = {};
-		m_GetTooltipFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GetTooltipFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		if (result.value != nullptr && result.value[0] != '\0')
 			return result.value;
 	}
@@ -2342,7 +2405,7 @@ bool NativeInterfaceEventClient::DefaultCommand(const CUnit* unit, const CFeatur
 	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_DefaultCommandFuncPtr) {
 		DefaultCommandResult result = {.value = false, .command = cmd};
-		m_DefaultCommandFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_DefaultCommandFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		if (result.value)
 			cmd = result.command;
 		return result.value;
@@ -2363,7 +2426,7 @@ void NativeInterfaceEventClient::ActiveCommandChanged(const SCommandDescription*
 	DispatchWasmCallin(CoreCallinOf("ActiveCommandChanged"), &query, false);
 	if (m_ActiveCommandChangedFuncPtr) {
 		ActiveCommandChangedResult result = {};
-		m_ActiveCommandChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_ActiveCommandChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2374,7 +2437,7 @@ void NativeInterfaceEventClient::CameraRotationChanged(const float3& rot) {
 	DispatchWasmCallin(CoreCallinOf("CameraRotationChanged"), &query, false);
 	if (m_CameraRotationChangedFuncPtr) {
 		Float3CallinResult result = {};
-		m_CameraRotationChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_CameraRotationChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2385,7 +2448,7 @@ void NativeInterfaceEventClient::CameraPositionChanged(const float3& pos) {
 	DispatchWasmCallin(CoreCallinOf("CameraPositionChanged"), &query, false);
 	if (m_CameraPositionChangedFuncPtr) {
 		Float3CallinResult result = {};
-		m_CameraPositionChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_CameraPositionChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2395,7 +2458,7 @@ bool NativeInterfaceEventClient::CommandNotify(const Command& cmd) {
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("CommandNotify"), &query, false, wasmValue);
 	if (m_CommandNotifyFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_CommandNotifyFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_CommandNotifyFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2407,7 +2470,7 @@ bool NativeInterfaceEventClient::AddConsoleLine(const std::string& msg, const st
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AddConsoleLine"), &query, false, wasmValue);
 	if (m_AddConsoleLineFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_AddConsoleLineFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_AddConsoleLineFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2419,7 +2482,7 @@ bool NativeInterfaceEventClient::GroupChanged(int groupID) {
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("GroupChanged"), &query, false, wasmValue);
 	if (m_GroupChangedFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_GroupChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GroupChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2432,7 +2495,7 @@ void NativeInterfaceEventClient::MiniMapRotationChanged(float newRot, float oldR
 		return;
 
 	SimpleCallinResult result = {};
-	m_MiniMapRotationChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_MiniMapRotationChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 }
 
 void NativeInterfaceEventClient::MiniMapStateChanged(bool isMinimized, bool isMaximized, bool isSlaved) {
@@ -2446,7 +2509,7 @@ void NativeInterfaceEventClient::MiniMapStateChanged(bool isMinimized, bool isMa
 		return;
 
 	SimpleCallinResult result = {};
-	m_MiniMapStateChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_MiniMapStateChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 }
 
 void NativeInterfaceEventClient::MiniMapGeometryChanged(int2 newPos, int2 newDim, int2 oldPos, int2 oldDim) {
@@ -2465,7 +2528,7 @@ void NativeInterfaceEventClient::MiniMapGeometryChanged(int2 newPos, int2 newDim
 		return;
 
 	SimpleCallinResult result = {};
-	m_MiniMapGeometryChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	INVOKE_NATIVE(m_MiniMapGeometryChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 }
 
 bool NativeInterfaceEventClient::GameSetup(const std::string& state, bool& ready, const std::vector<std::pair<int, std::string>>& playerStates) {
@@ -2486,7 +2549,7 @@ bool NativeInterfaceEventClient::GameSetup(const std::string& state, bool& ready
 	DispatchWasmCallin(CoreCallinOf("GameSetup"), &query, false);
 	if (m_GameSetupFuncPtr) {
 		GameSetupResult result = {.handled = false, .ready = ready};
-		m_GameSetupFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GameSetupFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		if (result.handled)
 			ready = result.ready;
 		return result.handled;
@@ -2505,7 +2568,7 @@ std::string NativeInterfaceEventClient::WorldTooltip(const CUnit* unit, const CF
 	const bool hasWasmValue = DispatchWasmStringCallin(CoreCallinOf("WorldTooltip"), &query, false, wasmValue);
 	if (m_WorldTooltipFuncPtr) {
 		StringCallinResult result = {};
-		m_WorldTooltipFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_WorldTooltipFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		if (result.value != nullptr && result.value[0] != '\0')
 			return result.value;
 	}
@@ -2527,7 +2590,7 @@ bool NativeInterfaceEventClient::MapDrawCmd(int playerID, int type, const float3
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("MapDrawCmd"), &query, false, wasmValue);
 	if (m_MapDrawCmdFuncPtr) {
 		BoolCallinResult result = {.value = false};
-		m_MapDrawCmdFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_MapDrawCmdFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;
@@ -2558,7 +2621,7 @@ void NativeInterfaceEventClient::ViewResize() {
 	DispatchWasmCallin(CoreCallinOf("ViewResize"), &query, false);
 	if (m_ViewResizeFuncPtr) {
 		ViewResizeResult result = {};
-		m_ViewResizeFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_ViewResizeFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2567,7 +2630,7 @@ void NativeInterfaceEventClient::SunChanged() {
 	DispatchWasmCallin(CoreCallinOf("SunChanged"), &query, false);
 	if (m_SunChangedFuncPtr) {
 		SunChangedResult result = {};
-		m_SunChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_SunChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2576,7 +2639,7 @@ void NativeInterfaceEventClient::FontsChanged() {
 	DispatchWasmCallin(CoreCallinOf("FontsChanged"), &query, false);
 	if (m_FontsChangedFuncPtr) {
 		SimpleCallinResult result = {};
-		m_FontsChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_FontsChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2585,7 +2648,7 @@ void NativeInterfaceEventClient::GameProgress(int gameFrame) {
 	DispatchWasmCallin(CoreCallinOf("GameProgress"), &query, false);
 	if (m_GameProgressFuncPtr) {
 		GameProgressResult result = {};
-		m_GameProgressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_GameProgressFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2601,7 +2664,7 @@ void NativeInterfaceEventClient::StockpileChanged(const CUnit* unit, const CWeap
 	DispatchWasmCallin(CoreCallinOf("StockpileChanged"), &query, true);
 	if (m_StockpileChangedFuncPtr) {
 		StockpileChangedResult result = {};
-		m_StockpileChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_StockpileChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2610,7 +2673,7 @@ void NativeInterfaceEventClient::CollectGarbage(bool forced) {
 	DispatchWasmCallin(CoreCallinOf("CollectGarbage"), &query, false);
 	if (m_CollectGarbageFuncPtr) {
 		CollectGarbageResult result = {};
-		m_CollectGarbageFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_CollectGarbageFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2623,7 +2686,7 @@ void NativeInterfaceEventClient::Pong(uint8_t pingTag, const spring_time pktSend
 	DispatchWasmCallin(CoreCallinOf("Pong"), &query, false);
 	if (m_PongFuncPtr) {
 		PongResult result = {};
-		m_PongFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_PongFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2644,7 +2707,7 @@ void NativeInterfaceEventClient::HandleLuaMsg(int playerID, int script, int mode
 	DispatchWasmCallin(CoreCallinOf("HandleLuaMsg"), &query, syncedMessage);
 	if (m_HandleLuaMsgFuncPtr) {
 		HandleLuaMsgResult result = {};
-		m_HandleLuaMsgFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_HandleLuaMsgFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
 
@@ -2657,6 +2720,8 @@ void NativeInterfaceEventClient::HandleLuaCall(const char* msg, size_t msgLength
 	if (m_HandleLuaCallFuncPtr) {
 		HandleLuaCallResult result = {};
 		ScopedNativeSyncedCode syncedCode(synced);
-		m_HandleLuaCallFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		INVOKE_NATIVE(m_HandleLuaCallFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 	}
 }
+
+#undef INVOKE_NATIVE

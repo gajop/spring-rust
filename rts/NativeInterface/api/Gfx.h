@@ -63,6 +63,11 @@ struct GfxOrthoQuery { float left; float right; float bottom; float top; float n
 struct GfxFrustumQuery { float left; float right; float bottom; float top; float nearVal; float farVal; };
 struct GfxGetMatrixDataQuery { uint32_t mode; };
 struct GfxGetMatrixDataResult { const Error* error; float values[16]; };
+
+// Non-GL matrix queries accepted by GetMatrixData. These let screen-effect
+// callins retrieve the rendered camera transform after the world drawer has
+// reset the compatibility matrices to 2D screen space.
+static constexpr uint32_t GFX_MATRIX_VIEWPROJECTIONINVERSE = 0x10000u;
 struct GfxVertexQuery { float x; float y; float z; float w; uint32_t count; };
 struct GfxMultiTexCoordQuery { int32_t texNum; float s; float t; float r; float q; uint32_t count; };
 struct GfxColorQuery { float r; float g; float b; float a; };

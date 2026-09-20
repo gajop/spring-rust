@@ -32,6 +32,8 @@
 #include "SolLuaPlugin.h"
 
 #include "RmlUi/Core/Context.h"
+#include "SolLuaDocument.h"
+#include "SolLuaEventListener.h"
 #include "SolLuaInstancer.h"
 #include <RmlUi/Core.h>
 
@@ -130,6 +132,8 @@ namespace Rml::SolLua
 
 	void SolLuaPlugin::OnInitialise()
 	{
+		previous_document_element_instancer = Factory::GetElementInstancer("body");
+		previous_event_listener_instancer = Factory::GetEventListenerInstancer();
 		document_element_instancer = std::make_unique<SolLuaDocumentElementInstancer>(m_lua_state, m_lua_env_identifier);
 		event_listener_instancer = std::make_unique<SolLuaEventListenerInstancer>(m_lua_state);
 		Factory::RegisterElementInstancer("body", document_element_instancer.get());
@@ -138,7 +142,30 @@ namespace Rml::SolLua
 
 	void SolLuaPlugin::OnShutdown()
 	{
-		// m_lua_state.collect_garbage();
+		// Factory registrations are non-owning. Restore them before destroying
+		// the Lua-owned instancers, otherwise the next context creation calls
+		// through a dangling body or event-listener pointer.
+		if (Factory::GetElementInstancer("body") == document_element_instancer.get())
+			Factory::RegisterElementInstancer("body", previous_document_element_instancer);
+		if (Factory::GetEventListenerInstancer() == event_listener_instancer.get())
+			Factory::RegisterEventListenerInstancer(previous_event_listener_instancer);
+
+		// Native and Core-WASM contexts may outlive LuaUI. Repoint every live
+		// element created by this plugin before its instancer is destroyed, and
+		// release document environments while the Lua state is still valid.
+		for (const Element* element : g_liveElements)
+		{
+			auto* live_element = const_cast<Element*>(element);
+			if (live_element->GetInstancer() == document_element_instancer.get())
+				live_element->ReplaceInstancer(previous_document_element_instancer);
+			if (auto* document = dynamic_cast<SolLuaDocument*>(live_element))
+				document->DetachLua();
+		}
+
+		ReleaseSolLuaEventListeners();
+		g_liveElements.clear();
+		document_element_instancer.reset();
+		event_listener_instancer.reset();
 		delete this;
 	}
 } // end namespace Rml::SolLua

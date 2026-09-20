@@ -12,6 +12,7 @@
 #endif // !HEADLESS
 #include "System/float3.h"
 #include "System/Color.h"
+#include "System/FileSystem/VFSModes.h"
 #include "Rendering/Textures/TextureCreationParams.hpp"
 
 
@@ -63,7 +64,9 @@ public:
 	bool CondReinterpret(int w, int h, int c, uint32_t dt);
 
 	/// Load data from a file on the VFS
-	bool Load(std::string const& filename, float defaultAlpha = 1.0f, uint32_t reqChannel = 4, uint32_t reqDataType = 0x1401/*GL_UNSIGNED_BYTE*/, bool forceReplaceAlpha = false);
+	bool Load(std::string const& filename, float defaultAlpha = 1.0f, uint32_t reqChannel = 4,
+		uint32_t reqDataType = 0x1401/*GL_UNSIGNED_BYTE*/, bool forceReplaceAlpha = false,
+		std::string const& vfsModes = SPRING_VFS_RAW_FIRST);
 	/// Load data from a gray-scale file on the VFS
 	bool LoadGrayscale(std::string const& filename);
 

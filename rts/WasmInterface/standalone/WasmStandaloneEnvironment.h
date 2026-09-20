@@ -29,9 +29,12 @@ public:
 
 	void EnsureEventClient();
 	void RemoveEventClient();
+	void ActivateMenu(const std::string& message);
+	void ActivateGame();
 
 	void Update();
 	bool HasModules(WasmEnvironment environment) const;
+	bool HasNativeModule() const { return m_nativeModuleLoaded; }
 	WasmInterfaceSystem* GetWasmSystem() const;
 	NativeInterface* GetNativeInterface() const;
 
@@ -42,4 +45,5 @@ private:
 	std::unique_ptr<WasmInterfaceSystem> m_wasmSystem;
 	std::unique_ptr<NativeInterfaceEventClient> m_eventClient;
 	std::unique_ptr<SharedLib> m_sharedLib;
+	bool m_nativeModuleLoaded = false;
 };

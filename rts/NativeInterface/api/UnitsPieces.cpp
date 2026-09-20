@@ -492,7 +492,10 @@ static void NativeGetUnitPiecePosition(const GetUnitPiecePositionQuery* query, G
 	}
 
 	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum - 1);
-	float3 pos = unit->GetObjectSpacePos(piece->GetAbsolutePos());
+	// Spring.GetUnitPiecePosition returns the piece's model-relative
+	// coordinates.  GetUnitPiecePosDir is the separate API that transforms
+	// its position into object/world space.
+	const float3 pos = piece->GetAbsolutePos();
 
 	result->position.x = pos.x;
 	result->position.y = pos.y;

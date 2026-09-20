@@ -37,6 +37,7 @@
 #include <ranges>
 #include <tracy/Tracy.hpp>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "Game/Game.h"
 #include "Game/UI/MouseHandler.h"
@@ -60,6 +61,7 @@
 #include "RmlUi_VFSFileInterface.h"
 #include "System/Input/InputHandler.h"
 #include "System/Log/ILog.h"
+#include "System/FileSystem/VFSModes.h"
 
 #define RML_DEBUG_HOST_CONTEXT_NAME "__debug_host_context__"
 
@@ -103,6 +105,15 @@ public:
 
 	std::vector<Rml::Context*> contexts;
 	std::unordered_map<Rml::Context*, Rml::String> contexts_to_remove;
+	std::unordered_set<Rml::Context*> native_contexts;
+	struct ContextOwner {
+		void* owner = nullptr;
+		bool menuPhase = false;
+	};
+	std::unordered_map<Rml::Context*, ContextOwner> context_owners;
+	bool menu_active = true;
+	void* current_context_owner = nullptr;
+	bool current_context_menu_phase = false;
 
 	Rml::Context* debug_host_context = nullptr;
 	Rml::Context* debug_context = nullptr;
@@ -124,6 +135,10 @@ public:
 
 	lua_State* ls = nullptr;
 	Rml::SolLua::SolLuaPlugin* luaPlugin = nullptr;
+	Rml::ElementInstancer* default_document_element_instancer = nullptr;
+	Rml::EventListenerInstancer* default_event_listener_instancer = nullptr;
+	Rml::ElementInstancer* lua_document_element_instancer = nullptr;
+	Rml::EventListenerInstancer* lua_event_listener_instancer = nullptr;
 
 	RmlGui::SVG::DynamicSVGPlugin* svgPlugin;
 	Rml::UniquePtr<Rml::ElementInstancerGeneric<RmlGui::ElementLuaTexture>> element_lua_texture_instancer;
@@ -134,13 +149,20 @@ public:
 
 static Rml::UniquePtr<BackendState> state;
 
-// Native contexts and their data-model/type registrations outlive LuaUI's
-// state. Clear them before the Lua plugin tears down or a replacement LuaUI
-// starts creating contexts with the same names.
-static void RemoveNativeRmlContext(uint64_t contextHandle)
+static void SetAssetVfsModes(bool menuPhase)
 {
-	RmlGui::RemoveContextImmediately(
-		reinterpret_cast<Rml::Context*>(static_cast<uintptr_t>(contextHandle)));
+	state->file_interface.SetModes(menuPhase
+		? SPRING_VFS_RAW SPRING_VFS_MENU_BASE : SPRING_VFS_RAW_FIRST);
+}
+
+static bool CurrentAssetMenuPhase()
+{
+	// An explicit owner scope takes precedence over the active engine phase.
+	// With no owner, legacy Lua contexts follow the active phase; a null owner
+	// with menuPhase=true is the explicit scope used while updating a menu UI.
+	return state->current_context_owner != nullptr
+		? state->current_context_menu_phase
+		: (state->current_context_menu_phase || state->menu_active);
 }
 
 bool RmlInitialized()
@@ -163,6 +185,37 @@ static bool IsInterfaceHidden()
 {
 	return game != nullptr && game->hideInterface;
 }
+
+static bool IsContextActive(const Rml::Context* context)
+{
+	if (context == nullptr)
+		return false;
+
+	const auto owner = state->context_owners.find(const_cast<Rml::Context*>(context));
+	const bool isMenuContext = owner != state->context_owners.end() && owner->second.menuPhase;
+	return state->menu_active ? isMenuContext : !isMenuContext;
+}
+
+class ScopedContextOwner
+{
+public:
+	explicit ScopedContextOwner(Rml::Context* context)
+		: previousOwner(RmlGui::GetCurrentContextOwner())
+		, previousMenuPhase(RmlGui::IsCurrentContextMenuPhase())
+	{
+		RmlGui::SetCurrentContextOwner(
+			RmlGui::GetContextOwner(context), RmlGui::IsMenuContext(context));
+	}
+
+	~ScopedContextOwner()
+	{
+		RmlGui::SetCurrentContextOwner(previousOwner, previousMenuPhase);
+	}
+
+private:
+	void* previousOwner;
+	bool previousMenuPhase;
+};
 
 static void CancelPointerCapture();
 
@@ -208,8 +261,12 @@ bool RmlGui::IsInitialized()
 
 bool RmlGui::Initialize()
 {
+	if (RmlInitialized())
+		return true;
+
 	LOG_L(L_INFO, "[RmlUi::%s] Beginning RmlUi Initialization", __func__);
 	state = Rml::MakeUnique<BackendState>();
+	SetAssetVfsModes(true);
 
 	if (!((bool) state->render_interface)) {
 		state.reset();
@@ -230,6 +287,8 @@ bool RmlGui::Initialize()
 	state->winY = winY;
 
 	Rml::Initialise();
+	state->default_document_element_instancer = Rml::Factory::GetElementInstancer("body");
+	state->default_event_listener_instancer = Rml::Factory::GetEventListenerInstancer();
 
 	Rml::LoadFontFace("fonts/FreeSansBold.otf", true);
 	state->inputCon = input.AddHandler(&RmlGui::ProcessEvent);
@@ -248,7 +307,8 @@ bool RmlGui::Initialize()
 bool RmlGui::InitializeLua(lua_State* lua_state)
 {
 	if (!RmlInitialized()) {
-		RmlGui::Initialize();
+		if (!RmlGui::Initialize())
+			return false;
 	} else if (state->ls != nullptr) {
 		return false;
 	}
@@ -258,6 +318,8 @@ bool RmlGui::InitializeLua(lua_State* lua_state)
 	sol::state_view lua(lua_state);
 	state->ls = lua_state;
 	state->luaPlugin = Rml::SolLua::Initialise(&lua, "rmlDocumentId");
+	state->lua_document_element_instancer = Rml::Factory::GetElementInstancer("body");
+	state->lua_event_listener_instancer = Rml::Factory::GetEventListenerInstancer();
 	state->luaPlugin->systemInterface = &state->system_interface;
 	state->system_interface.SetTranslationTable(&state->luaPlugin->translationTable);
 	return true;
@@ -268,12 +330,6 @@ bool RmlGui::RemoveLua()
 	if (!RmlInitialized()) {
 		return false;
 	}
-
-	// Native modules are not owned by LuaUI, so RemoveLuaItems() does not
-	// release their contexts or the engine-side data-model registrations. Do
-	// this while the old contexts and callbacks are still valid; otherwise a
-	// subsequent /luaui reload can report duplicate models or stale value types.
-	NativeRmlUi::ClearAllContexts(RemoveNativeRmlContext);
 
 	if (state->ls == nullptr) {
 		return false;
@@ -292,15 +348,22 @@ bool RmlGui::RemoveLua()
 	state->luaPlugin->RemoveLuaItems();
 
 	for (auto* context : state->contexts) {
-		MarkContextForRemoval(context);
+		if (!state->native_contexts.contains(context))
+			MarkContextForRemoval(context);
 	}
 
 	// Update to allow clean up of removed items.
 	Update();
 
+	// Native and Core-WASM contexts survive LuaUI teardown. Keep the global
+	// factory on the safe defaults while the plugin is being destroyed.
+	Rml::Factory::RegisterElementInstancer("body", state->default_document_element_instancer);
+	Rml::Factory::RegisterEventListenerInstancer(state->default_event_listener_instancer);
 	Rml::UnregisterPlugin(state->luaPlugin);
 	state->system_interface.SetTranslationTable(nullptr);
 	state->luaPlugin = nullptr;
+	state->lua_document_element_instancer = nullptr;
+	state->lua_event_listener_instancer = nullptr;
 	state->ls = nullptr;
 
 	return true;
@@ -337,6 +400,69 @@ void RmlGui::Reload()
 		return;
 	}
 	RmlGui::Initialize();
+}
+
+void RmlGui::SetMenuActive(bool active)
+{
+	if (!RmlInitialized())
+		return;
+	if (state->menu_active == active)
+		return;
+
+	// RmlUi keys file textures by source string. Release them at a phase
+	// boundary so a same-named menu/game asset cannot reuse the other phase's
+	// GPU handle after the VFS precedence changes.
+	Rml::ReleaseTextures(&state->render_interface);
+	state->menu_active = active;
+	SetAssetVfsModes(active);
+	state->inputReceiver.setActive(false);
+	if (state->pointer_capture_context != nullptr &&
+		!IsContextActive(state->pointer_capture_context)) {
+		CancelPointerCapture();
+	}
+}
+
+void RmlGui::SetCurrentContextOwner(void* owner, bool menuPhase)
+{
+	if (!RmlInitialized())
+		return;
+	state->current_context_owner = owner;
+	state->current_context_menu_phase = menuPhase;
+	if (state->luaPlugin != nullptr) {
+		Rml::Factory::RegisterElementInstancer("body", owner == nullptr
+			? state->lua_document_element_instancer
+			: state->default_document_element_instancer);
+		Rml::Factory::RegisterEventListenerInstancer(owner == nullptr
+			? state->lua_event_listener_instancer
+			: state->default_event_listener_instancer);
+	}
+	SetAssetVfsModes(CurrentAssetMenuPhase());
+}
+
+void* RmlGui::GetCurrentContextOwner()
+{
+	return RmlInitialized() ? state->current_context_owner : nullptr;
+}
+
+bool RmlGui::IsCurrentContextMenuPhase()
+{
+	return RmlInitialized() && state->current_context_menu_phase;
+}
+
+void* RmlGui::GetContextOwner(const Rml::Context* context)
+{
+	if (!RmlInitialized() || context == nullptr)
+		return nullptr;
+	const auto owner = state->context_owners.find(const_cast<Rml::Context*>(context));
+	return owner == state->context_owners.end() ? nullptr : owner->second.owner;
+}
+
+const char* RmlGui::GetAssetVfsModes()
+{
+	if (!RmlInitialized())
+		return SPRING_VFS_RAW_FIRST;
+	return CurrentAssetMenuPhase()
+		? SPRING_VFS_RAW SPRING_VFS_MENU_BASE : SPRING_VFS_RAW_FIRST;
 }
 
 void RmlGui::SetDebugContext(Rml::Context* context)
@@ -456,6 +582,12 @@ CInputReceiver* RmlGui::GetInputReceiver()
 void RmlGui::OnContextCreate(Rml::Context* context)
 {
 	context->SetDimensions({state->winX, state->winY});
+	// Lua-created contexts do not pass through RegisterNativeContext(), but
+	// they still need the same stable phase classification as native/Core
+	// contexts. Only the explicit native/Core registration may attach a module
+	// owner; otherwise the current backend phase identifies legacy Lua UI.
+	state->context_owners.emplace(context, BackendState::ContextOwner{
+		nullptr, state->menu_active});
 	if likely(state->debug_host_context || context->GetName() != RML_DEBUG_HOST_CONTEXT_NAME) {
 		state->contexts.push_back(context);
 	} else {
@@ -465,6 +597,9 @@ void RmlGui::OnContextCreate(Rml::Context* context)
 
 void RmlGui::OnContextDestroy(Rml::Context* context)
 {
+	NativeRmlUi::ForgetContext(context);
+	state->native_contexts.erase(context);
+	state->context_owners.erase(context);
 	state->contexts_to_remove.erase(context);
 	if (context == state->debug_context) {
 		state->debug_context = nullptr;
@@ -480,6 +615,24 @@ void RmlGui::OnContextDestroy(Rml::Context* context)
 		state->pointer_capture_delta_y = 0;
 	}
 	state->contexts.erase(std::ranges::find(state->contexts, context));
+}
+
+void RmlGui::RegisterNativeContext(Rml::Context* context)
+{
+	if (!RmlInitialized() || context == nullptr)
+		return;
+
+	state->native_contexts.insert(context);
+	state->context_owners.insert_or_assign(context, BackendState::ContextOwner{
+		state->current_context_owner, state->current_context_menu_phase});
+}
+
+bool RmlGui::IsMenuContext(const Rml::Context* context)
+{
+	if (!RmlInitialized() || context == nullptr)
+		return false;
+	const auto owner = state->context_owners.find(const_cast<Rml::Context*>(context));
+	return owner != state->context_owners.end() && owner->second.menuPhase;
 }
 
 bool RmlGui::PullContextToFront(Rml::Context* context)
@@ -637,7 +790,10 @@ void RmlGui::Update()
 		state->inputReceiver.setActive(false);
 
 	for (const auto& context : state->contexts) {
-		context->Update();
+		if (IsContextActive(context)) {
+			ScopedContextOwner ownerScope(context);
+			context->Update();
+		}
 	}
 
 	// move clicked context to top
@@ -677,7 +833,10 @@ void RmlGui::RenderFrame()
 	RmlGui::BeginFrame();
 	// render back-to-front so that index 0 is atop index 1 and so on
 	for (auto& context: std::ranges::reverse_view(state->contexts)) {
-		context->Render();
+		if (IsContextActive(context)) {
+			ScopedContextOwner ownerScope(context);
+			context->Render();
+		}
 	}
 	RmlGui::PresentFrame();
 #endif
@@ -716,6 +875,9 @@ bool RmlGui::ProcessMouseMove(int x, int y, int dx, int dy, int button)
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
+		if (!IsContextActive(context))
+			continue;
+		ScopedContextOwner ownerScope(context);
 		result |= !RmlSDLRecoil::EventMouseMove(context, x, y);
 		if (result) break;
 	}
@@ -738,6 +900,9 @@ bool RmlGui::ProcessMousePress(int x, int y, int button)
 
 	bool result = false;
 	for (const auto& context : state->contexts) {
+		if (!IsContextActive(context))
+			continue;
+		ScopedContextOwner ownerScope(context);
 		bool handled = false;
 
 		if (!result) {
@@ -773,6 +938,7 @@ bool RmlGui::ProcessPointerCaptureRelease(int x, int y, int button)
 	}
 	if (button != SDL_BUTTON_LEFT)
 		return false;
+	ScopedContextOwner ownerScope(context);
 	state->pointer_capture_context = nullptr;
 	state->pointer_capture_end_context = context;
 	state->pointer_capture_end = BackendState::PointerCaptureEnd::Released;
@@ -793,6 +959,9 @@ bool RmlGui::ProcessMouseRelease(int x, int y, int button)
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
+		if (!IsContextActive(context))
+			continue;
+		ScopedContextOwner ownerScope(context);
 		result |= !RmlSDLRecoil::EventMouseRelease(context, x, y, button);
 		if (result) break;
 	}
@@ -810,6 +979,9 @@ bool RmlGui::ProcessMouseWheel(float delta)
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
+		if (!IsContextActive(context))
+			continue;
+		ScopedContextOwner ownerScope(context);
 		result |= !RmlSDLRecoil::EventMouseWheel(context, delta);
 		if (result) break;
 	}
@@ -827,6 +999,9 @@ bool RmlGui::ProcessKeyPressed(int keyCode, int scanCode, bool isRepeat)
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
+		if (!IsContextActive(context))
+			continue;
+		ScopedContextOwner ownerScope(context);
 		auto kc = RmlSDLRecoil::ConvertKey(keyCode);
 		result |= !RmlSDLRecoil::EventKeyDown(context, kc);
 		if (result) break;
@@ -841,6 +1016,9 @@ bool RmlGui::ProcessKeyReleased(int keyCode, int scanCode)
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
+		if (!IsContextActive(context))
+			continue;
+		ScopedContextOwner ownerScope(context);
 		result |= !RmlSDLRecoil::EventKeyUp(context, RmlSDLRecoil::ConvertKey(keyCode));
 		if (result) break;
 	}
@@ -854,6 +1032,9 @@ bool RmlGui::ProcessTextInput(const std::string& text)
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
+		if (!IsContextActive(context))
+			continue;
+		ScopedContextOwner ownerScope(context);
 		result |= !RmlSDLRecoil::EventTextInput(context, text);
 		if (result) break;
 	}
@@ -873,19 +1054,8 @@ bool processContextEvent(Rml::Context* context, const SDL_Event& event)
 			return true;  // handled elsewhere
 
 		case SDL_WINDOWEVENT: {
-			if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-				auto x = event.window.data1;
-				auto y = event.window.data2;
-
-				if (state->winX != x || state->winY != y) {
-					state->render_interface.SetViewport(x, y);
-					state->winX = x;
-					state->winY = y;
-
-					for (Rml::Context* context : state->contexts)
-						context->SetDimensions({x, y});
-				}
-			}
+			// Window bookkeeping is performed once by ProcessEvent before it
+			// filters inactive contexts.
 		} break;
 
 		default:
@@ -903,9 +1073,23 @@ bool RmlGui::ProcessEvent(const SDL_Event& event)
 	if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
 		CancelPointerCapture();
 	}
+	if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+		const int x = event.window.data1;
+		const int y = event.window.data2;
+		if (state->winX != x || state->winY != y) {
+			state->render_interface.SetViewport(x, y);
+			state->winX = x;
+			state->winY = y;
+			for (Rml::Context* context : state->contexts)
+				context->SetDimensions({x, y});
+		}
+	}
 
 	bool result = false;
 	for (const auto& context : state->contexts) {
+		if (!IsContextActive(context))
+			continue;
+		ScopedContextOwner ownerScope(context);
 		result |= !processContextEvent(context, event);
 		if (result) break;
 	}

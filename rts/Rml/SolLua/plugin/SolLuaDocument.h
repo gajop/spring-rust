@@ -33,6 +33,7 @@
 
 #include <RmlUi/Core/ElementDocument.h>
 
+#include <memory>
 #include <sol2/sol.hpp>
 
 
@@ -82,7 +83,11 @@ namespace Rml::SolLua
 		/// Gets the Lua environment attached to this document.
 		/// </summary>
 		/// <returns>A reference to the Lua environment.</returns>
-		sol::environment& GetLuaEnvironment() { return m_environment; }
+		sol::environment& GetLuaEnvironment() { return *m_environment; }
+
+		/// Releases all Lua references held by this document while its Lua state
+		/// is still alive. The document may remain owned by a native context.
+		void DetachLua();
 
 		/// <summary>
 		/// Gets the Lua environment identifier attached to this document.
@@ -90,9 +95,9 @@ namespace Rml::SolLua
 		/// <returns>A const reference to the Lua environment identifier.</returns>
 		const Rml::String& GetLuaEnvironmentIdentifier() const { return m_lua_env_identifier; }
 
-		sol::environment m_environment;
+		std::unique_ptr<sol::environment> m_environment;
 	protected:
-		sol::state_view m_state;
+		lua_State* m_lua_state = nullptr;
 		Rml::String m_lua_env_identifier;
 	};
 

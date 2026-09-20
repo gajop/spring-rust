@@ -48,14 +48,21 @@ namespace Rml::SolLua
 	public:
 		SolLuaEventListener(sol::state_view &lua, const Rml::String &code, Rml::Element *element);
 		SolLuaEventListener(sol::protected_function func, Rml::Element *element);
+		~SolLuaEventListener() override;
 
 		void OnDetach(Rml::Element *element) override;
 		void ProcessEvent(Rml::Event &event) override;
+		void DetachFromElement();
+		void DetachLua();
 
 	private:
 		sol::protected_function m_func;
 		Rml::Element *m_element;
 		bool m_detached = false;
 	};
+
+	/// Detaches and destroys all SolLua listeners that still exist. This must
+	/// run before the Lua state is closed.
+	void ReleaseSolLuaEventListeners();
 
 } // namespace Rml::SolLua

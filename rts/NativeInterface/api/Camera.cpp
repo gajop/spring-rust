@@ -362,7 +362,14 @@ static void NativeSetCameraState(const SetCameraStateQuery* query, SetCameraStat
 
 	camHandler->SetTransitionParams(query->transitionTimeFactor, query->transitionTimeExponent);
 	const bool success = camHandler->SetState(state);
-	camHandler->CameraTransition(std::max(0.0f, query->transitionTime));
+	const float transitionTime = std::max(0.0f, query->transitionTime);
+	camHandler->CameraTransition(transitionTime);
+	// A zero-length transition is the native equivalent of Lua's
+	// Spring.SetCameraState(state, 0).  CameraTransition() only records the
+	// transition in exponential mode; force one update here so callers do not
+	// spend the first frames easing from the previous camera state.
+	if (transitionTime == 0.0f)
+		camHandler->UpdateTransition();
 	result->error = nullptr;
 	result->success = success;
 }

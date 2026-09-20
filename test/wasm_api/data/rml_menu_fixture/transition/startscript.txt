@@ -1,0 +1,57 @@
+[GAME]
+{
+    IsHost=1;
+    MyPlayerName=RmlUiTransition;
+    GameType=RmlUi Menu Transition Game 0.1;
+    MapName=rmlui_transition_generated_10x8;
+    InitBlank=1;
+    FixedRNGSeed=1;
+    OnlyLocal=1;
+    GameStartDelay=0;
+    RecordDemo=0;
+    MaxSpeed=100;
+    MinSpeed=100;
+    NumPlayers=1;
+    NumTeams=2;
+    NumAllyTeams=2;
+    [MAPOPTIONS]
+    {
+        new_map_x=10;
+        new_map_y=8;
+        blank_map_height=0;
+        blank_map_color_r=64;
+        blank_map_color_g=128;
+        blank_map_color_b=64;
+    }
+    [MODOPTIONS]
+    {
+        LuaRules=1;
+        LuaGaia=1;
+    }
+    [PLAYER0]
+    {
+        Name=RmlUiTransition;
+        Spectator=1;
+        Team=0;
+    }
+    [TEAM0]
+    {
+        TeamLeader=0;
+        AllyTeam=0;
+        Side=ARM;
+    }
+    [TEAM1]
+    {
+        TeamLeader=0;
+        AllyTeam=1;
+        Side=ARM;
+    }
+    [ALLYTEAM0]
+    {
+        NumAllies=0;
+    }
+    [ALLYTEAM1]
+    {
+        NumAllies=0;
+    }
+}

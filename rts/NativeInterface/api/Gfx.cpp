@@ -51,6 +51,7 @@
 #include "Rendering/Textures/TextureAtlas.h"
 #include "Rendering/Textures/TextureFormat.h"
 #include "Lua/LuaOpenGLUtils.h"
+#include "Lua/LuaOpenGL.h"
 #include "Constants.h"
 
 // Verify every exposed GLConstant (api/Constants.h) matches the real GL_* value
@@ -872,25 +873,7 @@ static void SwapBuffers(const GfxEmptyQuery*, GfxEmptyResult* result)
 static void ResetMatrices(const GfxEmptyQuery*, GfxEmptyResult* result)
 {
 	result->error = nullptr;
-
-	// LuaOpenGL::ResetScreenMatrices resets the texture stack and then
-	// restores the screen projection/view matrices used by DrawScreen. Native
-	// graphics calls are dispatched from the same draw callback, so resetting
-	// to three identity matrices here leaves object transforms in a different
-	// coordinate space from their Lua counterparts.
-	glMatrixMode(GL_TEXTURE);
-	glLoadIdentity();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	if (globalRendering != nullptr) {
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(&globalRendering->screenProjMatrix.m[0]);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(&globalRendering->screenViewMatrix.m[0]);
-	}
+	LuaOpenGL::ResetActiveMatrices();
 }
 
 static void DepthTest(const GfxDepthTestQuery* query, GfxEmptyResult* result)
@@ -5192,6 +5175,14 @@ static void GetMatrixData(const GfxGetMatrixDataQuery* query, GfxGetMatrixDataRe
 {
 	result->error = nullptr;
 	std::fill(std::begin(result->values), std::end(result->values), 0.0f);
+	if (query->mode == GFX_MATRIX_VIEWPROJECTIONINVERSE) {
+		if (camera == nullptr) {
+			result->error = &NOT_READY_ERROR;
+			return;
+		}
+		std::memcpy(result->values, camera->GetViewProjectionMatrixInverse().m, sizeof(result->values));
+		return;
+	}
 	glGetFloatv(MatrixModeToPName(query->mode), result->values);
 }
 

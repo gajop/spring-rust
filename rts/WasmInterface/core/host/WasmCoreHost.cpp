@@ -19,6 +19,8 @@
 #include "WasmCoreValidation.h"
 #include "WasmCoreVariableCallins.h"
 #include "WasmResources.h"
+#include "NativeInterface/api/RmlUi.h"
+#include "Rml/Backends/RmlUi_Backend.h"
 
 #if __has_include("../wasm/generated/WasmCoreGeneratedCallinBindings.h")
 #include "../wasm/generated/WasmCoreGeneratedCallinBindings.h"
@@ -44,6 +46,22 @@ std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 {
 	static std::vector<std::unique_ptr<WasmCoreHost>> hosts;
 	return hosts;
+}
+
+void RemoveRmlContext(std::uint64_t contextHandle)
+{
+	RmlGui::RemoveContextImmediately(
+		reinterpret_cast<Rml::Context*>(static_cast<uintptr_t>(contextHandle)));
+}
+
+void ClearHostRmlContexts(WasmCoreHost* host)
+{
+	if (host == nullptr)
+		return;
+
+	NativeRmlUi::ClearOwnerContexts(host, RemoveRmlContext);
+	if (RmlGui::GetCurrentContextOwner() == host)
+		RmlGui::SetCurrentContextOwner(nullptr, false);
 }
 
 constexpr std::size_t CALLIN_COUNT =
@@ -262,6 +280,7 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 	auto host = std::unique_ptr<WasmCoreHost>(
 		new WasmCoreHost(std::move(moduleName), environment, nullptr));
 	auto backend = std::make_unique<Backend>(nativeInterface, runtime, environment, host.get());
+	backend->bindings.Host().host = host.get();
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	auto* engine = static_cast<wasm_engine_t*>(runtime.BackendEngine());
@@ -499,6 +518,8 @@ void WasmCoreHost::Unload(std::string_view moduleName)
 {
 	auto& hosts = Hosts();
 	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
+		if (host != nullptr && host->moduleName == moduleName)
+			ClearHostRmlContexts(host.get());
 		return host != nullptr && host->moduleName == moduleName;
 	}), hosts.end());
 	// Unloading may have taken a faulted guest with it. Leaving the pending
@@ -508,6 +529,8 @@ void WasmCoreHost::Unload(std::string_view moduleName)
 
 void WasmCoreHost::UnloadAll()
 {
+	for (const auto& host : Hosts())
+		ClearHostRmlContexts(host.get());
 	Hosts().clear();
 	PendingFaultCount() = 0;
 }
@@ -1399,7 +1422,12 @@ bool WasmCoreHost::Dispatch(const recoil::wasm::core::WasmCoreDispatchPlan* plan
 	const void* query, void* result, std::string& error)
 {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
+	void* previousOwner = RmlGui::GetCurrentContextOwner();
+	const bool previousMenuPhase = RmlGui::IsCurrentContextMenuPhase();
+	if (plan != nullptr && plan->host != nullptr)
+		RmlGui::SetCurrentContextOwner(plan->host, plan->host->IsMenuEnvironment());
 	const bool success = recoil::wasm::core::DispatchPlan(plan, query, result, error);
+	RmlGui::SetCurrentContextOwner(previousOwner, previousMenuPhase);
 	if (plan != nullptr && plan->host != nullptr)
 		plan->host->FlushCusCreates();
 	return success;

@@ -2186,7 +2186,7 @@
       "results": []
     }
   ],
-  "callout_count": 747,
+  "callout_count": 749,
   "callouts": [
     {
       "class": "handwritten-reviewed",
@@ -4235,6 +4235,12 @@
       "signature": "i32,i32,f32->i64"
     },
     {
+      "class": "fixed",
+      "function": "SetNoBlocking",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
       "class": "variable-input-nested-adapted",
       "function": "SetCameraState",
       "module": "camera",
@@ -4987,6 +4993,12 @@
     {
       "class": "fixed",
       "function": "SetUnitLeaveTracks",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetUnitLuaDraw",
       "module": "unsynced_ctrl",
       "signature": "i32,i32->i64"
     },
@@ -6673,5 +6685,5 @@
   ],
   "canonical_callin_count": 120,
   "environment": "gaia-synced",
-  "surface_count": 920
+  "surface_count": 922
 }

@@ -12,6 +12,7 @@
 #include "WasmCoreDispatchPlan.h"
 #include "WasmCoreUiCallinFilter.h"
 #include "WasmCoreHost.h"
+#include "NativeInterface/api/RmlUi.h"
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "System/Log/ILog.h"
 #include "WasmCoreUiCallinFilter.h"
@@ -46,7 +47,7 @@ bool DispatchCoreModule(const recoil::wasm::core::WasmCoreDispatchPlan* plan,
 {
 	const auto dispatchStage = spring::benchmark_callins::BeginStage(
 		spring::benchmark_callins::Stage::ModuleDispatch);
-	if (recoil::wasm::core::DispatchPlan(plan, query, result, error)) {
+	if (WasmCoreHost::Dispatch(plan, query, result, error)) {
 		spring::benchmark_callins::End(dispatchStage);
 		return true;
 	}
@@ -364,6 +365,10 @@ void WasmInterfaceSystem::RemoveFaultedModules()
 			LOG_L(L_WARNING, "Core Wasm module %s was deregistered due to fault",
 				module.descriptor.name.c_str());
 		}
+	}
+	for (const CoreModuleRecord& module : coreModules) {
+		if (WasmCoreHost::ModuleFaulted(module.descriptor.name) && module.host != nullptr)
+			deferredRmlOwners.push_back(module.host);
 	}
 	if (WasmCoreHost::RemoveFaulted() == 0)
 		return;

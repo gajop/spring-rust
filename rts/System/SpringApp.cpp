@@ -17,6 +17,7 @@
 #include <X11/Xlib.h> // XInitThreads
 #endif
 
+#undef None
 #undef KeyPress
 #undef KeyRelease
 #undef GrayScale
@@ -59,6 +60,9 @@
 #include "Rendering/Textures/Bitmap.h"
 #include "Rendering/Textures/NamedTextures.h"
 #include "Rendering/Textures/TextureAtlas.h"
+#undef None
+#undef Always
+#include "Rml/Backends/RmlUi_Backend.h"
 #include "Sim/Misc/DefinitionTag.h" // DefType
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/ModInfo.h"
@@ -291,6 +295,12 @@ bool SpringApp::Init()
 	CMouseHandler::InitStatic();
 
 	inputToken = input.AddHandler([this](const SDL_Event& event) { return SpringApp::MainEventHandler(event); });
+
+	// RmlUi is shared by the menu and game UI. Keep its renderer, input handler,
+	// and context registry alive across the menu-to-game transition so menu
+	// modules can be unloaded independently and LuaUI reloads do not invalidate
+	// their contexts.
+	RmlGui::Initialize();
 
 	// Global structures
 	ENTER_SYNCED_CODE();
@@ -1025,6 +1035,7 @@ void SpringApp::Kill(bool fromRun)
 	spring::SafeDelete(game);
 	spring::SafeDelete(pregame);
 	spring::SafeDelete(luaMenuController);
+	RmlGui::Shutdown();
 
 	LuaMemPool::KillStatic();
 

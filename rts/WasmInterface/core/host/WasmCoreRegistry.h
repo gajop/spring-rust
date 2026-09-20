@@ -65,7 +65,9 @@ inline constexpr std::uint32_t AllEnvironmentMask =
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesUnsynced)) |
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaSynced)) |
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaUnsynced)) |
-	(1u << static_cast<std::uint32_t>(WasmEnvironment::UI));
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::UI)) |
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::Menu)) |
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::Intro));
 inline constexpr std::uint32_t SyncedEnvironmentMask =
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesSynced)) |
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaSynced));
@@ -73,6 +75,8 @@ inline constexpr std::uint32_t UnsyncedEnvironmentMask =
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesUnsynced)) |
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaUnsynced)) |
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::UI));
+inline constexpr std::uint32_t RmlEnvironmentMask = UnsyncedEnvironmentMask |
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::Menu));
 
 inline constexpr ImportDescriptor kImports[] = {
 	{UnitsInfoModule, "get-unit-def-id", "i32->i64", AllEnvironmentMask},
@@ -148,15 +152,15 @@ inline constexpr ImportDescriptor kImports[] = {
 	// are registered by hand in WasmCoreRmlUiBindings.cpp. The generic lowering
 	// cannot describe the retained callback triple, so the generated registry
 	// omits them and these are the only signatures a guest can import.
-	{RmlUiModule, "context-add-event-listener", "i64,i32,i32,i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
-	{RmlUiModule, "element-add-event-listener", "i64,i32,i32,i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
-	{RmlUiModule, "data-model-bind-event", "i64,i32,i32,i32,i32,i32,i32,i64,i32->i32", UnsyncedEnvironmentMask},
-	{RmlUiModule, "data-model-unbind-event", "i64->i64", UnsyncedEnvironmentMask},
-	{RmlUiModule, "data-model-current-event", "i32->i32", UnsyncedEnvironmentMask},
-	{RmlUiModule, "data-model-current-value", "i64,i32,i32,i32->i32", UnsyncedEnvironmentMask},
-	{RmlUiModule, "event-listener-on-attach", "i64,i64->i64", UnsyncedEnvironmentMask},
-	{RmlUiModule, "event-listener-on-detach", "i64,i64->i64", UnsyncedEnvironmentMask},
-	{RmlUiModule, "event-listener-process-event", "i64,i64->i64", UnsyncedEnvironmentMask},
+	{RmlUiModule, "context-add-event-listener", "i64,i32,i32,i32,i32,i32,i32,i32->i32", RmlEnvironmentMask},
+	{RmlUiModule, "element-add-event-listener", "i64,i32,i32,i32,i32,i32,i32,i32->i32", RmlEnvironmentMask},
+	{RmlUiModule, "data-model-bind-event", "i64,i32,i32,i32,i32,i32,i32,i64,i32->i32", RmlEnvironmentMask},
+	{RmlUiModule, "data-model-unbind-event", "i64->i64", RmlEnvironmentMask},
+	{RmlUiModule, "data-model-current-event", "i32->i32", RmlEnvironmentMask},
+	{RmlUiModule, "data-model-current-value", "i64,i32,i32,i32->i32", RmlEnvironmentMask},
+	{RmlUiModule, "event-listener-on-attach", "i64,i64->i64", RmlEnvironmentMask},
+	{RmlUiModule, "event-listener-on-detach", "i64,i64->i64", RmlEnvironmentMask},
+	{RmlUiModule, "event-listener-process-event", "i64,i64->i64", RmlEnvironmentMask},
 
 	// Profiling reads are intentionally unsynced-only. GetTimerMicros was
 	// historically marked all-environment despite using spring_now(); allowing a

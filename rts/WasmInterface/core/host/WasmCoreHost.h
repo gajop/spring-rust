@@ -50,6 +50,7 @@ public:
 	// Diagnostic name for a resolved module handle; dispatch carries the handle
 	// and only needs the name when reporting an error.
 	static std::string_view ModuleName(const WasmCoreHost* host);
+	bool IsMenuEnvironment() const { return environment == WasmEnvironment::Menu; }
 
 	static bool ModuleHasCallin(const WasmCoreHost* host, WasmCoreCallin callin)
 	{

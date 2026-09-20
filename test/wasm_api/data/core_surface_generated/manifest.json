@@ -2202,7 +2202,7 @@
           "results": []
         }
       ],
-      "callout_count": 747,
+      "callout_count": 749,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -4251,6 +4251,12 @@
           "signature": "i32,i32,f32->i64"
         },
         {
+          "class": "fixed",
+          "function": "SetNoBlocking",
+          "module": "move_ctrl",
+          "signature": "i32,i32->i64"
+        },
+        {
           "class": "variable-input-nested-adapted",
           "function": "SetCameraState",
           "module": "camera",
@@ -5003,6 +5009,12 @@
         {
           "class": "fixed",
           "function": "SetUnitLeaveTracks",
+          "module": "unsynced_ctrl",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "SetUnitLuaDraw",
           "module": "unsynced_ctrl",
           "signature": "i32,i32->i64"
         },
@@ -6689,7 +6701,7 @@
       ],
       "canonical_callin_count": 121,
       "environment": "rules-synced",
-      "surface_count": 921
+      "surface_count": 923
     },
     {
       "alias_callin_count": 50,
@@ -8595,7 +8607,7 @@
           ]
         }
       ],
-      "callout_count": 1151,
+      "callout_count": 1152,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -11840,6 +11852,12 @@
         {
           "class": "fixed",
           "function": "SetUnitLeaveTracks",
+          "module": "unsynced_ctrl",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "SetUnitLuaDraw",
           "module": "unsynced_ctrl",
           "signature": "i32,i32->i64"
         },
@@ -15506,7 +15524,7 @@
       ],
       "canonical_callin_count": 107,
       "environment": "rules-unsynced",
-      "surface_count": 1308
+      "surface_count": 1309
     },
     {
       "alias_callin_count": 53,
@@ -17696,7 +17714,7 @@
           "results": []
         }
       ],
-      "callout_count": 747,
+      "callout_count": 749,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -19745,6 +19763,12 @@
           "signature": "i32,i32,f32->i64"
         },
         {
+          "class": "fixed",
+          "function": "SetNoBlocking",
+          "module": "move_ctrl",
+          "signature": "i32,i32->i64"
+        },
+        {
           "class": "variable-input-nested-adapted",
           "function": "SetCameraState",
           "module": "camera",
@@ -20497,6 +20521,12 @@
         {
           "class": "fixed",
           "function": "SetUnitLeaveTracks",
+          "module": "unsynced_ctrl",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "SetUnitLuaDraw",
           "module": "unsynced_ctrl",
           "signature": "i32,i32->i64"
         },
@@ -22183,7 +22213,7 @@
       ],
       "canonical_callin_count": 120,
       "environment": "gaia-synced",
-      "surface_count": 920
+      "surface_count": 922
     },
     {
       "alias_callin_count": 50,
@@ -24089,7 +24119,7 @@
           ]
         }
       ],
-      "callout_count": 1151,
+      "callout_count": 1152,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -27334,6 +27364,12 @@
         {
           "class": "fixed",
           "function": "SetUnitLeaveTracks",
+          "module": "unsynced_ctrl",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "SetUnitLuaDraw",
           "module": "unsynced_ctrl",
           "signature": "i32,i32->i64"
         },
@@ -31000,7 +31036,7 @@
       ],
       "canonical_callin_count": 107,
       "environment": "gaia-unsynced",
-      "surface_count": 1308
+      "surface_count": 1309
     },
     {
       "alias_callin_count": 50,
@@ -32667,7 +32703,7 @@
           ]
         }
       ],
-      "callout_count": 1154,
+      "callout_count": 1155,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -35912,6 +35948,12 @@
         {
           "class": "fixed",
           "function": "SetUnitLeaveTracks",
+          "module": "unsynced_ctrl",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "SetUnitLuaDraw",
           "module": "unsynced_ctrl",
           "signature": "i32,i32->i64"
         },
@@ -39596,7 +39638,7 @@
       ],
       "canonical_callin_count": 90,
       "environment": "ui",
-      "surface_count": 1294
+      "surface_count": 1295
     },
     {
       "alias_callin_count": 24,
@@ -40164,7 +40206,7 @@
           "results": []
         }
       ],
-      "callout_count": 336,
+      "callout_count": 516,
       "callouts": [
         {
           "class": "fixed",
@@ -41883,6 +41925,1086 @@
           "signature": "i32,i32->i32"
         },
         {
+          "class": "variable-input-borrowed",
+          "function": "AddTranslationString",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ClearDocumentPathRequests",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ClearTranslations",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextActivateTheme",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "handwritten-reviewed",
+          "function": "ContextAddEventListener",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextCreateDataModel",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextCreateDocument",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextEnableMouseCursor",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextGetDensityIndependentPixelRatio",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextGetDimensions",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextGetDocument",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextGetElementAtPoint",
+          "module": "rml_ui",
+          "signature": "i64,f32,f32,i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextGetFocusElement",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextGetHoverElement",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "ContextGetName",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextGetRootElement",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextIsMouseInteracting",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextIsThemeActive",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextLoadDocument",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextOpenDataModel",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextProcessKeyDown",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextProcessKeyUp",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextProcessMouseButtonDown",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextProcessMouseButtonUp",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextProcessMouseLeave",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextProcessMouseMove",
+          "module": "rml_ui",
+          "signature": "i64,f32,f32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextProcessMouseWheel",
+          "module": "rml_ui",
+          "signature": "i64,f32,f32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextProcessTextInput",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextPullDocumentToFront",
+          "module": "rml_ui",
+          "signature": "i64,i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextPullToFront",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextPushDocumentToBack",
+          "module": "rml_ui",
+          "signature": "i64,i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextRemoveDataModel",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ContextRemoveEventListener",
+          "module": "rml_ui",
+          "signature": "i64,i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextRender",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextSetDensityIndependentPixelRatio",
+          "module": "rml_ui",
+          "signature": "i64,f32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextSetDimensions",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextSetPointerCapture",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextTakePointerCaptureDelta",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextUnloadAllDocuments",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextUnloadDocument",
+          "module": "rml_ui",
+          "signature": "i64,i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ContextUpdate",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "CreateContext",
+          "module": "rml_ui",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DataModelBindBool",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DataModelBindColor",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32,i32,i32,i32,i32->i32"
+        },
+        {
+          "class": "handwritten-reviewed",
+          "function": "DataModelBindEvent",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DataModelBindFloat",
+          "module": "rml_ui",
+          "signature": "i64,f32,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DataModelBindInt",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DataModelBindPercent",
+          "module": "rml_ui",
+          "signature": "i64,f32,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DataModelBindPixels",
+          "module": "rml_ui",
+          "signature": "i64,f32,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-nested-adapted",
+          "function": "DataModelBindRows",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DataModelBindString",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelGetBool",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelGetColor",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelGetFloat",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelGetInt",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelGetPercent",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelGetPixels",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "DataModelGetString",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelSetBool",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelSetColor",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelSetFloat",
+          "module": "rml_ui",
+          "signature": "i64,f32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelSetInt",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelSetPercent",
+          "module": "rml_ui",
+          "signature": "i64,f32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DataModelSetPixels",
+          "module": "rml_ui",
+          "signature": "i64,f32->i64"
+        },
+        {
+          "class": "variable-input-nested-adapted",
+          "function": "DataModelSetRows",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DataModelSetString",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "handwritten-reviewed",
+          "function": "DataModelUnbindEvent",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DocumentAppendToStyleSheet",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DocumentClose",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DocumentCreateElement",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DocumentCreateTextNode",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DocumentGetContext",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "DocumentGetTitle",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "DocumentGetUrl",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "DocumentHide",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DocumentIsModal",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DocumentLoadExternalScript",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DocumentLoadInlineScript",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DocumentPullToFront",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DocumentPushToBack",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DocumentReloadStyleSheet",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "DocumentSetTitle",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed-option",
+          "function": "DocumentShow",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "DocumentUpdateDocument",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "handwritten-reviewed",
+          "function": "ElementAddEventListener",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementAppendChild",
+          "module": "rml_ui",
+          "signature": "i64,i64,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementArePseudoClassesSet",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementBlur",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementClick",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementClone",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementClosest",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementDispatchEvent",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementFocus",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "ElementFormControlInputGetSelection",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementFormControlInputSelect",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementFormControlInputSetSelection",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementFormControlSelectAdd",
+          "module": "rml_ui",
+          "signature": "i64,i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementFormControlSelectRemove",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementFormControlSelectRemoveAll",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "ElementFormControlTextAreaGetSelection",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementFormControlTextAreaSelect",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementFormControlTextAreaSetSelection",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementFormSubmit",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "dynamic-output-caller-owned",
+          "function": "ElementGetActivePseudoClasses",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "ElementGetAttribute",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetChild",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "ElementGetClassName",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementGetElementById",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "ElementGetElementsByClassName",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementGetElementsByClassNameCount",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "ElementGetElementsByTagName",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementGetElementsByTagNameCount",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "ElementGetId",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "ElementGetInnerRml",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetRect",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetScrollLeft",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetScrollTop",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "ElementGetTagName",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "ElementGetValue",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementHasAttribute",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementHasChildNodes",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementInsertBefore",
+          "module": "rml_ui",
+          "signature": "i64,i64,i64,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementIsClassSet",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementIsPointWithinElement",
+          "module": "rml_ui",
+          "signature": "i64,f32,f32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementIsPseudoClassSet",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementIsVisible",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementMatches",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementProcessDefaultAction",
+          "module": "rml_ui",
+          "signature": "i64,i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementQuerySelector",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "ElementQuerySelectorAll",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementQuerySelectorAllCount",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementRemoveAttribute",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementRemoveChild",
+          "module": "rml_ui",
+          "signature": "i64,i64,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementRemoveEventListener",
+          "module": "rml_ui",
+          "signature": "i64,i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementReplaceChild",
+          "module": "rml_ui",
+          "signature": "i64,i64,i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementScrollIntoView",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementSetAttribute",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementSetClass",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementSetClassName",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementSetId",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementSetInnerRml",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementSetPseudoClass",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementSetScrollLeft",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementSetScrollTop",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementTabSetRemoveTab",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementTabSetSetPanel",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "ElementTabSetSetTab",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "EventGetCurrent",
+          "module": "rml_ui",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "EventGetCurrentElement",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "EventGetParameterBool",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "EventGetParameterFloat",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "EventGetParameterInt",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "EventGetParameterString",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "EventGetParameterType",
+          "module": "rml_ui",
+          "signature": "i64,i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "EventGetPhase",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "EventGetTargetElement",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "EventGetType",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "EventIsImmediatePropagating",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "EventIsInterruptible",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "EventIsPropagating",
+          "module": "rml_ui",
+          "signature": "i64,i32->i32"
+        },
+        {
+          "class": "handwritten-reviewed",
+          "function": "EventListenerOnAttach",
+          "module": "rml_ui",
+          "signature": "i64,i64->i64"
+        },
+        {
+          "class": "handwritten-reviewed",
+          "function": "EventListenerOnDetach",
+          "module": "rml_ui",
+          "signature": "i64,i64->i64"
+        },
+        {
+          "class": "handwritten-reviewed",
+          "function": "EventListenerProcessEvent",
+          "module": "rml_ui",
+          "signature": "i64,i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "EventStopImmediatePropagation",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "EventStopPropagation",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GetContext",
+          "module": "rml_ui",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "dynamic-output-caller-owned",
+          "function": "GetDocumentPathRequests",
+          "module": "rml_ui",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "GetVersion",
+          "module": "rml_ui",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "IsReady",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed-mixed-fixed",
+          "function": "LoadFontFace",
+          "module": "rml_ui",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed-mixed-fixed",
+          "function": "RegiserEventType",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed-mixed-fixed",
+          "function": "RegisterEventType",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "RemoveContext",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "RemoveContextByName",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "SetDebugContext",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "SetDebugContextByName",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "SetMouseCursorAlias",
+          "module": "rml_ui",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "SolLuaDataModelSetDirty",
+          "module": "rml_ui",
+          "signature": "i64,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "Vector2fNew",
+          "module": "rml_ui",
+          "signature": "f32,f32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "Vector2iNew",
+          "module": "rml_ui",
+          "signature": "i32,i32,i32->i32"
+        },
+        {
           "class": "fixed",
           "function": "AbortDownload",
           "module": "vfs",
@@ -42185,7 +43307,7 @@
       ],
       "canonical_callin_count": 26,
       "environment": "menu",
-      "surface_count": 386
+      "surface_count": 566
     },
     {
       "alias_callin_count": 19,
@@ -44434,6 +45556,6 @@
   "purpose": "instantiate-only complete Core ABI signature/link coverage",
   "unique_executable_callin_spellings": 185,
   "unique_executable_callins": 132,
-  "unique_executable_callouts": 1359,
+  "unique_executable_callouts": 1361,
   "version": 2
 }

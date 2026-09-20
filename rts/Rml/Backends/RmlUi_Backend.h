@@ -47,6 +47,12 @@ namespace RmlGui
 
 	void Shutdown();
 	void Reload();
+	void SetMenuActive(bool active);
+	void SetCurrentContextOwner(void* owner, bool menuPhase);
+	void* GetCurrentContextOwner();
+	bool IsCurrentContextMenuPhase();
+	void* GetContextOwner(const Rml::Context* context);
+	const char* GetAssetVfsModes();
 
 	Rml::SystemInterface* GetSystemInterface();
 	std::vector<std::string> GetDocumentPathRequests(const std::string& document_path);
@@ -83,6 +89,8 @@ namespace RmlGui
 
 	void OnContextCreate(Rml::Context* context);
 	void OnContextDestroy(Rml::Context* context);
+	void RegisterNativeContext(Rml::Context* context);
+	bool IsMenuContext(const Rml::Context* context);
 	// Contexts are independent UI planes. Hosts use this to explicitly promote
 	// transient UI (tooltips, drag overlays, etc.) above other contexts.
 	bool PullContextToFront(Rml::Context* context);

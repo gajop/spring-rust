@@ -50,6 +50,10 @@ class LuaOpenGL {
 		static void EnableCommon(DrawMode);
 		static void ResetCommon(DrawMode);
 		static void DisableCommon(DrawMode);
+		// Reset the matrix set selected by the active draw callback.  Native
+		// graphics callers use this to match gl.ResetMatrices() without
+		// duplicating the world/screen/minimap context selection.
+		static void ResetActiveMatrices() { if (resetMatrixFunc != nullptr) resetMatrixFunc(); else ResetScreenMatrices(); }
 
 		static void EnableDrawGenesis();
 		static void ResetDrawGenesis();

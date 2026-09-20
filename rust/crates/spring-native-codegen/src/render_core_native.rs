@@ -12,7 +12,7 @@ pub fn render_registry(model: &ApiModel) -> String {
     output.push_str(
         "enum class LoweringStatus : std::uint8_t { automatic, annotated, manual, unsupported };\n",
     );
-    output.push_str("enum class Environment : std::uint8_t { rulesSynced, rulesUnsynced, gaiaSynced, gaiaUnsynced, ui };\n\n");
+    output.push_str("enum class Environment : std::uint8_t { rulesSynced, rulesUnsynced, gaiaSynced, gaiaUnsynced, ui, menu, intro };\n\n");
     output.push_str("struct CalloutDescriptor { const char* module; const char* name; std::uint32_t environmentMask; bool mutating; bool visibilitySensitive; LoweringStatus status; };\n\n");
     output.push_str("inline constexpr CalloutDescriptor kCallouts[] = {\n");
     for module in &model.modules {

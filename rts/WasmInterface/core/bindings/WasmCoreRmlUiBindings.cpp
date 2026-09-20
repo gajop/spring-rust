@@ -6,10 +6,13 @@
 #include <limits>
 #include <span>
 #include <string>
+#include <utility>
 
 #include "WasmCoreGeneratedSupport.h"
 #include "WasmCoreGuestInput.h"
 #include "WasmCoreWire.h"
+#include "WasmInterface/core/host/WasmCoreHost.h"
+#include "Rml/Backends/RmlUi_Backend.h"
 
 namespace recoil::wasm::core {
 
@@ -27,6 +30,26 @@ struct RetainedCallbackContext {
 	std::uint32_t destroyCallbackID = 0;
 };
 
+class ScopedRmlContextOwner {
+public:
+	explicit ScopedRmlContextOwner(HostState& state)
+		: previousOwner(RmlGui::GetCurrentContextOwner())
+		, previousMenuPhase(RmlGui::IsCurrentContextMenuPhase())
+	{
+		RmlGui::SetCurrentContextOwner(state.host,
+			state.environment == WasmEnvironment::Menu);
+	}
+
+	~ScopedRmlContextOwner()
+	{
+		RmlGui::SetCurrentContextOwner(previousOwner, previousMenuPhase);
+	}
+
+private:
+	void* previousOwner = nullptr;
+	bool previousMenuPhase = false;
+};
+
 thread_local const RmlDataEventArgs* currentDataEvent = nullptr;
 
 void InvokeRetainedCallback(void* data)
@@ -36,9 +59,14 @@ void InvokeRetainedCallback(void* data)
 		return;
 	if (auto alive = callback->hostAlive.lock()) {
 		if (*alive) {
+			ScopedRmlContextOwner owner(*callback->state);
 			std::string error;
-			generated::DispatchRetainedCallback(*callback->state,
-				callback->callbackID, callback->userData, error);
+			if (!generated::DispatchRetainedCallback(*callback->state,
+				callback->callbackID, callback->userData, error) &&
+				callback->state->host != nullptr) {
+				WasmCoreHost::FaultHost(callback->state->host,
+					error.empty() ? "Core Wasm RmlUi callback failed" : std::move(error));
+			}
 		}
 	}
 }
@@ -50,11 +78,16 @@ void InvokeRetainedDataCallback(void* data, const RmlDataEventArgs* arguments)
 		return;
 	if (auto alive = callback->hostAlive.lock()) {
 		if (*alive) {
+			ScopedRmlContextOwner owner(*callback->state);
 			const RmlDataEventArgs* previous = currentDataEvent;
 			currentDataEvent = arguments;
 			std::string error;
-			generated::DispatchRetainedCallback(*callback->state,
-				callback->callbackID, callback->userData, error);
+			if (!generated::DispatchRetainedCallback(*callback->state,
+				callback->callbackID, callback->userData, error) &&
+				callback->state->host != nullptr) {
+				WasmCoreHost::FaultHost(callback->state->host,
+					error.empty() ? "Core Wasm RmlUi data callback failed" : std::move(error));
+			}
 			currentDataEvent = previous;
 		}
 	}
@@ -67,6 +100,7 @@ void DestroyRetainedCallback(void* data)
 		return;
 	if (auto alive = callback->hostAlive.lock()) {
 		if (*alive && callback->state != nullptr && callback->destroyCallbackID != 0) {
+			ScopedRmlContextOwner owner(*callback->state);
 			std::string error;
 			generated::DispatchRetainedCallback(*callback->state,
 				callback->destroyCallbackID, callback->userData, error);

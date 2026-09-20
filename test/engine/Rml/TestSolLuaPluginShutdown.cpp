@@ -3,6 +3,7 @@
 #include <catch_amalgamated.hpp>
 
 #include "Rml/SolLua/plugin/SolLuaPlugin.h"
+#include "Rml/SolLua/plugin/SolLuaDocument.h"
 #include "Rml/SolLua/plugin/SolLuaEventListener.h"
 
 #include <RmlUi/Core.h>
@@ -67,6 +68,50 @@ TEST_CASE("SolLuaPlugin removes all tracked documents before plugin shutdown")
 
 	REQUIRE(Rml::RemoveContext(context->GetName()));
 	Rml::UnregisterPlugin(luaPlugin);
+	Rml::Shutdown();
+}
+
+TEST_CASE("SolLuaPlugin teardown restores factories and surviving elements")
+{
+	NullRenderInterface renderInterface;
+	Rml::SetRenderInterface(&renderInterface);
+	REQUIRE(Rml::Initialise());
+
+	Rml::ElementInstancer* defaultDocumentInstancer = Rml::Factory::GetElementInstancer("body");
+	Rml::EventListenerInstancer* defaultEventListenerInstancer = Rml::Factory::GetEventListenerInstancer();
+
+	sol::state lua;
+	lua.open_libraries(sol::lib::base);
+	auto* luaPlugin = new Rml::SolLua::SolLuaPlugin(lua, "rmlDocumentId");
+	Rml::RegisterPlugin(luaPlugin);
+
+	// This context models a native/Core-WASM context that was created while
+	// LuaUI had installed its process-wide factories. It must remain usable
+	// after the Lua plugin is removed.
+	Rml::Context* survivingContext = Rml::CreateContext("sol-lua-surviving", {1024, 768});
+	REQUIRE(survivingContext != nullptr);
+	Rml::ElementDocument* survivingDocument = survivingContext->CreateDocument();
+	REQUIRE(survivingDocument != nullptr);
+	REQUIRE(dynamic_cast<Rml::SolLua::SolLuaDocument*>(survivingDocument) != nullptr);
+	survivingDocument->SetAttribute("onclick", "return true");
+
+	REQUIRE(Rml::Factory::GetElementInstancer("body") != defaultDocumentInstancer);
+	REQUIRE(Rml::Factory::GetEventListenerInstancer() != defaultEventListenerInstancer);
+
+	Rml::UnregisterPlugin(luaPlugin);
+
+	REQUIRE(Rml::Factory::GetElementInstancer("body") == defaultDocumentInstancer);
+	REQUIRE(Rml::Factory::GetEventListenerInstancer() == defaultEventListenerInstancer);
+
+	// Context and document creation after Lua teardown must use the restored
+	// factories, and destroying both contexts must not call freed Lua objects.
+	Rml::Context* nextContext = Rml::CreateContext("sol-lua-after-shutdown", {1024, 768});
+	REQUIRE(nextContext != nullptr);
+	REQUIRE(nextContext->CreateDocument() != nullptr);
+	REQUIRE(dynamic_cast<Rml::SolLua::SolLuaDocument*>(nextContext->GetDocument(0)) == nullptr);
+
+	REQUIRE(Rml::RemoveContext(nextContext->GetName()));
+	REQUIRE(Rml::RemoveContext(survivingContext->GetName()));
 	Rml::Shutdown();
 }
 

@@ -187,9 +187,7 @@ pub fn unit_piece_position_by_name(unit_id: i32, name: &str) -> Option<Float3> {
         .into_iter()
         .find(|piece| piece.name == name)
         .map(|piece| piece.piece_num)?;
-    let piece =
-        generated::owned::units_pieces::get_unit_piece_pos_dir(unit_id, piece_number).ok()?;
-    Some(piece.position)
+    generated::owned::units_pieces::get_unit_piece_position(unit_id, piece_number).ok()
 }
 
 pub struct SpawnCEGResult {

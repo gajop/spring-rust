@@ -295,7 +295,6 @@ CGame::~CGame()
 	ENTER_SYNCED_CODE();
 	LOG("[Game::%s][1]", __func__);
 
-	RmlGui::Shutdown();
 	helper->Kill();
 	KillLua(true);
 	KillMisc();
@@ -876,13 +875,16 @@ void CGame::LoadInterface()
 		GameSetupDrawer::Enable();
 	}
 
-	RmlGui::Initialize();
 }
 
 void CGame::LoadLua(bool dryRun, bool onlyUnsynced)
 {
 	ZoneScoped;
 	assert(!(dryRun && onlyUnsynced));
+	// Game-owned Lua/native contexts are created during loading, before the
+	// load screen hands control to the game controller. Switch ownership before
+	// those contexts are registered so they cannot be classified as menu UI.
+	RmlGui::SetMenuActive(false);
 	// Lua components
 	ENTER_SYNCED_CODE();
 	CLuaHandle::SetDevMode(gameSetup->luaDevMode);

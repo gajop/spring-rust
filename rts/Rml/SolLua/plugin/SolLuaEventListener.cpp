@@ -38,14 +38,21 @@
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
 
+#include <unordered_set>
 #include <string>
+#include <vector>
 
 namespace Rml::SolLua
 {
+	namespace
+	{
+		std::unordered_set<SolLuaEventListener*> live_listeners;
+	}
 
 	SolLuaEventListener::SolLuaEventListener(sol::state_view& lua, const Rml::String& code, Rml::Element* element)
 		: m_element(element)
 	{
+		live_listeners.insert(this);
 		if (element == nullptr)
 			return;
 
@@ -111,6 +118,41 @@ namespace Rml::SolLua
 	SolLuaEventListener::SolLuaEventListener(sol::protected_function func, Rml::Element* element)
 		: m_func(func), m_element(element)
 	{
+		live_listeners.insert(this);
+	}
+
+	SolLuaEventListener::~SolLuaEventListener()
+	{
+		live_listeners.erase(this);
+	}
+
+	void SolLuaEventListener::DetachFromElement()
+	{
+		if (m_element != nullptr)
+		{
+			Rml::Element* element = m_element;
+			element->RemoveEventListener(this);
+		}
+		m_element = nullptr;
+		m_detached = true;
+	}
+
+	void SolLuaEventListener::DetachLua()
+	{
+		m_func = sol::protected_function{};
+		m_element = nullptr;
+		m_detached = true;
+	}
+
+	void ReleaseSolLuaEventListeners()
+	{
+		const std::vector<SolLuaEventListener*> listeners(live_listeners.begin(), live_listeners.end());
+		for (auto* listener : listeners)
+			listener->DetachFromElement();
+		for (auto* listener : listeners)
+			listener->DetachLua();
+		for (auto* listener : listeners)
+			delete listener;
 	}
 
 	void SolLuaEventListener::OnDetach(Rml::Element* element)

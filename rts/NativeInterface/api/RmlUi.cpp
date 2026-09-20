@@ -49,6 +49,7 @@ static uint64_t ToHandle(T* pointer)
 // pointer, and resolving one that has since died returns null instead of a wild
 // pointer.
 static std::unordered_map<uint64_t, Rml::ObserverPtr<Rml::Element>> liveElements;
+static std::unordered_map<uint64_t, Rml::Context*> liveElementContexts;
 
 static uint64_t ToElementHandle(Rml::Element* element)
 {
@@ -60,12 +61,18 @@ static uint64_t ToElementHandle(Rml::Element* element)
 	// them rather than grow without bound.
 	if (liveElements.size() > 4096) {
 		for (auto it = liveElements.begin(); it != liveElements.end(); ) {
-			it = (it->second.get() == nullptr) ? liveElements.erase(it) : std::next(it);
+			if (it->second.get() == nullptr) {
+				liveElementContexts.erase(it->first);
+				it = liveElements.erase(it);
+			} else {
+				++it;
+			}
 		}
 	}
 
 	const uint64_t handle = ToHandle(element);
 	liveElements.insert_or_assign(handle, element->GetObserverPtr());
+	liveElementContexts.insert_or_assign(handle, element->GetContext());
 	return handle;
 }
 
@@ -96,7 +103,11 @@ static uint64_t nextElementPtrHandle = 1;
 static uint64_t nextDataModelHandle = 1;
 static uint64_t nextDataModelVariableHandle = 1;
 static std::unordered_map<uint64_t, Rml::ElementPtr> ownedElementPtrs;
-static std::unordered_set<Rml::String> nativeContextNames;
+static std::unordered_map<uint64_t, Rml::Context*> ownedElementContexts;
+struct NativeContextRecord {
+	void* owner = nullptr;
+};
+static std::unordered_map<Rml::Context*, NativeContextRecord> nativeContexts;
 static std::unordered_set<uint64_t> liveEventListeners;
 
 enum class NativeDataValueType { Bool, Int, Float, String, Color, Pixels, Percent };
@@ -152,6 +163,26 @@ struct NativeDataRows
 	std::unique_ptr<Rml::VariableDefinition> collectionDefinition;
 };
 
+class ScopedRmlOwner
+{
+public:
+	ScopedRmlOwner(void* owner, bool menuPhase)
+		: previousOwner(RmlGui::GetCurrentContextOwner())
+		, previousMenuPhase(RmlGui::IsCurrentContextMenuPhase())
+	{
+		RmlGui::SetCurrentContextOwner(owner, menuPhase);
+	}
+
+	~ScopedRmlOwner()
+	{
+		RmlGui::SetCurrentContextOwner(previousOwner, previousMenuPhase);
+	}
+
+private:
+	void* previousOwner;
+	bool previousMenuPhase;
+};
+
 struct NativeDataEventCallbackState
 {
 	NativeDataEventCallbackState(
@@ -159,20 +190,26 @@ struct NativeDataEventCallbackState
 		void* userData_,
 		NativeCallback destroyCallback_,
 		Rml::String name_,
-		std::vector<RmlDataFieldType> fieldTypes_
+		std::vector<RmlDataFieldType> fieldTypes_,
+		void* owner_,
+		bool menuPhase_
 	)
 		: callback(callback_)
 		, userData(userData_)
 		, destroyCallback(destroyCallback_)
 		, name(std::move(name_))
 		, fieldTypes(std::move(fieldTypes_))
+		, owner(owner_)
+		, menuPhase(menuPhase_)
 	{
 	}
 
 	~NativeDataEventCallbackState()
 	{
-		if (destroyCallback != nullptr)
+		if (destroyCallback != nullptr) {
+			ScopedRmlOwner ownerScope(owner, menuPhase);
 			destroyCallback(userData);
+		}
 	}
 
 	RmlDataEventCallback callback = nullptr;
@@ -180,6 +217,8 @@ struct NativeDataEventCallbackState
 	NativeCallback destroyCallback = nullptr;
 	Rml::String name;
 	std::vector<RmlDataFieldType> fieldTypes;
+	void* owner = nullptr;
+	bool menuPhase = false;
 };
 
 struct NativeDataEventDispatcher
@@ -366,13 +405,15 @@ static thread_local Rml::Event* currentEvent = nullptr;
 static thread_local Rml::Element* currentEventElement = nullptr;
 static thread_local Rml::ElementDocument* currentEventDocument = nullptr;
 
-static uint64_t StoreElementPtr(Rml::ElementPtr&& element)
+static uint64_t StoreElementPtr(Rml::ElementPtr&& element, Rml::Context* context = nullptr)
 {
 	if (!element)
 		return 0;
 
 	const uint64_t handle = nextElementPtrHandle++;
+	Rml::Context* ownerContext = context != nullptr ? context : element->GetContext();
 	ownedElementPtrs.emplace(handle, std::move(element));
+	ownedElementContexts.emplace(handle, ownerContext);
 	return handle;
 }
 
@@ -384,6 +425,7 @@ static Rml::ElementPtr TakeElementPtr(uint64_t handle)
 
 	Rml::ElementPtr element = std::move(it->second);
 	ownedElementPtrs.erase(it);
+	ownedElementContexts.erase(handle);
 	return element;
 }
 
@@ -403,6 +445,7 @@ static Rml::Element* FromElementHandle(uint64_t handle)
 	if (Rml::Element* element = it->second.get())
 		return element;
 
+	liveElementContexts.erase(handle);
 	liveElements.erase(it);
 	return nullptr;
 }
@@ -443,6 +486,23 @@ static void EraseNativeDataModelHandles(Rml::Context* context)
 	nativeColourTypes.erase(context);
 	nativePixelTypes.erase(context);
 	nativePercentTypes.erase(context);
+
+	for (auto it = liveElementContexts.begin(); it != liveElementContexts.end(); ) {
+		if (it->second == context) {
+			liveElements.erase(it->first);
+			it = liveElementContexts.erase(it);
+		} else {
+			++it;
+		}
+	}
+	for (auto it = ownedElementContexts.begin(); it != ownedElementContexts.end(); ) {
+		if (it->second == context) {
+			ownedElementPtrs.erase(it->first);
+			it = ownedElementContexts.erase(it);
+		} else {
+			++it;
+		}
+	}
 }
 
 static void EraseNativeDataModelHandles(Rml::Context* context, const Rml::String& name)
@@ -551,6 +611,9 @@ public:
 	{
 		liveEventListeners.erase(ToHandle(this));
 		if (destroyCallback != nullptr) {
+			Rml::Context* context = element != nullptr ? element->GetContext() : nullptr;
+			ScopedRmlOwner ownerScope(
+				RmlGui::GetContextOwner(context), RmlGui::IsMenuContext(context));
 			destroyCallback(userData);
 		}
 		delete this;
@@ -565,6 +628,9 @@ public:
 		currentEvent = &event;
 		currentEventElement = element;
 		currentEventDocument = element != nullptr ? element->GetOwnerDocument() : nullptr;
+		Rml::Context* context = element != nullptr ? element->GetContext() : nullptr;
+		ScopedRmlOwner ownerScope(
+			RmlGui::GetContextOwner(context), RmlGui::IsMenuContext(context));
 		if (callback != nullptr) {
 			callback(userData);
 		}
@@ -610,12 +676,34 @@ static void NativeCreateContext(const RmlCreateContextQuery* query, RmlCreateCon
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
+	if (!RmlGui::IsInitialized()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	// Inspect the raw RmlUi registry as well as the visible-context wrapper.
+	// A context queued for removal is still owned by its original module until
+	// the removal is committed, so another module must not reclaim its name in
+	// that window.
+	Rml::Context* existingContext = Rml::GetContext(query->name);
+	if (existingContext != nullptr &&
+		RmlGui::GetContextOwner(existingContext) != RmlGui::GetCurrentContextOwner()) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
 
 	Rml::Context* context = RmlGui::GetOrCreateContext(query->name);
 	result->contextHandle = ToHandle(context);
 	result->success = (context != nullptr);
 	if (result->success) {
-		nativeContextNames.emplace(query->name);
+		nativeContexts.insert_or_assign(context,
+			NativeContextRecord{RmlGui::GetCurrentContextOwner()});
+		if (existingContext == nullptr) {
+			RmlGui::RegisterNativeContext(context);
+		}
+		// Reusing a context owned by the same module preserves the phase in
+		// which that context was created. A later activation must not silently
+		// reclassify existing UI and move it outside owner cleanup.
 	}
 	if (!result->success) {
 		result->error = &NOT_READY_ERROR;
@@ -1577,6 +1665,7 @@ static void DispatchNativeDataEvent(
 		.values = values.empty() ? nullptr : values.data(),
 		.count = values.size(),
 	};
+	ScopedRmlOwner ownerScope(callbackState->owner, callbackState->menuPhase);
 	callbackState->callback(callbackState->userData, &args);
 }
 
@@ -1640,7 +1729,9 @@ static void NativeDataModelBindEvent(const RmlDataModelBindEventQuery* query, Rm
 		query->userData,
 		query->destroyCallback,
 		query->name,
-		std::move(fieldTypes)
+		std::move(fieldTypes),
+		RmlGui::GetContextOwner(model->context),
+		RmlGui::IsMenuContext(model->context)
 	);
 	dispatcher->callbackState = callbackState;
 	const uint64_t eventHandle = nextDataModelVariableHandle++;
@@ -2248,7 +2339,7 @@ static void NativeDocumentCreateElement(const RmlDocumentCreateElementQuery* que
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	result->elementPtrHandle = StoreElementPtr(document->CreateElement(query->tagName));
+	result->elementPtrHandle = StoreElementPtr(document->CreateElement(query->tagName), document->GetContext());
 	result->success = (result->elementPtrHandle != 0);
 }
 
@@ -2262,7 +2353,7 @@ static void NativeDocumentCreateTextNode(const RmlDocumentStringQuery* query, Rm
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	result->elementPtrHandle = StoreElementPtr(document->CreateTextNode(query->value));
+	result->elementPtrHandle = StoreElementPtr(document->CreateTextNode(query->value), document->GetContext());
 	result->success = (result->elementPtrHandle != 0);
 }
 
@@ -2617,7 +2708,7 @@ static void NativeElementRemoveChild(const RmlElementChildQuery* query, RmlDocum
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	result->elementPtrHandle = StoreElementPtr(element->RemoveChild(child));
+	result->elementPtrHandle = StoreElementPtr(element->RemoveChild(child), element->GetContext());
 	result->success = (result->elementPtrHandle != 0);
 }
 
@@ -2633,7 +2724,7 @@ static void NativeElementReplaceChild(const RmlElementReplaceChildQuery* query, 
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	result->elementPtrHandle = StoreElementPtr(element->ReplaceChild(std::move(inserted), replaced));
+	result->elementPtrHandle = StoreElementPtr(element->ReplaceChild(std::move(inserted), replaced), element->GetContext());
 	result->success = (result->elementPtrHandle != 0);
 }
 
@@ -2786,7 +2877,7 @@ static void NativeElementClone(const RmlElementHandleQuery* query, RmlDocumentCr
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	result->elementPtrHandle = StoreElementPtr(element->Clone());
+	result->elementPtrHandle = StoreElementPtr(element->Clone(), element->GetContext());
 	result->success = (result->elementPtrHandle != 0);
 }
 
@@ -3580,31 +3671,95 @@ static void NativeVector2iNew(const RmlVector2iNewQuery* query, RmlVector2iNewRe
 
 namespace NativeRmlUi {
 
-void ClearAllContexts(ContextRemover removeContext)
+enum class ContextScope {
+	All,
+	Menu,
+	NonMenu,
+};
+
+static void ClearContexts(ContextRemover removeContext, ContextScope scope)
 {
 	// Context removal is normally deferred until RmlGui::Update. A native
 	// reload loads the replacement module before that update, however, so a new
 	// CreateContext with the same name would revive the old context and leave its
 	// event callbacks pointing at freed module data.
 	if (RmlGui::IsInitialized()) {
-		for (const Rml::String& name : nativeContextNames) {
-			if (Rml::Context* context = Rml::GetContext(name)) {
-				EraseNativeDataModelHandles(context);
-				if (removeContext != nullptr) {
-					removeContext(ToHandle(context));
-				}
+		for (auto it = nativeContexts.begin(); it != nativeContexts.end(); ) {
+			Rml::Context* context = it->first;
+			if (FromHandle(ToHandle(context)) == nullptr) {
+				it = nativeContexts.erase(it);
+				continue;
 			}
+
+			const bool isMenuContext = RmlGui::IsMenuContext(context);
+			if ((scope == ContextScope::Menu && !isMenuContext) ||
+				(scope == ContextScope::NonMenu && isMenuContext))
+			{
+				++it;
+				continue;
+			}
+
+			EraseNativeDataModelHandles(context);
+			it = nativeContexts.erase(it);
+			if (removeContext != nullptr)
+				removeContext(ToHandle(context));
 		}
 	}
 
-	nativeContextNames.clear();
-	nativeDataModels.clear();
-	nativeDataRowsModels.clear();
-	nativeColourTypes.clear();
-	nativePixelTypes.clear();
-	nativePercentTypes.clear();
-	ownedElementPtrs.clear();
-	liveElements.clear();
+	if (scope == ContextScope::All) {
+		nativeContexts.clear();
+		nativeDataModels.clear();
+		nativeDataVariableModels.clear();
+		nativeDataRowsModels.clear();
+		nativeDataEventModels.clear();
+		nativeColourTypes.clear();
+		nativePixelTypes.clear();
+		nativePercentTypes.clear();
+		ownedElementPtrs.clear();
+		ownedElementContexts.clear();
+		liveElements.clear();
+		liveElementContexts.clear();
+	}
+}
+
+void ClearAllContexts(ContextRemover removeContext)
+{
+	ClearContexts(removeContext, ContextScope::All);
+}
+
+void ClearMenuContexts(ContextRemover removeContext)
+{
+	ClearContexts(removeContext, ContextScope::Menu);
+}
+
+void ClearNonMenuContexts(ContextRemover removeContext)
+{
+	ClearContexts(removeContext, ContextScope::NonMenu);
+}
+
+void ClearOwnerContexts(void* owner, ContextRemover removeContext)
+{
+	for (auto it = nativeContexts.begin(); it != nativeContexts.end(); ) {
+		Rml::Context* context = it->first;
+		if (FromHandle(ToHandle(context)) == nullptr) {
+			it = nativeContexts.erase(it);
+			continue;
+		}
+		if (it->second.owner != owner) {
+			++it;
+			continue;
+		}
+
+		it = nativeContexts.erase(it);
+		EraseNativeDataModelHandles(context);
+		if (removeContext != nullptr)
+			removeContext(ToHandle(context));
+	}
+}
+
+void ForgetContext(Rml::Context* context)
+{
+	nativeContexts.erase(context);
 }
 
 } // namespace NativeRmlUi

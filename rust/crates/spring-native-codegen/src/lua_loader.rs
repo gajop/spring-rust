@@ -273,10 +273,12 @@ impl LuaLoaderMatrix {
             return unsynced_and_ui();
         }
 
-        // RmlUi is part of the current in-game unsynced/UI path.  It is not a
-        // synced gadget capability.
+        // RmlUi is available to the in-game unsynced/UI path and to the
+        // standalone menu. It is not a synced gadget capability.
         if module == "rml_ui" {
-            return unsynced_and_ui();
+            let mut environments = unsynced_and_ui();
+            environments.insert(Environment::Menu);
+            return environments;
         }
 
         let Ok(source) = fs::read_to_string(header) else {

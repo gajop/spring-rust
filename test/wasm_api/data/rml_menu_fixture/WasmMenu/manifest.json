@@ -1,0 +1,5 @@
+# This file is part of the Spring engine (GPL v2 or later), see LICENSE.html
+
+# Core-Wasm menu fixture. The menu loader uses the engine's line manifest
+# format even though the historical filename is manifest.json.
+module(rml-menu, WasmMenu/rml_menu.wasm, menu, 0, 1.0.0)

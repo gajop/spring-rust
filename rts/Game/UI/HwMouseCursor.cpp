@@ -218,20 +218,13 @@ IHardwareCursor* IHardwareCursor::Alloc(void* mem) {
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
 
-	if (SDL_GetWindowWMInfo(globalRendering->GetWindow(), &info)) {
-		switch (info.subsystem)
-		{
-		case SDL_SYSWM_X11:
-			return (new (mem) HardwareCursorX11());
-		case SDL_SYSWM_WAYLAND:
-		default: {
-			return (new (mem) HardwareCursorSDL());
-		} break;
-		}
-	}
-#endif
+	if (SDL_GetWindowWMInfo(globalRendering->GetWindow(), &info) && info.subsystem == SDL_SYSWM_X11)
+		return (new (mem) HardwareCursorX11());
 
-	return nullptr;
+	// Wayland, and video drivers with no window system at all (SDL's "offscreen", which renders
+	// headless through EGL) where SDL_GetWindowWMInfo fails: the caller never checks for null.
+	return (new (mem) HardwareCursorSDL());
+#endif
 }
 
 void IHardwareCursor::Free(IHardwareCursor* hwc) {

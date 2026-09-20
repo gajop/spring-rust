@@ -1218,7 +1218,8 @@ bool CBitmap::CondReinterpret(int w, int h, int c, uint32_t dt)
 #endif
 }
 
-bool CBitmap::Load(std::string const& filename, float defaultAlpha, uint32_t reqChannel, uint32_t reqDataType, bool forceReplaceAlpha)
+bool CBitmap::Load(std::string const& filename, float defaultAlpha, uint32_t reqChannel,
+	uint32_t reqDataType, bool forceReplaceAlpha, std::string const& vfsModes)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	bool isLoaded = false;
@@ -1283,7 +1284,7 @@ bool CBitmap::Load(std::string const& filename, float defaultAlpha, uint32_t req
 	#endif
 
 
-	CFileHandler file(filename);
+	CFileHandler file(filename, vfsModes);
 	std::vector<uint8_t> buffer;
 
 	if (!file.FileExists()) {

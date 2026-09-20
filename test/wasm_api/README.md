@@ -49,3 +49,11 @@ python3 rts/wasm/verify_codegen.py
 guests used by `test/native_api_parity/run_benchmarks_core.py`. Fuel and epoch
 interruption are diagnostic opt-in controls; throughput-first gameplay
 measurements leave them disabled.
+
+The repository-owned RmlUi menu smoke fixture is in
+[`data/rml_menu_fixture`](data/rml_menu_fixture). It exercises the menu
+environment's RmlUi import surface and provides shared RML/RCSS/SVG content
+for Core-WASM and native menu modules. Its `transition/` subfixture also runs
+two complete menu -> game -> menu cycles with an engine-generated map and no
+map archive. The fixture README contains the reproducible commands and archive
+layouts.

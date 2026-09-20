@@ -140,6 +140,11 @@ macro_rules! __impl_ui_exports {
         }
         $crate::reexports::export_mouse_release!(__spring_addon_mouse_release);
 
+        fn __spring_addon_mouse_wheel(up: bool, value: f32) -> bool {
+            __with_widget_handler(|handler| handler.mouse_wheel(up, value))
+        }
+        $crate::reexports::export_mouse_wheel!(__spring_addon_mouse_wheel);
+
         fn __spring_addon_key_press<'a>(
             key_code: i32,
             alt: bool,

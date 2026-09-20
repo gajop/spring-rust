@@ -214,14 +214,19 @@ public:
 		if (eventClient)
 			eventHandler.RemoveClient(eventClient.get());
 
-		if (eventClient || !benchmarkEventClients.empty())
-			NativeRmlUi::ClearAllContexts(RemoveNativeRmlContext);
-
 		for (auto& client : benchmarkEventClients)
 			client->Shutdown();
+		for (auto& client : benchmarkEventClients) {
+			NativeRmlUi::ClearOwnerContexts(client->ContextOwner(), RemoveNativeRmlContext);
+			if (RmlGui::GetCurrentContextOwner() == client->ContextOwner())
+				RmlGui::SetCurrentContextOwner(nullptr, false);
+		}
 		benchmarkEventClients.clear();
 		if (eventClient) {
 			eventClient->Shutdown();
+			NativeRmlUi::ClearOwnerContexts(eventClient->ContextOwner(), RemoveNativeRmlContext);
+			if (RmlGui::GetCurrentContextOwner() == eventClient->ContextOwner())
+				RmlGui::SetCurrentContextOwner(nullptr, false);
 			eventClient.reset();
 		}
 	}
@@ -289,7 +294,7 @@ public:
 		}
 
 		// Create event client, load symbols, and register with event handler
-		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, sharedLib.get(), wasmSystem.get());
+		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, sharedLib.get(), wasmSystem.get(), false);
 		eventClient->LoadSymbols();
 		eventClient->Initialize();
 		if (unitScriptEngine != nullptr)
@@ -311,7 +316,7 @@ public:
 		}
 		for (std::size_t index = 1; index < benchmarkModuleCount; ++index) {
 			auto client = std::make_unique<NativeInterfaceEventClient>(
-				&nativeInterface, sharedLib.get(), wasmSystem.get());
+				&nativeInterface, sharedLib.get(), wasmSystem.get(), false);
 			client->LoadSymbols();
 			client->Initialize();
 			if (unitScriptEngine != nullptr)
@@ -329,7 +334,7 @@ public:
 		// installed. This lets Wasm-only content receive the same engine event
 		// stream without changing the native module loading contract.
 		eventClient = std::make_unique<NativeInterfaceEventClient>(
-			&nativeInterface, nullptr, wasmSystem.get());
+			&nativeInterface, nullptr, wasmSystem.get(), false);
 		if (unitScriptEngine != nullptr)
 			unitScriptEngine->AddCusBackend(eventClient->CusBackend());
 		eventHandler.AddClient(eventClient.get());

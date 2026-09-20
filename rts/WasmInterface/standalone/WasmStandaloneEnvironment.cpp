@@ -8,6 +8,8 @@
 
 #include "NativeInterface/NativeInterface.h"
 #include "NativeInterface/NativeInterfaceEventClient.h"
+#include "NativeInterface/api/RmlUi.h"
+#include "Rml/Backends/RmlUi_Backend.h"
 #include "WasmInterface/system/WasmInterfaceSystem.h"
 #include "WasmInterface/runtime/WasmEnvironment.h"
 
@@ -37,6 +39,7 @@ extern const PlayerApi PLAYER_API;
 extern const MessagesApi MESSAGES_API;
 extern const ProfilingApi PROFILING_API;
 extern const TracingApi TRACING_API;
+extern const RmlUiApi RMLUI_API;
 
 namespace {
 
@@ -75,18 +78,21 @@ std::string GenerateRandomName(int length)
 	return result;
 }
 
-std::optional<fs::path> CopyToTemp(const std::string& sourcePath, bool isVfsFile)
+std::optional<fs::path> CopyToTemp(const std::string& sourcePath, const char* vfsModes)
 {
 	try {
 		const std::string extension = fs::path(sourcePath).extension().string();
 		std::string randomName = GenerateRandomName(10) + extension;
 		fs::path destPath = fs::temp_directory_path() / randomName;
 
-		if (isVfsFile) {
-			CFileHandler moduleFile(sourcePath, SPRING_VFS_MOD);
+		if (vfsModes != nullptr) {
+			CFileHandler moduleFile(sourcePath, vfsModes);
 			std::string moduleData;
-			if (!moduleFile.FileExists() || !moduleFile.LoadStringData(moduleData)) {
-				LOG_L(L_ERROR, "Native module does not exist: %s", sourcePath.c_str());
+			if (!moduleFile.FileExists()) {
+				return std::nullopt;
+			}
+			if (!moduleFile.LoadStringData(moduleData)) {
+				LOG_L(L_ERROR, "Failed to read native module: %s", sourcePath.c_str());
 				return std::nullopt;
 			}
 
@@ -98,7 +104,6 @@ std::optional<fs::path> CopyToTemp(const std::string& sourcePath, bool isVfsFile
 			}
 		} else {
 			if (!fs::exists(sourcePath)) {
-				LOG_L(L_ERROR, "Native module source does not exist: %s", sourcePath.c_str());
 				return std::nullopt;
 			}
 			fs::copy_file(sourcePath, destPath, fs::copy_options::overwrite_existing);
@@ -109,6 +114,12 @@ std::optional<fs::path> CopyToTemp(const std::string& sourcePath, bool isVfsFile
 		LOG_L(L_ERROR, "Failed to prepare native module: %s", e.what());
 		return std::nullopt;
 	}
+}
+
+void RemoveNativeRmlContext(uint64_t contextHandle)
+{
+	RmlGui::RemoveContextImmediately(
+		reinterpret_cast<Rml::Context*>(static_cast<uintptr_t>(contextHandle)));
 }
 
 } // namespace
@@ -149,6 +160,7 @@ std::unique_ptr<WasmStandaloneEnvironment> WasmStandaloneEnvironment::Create()
 	env->m_nativeInterface->messages = &MESSAGES_API;
 	env->m_nativeInterface->profiling = &PROFILING_API;
 	env->m_nativeInterface->tracing = &TRACING_API;
+	env->m_nativeInterface->rmlUi = &RMLUI_API;
 
 	env->m_wasmSystem = std::make_unique<WasmInterfaceSystem>(env->m_nativeInterface.get());
 
@@ -189,10 +201,11 @@ bool WasmStandaloneEnvironment::LoadManifest(const std::string& manifestPath)
 bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 {
 	std::string resolvedPath = PlatformLibraryPath(pathStem);
-	if (!fs::exists(resolvedPath))
-		return false;
-
-	auto tempPath = CopyToTemp(resolvedPath, false);
+	// Menu modules live in the menu archive. Extract from the active menu VFS
+	// before falling back to a process-filesystem path for developer installs.
+	auto tempPath = CopyToTemp(resolvedPath, SPRING_VFS_MENU_BASE);
+	if (!tempPath.has_value())
+		tempPath = CopyToTemp(resolvedPath, nullptr);
 	if (!tempPath.has_value())
 		return false;
 
@@ -226,13 +239,20 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 
 	RemoveEventClient();
 	m_sharedLib = std::move(lib);
+	m_nativeModuleLoaded = true;
 
 	LOG("Successfully loaded native module %s", resolvedPath.c_str());
 
 	m_eventClient = std::make_unique<NativeInterfaceEventClient>(
-		m_nativeInterface.get(), m_sharedLib.get(), m_wasmSystem.get());
+		m_nativeInterface.get(), m_sharedLib.get(), m_wasmSystem.get(), true);
 	m_eventClient->LoadSymbols();
 	m_eventClient->Initialize();
+	if (!m_eventClient->IsInitialized()) {
+		LOG_L(L_ERROR, "Native menu module failed to initialize: %s", resolvedPath.c_str());
+		RemoveEventClient();
+		m_sharedLib.reset();
+		return false;
+	}
 	eventHandler.AddClient(m_eventClient.get());
 
 	return true;
@@ -244,19 +264,41 @@ void WasmStandaloneEnvironment::EnsureEventClient()
 		return;
 
 	m_eventClient = std::make_unique<NativeInterfaceEventClient>(
-		m_nativeInterface.get(), nullptr, m_wasmSystem.get());
+		m_nativeInterface.get(), nullptr, m_wasmSystem.get(), true);
 	eventHandler.AddClient(m_eventClient.get());
 }
 
 void WasmStandaloneEnvironment::RemoveEventClient()
 {
-	if (!m_eventClient)
+	if (!m_eventClient) {
+		m_nativeModuleLoaded = false;
 		return;
+	}
 
 	eventHandler.RemoveClient(m_eventClient.get());
+	// Give a native menu its valid shutdown window first. Its shutdown hook may
+	// still query or explicitly remove its contexts. Only then clear resources
+	// the module left behind, while its callback code and module data remain
+	// valid.
 	if (m_sharedLib)
 		m_eventClient->Shutdown();
+	NativeRmlUi::ClearOwnerContexts(m_eventClient->ContextOwner(), RemoveNativeRmlContext);
+	if (RmlGui::GetCurrentContextOwner() == m_eventClient->ContextOwner())
+		RmlGui::SetCurrentContextOwner(nullptr, false);
 	m_eventClient.reset();
+	m_nativeModuleLoaded = false;
+}
+
+void WasmStandaloneEnvironment::ActivateMenu(const std::string& message)
+{
+	if (m_eventClient && m_nativeModuleLoaded)
+		m_eventClient->ActivateMenu(message);
+}
+
+void WasmStandaloneEnvironment::ActivateGame()
+{
+	if (m_eventClient && m_nativeModuleLoaded)
+		m_eventClient->ActivateGame();
 }
 
 void WasmStandaloneEnvironment::Update()

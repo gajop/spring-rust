@@ -29,6 +29,7 @@
  */
 
 #include "RmlUi_Renderer_GL3_Recoil.h"
+#include "RmlUi_Backend.h"
 #include <RmlUi/Core/Log.h>
 
 #include "Rendering/GL/VAO.h"
@@ -1066,7 +1067,8 @@ RenderInterface_GL3_Recoil::RenderToClipMask(Rml::ClipMaskOperation operation, R
 Rml::TextureHandle RenderInterface_GL3_Recoil::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source)
 {
 	CBitmap bmp;
-	if (!bmp.Load(source)) {
+	if (!bmp.Load(source, 1.0f, 4, 0x1401/*GL_UNSIGNED_BYTE*/, false,
+		RmlGui::GetAssetVfsModes())) {
 		return false;
 	}
 	texture_dimensions.x = bmp.xsize;

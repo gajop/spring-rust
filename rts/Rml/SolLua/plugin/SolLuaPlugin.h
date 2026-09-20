@@ -33,6 +33,7 @@
 
 #include "Rml/SolLua/TranslationTable.h"
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/EventListenerInstancer.h>
 #include <RmlUi/Core/Platform.h>
 #include <RmlUi/Core/Plugin.h>
 #include <RmlUi/Lua/Header.h>
@@ -83,6 +84,8 @@ namespace Rml::SolLua
 
 		std::unique_ptr<SolLuaDocumentElementInstancer> document_element_instancer;
 		std::unique_ptr<SolLuaEventListenerInstancer> event_listener_instancer;
+		ElementInstancer* previous_document_element_instancer = nullptr;
+		Rml::EventListenerInstancer* previous_event_listener_instancer = nullptr;
 
 		sol::state_view m_lua_state;
 		Rml::String m_lua_env_identifier;

@@ -31,6 +31,8 @@ class WasmInterfaceSystem;
  */
 namespace fptr {
 	using InitializeNativeModuleFuncPtr = void(*)(NativeInterface*, const InitializeNativeModuleQuery*, InitializeNativeModuleResult*);
+	using ActivateMenuFuncPtr = void(*)(NativeInterface*, void*, const ActivateMenuQuery*, ActivateMenuResult*);
+	using ActivateGameFuncPtr = void(*)(NativeInterface*, void*, const SimpleCallinQuery*, SimpleCallinResult*);
 	using DownloadFailedFuncPtr = void(*)(NativeInterface*, void*, const DownloadFailedQuery*, DownloadFailedResult*);
 	using DownloadFinishedFuncPtr = void(*)(NativeInterface*, void*, const DownloadFinishedQuery*, DownloadFinishedResult*);
 	using DownloadProgressFuncPtr = void(*)(NativeInterface*, void*, const DownloadProgressQuery*, DownloadProgressResult*);
@@ -228,13 +230,18 @@ namespace fptr {
 class NativeInterfaceEventClient : public CEventClient, public NativeUnitScriptBackend {
 public:
 	NativeInterfaceEventClient(NativeInterface* nativeInterface, SharedLib* sharedLib,
-		WasmInterfaceSystem* wasmSystem = nullptr);
+		WasmInterfaceSystem* wasmSystem = nullptr, bool menuModule = false);
 
 	// Load symbols from DLL
 	void LoadSymbols();
 
 	// Initialize the native module
 	void* Initialize();
+	bool IsInitialized() const { return m_initialized; }
+	bool IsMenuModule() const { return m_menuModule; }
+	void ActivateMenu(const std::string& message);
+	void ActivateGame();
+	void* ContextOwner() const { return const_cast<NativeInterfaceEventClient*>(this); }
 
 	// Release module-owned state before its shared object is unloaded. Must be
 	// called after the event client is unregistered and while m_sharedLib is valid.
@@ -458,9 +465,12 @@ private:
 	WasmInterfaceSystem* m_wasmSystem = nullptr;
 	void* m_moduleData = nullptr;
 	bool m_initialized = false;
+	bool m_menuModule = false;
 
 	// Function pointers to native module
 	fptr::InitializeNativeModuleFuncPtr m_InitializeNativeModuleFuncPtr = nullptr;
+	fptr::ActivateMenuFuncPtr m_ActivateMenuFuncPtr = nullptr;
+	fptr::ActivateGameFuncPtr m_ActivateGameFuncPtr = nullptr;
 	fptr::DownloadFailedFuncPtr m_DownloadFailedFuncPtr = nullptr;
 	fptr::DownloadFinishedFuncPtr m_DownloadFinishedFuncPtr = nullptr;
 	fptr::DownloadProgressFuncPtr m_DownloadProgressFuncPtr = nullptr;

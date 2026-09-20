@@ -1,0 +1,14 @@
+<rml>
+	<head>
+		<link type="text/rcss" href="menu.rcss" />
+	</head>
+	<body>
+		<div id="menu-panel">
+			<h1 id="title">RmlUi menu fixture</h1>
+			<p id="status">Core-Wasm menu RmlUi smoke fixture.</p>
+			<img id="fixture-image" src="fixture.png" />
+			<input id="name" type="text" value="Player" />
+			<button id="launch">Launch</button>
+		</div>
+	</body>
+</rml>

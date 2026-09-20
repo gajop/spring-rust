@@ -452,11 +452,19 @@ extern const RmlUiApi RMLUI_API;
 #ifdef __cplusplus
 }
 
+namespace Rml {
+	class Context;
+}
+
 // Native modules are hot-reloaded independently of RmlUi. The engine owns
 // contexts created through this API and must destroy them before unloading a
 // module, otherwise their event listeners retain callbacks into the old .so.
 namespace NativeRmlUi {
 	using ContextRemover = void (*)(uint64_t contextHandle);
 	void ClearAllContexts(ContextRemover removeContext);
+	void ClearMenuContexts(ContextRemover removeContext);
+	void ClearNonMenuContexts(ContextRemover removeContext);
+	void ClearOwnerContexts(void* owner, ContextRemover removeContext);
+	void ForgetContext(Rml::Context* context);
 }
 #endif

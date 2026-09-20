@@ -56,6 +56,9 @@ pub trait Widget<G = ()> {
     ) -> EventResult {
         EventResult::Ignored
     }
+    fn mouse_wheel(&self, _ctx: &AddonContext<'_, G>, _up: bool, _value: f32) -> EventResult {
+        EventResult::Ignored
+    }
 
     fn draw_world_pre_unit(&self, _ctx: &AddonContext<'_, G>) {}
     fn draw_world_refraction(&self, _ctx: &AddonContext<'_, G>) {}
@@ -224,6 +227,17 @@ impl<G> WidgetHandler<G> {
                 }
             }
         });
+    }
+
+    pub fn mouse_wheel(&self, up: bool, value: f32) -> bool {
+        self.dispatch("MouseWheel", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() && widget.mouse_wheel(ctx, up, value).is_handled() {
+                    return true;
+                }
+            }
+            false
+        })
     }
 
     pub fn draw_world_pre_unit(&self) {

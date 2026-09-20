@@ -1902,7 +1902,7 @@
       ]
     }
   ],
-  "callout_count": 1151,
+  "callout_count": 1152,
   "callouts": [
     {
       "class": "handwritten-reviewed",
@@ -5147,6 +5147,12 @@
     {
       "class": "fixed",
       "function": "SetUnitLeaveTracks",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetUnitLuaDraw",
       "module": "unsynced_ctrl",
       "signature": "i32,i32->i64"
     },
@@ -8813,5 +8819,5 @@
   ],
   "canonical_callin_count": 107,
   "environment": "rules-unsynced",
-  "surface_count": 1308
+  "surface_count": 1309
 }

@@ -20,6 +20,7 @@ Registered as `Spring.UnitRendering` and `Spring.FeatureRendering`.
 #include "LuaUtils.h"
 
 #include "Rendering/LuaObjectDrawer.h"
+#include "Rendering/Units/UnitDrawer.h"
 #include "Sim/Objects/SolidObjectDef.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Features/FeatureHandler.h"
@@ -673,7 +674,14 @@ static int SetObjectLuaDraw(lua_State* L, ObjectType* obj)
 int LuaObjectRenderingImpl::SetUnitLuaDraw(lua_State* L)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	return (SetObjectLuaDraw<CSolidObject>(L, unitHandler.GetUnit(luaL_checkint(L, 1))));
+	CUnit* unit = unitHandler.GetUnit(luaL_checkint(L, 1));
+	if (unit != nullptr && lua_isboolean(L, 2) && lua_toboolean(L, 2)) {
+		// DrawUnit uses the legacy matrix API (glScale, glTranslate, etc.).
+		// The GL4 drawer batches units and cannot observe those per-unit matrix
+		// changes. Select the legacy drawer so DrawUnit callbacks actually run.
+		CUnitDrawer::ForceLegacyPath();
+	}
+	return (SetObjectLuaDraw<CSolidObject>(L, unit));
 }
 
 /*** Enable or disable custom Lua drawing for a feature.
@@ -780,4 +788,3 @@ int LuaObjectRenderingImpl::Debug(lua_State* L)
 
 /******************************************************************************/
 /******************************************************************************/
-

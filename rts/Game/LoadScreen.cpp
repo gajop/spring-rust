@@ -15,6 +15,7 @@
 #include "Lua/LuaMenu.h"
 #include "Menu/LuaMenuController.h"
 #include "NativeInterface/api/Callins.h"
+#include "Rml/Backends/RmlUi_Backend.h"
 #include "WasmInterface/core/host/WasmCoreCallinId.h"
 #include "WasmInterface/runtime/WasmEnvironment.h"
 #include "WasmInterface/standalone/WasmStandaloneEnvironment.h"
@@ -82,6 +83,7 @@ CLoadScreen::~CLoadScreen()
 
 	if (!gu->globalQuit) {
 		activeController = game;
+		RmlGui::SetMenuActive(false);
 
 		if (luaMenu != nullptr)
 			luaMenu->ActivateGame();

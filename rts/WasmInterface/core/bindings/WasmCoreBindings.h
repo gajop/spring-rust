@@ -12,6 +12,7 @@
 #include "WasmResources.h"
 
 class NativeUnitScriptBackend;
+class WasmCoreHost;
 
 namespace recoil::wasm::core {
 
@@ -20,6 +21,7 @@ namespace recoil::wasm::core {
 struct HostState {
 	NativeInterface* native = nullptr;
 	NativeUnitScriptBackend* cusBackend = nullptr;
+	::WasmCoreHost* host = nullptr;
 	Memory memory;
 	WasmExecutionBudget* budget = nullptr;
 	WasmEnvironment environment = WasmEnvironment::RulesSynced;

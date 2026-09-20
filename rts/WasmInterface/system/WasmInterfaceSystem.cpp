@@ -11,8 +11,16 @@
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "System/Log/ILog.h"
 #include "WasmCoreHost.h"
+#include "NativeInterface/api/RmlUi.h"
+#include "Rml/Backends/RmlUi_Backend.h"
 
 namespace {
+	void RemoveRmlContext(std::uint64_t contextHandle)
+	{
+		RmlGui::RemoveContextImmediately(
+			reinterpret_cast<Rml::Context*>(static_cast<uintptr_t>(contextHandle)));
+	}
+
 	bool IsCoreModule(const std::vector<std::uint8_t>& bytes)
 	{
 		return bytes.size() >= 8 && bytes[0] == 0x00 && bytes[1] == 'a' &&
@@ -195,6 +203,7 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 		});
 	if (iter == coreModules.end())
 		return false;
+	ShutdownAndClearModule(*iter);
 	if (unitScriptEngine != nullptr)
 		unitScriptEngine->RemoveCusBackend(iter->host);
 	coreModules.erase(iter);
@@ -205,7 +214,8 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 
 void WasmInterfaceSystem::UnloadAll()
 {
-	for (const CoreModuleRecord& module : coreModules) {
+	for (CoreModuleRecord& module : coreModules) {
+		ShutdownAndClearModule(module);
 		if (unitScriptEngine != nullptr)
 			unitScriptEngine->RemoveCusBackend(module.host);
 		WasmCoreHost::Unload(module.descriptor.name);
@@ -216,9 +226,35 @@ void WasmInterfaceSystem::UnloadAll()
 
 void WasmInterfaceSystem::Update()
 {
+	ProcessDeferredRmlCleanup();
 	if (WasmCoreHost::PendingFaults() == 0)
 		return;
 	RemoveFaultedModules();
+}
+
+void WasmInterfaceSystem::ShutdownAndClearModule(CoreModuleRecord& module)
+{
+	if (module.host == nullptr)
+		return;
+
+	if (!WasmCoreHost::ModuleFaulted(module.descriptor.name)) {
+		ShutdownQuery query = {};
+		std::string error;
+		if (!WasmCoreHost::DispatchModule(module.host, CoreCallinOf("Shutdown"),
+				&query, nullptr, error) && !error.empty()) {
+			LOG_L(L_WARNING, "Core Wasm module %s shutdown failed: %s",
+				module.descriptor.name.c_str(), error.c_str());
+		}
+	}
+
+	NativeRmlUi::ClearOwnerContexts(module.host, RemoveRmlContext);
+}
+
+void WasmInterfaceSystem::ProcessDeferredRmlCleanup()
+{
+	for (void* owner : deferredRmlOwners)
+		NativeRmlUi::ClearOwnerContexts(owner, RemoveRmlContext);
+	deferredRmlOwners.clear();
 }
 
 void WasmInterfaceSystem::Tick(std::uint32_t frame)

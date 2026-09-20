@@ -235,6 +235,9 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::KillStatic(bool reload)
 template<typename TDrawerData, typename TDrawer>
 inline void CModelDrawerBase<TDrawerData, TDrawer>::ForceLegacyPath()
 {
+	if (forceLegacyPath)
+		return;
+
 	reselectionRequested = true;
 	forceLegacyPath = true;
 	LOG_L(L_WARNING, "[%s::%s] Using legacy (slow) %s renderer! This is caused by insufficient GPU/driver capabilities or by using of old Lua rendering API", className, __func__, className);

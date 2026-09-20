@@ -6,6 +6,19 @@
 
 #include "Rml/Backends/RmlUi_Backend.h"
 
+#include <unordered_map>
+#include <unordered_set>
+
+namespace {
+	struct ContextOwner {
+		void* owner;
+		bool menuPhase;
+	};
+	std::unordered_map<Rml::Context*, ContextOwner> contextOwners;
+	bool menuActive = true;
+	void* currentOwner = nullptr;
+}
+
 bool RmlGui::PullContextToFront(Rml::Context*)
 {
 	return false;
@@ -35,3 +48,57 @@ bool RmlGui::TakePointerCaptureDelta(Rml::Context*, int&, int&, int&)
 {
 	return false;
 }
+
+void RmlGui::RegisterNativeContext(Rml::Context* context)
+{
+	contextOwners.insert_or_assign(context, ContextOwner{currentOwner, menuActive});
+}
+
+bool RmlGui::IsMenuContext(const Rml::Context* context)
+{
+	const auto iter = contextOwners.find(const_cast<Rml::Context*>(context));
+	return iter != contextOwners.end() && iter->second.menuPhase;
+}
+
+void RmlGui::SetMenuActive(bool active)
+{
+	menuActive = active;
+}
+
+void RmlGui::SetCurrentContextOwner(void* owner, bool menuPhase)
+{
+	currentOwner = owner;
+	menuActive = menuPhase;
+}
+
+void* RmlGui::GetCurrentContextOwner()
+{
+	return currentOwner;
+}
+
+bool RmlGui::IsCurrentContextMenuPhase()
+{
+	return menuActive;
+}
+
+void* RmlGui::GetContextOwner(const Rml::Context* context)
+{
+	const auto iter = contextOwners.find(const_cast<Rml::Context*>(context));
+	return iter == contextOwners.end() ? nullptr : iter->second.owner;
+}
+
+const char* RmlGui::GetAssetVfsModes()
+{
+	return "";
+}
+
+namespace RmlGui {
+
+void ResetTestContextState()
+{
+	contextOwners.clear();
+	menuActive = true;
+	currentOwner = nullptr;
+}
+
+} // namespace RmlGui

@@ -5,13 +5,13 @@
 #include "System/FileSystem/FileHandler.h"
 
 VFSFileInterface::VFSFileInterface()
+	: vfsModes(SPRING_VFS_RAW_FIRST)
 {
 }
 
 Rml::FileHandle VFSFileInterface::Open(const Rml::String& path)
 {
-	const std::string mode = SPRING_VFS_RAW_FIRST;
-	CFileHandler* fh = new CFileHandler(path, mode);
+	CFileHandler* fh = new CFileHandler(path, vfsModes);
 	if (!fh->FileExists()) {
 		delete fh;
 		return (Rml::FileHandle) nullptr;
