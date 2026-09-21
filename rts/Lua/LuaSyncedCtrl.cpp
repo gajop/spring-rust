@@ -7709,7 +7709,7 @@ int LuaSyncedCtrl::SpawnCEG(lua_State* L)
 
 	// args from Lua are assumed not to include the prefix
 	// (Spawn*C*EG implies only custom generators can fire)
-	const unsigned int cegID = lua_isstring(L, 1)? explGenHandler.LoadCustomGeneratorID(lua_tostring(L, 1)): luaL_checkint(L, 1);
+	const unsigned int cegID = lua_israwstring(L, 1)? explGenHandler.LoadCustomGeneratorID(lua_tostring(L, 1)): luaL_checkint(L, 1);
 
 	lua_pushboolean(L, explGenHandler.GenExplosion(
 		cegID,

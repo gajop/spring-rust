@@ -207,7 +207,8 @@ pub fn spawn_ceg(
 ) -> crate::Result<SpawnCEGResult> {
     let ceg = generated::owned::effects_control::DefRef {
         name: String::from(ceg_name),
-        id: 0,
+        // DefRef uses a nonnegative ID for numeric lookup; -1 selects the name.
+        id: -1,
     };
     let result =
         generated::owned::effects_control::spawn_ceg(&ceg, pos, dir, radius, damage, dmg_mod)?;

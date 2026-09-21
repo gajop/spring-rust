@@ -949,13 +949,12 @@ bool CCustomExplosionGenerator::Load(CExplosionGeneratorHandler* handler, const 
 		// not a fatal error: any calls to Explosion will just return early
 		LOG_L(L_WARNING, "[CCEG::%s] table for CEG \"%s\" invalid (parse errors?)", __func__, tag);
 
-		// A tag that is nothing but digits is not a CEG somebody forgot to
-		// define: it is a caller handing us a number where a name belongs,
-		// e.g. Spring.SpawnCEG(3) - lua_isstring accepts numbers, so the
-		// mistake reaches us silently as "3".  The name on its own identifies
-		// nothing, so print where the request came from.
+		// A tag that is nothing but digits is probably a numeric value where a
+		// name belongs, e.g. a string "3" passed to a name-taking path.  The
+		// name on its own identifies nothing, so print where the request came
+		// from.
 		if (tag[0] != 0 && std::all_of(tag, tag + strlen(tag), [](char c) { return c >= '0' && c <= '9'; })) {
-			LOG_L(L_WARNING, "[CCEG::%s] \"%s\" is numeric, so a caller passed a number instead of a CEG name", __func__, tag);
+			LOG_L(L_WARNING, "[CCEG::%s] \"%s\" is numeric-looking, so a caller passed a value instead of a CEG name", __func__, tag);
 			CrashHandler::Stacktrace(Threading::GetCurrentThread(), "CEG", LOG_LEVEL_WARNING);
 		}
 
@@ -1190,4 +1189,3 @@ bool CCustomExplosionGenerator::OutputProjectileClassInfo()
 	return false;
 #endif
 }
-
