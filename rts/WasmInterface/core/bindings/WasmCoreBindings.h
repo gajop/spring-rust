@@ -184,6 +184,14 @@ public:
 		if (host.environment != WasmEnvironment::UI &&
 			!RegisterFastImports(linker, &host, error))
 			return false;
+#if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_IO_BINDINGS)
+		// Register the legacy variable-I/O callbacks before the generated
+		// transports. Several imports share names while using different
+		// descriptor layouts; the selected generated transport must shadow this
+		// compatibility registration.
+		if (!generated::RegisterGeneratedVariableIoImports(linker, &host, error))
+			return false;
+#endif
 #if defined(RECOIL_WASM_CORE_GENERATED_BINDINGS)
 		if (!generated::RegisterGeneratedImports(linker, &host, error))
 			return false;
@@ -210,10 +218,6 @@ public:
 #endif
 #if defined(RECOIL_WASM_CORE_GENERATED_BORROWED_BINDINGS)
 		if (!generated::RegisterGeneratedBorrowedImports(linker, &host, error))
-			return false;
-#endif
-#if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_IO_BINDINGS)
-		if (!generated::RegisterGeneratedVariableIoImports(linker, &host, error))
 			return false;
 #endif
 		if (!RegisterUnitsInfoVariableImports(linker, &host, error))

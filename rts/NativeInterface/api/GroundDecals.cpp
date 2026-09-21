@@ -6,6 +6,7 @@
 #include <cstring>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "Rendering/Env/IGroundDecalDrawer.h"
 #include "Rendering/Env/Decals/GroundDecal.h"
@@ -21,6 +22,11 @@ namespace {
 
 static thread_local uint8_t scratchBuffer[8192];
 static thread_local size_t bufferPos = 0;
+static thread_local std::vector<uint32_t> decalIDs;
+static thread_local std::vector<std::string> textureNameStorage;
+static thread_local std::vector<const char*> textureNamePointers;
+static thread_local std::vector<std::string> filenameStorage;
+static thread_local std::vector<const char*> filenamePointers;
 
 static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
@@ -138,26 +144,16 @@ static void NativeGetAllGroundDecals(const GetAllGroundDecalsQuery*, GetAllGroun
 	if (validCount == 0)
 		return;
 
-	const size_t bytesNeeded = validCount * sizeof(uint32_t);
-	if (bytesNeeded > sizeof(scratchBuffer)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	uint32_t* ids = reinterpret_cast<uint32_t*>(scratchBuffer + bufferPos);
-	size_t base = bufferPos;
-	bufferPos += bytesNeeded;
-
-	uint32_t idx = 0;
+	decalIDs.clear();
+	decalIDs.reserve(validCount);
 	for (const auto& d : decals) {
 		if (!d.IsValid())
 			continue;
-		ids[idx++] = d.info.id;
+		decalIDs.push_back(d.info.id);
 	}
 
-	bufferPos = base + bytesNeeded;
-	result->decalIDs = ids;
-	result->count = validCount;
+	result->decalIDs = decalIDs.data();
+	result->count = decalIDs.size();
 }
 
 static void NativeGetGroundDecalType(const GetGroundDecalTypeQuery* query, GetGroundDecalTypeResult* result)
@@ -237,23 +233,16 @@ static void NativeGetGroundDecalTextures(const GetGroundDecalTexturesQuery* quer
 	const auto texCount = texNames.size();
 
 	if (texCount > 0) {
-		const size_t pointerBytes = texCount * sizeof(const char*);
-		if (bufferPos + pointerBytes > sizeof(scratchBuffer)) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
+		textureNameStorage.clear();
+		textureNamePointers.clear();
+		textureNameStorage.reserve(texCount);
+		textureNamePointers.reserve(texCount);
+		for (const auto& name : texNames) {
+			textureNameStorage.push_back(name);
+			textureNamePointers.push_back(textureNameStorage.back().c_str());
 		}
 
-		const char** names = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
-		bufferPos += pointerBytes;
-
-		for (size_t i = 0; i < texCount; ++i) {
-			if (!CopyString(texNames[i], &names[i])) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				return;
-			}
-		}
-
-		result->textures = names;
+		result->textures = textureNamePointers.data();
 		result->textureCount = static_cast<uint32_t>(texCount);
 	}
 
@@ -265,23 +254,16 @@ static void NativeGetGroundDecalTextures(const GetGroundDecalTexturesQuery* quer
 	if (fileCount == 0)
 		return;
 
-	const size_t pointerBytes = fileCount * sizeof(const char*);
-	if (bufferPos + pointerBytes > sizeof(scratchBuffer)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
+	filenameStorage.clear();
+	filenamePointers.clear();
+	filenameStorage.reserve(fileCount);
+	filenamePointers.reserve(fileCount);
+	for (const auto& name : texFileNames) {
+		filenameStorage.push_back(name);
+		filenamePointers.push_back(filenameStorage.back().c_str());
 	}
 
-	const char** names = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
-	bufferPos += pointerBytes;
-
-	for (size_t i = 0; i < fileCount; ++i) {
-		if (!CopyString(texFileNames[i], &names[i])) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
-		}
-	}
-
-	result->filenames = names;
+	result->filenames = filenamePointers.data();
 	result->filenameCount = static_cast<uint32_t>(fileCount);
 }
 

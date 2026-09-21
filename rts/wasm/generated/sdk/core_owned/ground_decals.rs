@@ -27,7 +27,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAllGroundDecalsResult {
             pub decal_i_ds: Vec<u32>,
         }
@@ -70,7 +70,7 @@
             pub decal_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalMiddlePosResult {
             pub mid_pos: Vec<f32>,
             pub success: bool,
@@ -95,7 +95,7 @@
             pub decal_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalNormalResult {
             pub normal: Vec<f32>,
         }
@@ -116,7 +116,7 @@
             pub decal_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalQuadPosResult {
             pub positions: Vec<f32>,
             pub success: bool,
@@ -163,23 +163,23 @@
             pub main_tex: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalTextureResult {
             pub texture: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalTexturesOptions {
             pub main_tex: Option<bool>,
             pub include_filenames: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalTexturesQuery {
             pub options: GetGroundDecalTexturesOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalTexturesResult {
             pub textures: Vec<String>,
             pub filenames: Vec<String>,
@@ -190,7 +190,7 @@
             pub decal_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalTintResult {
             pub tint: Vec<f32>,
         }
@@ -200,7 +200,7 @@
             pub decal_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalTypeResult {
             pub type_: String,
         }
@@ -211,7 +211,7 @@
             pub quad_index: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalUserDataResult {
             pub values: Vec<f32>,
             pub success: bool,
@@ -338,7 +338,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetGroundDecalTextureQuery {
             pub decal_id: u32,
             pub texture_name: String,
@@ -432,7 +432,7 @@
             pub glow_falloff: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalMiddlePosValue {
             pub mid_pos: Vec<f32>,
             pub success: bool,
@@ -453,7 +453,7 @@
             pub owner_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalQuadPosValue {
             pub positions: Vec<f32>,
             pub success: bool,
@@ -479,13 +479,13 @@
             pub tex_traveled_distance: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalTexturesValue {
             pub textures: Vec<String>,
             pub filenames: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundDecalUserDataValue {
             pub values: Vec<f32>,
             pub success: bool,

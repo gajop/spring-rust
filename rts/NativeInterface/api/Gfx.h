@@ -40,6 +40,7 @@ struct GfxCullFaceQuery { GfxCullFace face; };
 struct GfxBoolResult { const Error* error; bool value; };
 struct GfxIntResult { const Error* error; int32_t value; };
 struct GfxUIntResult { const Error* error; uint32_t value; };
+struct GfxUInt64Result { const Error* error; uint64_t value; };
 struct GfxFloatResult { const Error* error; float value; };
 struct GfxStringResult { const Error* error; const char* value; };
 
@@ -67,7 +68,14 @@ struct GfxGetMatrixDataResult { const Error* error; float values[16]; };
 // Non-GL matrix queries accepted by GetMatrixData. These let screen-effect
 // callins retrieve the rendered camera transform after the world drawer has
 // reset the compatibility matrices to 2D screen space.
+static constexpr uint32_t GFX_MATRIX_VIEWPROJECTION = 0x10001u;
 static constexpr uint32_t GFX_MATRIX_VIEWPROJECTIONINVERSE = 0x10000u;
+static constexpr uint32_t GFX_MATRIX_VIEW = 0x10002u;
+static constexpr uint32_t GFX_MATRIX_VIEWINVERSE = 0x10003u;
+static constexpr uint32_t GFX_MATRIX_PROJECTION = 0x10004u;
+static constexpr uint32_t GFX_MATRIX_PROJECTIONINVERSE = 0x10005u;
+static constexpr uint32_t GFX_MATRIX_BILLBOARD = 0x10006u;
+static constexpr uint32_t GFX_MATRIX_SHADOW = 0x10007u;
 struct GfxVertexQuery { float x; float y; float z; float w; uint32_t count; };
 struct GfxMultiTexCoordQuery { int32_t texNum; float s; float t; float r; float q; uint32_t count; };
 struct GfxColorQuery { float r; float g; float b; float a; };
@@ -111,8 +119,8 @@ struct GfxUniformLocationQuery { uint32_t shaderID; const char* name; };
 struct GfxUniformLocationResult { const Error* error; int32_t location; };
 struct GfxUniformFloatQuery { int32_t location; float values[4]; uint32_t count; };
 struct GfxUniformIntQuery { int32_t location; int32_t values[4]; uint32_t count; };
-struct GfxUniformArrayFloatQuery { int32_t location; const float* values; uint32_t count; };
-struct GfxUniformArrayIntQuery { int32_t location; const int32_t* values; uint32_t count; };
+struct GfxUniformArrayFloatQuery { int32_t location; const float* values; uint32_t count; uint32_t components; };
+struct GfxUniformArrayIntQuery { int32_t location; const int32_t* values; uint32_t count; uint32_t components; };
 struct GfxUniformMatrixQuery { int32_t location; const float* values; uint32_t count; bool transpose; };
 struct GfxSubroutineIndexQuery { uint32_t shaderID; uint32_t shaderType; const char* name; };
 struct GfxSubroutineIndexResult { const Error* error; int32_t index; bool success; };
@@ -152,6 +160,8 @@ struct GfxConsoleCommandsResult { const Error* error; const GfxConsoleCommandEnt
 
 #ifdef __cplusplus
 bool GetNativeGfxTextureInfo(const char* name, uint32_t* id, int32_t* xsize, int32_t* ysize, uint32_t* target);
+bool GetNativeGfxDisplayList(uint32_t id, uint32_t* glID);
+bool GetNativeGfxShaderProgram(uint32_t id, uint32_t* glID);
 #endif
 struct GfxCopyToTextureQuery { const char* name; int32_t xoff; int32_t yoff; int32_t x; int32_t y; int32_t width; int32_t height; uint32_t target; uint32_t level; };
 struct GfxUploadTextureQuery {
@@ -171,7 +181,12 @@ struct GfxUploadTextureQuery {
 };
 struct GfxBindImageTextureQuery { uint32_t unit; const char* name; int32_t level; int32_t layer; bool layered; uint32_t access; uint32_t format; };
 struct GfxReadPixelsQuery { int32_t x; int32_t y; int32_t width; int32_t height; uint32_t format; };
-struct GfxReadPixelsResult { const Error* error; const float* values; uint32_t count; uint32_t components; };
+struct GfxReadPixelsResult {
+	const Error* error;
+	RECOIL_WASM_LIST("f32", "count") const float* values;
+	uint32_t count;
+	uint32_t components;
+};
 struct GfxRBOCreateQuery { int32_t xsize; int32_t ysize; uint32_t target; uint32_t format; int32_t samples; };
 struct GfxRBOInfoQuery { uint32_t rboID; };
 struct GfxRBOInfoResult {
@@ -338,6 +353,7 @@ struct GfxCallbackQuery { NativeCallback callback; void* userData; };
 struct GfxBeginEndQuery { uint32_t primitive; NativeCallback callback; void* userData; };
 struct GfxRenderToTextureQuery { const char* name; NativeCallback callback; void* userData; };
 struct GfxUnsafeStateQuery { uint32_t state; bool reverse; NativeCallback callback; void* userData; };
+struct GfxCreateQueryQuery { uint32_t target; bool hasTarget; };
 struct GfxRunQueryQuery { uint32_t id; NativeCallback callback; void* userData; };
 struct GfxSaveImageOptions { bool alpha; bool yflip; bool grayscale16bit; };
 struct GfxSaveImageQuery { int32_t x; int32_t y; int32_t width; int32_t height; const char* filename; GfxSaveImageOptions options; uint32_t readBuffer; };
@@ -581,10 +597,10 @@ struct GfxApi {
 	void (*CreateList)(const GfxCallbackQuery* query, GfxUIntResult* result);
 	void (*CallList)(const GfxUIntQuery* query, GfxEmptyResult* result);
 	void (*DeleteList)(const GfxUIntQuery* query, GfxEmptyResult* result);
-	void (*CreateQuery)(const GfxEmptyQuery* query, GfxUIntResult* result);
+	void (*CreateQuery)(const GfxCreateQueryQuery* query, GfxUIntResult* result);
 	void (*DeleteQuery)(const GfxUIntQuery* query, GfxEmptyResult* result);
 	void (*RunQuery)(const GfxRunQueryQuery* query, GfxEmptyResult* result);
-	void (*GetQuery)(const GfxUIntQuery* query, GfxUIntResult* result);
+	void (*GetQuery)(const GfxUIntQuery* query, GfxUInt64Result* result);
 	void (*GetGlobalTexNames)(const GfxEmptyQuery* query, GfxAtlasTexturesResult* result);
 	void (*GetGlobalTexCoords)(const GfxStringQuery* query, GfxAtlasTextureResult* result);
 	void (*BeginText)(const GfxBoolQuery* query, GfxEmptyResult* result);

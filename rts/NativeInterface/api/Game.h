@@ -123,7 +123,15 @@ struct IsCheatingEnabledQuery { uint8_t _unused; };
 struct IsCheatingEnabledResult { const Error* error; bool enabled; };
 
 struct IsGodModeEnabledQuery { uint8_t _unused; };
-struct IsGodModeEnabledResult { const Error* error; bool enabled; };
+// Lua returns the aggregate god-mode state and the two independent control
+// flags. Keep all three values in the typed result so native and Core callers
+// observe the same state as Spring.IsGodModeEnabled.
+struct IsGodModeEnabledResult {
+	const Error* error;
+	bool enabled;
+	bool controlAllies;
+	bool controlEnemies;
+};
 
 struct IsDevLuaEnabledQuery { uint8_t _unused; };
 struct IsDevLuaEnabledResult { const Error* error; bool enabled; };

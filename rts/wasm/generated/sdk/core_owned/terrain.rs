@@ -55,7 +55,7 @@
             pub z: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundInfoResult {
             pub terrain_type_index: i32,
             pub terrain_type_name: String,
@@ -119,7 +119,7 @@
             pub terrain_type_index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTerrainTypeDataResult {
             pub index: i32,
             pub name: String,
@@ -174,7 +174,7 @@
             pub curr_max_height: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroundInfoValue {
             pub terrain_type_index: i32,
             pub terrain_type_name: String,
@@ -199,7 +199,7 @@
             pub points_z: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTerrainTypeDataValue {
             pub index: i32,
             pub name: String,

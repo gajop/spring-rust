@@ -6,7 +6,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetSoundDevicesResult {
             pub devices: Vec<String>,
         }
@@ -31,7 +31,7 @@
             pub time: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LoadSoundDefQuery {
             pub sound_name: String,
         }
@@ -51,7 +51,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PlaySoundFileQuery {
             pub sound_file: String,
             pub volume: f32,
@@ -65,7 +65,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PlaySoundStreamQuery {
             pub ogg_file: String,
             pub volume: f32,
@@ -77,7 +77,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PreloadSoundItemQuery {
             pub sound_name: String,
         }
@@ -87,7 +87,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetSoundEffectParamsQuery {
             pub params: SoundEffectParams,
         }

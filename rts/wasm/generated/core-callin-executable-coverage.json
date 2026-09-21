@@ -369,9 +369,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "class": "generated-shared-scratch",
       "verified": false,
@@ -749,9 +747,7 @@
       "aggregation": "first",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "class": "generated-packed-result",
       "verified": false,
@@ -1238,9 +1234,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "class": "generated-direct",
       "verified": false,
@@ -1377,9 +1371,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "class": "generated-shared-scratch",
       "verified": false,
@@ -1441,9 +1433,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "class": "generated-fixed-flattened",
       "verified": false,
@@ -1555,9 +1545,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "class": "generated-direct",
       "verified": false,
@@ -1892,9 +1880,7 @@
       "aggregation": "first",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "class": "specialized",
       "verified": false,

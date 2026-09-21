@@ -390,7 +390,7 @@ fn probe_is_god_mode_enabled(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::game::is_god_mode_enabled(0u8);
     let fields = match result {
         Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("enabled", value)];
+            let output_fields: Vec<String> = vec![encode_bool("enabled", value.enabled)];
             output_fields.join("|")
         }
         Err(error) => format!("__error|i|{}", error.code),
@@ -5197,7 +5197,7 @@ fn probe_set_god_mode(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::game::is_god_mode_enabled(0u8);
     let fields = match result {
         Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("enabled", value)];
+            let output_fields: Vec<String> = vec![encode_bool("enabled", value.enabled), encode_bool("controlAllies", value.control_allies), encode_bool("controlEnemies", value.control_enemies)];
             output_fields.join("|")
         }
         Err(error) => format!("__error|i|{}", error.code),

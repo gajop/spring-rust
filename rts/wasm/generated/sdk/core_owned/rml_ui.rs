@@ -1,18 +1,19 @@
     pub mod rml_ui {
         use super::{Result, String, Vec};
 
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum RmlDataFieldType {
-            RmlFieldBool,
-            RmlFieldColor,
-            RmlFieldFloat,
-            RmlFieldInt,
-            RmlFieldPercent,
-            RmlFieldPixels,
-            RmlFieldString,
+            RmlFieldBool = 0,
+            RmlFieldColor = 4,
+            RmlFieldFloat = 2,
+            RmlFieldInt = 1,
+            RmlFieldPercent = 6,
+            RmlFieldPixels = 5,
+            RmlFieldString = 3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlAddTranslationStringQuery {
             pub key: String,
             pub translation: String,
@@ -23,7 +24,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlClearDocumentPathRequestsQuery {
             pub document_path: String,
         }
@@ -54,13 +55,13 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextCreateDataModelQuery {
             pub context_handle: u64,
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextCreateDocumentQuery {
             pub context_handle: u64,
             pub tag: String,
@@ -88,7 +89,7 @@
             pub destroy_callback: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextEventListenerRemoveQuery {
             pub context_handle: u64,
             pub event_listener_handle: u64,
@@ -102,7 +103,7 @@
             pub y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextGetDocumentQuery {
             pub context_handle: u64,
             pub name: String,
@@ -139,7 +140,7 @@
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextGetNameResult {
             pub name: String,
         }
@@ -156,7 +157,7 @@
             pub key_modifier_state: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextLoadDocumentQuery {
             pub context_handle: u64,
             pub document_path: String,
@@ -191,7 +192,7 @@
             pub key_modifier_state: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextOpenDataModelQuery {
             pub context_handle: u64,
             pub name: String,
@@ -231,26 +232,26 @@
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextStringBoolQuery {
             pub context_handle: u64,
             pub name: String,
             pub value: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextStringQuery {
             pub context_handle: u64,
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlContextTextInputQuery {
             pub context_handle: u64,
             pub text: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlCreateContextQuery {
             pub name: String,
         }
@@ -261,27 +262,27 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataEventArgs {
             pub event_handle: u64,
             pub target_element_handle: u64,
             pub values: Vec<RmlDataValue>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataFieldDef {
             pub name: String,
             pub type_: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelBindBoolQuery {
             pub data_model_handle: u64,
             pub name: String,
             pub initial_value: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelBindColorQuery {
             pub data_model_handle: u64,
             pub name: String,
@@ -307,28 +308,28 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelBindFloatQuery {
             pub data_model_handle: u64,
             pub name: String,
             pub initial_value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelBindIntQuery {
             pub data_model_handle: u64,
             pub name: String,
             pub initial_value: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelBindPercentQuery {
             pub data_model_handle: u64,
             pub name: String,
             pub initial_value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelBindPixelsQuery {
             pub data_model_handle: u64,
             pub name: String,
@@ -341,14 +342,14 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelBindRowsQuery {
             pub data_model_handle: u64,
             pub name: String,
             pub fields: Vec<RmlDataFieldDef>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelBindStringQuery {
             pub data_model_handle: u64,
             pub name: String,
@@ -399,7 +400,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelGetStringResult {
             pub value: String,
             pub success: bool,
@@ -411,7 +412,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelSetRowsQuery {
             pub rows_handle: u64,
             pub values: Vec<RmlDataValue>,
@@ -461,13 +462,13 @@
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataModelVariableStringQuery {
             pub variable_handle: u64,
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDataValue {
             pub type_: u8,
             pub bool_value: bool,
@@ -485,7 +486,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDocumentCreateElementQuery {
             pub document_handle: u64,
             pub tag_name: String,
@@ -503,7 +504,7 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDocumentGetStringResult {
             pub value: String,
         }
@@ -513,7 +514,7 @@
             pub document_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDocumentInlineScriptQuery {
             pub document_handle: u64,
             pub content: String,
@@ -521,25 +522,25 @@
             pub source_line: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDocumentSetTitleQuery {
             pub document_handle: u64,
             pub title: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDocumentShowOptions {
             pub modal: Option<i32>,
             pub focus: Option<i32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDocumentShowQuery {
             pub document_handle: u64,
             pub options: RmlDocumentShowOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlDocumentStringQuery {
             pub document_handle: u64,
             pub value: String,
@@ -562,13 +563,13 @@
             pub child_element_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementDispatchEventQuery {
             pub element_handle: u64,
             pub event: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementEventListenerRemoveQuery {
             pub element_handle: u64,
             pub event_listener_handle: u64,
@@ -596,7 +597,7 @@
             pub end: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementFormControlSelectionResult {
             pub start: i32,
             pub end: i32,
@@ -604,26 +605,26 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementFormSubmitQuery {
             pub element_handle: u64,
             pub name: String,
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementGetAttributeQuery {
             pub element_handle: u64,
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementGetAttributeResult {
             pub value: String,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementGetByStringQuery {
             pub element_handle: u64,
             pub value: String,
@@ -659,12 +660,12 @@
             pub height: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementGetStringResult {
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementHandleListResult {
             pub element_handles: Vec<u64>,
         }
@@ -707,7 +708,7 @@
             pub align_with_top: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementSetAttributeQuery {
             pub element_handle: u64,
             pub name: String,
@@ -726,25 +727,25 @@
             pub value: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementSetStringQuery {
             pub element_handle: u64,
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementStringBoolQuery {
             pub element_handle: u64,
             pub name: String,
             pub value: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementStringListResult {
             pub values: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementStringQuery {
             pub element_handle: u64,
             pub value: String,
@@ -756,7 +757,7 @@
             pub index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlElementTabSetIndexStringQuery {
             pub element_handle: u64,
             pub index: i32,
@@ -794,7 +795,7 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlEventGetStringResult {
             pub value: String,
             pub exists: bool,
@@ -838,13 +839,13 @@
             pub event_listener_handle: u64,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlEventParameterQuery {
             pub event_handle: u64,
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlGetContextQuery {
             pub name: String,
         }
@@ -855,12 +856,12 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlGetDocumentPathRequestsQuery {
             pub document_path: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlGetDocumentPathRequestsResult {
             pub paths: Vec<String>,
         }
@@ -870,7 +871,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlGetVersionResult {
             pub version: String,
         }
@@ -885,7 +886,7 @@
             pub ready: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlLoadFontFaceQuery {
             pub file_path: String,
             pub fallback: bool,
@@ -897,14 +898,14 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlRegisterEventTypeOptions {
             pub interruptible: bool,
             pub bubbles: bool,
             pub default_phase: Option<i32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlRegisterEventTypeQuery {
             pub event_type: String,
             pub options: RmlRegisterEventTypeOptions,
@@ -915,7 +916,7 @@
             pub event_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlRemoveContextByNameQuery {
             pub name: String,
         }
@@ -935,7 +936,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlSetDebugContextByNameQuery {
             pub name: String,
         }
@@ -955,7 +956,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlSetMouseCursorAliasQuery {
             pub rml_name: String,
             pub recoil_name: String,
@@ -966,7 +967,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RmlSolLuaDataModelSetDirtyQuery {
             pub data_model_handle: u64,
             pub property: String,
@@ -1251,7 +1252,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DataModelGetStringValue {
             pub value: String,
             pub success: bool,
@@ -1299,7 +1300,7 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ElementFormControlInputGetSelectionValue {
             pub start: i32,
             pub end: i32,
@@ -1307,7 +1308,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ElementFormControlTextAreaGetSelectionValue {
             pub start: i32,
             pub end: i32,
@@ -1315,7 +1316,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ElementGetAttributeValue {
             pub value: String,
             pub exists: bool,
@@ -1397,7 +1398,7 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EventGetParameterStringValue {
             pub value: String,
             pub exists: bool,
@@ -1421,7 +1422,7 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EventGetTypeValue {
             pub value: String,
             pub exists: bool,
@@ -2063,7 +2064,7 @@
 
         #[inline]
         pub fn data_model_set_rows(rows_handle: u64, values: &[RmlDataValue]) -> Result<bool> {
-            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.type_ as u32).to_le_bytes()); __b.extend_from_slice(&(if __item.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.int_value.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.red as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.green as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.blue as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.alpha as u32).to_le_bytes());} __b };
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.type_ as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if __item.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.int_value.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.red as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.green as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.blue as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.alpha as u32).to_le_bytes());} __b };
             crate::generated::dynamic_input::rml_ui::data_model_set_rows(rows_handle as i64, &__blob0)
         }
 

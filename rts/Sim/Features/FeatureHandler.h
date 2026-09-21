@@ -5,6 +5,7 @@
 
 #include <vector>
 
+#include "System/SpringMath.h"
 #include "System/float3.h"
 #include "System/Misc/NonCopyable.h"
 #include "System/creg/creg_cond.h"
@@ -18,23 +19,23 @@ class LuaTable;
 struct FeatureDef;
 
 struct FeatureLoadParams {
-	const CSolidObject* parentObj;
-	const UnitDef* unitDef;
-	const FeatureDef* featureDef;
+	const CSolidObject* parentObj = nullptr;
+	const UnitDef* unitDef = nullptr;
+	const FeatureDef* featureDef = nullptr;
 
 	// not used if parentObj != nullptr
-	float3 pos;
-	float3 speed;
+	float3 pos = ZeroVector;
+	float3 speed = ZeroVector;
 
-	int featureID;
-	int teamID;
-	int allyTeamID;
+	int featureID = -1;
+	int teamID = -1;
+	int allyTeamID = -1;
 
-	short int heading;
-	short int facing;
+	short int heading = 0;
+	short int facing = FACING_SOUTH;
 
-	int wreckLevels;
-	int smokeTime;
+	int wreckLevels = 0;
+	int smokeTime = 0;
 };
 
 

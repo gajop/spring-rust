@@ -1,12 +1,13 @@
     pub mod config {
         use super::{Result, String, Vec};
 
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum ConfigValueType {
-            ConfigTypeBool,
-            ConfigTypeFloat,
-            ConfigTypeInt,
-            ConfigTypeString,
+            ConfigTypeBool = 3,
+            ConfigTypeFloat = 1,
+            ConfigTypeInt = 0,
+            ConfigTypeString = 2,
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -20,7 +21,7 @@
             pub read_only: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetConfigFloatQuery {
             pub key: String,
             pub default_value: Option<f32>,
@@ -32,7 +33,7 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetConfigIntQuery {
             pub key: String,
             pub default_value: Option<i32>,
@@ -49,18 +50,18 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetConfigParamsResult {
             pub params: Vec<ConfigParam>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetConfigStringQuery {
             pub key: String,
             pub default_value: Option<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetConfigStringResult {
             pub value: String,
             pub exists: bool,
@@ -71,12 +72,12 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetLogSectionsResult {
             pub sections: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetConfigFloatQuery {
             pub key: String,
             pub value: f32,
@@ -88,7 +89,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetConfigIntQuery {
             pub key: String,
             pub value: i32,
@@ -100,7 +101,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetConfigStringQuery {
             pub key: String,
             pub value: String,
@@ -112,7 +113,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetLogSectionFilterLevelQuery {
             pub section: String,
             pub level: i32,
@@ -137,7 +138,7 @@
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetConfigStringValue {
             pub value: String,
             pub exists: bool,

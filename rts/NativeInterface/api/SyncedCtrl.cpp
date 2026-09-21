@@ -74,6 +74,7 @@
 #include "System/StringHash.h"
 #include "System/float3.h"
 #include "System/Matrix44f.h"
+#include "System/SpringMath.h"
 #include "System/creg/STL_Map.h"
 #include "System/Log/ILog.h"
 #include "Sim/Units/Scripts/CobInstance.h"
@@ -2036,14 +2037,11 @@ static void NativeSetUnitPieceCollisionVolumeData(const SetUnitPieceCollisionVol
 	result->success = true;
 }
 
-// Weapon numbers on the native surface follow the Lua convention
-// (LUA_WEAPON_BASE_INDEX): 1 selects the unit's first weapon. Anything below 1
-// resolves to a negative index, which each caller reads as "no specific weapon"
-// the way Lua does. UnitsWeapons.cpp::GetLuaWeapon applies the same rule to the
-// reader callouts.
-static int LuaWeaponIndex(int32_t luaWeaponNum)
+// These control fields preserve the public one-based weapon-number convention.
+// The engine's weapon vector is zero based.
+static int WeaponIndexFromOneBasedNumber(int32_t weaponNum)
 {
-	return static_cast<int>(luaWeaponNum) - LUA_WEAPON_BASE_INDEX;
+	return static_cast<int>(weaponNum) - 1;
 }
 
 static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetResult* result)
@@ -2072,7 +2070,7 @@ static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetRe
 	const float3 targetPos(query->target.pos.x, query->target.pos.y, query->target.pos.z);
 
 	if (query->target.isGroundTarget) {
-		const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+		const int weaponIndex = WeaponIndexFromOneBasedNumber(query->weaponNum);
 		if (weaponIndex < 0) {
 			result->success = unit->AttackGround(targetPos, query->options.userTarget, query->options.manualFire);
 		} else if (static_cast<size_t>(weaponIndex) < unit->weapons.size()) {
@@ -2095,7 +2093,7 @@ static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetRe
 		return;
 	}
 
-	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	const int weaponIndex = WeaponIndexFromOneBasedNumber(query->weaponNum);
 	if (weaponIndex < 0) {
 		result->success = unit->AttackUnit(target, query->options.userTarget, query->options.manualFire);
 	} else if (static_cast<size_t>(weaponIndex) < unit->weapons.size()) {
@@ -2124,7 +2122,7 @@ static void NativeSetUnitShieldState(const SetUnitShieldStateQuery* query, SetUn
 
 	CPlasmaRepulser* shield = static_cast<CPlasmaRepulser*>(unit->shieldWeapon);
 
-	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	const int weaponIndex = WeaponIndexFromOneBasedNumber(query->weaponNum);
 	if (weaponIndex >= 0 && static_cast<size_t>(weaponIndex) < unit->weapons.size()) {
 		shield = dynamic_cast<CPlasmaRepulser*>(unit->weapons[weaponIndex]);
 	}
@@ -2162,7 +2160,7 @@ static void NativeSetUnitShieldRechargeDelay(const SetUnitShieldRechargeDelayQue
 
 	CPlasmaRepulser* shield = static_cast<CPlasmaRepulser*>(unit->shieldWeapon);
 
-	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	const int weaponIndex = WeaponIndexFromOneBasedNumber(query->weaponNum);
 	if (weaponIndex >= 0 && static_cast<size_t>(weaponIndex) < unit->weapons.size()) {
 		shield = dynamic_cast<CPlasmaRepulser*>(unit->weapons[weaponIndex]);
 	}
@@ -2694,7 +2692,9 @@ static void NativeSetUnitWeaponState(const SetUnitWeaponStateQuery* query, SetUn
 		return;
 	}
 
-	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	// UnitControl's weapon control calls use zero-based native indices.  The
+	// Lua parity adapter converts Lua's one-based number before reaching here.
+	const int weaponIndex = query->weaponNum;
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
 		return;
@@ -2729,7 +2729,9 @@ static void NativeUnitWeaponFire(const UnitWeaponFireQuery* query, UnitWeaponFir
 		return;
 	}
 
-	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	// UnitControl's weapon control calls use zero-based native indices.  The
+	// Lua parity adapter converts Lua's one-based number before reaching here.
+	const int weaponIndex = query->weaponNum;
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
 		return;
@@ -2756,7 +2758,9 @@ static void NativeUnitWeaponHoldFire(const UnitWeaponHoldFireQuery* query, UnitW
 		return;
 	}
 
-	const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+	// UnitControl's weapon control calls use zero-based native indices.  The
+	// Lua parity adapter converts Lua's one-based number before reaching here.
+	const int weaponIndex = query->weaponNum;
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
 		return;
@@ -2938,7 +2942,9 @@ static void NativeSetUnitWeaponDamages(const SetUnitWeaponDamagesQuery* query, S
 		// "selfDestruct"
 		damages = DynDamageArray::GetMutable(unit->selfdExpDamages);
 	} else {
-		const int weaponIndex = LuaWeaponIndex(query->weaponNum);
+		// UnitControl's weapon control calls use zero-based native indices.  The
+		// Lua parity adapter converts Lua's one-based number before reaching here.
+		const int weaponIndex = query->weaponNum;
 		if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
 			return;
@@ -3813,14 +3819,16 @@ static void NativeCreateFeature(const CreateFeatureQuery* query, CreateFeatureRe
 
 	FeatureLoadParams params;
 	params.parentObj = nullptr;
+	params.unitDef = nullptr;
 	params.featureDef = featureDef;
 	params.pos = pos;
 	params.speed = ZeroVector;
 	params.featureID = query->featureID;
 	params.teamID = teamID;
 	params.allyTeamID = (teamID < 0) ? -1 : teamHandler.AllyTeam(teamID);
-	params.heading = query->facing;
-	params.facing = query->facing;
+	const short heading = static_cast<short>(query->heading);
+	params.heading = heading;
+	params.facing = GetFacingFromHeading(heading);
 	params.wreckLevels = 0;
 	params.smokeTime = 0;
 

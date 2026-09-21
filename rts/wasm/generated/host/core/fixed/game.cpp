@@ -787,22 +787,44 @@ wasm_trap_t* Core_game_is_god_mode_enabled(void* environment, wasmtime_caller_t*
     if (state == nullptr || state->native == nullptr || state->native->game == nullptr ||
         state->native->game->IsGodModeEnabled == nullptr)
         return Trap("IsGodModeEnabled generated Core binding is unavailable");
-    if (1 != 0 && (slots == nullptr || slotCount != 1))
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
         return Trap("IsGodModeEnabled generated Core ABI signature mismatch");
-    if (1 == 0 && slotCount != 0)
+    if (2 == 0 && slotCount != 0)
         return Trap("IsGodModeEnabled generated Core ABI signature mismatch");
 
     std::string budgetError;
-    ImportGuard guard(state, 2u, budgetError);
+    ImportGuard guard(state, 3u, budgetError);
     if (!guard.Ok())
         return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
+    if (!state->memory.Contains(output, 12u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
 
     IsGodModeEnabledQuery query{};
     query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
     IsGodModeEnabledResult result{};
     state->native->game->IsGodModeEnabled(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
-    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.enabled ? 1u : 0u), errorCode));
+    if (errorCode != 0) {
+        slots[0].i32 = errorCode;
+        return nullptr;
+    }
+    std::array<std::uint8_t, 12> wire{};
+    WireWriter writer(wire);
+    if (!writer.Bool(result.enabled)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.controlAllies)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.controlEnemies)) return Trap("generated Core wire overflow");
+    if (!writer.Finish(4u))
+        return Trap("generated Core wire layout mismatch for IsGodModeEnabled");
+    if (!state->memory.Write(output, wire.data(), wire.size()))
+        return Trap("generated Core output range changed unexpectedly");
+    slots[0].i32 = 0;
     return nullptr;
 }
 
@@ -989,10 +1011,10 @@ bool RegisterGeneratedImports_game(wasmtime_linker_t* linker, HostState* state, 
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGenerated(linker, "spring:game", "is-god-mode-enabled",
-                MakeFuncType(params, 1, results, 1), Core_game_is_god_mode_enabled, state, error))
+                MakeFuncType(params, 2, results, 1), Core_game_is_god_mode_enabled, state, error))
             return false;
     }
     {

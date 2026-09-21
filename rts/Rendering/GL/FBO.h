@@ -27,6 +27,7 @@ public:
 	static bool IsSupported();
 	static bool IsReady();
 	static GLint GetCurrentBoundFBO();
+	static GLuint SetWorldDrawTarget(GLuint fboId);
 
 	FBO(         ) { Init(false); }
 	explicit FBO(bool noop) { Init( noop); }
@@ -199,6 +200,7 @@ private:
 
 	static GLint maxAttachments;
 	static GLsizei maxSamples;
+	static GLuint worldDrawTarget;
 
 	/**
 	 * @brief DownloadAttachment

@@ -32,6 +32,12 @@ struct SetUnitNoMinimapResult { const Error* error; bool success; };
 struct SetUnitLuaDrawQuery { int32_t unitID; bool luaDraw; };
 struct SetUnitLuaDrawResult { const Error* error; bool success; };
 
+struct SetFeatureLuaDrawQuery { int32_t featureID; bool luaDraw; };
+struct SetFeatureLuaDrawResult { const Error* error; bool success; };
+
+struct SetProjectileLuaDrawQuery { int32_t projectileID; bool luaDraw; };
+struct SetProjectileLuaDrawResult { const Error* error; bool success; };
+
 struct SetUnitNoGroupQuery { int32_t unitID; bool noGroup; };
 struct SetUnitNoGroupResult { const Error* error; bool success; };
 
@@ -409,6 +415,8 @@ struct UnsyncedCtrlApi {
 	void (*SetWaterTexture)(const SetWaterTextureQuery* query, SetWaterTextureResult* result);
 	void (*GetWaterTexture)(const GetWaterTextureQuery* query, GetWaterTextureResult* result);
 	void (*SetUnitLuaDraw)(const SetUnitLuaDrawQuery* query, SetUnitLuaDrawResult* result);
+	void (*SetFeatureLuaDraw)(const SetFeatureLuaDrawQuery* query, SetFeatureLuaDrawResult* result);
+	void (*SetProjectileLuaDraw)(const SetProjectileLuaDrawQuery* query, SetProjectileLuaDrawResult* result);
 };
 
 extern const UnsyncedCtrlApi UNSYNCED_CTRL_API;

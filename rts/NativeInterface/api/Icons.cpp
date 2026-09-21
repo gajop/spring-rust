@@ -3,6 +3,8 @@
 #include "Icons.h"
 
 #include <cstring>
+#include <string>
+#include <vector>
 
 #include "Rendering/IconHandler.h"
 #include "Sim/Units/Unit.h"
@@ -13,6 +15,8 @@ namespace {
 
 thread_local uint8_t scratchBuffer[4096];
 thread_local size_t bufferPos = 0;
+thread_local std::vector<IconDataEntry> iconEntries;
+thread_local std::vector<std::string> iconNameStorage;
 
 static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
@@ -47,9 +51,12 @@ static bool CopyString(const std::string& src, const char** outPtr)
 	return true;
 }
 
-static void FillIconData(const icon::IconData& src, bool fullData, IconDataEntry* dst, const Error** errorOut)
+static void FillIconData(const icon::IconData& src, bool fullData, IconDataEntry* dst,
+	const Error** errorOut, const char* nameOverride = nullptr)
 {
-	if (!CopyString(src.GetName(), &dst->name)) {
+	if (nameOverride != nullptr) {
+		dst->name = nameOverride;
+	} else if (!CopyString(src.GetName(), &dst->name)) {
 		*errorOut = &BUFFER_OVERFLOW_ERROR;
 		return;
 	}
@@ -143,24 +150,21 @@ static void NativeGetAllIconDataArray(const GetAllIconDataArrayQuery* query, Get
 	if (count == 0)
 		return;
 
-	const size_t bytesNeeded = count * sizeof(IconDataEntry);
-	if (bytesNeeded > sizeof(scratchBuffer)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	IconDataEntry* entries = reinterpret_cast<IconDataEntry*>(scratchBuffer + bufferPos);
-	size_t base = bufferPos;
-	bufferPos += bytesNeeded;
+	iconEntries.clear();
+	iconNameStorage.clear();
+	iconEntries.resize(count);
+	iconNameStorage.reserve(count);
 
 	for (size_t i = 0; i < count; ++i) {
-		FillIconData(icons[i], query->fullData, &entries[i], &result->error);
+		iconNameStorage.emplace_back(icons[i].GetName());
+		FillIconData(icons[i], query->fullData, &iconEntries[i], &result->error,
+			iconNameStorage.back().c_str());
 		if (result->error != nullptr) {
 			return;
 		}
 	}
 
-	result->entries = entries;
+	result->entries = iconEntries.data();
 	result->count = static_cast<uint32_t>(count);
 }
 

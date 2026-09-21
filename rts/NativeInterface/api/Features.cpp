@@ -15,6 +15,7 @@
 #include "Game/Game.h"
 #include <cstddef>
 #include <cstring>
+#include <vector>
 
 namespace {
 
@@ -22,6 +23,7 @@ namespace {
 static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local std::vector<int32_t> featureIDs;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Feature system not ready" };
@@ -84,21 +86,15 @@ static void NativeGetAllFeatures(const GetAllFeaturesQuery* query, GetAllFeature
 		return;
 	}
 
-	// Use scratch buffer for array
-	int32_t* features = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	featureIDs.clear();
 
 	for (const auto featureID : featureHandler.GetActiveFeatureIDs()) {
-		if (WasmUiVisibility::IsFeatureVisible(WasmUiVisibility::FindFeature(featureID)) &&
-			count < maxFeatures) {
-			features[count++] = featureID;
-		}
+		if (WasmUiVisibility::IsFeatureVisible(WasmUiVisibility::FindFeature(featureID)))
+			featureIDs.push_back(featureID);
 	}
 
-	result->features = features;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->features = featureIDs.empty() ? nullptr : featureIDs.data();
+	result->count = featureIDs.size();
 }
 
 // Spatial queries
@@ -117,25 +113,19 @@ static void NativeGetFeaturesInRectangle(const GetFeaturesInRectangleQuery* quer
 	const float3 mins(query->minX, 0.0f, query->minZ);
 	const float3 maxs(query->maxX, 0.0f, query->maxZ);
 
-	// Use scratch buffer for array
-	int32_t* features = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	featureIDs.clear();
 
 	QuadFieldQuery qfq;
 	quadField.GetFeaturesExact(qfq, mins, maxs);
 	if (qfq.features != nullptr) {
 		for (const CFeature* feature : *(qfq.features)) {
-			if (feature != nullptr && WasmUiVisibility::IsFeatureVisible(feature) &&
-				count < maxFeatures) {
-				features[count++] = feature->id;
-			}
+			if (feature != nullptr && WasmUiVisibility::IsFeatureVisible(feature))
+				featureIDs.push_back(feature->id);
 		}
 	}
 
-	result->features = features;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->features = featureIDs.empty() ? nullptr : featureIDs.data();
+	result->count = featureIDs.size();
 }
 
 static void NativeGetFeaturesInSphere(const GetFeaturesInSphereQuery* query, GetFeaturesInSphereResult* result)
@@ -153,10 +143,7 @@ static void NativeGetFeaturesInSphere(const GetFeaturesInSphereQuery* query, Get
 	const float3 pos(query->center.x, query->center.y, query->center.z);
 	const float radiusSq = query->radius * query->radius;
 
-	// Use scratch buffer for array
-	int32_t* features = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	featureIDs.clear();
 
 	QuadFieldQuery qfq;
 	quadField.GetFeaturesExact(qfq, pos, query->radius);
@@ -164,16 +151,14 @@ static void NativeGetFeaturesInSphere(const GetFeaturesInSphereQuery* query, Get
 		for (const CFeature* feature : *(qfq.features)) {
 			if (feature != nullptr && WasmUiVisibility::IsFeatureVisible(feature)) {
 				const float distSq = feature->pos.SqDistance(pos);
-				if (distSq <= radiusSq && count < maxFeatures) {
-					features[count++] = feature->id;
-				}
+				if (distSq <= radiusSq)
+					featureIDs.push_back(feature->id);
 			}
 		}
 	}
 
-	result->features = features;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->features = featureIDs.empty() ? nullptr : featureIDs.data();
+	result->count = featureIDs.size();
 }
 
 static void NativeGetFeaturesInCylinder(const GetFeaturesInCylinderQuery* query, GetFeaturesInCylinderResult* result)
@@ -192,10 +177,7 @@ static void NativeGetFeaturesInCylinder(const GetFeaturesInCylinderQuery* query,
 	const float radiusSq = query->radius * query->radius;
 	const float halfHeight = query->height * 0.5f;
 
-	// Use scratch buffer for array
-	int32_t* features = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	featureIDs.clear();
 
 	QuadFieldQuery qfq;
 	quadField.GetFeaturesExact(qfq, pos, query->radius);
@@ -208,16 +190,14 @@ static void NativeGetFeaturesInCylinder(const GetFeaturesInCylinderQuery* query,
 				const float distXZSq = dx * dx + dz * dz;
 				const float dy = std::abs(fpos.y - pos.y);
 
-				if (distXZSq <= radiusSq && dy <= halfHeight && count < maxFeatures) {
-					features[count++] = feature->id;
-				}
+				if (distXZSq <= radiusSq && dy <= halfHeight)
+					featureIDs.push_back(feature->id);
 			}
 		}
 	}
 
-	result->features = features;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->features = featureIDs.empty() ? nullptr : featureIDs.data();
+	result->count = featureIDs.size();
 }
 
 // Basic info
@@ -966,24 +946,19 @@ static void NativeGetRenderFeatures(const GetRenderFeaturesQuery* query, GetRend
 	if (features.empty())
 		return;
 
-	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	featureIDs.clear();
 
 	for (const CFeature* feature : features) {
-		if (count >= maxCount)
-			break;
 		if (!WasmUiVisibility::IsFeatureVisible(feature) ||
 			(feature->drawFlag & query->drawMask) == 0)
 			continue;
 
-		out[count++] = feature->id;
+		featureIDs.push_back(feature->id);
 	}
 
-	result->features = out;
-	bufferPos += count * sizeof(int32_t);
+	result->features = featureIDs.empty() ? nullptr : featureIDs.data();
 	(void)query->sendMask;
-	result->count = count;
+	result->count = featureIDs.size();
 }
 
 static void NativeGetRenderFeaturesDrawFlagChanged(const GetRenderFeaturesDrawFlagChangedQuery* query, GetRenderFeaturesDrawFlagChangedResult* result)
@@ -1003,24 +978,18 @@ static void NativeGetRenderFeaturesDrawFlagChanged(const GetRenderFeaturesDrawFl
 	if (features.empty())
 		return;
 
-	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	featureIDs.clear();
 
 	for (const CFeature* f : features) {
-		if (count >= maxCount)
-			break;
-
 		if (!WasmUiVisibility::IsFeatureVisible(f) || f->previousDrawFlag == f->drawFlag)
 			continue;
 
-		out[count++] = f->id;
+		featureIDs.push_back(f->id);
 	}
 
-	result->features = out;
-	bufferPos += count * sizeof(int32_t);
+	result->features = featureIDs.empty() ? nullptr : featureIDs.data();
 	(void)query->sendMask;
-	result->count = count;
+	result->count = featureIDs.size();
 }
 
 } // namespace

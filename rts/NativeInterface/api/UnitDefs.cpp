@@ -7,6 +7,7 @@
 #include "Lua/LuaDefs.h"
 #include <cstring>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -16,6 +17,11 @@ namespace {
 // property table at 64 of its 249 entries.
 static thread_local uint8_t scratchBuffer[64 * 1024];
 static thread_local size_t bufferPos = 0;
+static thread_local std::vector<int32_t> unitDefIDs;
+static thread_local std::vector<UnitDefParamKey> unitDefParamKeys;
+static thread_local std::vector<int32_t> unitWeaponIDs;
+static thread_local std::vector<int32_t> unitBuildableIDs;
+static thread_local std::vector<const char*> unitCustomParamKeys;
 
 // Static errors
 static const Error INVALID_UNITDEF_ERROR = { .code = ERROR_INVALID_ID, .message = "Invalid unit def ID" };
@@ -29,19 +35,15 @@ static void NativeGetUnitDefIDs(const GetUnitDefIDsQuery* query, GetUnitDefIDsRe
 	result->count = 0;
 
 	const auto& unitDefs = unitDefHandler->GetUnitDefsVec();
-	const size_t maxIDs = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-
-	int32_t* ids = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
+	unitDefIDs.clear();
+	unitDefIDs.reserve(unitDefs.size() > 0 ? unitDefs.size() - 1 : 0);
 
 	// Start at 1 since ID 0 is not valid
-	for (size_t i = 1; i < unitDefs.size() && count < maxIDs; i++) {
-		ids[count++] = static_cast<int32_t>(i);
-	}
+	for (size_t i = 1; i < unitDefs.size(); i++)
+		unitDefIDs.push_back(static_cast<int32_t>(i));
 
-	result->ids = ids;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->ids = unitDefIDs.empty() ? nullptr : unitDefIDs.data();
+	result->count = unitDefIDs.size();
 }
 
 static void NativeGetUnitDefCount(const GetUnitDefCountQuery* query, GetUnitDefCountResult* result) {
@@ -141,28 +143,22 @@ static void NativeGetUnitDefParamKeys(const GetUnitDefParamKeysQuery* query, Get
 	result->error = nullptr;
 
 	const ParamMap& params = LuaUnitDefs::GetParamMap();
-
-	const size_t maxKeys = (sizeof(scratchBuffer) - bufferPos) / sizeof(UnitDefParamKey);
-	UnitDefParamKey* keys = reinterpret_cast<UnitDefParamKey*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
+	unitDefParamKeys.clear();
+	unitDefParamKeys.reserve(params.size());
 
 	for (const auto& pair : params) {
-		if (count >= maxKeys)
-			break;
 		// Lua's own iteration helpers, not properties.
 		if (pair.first == "next" || pair.first == "pairs")
 			continue;
 
-		keys[count].name = pair.first.c_str();
-		keys[count].type = IsClassifyKey(pair.first.c_str())
-			? UNIT_DEF_PARAM_BOOL
-			: ParamTypeOf(&pair.second);
-		count++;
+		unitDefParamKeys.push_back({
+			.name = pair.first.c_str(),
+			.type = IsClassifyKey(pair.first.c_str()) ? UNIT_DEF_PARAM_BOOL : ParamTypeOf(&pair.second),
+		});
 	}
 
-	result->keys = keys;
-	result->count = count;
-	bufferPos += count * sizeof(UnitDefParamKey);
+	result->keys = unitDefParamKeys.empty() ? nullptr : unitDefParamKeys.data();
+	result->count = unitDefParamKeys.size();
 }
 
 static void NativeGetUnitDefParamType(const GetUnitDefParamTypeQuery* query, GetUnitDefParamTypeResult* result) {
@@ -337,8 +333,8 @@ static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByI
 	result->physics.radius = ud->collisionVolume.GetBoundingRadius();
 	result->physics.speed = ud->speed;
 	result->physics.turnRate = ud->turnRate;
-	result->physics.acceleration = 0.0f;  // No longer available in engine
-	result->physics.brakeRate = 0.0f;     // No longer available in engine
+	result->physics.acceleration = ud->maxAcc;
+	result->physics.brakeRate = ud->maxDec;
 	result->physics.canFly = ud->canfly;
 	result->physics.canMove = ud->canmove;
 	result->physics.canHover = ud->hoverAttack;  // Closest equivalent
@@ -353,29 +349,23 @@ static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByI
 	FillClassify(ud, &result->classify);
 
 	// Weapons
-	const size_t maxWeapons = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-	int32_t* weaponIDs = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t weaponCount = 0;
-	for (unsigned int i = 0; i < ud->weapons.size() && weaponCount < maxWeapons; i++) {
+	unitWeaponIDs.clear();
+	unitWeaponIDs.reserve(ud->weapons.size());
+	for (unsigned int i = 0; i < ud->weapons.size(); i++) {
 		if (ud->weapons[i].def != nullptr) {
-			weaponIDs[weaponCount++] = ud->weapons[i].def->id;
+			unitWeaponIDs.push_back(ud->weapons[i].def->id);
 		}
 	}
-	result->weapons.weaponDefIDs = weaponIDs;
-	result->weapons.weaponCount = weaponCount;
-	bufferPos += weaponCount * sizeof(int32_t);
+	result->weapons.weaponDefIDs = unitWeaponIDs.empty() ? nullptr : unitWeaponIDs.data();
+	result->weapons.weaponCount = unitWeaponIDs.size();
 
 	// Build options (now a map<int, string>)
-	const size_t maxBuildable = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-	int32_t* buildableIDs = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t buildableCount = 0;
-	for (const auto& buildOption : ud->buildOptions) {
-		if (buildableCount >= maxBuildable) break;
-		buildableIDs[buildableCount++] = buildOption.first;  // first is the unit def ID
-	}
-	result->buildOptions.buildableUnitDefIDs = buildableIDs;
-	result->buildOptions.buildableCount = buildableCount;
-	bufferPos += buildableCount * sizeof(int32_t);
+	unitBuildableIDs.clear();
+	unitBuildableIDs.reserve(ud->buildOptions.size());
+	for (const auto& buildOption : ud->buildOptions)
+		unitBuildableIDs.push_back(buildOption.first);  // first is the unit def ID
+	result->buildOptions.buildableUnitDefIDs = unitBuildableIDs.empty() ? nullptr : unitBuildableIDs.data();
+	result->buildOptions.buildableCount = unitBuildableIDs.size();
 
 	// Sensors
 	result->sensors.losRadius = ud->losRadius;
@@ -553,32 +543,13 @@ static void NativeGetUnitDefCustomParamKeys(const GetUnitDefCustomParamKeysQuery
 		return;
 	}
 
-	// Allocate array of string pointers
-	const size_t maxKeys = ud->customParams.size();
-	if (bufferPos + maxKeys * sizeof(const char*) > sizeof(scratchBuffer)) {
-		result->error = &INVALID_UNITDEF_ERROR;
-		return;
-	}
+	unitCustomParamKeys.clear();
+	unitCustomParamKeys.reserve(ud->customParams.size());
+	for (const auto& pair : ud->customParams)
+		unitCustomParamKeys.push_back(pair.first.c_str());
 
-	const char** keys = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
-	bufferPos += maxKeys * sizeof(const char*);
-	uint32_t count = 0;
-
-	for (const auto& pair : ud->customParams) {
-		const char* key = pair.first.c_str();
-		const size_t keyLen = strlen(key);
-		if (bufferPos + keyLen + 1 > sizeof(scratchBuffer)) {
-			result->error = &INVALID_UNITDEF_ERROR;
-			return;
-		}
-		char* keyBuf = reinterpret_cast<char*>(scratchBuffer + bufferPos);
-		memcpy(keyBuf, key, keyLen + 1);
-		keys[count++] = keyBuf;
-		bufferPos += keyLen + 1;
-	}
-
-	result->keys = keys;
-	result->count = count;
+	result->keys = unitCustomParamKeys.empty() ? nullptr : unitCustomParamKeys.data();
+	result->count = unitCustomParamKeys.size();
 }
 
 } // namespace

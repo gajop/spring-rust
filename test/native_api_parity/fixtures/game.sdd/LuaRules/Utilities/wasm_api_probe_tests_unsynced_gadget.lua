@@ -5,28 +5,6 @@ return {
 
 		"platform_is_headless",
 
-		"get_config_int",
-
-		"get_config_float",
-
-		"get_config_string",
-
-		"get_config_int_nil_default",
-
-		"get_config_float_nil_default",
-
-		"get_config_string_nil_default",
-
-		"get_config_params",
-
-		"get_log_sections",
-
-		"config_int",
-
-		"config_float",
-
-		"config_string",
-
 		"get_local_player_id",
 
 		"get_local_team_id",
@@ -38,8 +16,6 @@ return {
 		"get_player_roster_count",
 
 		"get_player_statistics",
-
-		"get_player_traffic_missing_packet",
 
 		"is_replay",
 
@@ -53,30 +29,6 @@ return {
 
 		"get_video_capturing_mode",
 
-		"get_profiler_record_names_count",
-
-		"get_lua_mem_usage",
-
-		"diff_timers",
-
-		"get_timer",
-
-		"get_timer_micros",
-
-		"get_frame_timer",
-
-		"get_draw_seconds",
-
-		"get_profiler_time_record_empty",
-
-		"get_vid_mem_usage",
-
-		"vfs_create_dir_existing",
-
-		"vfs_create_dir_invalid",
-
-		"vfs_extract_archive_invalid",
-
 		"get_prev_frame_sync_checksum",
 
 		"get_box_selection_by_engine",
@@ -84,8 +36,6 @@ return {
 		"get_build_facing",
 
 		"get_build_spacing",
-
-		"get_last_message_positions_count",
 
 		"get_draw_selection_info",
 
@@ -107,8 +57,6 @@ return {
 
 		"get_visible_units",
 
-		"get_visible_projectiles",
-
 		"get_features_in_screen_rectangle",
 
 		"get_render_units",
@@ -123,8 +71,6 @@ return {
 
 		"get_feature_palette_index",
 
-		"get_unit_icon",
-
 		"box_selection_by_engine",
 
 		"build_facing",
@@ -132,20 +78,6 @@ return {
 		"build_spacing",
 
 		"draw_selection_info",
-
-		"last_message_position_count",
-
-		"sdl_start_text_input",
-
-		"sdl_stop_text_input",
-
-		"sdl_set_text_input_rect",
-
-		"set_video_capturing_time_offset",
-
-		"set_log_section_filter_level",
-
-		"garbage_collect_ctrl",
 
 		"get_unit_no_draw",
 
@@ -177,11 +109,7 @@ return {
 
 		"get_unit_view_position",
 
-		"get_unit_icon_data",
-
 		"get_feature_draw_flag",
-
-		"get_synced_gc_info_fixed_available",
 
 		"get_feature_no_draw",
 
@@ -194,10 +122,6 @@ return {
 		"get_render_features",
 
 		"get_render_features_draw_flag_changed",
-
-		"get_replay_file_path",
-
-		"get_replay_recording_file_path",
 
 		"custom_palette_color",
 
@@ -215,12 +139,6 @@ return {
 
 		"clear_units_previous_draw_flag",
 
-		"set_share_level",
-
-		"share_resources",
-
-		"solve_nurbscurve",
-
 	},
 	values = {
 		["platform_architecture"] = {
@@ -229,57 +147,6 @@ return {
 		["platform_is_headless"] = {
 			key = "isHeadless",
 		},
-		["get_config_int"] = {
-			key = "native_api_parity_missing_int",
-			defaultValue = 150,
-			hasDefault = true,
-		},
-		["get_config_float"] = {
-			key = "native_api_parity_missing_float",
-			defaultValue = 3.0,
-			hasDefault = true,
-		},
-		["get_config_string"] = {
-			key = "native_api_parity_missing_string",
-			defaultValue = "native-api-parity-default",
-			hasDefault = true,
-		},
-		["get_config_int_nil_default"] = {
-			key = "native_api_parity_missing_int_nil",
-			defaultValue = 0,
-			hasDefault = false,
-		},
-		["get_config_float_nil_default"] = {
-			key = "native_api_parity_missing_float_nil",
-			defaultValue = 0,
-			hasDefault = false,
-		},
-		["get_config_string_nil_default"] = {
-			key = "native_api_parity_missing_string_nil",
-			defaultValue = "",
-			hasDefault = false,
-		},
-		["config_int"] = {
-			key = "native_api_parity_config_int",
-			value = 30,
-			defaultValue = 0,
-			hasDefault = false,
-			useOverlay = true,
-		},
-		["config_float"] = {
-			key = "native_api_parity_config_float",
-			value = 5.5,
-			defaultValue = 0,
-			hasDefault = false,
-			useOverlay = true,
-		},
-		["config_string"] = {
-			key = "native_api_parity_config_string",
-			value = "native-api-parity",
-			defaultValue = "",
-			hasDefault = false,
-			useOverlay = true,
-		},
 		["get_player_roster_count"] = {
 			sortMode = 0,
 			showPathingPlayers = false,
@@ -287,31 +154,8 @@ return {
 		["get_player_statistics"] = {
 			playerID = 0,
 		},
-		["get_player_traffic_missing_packet"] = {
-			packetID = 4095,
-		},
 		["get_game_state"] = {
 			maxLatency = 500,
-		},
-		["diff_timers"] = {
-			returnMs = true,
-			fromMicroSecs = false,
-		},
-		["get_frame_timer"] = {
-			lastFrameTime = false,
-		},
-		["get_profiler_time_record_empty"] = {
-			profilerName = "native_api_parity_missing_profiler",
-			frameData = false,
-		},
-		["vfs_create_dir_existing"] = {
-			path = "LuaRules",
-		},
-		["vfs_create_dir_invalid"] = {
-			path = "../native_api_parity_invalid",
-		},
-		["vfs_extract_archive_invalid"] = {
-			path = "native_api_parity_missing_archive_file",
 		},
 		["get_cmd_desc_index_missing"] = {
 			cmdID = -999999,
@@ -327,11 +171,6 @@ return {
 		["get_visible_units"] = {
 			radius = 0,
 			includeIcons = true,
-		},
-		["get_visible_projectiles"] = {
-			includeSynced = true,
-			includeWeapon = true,
-			includePiece = true,
 		},
 		["get_features_in_screen_rectangle"] = {
 			left = 0,
@@ -358,34 +197,6 @@ return {
 		["draw_selection_info"] = {
 			draw = false,
 		},
-		["last_message_position_count"] = {
-			x = 1024.0,
-			y = 128.0,
-			z = 1024.0,
-		},
-		["sdl_set_text_input_rect"] = {
-			x = 0,
-			y = 0,
-			w = 32,
-			h = 32,
-		},
-		["set_video_capturing_time_offset"] = {
-			timeOffset = 0.25,
-		},
-		["set_log_section_filter_level"] = {
-			section = "NativeApiParity",
-			level = 3,
-		},
-		["garbage_collect_ctrl"] = {
-			itersPerBatch = 1,
-			numStepsPerIter = 1,
-			minStepsPerIter = 1,
-			maxStepsPerIter = 2,
-			minLoopRunTime = 0,
-			maxLoopRunTime = 0,
-			baseRunTimeMult = 1,
-			baseMemLoadMult = 1,
-		},
 		["unit_no_draw"] = {
 			noDraw = false,
 		},
@@ -406,12 +217,6 @@ return {
 		},
 		["get_unit_view_position"] = {
 			midPos = false,
-		},
-		["get_unit_icon_data"] = {
-			fullData = false,
-		},
-		["get_synced_gc_info_fixed_available"] = {
-			collect = false,
 		},
 		["get_render_features"] = {
 			drawMask = 0,
@@ -440,21 +245,6 @@ return {
 		},
 		["feature_always_update_matrix"] = {
 			update = true,
-		},
-		["set_share_level"] = {
-			resource = "metal",
-			level = 0,
-		},
-		["share_resources"] = {
-			resource = "metal",
-			amount = 0,
-		},
-		["solve_nurbscurve"] = {
-			degree = 2,
-			controlPoints = {0, 0, 0, 1, 256, 64, 128, 1, 512, 0, 256, 1},
-			points = {{["x"] = 0, ["y"] = 0, ["z"] = 0, ["w"] = 1}, {["x"] = 256, ["y"] = 64, ["z"] = 128, ["w"] = 1}, {["x"] = 512, ["y"] = 0, ["z"] = 256, ["w"] = 1}},
-			knots = {0, 0, 0, 1, 1, 1},
-			segments = 4,
 		},
 	},
 }

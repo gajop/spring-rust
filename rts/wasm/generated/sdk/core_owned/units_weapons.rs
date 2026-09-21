@@ -38,7 +38,7 @@
             pub weapon_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitWeaponDamagesResult {
             pub damages: UnitWeaponDamages,
         }
@@ -63,7 +63,7 @@
             pub has_free_line_of_fire: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitWeaponStateQuery {
             pub unit_id: i32,
             pub weapon_num: i32,
@@ -148,7 +148,7 @@
             pub vectors: UnitWeaponVectors,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitWeaponDamages {
             pub damages: Vec<f32>,
             pub paralyze_damage_time: f32,

@@ -1,14 +1,15 @@
     pub mod tracing {
         use super::{Result, String, Vec};
 
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum TraceFlags {
-            TraceFeatures,
-            TraceGround,
-            TraceNoEnemyUnits,
-            TraceOnlyEnemy,
-            TraceSky,
-            TraceUnits,
+            TraceFeatures = 2,
+            TraceGround = 4,
+            TraceNoEnemyUnits = 16,
+            TraceOnlyEnemy = 32,
+            TraceSky = 8,
+            TraceUnits = 1,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -20,14 +21,14 @@
             pub ally_team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayBetweenPositionsQuery {
             pub start: Float3,
             pub end: Float3,
             pub type_: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayBetweenPositionsResult {
             pub hits: Vec<TraceRayHit>,
         }
@@ -46,12 +47,12 @@
             pub hit_normal: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayGroundBetweenPositionsOptions {
             pub test_water: Option<bool>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayGroundBetweenPositionsQuery {
             pub start: Float3,
             pub end: Float3,
@@ -66,13 +67,13 @@
             pub hit_normal: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayGroundInDirectionOptions {
             pub length: Option<f32>,
             pub test_water: Option<bool>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayGroundInDirectionQuery {
             pub start: Float3,
             pub dir: Float3,
@@ -94,12 +95,12 @@
             pub object_type: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayInDirectionOptions {
             pub max_length: Option<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayInDirectionQuery {
             pub pos: Float3,
             pub dir: Float3,
@@ -107,7 +108,7 @@
             pub type_: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TraceRayInDirectionResult {
             pub hits: Vec<TraceRayHit>,
         }

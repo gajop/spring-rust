@@ -30,7 +30,7 @@
             pub resurrect_progress: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct FeatureLastHitPiece {
             pub name: String,
             pub piece_num: i32,
@@ -55,7 +55,7 @@
             pub reclaim_time: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct FeatureResurrect {
             pub resurrect_as: String,
             pub resurrect_def_id: i32,
@@ -79,7 +79,7 @@
             pub ignore_hits: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct FeatureTransformMatrix {
             pub values: Vec<f32>,
         }
@@ -89,7 +89,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAllFeaturesResult {
             pub features: Vec<i32>,
         }
@@ -219,7 +219,7 @@
             pub feature_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureLastAttackedPieceResult {
             pub piece: FeatureLastHitPiece,
         }
@@ -320,7 +320,7 @@
             pub feature_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureResurrectResult {
             pub resurrect: FeatureResurrect,
             pub can_resurrect: bool,
@@ -383,7 +383,7 @@
             pub feature_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureTransformMatrixResult {
             pub matrix: FeatureTransformMatrix,
         }
@@ -406,7 +406,7 @@
             pub height: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeaturesInCylinderResult {
             pub features: Vec<i32>,
         }
@@ -419,7 +419,7 @@
             pub max_z: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeaturesInRectangleResult {
             pub features: Vec<i32>,
         }
@@ -430,7 +430,7 @@
             pub radius: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeaturesInSphereResult {
             pub features: Vec<i32>,
         }
@@ -440,7 +440,7 @@
             pub send_mask: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetRenderFeaturesDrawFlagChangedResult {
             pub features: Vec<i32>,
         }
@@ -451,7 +451,7 @@
             pub send_mask: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetRenderFeaturesResult {
             pub features: Vec<i32>,
         }
@@ -513,7 +513,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureResurrectValue {
             pub resurrect: FeatureResurrect,
             pub can_resurrect: bool,

@@ -6073,18 +6073,18 @@ wasm_trap_t* CoreVariable_gfx_uniform_array_float(void* environment, wasmtime_ca
     if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
         state->native->gfx->UniformArrayFloat == nullptr)
         return Trap("UniformArrayFloat generated Core binding is unavailable");
-    if (slots == nullptr || slotCount != 2)
+    if (slots == nullptr || slotCount != 3)
         return Trap("UniformArrayFloat generated Core ABI signature mismatch");
 
     std::string budgetError;
-    ImportGuard guard(state, 3u, budgetError);
+    ImportGuard guard(state, 4u, budgetError);
     if (!guard.Ok())
         return Trap(budgetError);
 
     std::string memoryError;
     if (!EnsureMemory(state, caller, memoryError))
         return Trap(memoryError);
-    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[1].i32);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> descriptorWire;
     if (!state->memory.View(descriptor, 8u, descriptorWire)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
@@ -6127,6 +6127,7 @@ wasm_trap_t* CoreVariable_gfx_uniform_array_float(void* environment, wasmtime_ca
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
+    query.components = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.components)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -6145,18 +6146,18 @@ wasm_trap_t* CoreVariable_gfx_uniform_array_int(void* environment, wasmtime_call
     if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
         state->native->gfx->UniformArrayInt == nullptr)
         return Trap("UniformArrayInt generated Core binding is unavailable");
-    if (slots == nullptr || slotCount != 2)
+    if (slots == nullptr || slotCount != 3)
         return Trap("UniformArrayInt generated Core ABI signature mismatch");
 
     std::string budgetError;
-    ImportGuard guard(state, 3u, budgetError);
+    ImportGuard guard(state, 4u, budgetError);
     if (!guard.Ok())
         return Trap(budgetError);
 
     std::string memoryError;
     if (!EnsureMemory(state, caller, memoryError))
         return Trap(memoryError);
-    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[1].i32);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> descriptorWire;
     if (!state->memory.View(descriptor, 8u, descriptorWire)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
@@ -6199,6 +6200,7 @@ wasm_trap_t* CoreVariable_gfx_uniform_array_int(void* environment, wasmtime_call
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
+    query.components = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.components)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -12476,6 +12478,116 @@ wasm_trap_t* CoreVariable_cob_script_get_cob_script_id(void* environment, wasmti
     return nullptr;
 }
 
+wasm_trap_t* CoreVariable_object_rendering_clear_deferred_material_uniform(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->objectRendering == nullptr ||
+        state->native->objectRendering->ClearDeferredMaterialUniform == nullptr)
+        return Trap("ClearDeferredMaterialUniform generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5)
+        return Trap("ClearDeferredMaterialUniform generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    ClearObjectMaterialUniformQuery query{};
+    query.objectType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectType)>>>(slots[0].i32);
+    query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[1].i32);
+    query.materialType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.materialType)>>>(slots[2].i32);
+    query.lodLevel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodLevel)>>>(slots[3].i32);
+    std::uint32_t namePointer = 0;
+    std::uint32_t nameCount = 0;
+    if (!reader.U32(namePointer) || !reader.U32(nameCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> nameBytes;
+    if (!state->memory.View(namePointer, nameCount, nameBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    std::string nameStorage(reinterpret_cast<const char*>(nameBytes.data()), nameBytes.size());
+    query.name = nameStorage.c_str();
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    ObjectRenderingResult result{};
+    state->native->objectRendering->ClearDeferredMaterialUniform(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreVariable_object_rendering_clear_forward_material_uniform(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->objectRendering == nullptr ||
+        state->native->objectRendering->ClearForwardMaterialUniform == nullptr)
+        return Trap("ClearForwardMaterialUniform generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5)
+        return Trap("ClearForwardMaterialUniform generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    ClearObjectMaterialUniformQuery query{};
+    query.objectType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectType)>>>(slots[0].i32);
+    query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[1].i32);
+    query.materialType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.materialType)>>>(slots[2].i32);
+    query.lodLevel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodLevel)>>>(slots[3].i32);
+    std::uint32_t namePointer = 0;
+    std::uint32_t nameCount = 0;
+    if (!reader.U32(namePointer) || !reader.U32(nameCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> nameBytes;
+    if (!state->memory.View(namePointer, nameCount, nameBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    std::string nameStorage(reinterpret_cast<const char*>(nameBytes.data()), nameBytes.size());
+    query.name = nameStorage.c_str();
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    ObjectRenderingResult result{};
+    state->native->objectRendering->ClearForwardMaterialUniform(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 
 } // namespace
 
@@ -12490,6 +12602,6 @@ bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(204 >= 0, "generated variable Core callback count");
+static_assert(206 >= 0, "generated variable Core callback count");
 
 } // namespace recoil::wasm::core::generated

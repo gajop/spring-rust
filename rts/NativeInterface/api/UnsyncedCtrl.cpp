@@ -47,6 +47,8 @@
 #include "Sim/Units/UnitDefHandler.h"
 #include "Sim/Features/FeatureHandler.h"
 #include "Sim/Features/FeatureDefHandler.h"
+#include "Sim/Projectiles/Projectile.h"
+#include "Sim/Projectiles/ProjectileHandler.h"
 #include "Sim/Misc/CustomColorPalette.h"
 #include "Sim/Misc/GlobalConstants.h"
 #include "Rendering/IconHandler.h"
@@ -278,6 +280,36 @@ static void NativeSetUnitLuaDraw(const SetUnitLuaDrawQuery* query, SetUnitLuaDra
 		// selecting the legacy drawer before the next frame.
 		CUnitDrawer::ForceLegacyPath();
 	}
+	result->success = true;
+}
+
+static void NativeSetFeatureLuaDraw(const SetFeatureLuaDrawQuery* query, SetFeatureLuaDrawResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	feature->luaDraw = query->luaDraw;
+	result->success = true;
+}
+
+static void NativeSetProjectileLuaDraw(const SetProjectileLuaDrawQuery* query, SetProjectileLuaDrawResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	CProjectile* projectile = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	if (projectile == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	projectile->luaDraw = query->luaDraw;
 	result->success = true;
 }
 
@@ -1973,4 +2005,6 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetWaterTexture = NativeSetWaterTexture,
 	.GetWaterTexture = NativeGetWaterTexture,
 	.SetUnitLuaDraw = NativeSetUnitLuaDraw,
+	.SetFeatureLuaDraw = NativeSetFeatureLuaDraw,
+	.SetProjectileLuaDraw = NativeSetProjectileLuaDraw,
 };

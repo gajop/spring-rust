@@ -1,11 +1,12 @@
     pub mod gfx {
         use super::{Result, String, Vec};
 
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum GfxCullFace {
-            GfxCullFaceBack,
-            GfxCullFaceFront,
-            GfxCullFaceFrontAndBack,
+            GfxCullFaceBack = 1029,
+            GfxCullFaceFront = 1028,
+            GfxCullFaceFrontAndBack = 1032,
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -29,7 +30,7 @@
             pub tex_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxActiveUniformEntry {
             pub name: String,
             pub type_: String,
@@ -39,7 +40,7 @@
             pub location: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxActiveUniformsResult {
             pub entries: Vec<GfxActiveUniformEntry>,
         }
@@ -51,7 +52,7 @@
             pub ref_: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxAtlasTextureEntry {
             pub name: String,
             pub x1: f32,
@@ -61,7 +62,7 @@
             pub page_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxAtlasTextureQuery {
             pub atlas_name: String,
             pub texture_name: String,
@@ -76,7 +77,7 @@
             pub page_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxAtlasTexturesResult {
             pub entries: Vec<GfxAtlasTextureEntry>,
         }
@@ -88,7 +89,7 @@
             pub user_data: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxBindImageTextureQuery {
             pub unit: u32,
             pub name: String,
@@ -156,13 +157,13 @@
             pub user_data: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxChangeTextureParamsQuery {
             pub name: String,
             pub params: GfxTextureParams,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxClearAttachmentFBOQuery {
             pub target: u32,
             pub attachment: u32,
@@ -170,7 +171,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxClearQuery {
             pub bits: u32,
             pub values: Vec<f32>,
@@ -183,7 +184,7 @@
             pub enable: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxClipPlaneQuery {
             pub plane: u32,
             pub equation: Vec<f32>,
@@ -210,7 +211,7 @@
             pub a: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxConsoleCommandEntry {
             pub command: String,
             pub description: String,
@@ -218,12 +219,12 @@
             pub cheat: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxConsoleCommandsResult {
             pub entries: Vec<GfxConsoleCommandEntry>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxCopyToTextureQuery {
             pub name: String,
             pub xoff: i32,
@@ -236,6 +237,11 @@
             pub level: u32,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GfxCreateQueryQuery {
+            pub target: Option<u32>,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxCreateShaderOptions {
             pub has_geo_input_type: bool,
@@ -246,7 +252,7 @@
             pub geo_output_verts: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxCreateShaderQuery {
             pub definitions: String,
             pub vertex: String,
@@ -337,7 +343,7 @@
             pub size_in_bytes_on_cpu: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxEngineTextureNamesResult {
             pub names: Vec<String>,
         }
@@ -347,7 +353,7 @@
             pub index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFBOAttachment {
             pub attachment: u32,
             pub texture_name: String,
@@ -357,7 +363,7 @@
             pub use_rbo: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFBOAttachmentQuery {
             pub fbo_id: u32,
             pub attachment: u32,
@@ -368,7 +374,7 @@
             pub use_rbo: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFBOCreateQuery {
             pub target: u32,
             pub attachments: Vec<GfxFBOAttachment>,
@@ -376,7 +382,7 @@
             pub read_buffer: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFBODrawBuffersQuery {
             pub fbo_id: u32,
             pub buffers: Vec<u32>,
@@ -421,12 +427,12 @@
             pub options: GfxFeatureDrawOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFixedStateQuery {
             pub param: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFixedStateResult {
             pub bools: Vec<bool>,
             pub bool_count: u32,
@@ -467,7 +473,7 @@
             pub a: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFontInfoResult {
             pub path: String,
             pub family: String,
@@ -503,7 +509,7 @@
             pub options: GfxFontSubmitBufferedOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFontTextQuery {
             pub font_id: u32,
             pub text: String,
@@ -513,7 +519,7 @@
             pub options: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFontWorldTextQuery {
             pub font_id: u32,
             pub text: String,
@@ -522,7 +528,7 @@
             pub options: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFontWrapTextQuery {
             pub font_id: u32,
             pub text: String,
@@ -531,7 +537,7 @@
             pub size: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxFontWrapTextResult {
             pub text: String,
             pub lines: i32,
@@ -559,7 +565,7 @@
             pub mode: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxGetMatrixDataResult {
             pub values: Vec<f32>,
         }
@@ -570,7 +576,7 @@
             pub max_values: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxGetNumberResult {
             pub values: Vec<f32>,
             pub count: u32,
@@ -621,7 +627,7 @@
             pub state: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxLightQuery {
             pub light: i32,
             pub options: GfxLightOptions,
@@ -636,7 +642,7 @@
             pub pattern: u16,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxLoadFontQuery {
             pub path: String,
             pub size: i32,
@@ -650,7 +656,7 @@
             pub opcode: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxMaterialQuery {
             pub pname: u32,
             pub values: Vec<f32>,
@@ -662,7 +668,7 @@
             pub mode: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxMatrixQuery {
             pub values: Vec<f32>,
         }
@@ -690,7 +696,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxMultiTexEnvQuery {
             pub tex_num: i32,
             pub target: u32,
@@ -705,7 +711,7 @@
             pub state: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxMultiTexGenQuery {
             pub tex_num: i32,
             pub target: u32,
@@ -715,7 +721,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxObjectBufferUniformsQuery {
             pub object_id: i32,
             pub values: Vec<f32>,
@@ -727,7 +733,7 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxObjectLabelQuery {
             pub identifier: u32,
             pub object_id: u32,
@@ -770,7 +776,7 @@
             pub far_val: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxPointParameterQuery {
             pub pname: u32,
             pub value: f32,
@@ -790,7 +796,7 @@
             pub units: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxPushDebugGroupQuery {
             pub id: u32,
             pub message: String,
@@ -844,7 +850,7 @@
             pub format: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxReadPixelsResult {
             pub values: Vec<f32>,
             pub components: u32,
@@ -887,7 +893,7 @@
             pub grayscale16bit: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxSaveImageQuery {
             pub x: i32,
             pub y: i32,
@@ -928,7 +934,7 @@
             pub params: Float4,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxShapeQuery {
             pub primitive: u32,
             pub vertices: Vec<GfxVertexData>,
@@ -980,17 +986,17 @@
             pub enable: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxStringQuery {
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxStringResult {
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxSubroutineIndexQuery {
             pub shader_id: u32,
             pub shader_type: u32,
@@ -1003,7 +1009,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxTesselationShaderParameterQuery {
             pub param: u32,
             pub value: i32,
@@ -1012,7 +1018,7 @@
             pub use_float_array: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxTexEnvQuery {
             pub target: u32,
             pub pname: u32,
@@ -1026,7 +1032,7 @@
             pub state: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxTexGenQuery {
             pub target: u32,
             pub options: GfxTexGenOptions,
@@ -1054,7 +1060,7 @@
             pub lines: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxTextQuery {
             pub text: String,
             pub x: f32,
@@ -1063,7 +1069,7 @@
             pub options: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxTextureBindQuery {
             pub name: String,
             pub tex_num: i32,
@@ -1080,7 +1086,7 @@
             pub fbo: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxTextureNameQuery {
             pub name: String,
         }
@@ -1118,6 +1124,11 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GfxUInt64Result {
+            pub value: u64,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxUIntQuery {
             pub value: u32,
         }
@@ -1127,33 +1138,35 @@
             pub value: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxUniformArrayFloatQuery {
             pub location: i32,
             pub values: Vec<f32>,
+            pub components: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxUniformArrayIntQuery {
             pub location: i32,
             pub values: Vec<i32>,
+            pub components: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxUniformFloatQuery {
             pub location: i32,
             pub values: Vec<f32>,
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxUniformIntQuery {
             pub location: i32,
             pub values: Vec<i32>,
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxUniformLocationQuery {
             pub shader_id: u32,
             pub name: String,
@@ -1164,7 +1177,7 @@
             pub location: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxUniformMatrixQuery {
             pub location: i32,
             pub values: Vec<f32>,
@@ -1201,7 +1214,7 @@
             pub user_data: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxUploadTextureQuery {
             pub name: String,
             pub target: u32,
@@ -1261,7 +1274,7 @@
             pub raw_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxVAOSubmissionQuery {
             pub vao_id: u32,
             pub ids: Vec<u32>,
@@ -1292,7 +1305,7 @@
             pub copy_size_in_bytes: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxVBODefineQuery {
             pub vbo_id: u32,
             pub elements_count: i32,
@@ -1312,7 +1325,7 @@
             pub force_gpu_read: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxVBODownloadResult {
             pub values: Vec<f32>,
         }
@@ -1332,7 +1345,7 @@
             pub primitive_restart_index: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxVBOInstanceDataQuery {
             pub vbo_id: u32,
             pub ids: Vec<u32>,
@@ -1354,7 +1367,7 @@
             pub target: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxVBOUploadQuery {
             pub vbo_id: u32,
             pub data: Vec<f32>,
@@ -1369,13 +1382,13 @@
             pub bytes_written: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxValueQuery {
             pub key: String,
             pub mode: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxValueResult {
             pub values: Vec<f32>,
             pub count: u32,
@@ -1383,7 +1396,7 @@
             pub string_value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GfxVertexData {
             pub vertex: Vec<f32>,
             pub normal: Vec<f32>,
@@ -1497,7 +1510,7 @@
             pub lines: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct FontWrapTextValue {
             pub text: String,
             pub lines: i32,
@@ -1512,7 +1525,7 @@
             pub page_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAtmosphereValue {
             pub values: Vec<f32>,
             pub count: u32,
@@ -1526,7 +1539,7 @@
             pub size_in_bytes_on_cpu: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFixedStateValue {
             pub bools: Vec<bool>,
             pub bool_count: u32,
@@ -1536,7 +1549,7 @@
             pub float_count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFontInfoValue {
             pub path: String,
             pub family: String,
@@ -1559,7 +1572,7 @@
             pub page_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMapRenderingValue {
             pub values: Vec<f32>,
             pub count: u32,
@@ -1567,7 +1580,7 @@
             pub string_value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetNumberValue {
             pub values: Vec<f32>,
             pub count: u32,
@@ -1596,7 +1609,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetSunValue {
             pub values: Vec<f32>,
             pub count: u32,
@@ -1648,7 +1661,7 @@
             pub view_size_y: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWaterRenderingValue {
             pub values: Vec<f32>,
             pub count: u32,
@@ -1668,7 +1681,7 @@
             pub has_previous: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ReadPixelsValue {
             pub values: Vec<f32>,
             pub components: u32,
@@ -1896,7 +1909,7 @@
         #[inline]
         pub fn change_texture_params(name: &str, params: GfxTextureParams) -> Result<()> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
-            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.target.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.format.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.border.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.min_filter.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.mag_filter.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_s.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_t.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_r.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.compare_func.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.lod_bias.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.aniso.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.samples.to_le_bytes()); __b.extend_from_slice(&(if params.fbo { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if params.fbo_depth { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.target.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.format.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.border.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.min_filter.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.mag_filter.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_s.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_t.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.wrap_r.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.compare_func.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.lod_bias.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.aniso.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&params.samples.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if params.fbo { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if params.fbo_depth { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             crate::generated::dynamic_input::gfx::change_texture_params(&__blob0, &__blob1)
         }
 
@@ -1978,7 +1991,7 @@
 
         #[inline]
         pub fn create_fbo(target: u32, attachments: &[GfxFBOAttachment], draw_buffers: &[u32], read_buffer: u32) -> Result<CreateFBOValue> {
-            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(attachments.len() as u32).to_le_bytes()); for __item in attachments.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.attachment.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.texture_name.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.texture_name.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.texture_target.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.mip_level.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.rbo_id.to_le_bytes()); __b.extend_from_slice(&(if __item.use_rbo { 1u32 } else { 0u32 }).to_le_bytes());} __b };
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(attachments.len() as u32).to_le_bytes()); for __item in attachments.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.attachment.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.texture_name.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.texture_name.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.texture_target.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.mip_level.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.rbo_id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if __item.use_rbo { 1u32 } else { 0u32 }).to_le_bytes());} __b };
             let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(draw_buffers.len() as u32).to_le_bytes()); for __item in draw_buffers.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_le_bytes());} __b };
             let mut __output = [0u8; 8];
             crate::generated::dynamic_input::gfx::create_fbo(target as i32, read_buffer as i32, &__blob0, &__blob1, &mut __output)?;
@@ -2006,8 +2019,8 @@
         }
 
         #[inline]
-        pub fn create_query(unused: u8) -> Result<u32> {
-            let value = crate::generated::gfx::create_query(unused)?;
+        pub fn create_query(target: Option<u32>) -> Result<u32> {
+            let value = crate::generated::gfx::create_query(target)?;
             Ok(value)
         }
 
@@ -2026,7 +2039,7 @@
             let __blob4 = { let mut __b = Vec::with_capacity(4 + geometry.len()); __b.extend_from_slice(&(geometry.len() as u32).to_le_bytes()); __b.extend_from_slice(geometry.as_bytes()); __b };
             let __blob5 = { let mut __b = Vec::with_capacity(4 + fragment.len()); __b.extend_from_slice(&(fragment.len() as u32).to_le_bytes()); __b.extend_from_slice(fragment.as_bytes()); __b };
             let __blob6 = { let mut __b = Vec::with_capacity(4 + compute.len()); __b.extend_from_slice(&(compute.len() as u32).to_le_bytes()); __b.extend_from_slice(compute.as_bytes()); __b };
-            let __blob7 = { let mut __b = Vec::new(); __b.extend_from_slice(&(if options.has_geo_input_type { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_input_type.to_le_bytes()); __b.extend_from_slice(&(if options.has_geo_output_type { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_output_type.to_le_bytes()); __b.extend_from_slice(&(if options.has_geo_output_verts { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_output_verts.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob7 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if options.has_geo_input_type { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_input_type.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if options.has_geo_output_type { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_output_type.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if options.has_geo_output_verts { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&options.geo_output_verts.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             let mut __output = [0u8; 8];
             crate::generated::dynamic_input::gfx::create_shader(&__blob0, &__blob1, &__blob2, &__blob3, &__blob4, &__blob5, &__blob6, &__blob7, &mut __output)?;
             let mut __cursor = 0usize;
@@ -2082,7 +2095,7 @@
 
         #[inline]
         pub fn define_vbo(vbo_id: u32, elements_count: i32, element_array: bool, index_type: u32, use_default_attributes: bool, default_attribute_count: u32, attributes: &[GfxVBOAttributeOptions]) -> Result<()> {
-            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(attributes.len() as u32).to_le_bytes()); for __item in attributes.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.type_.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.size.to_le_bytes()); __b.extend_from_slice(&(if __item.normalized { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); }} __b };
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(attributes.len() as u32).to_le_bytes()); for __item in attributes.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.type_.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.size.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if __item.normalized { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); }} __b };
             crate::generated::dynamic_input::gfx::define_vbo(vbo_id as i32, elements_count, element_array as i32, index_type as i32, use_default_attributes as i32, default_attribute_count as i32, &__blob0)
         }
 
@@ -2780,9 +2793,9 @@
         }
 
         #[inline]
-        pub fn get_matrix_data(mode: u32) -> Result<Vec<f32>> {
+        pub fn get_matrix_data(mode: u32) -> Result<[f32; 16]> {
             let value = crate::generated::gfx::get_matrix_data(mode)?;
-            Ok(value.into_iter().collect::<Vec<_>>())
+            Ok(value)
         }
 
         #[inline]
@@ -2795,7 +2808,7 @@
         }
 
         #[inline]
-        pub fn get_query(value: u32) -> Result<u32> {
+        pub fn get_query(value: u32) -> Result<u64> {
             let value = crate::generated::gfx::get_query(value)?;
             Ok(value)
         }
@@ -3286,15 +3299,51 @@
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "read-pixels"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
+                pub safe fn call(x: i32, y: i32, width: i32, height: i32, format: i32, output: i32) -> i32;
             }
         }
 
-        #[doc = "Exact Core ABI forwarding entry for spring:gfx.read-pixels."]
-        #[doc(hidden)]
         #[inline]
-        pub fn read_pixels(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32 {
-            __core_owned_read_pixels::call(p0, p1, p2, p3, p4, p5)
+        pub fn read_pixels(x: i32, y: i32, width: i32, height: i32, format: u32) -> Result<ReadPixelsValue> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut values = Vec::<f32>::new();
+                loop {
+                    let (values_pointer, values_capacity) = crate::wasm_mut_slice_parts(&mut values)?;
+                    let mut descriptor = [
+                        values_pointer as u32,
+                        values_capacity as u32,
+                        0u32,
+                        0u32,
+                    ];
+                    let descriptor_pointer = crate::wasm_output_ptr(&mut descriptor)?;
+                    let status = __core_owned_read_pixels::call(
+                        x,
+                        y,
+                        width,
+                        height,
+                        format as i32,
+                        descriptor_pointer,
+                    );
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        values.truncate(required);
+                        return Ok(ReadPixelsValue {
+                            values,
+                            components: descriptor[3],
+                        });
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    values.resize(required, 0.0);
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (x, y, width, height, format);
+                Err(unreachable!())
+            }
         }
 
         #[inline]
@@ -3362,7 +3411,7 @@
         #[inline]
         pub fn save_image(x: i32, y: i32, width: i32, height: i32, filename: &str, options: GfxSaveImageOptions, read_buffer: u32) -> Result<bool> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + filename.len()); __b.extend_from_slice(&(filename.len() as u32).to_le_bytes()); __b.extend_from_slice(filename.as_bytes()); __b };
-            let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(if options.alpha { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if options.yflip { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if options.grayscale16bit { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if options.alpha { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if options.yflip { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if options.grayscale16bit { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             crate::generated::dynamic_input::gfx::save_image(x, y, width, height, read_buffer as i32, &__blob0, &__blob1)
         }
 
@@ -3435,7 +3484,7 @@
 
         #[inline]
         pub fn shape(primitive: u32, vertices: &[GfxVertexData]) -> Result<()> {
-            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(vertices.len() as u32).to_le_bytes()); for __item in vertices.iter() { for __i0 in 0..3usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.vertex[__i0].to_bits().to_le_bytes()); } for __i147 in 0..3usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.normal[__i147].to_bits().to_le_bytes()); } for __i298 in 0..2usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.tex_coord[__i298].to_bits().to_le_bytes()); } for __i452 in 0..4usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.color[__i452].to_bits().to_le_bytes()); } __b.extend_from_slice(&(if __item.has_vertex { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if __item.has_normal { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if __item.has_tex_coord { 1u32 } else { 0u32 }).to_le_bytes()); __b.extend_from_slice(&(if __item.has_color { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); }} __b };
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(vertices.len() as u32).to_le_bytes()); for __item in vertices.iter() { for __i0 in 0..3usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.vertex.get(__i0).copied().unwrap_or_default().to_bits().to_le_bytes()); } for __i180 in 0..3usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.normal.get(__i180).copied().unwrap_or_default().to_bits().to_le_bytes()); } for __i364 in 0..2usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.tex_coord.get(__i364).copied().unwrap_or_default().to_bits().to_le_bytes()); } for __i551 in 0..4usize { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.color.get(__i551).copied().unwrap_or_default().to_bits().to_le_bytes()); } while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if __item.has_vertex { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if __item.has_normal { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if __item.has_tex_coord { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if __item.has_color { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); }} __b };
             crate::generated::dynamic_input::gfx::shape(primitive as i32, &__blob0)
         }
 
@@ -3579,13 +3628,13 @@
         }
 
         #[inline]
-        pub fn uniform_array_float(location: i32, values: &[f32]) -> Result<()> {
-            crate::generated::borrowed::gfx::uniform_array_float(location, values)
+        pub fn uniform_array_float(location: i32, values: &[f32], components: u32) -> Result<()> {
+            crate::generated::borrowed::gfx::uniform_array_float(location, values, components)
         }
 
         #[inline]
-        pub fn uniform_array_int(location: i32, values: &[i32]) -> Result<()> {
-            crate::generated::borrowed::gfx::uniform_array_int(location, values)
+        pub fn uniform_array_int(location: i32, values: &[i32], components: u32) -> Result<()> {
+            crate::generated::borrowed::gfx::uniform_array_int(location, values, components)
         }
 
         #[inline]

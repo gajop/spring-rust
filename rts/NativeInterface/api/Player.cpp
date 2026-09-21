@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 #include "Game/Game.h"
 #include "Game/GlobalUnsynced.h"
@@ -17,6 +18,7 @@ namespace {
 static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local std::vector<RosterEntry> rosterEntries;
 
 // Static errors
 static const Error PLAYER_NOT_AVAILABLE_ERROR = {
@@ -104,16 +106,10 @@ static void NativeGetPlayerRoster(const GetPlayerRosterQuery* query, GetPlayerRo
 	const std::vector<int>& playerIndices = playerRoster.GetIndices(query->showPathingPlayers);
 	playerRoster.SetSortTypeByCode(oldSortType);
 
-	// Write roster entries to scratch buffer
-	RosterEntry* entries = reinterpret_cast<RosterEntry*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	rosterEntries.clear();
+	rosterEntries.reserve(playerIndices.size());
 
 	for (size_t i = 0; i < playerIndices.size(); i++) {
-		if (bufferPos + sizeof(RosterEntry) > sizeof(scratchBuffer)) {
-			result->error = &PLAYER_NOT_AVAILABLE_ERROR;
-			return;
-		}
-
 		const int playerID = playerIndices[i];
 		const CPlayer* p = playerHandler.Player(playerID);
 
@@ -121,7 +117,7 @@ static void NativeGetPlayerRoster(const GetPlayerRosterQuery* query, GetPlayerRo
 			continue;
 		}
 
-		RosterEntry& entry = entries[count];
+		RosterEntry& entry = rosterEntries.emplace_back();
 		entry.name = p->name.c_str();
 		entry.playerID = playerID;
 		entry.teamID = p->team;
@@ -136,13 +132,11 @@ static void NativeGetPlayerRoster(const GetPlayerRosterQuery* query, GetPlayerRo
 		entry.country = p->countryCode.empty() ? nullptr : p->countryCode.c_str();
 		entry.rank = p->rank;
 
-		bufferPos += sizeof(RosterEntry);
-		count++;
 	}
 
 	result->error = nullptr;
-	result->entries = entries;
-	result->count = count;
+	result->entries = rosterEntries.empty() ? nullptr : rosterEntries.data();
+	result->count = rosterEntries.size();
 }
 
 // Player traffic

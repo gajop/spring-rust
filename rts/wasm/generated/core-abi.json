@@ -3831,14 +3831,20 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "packed32",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 12,
+          "alignment": 4
+        }
+      },
       "direct_params": [
+        "i32",
         "i32"
       ],
       "direct_results": [
-        "i64"
+        "i32"
       ],
-      "signature": "i32->i64",
+      "signature": "i32,i32->i32",
       "notes": []
     },
     {
@@ -4928,7 +4934,7 @@
       "mutating": false,
       "visibility_sensitive": false,
       "source_status": "automatic",
-      "input_strategy": "direct",
+      "input_strategy": "fixed-input-buffer",
       "result_strategy": "packed32",
       "direct_params": [
         "i32"
@@ -6678,14 +6684,20 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "packed32",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 8,
+          "alignment": 8
+        }
+      },
       "direct_params": [
+        "i32",
         "i32"
       ],
       "direct_results": [
-        "i64"
+        "i32"
       ],
-      "signature": "i32->i64",
+      "signature": "i32,i32->i32",
       "notes": []
     },
     {
@@ -8869,12 +8881,13 @@
       "result_strategy": "status",
       "direct_params": [
         "i32",
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i32"
       ],
-      "signature": "i32,i32->i32",
+      "signature": "i32,i32,i32->i32",
       "notes": []
     },
     {
@@ -8890,12 +8903,13 @@
       "result_strategy": "status",
       "direct_params": [
         "i32",
+        "i32",
         "i32"
       ],
       "direct_results": [
         "i32"
       ],
-      "signature": "i32,i32->i32",
+      "signature": "i32,i32,i32->i32",
       "notes": []
     },
     {
@@ -11960,6 +11974,26 @@
     },
     {
       "module": "move_ctrl",
+      "function": "GetTag",
+      "import_module": "spring:move-ctrl",
+      "import_name": "get-tag",
+      "environment_mask": 5,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
       "function": "GetUnitEstimatedPath",
       "import_module": "spring:move-ctrl",
       "import_name": "get-unit-estimated-path",
@@ -12043,6 +12077,90 @@
     },
     {
       "module": "move_ctrl",
+      "function": "SetCollideStop",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-collide-stop",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetDrag",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-drag",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "f32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,f32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetExtrapolate",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-extrapolate",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetGravity",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-gravity",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "f32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,f32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
       "function": "SetGroundMoveTypeMaxSpeed",
       "import_module": "spring:move-ctrl",
       "import_name": "set-ground-move-type-max-speed",
@@ -12064,6 +12182,90 @@
     },
     {
       "module": "move_ctrl",
+      "function": "SetGroundOffset",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-ground-offset",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "f32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,f32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetHeading",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-heading",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetLimits",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-limits",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "fixed-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetLimitsStop",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-limits-stop",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
       "function": "SetMoveCtrlGravity",
       "import_module": "spring:move-ctrl",
       "import_name": "set-move-ctrl-gravity",
@@ -12081,6 +12283,28 @@
         "i64"
       ],
       "signature": "i32,f32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetMoveDef",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-move-def",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32->i64",
       "notes": []
     },
     {
@@ -12146,6 +12370,547 @@
         "i64"
       ],
       "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetPhysics",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-physics",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "fixed-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetPosition",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-position",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "fixed-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetProgressState",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-progress-state",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetRelativeVelocity",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-relative-velocity",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "fixed-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetRotation",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-rotation",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "fixed-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetRotationVelocity",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-rotation-velocity",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "fixed-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetTag",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-tag",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetTrackGround",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-track-ground",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetTrackLimits",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-track-limits",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetTrackSlope",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-track-slope",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetVelocity",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-velocity",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "fixed-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "move_ctrl",
+      "function": "SetWindFactor",
+      "import_module": "spring:move-ctrl",
+      "import_name": "set-wind-factor",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "f32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,f32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "ClearDeferredMaterialUniform",
+      "import_module": "spring:object-rendering",
+      "import_name": "clear-deferred-material-uniform",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "ClearForwardMaterialUniform",
+      "import_module": "spring:object-rendering",
+      "import_name": "clear-forward-material-uniform",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "GetLOD",
+      "import_module": "spring:object-rendering",
+      "import_name": "get-lod",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 8,
+          "alignment": 4
+        }
+      },
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetDeferredMaterialUniform",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-deferred-material-uniform",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetForwardMaterialUniform",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-forward-material-uniform",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetLODCount",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-lod-count",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetLODDistance",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-lod-distance",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "f32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,f32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetLODLength",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-lod-length",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "f32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,f32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetMaterial",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-material",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32,i32->i64",
+      "notes": [
+        "list<string> requires adapted Core pointer-table lowering and cannot use the native borrowed-list fast path"
+      ]
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetMaterialDisplayLists",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-material-display-lists",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetMaterialLastLOD",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-material-last-lod",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "object_rendering",
+      "function": "SetPieceList",
+      "import_module": "spring:object-rendering",
+      "import_name": "set-piece-list",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32,i32->i64",
       "notes": []
     },
     {
@@ -18238,14 +19003,20 @@
       "visibility_sensitive": false,
       "source_status": "automatic",
       "input_strategy": "direct",
-      "result_strategy": "packed32",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 8,
+          "alignment": 4
+        }
+      },
       "direct_params": [
+        "i32",
         "i32"
       ],
       "direct_results": [
-        "i64"
+        "i32"
       ],
-      "signature": "i32->i64",
+      "signature": "i32,i32->i32",
       "notes": []
     },
     {
@@ -27559,6 +28330,27 @@
     },
     {
       "module": "unsynced_ctrl",
+      "function": "SetFeatureLuaDraw",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "set-feature-lua-draw",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_ctrl",
       "function": "SetFeatureNoDraw",
       "import_module": "spring:unsynced-ctrl",
       "import_name": "set-feature-no-draw",
@@ -27771,6 +28563,27 @@
         "i64"
       ],
       "signature": "f32,f32,f32,f32,f32,f32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_ctrl",
+      "function": "SetProjectileLuaDraw",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "set-projectile-lua-draw",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
       "notes": []
     },
     {
@@ -30295,7 +31108,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1150,
+  "automatic_count": 1186,
   "manual_count": 194,
   "unsupported_count": 17
 }

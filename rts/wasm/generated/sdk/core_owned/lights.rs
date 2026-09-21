@@ -14,7 +14,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AddMapLightQuery {
             pub params: LightParams,
         }
@@ -24,7 +24,7 @@
             pub light_handle: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AddModelLightQuery {
             pub params: LightParams,
         }
@@ -34,7 +34,7 @@
             pub light_handle: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LightParams {
             pub position: Vec<f32>,
             pub direction: Vec<f32>,
@@ -81,7 +81,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UpdateMapLightQuery {
             pub light_handle: u32,
             pub params: LightParams,
@@ -92,7 +92,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UpdateModelLightQuery {
             pub light_handle: u32,
             pub params: LightParams,

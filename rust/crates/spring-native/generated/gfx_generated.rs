@@ -1421,12 +1421,13 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn uniform_array_float(&self, location: i32, values: &[f32]) -> Result<(), Error> {
+    pub fn uniform_array_float(&self, location: i32, values: &[f32], components: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUniformArrayFloatQuery {
                 location,
                 values: values.as_ptr(),
                 count: values.len() as u32,
+                components,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.UniformArrayFloat.expect("UniformArrayFloat function pointer must be initialized");
@@ -1436,12 +1437,13 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn uniform_array_int(&self, location: i32, values: &[i32]) -> Result<(), Error> {
+    pub fn uniform_array_int(&self, location: i32, values: &[i32], components: u32) -> Result<(), Error> {
         unsafe {
             let query = sys::GfxUniformArrayIntQuery {
                 location,
                 values: values.as_ptr(),
                 count: values.len() as u32,
+                components,
             };
             let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
             let func = self.api.UniformArrayInt.expect("UniformArrayInt function pointer must be initialized");
@@ -2892,10 +2894,11 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn create_query(&self) -> Result<u32, Error> {
+    pub fn create_query(&self, target: Option<u32>) -> Result<u32, Error> {
         unsafe {
-            let query = sys::GfxEmptyQuery {
-                _unused: 0,
+            let query = sys::GfxCreateQueryQuery {
+                target: target.unwrap_or(0),
+                hasTarget: target.is_some(),
             };
             let mut result = MaybeUninit::<sys::GfxUIntResult>::zeroed();
             let func = self.api.CreateQuery.expect("CreateQuery function pointer must be initialized");
@@ -2939,12 +2942,12 @@ impl<'a> Gfx<'a> {
         }
     }
 
-    pub fn get_query(&self, value: u32) -> Result<u32, Error> {
+    pub fn get_query(&self, value: u32) -> Result<u64, Error> {
         unsafe {
             let query = sys::GfxUIntQuery {
                 value,
             };
-            let mut result = MaybeUninit::<sys::GfxUIntResult>::zeroed();
+            let mut result = MaybeUninit::<sys::GfxUInt64Result>::zeroed();
             let func = self.api.GetQuery.expect("GetQuery function pointer must be initialized");
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();

@@ -10,10 +10,10 @@
         }
 
         #[inline]
-        pub fn create_feature(feature_def: &DefRef, pos: Float3, facing: i32, team_id: i32, feature_id: i32) -> Result<i32> {
+        pub fn create_feature(feature_def: &DefRef, pos: Float3, heading: i32, team_id: i32, feature_id: i32) -> Result<i32> {
             let __blob0 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(feature_def.name.len() as u32).to_le_bytes()); __b.extend_from_slice(feature_def.name.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&feature_def.id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&pos.x.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&pos.y.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&pos.z.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
-            crate::generated::dynamic_input::feature_control::create_feature(facing, team_id, feature_id, &__blob0, &__blob1)
+            crate::generated::dynamic_input::feature_control::create_feature(heading, team_id, feature_id, &__blob0, &__blob1)
         }
 
         #[inline]

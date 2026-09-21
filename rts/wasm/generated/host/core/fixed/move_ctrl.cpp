@@ -33,6 +33,32 @@ bool DefineGenerated(wasmtime_linker_t* linker, const char* moduleName,
     return false;
 }
 
+wasm_trap_t* Core_move_ctrl_get_tag(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->GetTag == nullptr)
+        return Trap("GetTag generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("GetTag generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("GetTag generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GetMoveCtrlTagQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    GetMoveCtrlTagResult result{};
+    state->native->moveCtrl->GetTag(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.tag), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_move_ctrl_is_move_ctrl_enabled(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -86,6 +112,114 @@ wasm_trap_t* Core_move_ctrl_move_ctrl(void* environment, wasmtime_caller_t* call
     return nullptr;
 }
 
+wasm_trap_t* Core_move_ctrl_set_collide_stop(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetCollideStop == nullptr)
+        return Trap("SetCollideStop generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetCollideStop generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetCollideStop generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlBoolQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].i32 != 0;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetCollideStop(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_drag(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetDrag == nullptr)
+        return Trap("SetDrag generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetDrag generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetDrag generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlFloatQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].f32;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetDrag(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_extrapolate(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetExtrapolate == nullptr)
+        return Trap("SetExtrapolate generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetExtrapolate generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetExtrapolate generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlBoolQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].i32 != 0;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetExtrapolate(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_gravity(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetGravity == nullptr)
+        return Trap("SetGravity generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetGravity generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetGravity generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlFloatQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].f32;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetGravity(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_move_ctrl_set_ground_move_type_max_speed(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -108,6 +242,136 @@ wasm_trap_t* Core_move_ctrl_set_ground_move_type_max_speed(void* environment, wa
     query.maxSpeed = slots[1].f32;
     SetGroundMoveTypeMaxSpeedResult result{};
     state->native->moveCtrl->SetGroundMoveTypeMaxSpeed(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_ground_offset(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetGroundOffset == nullptr)
+        return Trap("SetGroundOffset generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetGroundOffset generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetGroundOffset generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlFloatQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].f32;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetGroundOffset(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_heading(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetHeading == nullptr)
+        return Trap("SetHeading generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetHeading generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetHeading generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlHeadingQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.heading = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.heading)>>>(slots[1].i32);
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetHeading(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_limits(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetLimits == nullptr)
+        return Trap("SetLimits generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetLimits generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetLimits generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(input, 24u, inputWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+
+    MoveCtrlLimitsQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    if (!reader.F32(query.mins.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.mins.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.mins.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.F32(query.maxs.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.maxs.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.maxs.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetLimits(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_limits_stop(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetLimitsStop == nullptr)
+        return Trap("SetLimitsStop generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetLimitsStop generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetLimitsStop generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlBoolQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].i32 != 0;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetLimitsStop(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
     return nullptr;
@@ -223,6 +487,446 @@ wasm_trap_t* Core_move_ctrl_set_no_blocking(void* environment, wasmtime_caller_t
     return nullptr;
 }
 
+wasm_trap_t* Core_move_ctrl_set_physics(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetPhysics == nullptr)
+        return Trap("SetPhysics generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetPhysics generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetPhysics generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(input, 36u, inputWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+
+    MoveCtrlPhysicsQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    if (!reader.F32(query.position.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.position.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.position.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.F32(query.velocity.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.velocity.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.velocity.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.F32(query.rotation.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.rotation.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.rotation.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetPhysics(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_position(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetPosition == nullptr)
+        return Trap("SetPosition generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetPosition generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetPosition generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(input, 12u, inputWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+
+    MoveCtrlFloat3Query query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    if (!reader.F32(query.value.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetPosition(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_progress_state(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetProgressState == nullptr)
+        return Trap("SetProgressState generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetProgressState generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetProgressState generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    SetMoveCtrlProgressStateQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.state = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.state)>>>(slots[1].i32);
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetProgressState(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_relative_velocity(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetRelativeVelocity == nullptr)
+        return Trap("SetRelativeVelocity generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetRelativeVelocity generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetRelativeVelocity generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(input, 12u, inputWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+
+    MoveCtrlFloat3Query query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    if (!reader.F32(query.value.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetRelativeVelocity(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_rotation(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetRotation == nullptr)
+        return Trap("SetRotation generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetRotation generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetRotation generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(input, 12u, inputWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+
+    MoveCtrlFloat3Query query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    if (!reader.F32(query.value.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetRotation(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_rotation_velocity(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetRotationVelocity == nullptr)
+        return Trap("SetRotationVelocity generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetRotationVelocity generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetRotationVelocity generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(input, 12u, inputWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+
+    MoveCtrlFloat3Query query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    if (!reader.F32(query.value.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetRotationVelocity(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_tag(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetTag == nullptr)
+        return Trap("SetTag generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetTag generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetTag generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    SetMoveCtrlTagQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.tag = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.tag)>>>(slots[1].i32);
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetTag(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_track_ground(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetTrackGround == nullptr)
+        return Trap("SetTrackGround generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetTrackGround generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetTrackGround generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlBoolQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].i32 != 0;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetTrackGround(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_track_limits(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetTrackLimits == nullptr)
+        return Trap("SetTrackLimits generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetTrackLimits generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetTrackLimits generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlBoolQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].i32 != 0;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetTrackLimits(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_track_slope(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetTrackSlope == nullptr)
+        return Trap("SetTrackSlope generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetTrackSlope generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetTrackSlope generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlBoolQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].i32 != 0;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetTrackSlope(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_velocity(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetVelocity == nullptr)
+        return Trap("SetVelocity generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetVelocity generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetVelocity generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t input = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(input, 12u, inputWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+
+    MoveCtrlFloat3Query query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    if (!reader.F32(query.value.x)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.y)) return Trap("generated Core wire underflow");
+    if (!reader.F32(query.value.z)) return Trap("generated Core wire underflow");
+    if (!reader.Align(4u)) return Trap("generated Core record alignment overflow");
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetVelocity(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_move_ctrl_set_wind_factor(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->moveCtrl == nullptr ||
+        state->native->moveCtrl->SetWindFactor == nullptr)
+        return Trap("SetWindFactor generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetWindFactor generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetWindFactor generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    MoveCtrlFloatQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.value = slots[1].f32;
+    MoveCtrlResult result{};
+    state->native->moveCtrl->SetWindFactor(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 
 } // namespace
 
@@ -231,6 +935,13 @@ bool RegisterGeneratedImports_move_ctrl(wasmtime_linker_t* linker, HostState* st
     if (linker == nullptr || state == nullptr || state->native == nullptr) {
         error = "cannot register generated Core Wasm imports without linker/host/native API";
         return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "get-tag",
+                MakeFuncType(params, 1, results, 1), Core_move_ctrl_get_tag, state, error))
+            return false;
     }
     {
         const wasm_valkind_t params[] = {WASM_I32};
@@ -247,10 +958,66 @@ bool RegisterGeneratedImports_move_ctrl(wasmtime_linker_t* linker, HostState* st
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-collide-stop",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_collide_stop, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_F32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-drag",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_drag, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-extrapolate",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_extrapolate, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_F32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-gravity",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_gravity, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_F32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:move-ctrl", "set-ground-move-type-max-speed",
                 MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_ground_move_type_max_speed, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_F32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-ground-offset",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_ground_offset, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-heading",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_heading, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-limits",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_limits, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-limits-stop",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_limits_stop, state, error))
             return false;
     }
     {
@@ -281,10 +1048,94 @@ bool RegisterGeneratedImports_move_ctrl(wasmtime_linker_t* linker, HostState* st
                 MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_no_blocking, state, error))
             return false;
     }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-physics",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_physics, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-position",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_position, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-progress-state",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_progress_state, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-relative-velocity",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_relative_velocity, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-rotation",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_rotation, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-rotation-velocity",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_rotation_velocity, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-tag",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_tag, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-track-ground",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_track_ground, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-track-limits",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_track_limits, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-track-slope",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_track_slope, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-velocity",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_velocity, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_F32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:move-ctrl", "set-wind-factor",
+                MakeFuncType(params, 2, results, 1), Core_move_ctrl_set_wind_factor, state, error))
+            return false;
+    }
 
     return true;
 }
 
-static_assert(7 >= 0, "generated Core Wasm callback count");
+static_assert(28 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

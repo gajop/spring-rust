@@ -1,61 +1,81 @@
     pub mod move_ctrl {
         use super::{Result, String, Vec};
 
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        pub enum MoveTypeBooleanField {
-            MoveTypeAirCollide,
-            MoveTypeAirLoopbackAttack,
-            MoveTypeAirUseSmoothMesh,
-            MoveTypeGroundAtEndOfPath,
-            MoveTypeGroundAtGoal,
-            MoveTypeGroundPushResistant,
-            MoveTypeGunshipAirStrafe,
-            MoveTypeGunshipBankingAllowed,
-            MoveTypeGunshipCollide,
-            MoveTypeGunshipDontLand,
-            MoveTypeGunshipUseSmoothMesh,
-            MoveTypeUseWantedSpeedFormation,
-            MoveTypeUseWantedSpeedIndividual,
+        pub enum MoveCtrlProgressState {
+            MoveCtrlProgressActive = 1,
+            MoveCtrlProgressDone = 0,
+            MoveCtrlProgressFailed = 2,
         }
 
+        #[repr(i32)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        pub enum MoveTypeBooleanField {
+            MoveTypeAirCollide = 10,
+            MoveTypeAirLoopbackAttack = 12,
+            MoveTypeAirUseSmoothMesh = 11,
+            MoveTypeGroundAtEndOfPath = 3,
+            MoveTypeGroundAtGoal = 2,
+            MoveTypeGroundPushResistant = 4,
+            MoveTypeGunshipAirStrafe = 7,
+            MoveTypeGunshipBankingAllowed = 9,
+            MoveTypeGunshipCollide = 5,
+            MoveTypeGunshipDontLand = 6,
+            MoveTypeGunshipUseSmoothMesh = 8,
+            MoveTypeUseWantedSpeedFormation = 1,
+            MoveTypeUseWantedSpeedIndividual = 0,
+        }
+
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum MoveTypeNumericField {
-            MoveTypeAirAccRate,
-            MoveTypeAirAttackSafetyDistance,
-            MoveTypeAirDecRate,
-            MoveTypeAirManeuverBlockTime,
-            MoveTypeAirMaxAcc,
-            MoveTypeAirMaxAileron,
-            MoveTypeAirMaxBank,
-            MoveTypeAirMaxDec,
-            MoveTypeAirMaxElevator,
-            MoveTypeAirMaxPitch,
-            MoveTypeAirMaxRudder,
-            MoveTypeAirMyGravity,
-            MoveTypeAirTurnRadius,
-            MoveTypeAirWantedHeight,
-            MoveTypeGroundAccRate,
-            MoveTypeGroundDecRate,
-            MoveTypeGroundMaxReverseDist,
-            MoveTypeGroundMaxReverseSpeed,
-            MoveTypeGroundMinReverseAngle,
-            MoveTypeGroundMinScriptChangeHeading,
-            MoveTypeGroundMyGravity,
-            MoveTypeGroundSqSkidSpeedMult,
-            MoveTypeGroundTurnAccel,
-            MoveTypeGroundTurnRate,
-            MoveTypeGunshipAccRate,
-            MoveTypeGunshipAltitudeRate,
-            MoveTypeGunshipCurrentBank,
-            MoveTypeGunshipCurrentPitch,
-            MoveTypeGunshipDecRate,
-            MoveTypeGunshipMaxDrift,
-            MoveTypeGunshipTurnRate,
-            MoveTypeGunshipWantedHeight,
-            MoveTypeManeuverLeash,
-            MoveTypeMaxSpeed,
-            MoveTypeMaxWantedSpeed,
-            MoveTypeWaterline,
+            MoveTypeAirAccRate = 24,
+            MoveTypeAirAttackSafetyDistance = 33,
+            MoveTypeAirDecRate = 25,
+            MoveTypeAirManeuverBlockTime = 35,
+            MoveTypeAirMaxAcc = 26,
+            MoveTypeAirMaxAileron = 30,
+            MoveTypeAirMaxBank = 28,
+            MoveTypeAirMaxDec = 27,
+            MoveTypeAirMaxElevator = 31,
+            MoveTypeAirMaxPitch = 29,
+            MoveTypeAirMaxRudder = 32,
+            MoveTypeAirMyGravity = 34,
+            MoveTypeAirTurnRadius = 23,
+            MoveTypeAirWantedHeight = 22,
+            MoveTypeGroundAccRate = 6,
+            MoveTypeGroundDecRate = 7,
+            MoveTypeGroundMaxReverseDist = 9,
+            MoveTypeGroundMaxReverseSpeed = 11,
+            MoveTypeGroundMinReverseAngle = 10,
+            MoveTypeGroundMinScriptChangeHeading = 13,
+            MoveTypeGroundMyGravity = 8,
+            MoveTypeGroundSqSkidSpeedMult = 12,
+            MoveTypeGroundTurnAccel = 5,
+            MoveTypeGroundTurnRate = 4,
+            MoveTypeGunshipAccRate = 15,
+            MoveTypeGunshipAltitudeRate = 18,
+            MoveTypeGunshipCurrentBank = 19,
+            MoveTypeGunshipCurrentPitch = 20,
+            MoveTypeGunshipDecRate = 16,
+            MoveTypeGunshipMaxDrift = 21,
+            MoveTypeGunshipTurnRate = 17,
+            MoveTypeGunshipWantedHeight = 14,
+            MoveTypeManeuverLeash = 2,
+            MoveTypeMaxSpeed = 0,
+            MoveTypeMaxWantedSpeed = 1,
+            MoveTypeWaterline = 3,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetMoveCtrlTagQuery {
+            pub unit_id: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetMoveCtrlTagResult {
+            pub tag: i32,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -63,7 +83,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitEstimatedPathResult {
             pub waypoints: Vec<PathWaypoint>,
             pub starts: Vec<i32>,
@@ -74,7 +94,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitMoveTypeDataResult {
             pub data: MoveTypeData,
         }
@@ -90,6 +110,52 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct MoveCtrlBoolQuery {
+            pub unit_id: i32,
+            pub value: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct MoveCtrlFloat3Query {
+            pub unit_id: i32,
+            pub value: Float3,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct MoveCtrlFloatQuery {
+            pub unit_id: i32,
+            pub value: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct MoveCtrlHeadingQuery {
+            pub unit_id: i32,
+            pub heading: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct MoveCtrlLimitsQuery {
+            pub unit_id: i32,
+            pub mins: Float3,
+            pub maxs: Float3,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct MoveCtrlMoveDefQuery {
+            pub unit_id: i32,
+            pub move_def_id: i32,
+            pub move_def_name: Option<String>,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct MoveCtrlPhysicsQuery {
+            pub unit_id: i32,
+            pub position: Float3,
+            pub velocity: Float3,
+            pub rotation: Float3,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct MoveCtrlQuery {
             pub unit_id: i32,
             pub enable: bool,
@@ -100,7 +166,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct MoveTypeData {
             pub name: String,
             pub max_speed: f32,
@@ -151,6 +217,18 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq)]
+        pub struct SetMoveCtrlProgressStateQuery {
+            pub unit_id: i32,
+            pub state: MoveCtrlProgressState,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetMoveCtrlTagQuery {
+            pub unit_id: i32,
+            pub tag: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct SetMoveTypeBooleanQuery {
             pub unit_id: i32,
             pub field: MoveTypeBooleanField,
@@ -187,10 +265,16 @@
 
         pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitEstimatedPathValue {
             pub waypoints: Vec<PathWaypoint>,
             pub starts: Vec<i32>,
+        }
+
+        #[inline]
+        pub fn get_tag(unit_id: i32) -> Result<i32> {
+            let value = crate::generated::move_ctrl::get_tag(unit_id)?;
+            Ok(value)
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -244,8 +328,56 @@
         }
 
         #[inline]
+        pub fn set_collide_stop(unit_id: i32, value: bool) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_collide_stop(unit_id, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_drag(unit_id: i32, value: f32) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_drag(unit_id, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_extrapolate(unit_id: i32, value: bool) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_extrapolate(unit_id, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_gravity(unit_id: i32, value: f32) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_gravity(unit_id, value)?;
+            Ok(value)
+        }
+
+        #[inline]
         pub fn set_ground_move_type_max_speed(unit_id: i32, max_speed: f32) -> Result<bool> {
             let value = crate::generated::move_ctrl::set_ground_move_type_max_speed(unit_id, max_speed)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_ground_offset(unit_id: i32, value: f32) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_ground_offset(unit_id, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_heading(unit_id: i32, heading: i32) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_heading(unit_id, heading)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_limits(unit_id: i32, mins: Float3, maxs: Float3) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_limits(unit_id, crate::generated::move_ctrl::Float3 { x: mins.x, y: mins.y, z: mins.z }, crate::generated::move_ctrl::Float3 { x: maxs.x, y: maxs.y, z: maxs.z })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_limits_stop(unit_id: i32, value: bool) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_limits_stop(unit_id, value)?;
             Ok(value)
         }
 
@@ -253,6 +385,22 @@
         pub fn set_move_ctrl_gravity(unit_id: i32, gravity_factor: f32) -> Result<bool> {
             let value = crate::generated::move_ctrl::set_move_ctrl_gravity(unit_id, gravity_factor)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_set_move_def {
+            #[link(wasm_import_module = "spring:move-ctrl")]
+            unsafe extern "C" {
+                #[link_name = "set-move-def"]
+                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i64;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:move-ctrl.set-move-def."]
+        #[doc(hidden)]
+        #[inline]
+        pub fn set_move_def(p0: i32, p1: i32, p2: i32) -> i64 {
+            __core_owned_set_move_def::call(p0, p1, p2)
         }
 
         #[inline]
@@ -270,6 +418,78 @@
         #[inline]
         pub fn set_no_blocking(unit_id: i32, no_blocking: bool) -> Result<bool> {
             let value = crate::generated::move_ctrl::set_no_blocking(unit_id, no_blocking)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_physics(unit_id: i32, position: Float3, velocity: Float3, rotation: Float3) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_physics(unit_id, crate::generated::move_ctrl::Float3 { x: position.x, y: position.y, z: position.z }, crate::generated::move_ctrl::Float3 { x: velocity.x, y: velocity.y, z: velocity.z }, crate::generated::move_ctrl::Float3 { x: rotation.x, y: rotation.y, z: rotation.z })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_position(unit_id: i32, value: Float3) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_position(unit_id, crate::generated::move_ctrl::Float3 { x: value.x, y: value.y, z: value.z })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_progress_state(unit_id: i32, state: MoveCtrlProgressState) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_progress_state(unit_id, match state { MoveCtrlProgressState::MoveCtrlProgressActive => 1i32, MoveCtrlProgressState::MoveCtrlProgressDone => 0i32, MoveCtrlProgressState::MoveCtrlProgressFailed => 2i32 })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_relative_velocity(unit_id: i32, value: Float3) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_relative_velocity(unit_id, crate::generated::move_ctrl::Float3 { x: value.x, y: value.y, z: value.z })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_rotation(unit_id: i32, value: Float3) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_rotation(unit_id, crate::generated::move_ctrl::Float3 { x: value.x, y: value.y, z: value.z })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_rotation_velocity(unit_id: i32, value: Float3) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_rotation_velocity(unit_id, crate::generated::move_ctrl::Float3 { x: value.x, y: value.y, z: value.z })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_tag(unit_id: i32, tag: i32) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_tag(unit_id, tag)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_track_ground(unit_id: i32, value: bool) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_track_ground(unit_id, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_track_limits(unit_id: i32, value: bool) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_track_limits(unit_id, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_track_slope(unit_id: i32, value: bool) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_track_slope(unit_id, value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_velocity(unit_id: i32, value: Float3) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_velocity(unit_id, crate::generated::move_ctrl::Float3 { x: value.x, y: value.y, z: value.z })?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_wind_factor(unit_id: i32, value: f32) -> Result<bool> {
+            let value = crate::generated::move_ctrl::set_wind_factor(unit_id, value)?;
             Ok(value)
         }
 

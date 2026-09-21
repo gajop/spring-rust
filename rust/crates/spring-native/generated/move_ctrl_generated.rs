@@ -61,6 +61,72 @@ impl<'a> MoveCtrl<'a> {
         }
     }
 
+    pub fn set_tag(&self, unit_id: i32, tag: i32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetMoveCtrlTagQuery {
+                unitID: unit_id,
+                tag,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetTag.expect("SetTag function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn get_tag(&self, unit_id: i32) -> Result<i32, Error> {
+        unsafe {
+            let query = sys::GetMoveCtrlTagQuery {
+                unitID: unit_id,
+            };
+            let mut result = MaybeUninit::<sys::GetMoveCtrlTagResult>::zeroed();
+            let func = self.api.GetTag.expect("GetTag function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.tag
+            })
+        }
+    }
+
+    pub fn set_progress_state(&self, unit_id: i32, state: sys::MoveCtrlProgressState) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetMoveCtrlProgressStateQuery {
+                unitID: unit_id,
+                state,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetProgressState.expect("SetProgressState function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_move_def(&self, unit_id: i32, move_def_id: i32, move_def_name: Option<&str>) -> Result<bool, Error> {
+        unsafe {
+            let move_def_name_cstr = move_def_name.as_ref().map(|value| std::ffi::CString::new(*value)).transpose().map_err(|_| Error::invalid_argument("move_def_name"))?;
+            let query = sys::MoveCtrlMoveDefQuery {
+                unitID: unit_id,
+                moveDefID: move_def_id,
+                moveDefName: move_def_name_cstr.as_ref().map_or(std::ptr::null(), |value| value.as_ptr()),
+                hasMoveDefName: move_def_name.is_some(),
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetMoveDef.expect("SetMoveDef function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
     pub fn is_move_ctrl_enabled(&self, unit_id: i32) -> Result<bool, Error> {
         unsafe {
             let query = sys::IsMoveCtrlEnabledQuery {
@@ -150,6 +216,297 @@ impl<'a> MoveCtrl<'a> {
             };
             let mut result = MaybeUninit::<sys::SetNoBlockingResult>::zeroed();
             let func = self.api.SetNoBlocking.expect("SetNoBlocking function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_extrapolate(&self, unit_id: i32, value: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlBoolQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetExtrapolate.expect("SetExtrapolate function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_physics(&self, unit_id: i32, position: sys::Float3, velocity: sys::Float3, rotation: sys::Float3) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlPhysicsQuery {
+                unitID: unit_id,
+                position,
+                velocity,
+                rotation,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetPhysics.expect("SetPhysics function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_position(&self, unit_id: i32, value: sys::Float3) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloat3Query {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetPosition.expect("SetPosition function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_velocity(&self, unit_id: i32, value: sys::Float3) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloat3Query {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetVelocity.expect("SetVelocity function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_relative_velocity(&self, unit_id: i32, value: sys::Float3) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloat3Query {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetRelativeVelocity.expect("SetRelativeVelocity function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_rotation(&self, unit_id: i32, value: sys::Float3) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloat3Query {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetRotation.expect("SetRotation function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_rotation_velocity(&self, unit_id: i32, value: sys::Float3) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloat3Query {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetRotationVelocity.expect("SetRotationVelocity function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_heading(&self, unit_id: i32, heading: i32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlHeadingQuery {
+                unitID: unit_id,
+                heading,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetHeading.expect("SetHeading function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_track_slope(&self, unit_id: i32, value: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlBoolQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetTrackSlope.expect("SetTrackSlope function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_track_ground(&self, unit_id: i32, value: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlBoolQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetTrackGround.expect("SetTrackGround function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_track_limits(&self, unit_id: i32, value: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlBoolQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetTrackLimits.expect("SetTrackLimits function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_ground_offset(&self, unit_id: i32, value: f32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloatQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetGroundOffset.expect("SetGroundOffset function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_gravity(&self, unit_id: i32, value: f32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloatQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetGravity.expect("SetGravity function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_drag(&self, unit_id: i32, value: f32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloatQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetDrag.expect("SetDrag function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_wind_factor(&self, unit_id: i32, value: f32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlFloatQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetWindFactor.expect("SetWindFactor function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_limits(&self, unit_id: i32, mins: sys::Float3, maxs: sys::Float3) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlLimitsQuery {
+                unitID: unit_id,
+                mins,
+                maxs,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetLimits.expect("SetLimits function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_collide_stop(&self, unit_id: i32, value: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlBoolQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetCollideStop.expect("SetCollideStop function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_limits_stop(&self, unit_id: i32, value: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::MoveCtrlBoolQuery {
+                unitID: unit_id,
+                value,
+            };
+            let mut result = MaybeUninit::<sys::MoveCtrlResult>::zeroed();
+            let func = self.api.SetLimitsStop.expect("SetLimitsStop function pointer must be initialized");
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();
             Error::result_or(result.error, {

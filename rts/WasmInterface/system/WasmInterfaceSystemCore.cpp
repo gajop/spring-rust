@@ -178,14 +178,17 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 
 	// Budgets are frame-scoped rather than call-scoped. Reset every synced
 	// instance immediately before the simulation GameFrame boundary and every
-	// unsynced/UI instance immediately before the Update boundary. This makes
-	// all later callins/callouts in the same frame share one deterministic
-	// allowance and never lets a guest reset its own window through re-entry.
-	const bool resetBudgetWindow =
-		(synced && callin == WasmCoreCallin::GameFrame) ||
-		(!synced && callin == WasmCoreCallin::Update);
-	if (resetBudgetWindow && !system->ResetBudgetWindow(synced, error))
+	// unsynced/UI instance immediately before the Update boundary. GameFrame is
+	// also broadcast to unsynced worlds below, so their budget must be reset at
+	// the same boundary before that broadcast runs.
+	if (synced && callin == WasmCoreCallin::GameFrame) {
+		if (!system->ResetBudgetWindow(true, error) ||
+			!system->ResetBudgetWindow(false, error))
+			return false;
+	} else if (!synced && callin == WasmCoreCallin::Update &&
+		!system->ResetBudgetWindow(false, error)) {
 		return false;
+	}
 
 	const auto selectionStage = spring::benchmark_callins::BeginStage(
 		spring::benchmark_callins::Stage::CoreSelection);
@@ -207,10 +210,22 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 		1u << static_cast<std::uint32_t>(WasmEnvironment::Intro);
 	static constexpr std::uint32_t standaloneBits = uiBit | menuBit | introBit;
 
+	// Synced-originated event callins are broadcasts. Lua sends their event
+	// half to both the synced and unsynced gadget handles, in that order. The
+	// Lua message bridges use the same boolean to select one side, so keep
+	// those targeted. The generated environment mask still decides whether a
+	// particular callin exists in either world.
+	const bool broadcastSyncedEvent = synced &&
+		callin != CoreCallinOf("HandleLuaCall") &&
+		callin != CoreCallinOf("HandleLuaMsg");
+	const std::uint32_t eventBits = broadcastSyncedEvent
+		? (syncedBits | unsyncedBits)
+		: (synced ? syncedBits : unsyncedBits);
+
 	const CoreSubscriberIndex& subscribers = system->Subscribers();
 	const CoreSubscriberIndex::CallinRoute& route = subscribers.Route(callin);
 	const std::uint32_t reachable =
-		route.environmentMask & ((synced ? syncedBits : unsyncedBits) | standaloneBits);
+		route.environmentMask & (eventBits | standaloneBits);
 	if (reachable == 0) {
 		spring::benchmark_callins::End(selectionStage);
 		return true;
@@ -220,6 +235,14 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 		WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced};
 	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
 		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
+	static constexpr std::array<WasmEnvironment, 4> broadcastEnvironments{
+		WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced,
+		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
+	const auto primary = broadcastSyncedEvent
+		? std::span<const WasmEnvironment>(broadcastEnvironments)
+		: (synced
+			? std::span<const WasmEnvironment>(syncedEnvironments)
+			: std::span<const WasmEnvironment>(unsyncedEnvironments));
 
 	// Callins that discard guest return values — every draw and frame event
 	// among them — need no invocation list and no aggregation state. Run them
@@ -229,16 +252,15 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 		const auto aggregationStage = spring::benchmark_callins::BeginStage(
 			spring::benchmark_callins::Stage::CoreAggregation);
 		bool success = system->DispatchIgnoredCallin(callin, route, query, reachable,
-			synced ? syncedEnvironments : unsyncedEnvironments, handled, error);
+			primary, handled, error);
 		spring::benchmark_callins::End(aggregationStage);
 		if (WasmCoreHost::PendingFaults() != 0)
 			system->RemoveFaultedModules();
 		return success;
 	}
 
-	std::array<CoreCallinInvocation, 5> invocations{};
+	std::array<CoreCallinInvocation, 7> invocations{};
 	std::size_t invocationCount = 0;
-	const auto& primary = synced ? syncedEnvironments : unsyncedEnvironments;
 	for (const WasmEnvironment environment : primary) {
 		if ((reachable & (1u << static_cast<std::uint32_t>(environment))) != 0)
 			invocations[invocationCount++] = {environment, query, true};

@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "Rendering/GL/myGL.h"
+#include "Rendering/GL/FBO.h"
 
 #include "WorldDrawer.h"
 #include "Sim/Units/UnitDefHandler.h"
@@ -295,10 +296,13 @@ void CWorldDrawer::ResetMVPMatrices() const
 
 
 
-void CWorldDrawer::Draw() const
+void CWorldDrawer::Draw(unsigned int worldFBO) const
 {
 	SCOPED_TIMER("Draw::World");
 	SCOPED_GL_DEBUGGROUP("Draw::World");
+
+	const GLuint previousWorldFBO = FBO::SetWorldDrawTarget(worldFBO);
+	FBO::Unbind();
 
 	const auto& sky = ISky::GetSky();
 	glClearColor(sky->fogColor.x, sky->fogColor.y, sky->fogColor.z, 0.0f);
@@ -324,6 +328,9 @@ void CWorldDrawer::Draw() const
 	DrawBelowWaterOverlay();
 
 	glDisable(GL_FOG);
+
+	FBO::Unbind();
+	FBO::SetWorldDrawTarget(previousWorldFBO);
 }
 
 

@@ -654,6 +654,48 @@ pub mod borrowed {
 
     }
 
+    pub mod move_ctrl {
+        use crate::{ApiError, ErrorCode, Result};
+
+        #[cfg(target_arch = "wasm32")]
+        mod raw {
+            #[link(wasm_import_module = "spring:move-ctrl")]
+            unsafe extern "C" {
+                #[link_name = "set-move-def"]
+                pub safe fn set_move_def(arg0: i32, arg1: i32, arg2: i32) -> i64;
+            }
+        }
+
+        #[inline]
+        pub fn set_move_def(unit_id: i32, move_def_id: i32, move_def_name: Option<&core::ffi::CStr>) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 12];
+            let mut cursor = 0usize;
+            let core_optional = match move_def_name {
+                Some(core_value) => {
+                    let (core_ptr, core_len) = crate::wasm_slice_parts(core_value.to_bytes())?;
+                    Some((core_ptr as u32, core_len as u32))
+                }
+                None => None,
+            };
+            if !super::__core_borrowed_wire::put_optional_pair(&mut descriptor, &mut cursor, core_optional) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_move_def(unit_id, move_def_id, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unit_id, move_def_id, move_def_name);
+                Err(unreachable!())
+            }
+        }
+
+    }
+
     pub mod input {
         use crate::{ApiError, ErrorCode, Result};
 
@@ -1878,12 +1920,12 @@ pub mod borrowed {
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "uniform-array-float"]
-                pub safe fn uniform_array_float(arg0: i32, arg1: i32) -> i32;
+                pub safe fn uniform_array_float(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
                 #[link_name = "uniform-array-int"]
-                pub safe fn uniform_array_int(arg0: i32, arg1: i32) -> i32;
+                pub safe fn uniform_array_int(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
@@ -2859,7 +2901,7 @@ pub mod borrowed {
         }
 
         #[inline]
-        pub fn uniform_array_float(location: i32, values: &[f32]) -> Result<()> {
+        pub fn uniform_array_float(location: i32, values: &[f32], components: u32) -> Result<()> {
             #[cfg(target_arch = "wasm32")]
             {
             let mut descriptor = [0u8; 8];
@@ -2868,18 +2910,18 @@ pub mod borrowed {
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
-            let status = raw::uniform_array_float(location, descriptor_ptr);
+            let status = raw::uniform_array_float(location, components as i32, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
             {
-                let _ = (location, values);
+                let _ = (location, values, components);
                 Err(unreachable!())
             }
         }
 
         #[inline]
-        pub fn uniform_array_int(location: i32, values: &[i32]) -> Result<()> {
+        pub fn uniform_array_int(location: i32, values: &[i32], components: u32) -> Result<()> {
             #[cfg(target_arch = "wasm32")]
             {
             let mut descriptor = [0u8; 8];
@@ -2888,12 +2930,12 @@ pub mod borrowed {
             if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
-            let status = raw::uniform_array_int(location, descriptor_ptr);
+            let status = raw::uniform_array_int(location, components as i32, descriptor_ptr);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
             }
             #[cfg(not(target_arch = "wasm32"))]
             {
-                let _ = (location, values);
+                let _ = (location, values, components);
                 Err(unreachable!())
             }
         }
@@ -5996,6 +6038,69 @@ pub mod borrowed {
 
     }
 
+    pub mod object_rendering {
+        use crate::{ApiError, ErrorCode, Result};
+
+        #[cfg(target_arch = "wasm32")]
+        mod raw {
+            #[link(wasm_import_module = "spring:object-rendering")]
+            unsafe extern "C" {
+                #[link_name = "clear-deferred-material-uniform"]
+                pub safe fn clear_deferred_material_uniform(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+            }
+            #[link(wasm_import_module = "spring:object-rendering")]
+            unsafe extern "C" {
+                #[link_name = "clear-forward-material-uniform"]
+                pub safe fn clear_forward_material_uniform(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+            }
+        }
+
+        #[inline]
+        pub fn clear_deferred_material_uniform(object_type: i32, object_id: i32, material_type: i32, lod_level: u32, name: &core::ffi::CStr) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::clear_deferred_material_uniform(object_type, object_id, material_type, lod_level as i32, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (object_type, object_id, material_type, lod_level, name);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn clear_forward_material_uniform(object_type: i32, object_id: i32, material_type: i32, lod_level: u32, name: &core::ffi::CStr) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::clear_forward_material_uniform(object_type, object_id, material_type, lod_level as i32, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (object_type, object_id, material_type, lod_level, name);
+                Err(unreachable!())
+            }
+        }
+
+    }
+
 #[doc(hidden)]
-    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 207;
+    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 210;
 }

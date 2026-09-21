@@ -6492,10 +6492,12 @@ int LuaOpenGL::SaveImage(lua_State* L)
 
 /***
  * @function gl.CreateQuery
+ * @param target integer
  * @return any query
  */
 int LuaOpenGL::CreateQuery(lua_State* L)
 {
+	const GLenum target = static_cast<GLenum>(luaL_optint(L, 1, GL_SAMPLES_PASSED));
 	GLuint id;
 	glGenQueries(1, &id);
 
@@ -6507,7 +6509,7 @@ int LuaOpenGL::CreateQuery(lua_State* L)
 	if (qry == nullptr)
 		return 0;
 
-	*qry = {static_cast<unsigned int>(occlusionQueries.size()), id};
+	*qry = {static_cast<unsigned int>(occlusionQueries.size()), id, target};
 	occlusionQueries.push_back(qry);
 
 	lua_pushlightuserdata(L, reinterpret_cast<void*>(qry));
@@ -6568,9 +6570,9 @@ int LuaOpenGL::RunQuery(lua_State* L)
 	const int args = lua_gettop(L); // number of arguments
 
 	running = true;
-	glBeginQuery(GL_SAMPLES_PASSED, qry->id);
+	glBeginQuery(qry->target, qry->id);
 	const int error = lua_pcall(L, (args - 2), 0, 0);
-	glEndQuery(GL_SAMPLES_PASSED);
+	glEndQuery(qry->target);
 	running = false;
 
 	if (error != 0) {
@@ -6598,10 +6600,10 @@ int LuaOpenGL::GetQuery(lua_State* L)
 	if (qry->index >= occlusionQueries.size())
 		return 0;
 
-	GLuint count;
-	glGetQueryObjectuiv(qry->id, GL_QUERY_RESULT, &count);
+	GLuint64 count;
+	glGetQueryObjectui64v(qry->id, GL_QUERY_RESULT, &count);
 
-	lua_pushnumber(L, count);
+	lua_pushinteger(L, static_cast<lua_Integer>(count));
 	return 1;
 }
 

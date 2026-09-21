@@ -515,6 +515,27 @@ impl NativeApiParity {
         }
         Ok(())
     }
+
+    pub(crate) fn compare_optional_i32(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: i32,
+        native_present: bool,
+    ) -> Result<(), String> {
+        let lua_value = message.get(field);
+        if native_present != lua_value.is_some() {
+            return Err(format!(
+                "{label}.{field}: native_present={native_present}, lua_present={}",
+                lua_value.is_some()
+            ));
+        }
+        if native_present {
+            self.same_i32_if_present(label, message, field, native)?;
+        }
+        Ok(())
+    }
     pub(crate) fn same_string_if_present(
         &self,
         label: &str,

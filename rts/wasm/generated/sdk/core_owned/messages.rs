@@ -1,13 +1,13 @@
     pub mod messages {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ConsoleEntry {
             pub text: String,
             pub priority: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EchoQuery {
             pub message: String,
             pub rest: String,
@@ -23,7 +23,7 @@
             pub max_lines: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetConsoleBufferResult {
             pub entries: Vec<ConsoleEntry>,
         }
@@ -33,7 +33,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetCurrentTooltipResult {
             pub tooltip: String,
         }
@@ -48,7 +48,7 @@
             pub writing: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LogQuery {
             pub section: String,
             pub level: i32,
@@ -60,7 +60,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendAllyChatQuery {
             pub message: String,
         }
@@ -70,7 +70,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendCommandsQuery {
             pub command: String,
             pub rest: String,
@@ -81,7 +81,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendLuaGaiaQuery {
             pub message: String,
         }
@@ -91,7 +91,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendLuaMenuMsgQuery {
             pub message: String,
         }
@@ -101,7 +101,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendLuaRulesQuery {
             pub message: String,
         }
@@ -111,7 +111,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendLuaUIQuery {
             pub message: String,
             pub mode: String,
@@ -122,7 +122,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendMessageQuery {
             pub message: String,
         }
@@ -132,7 +132,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendMessageToAllyTeamQuery {
             pub ally_team_id: i32,
             pub message: String,
@@ -143,7 +143,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendMessageToPlayerQuery {
             pub player_id: i32,
             pub message: String,
@@ -154,7 +154,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendMessageToSpectatorsQuery {
             pub message: String,
         }
@@ -164,7 +164,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendMessageToTeamQuery {
             pub team_id: i32,
             pub message: String,
@@ -175,7 +175,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendPrivateChatQuery {
             pub message: String,
             pub player_id: i32,
@@ -186,7 +186,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendPublicChatQuery {
             pub message: String,
         }
@@ -196,7 +196,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendSkirmishAIMessageQuery {
             pub ai_id: i32,
             pub message: String,
@@ -207,7 +207,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendSpectatorChatQuery {
             pub message: String,
         }
@@ -217,7 +217,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SendToUnsyncedQuery {
             pub message: String,
         }

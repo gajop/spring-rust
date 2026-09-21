@@ -912,7 +912,7 @@ wasm_trap_t* CoreVariableOutput_teams_get_team_stats_history(void* environment, 
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t historyCapacityBytes = static_cast<std::uint64_t>(historyCapacity) * 76u;
+    const std::uint64_t historyCapacityBytes = static_cast<std::uint64_t>(historyCapacity) * 84u;
     if (historyCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(historyPointer, static_cast<std::size_t>(historyCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetTeamStatsHistoryQuery query{};
@@ -931,11 +931,13 @@ wasm_trap_t* CoreVariableOutput_teams_get_team_stats_history(void* environment, 
     outputTooSmall = outputTooSmall || historyCapacity < historyRequired;
     if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (historyRequired != 0) {
-        const std::size_t historyBytes = static_cast<std::size_t>(historyRequired) * 76u;
+        const std::size_t historyBytes = static_cast<std::size_t>(historyRequired) * 84u;
         std::span<std::uint8_t> historyWire;
         if (!state->memory.MutableView(historyPointer, historyBytes, historyWire)) return Trap("generated Core variable output range changed unexpectedly");
         WireWriter historyWriter(historyWire);
         for (std::uint32_t coreIndex = 0; coreIndex < historyRequired; ++coreIndex) {
+        if (!historyWriter.F32(result.history[coreIndex].time)) return Trap("generated Core wire overflow");
+        if (!historyWriter.I32(result.history[coreIndex].frame)) return Trap("generated Core wire overflow");
         if (!historyWriter.F32(result.history[coreIndex].metalUsed)) return Trap("generated Core wire overflow");
         if (!historyWriter.F32(result.history[coreIndex].metalProduced)) return Trap("generated Core wire overflow");
         if (!historyWriter.F32(result.history[coreIndex].metalExcess)) return Trap("generated Core wire overflow");

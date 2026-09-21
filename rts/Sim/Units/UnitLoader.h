@@ -3,6 +3,7 @@
 #ifndef UNIT_LOADER_H
 #define UNIT_LOADER_H
 
+#include "System/SpringMath.h"
 #include "System/float3.h"
 
 #include <string>
@@ -16,18 +17,18 @@ struct UnitDef;
 struct UnitDefWeapon;
 
 struct UnitLoadParams {
-	const UnitDef* unitDef; /// must be non-NULL
-	const CUnit* builder; /// may be NULL
+	const UnitDef* unitDef = nullptr; /// must be non-NULL
+	const CUnit* builder = nullptr; /// may be NULL
 
-	float3 pos;
-	float3 speed;
+	float3 pos = ZeroVector;
+	float3 speed = ZeroVector;
 
-	int unitID;
-	int teamID;
-	int facing;
+	int unitID = -1;
+	int teamID = -1;
+	int facing = FACING_SOUTH;
 
-	bool beingBuilt;
-	bool flattenGround;
+	bool beingBuilt = false;
+	bool flattenGround = false;
 };
 
 class CUnitLoader

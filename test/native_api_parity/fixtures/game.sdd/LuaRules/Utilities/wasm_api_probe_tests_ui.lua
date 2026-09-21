@@ -15,10 +15,6 @@ return {
 
 		"get_key_code",
 
-		"get_key_symbol",
-
-		"get_scan_symbol",
-
 		"get_key_from_scan_symbol",
 
 		"get_key_state",
@@ -29,17 +25,9 @@ return {
 
 		"get_active_page",
 
-		"get_active_command",
-
-		"get_default_command",
-
 		"get_mouse_start_position",
 
 		"get_selection_box",
-
-		"get_action_hot_keys",
-
-		"get_gather_mode",
 
 		"is_user_writing",
 
@@ -55,25 +43,9 @@ return {
 
 		"send_message_to_player_console_buffer_count",
 
-		"send_message_to_team_console_buffer_count",
-
 		"send_message_to_ally_team_console_buffer_count",
 
 		"send_message_to_spectators_console_buffer_count",
-
-		"vfs_get_all_archives_count",
-
-		"vfs_get_maps_count",
-
-		"vfs_get_games_count",
-
-		"vfs_download_archive_invalid_category",
-
-		"vfs_download_archive_missing_name",
-
-		"vfs_abort_download_missing",
-
-		"vfs_scan_all_dirs",
 
 		"get_units_in_screen_rectangle",
 
@@ -131,8 +103,6 @@ return {
 
 		"get_group_units_sorted_fixed",
 
-		"get_key_bindings_count",
-
 		"get_active_cmd_descs_fixed_count",
 
 		"get_active_cmd_desc_fixed_fields",
@@ -146,12 +116,6 @@ return {
 		["get_key_code"] = {
 			keySym = "a",
 		},
-		["get_key_symbol"] = {
-			keyCode = 97,
-		},
-		["get_scan_symbol"] = {
-			scanCode = 4,
-		},
 		["get_key_from_scan_symbol"] = {
 			scanSymbol = "a",
 		},
@@ -160,9 +124,6 @@ return {
 		},
 		["get_mouse_start_position"] = {
 			button = 1,
-		},
-		["get_action_hot_keys"] = {
-			action = "move",
 		},
 		["get_console_buffer_count"] = {
 			maxLines = 3,
@@ -188,11 +149,6 @@ return {
 			message = "native-api-parity-player-message",
 			maxLines = 8,
 		},
-		["send_message_to_team_console_buffer_count"] = {
-			teamID = 0,
-			message = "native-api-parity-team-message",
-			maxLines = 8,
-		},
 		["send_message_to_ally_team_console_buffer_count"] = {
 			allyTeamID = 0,
 			message = "native-api-parity-ally-team-message",
@@ -201,26 +157,6 @@ return {
 		["send_message_to_spectators_console_buffer_count"] = {
 			message = "native-api-parity-spectator-message",
 			maxLines = 8,
-		},
-		["vfs_get_all_archives_count"] = {
-			path = "",
-		},
-		["vfs_get_maps_count"] = {
-			path = "",
-		},
-		["vfs_get_games_count"] = {
-			path = "",
-		},
-		["vfs_download_archive_invalid_category"] = {
-			filename = "native_api_parity_missing_archive",
-			category = "invalid",
-		},
-		["vfs_download_archive_missing_name"] = {
-			filename = "",
-			category = "map",
-		},
-		["vfs_abort_download_missing"] = {
-			id = -1,
 		},
 		["get_units_in_screen_rectangle"] = {
 			left = 0,
@@ -282,10 +218,6 @@ return {
 		},
 		["get_group_units_sorted_fixed"] = {
 			groupID = 0,
-		},
-		["get_key_bindings_count"] = {
-			keySet1 = "",
-			keySet2 = "",
 		},
 		["get_active_cmd_desc_fixed_fields"] = {
 			cmdIndex = 1,

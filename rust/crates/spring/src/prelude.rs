@@ -1,7 +1,8 @@
 pub use crate::{
     ABI_VERSION, AllowUnitCreationResult, ApiError, DamageResult, ErrorCode, Result, UnitHealth,
     export_allow_unit_creation, export_draw_world, export_environment_mask, export_game_frame,
-    export_game_frame_post, export_unit_created, export_unit_pre_damaged, export_update,
+    export_game_frame_post, export_unit_created, export_unit_created_raw, export_unit_pre_damaged,
+    export_update,
 };
 
 pub use crate::{

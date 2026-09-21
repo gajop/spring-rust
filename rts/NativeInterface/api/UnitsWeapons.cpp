@@ -4,16 +4,16 @@
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Weapons/Weapon.h"
 #include "Sim/Weapons/WeaponDef.h"
+#include "Sim/Projectiles/WeaponProjectiles/WeaponProjectile.h"
 #include "Sim/Misc/GlobalConstants.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "System/float3.h"
 
+#include <vector>
+
 namespace {
 
-// Scratch buffer
-static thread_local char scratchBuffer[1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local std::vector<float> damageValues;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit system not ready" };
@@ -24,18 +24,17 @@ static bool IsReady() {
 	return (gs != nullptr);
 }
 
-static const CWeapon* GetLuaWeapon(const CUnit* unit, int32_t luaWeaponNum)
+static const CWeapon* GetWeaponByOneBasedNumber(const CUnit* unit, int32_t weaponNum)
 {
-	const int weaponNum = luaWeaponNum - 1;
-	if (weaponNum < 0 || weaponNum >= static_cast<int>(unit->weapons.size()))
+	const int weaponIndex = weaponNum - 1;
+	if (weaponIndex < 0 || weaponIndex >= static_cast<int>(unit->weapons.size()))
 		return nullptr;
 
-	return unit->weapons[weaponNum];
+	return unit->weapons[weaponIndex];
 }
 
 static void NativeGetUnitWeaponCount(const GetUnitWeaponCountQuery* query, GetUnitWeaponCountResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->count = 0;
 
@@ -55,7 +54,6 @@ static void NativeGetUnitWeaponCount(const GetUnitWeaponCountQuery* query, GetUn
 
 static void NativeGetUnitMaxRange(const GetUnitMaxRangeQuery* query, GetUnitMaxRangeResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->maxRange = 0.0f;
 
@@ -75,7 +73,6 @@ static void NativeGetUnitMaxRange(const GetUnitMaxRangeQuery* query, GetUnitMaxR
 
 static void NativeGetUnitWeaponState(const GetUnitWeaponStateQuery* query, GetUnitWeaponStateResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -93,7 +90,7 @@ static void NativeGetUnitWeaponState(const GetUnitWeaponStateQuery* query, GetUn
 	// on the guest side.
 	(void)query->key;
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
 	if (weapon == nullptr || weapon->weaponDef == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -106,20 +103,19 @@ static void NativeGetUnitWeaponState(const GetUnitWeaponStateQuery* query, GetUn
 	result->state.reloadFrame = weapon->reloadStatus;
 	result->state.range = weapon->range;
 	result->state.projectileSpeed = weapon->projectileSpeed;
-	result->state.accuracy = weapon->accuracyError;
-	result->state.sprayAngle = weapon->sprayAngle;
+	result->state.accuracy = weapon->AccuracyExperience();
+	result->state.sprayAngle = weapon->SprayAngleExperience();
 	result->state.aimFromHeight = weapon->aimFromPos.y;
 	result->state.salvoSize = weapon->salvoSize;
-	result->state.salvoDelay = weapon->salvoDelay;
+	result->state.salvoDelay = weapon->salvoDelay * INV_GAME_SPEED;
 	result->state.salvoError = weapon->salvoError.Length();
-	result->state.targetMoveError = weapon->weaponDef->targetMoveError;
+	result->state.targetMoveError = weapon->MoveErrorExperience();
 	result->state.turnRate = 0.0f; // Not easily accessible
 	result->state.autoTarget = !weapon->noAutoTarget;
 }
 
 static void NativeGetUnitWeaponDamages(const GetUnitWeaponDamagesQuery* query, GetUnitWeaponDamagesResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->damages.damages = nullptr;
 	result->damages.damageCount = 0;
@@ -135,37 +131,33 @@ static void NativeGetUnitWeaponDamages(const GetUnitWeaponDamagesQuery* query, G
 		return;
 	}
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
-	if (weapon == nullptr || weapon->weaponDef == nullptr) {
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
+	if (weapon == nullptr || weapon->damages == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
 	}
 
-	const DynDamageArray& damages = weapon->weaponDef->damages;
+	// Read the live weapon damage array. SetUnitWeaponDamages mutates this
+	// array; the weapon definition contains only its initial values.
+	const DynDamageArray& damages = *weapon->damages;
 
-	// Use scratch buffer for array
-	float* damageValues = reinterpret_cast<float*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxDamages = (sizeof(scratchBuffer) - bufferPos) / sizeof(float);
+	damageValues.clear();
+	damageValues.reserve(damages.GetNumTypes());
+	for (int i = 0; i < damages.GetNumTypes(); i++)
+		damageValues.push_back(damages.Get(i));
 
-	for (int i = 0; i < damages.GetNumTypes() && count < maxDamages; i++) {
-		damageValues[count++] = damages.Get(i);
-	}
-
-	result->damages.damages = damageValues;
-	result->damages.damageCount = count;
+	result->damages.damages = damageValues.empty() ? nullptr : damageValues.data();
+	result->damages.damageCount = damageValues.size();
 	result->damages.paralyzeDamageTime = damages.paralyzeDamageTime;
 	result->damages.impulseFactor = damages.impulseFactor;
 	result->damages.impulseBoost = damages.impulseBoost;
 	result->damages.craterMult = damages.craterMult;
 	result->damages.craterBoost = damages.craterBoost;
 	result->damages.defaultDamage = damages.GetDefault();
-	bufferPos += count * sizeof(float);
 }
 
 static void NativeGetUnitWeaponVectors(const GetUnitWeaponVectorsQuery* query, GetUnitWeaponVectorsResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -179,7 +171,7 @@ static void NativeGetUnitWeaponVectors(const GetUnitWeaponVectorsQuery* query, G
 		return;
 	}
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -211,7 +203,6 @@ static void NativeGetUnitWeaponVectors(const GetUnitWeaponVectorsQuery* query, G
 
 static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* query, GetUnitWeaponTryTargetResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->canTarget = false;
 
@@ -226,7 +217,7 @@ static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* quer
 		return;
 	}
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -253,7 +244,6 @@ static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* quer
 
 static void NativeGetUnitWeaponTestTarget(const GetUnitWeaponTestTargetQuery* query, GetUnitWeaponTestTargetResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->canTarget = false;
 
@@ -268,7 +258,7 @@ static void NativeGetUnitWeaponTestTarget(const GetUnitWeaponTestTargetQuery* qu
 		return;
 	}
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -281,11 +271,11 @@ static void NativeGetUnitWeaponTestTarget(const GetUnitWeaponTestTargetQuery* qu
 		target.type = Target_Pos;
 		target.groundPos = tgtPos;
 	} else if (query->targetID >= 0) {
-		target.type = Target_Unit;
-		target.unit = unitHandler.GetUnit(query->targetID);
-		if (target.unit != nullptr) {
-			tgtPos = target.unit->pos;
-		}
+		const CUnit* targetUnit = unitHandler.GetUnit(query->targetID);
+		if (targetUnit == nullptr)
+			return;
+		tgtPos = weapon->GetUnitLeadTargetPos(targetUnit);
+		target = SWeaponTarget(targetUnit, tgtPos, true);
 	} else {
 		return; // Invalid target
 	}
@@ -295,7 +285,6 @@ static void NativeGetUnitWeaponTestTarget(const GetUnitWeaponTestTargetQuery* qu
 
 static void NativeGetUnitWeaponTestRange(const GetUnitWeaponTestRangeQuery* query, GetUnitWeaponTestRangeResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->inRange = false;
 
@@ -310,7 +299,7 @@ static void NativeGetUnitWeaponTestRange(const GetUnitWeaponTestRangeQuery* quer
 		return;
 	}
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -326,7 +315,6 @@ static void NativeGetUnitWeaponTestRange(const GetUnitWeaponTestRangeQuery* quer
 
 static void NativeGetUnitWeaponHaveFreeLineOfFire(const GetUnitWeaponHaveFreeLineOfFireQuery* query, GetUnitWeaponHaveFreeLineOfFireResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->hasFreeLineOfFire = false;
 
@@ -341,7 +329,7 @@ static void NativeGetUnitWeaponHaveFreeLineOfFire(const GetUnitWeaponHaveFreeLin
 		return;
 	}
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -355,11 +343,11 @@ static void NativeGetUnitWeaponHaveFreeLineOfFire(const GetUnitWeaponHaveFreeLin
 		target.type = Target_Pos;
 		target.groundPos = tgtPos;
 	} else if (query->targetID >= 0) {
-		target.type = Target_Unit;
-		target.unit = unitHandler.GetUnit(query->targetID);
-		if (target.unit != nullptr) {
-			tgtPos = target.unit->pos;
-		}
+		const CUnit* targetUnit = unitHandler.GetUnit(query->targetID);
+		if (targetUnit == nullptr)
+			return;
+		tgtPos = weapon->GetUnitLeadTargetPos(targetUnit);
+		target = SWeaponTarget(targetUnit, tgtPos, true);
 	} else {
 		return; // Invalid target
 	}
@@ -369,7 +357,6 @@ static void NativeGetUnitWeaponHaveFreeLineOfFire(const GetUnitWeaponHaveFreeLin
 
 static void NativeGetUnitWeaponCanFire(const GetUnitWeaponCanFireQuery* query, GetUnitWeaponCanFireResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->canFire = false;
 
@@ -384,7 +371,7 @@ static void NativeGetUnitWeaponCanFire(const GetUnitWeaponCanFireQuery* query, G
 		return;
 	}
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -395,9 +382,10 @@ static void NativeGetUnitWeaponCanFire(const GetUnitWeaponCanFireQuery* query, G
 
 static void NativeGetUnitWeaponTarget(const GetUnitWeaponTargetQuery* query, GetUnitWeaponTargetResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->target.targetType = 0; // No target
+	result->target.targetID = -1;
+	result->target.targetPos = {0.0f, 0.0f, 0.0f};
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -410,7 +398,7 @@ static void NativeGetUnitWeaponTarget(const GetUnitWeaponTargetQuery* query, Get
 		return;
 	}
 
-	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
+	const CWeapon* weapon = GetWeaponByOneBasedNumber(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -434,6 +422,13 @@ static void NativeGetUnitWeaponTarget(const GetUnitWeaponTargetQuery* query, Get
 		case Target_Pos:
 			result->target.targetType = 2;
 			result->target.targetID = -1;
+			result->target.targetPos.x = targetPos.x;
+			result->target.targetPos.y = targetPos.y;
+			result->target.targetPos.z = targetPos.z;
+			break;
+		case Target_Intercept:
+			result->target.targetType = 3;
+			result->target.targetID = (target.intercept != nullptr) ? target.intercept->id : -1;
 			result->target.targetPos.x = targetPos.x;
 			result->target.targetPos.y = targetPos.y;
 			result->target.targetPos.z = targetPos.z;

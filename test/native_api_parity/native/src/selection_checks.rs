@@ -69,7 +69,7 @@ impl NativeApiParity {
                     .selection()
                     .get_unit_group(unit_id)
                     .map_err(|err| format!("get_unit_group({unit_id}) failed: {err:?}"))?;
-                self.same_i32_if_present(label, message, "groupID", native)
+                self.compare_optional_i32(label, message, "groupID", native.0, native.1)
             }
             "get_unit_group" => {
                 let unit_id = i32_field(message, "unitID")?;
@@ -78,7 +78,7 @@ impl NativeApiParity {
                     .selection()
                     .get_unit_group(unit_id)
                     .map_err(|err| format!("get_unit_group({unit_id}) failed: {err:?}"))?;
-                self.same_i32_if_present(label, message, "groupID", native)
+                self.compare_optional_i32(label, message, "groupID", native.0, native.1)
             }
             "get_group_units" => {
                 let group_id = i32_field(message, "groupID")?;

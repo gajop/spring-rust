@@ -77,6 +77,16 @@ impl NativeApiParity {
     }
     pub(crate) fn check_game_bool(&mut self, message: &Value, label: &str) -> Result<(), String> {
         let test_name = base_test_name(label);
+        if test_name == "is_god_mode_enabled" {
+            let (enabled, control_allies, control_enemies) = self
+                .interface
+                .game()
+                .is_god_mode_enabled()
+                .map_err(|err| format!("is_god_mode_enabled() failed: {err:?}"))?;
+            self.same_bool_if_present(label, message, "enabled", enabled)?;
+            self.same_bool_if_present(label, message, "controlAllies", control_allies)?;
+            return self.same_bool_if_present(label, message, "controlEnemies", control_enemies);
+        }
         let native = match test_name {
             "is_cheating_enabled" => self
                 .interface
@@ -98,11 +108,6 @@ impl NativeApiParity {
                 .game()
                 .is_game_over()
                 .map_err(|err| format!("is_game_over() failed: {err:?}"))?,
-            "is_god_mode_enabled" => self
-                .interface
-                .game()
-                .is_god_mode_enabled()
-                .map_err(|err| format!("is_god_mode_enabled() failed: {err:?}"))?,
             "is_dev_lua_enabled" => self
                 .interface
                 .game()

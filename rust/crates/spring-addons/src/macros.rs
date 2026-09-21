@@ -44,7 +44,7 @@ macro_rules! export_ui_widgets {
 #[doc(hidden)]
 macro_rules! __impl_ui_exports {
     ($state_type:ty, $setup_fn:path) => {
-        thread_local! {
+        $crate::reexports::thread_local! {
             static HANDLER: ::core::cell::OnceCell<$crate::ui::WidgetHandler<$state_type>> = const {
                 ::core::cell::OnceCell::new()
             };
@@ -119,6 +119,75 @@ macro_rules! __impl_ui_exports {
             __with_widget_handler(|handler| handler.update(dt));
         }
         $crate::reexports::export_update!(__spring_addon_update);
+
+        fn __spring_addon_unit_created(u: i32, d: i32, t: i32, b: i32) {
+            __with_widget_handler(|handler| handler.unit_created(u, d, t, b));
+        }
+        $crate::reexports::export_unit_created_raw!(__spring_addon_unit_created);
+
+        fn __spring_addon_feature_created(feature_id: i32, ally_team_id: i32) {
+            __with_widget_handler(|handler| handler.feature_created(feature_id, ally_team_id));
+        }
+        $crate::reexports::export_feature_created!(__spring_addon_feature_created);
+
+        fn __spring_addon_feature_destroyed(feature_id: i32, ally_team_id: i32) {
+            __with_widget_handler(|handler| handler.feature_destroyed(feature_id, ally_team_id));
+        }
+        $crate::reexports::export_feature_destroyed!(__spring_addon_feature_destroyed);
+
+        fn __spring_addon_unit_destroyed(u: i32, d: i32, t: i32, a: i32, ad: i32, at: i32, w: i32) {
+            let event = $crate::event::UnitDestroyedEvent {
+                unit_id: u,
+                unit_def_id: d,
+                unit_team: t,
+                attacker_id: a,
+                attacker_def_id: ad,
+                attacker_team: at,
+                weapon_def_id: w,
+            };
+            __with_widget_handler(|handler| handler.unit_destroyed(&event));
+        }
+        $crate::reexports::export_unit_destroyed!(__spring_addon_unit_destroyed);
+
+        fn __spring_addon_unit_given(u: i32, d: i32, old_team: i32, new_team: i32) {
+            __with_widget_handler(|handler| handler.unit_given(u, d, old_team, new_team));
+        }
+        $crate::reexports::export_unit_given!(__spring_addon_unit_given);
+
+        fn __spring_addon_unit_taken(u: i32, d: i32, old_team: i32, new_team: i32) {
+            __with_widget_handler(|handler| handler.unit_taken(u, d, old_team, new_team));
+        }
+        $crate::reexports::export_unit_taken!(__spring_addon_unit_taken);
+
+        fn __spring_addon_unit_entered_los(u: i32, d: i32, t: i32, a: i32) {
+            __with_widget_handler(|handler| handler.unit_entered_los(u, d, t, a));
+        }
+        $crate::reexports::export_unit_entered_los!(__spring_addon_unit_entered_los);
+
+        fn __spring_addon_unit_left_los(u: i32, d: i32, t: i32, a: i32) {
+            __with_widget_handler(|handler| handler.unit_left_los(u, d, t, a));
+        }
+        $crate::reexports::export_unit_left_los!(__spring_addon_unit_left_los);
+
+        fn __spring_addon_unit_entered_radar(u: i32, d: i32, t: i32, a: i32) {
+            __with_widget_handler(|handler| handler.unit_entered_radar(u, d, t, a));
+        }
+        $crate::reexports::export_unit_entered_radar!(__spring_addon_unit_entered_radar);
+
+        fn __spring_addon_unit_left_radar(u: i32, d: i32, t: i32, a: i32) {
+            __with_widget_handler(|handler| handler.unit_left_radar(u, d, t, a));
+        }
+        $crate::reexports::export_unit_left_radar!(__spring_addon_unit_left_radar);
+
+        fn __spring_addon_projectile_created(p: i32, o: i32, w: i32) {
+            __with_widget_handler(|handler| handler.projectile_created(p, o, w));
+        }
+        $crate::reexports::export_projectile_created!(__spring_addon_projectile_created);
+
+        fn __spring_addon_projectile_destroyed(p: i32, o: i32, w: i32) {
+            __with_widget_handler(|handler| handler.projectile_destroyed(p, o, w));
+        }
+        $crate::reexports::export_projectile_destroyed!(__spring_addon_projectile_destroyed);
 
         fn __spring_addon_recv_from_synced(msg: &[u8]) {
             __with_widget_handler(|handler| handler.recv_from_synced(msg));
@@ -203,6 +272,11 @@ macro_rules! __impl_ui_exports {
         }
         $crate::reexports::export_draw_world!(__spring_addon_draw_world);
 
+        fn __spring_addon_draw_genesis(_unused: u8) {
+            __with_widget_handler(|handler| handler.draw_genesis());
+        }
+        $crate::reexports::export_draw_genesis!(__spring_addon_draw_genesis);
+
         fn __spring_addon_draw_screen(w: i32, h: i32) {
             __with_widget_handler(|handler| handler.draw_screen(w, h));
         }
@@ -283,11 +357,8 @@ macro_rules! export_rules_gadgets {
             $crate::reexports::rules_synced::ENVIRONMENT_MASK
         );
 
-        // Every environment must export the dispatcher: it is what runs the
-        // synchronous closure passed to callouts such as
-        // `gfx::render_to_texture`. Only the UI environment also keeps a
-        // registry of retained callbacks, so anything reaching this handler
-        // (the closure case having already been served) is unexpected.
+        // Core rules callouts use synchronous closures directly.  A retained
+        // callback registry is only needed by unsynced rendering environments.
         #[allow(dead_code)]
         fn __spring_addon_callback_dispatch(callback_id: u32, _user_data: u32) {
             $crate::log::warn_unhandled_callback(callback_id);
@@ -301,7 +372,7 @@ macro_rules! export_rules_gadgets {
 #[doc(hidden)]
 macro_rules! __impl_rules_exports {
     ($state_type:ty, $setup_fn:path) => {
-        thread_local! {
+        $crate::reexports::thread_local! {
             static HANDLER: ::core::cell::OnceCell<$crate::rules::GadgetHandler<$state_type>> = const {
                 ::core::cell::OnceCell::new()
             };
@@ -362,6 +433,16 @@ macro_rules! __impl_rules_exports {
             });
         }
         $crate::reexports::export_unit_created!(__spring_addon_unit_created);
+
+        fn __spring_addon_feature_created(feature_id: i32, ally_team_id: i32) {
+            __with_gadget_handler(|handler| handler.feature_created(feature_id, ally_team_id));
+        }
+        $crate::reexports::export_feature_created!(__spring_addon_feature_created);
+
+        fn __spring_addon_feature_destroyed(feature_id: i32, ally_team_id: i32) {
+            __with_gadget_handler(|handler| handler.feature_destroyed(feature_id, ally_team_id));
+        }
+        $crate::reexports::export_feature_destroyed!(__spring_addon_feature_destroyed);
 
         fn __spring_addon_unit_destroyed(
             u: i32,
@@ -511,17 +592,37 @@ macro_rules! __impl_unsynced_exports {
             $crate::reexports::rules_unsynced::ENVIRONMENT_MASK
         );
 
-        // Every environment must export the dispatcher: it is what runs the
-        // synchronous closure passed to callouts such as
-        // `gfx::render_to_texture`. Only the UI environment also keeps a
-        // registry of retained callbacks, so anything reaching this handler
-        // (the closure case having already been served) is unexpected.
+        $crate::reexports::thread_local! {
+            static CALLBACK_REGISTRY: $crate::ui::UiCallbackRegistry<$state_type> = const {
+                $crate::ui::UiCallbackRegistry::new()
+            };
+        }
+
         #[allow(dead_code)]
-        fn __spring_addon_callback_dispatch(callback_id: u32, _user_data: u32) {
-            $crate::log::warn_unhandled_callback(callback_id);
+        pub fn register_callback(
+            f: impl FnMut(&$state_type) + 'static,
+        ) -> $crate::reexports::callback::RetainedCallback {
+            CALLBACK_REGISTRY.with(|registry| registry.register(f))
+        }
+
+        #[allow(dead_code)]
+        pub fn unregister_callback(callback: $crate::reexports::callback::RetainedCallback) {
+            CALLBACK_REGISTRY.with(|registry| registry.unregister(callback));
+        }
+
+        fn __spring_addon_callback_dispatch(callback_id: u32, user_data: u32) {
+            __with_unsynced_handler(|handler| {
+                handler.with_context(|ctx| {
+                    let handled = CALLBACK_REGISTRY
+                        .with(|registry| registry.dispatch(ctx.global(), callback_id, user_data));
+                    if !handled {
+                        $crate::log::warn_unhandled_callback(callback_id);
+                    }
+                });
+            });
         }
         $crate::reexports::export_callback_dispatch!(__spring_addon_callback_dispatch);
-        thread_local! {
+        $crate::reexports::thread_local! {
             static HANDLER: ::core::cell::OnceCell<$crate::unsynced::UnsyncedHandler<$state_type>> = const {
                 ::core::cell::OnceCell::new()
             };
@@ -566,12 +667,166 @@ macro_rules! __impl_unsynced_exports {
         }
         $crate::reexports::export_game_frame!(__spring_addon_unsynced_game_frame);
 
+        fn __spring_addon_unsynced_update(delta_seconds: f32) {
+            __with_unsynced_handler(|handler| handler.update(delta_seconds));
+        }
+        $crate::reexports::export_update!(__spring_addon_unsynced_update);
+
+        fn __spring_addon_unsynced_unit_created(
+            unit_id: i32,
+            unit_def_id: i32,
+            unit_team: i32,
+            builder_id: i32,
+        ) {
+            __with_unsynced_handler(|handler| {
+                handler.unit_created(unit_id, unit_def_id, unit_team, builder_id)
+            });
+        }
+        $crate::reexports::export_unit_created_raw!(__spring_addon_unsynced_unit_created);
+
+        fn __spring_addon_unsynced_unit_finished(
+            unit_id: i32,
+            unit_def_id: i32,
+            unit_team: i32,
+        ) {
+            __with_unsynced_handler(|handler| handler.unit_finished(unit_id, unit_def_id, unit_team));
+        }
+        $crate::reexports::export_unit_finished!(__spring_addon_unsynced_unit_finished);
+
+        fn __spring_addon_unsynced_unit_destroyed(
+            unit_id: i32,
+            unit_def_id: i32,
+            unit_team: i32,
+            attacker_id: i32,
+            attacker_def_id: i32,
+            attacker_team: i32,
+            weapon_def_id: i32,
+        ) {
+            let event = $crate::event::UnitDestroyedEvent {
+                unit_id,
+                unit_def_id,
+                unit_team,
+                attacker_id,
+                attacker_def_id,
+                attacker_team,
+                weapon_def_id,
+            };
+            __with_unsynced_handler(|handler| handler.unit_destroyed(&event));
+        }
+        $crate::reexports::export_unit_destroyed!(__spring_addon_unsynced_unit_destroyed);
+
+        fn __spring_addon_unsynced_unit_given(
+            unit_id: i32,
+            unit_def_id: i32,
+            old_team: i32,
+            new_team: i32,
+        ) {
+            __with_unsynced_handler(|handler| handler.unit_given(unit_id, unit_def_id, old_team, new_team));
+        }
+        $crate::reexports::export_unit_given!(__spring_addon_unsynced_unit_given);
+
+        fn __spring_addon_unsynced_unit_taken(
+            unit_id: i32,
+            unit_def_id: i32,
+            old_team: i32,
+            new_team: i32,
+        ) {
+            __with_unsynced_handler(|handler| handler.unit_taken(unit_id, unit_def_id, old_team, new_team));
+        }
+        $crate::reexports::export_unit_taken!(__spring_addon_unsynced_unit_taken);
+
+        fn __spring_addon_unsynced_feature_created(feature_id: i32, ally_team_id: i32) {
+            __with_unsynced_handler(|handler| handler.feature_created(feature_id, ally_team_id));
+        }
+        $crate::reexports::export_feature_created!(__spring_addon_unsynced_feature_created);
+
+        fn __spring_addon_unsynced_feature_destroyed(feature_id: i32, ally_team_id: i32) {
+            __with_unsynced_handler(|handler| handler.feature_destroyed(feature_id, ally_team_id));
+        }
+        $crate::reexports::export_feature_destroyed!(__spring_addon_unsynced_feature_destroyed);
+
+        fn __spring_addon_unsynced_projectile_created(
+            projectile_id: i32,
+            owner_id: i32,
+            weapon_def_id: i32,
+        ) {
+            __with_unsynced_handler(|handler| {
+                handler.projectile_created(projectile_id, owner_id, weapon_def_id)
+            });
+        }
+        $crate::reexports::export_projectile_created!(__spring_addon_unsynced_projectile_created);
+
+        fn __spring_addon_unsynced_projectile_destroyed(
+            projectile_id: i32,
+            owner_id: i32,
+            weapon_def_id: i32,
+        ) {
+            __with_unsynced_handler(|handler| {
+                handler.projectile_destroyed(projectile_id, owner_id, weapon_def_id)
+            });
+        }
+        $crate::reexports::export_projectile_destroyed!(__spring_addon_unsynced_projectile_destroyed);
+
+        fn __spring_addon_unsynced_recv_from_synced(message: &[u8]) {
+            __with_unsynced_handler(|handler| handler.recv_from_synced(message));
+        }
+        $crate::reexports::export_recv_from_synced!(__spring_addon_unsynced_recv_from_synced);
+
+        fn __spring_addon_unsynced_draw_screen(width: i32, height: i32) {
+            __with_unsynced_handler(|handler| handler.draw_screen(width, height));
+        }
+        $crate::reexports::export_draw_screen!(__spring_addon_unsynced_draw_screen);
+
+        fn __spring_addon_unsynced_draw_world() {
+            __with_unsynced_handler(|handler| handler.draw_world());
+        }
+        $crate::reexports::export_draw_world!(__spring_addon_unsynced_draw_world);
+
+        fn __spring_addon_unsynced_draw_world_pre_particles(
+            draw_above_water: bool,
+            draw_below_water: bool,
+            draw_reflection: bool,
+            draw_refraction: bool,
+        ) {
+            __with_unsynced_handler(|handler| {
+                handler.draw_world_pre_particles(
+                    draw_above_water,
+                    draw_below_water,
+                    draw_reflection,
+                    draw_refraction,
+                )
+            });
+        }
+        $crate::reexports::export_draw_world_pre_particles!(
+            __spring_addon_unsynced_draw_world_pre_particles
+        );
+
+        fn __spring_addon_unsynced_draw_screen_effects(width: i32, height: i32) {
+            __with_unsynced_handler(|handler| handler.draw_screen_effects(width, height));
+        }
+        $crate::reexports::export_draw_screen_effects!(__spring_addon_unsynced_draw_screen_effects);
+
+        fn __spring_addon_unsynced_draw_unit(unit_id: i32, draw_mode: i32) -> bool {
+            __with_unsynced_handler(|handler| handler.draw_unit(unit_id, draw_mode))
+        }
+        $crate::reexports::export_draw_unit!(__spring_addon_unsynced_draw_unit);
+
+        fn __spring_addon_unsynced_draw_feature(feature_id: i32, draw_mode: i32) -> bool {
+            __with_unsynced_handler(|handler| handler.draw_feature(feature_id, draw_mode))
+        }
+        $crate::reexports::export_draw_feature!(__spring_addon_unsynced_draw_feature);
+
         fn __spring_addon_unsynced_draw_world_pre_unit(_unused: u8) {
             __with_unsynced_handler(|handler| handler.draw_world_pre_unit());
         }
         $crate::reexports::export_draw_world_pre_unit!(
             __spring_addon_unsynced_draw_world_pre_unit
         );
+
+        fn __spring_addon_unsynced_draw_genesis(_unused: u8) {
+            __with_unsynced_handler(|handler| handler.draw_genesis());
+        }
+        $crate::reexports::export_draw_genesis!(__spring_addon_unsynced_draw_genesis);
 
         fn __spring_addon_unsynced_view_resize(
             screen_size_x: i32,

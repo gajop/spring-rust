@@ -1,12 +1,12 @@
     pub mod input {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetActionHotKeysQuery {
             pub action: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetActionHotKeysResult {
             pub hotkeys: Vec<String>,
         }
@@ -16,7 +16,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetActiveCommandResult {
             pub command_index: i32,
             pub command_id: i32,
@@ -40,7 +40,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetDefaultCommandResult {
             pub command_index: i32,
             pub command_id: i32,
@@ -58,18 +58,18 @@
             pub invert: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetKeyBindingsQuery {
             pub key_set1: String,
             pub key_set2: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetKeyBindingsResult {
             pub bindings: Vec<KeyBindingEntry>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetKeyCodeQuery {
             pub key_sym: String,
         }
@@ -79,12 +79,12 @@
             pub key_code: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetKeyFromScanSymbolQuery {
             pub scan_symbol: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetKeyFromScanSymbolResult {
             pub key_name: String,
         }
@@ -104,7 +104,7 @@
             pub key_code: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetKeySymbolResult {
             pub key_code_name: String,
             pub key_code_default_name: String,
@@ -123,12 +123,12 @@
             pub shift: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMouseButtonsPressedQuery {
             pub buttons: Vec<i32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMouseButtonsPressedResult {
             pub pressed: Vec<bool>,
         }
@@ -138,7 +138,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMouseCursorResult {
             pub cursor: String,
         }
@@ -170,7 +170,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPressedKeysResult {
             pub keys: Vec<i32>,
         }
@@ -180,7 +180,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPressedScansResult {
             pub scans: Vec<i32>,
         }
@@ -190,7 +190,7 @@
             pub scan_code: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetScanSymbolResult {
             pub scan_code_name: String,
             pub scan_code_default_name: String,
@@ -217,7 +217,7 @@
             pub above: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct KeyBindingEntry {
             pub command: String,
             pub extra: String,
@@ -274,7 +274,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetActiveCommandValue {
             pub command_index: i32,
             pub command_id: i32,
@@ -288,7 +288,7 @@
             pub max_page: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetDefaultCommandValue {
             pub command_index: i32,
             pub command_id: i32,
@@ -296,7 +296,7 @@
             pub command_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetKeySymbolValue {
             pub key_code_name: String,
             pub key_code_default_name: String,
@@ -317,7 +317,7 @@
             pub dir: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetScanSymbolValue {
             pub scan_code_name: String,
             pub scan_code_default_name: String,

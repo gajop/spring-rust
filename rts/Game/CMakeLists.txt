@@ -72,6 +72,7 @@ make_global_var(sources_engine_Game
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/UnsyncedCtrl.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/UnsyncedRead.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/Gfx.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/ObjectRendering.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/Lights.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/Icons.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/Markers.cpp"

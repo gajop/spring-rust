@@ -3,12 +3,12 @@
 #include "Sim/Features/FeatureDef.h"
 #include "Sim/Features/FeatureDefHandler.h"
 
+#include <vector>
+
 namespace {
 
-// Scratch buffer
-static thread_local char scratchBuffer[1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local std::vector<int32_t> featureDefIDs;
+static thread_local std::vector<const char*> customParamKeys;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "FeatureDef system not ready" };
@@ -19,7 +19,6 @@ static bool IsReady() {
 }
 
 static void NativeGetFeatureDefIDs(const GetFeatureDefIDsQuery* query, GetFeatureDefIDsResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->ids = nullptr;
 	result->count = 0;
@@ -29,23 +28,17 @@ static void NativeGetFeatureDefIDs(const GetFeatureDefIDsQuery* query, GetFeatur
 		return;
 	}
 
-	// Use scratch buffer for array
-	int32_t* ids = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxIds = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-
 	const auto& defsVec = featureDefHandler->GetFeatureDefsVec();
-	for (size_t i = 1; i < defsVec.size() && count < maxIds; i++) { // Start at 1, 0 is invalid
-		ids[count++] = defsVec[i].id;
-	}
+	featureDefIDs.clear();
+	featureDefIDs.reserve(defsVec.size() > 0 ? defsVec.size() - 1 : 0);
+	for (size_t i = 1; i < defsVec.size(); i++) // Start at 1, 0 is invalid
+		featureDefIDs.push_back(defsVec[i].id);
 
-	result->ids = ids;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->ids = featureDefIDs.empty() ? nullptr : featureDefIDs.data();
+	result->count = featureDefIDs.size();
 }
 
 static void NativeGetFeatureDefCount(const GetFeatureDefCountQuery* query, GetFeatureDefCountResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->count = 0;
 
@@ -58,7 +51,6 @@ static void NativeGetFeatureDefCount(const GetFeatureDefCountQuery* query, GetFe
 }
 
 static void NativeGetFeatureDefByID(const GetFeatureDefByIDQuery* query, GetFeatureDefByIDResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->exists = false;
 
@@ -93,7 +85,6 @@ static void NativeGetFeatureDefByID(const GetFeatureDefByIDQuery* query, GetFeat
 }
 
 static void NativeGetFeatureDefIDByName(const GetFeatureDefIDByNameQuery* query, GetFeatureDefIDByNameResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->id = -1;
 
@@ -109,7 +100,6 @@ static void NativeGetFeatureDefIDByName(const GetFeatureDefIDByNameQuery* query,
 }
 
 static void NativeValidFeatureDefID(const ValidFeatureDefIDQuery* query, ValidFeatureDefIDResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->valid = false;
 
@@ -122,7 +112,6 @@ static void NativeValidFeatureDefID(const ValidFeatureDefIDQuery* query, ValidFe
 }
 
 static void NativeGetFeatureDefName(const GetFeatureDefNameQuery* query, GetFeatureDefNameResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->name = "";
 
@@ -141,7 +130,6 @@ static void NativeGetFeatureDefName(const GetFeatureDefNameQuery* query, GetFeat
 }
 
 static void NativeGetFeatureDefMetal(const GetFeatureDefMetalQuery* query, GetFeatureDefMetalResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->metal = 0.0f;
 
@@ -160,7 +148,6 @@ static void NativeGetFeatureDefMetal(const GetFeatureDefMetalQuery* query, GetFe
 }
 
 static void NativeGetFeatureDefEnergy(const GetFeatureDefEnergyQuery* query, GetFeatureDefEnergyResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->energy = 0.0f;
 
@@ -179,7 +166,6 @@ static void NativeGetFeatureDefEnergy(const GetFeatureDefEnergyQuery* query, Get
 }
 
 static void NativeGetFeatureDefCustomParam(const GetFeatureDefCustomParamQuery* query, GetFeatureDefCustomParamResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->value = "";
 
@@ -202,7 +188,6 @@ static void NativeGetFeatureDefCustomParam(const GetFeatureDefCustomParamQuery* 
 }
 
 static void NativeGetFeatureDefCustomParamKeys(const GetFeatureDefCustomParamKeysQuery* query, GetFeatureDefCustomParamKeysResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->keys = nullptr;
 	result->count = 0;
@@ -218,21 +203,13 @@ static void NativeGetFeatureDefCustomParamKeys(const GetFeatureDefCustomParamKey
 		return;
 	}
 
-	const auto& params = def->customParams;
-	const size_t maxKeys = (sizeof(scratchBuffer) - bufferPos) / sizeof(const char*);
+	customParamKeys.clear();
+	customParamKeys.reserve(def->customParams.size());
+	for (const auto& [key, value] : def->customParams)
+		customParamKeys.push_back(key.c_str());
 
-	const char** keys = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-
-	for (const auto& [key, value] : params) {
-		if (count < maxKeys) {
-			keys[count++] = key.c_str();
-		}
-	}
-
-	result->keys = keys;
-	result->count = count;
-	bufferPos += count * sizeof(const char*);
+	result->keys = customParamKeys.empty() ? nullptr : customParamKeys.data();
+	result->count = customParamKeys.size();
 }
 
 } // namespace

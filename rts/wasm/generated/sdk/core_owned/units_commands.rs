@@ -7,7 +7,7 @@
             pub num_ordered: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct CommandDescription {
             pub cmd_id: i32,
             pub action: String,
@@ -24,7 +24,7 @@
             pub params: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct CommandFFI {
             pub cmd_id: i32,
             pub options: u8,
@@ -34,7 +34,7 @@
             pub params: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct FactoryQueueInfo {
             pub total_count: u32,
             pub current_count: u32,
@@ -54,12 +54,12 @@
             pub found: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetCommandParamsQuery {
             pub command: CommandFFI,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetCommandParamsResult {
             pub params: Vec<f32>,
         }
@@ -70,7 +70,7 @@
             pub max_commands: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetCommandQueueResult {
             pub commands: Vec<CommandFFI>,
         }
@@ -106,7 +106,7 @@
             pub max_commands: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFactoryCommandsResult {
             pub commands: Vec<CommandFFI>,
         }
@@ -118,7 +118,7 @@
             pub add_cmds: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFactoryCountsResult {
             pub info: FactoryQueueInfo,
         }
@@ -128,7 +128,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFullBuildQueueResult {
             pub entries: Vec<BuildQueueEntry>,
         }
@@ -138,7 +138,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetRealBuildQueueResult {
             pub unit_def_i_ds: Vec<i32>,
         }
@@ -148,7 +148,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitCmdDescsResult {
             pub cmd_descs: Vec<CommandDescription>,
         }
@@ -169,7 +169,7 @@
             pub max_commands: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitCommandsResult {
             pub commands: Vec<CommandFFI>,
         }
@@ -180,12 +180,12 @@
             pub cmd_index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitCurrentCommandResult {
             pub command: Option<CommandFFI>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GiveOrderArrayToUnitMapQuery {
             pub unit_i_ds: Vec<i32>,
             pub commands: Vec<CommandFFI>,
@@ -196,7 +196,7 @@
             pub units_ordered: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GiveOrderQuery {
             pub cmd_id: i32,
             pub params: Vec<f32>,
@@ -209,7 +209,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GiveOrderToUnitMapQuery {
             pub unit_i_ds: Vec<i32>,
             pub cmd_id: i32,

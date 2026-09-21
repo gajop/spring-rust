@@ -467,7 +467,7 @@ struct SetUnitCrashingResult { const Error* error; bool stateChanged; };
 // Unit weapon control queries
 struct SetUnitWeaponStateQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // 1-indexed as in Lua
+	int32_t weaponNum;          // zero-based native index; Lua callers convert from one-based
 	const char* key;
 	float value;
 };
@@ -475,13 +475,13 @@ struct SetUnitWeaponStateResult { const Error* error; bool success; };
 
 struct UnitWeaponFireQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // 1-indexed as in Lua
+	int32_t weaponNum;          // zero-based native index; Lua callers convert from one-based
 };
 struct UnitWeaponFireResult { const Error* error; bool success; };
 
 struct UnitWeaponHoldFireQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // 1-indexed as in Lua
+	int32_t weaponNum;          // zero-based native index; Lua callers convert from one-based
 };
 struct UnitWeaponHoldFireResult { const Error* error; bool success; };
 
@@ -511,7 +511,7 @@ struct SetUnitPosErrorParamsResult { const Error* error; bool success; };
 // Unit weapon damages query
 struct SetUnitWeaponDamagesQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // 1-indexed as in Lua, -1 for "explode", -2 for "selfDestruct"
+	int32_t weaponNum;          // zero-based native index, -1 for "explode", -2 for "selfDestruct"
 	const char* damageKey;      // damage type key (e.g., "paralyzeDamageTime", armor type index)
 	float damageValue;
 };
@@ -780,7 +780,7 @@ struct UnitControlApi {
 // ============================================================================
 
 // Queries - Feature Control
-struct CreateFeatureQuery { DefRef featureDef; Float3 pos; int32_t facing; int32_t teamID; int32_t featureID; };
+struct CreateFeatureQuery { DefRef featureDef; Float3 pos; int32_t heading; int32_t teamID; int32_t featureID; };
 struct CreateFeatureResult { const Error* error; int32_t featureID; };
 
 struct DestroyFeatureQuery { int32_t featureID; };

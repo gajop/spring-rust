@@ -162,6 +162,7 @@ class LuaOpenGL {
 		struct OcclusionQuery {
 			unsigned int index; // into LuaOpenGL::occlusionQueries
 			unsigned int id;
+			GLenum target;
 		};
 
 		static std::vector<OcclusionQuery*> occlusionQueries;

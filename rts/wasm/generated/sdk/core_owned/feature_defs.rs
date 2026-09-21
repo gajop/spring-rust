@@ -1,7 +1,7 @@
     pub mod feature_defs {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct FeatureDefInfo {
             pub id: i32,
             pub name: String,
@@ -27,7 +27,7 @@
             pub feature_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureDefByIDResult {
             pub info: FeatureDefInfo,
             pub exists: bool,
@@ -48,18 +48,18 @@
             pub feature_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureDefCustomParamKeysResult {
             pub keys: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureDefCustomParamQuery {
             pub feature_def_id: i32,
             pub key: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureDefCustomParamResult {
             pub value: String,
         }
@@ -74,7 +74,7 @@
             pub energy: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureDefIDByNameQuery {
             pub feature_def_name: String,
         }
@@ -89,7 +89,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureDefIDsResult {
             pub ids: Vec<i32>,
         }
@@ -109,7 +109,7 @@
             pub feature_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureDefNameResult {
             pub name: String,
         }
@@ -144,7 +144,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureDefByIDValue {
             pub info: FeatureDefInfo,
             pub exists: bool,

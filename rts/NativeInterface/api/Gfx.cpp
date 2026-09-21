@@ -7,6 +7,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
@@ -192,7 +193,11 @@ static std::unordered_map<std::string, NativeTexture> nativeTextures;
 static std::unordered_map<std::string, size_t> nativeAtlasMap;
 static std::vector<CTextureAtlas> nativeAtlases;
 static std::unordered_map<uint32_t, GLuint> nativeDisplayLists;
-static std::unordered_map<uint32_t, GLuint> nativeQueries;
+struct NativeQuery {
+	GLuint id = 0;
+	GLenum target = GL_SAMPLES_PASSED;
+};
+static std::unordered_map<uint32_t, NativeQuery> nativeQueries;
 static std::unordered_map<uint32_t, NativeShaderProgram> nativeShaders;
 static std::unordered_map<uint32_t, NativeRBO> nativeRBOs;
 static std::unordered_map<uint32_t, NativeFBO> nativeFBOs;
@@ -213,6 +218,28 @@ static uint32_t activeNativeShader = 0;
 static thread_local std::string stringResult;
 static thread_local std::string fontWrapResult;
 static thread_local std::vector<float> readPixelsResult;
+
+extern "C" bool GetNativeGfxDisplayList(uint32_t id, uint32_t* glID)
+{
+	const auto it = nativeDisplayLists.find(id);
+	if (it == nativeDisplayLists.end())
+		return false;
+
+	if (glID != nullptr)
+		*glID = it->second;
+	return true;
+}
+
+extern "C" bool GetNativeGfxShaderProgram(uint32_t id, uint32_t* glID)
+{
+	const auto it = nativeShaders.find(id);
+	if (it == nativeShaders.end())
+		return false;
+
+	if (glID != nullptr)
+		*glID = it->second.id;
+	return true;
+}
 static thread_local std::vector<GfxAtlasTextureEntry> atlasTextureEntries;
 static thread_local std::vector<std::string> activeUniformNames;
 static thread_local std::vector<std::string> activeUniformTypes;
@@ -262,8 +289,33 @@ static GLuint CompileShaderObject(const char* definitions, const char* source, G
 		return 0;
 	}
 
-	const GLchar* sources[2] = { definitions != nullptr ? definitions : "", source };
-	glShaderSource(obj, 2, sources, nullptr);
+	std::string shaderSource;
+	const std::string_view definitionText = definitions != nullptr ? definitions : "";
+	const std::string_view sourceText = source;
+	if (definitionText.empty()) {
+		shaderSource.assign(sourceText);
+	} else {
+		const size_t firstSourceCharacter = sourceText.find_first_not_of(" \t\r\n");
+		if (firstSourceCharacter != std::string_view::npos &&
+			sourceText.compare(firstSourceCharacter, 8, "#version") == 0) {
+			const size_t versionEnd = sourceText.find('\n', firstSourceCharacter);
+			const size_t versionLength = versionEnd == std::string_view::npos
+				? sourceText.size()
+				: versionEnd + 1;
+			shaderSource.reserve(sourceText.size() + definitionText.size() + 1);
+			shaderSource.append(sourceText.substr(0, versionLength));
+			shaderSource.append(definitionText);
+			shaderSource.push_back('\n');
+			shaderSource.append(sourceText.substr(versionLength));
+		} else {
+			shaderSource.reserve(sourceText.size() + definitionText.size() + 1);
+			shaderSource.append(definitionText);
+			shaderSource.push_back('\n');
+			shaderSource.append(sourceText);
+		}
+	}
+	const GLchar* sourcePointer = shaderSource.c_str();
+	glShaderSource(obj, 1, &sourcePointer, nullptr);
 	glCompileShader(obj);
 
 	GLint status = GL_FALSE;
@@ -1220,7 +1272,7 @@ static void CreateShader(const GfxCreateShaderQuery* query, GfxCreateShaderResul
 	GLint validStatus = GL_FALSE;
 	glGetProgramiv(program.id, GL_VALIDATE_STATUS, &validStatus);
 
-	if (linkStatus != GL_TRUE || validStatus != GL_TRUE) {
+	if (linkStatus != GL_TRUE) {
 		GLchar log[4096] = { 0 };
 		GLsizei logSize = 0;
 		glGetProgramInfoLog(program.id, sizeof(log), &logSize, log);
@@ -1228,6 +1280,18 @@ static void CreateShader(const GfxCreateShaderQuery* query, GfxCreateShaderResul
 		DeleteShaderProgram(program);
 		result->error = &OPERATION_FAILED_ERROR;
 		return;
+	}
+
+	// Validation depends on the current GL state. In particular, sampler
+	// uniforms may still all point at texture unit zero when a shader is
+	// created; the caller can assign them before the first draw. Keep the
+	// driver's log for diagnostics, but do not reject a successfully linked
+	// program because of this provisional validation result.
+	if (validStatus != GL_TRUE) {
+		GLchar log[4096] = { 0 };
+		GLsizei logSize = 0;
+		glGetProgramInfoLog(program.id, sizeof(log), &logSize, log);
+		nativeShaderLog = log;
 	}
 
 	const uint32_t shaderID = ++nativeShaderCounter;
@@ -1411,21 +1475,37 @@ static void UniformInt(const GfxUniformIntQuery* query, GfxEmptyResult* result)
 static void UniformArrayFloat(const GfxUniformArrayFloatQuery* query, GfxEmptyResult* result)
 {
 	result->error = nullptr;
-	if (query->values == nullptr && query->count > 0) {
+	if (query->components < 1 || query->components > 4 ||
+		query->count % query->components != 0 ||
+		(query->values == nullptr && query->count > 0)) {
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	glUniform1fv(query->location, query->count, query->values);
+	const GLsizei count = query->count / query->components;
+	switch (query->components) {
+		case 1: glUniform1fv(query->location, count, query->values); break;
+		case 2: glUniform2fv(query->location, count, query->values); break;
+		case 3: glUniform3fv(query->location, count, query->values); break;
+		case 4: glUniform4fv(query->location, count, query->values); break;
+	}
 }
 
 static void UniformArrayInt(const GfxUniformArrayIntQuery* query, GfxEmptyResult* result)
 {
 	result->error = nullptr;
-	if (query->values == nullptr && query->count > 0) {
+	if (query->components < 1 || query->components > 4 ||
+		query->count % query->components != 0 ||
+		(query->values == nullptr && query->count > 0)) {
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	glUniform1iv(query->location, query->count, query->values);
+	const GLsizei count = query->count / query->components;
+	switch (query->components) {
+		case 1: glUniform1iv(query->location, count, query->values); break;
+		case 2: glUniform2iv(query->location, count, query->values); break;
+		case 3: glUniform3iv(query->location, count, query->values); break;
+		case 4: glUniform4iv(query->location, count, query->values); break;
+	}
 }
 
 static void UniformMatrix(const GfxUniformMatrixQuery* query, GfxEmptyResult* result)
@@ -4030,7 +4110,7 @@ static void DeleteList(const GfxUIntQuery* query, GfxEmptyResult* result)
 	nativeDisplayLists.erase(it);
 }
 
-static void CreateQuery(const GfxEmptyQuery*, GfxUIntResult* result)
+static void CreateQuery(const GfxCreateQueryQuery* query, GfxUIntResult* result)
 {
 	result->error = nullptr;
 	result->value = 0;
@@ -4043,7 +4123,12 @@ static void CreateQuery(const GfxEmptyQuery*, GfxUIntResult* result)
 	}
 
 	result->value = ++nativeQueryCounter;
-	nativeQueries[result->value] = id;
+	nativeQueries[result->value] = {
+		.id = id,
+		.target = (query != nullptr && query->hasTarget)
+			? static_cast<GLenum>(query->target)
+			: GL_SAMPLES_PASSED,
+	};
 }
 
 static void DeleteQuery(const GfxUIntQuery* query, GfxEmptyResult* result)
@@ -4054,7 +4139,7 @@ static void DeleteQuery(const GfxUIntQuery* query, GfxEmptyResult* result)
 	if (it == nativeQueries.end())
 		return;
 
-	glDeleteQueries(1, &it->second);
+	glDeleteQueries(1, &it->second.id);
 	nativeQueries.erase(it);
 }
 
@@ -4073,12 +4158,12 @@ static void RunQuery(const GfxRunQueryQuery* query, GfxEmptyResult* result)
 		return;
 	}
 
-	glBeginQuery(GL_SAMPLES_PASSED, it->second);
+	glBeginQuery(it->second.target, it->second.id);
 	query->callback(query->userData);
-	glEndQuery(GL_SAMPLES_PASSED);
+	glEndQuery(it->second.target);
 }
 
-static void GetQuery(const GfxUIntQuery* query, GfxUIntResult* result)
+static void GetQuery(const GfxUIntQuery* query, GfxUInt64Result* result)
 {
 	result->error = nullptr;
 	result->value = 0;
@@ -4089,7 +4174,7 @@ static void GetQuery(const GfxUIntQuery* query, GfxUIntResult* result)
 		return;
 	}
 
-	glGetQueryObjectuiv(it->second, GL_QUERY_RESULT, &result->value);
+	glGetQueryObjectui64v(it->second.id, GL_QUERY_RESULT, &result->value);
 }
 
 static void GetGlobalTexNames(const GfxEmptyQuery*, GfxAtlasTexturesResult* result)
@@ -5175,12 +5260,27 @@ static void GetMatrixData(const GfxGetMatrixDataQuery* query, GfxGetMatrixDataRe
 {
 	result->error = nullptr;
 	std::fill(std::begin(result->values), std::end(result->values), 0.0f);
-	if (query->mode == GFX_MATRIX_VIEWPROJECTIONINVERSE) {
+	if (query->mode >= GFX_MATRIX_VIEWPROJECTIONINVERSE && query->mode <= GFX_MATRIX_SHADOW) {
 		if (camera == nullptr) {
 			result->error = &NOT_READY_ERROR;
 			return;
 		}
-		std::memcpy(result->values, camera->GetViewProjectionMatrixInverse().m, sizeof(result->values));
+		const CMatrix44f* matrix = nullptr;
+		switch (query->mode) {
+			case GFX_MATRIX_VIEWPROJECTION:          matrix = &camera->GetViewProjectionMatrix();          break;
+			case GFX_MATRIX_VIEWPROJECTIONINVERSE:  matrix = &camera->GetViewProjectionMatrixInverse();  break;
+			case GFX_MATRIX_VIEW:                   matrix = &camera->GetViewMatrix();                   break;
+			case GFX_MATRIX_VIEWINVERSE:            matrix = &camera->GetViewMatrixInverse();            break;
+			case GFX_MATRIX_PROJECTION:             matrix = &camera->GetProjectionMatrix();             break;
+			case GFX_MATRIX_PROJECTIONINVERSE:     matrix = &camera->GetProjectionMatrixInverse();     break;
+			case GFX_MATRIX_BILLBOARD:              matrix = &camera->GetBillBoardMatrix();              break;
+			case GFX_MATRIX_SHADOW:                matrix = &shadowHandler.GetShadowMatrix();           break;
+		}
+		if (matrix == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		std::memcpy(result->values, matrix->m, sizeof(result->values));
 		return;
 	}
 	glGetFloatv(MatrixModeToPName(query->mode), result->values);

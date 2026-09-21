@@ -1419,4 +1419,36 @@ impl<'a> UnsyncedCtrl<'a> {
         }
     }
 
+    pub fn set_feature_lua_draw(&self, feature_id: i32, lua_draw: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetFeatureLuaDrawQuery {
+                featureID: feature_id,
+                luaDraw: lua_draw,
+            };
+            let mut result = MaybeUninit::<sys::SetFeatureLuaDrawResult>::zeroed();
+            let func = self.api.SetFeatureLuaDraw.expect("SetFeatureLuaDraw function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_projectile_lua_draw(&self, projectile_id: i32, lua_draw: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetProjectileLuaDrawQuery {
+                projectileID: projectile_id,
+                luaDraw: lua_draw,
+            };
+            let mut result = MaybeUninit::<sys::SetProjectileLuaDrawResult>::zeroed();
+            let func = self.api.SetProjectileLuaDraw.expect("SetProjectileLuaDraw function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
 }

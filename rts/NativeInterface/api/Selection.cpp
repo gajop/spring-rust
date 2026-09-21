@@ -203,7 +203,7 @@ static void NativeGetSelectedGroup(const GetSelectedGroupQuery* query, GetSelect
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	result->error = nullptr;
-	result->groupID = -1;  // GetDefaultGroup no longer available
+	result->groupID = selectedUnitsHandler.GetSelectedGroup();
 }
 
 static void NativeGetGroupUnits(const GetGroupUnitsQuery* query, GetGroupUnitsResult* result) {
@@ -319,16 +319,17 @@ static void NativeGetUnitGroup(const GetUnitGroupQuery* query, GetUnitGroupResul
 	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
 
 	result->error = nullptr;
-	// Lua returns no value when the unit has no group; the parity-facing
-	// native result represents that same absence as zero.
 	result->groupID = 0;
+	result->hasGroup = false;
 
 	if (unit->team != gu->myTeam)
 		return;
 
 	const CGroup* group = unit->GetGroup();
-	if (group != nullptr)
+	if (group != nullptr) {
 		result->groupID = group->id;
+		result->hasGroup = true;
+	}
 }
 
 static void NativeSetUnitGroup(const SetUnitGroupQuery* query, SetUnitGroupResult* result) {

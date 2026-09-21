@@ -102,8 +102,7 @@
 // the native (Rust) plugin ("!native<N>") to its GL id/size. Used as the interim
 // cross-pool bridge so native-created textures are usable from Lua by handle --
 // the native side already resolves Lua textures the same way (see ResolveTexture
-// in Gfx.cpp). The proper fix unifies the two pools; see
-// SBC_PORT_MISSING_BINDINGS.md.
+// in Gfx.cpp). The proper fix unifies the two pools.
 extern "C" bool GetNativeGfxTextureInfo(
 	const char* name, uint32_t* id, int32_t* xsize, int32_t* ysize, uint32_t* target);
 
@@ -412,8 +411,7 @@ bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, con
 			// plugin share the '!' prefix but live in the NativeInterface's own
 			// registry, not this Lua state -- so resolve them by handle here.
 			// (Native already resolves Lua/engine textures the same way; see
-			// ResolveTexture in Gfx.cpp.) Proper fix: unify the pools, see
-			// SBC_PORT_MISSING_BINDINGS.md.
+			// ResolveTexture in Gfx.cpp.) The proper fix is to unify the pools.
 			{
 				uint32_t nativeID = 0;
 				int32_t nativeX = 0, nativeY = 0;

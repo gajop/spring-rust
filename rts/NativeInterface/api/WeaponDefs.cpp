@@ -2,12 +2,15 @@
 
 #include "Sim/Weapons/WeaponDefHandler.h"
 #include <cstring>
+#include <vector>
 
 namespace {
 
 // Scratch buffer
 static thread_local uint8_t scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
+static thread_local std::vector<int32_t> weaponDefIDs;
+static thread_local std::vector<const char*> customParamKeys;
 
 // Static errors
 static const Error INVALID_WEAPONDEF_ERROR = { .code = ERROR_INVALID_ID, .message = "Invalid weapon def ID" };
@@ -20,19 +23,15 @@ static void NativeGetWeaponDefIDs(const GetWeaponDefIDsQuery* query, GetWeaponDe
 	result->count = 0;
 
 	const auto& weaponDefs = weaponDefHandler->GetWeaponDefsVec();
-	const size_t maxIDs = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-
-	int32_t* ids = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
+	weaponDefIDs.clear();
+	weaponDefIDs.reserve(weaponDefs.size());
 
 	// Weapon ID 0 *is* valid, start at 0
-	for (size_t i = 0; i < weaponDefs.size() && count < maxIDs; i++) {
-		ids[count++] = static_cast<int32_t>(i);
-	}
+	for (size_t i = 0; i < weaponDefs.size(); i++)
+		weaponDefIDs.push_back(static_cast<int32_t>(i));
 
-	result->ids = ids;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->ids = weaponDefIDs.empty() ? nullptr : weaponDefIDs.data();
+	result->count = weaponDefIDs.size();
 }
 
 static void NativeGetWeaponDefCount(const GetWeaponDefCountQuery* query, GetWeaponDefCountResult* result) {
@@ -223,32 +222,13 @@ static void NativeGetWeaponDefCustomParamKeys(const GetWeaponDefCustomParamKeysQ
 		return;
 	}
 
-	// Allocate array of string pointers
-	const size_t maxKeys = wd->customParams.size();
-	if (bufferPos + maxKeys * sizeof(const char*) > sizeof(scratchBuffer)) {
-		result->error = &INVALID_WEAPONDEF_ERROR;
-		return;
-	}
+	customParamKeys.clear();
+	customParamKeys.reserve(wd->customParams.size());
+	for (const auto& pair : wd->customParams)
+		customParamKeys.push_back(pair.first.c_str());
 
-	const char** keys = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
-	bufferPos += maxKeys * sizeof(const char*);
-	uint32_t count = 0;
-
-	for (const auto& pair : wd->customParams) {
-		const char* key = pair.first.c_str();
-		const size_t keyLen = strlen(key);
-		if (bufferPos + keyLen + 1 > sizeof(scratchBuffer)) {
-			result->error = &INVALID_WEAPONDEF_ERROR;
-			return;
-		}
-		char* keyBuf = reinterpret_cast<char*>(scratchBuffer + bufferPos);
-		memcpy(keyBuf, key, keyLen + 1);
-		keys[count++] = keyBuf;
-		bufferPos += keyLen + 1;
-	}
-
-	result->keys = keys;
-	result->count = count;
+	result->keys = customParamKeys.empty() ? nullptr : customParamKeys.data();
+	result->count = customParamKeys.size();
 }
 
 } // namespace

@@ -37,7 +37,7 @@
             pub show_pathing_players: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPlayerRosterResult {
             pub entries: Vec<RosterEntry>,
         }
@@ -58,7 +58,7 @@
             pub packet_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPlayerTrafficResult {
             pub traffic: Vec<PlayerTraffic>,
         }
@@ -91,7 +91,7 @@
             pub bytes_received: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RosterEntry {
             pub name: String,
             pub player_id: i32,

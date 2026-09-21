@@ -15,6 +15,7 @@
 #include "Game/UI/KeySet.h"
 #include "Game/UI/MiniMap.h"
 #include "Rendering/GlobalRendering.h"
+#include "Rendering/GL/FBO.h"
 #include "Lua/LuaConfig.h"
 #include "Lua/LuaHandle.h"
 #include "Lua/LuaMaterial.h"
@@ -166,6 +167,13 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(WasmCoreCallin callin,
 	const void* query, bool synced, void* nativeResult)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+#ifdef HEADLESS
+	// Headless builds keep the UI Wasm world alive for lifecycle and data-model
+	// work, but never deliver renderer draw callins to it.
+	const std::string_view callinName = recoil::wasm::core::CallinName(callin);
+	if (callinName.size() >= 4 && callinName.substr(0, 4) == "Draw")
+		return true;
+#endif
 #if defined(RECOIL_DETAILED_TRACY_ZONING) && defined(TRACY_ENABLE)
 	const auto callinName = recoil::wasm::core::CallinName(callin);
 	ZoneNameVF(___recoil_detailed_tracy_zone, "Wasm::%.*s", static_cast<int>(callinName.size()), callinName.data());
@@ -731,7 +739,31 @@ void NativeInterfaceEventClient::DrawScreen() {
 		}                                                                          \
 	}
 
-DISPATCH_SIMPLE_CALLIN(DrawGenesis)
+void NativeInterfaceEventClient::DrawGenesis() {
+	SimpleCallinQuery query = {};
+	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "DrawGenesis");
+	const auto dispatchStage = spring::benchmark_callins::BeginStage(
+		spring::benchmark_callins::Stage::NativeDispatch);
+	const GLint fboBefore = FBO::GetCurrentBoundFBO();
+	DispatchWasmCallin(CoreCallinOf("DrawGenesis"), &query, false);
+	const GLint fboAfter = FBO::GetCurrentBoundFBO();
+	const bool wasmWorldFBORequested = m_wasmSystem != nullptr &&
+		(m_wasmSystem->HasCoreModules(WasmEnvironment::RulesUnsynced) ||
+		 m_wasmSystem->HasCoreModules(WasmEnvironment::GaiaUnsynced) ||
+		 m_wasmSystem->HasCoreModules(WasmEnvironment::UI)) &&
+		fboAfter != fboBefore && fboAfter != 0;
+	m_wasmWorldFBO = wasmWorldFBORequested ? static_cast<std::uint32_t>(fboAfter) : 0;
+	spring::benchmark_callins::End(dispatchStage);
+	spring::benchmark_callins::End(wasmToken);
+	if (m_DrawGenesisFuncPtr) {
+		const auto nativeToken = spring::benchmark_callins::Begin(
+			"native", spring::benchmark_callins::EventTestName("DrawGenesis"));
+		SimpleCallinResult result = {};
+		INVOKE_NATIVE(m_DrawGenesisFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
+		spring::benchmark_callins::End(nativeToken);
+	}
+}
+
 DISPATCH_SIMPLE_CALLIN(DrawWorld)
 DISPATCH_SIMPLE_CALLIN(DrawWorldPreUnit)
 DISPATCH_SIMPLE_CALLIN(DrawPreDecals)
@@ -976,7 +1008,7 @@ void NativeInterfaceEventClient::TeamChanged(int teamID) {
 
 void NativeInterfaceEventClient::PlayerChanged(int playerID) {
 	PlayerChangedQuery query = {.playerID = playerID};
-	DispatchWasmCallin(CoreCallinOf("PlayerChanged"), &query, true);
+	DispatchWasmCallin(CoreCallinOf("PlayerChanged"), &query, false);
 	if (m_PlayerChangedFuncPtr) {
 		PlayerChangedResult result = {};
 		INVOKE_NATIVE(m_PlayerChangedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
@@ -985,7 +1017,7 @@ void NativeInterfaceEventClient::PlayerChanged(int playerID) {
 
 void NativeInterfaceEventClient::PlayerAdded(int playerID) {
 	PlayerAddedQuery query = {.playerID = playerID};
-	DispatchWasmCallin(CoreCallinOf("PlayerAdded"), &query, true);
+	DispatchWasmCallin(CoreCallinOf("PlayerAdded"), &query, false);
 	if (m_PlayerAddedFuncPtr) {
 		PlayerAddedResult result = {};
 		INVOKE_NATIVE(m_PlayerAddedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
@@ -997,7 +1029,7 @@ void NativeInterfaceEventClient::PlayerRemoved(int playerID, int reason) {
 		.playerID = playerID,
 		.reason = reason
 	};
-	DispatchWasmCallin(CoreCallinOf("PlayerRemoved"), &query, true);
+	DispatchWasmCallin(CoreCallinOf("PlayerRemoved"), &query, false);
 	if (m_PlayerRemovedFuncPtr) {
 		PlayerRemovedResult result = {};
 		INVOKE_NATIVE(m_PlayerRemovedFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
@@ -1148,7 +1180,10 @@ void NativeInterfaceEventClient::UnitCommand(const CUnit* unit, const Command& c
 		.fromSynced = fromSynced,
 		.fromLua = fromLua
 	};
-	DispatchWasmCallin(CoreCallinOf("UnitCommand"), &query, fromSynced);
+	// fromSynced is callin data, not an event-routing selector. Lua registers
+	// UnitCommand on both halves, so every command is broadcast to both matching
+	// Core environments.
+	DispatchWasmCallin(CoreCallinOf("UnitCommand"), &query, true);
 	if (m_UnitCommandFuncPtr) {
 		UnitCommandResult result = {};
 		INVOKE_NATIVE(m_UnitCommandFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
@@ -1183,7 +1218,9 @@ bool NativeInterfaceEventClient::AllowCommand(const CUnit* unit, const Command& 
 		.fromLua = fromLua,
 	};
 	bool wasmValue = false;
-	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowCommand"), &query, fromSynced, wasmValue);
+	// AllowCommand is implemented by CSyncedLuaHandle and is registered for
+	// every command, regardless of the command's fromSynced value.
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("AllowCommand"), &query, true, wasmValue);
 	if (m_AllowCommandFuncPtr == nullptr)
 		return hasWasmValue ? wasmValue : true;
 
@@ -2670,7 +2707,7 @@ void NativeInterfaceEventClient::StockpileChanged(const CUnit* unit, const CWeap
 
 void NativeInterfaceEventClient::CollectGarbage(bool forced) {
 	CollectGarbageQuery query = {.forced = forced};
-	DispatchWasmCallin(CoreCallinOf("CollectGarbage"), &query, false);
+	DispatchWasmCallin(CoreCallinOf("CollectGarbage"), &query, true);
 	if (m_CollectGarbageFuncPtr) {
 		CollectGarbageResult result = {};
 		INVOKE_NATIVE(m_CollectGarbageFuncPtr, m_nativeInterface, m_moduleData, &query, &result);

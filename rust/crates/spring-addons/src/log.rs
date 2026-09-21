@@ -9,6 +9,9 @@ const SECTION: &str = "spring-addons";
 /// Spring's `LOG_LEVEL_WARNING`.
 const WARNING: i32 = 40;
 
+/// Spring's `LOG_LEVEL_INFO`.
+const INFO: i32 = 30;
+
 /// Spring's `LOG_LEVEL_ERROR`.
 const ERROR: i32 = 50;
 
@@ -23,6 +26,11 @@ pub fn error(message: &str) {
 /// Write a line to the engine log at warning level.
 pub fn warning(message: &str) {
     write(WARNING, message);
+}
+
+/// Write a line to the engine log at info level.
+pub fn info(message: &str) {
+    write(INFO, message);
 }
 
 fn write(level: i32, message: &str) {

@@ -23,6 +23,7 @@ spring::unordered_map<GLuint, FBO::TexData> FBO::fboTexData;
 
 GLint FBO::maxAttachments = 0;
 GLsizei FBO::maxSamples = -1;
+GLuint FBO::worldDrawTarget = 0;
 
 
 /**
@@ -45,6 +46,13 @@ GLint FBO::GetCurrentBoundFBO()
 	GLint curFBO;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &curFBO);
 	return curFBO;
+}
+
+GLuint FBO::SetWorldDrawTarget(GLuint fboId)
+{
+	const GLuint previousTarget = worldDrawTarget;
+	worldDrawTarget = fboId;
+	return previousTarget;
 }
 
 
@@ -331,8 +339,8 @@ void FBO::Unbind()
 	// fbo2.Bind();
 	//   do stuff
 	// FBO::Unbind(); <- not redundant!
-	//   continue with screen FBO
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	//   continue with the current world target or the screen FBO
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, worldDrawTarget);
 }
 
 bool FBO::Blit(int32_t fromID, int32_t toID, const std::array<int, 4>& srcRect, const std::array<int, 4>& dstRect, uint32_t mask, uint32_t filter)

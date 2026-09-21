@@ -6,8 +6,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <vector>
 
 #include "Sim/Misc/GlobalSynced.h"
+#include "Sim/Misc/GlobalConstants.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Misc/Team.h"
 #include "Sim/Units/Unit.h"
@@ -16,86 +18,64 @@
 
 namespace {
 
-// Scratch buffer
-static thread_local char scratchBuffer[1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local std::vector<TeamStatsHistoryPoint> historyBuffer;
+static thread_local std::vector<int32_t> teamIDs;
+static thread_local std::vector<int32_t> allyTeamIDs;
+static thread_local std::vector<int32_t> playerIDs;
+static thread_local std::vector<const char*> allyTeamKeys;
+static thread_local std::vector<const char*> allyTeamValues;
+static thread_local std::vector<AIOption> aiOptions;
+static thread_local std::vector<std::string> aiStringStorage;
 
 // Static errors
 static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
 static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
 static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid player ID" };
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Team system not ready" };
-static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
 
 static bool IsReady() { return (gs != nullptr); }
 
-template<typename T>
-static T* AllocateArray(size_t count) {
-	const size_t needed = count * sizeof(T);
-	if (bufferPos + needed > sizeof(scratchBuffer))
-		return nullptr;
-
-	T* out = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
-	bufferPos += needed;
-	return out;
-}
-
-static const char* CopyString(const std::string& str) {
-	const size_t len = str.size() + 1;
-	if (bufferPos + len > sizeof(scratchBuffer))
-		return nullptr;
-
-	char* out = &scratchBuffer[bufferPos];
-	memcpy(out, str.c_str(), len);
-	bufferPos += len;
-	return out;
+static const char* StoreAIString(const std::string& value)
+{
+	aiStringStorage.push_back(value);
+	return aiStringStorage.back().c_str();
 }
 
 static void NativeGetTeamList(const GetTeamListQuery* query, GetTeamListResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (query->allyTeamID >= 0 && !teamHandler.IsValidAllyTeam(query->allyTeamID)) { result->error = &INVALID_ALLY_TEAM_ERROR; return; }
 
-	int32_t* teams = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	teamIDs.clear();
 
 	for (int t = 0; t < teamHandler.ActiveTeams(); t++) {
-		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
 		if (teamHandler.Team(t) != nullptr) {
 			if (query->allyTeamID >= 0 && query->allyTeamID != teamHandler.AllyTeam(t)) {
 				continue;
 			}
-			teams[count++] = t;
-			bufferPos += sizeof(int32_t);
+			teamIDs.push_back(t);
 		}
 	}
 
 	result->error = nullptr;
-	result->teams = teams;
-	result->count = count;
+	result->teams = teamIDs.empty() ? nullptr : teamIDs.data();
+	result->count = teamIDs.size();
 }
 
 static void NativeGetAllyTeamList(const GetAllyTeamListQuery* query, GetAllyTeamListResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	int32_t* allyTeams = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	allyTeamIDs.clear();
 
 	for (int at = 0; at < teamHandler.ActiveAllyTeams(); at++) {
-		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
-		allyTeams[count++] = at;
-		bufferPos += sizeof(int32_t);
+		allyTeamIDs.push_back(at);
 	}
 
 	result->error = nullptr;
-	result->allyTeams = allyTeams;
-	result->count = count;
+	result->allyTeams = allyTeamIDs.empty() ? nullptr : allyTeamIDs.data();
+	result->count = allyTeamIDs.size();
 }
 
 static void NativeGetTeamInfo(const GetTeamInfoQuery* query, GetTeamInfoResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -115,7 +95,6 @@ static void NativeGetTeamInfo(const GetTeamInfoQuery* query, GetTeamInfoResult* 
 }
 
 static void NativeGetTeamAllyTeamID(const GetTeamAllyTeamIDQuery* query, GetTeamAllyTeamIDResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -124,7 +103,6 @@ static void NativeGetTeamAllyTeamID(const GetTeamAllyTeamIDQuery* query, GetTeam
 }
 
 static void NativeGetTeamMaxUnits(const GetTeamMaxUnitsQuery* query, GetTeamMaxUnitsResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -136,7 +114,6 @@ static void NativeGetTeamMaxUnits(const GetTeamMaxUnitsQuery* query, GetTeamMaxU
 }
 
 static void NativeGetTeamLuaAI(const GetTeamLuaAIQuery* query, GetTeamLuaAIResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -145,7 +122,6 @@ static void NativeGetTeamLuaAI(const GetTeamLuaAIQuery* query, GetTeamLuaAIResul
 }
 
 static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamResourcesResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -185,7 +161,6 @@ static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamRe
 }
 
 static void NativeGetTeamUnitStats(const GetTeamUnitStatsQuery* query, GetTeamUnitStatsResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -204,7 +179,6 @@ static void NativeGetTeamUnitStats(const GetTeamUnitStatsQuery* query, GetTeamUn
 }
 
 static void NativeGetTeamResourceStats(const GetTeamResourceStatsQuery* query, GetTeamResourceStatsResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -238,7 +212,6 @@ static void NativeGetTeamResourceStats(const GetTeamResourceStatsQuery* query, G
 }
 
 static void NativeGetTeamStatsHistory(const GetTeamStatsHistoryQuery* query, GetTeamStatsHistoryResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -253,44 +226,42 @@ static void NativeGetTeamStatsHistory(const GetTeamStatsHistoryQuery* query, Get
 	if (query->endIndex <= 0)
 		end = start;
 
-	TeamStatsHistoryPoint* points = reinterpret_cast<TeamStatsHistoryPoint*>(&scratchBuffer[bufferPos]);
+	historyBuffer.clear();
+	historyBuffer.reserve(std::max(0, end - start + 1));
 
-	uint32_t count = 0;
 	for (int i = start; i <= end && i < statCount; i++) {
-		if (bufferPos + sizeof(TeamStatsHistoryPoint) > sizeof(scratchBuffer)) break;
-
 		const TeamStatistics& stats = history[i];
-		points[count].metalUsed = stats.metalUsed;
-		points[count].metalProduced = stats.metalProduced;
-		points[count].metalExcess = stats.metalExcess;
-		points[count].metalReceived = stats.metalReceived;
-		points[count].metalSent = stats.metalSent;
-		points[count].energyUsed = stats.energyUsed;
-		points[count].energyProduced = stats.energyProduced;
-		points[count].energyExcess = stats.energyExcess;
-		points[count].energyReceived = stats.energyReceived;
-		points[count].energySent = stats.energySent;
-		points[count].damageDealt = stats.damageDealt;
-		points[count].damageReceived = stats.damageReceived;
-		points[count].unitsProduced = static_cast<uint32_t>(stats.unitsProduced);
-		points[count].unitsDied = static_cast<uint32_t>(stats.unitsDied);
-		points[count].unitsReceived = static_cast<uint32_t>(stats.unitsReceived);
-		points[count].unitsSent = static_cast<uint32_t>(stats.unitsSent);
-		points[count].unitsCaptured = static_cast<uint32_t>(stats.unitsCaptured);
-		points[count].unitsOutCaptured = static_cast<uint32_t>(stats.unitsOutCaptured);
-		points[count].unitsKilled = static_cast<uint32_t>(stats.unitsKilled);
-
-		bufferPos += sizeof(TeamStatsHistoryPoint);
-		count++;
+		const int historyFrame = (i + 1 == statCount) ? gs->GetLuaSimFrame() : stats.frame;
+		TeamStatsHistoryPoint& point = historyBuffer.emplace_back();
+		point.time = static_cast<float>(historyFrame) / GAME_SPEED;
+		point.frame = historyFrame;
+		point.metalUsed = stats.metalUsed;
+		point.metalProduced = stats.metalProduced;
+		point.metalExcess = stats.metalExcess;
+		point.metalReceived = stats.metalReceived;
+		point.metalSent = stats.metalSent;
+		point.energyUsed = stats.energyUsed;
+		point.energyProduced = stats.energyProduced;
+		point.energyExcess = stats.energyExcess;
+		point.energyReceived = stats.energyReceived;
+		point.energySent = stats.energySent;
+		point.damageDealt = stats.damageDealt;
+		point.damageReceived = stats.damageReceived;
+		point.unitsProduced = static_cast<uint32_t>(stats.unitsProduced);
+		point.unitsDied = static_cast<uint32_t>(stats.unitsDied);
+		point.unitsReceived = static_cast<uint32_t>(stats.unitsReceived);
+		point.unitsSent = static_cast<uint32_t>(stats.unitsSent);
+		point.unitsCaptured = static_cast<uint32_t>(stats.unitsCaptured);
+		point.unitsOutCaptured = static_cast<uint32_t>(stats.unitsOutCaptured);
+		point.unitsKilled = static_cast<uint32_t>(stats.unitsKilled);
 	}
 
 	result->error = nullptr;
-	result->history = points;
-	result->count = count;
+	result->history = historyBuffer.empty() ? nullptr : historyBuffer.data();
+	result->count = historyBuffer.size();
 }
 
 static void NativeGetAllyTeamInfo(const GetAllyTeamInfoQuery* query, GetAllyTeamInfoResult* result) {
-	bufferPos = 0;
 	result->info.keys = nullptr;
 	result->info.values = nullptr;
 	result->info.count = 0;
@@ -299,32 +270,22 @@ static void NativeGetAllyTeamInfo(const GetAllyTeamInfoQuery* query, GetAllyTeam
 
 	const AllyTeam& allyTeam = teamHandler.GetAllyTeam(query->allyTeamID);
 	const AllyTeam::customOpts& customOpts = allyTeam.GetAllValues();
-	const size_t pointerBytes = customOpts.size() * sizeof(const char*) * 2;
-	if (bufferPos + pointerBytes > sizeof(scratchBuffer)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	const char** keys = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
-	bufferPos += customOpts.size() * sizeof(const char*);
-	const char** values = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
-	bufferPos += customOpts.size() * sizeof(const char*);
-
-	uint32_t count = 0;
+	allyTeamKeys.clear();
+	allyTeamValues.clear();
+	allyTeamKeys.reserve(customOpts.size());
+	allyTeamValues.reserve(customOpts.size());
 	for (const auto& [key, value] : customOpts) {
-		keys[count] = key.c_str();
-		values[count] = value.c_str();
-		count++;
+		allyTeamKeys.push_back(key.c_str());
+		allyTeamValues.push_back(value.c_str());
 	}
 
 	result->error = nullptr;
-	result->info.keys = keys;
-	result->info.values = values;
-	result->info.count = count;
+	result->info.keys = allyTeamKeys.empty() ? nullptr : allyTeamKeys.data();
+	result->info.values = allyTeamValues.empty() ? nullptr : allyTeamValues.data();
+	result->info.count = allyTeamKeys.size();
 }
 
 static void NativeAreTeamsAllied(const AreTeamsAlliedQuery* query, AreTeamsAlliedResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID1) || !teamHandler.IsValidTeam(query->teamID2)) {
 		result->error = &INVALID_TEAM_ERROR;
@@ -336,7 +297,6 @@ static void NativeAreTeamsAllied(const AreTeamsAlliedQuery* query, AreTeamsAllie
 }
 
 static void NativeArePlayersAllied(const ArePlayersAlliedQuery* query, ArePlayersAlliedResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!playerHandler.IsValidPlayer(query->playerID1) || !playerHandler.IsValidPlayer(query->playerID2)) {
 		result->error = &INVALID_PLAYER_ERROR;
@@ -356,74 +316,61 @@ static void NativeArePlayersAllied(const ArePlayersAlliedQuery* query, ArePlayer
 }
 
 static void NativeGetPlayerList(const GetPlayerListQuery* query, GetPlayerListResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (query->teamID >= teamHandler.ActiveTeams()) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	int32_t* players = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	playerIDs.clear();
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
-		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
 		const CPlayer* player = playerHandler.Player(p);
 		if (player == nullptr) continue;
 		if (query->active && !player->active) continue;
 		if (query->teamID >= 0 && (player->spectator || player->team != query->teamID)) continue;
 
-		players[count++] = p;
-		bufferPos += sizeof(int32_t);
+		playerIDs.push_back(p);
 	}
 
 	result->error = nullptr;
-	result->players = players;
-	result->count = count;
+	result->players = playerIDs.empty() ? nullptr : playerIDs.data();
+	result->count = playerIDs.size();
 }
 
 static void NativeGetPlayerListInTeam(const GetPlayerListInTeamQuery* query, GetPlayerListInTeamResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	int32_t* players = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	playerIDs.clear();
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
 		if (player != nullptr && player->active && player->team == query->teamID) {
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
-			players[count++] = p;
-			bufferPos += sizeof(int32_t);
+			playerIDs.push_back(p);
 		}
 	}
 
 	result->error = nullptr;
-	result->players = players;
-	result->count = count;
+	result->players = playerIDs.empty() ? nullptr : playerIDs.data();
+	result->count = playerIDs.size();
 }
 
 static void NativeGetPlayerListInAllyTeam(const GetPlayerListInAllyTeamQuery* query, GetPlayerListInAllyTeamResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	int32_t* players = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	playerIDs.clear();
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
 		if (player != nullptr && player->active &&
 			(query->allyTeamID < 0 || teamHandler.AllyTeam(player->team) == query->allyTeamID)) {
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
-			players[count++] = p;
-			bufferPos += sizeof(int32_t);
+			playerIDs.push_back(p);
 		}
 	}
 
 	result->error = nullptr;
-	result->players = players;
-	result->count = count;
+	result->players = playerIDs.empty() ? nullptr : playerIDs.data();
+	result->count = playerIDs.size();
 }
 
 static void NativeGetPlayerInfo(const GetPlayerInfoQuery* query, GetPlayerInfoResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!playerHandler.IsValidPlayer(query->playerID)) { result->error = &INVALID_PLAYER_ERROR; return; }
 
@@ -448,7 +395,6 @@ static void NativeGetPlayerInfo(const GetPlayerInfoQuery* query, GetPlayerInfoRe
 }
 
 static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* query, GetPlayerControlledUnitResult* result) {
-	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!playerHandler.IsValidPlayer(query->playerID)) { result->error = &INVALID_PLAYER_ERROR; return; }
 
@@ -465,7 +411,8 @@ static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* qu
 }
 
 static void NativeGetAIInfo(const GetAIInfoQuery* query, GetAIInfoResult* result) {
-	bufferPos = 0;
+	aiOptions.clear();
+	aiStringStorage.clear();
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
@@ -492,35 +439,24 @@ static void NativeGetAIInfo(const GetAIInfoQuery* query, GetAIInfoResult* result
 	const bool exposeUnsyncedInfo = !WasmUiVisibility::Active() ||
 		WasmUiVisibility::FullRead() || skirmishAIHandler.IsLocalSkirmishAI(skirmishAIID);
 	result->info.skirmishAIID = static_cast<int32_t>(skirmishAIID);
-	result->info.name = CopyString(aiData->name);
+	aiStringStorage.reserve(3 + aiData->options.size() * 2);
+	aiOptions.clear();
+	aiOptions.reserve(aiData->options.size());
+	result->info.name = StoreAIString(aiData->name);
 	result->info.hostingPlayerID = aiData->hostPlayer;
-	result->info.shortName = exposeUnsyncedInfo ? CopyString(aiData->shortName) : "UNKNOWN";
-	result->info.version = exposeUnsyncedInfo ? CopyString(aiData->version) : "UNKNOWN";
-
-	if (result->info.name == nullptr || result->info.shortName == nullptr || result->info.version == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	result->info.shortName = exposeUnsyncedInfo ? StoreAIString(aiData->shortName) : "UNKNOWN";
+	result->info.version = exposeUnsyncedInfo ? StoreAIString(aiData->version) : "UNKNOWN";
 
 	if (exposeUnsyncedInfo && !aiData->options.empty()) {
-		result->info.options = AllocateArray<AIOption>(aiData->options.size());
-		if (result->info.options == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
-		}
-
 		uint32_t optionCount = 0;
 		for (const auto& option: aiData->options) {
-			AIOption& outOption = result->info.options[optionCount];
-			outOption.key = CopyString(option.first);
-			outOption.value = CopyString(option.second);
-			if (outOption.key == nullptr || outOption.value == nullptr) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				result->info.optionCount = optionCount;
-				return;
-			}
+			aiOptions.push_back({
+				.key = StoreAIString(option.first),
+				.value = StoreAIString(option.second),
+			});
 			optionCount++;
 		}
+		result->info.options = aiOptions.data();
 		result->info.optionCount = optionCount;
 	}
 

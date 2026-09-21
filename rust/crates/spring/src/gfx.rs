@@ -19,6 +19,54 @@ pub use resources::{
 
 use super::{ApiError, Result, SyncCallback};
 
+#[cfg(feature = "alloc")]
+use alloc::{string::String, vec::Vec};
+
+/// Matrix mode for the camera's combined view and projection transform.
+pub const MATRIX_VIEWPROJECTION: u32 = 0x10001;
+/// Matrix mode for the inverse of the camera's combined view and projection transform.
+pub const MATRIX_VIEWPROJECTION_INVERSE: u32 = 0x10000;
+/// Named engine matrix modes accepted by `get_matrix_data`.
+pub const MATRIX_VIEW: u32 = 0x10002;
+pub const MATRIX_VIEW_INVERSE: u32 = 0x10003;
+pub const MATRIX_PROJECTION: u32 = 0x10004;
+pub const MATRIX_PROJECTION_INVERSE: u32 = 0x10005;
+pub const MATRIX_BILLBOARD: u32 = 0x10006;
+pub const MATRIX_SHADOW: u32 = 0x10007;
+
+#[cfg(feature = "alloc")]
+#[derive(Debug, Clone, PartialEq)]
+pub struct ValueQueryResult {
+    pub values: [f32; 4],
+    pub count: u32,
+    pub bool_value: Option<bool>,
+    pub string_value: Option<alloc::string::String>,
+}
+
+#[cfg(feature = "alloc")]
+pub type AtmosphereValue = ValueQueryResult;
+
+#[cfg(feature = "alloc")]
+pub type SunValue = ValueQueryResult;
+
+#[cfg(feature = "alloc")]
+pub type WaterRenderingValue = ValueQueryResult;
+
+#[cfg(feature = "alloc")]
+pub type MapRenderingValue = ValueQueryResult;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ShaderUniformInt<'a> {
+    pub name: &'a str,
+    pub value: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ShaderUniformFloat<'a> {
+    pub name: &'a str,
+    pub value: f32,
+}
+
 /// Shader stage sources and optional geometry-stage configuration.
 ///
 /// Every field defaults to "unset", so callers name only the stages they
@@ -31,7 +79,7 @@ use super::{ApiError, Result, SyncCallback};
 /// })?;
 /// ```
 #[cfg(feature = "alloc")]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct ShaderCreateParams<'a> {
     /// Text prepended to every supplied stage, e.g. `#define` blocks.
     pub definitions: &'a str,
@@ -49,6 +97,10 @@ pub struct ShaderCreateParams<'a> {
     pub geo_output_type: Option<u32>,
     /// Maximum vertices the geometry stage emits; engine default when `None`.
     pub geo_output_verts: Option<i32>,
+    /// Integer uniforms to assign after the shader is linked.
+    pub uniform_ints: &'a [ShaderUniformInt<'a>],
+    /// Floating-point uniforms to assign after the shader is linked.
+    pub uniform_floats: &'a [ShaderUniformFloat<'a>],
 }
 
 /// Compile and link a shader from the stages named in `params`.
@@ -61,7 +113,7 @@ pub struct ShaderCreateParams<'a> {
 pub fn create_shader(
     params: ShaderCreateParams<'_>,
 ) -> Result<crate::owned::gfx::CreateShaderValue> {
-    crate::owned::gfx::create_shader(
+    let shader = crate::owned::gfx::create_shader(
         params.definitions,
         params.vertex,
         params.tcs,
@@ -77,7 +129,145 @@ pub fn create_shader(
             has_geo_output_verts: params.geo_output_verts.is_some(),
             geo_output_verts: params.geo_output_verts.unwrap_or(0),
         },
-    )
+    )?;
+
+    if params.uniform_ints.is_empty() && params.uniform_floats.is_empty() {
+        return Ok(shader);
+    }
+
+    let configured = (|| {
+        let _ = crate::owned::gfx::use_shader(shader.shader_id)?;
+        for uniform in params.uniform_ints {
+            let location = crate::owned::gfx::get_uniform_location(shader.shader_id, uniform.name)?;
+            crate::owned::gfx::uniform_int(location, &[uniform.value], 1)?;
+        }
+        for uniform in params.uniform_floats {
+            let location = crate::owned::gfx::get_uniform_location(shader.shader_id, uniform.name)?;
+            crate::owned::gfx::uniform(location, &[uniform.value], 1)?;
+        }
+        Ok::<(), crate::ApiError>(())
+    })();
+    let unbound = crate::owned::gfx::use_shader(0);
+    if let Err(error) = configured {
+        let _ = unbound;
+        return Err(error);
+    }
+    let _ = unbound?;
+
+    Ok(shader)
+}
+
+/// Return the camera's combined view and projection matrix.
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn get_view_projection_matrix() -> Result<[f32; 16]> {
+    crate::owned::gfx::get_matrix_data(MATRIX_VIEWPROJECTION)
+}
+
+/// Return the inverse of the camera's combined view and projection matrix.
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn get_view_projection_matrix_inverse() -> Result<[f32; 16]> {
+    crate::owned::gfx::get_matrix_data(MATRIX_VIEWPROJECTION_INVERSE)
+}
+
+/// Return one of the engine's named matrices used by Lua's `gl.GetMatrixData`.
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn get_named_matrix(mode: u32) -> Result<[f32; 16]> {
+    crate::owned::gfx::get_matrix_data(mode)
+}
+
+/// Upload one of the engine's named matrices used by Lua's `gl.UniformMatrix`.
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn uniform_named_matrix(location: i32, mode: u32) -> Result<()> {
+    let matrix = get_named_matrix(mode)?;
+    crate::owned::gfx::uniform_matrix(location, &matrix, false)
+}
+
+/// Read one of the typed results from Lua's `gl.GetAtmosphere`, `gl.GetSun`,
+/// `gl.GetWaterRendering`, or `gl.GetMapRendering` queries.
+#[cfg(feature = "alloc")]
+#[inline]
+fn get_value_query(key: &str, mode: &str, call: fn(i32, i32) -> i32) -> Result<ValueQueryResult> {
+    let mut key_wire = Vec::with_capacity(4 + key.len());
+    key_wire.extend_from_slice(&(key.len() as u32).to_le_bytes());
+    key_wire.extend_from_slice(key.as_bytes());
+    let mut mode_wire = Vec::with_capacity(4 + mode.len());
+    mode_wire.extend_from_slice(&(mode.len() as u32).to_le_bytes());
+    mode_wire.extend_from_slice(mode.as_bytes());
+    let (key_pointer, key_length) = super::wasm_slice_parts(&key_wire)?;
+    let (mode_pointer, mode_length) = super::wasm_slice_parts(&mode_wire)?;
+    let mut input = [
+        key_pointer as u32,
+        key_length as u32,
+        mode_pointer as u32,
+        mode_length as u32,
+    ];
+    let input_descriptor = super::wasm_output_ptr(&mut input)?;
+    let mut string_output = Vec::new();
+    let mut output = [0u32; 10];
+
+    loop {
+        let (string_pointer, string_capacity) = super::wasm_slice_parts(&string_output)?;
+        output[0] = string_pointer as u32;
+        output[1] = string_capacity as u32;
+        output[2] = 0;
+        let output_descriptor = super::wasm_output_ptr(&mut output)?;
+        let status = call(input_descriptor, output_descriptor);
+        let required = output[2] as usize;
+        if status == super::ErrorCode::BufferOverflow as i32 {
+            string_output.resize(required, 0);
+            continue;
+        }
+        if status != 0 {
+            return Err(ApiError::new(status));
+        }
+        let string_value = if required == 0 {
+            None
+        } else {
+            Some(
+                String::from_utf8(string_output)
+                    .map_err(|_| ApiError::new(super::ErrorCode::Internal as i32))?,
+            )
+        };
+        return Ok(ValueQueryResult {
+            values: [
+                f32::from_bits(output[3]),
+                f32::from_bits(output[4]),
+                f32::from_bits(output[5]),
+                f32::from_bits(output[6]),
+            ],
+            count: output[7],
+            bool_value: (output[8] != 0).then_some(output[9] != 0),
+            string_value,
+        });
+    }
+}
+
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn get_atmosphere(key: &str, mode: &str) -> Result<AtmosphereValue> {
+    get_value_query(key, mode, crate::owned::gfx::get_atmosphere)
+}
+
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn get_sun(key: &str, mode: &str) -> Result<SunValue> {
+    get_value_query(key, mode, crate::owned::gfx::get_sun)
+}
+
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn get_water_rendering(key: &str, mode: &str) -> Result<WaterRenderingValue> {
+    get_value_query(key, mode, crate::owned::gfx::get_water_rendering)
+}
+
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn get_map_rendering(key: &str, mode: &str) -> Result<MapRenderingValue> {
+    get_value_query(key, mode, crate::owned::gfx::get_map_rendering)
 }
 
 #[cfg(all(test, feature = "alloc"))]
@@ -304,6 +494,10 @@ pub fn push_pop_matrix_callback(callback: SyncCallback) -> Result<()> {
     }
 }
 
+/// Render into a named texture.
+///
+/// The engine resets the projection and modelview matrices to identity for
+/// this pass. Set both matrices explicitly before drawing world-space data.
 #[inline]
 pub fn render_to_texture(name: &str, callback: impl crate::callback::SyncHandler) -> Result<()> {
     callback.run_sync(|cb| render_to_texture_callback(name, cb))

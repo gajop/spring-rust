@@ -37,15 +37,9 @@ return {
 
 		"get_vector_from_heading",
 
-		"get_mod_option",
-
-		"get_map_option",
-
 		"get_mod_options",
 
 		"get_map_options",
-
-		"get_map_start_positions",
 
 		"global_los",
 
@@ -93,67 +87,9 @@ return {
 
 		"encoding_is_valid_base64_url",
 
-		"call_as_team",
-
-		"vfs_file_exists",
-
-		"vfs_missing_file_exists",
-
-		"vfs_file_size",
-
-		"vfs_file_info",
-
-		"vfs_read_file",
-
-		"vfs_read_file_as_string",
-
-		"vfs_list_dir_count",
-
-		"vfs_is_directory",
-
-		"vfs_missing_is_directory",
-
-		"vfs_pack_u8",
-
-		"vfs_pack_u16",
-
-		"vfs_pack_u32",
-
-		"vfs_pack_s8",
-
-		"vfs_pack_s16",
-
-		"vfs_pack_s32",
-
-		"vfs_pack_f32",
-
-		"vfs_unpack_u8",
-
-		"vfs_unpack_u16",
-
-		"vfs_unpack_u32",
-
-		"vfs_unpack_s8",
-
-		"vfs_unpack_s16",
-
-		"vfs_unpack_s32",
-
-		"vfs_unpack_f32",
-
-		"vfs_zlib_compress",
-
-		"vfs_zlib_decompress",
-
-		"vfs_calculate_hash_md5",
-
-		"vfs_calculate_hash_sha512",
-
 		"trace_ray_ground_in_direction",
 
 		"trace_ray_ground_between_positions",
-
-		"trace_ray_in_direction",
 
 		"trace_ray_between_positions",
 
@@ -223,21 +159,9 @@ return {
 
 		"get_team_units",
 
-		"get_team_units_by_defs",
-
-		"get_units_in_rectangle",
-
-		"get_units_in_box",
-
-		"get_units_in_sphere",
-
-		"get_units_in_cylinder",
-
 		"get_unit_separation",
 
 		"get_team_max_units",
-
-		"unit_rules_param",
 
 		"get_unit_cost_table",
 
@@ -273,8 +197,6 @@ return {
 
 		"unit_direction_after_set",
 
-		"get_team_units_counts",
-
 		"unit_add_damage",
 
 		"get_unit_nearest_ally",
@@ -296,8 +218,6 @@ return {
 		"get_unit_shield_state",
 
 		"get_unit_command_count",
-
-		"get_unit_commands",
 
 		"get_command_queue",
 
@@ -321,8 +241,6 @@ return {
 
 		"get_unit_move_type_data",
 
-		"get_unit_estimated_path",
-
 		"get_unit_weapon_vectors",
 
 		"get_unit_weapon_target",
@@ -339,13 +257,9 @@ return {
 
 		"get_factory_counts",
 
-		"get_full_build_queue",
-
 		"get_real_build_queue",
 
 		"get_closest_enemy_unit",
-
-		"get_units_in_planes",
 
 		"get_unit_script_names",
 
@@ -362,10 +276,6 @@ return {
 		"get_unit_root_piece",
 
 		"get_feature_root_piece",
-
-		"get_model_piece_list",
-
-		"get_model_piece_map",
 
 		"get_unit_piece_position",
 
@@ -391,27 +301,17 @@ return {
 
 		"get_all_projectiles",
 
-		"get_projectiles_in_rectangle",
-
-		"get_projectiles_in_sphere",
-
 		"get_position_los_state",
 
 		"radar_error_params",
 
 		"unit_los_state",
 
-		"unit_build_distance",
-
-		"unit_build_range3d",
-
 		"get_unit_worker_task",
 
 		"get_ally_team_info",
 
 		"get_unit_def_dimensions",
-
-		"map_square_terrain_type",
 
 		"get_player_controlled_unit",
 
@@ -421,10 +321,6 @@ return {
 
 		"unit_harvest_storage",
 
-		"get_unit_array_centroid",
-
-		"get_unit_map_centroid",
-
 		"get_unit_tooltip",
 
 		"unit_physical_state_bit",
@@ -432,8 +328,6 @@ return {
 		"feature_fire_time",
 
 		"feature_smoke_time",
-
-		"side_data_by_name",
 
 		"side_data_by_index",
 
@@ -487,8 +381,6 @@ return {
 
 		"get_features_in_rectangle",
 
-		"get_features_in_sphere",
-
 		"get_features_in_cylinder",
 
 		"feature_reclaim",
@@ -519,8 +411,6 @@ return {
 
 		"get_feature_ally_team",
 
-		"feature_rules_param",
-
 		"get_feature_collision_volume_data",
 
 		"feature_collision_volume_data",
@@ -530,8 +420,6 @@ return {
 		"feature_height_after_set",
 
 		"feature_add_damage",
-
-		"ground_height",
 
 		"ground_orig_height",
 
@@ -551,10 +439,6 @@ return {
 
 		"is_pos_in_map",
 
-		"get_ground_info",
-
-		"get_terrain_type_data",
-
 		"get_metal_map_size",
 
 		"get_metal_amount",
@@ -564,8 +448,6 @@ return {
 		"metal_amount",
 
 		"wind",
-
-		"terrain_type_data",
 
 		"terrain_add_grass",
 
@@ -614,10 +496,6 @@ return {
 		"valid_unit_def_id",
 
 		"get_unit_def_idby_name",
-
-		"get_unit_def_name",
-
-		"get_unit_def_human_name",
 
 		"get_unit_def_health",
 
@@ -707,13 +585,7 @@ return {
 
 		"get_team_ally_team_id",
 
-		"game_rules_param",
-
 		"team_resource",
-
-		"team_rules_param",
-
-		"player_rules_param",
 
 		"get_team_resource_stats",
 
@@ -724,10 +596,6 @@ return {
 		"team_add_resource",
 
 		"team_use_resource",
-
-		"get_team_damage_stats",
-
-		"get_team_stats_history",
 
 		"unit_add_impulse",
 
@@ -853,34 +721,6 @@ return {
 
 		"piece_projectile_params",
 
-		"projectile_damage_armor",
-
-		"projectile_damage_paralyze",
-
-		"projectile_damage_impulse_factor",
-
-		"projectile_damage_impulse_boost",
-
-		"projectile_damage_crater_mult",
-
-		"projectile_damage_crater_boost",
-
-		"projectile_damage_dyn_exp",
-
-		"projectile_damage_dyn_min",
-
-		"projectile_damage_dyn_range",
-
-		"projectile_damage_dyn_inverted",
-
-		"projectile_damage_crater_aoe",
-
-		"projectile_damage_damage_aoe",
-
-		"projectile_damage_edge_effectiveness",
-
-		"projectile_damage_explosion_speed",
-
 		"projectile_position_after_set",
 
 		"projectile_velocity_after_set",
@@ -892,8 +732,6 @@ return {
 		"projectile_intercepted_after_set",
 
 		"projectile_ttl_after_set",
-
-		"projectile_damage_after_set",
 
 		"piece_projectile_params_after_set",
 
@@ -910,12 +748,6 @@ return {
 		"projectile_collision",
 
 		"projectile_delete",
-
-		"add_height_map",
-
-		"add_original_height_map",
-
-		"add_smooth_mesh",
 
 		"add_team_resource_excess_stats",
 
@@ -937,8 +769,6 @@ return {
 
 		"transfer_team_max_units",
 
-		"get_piece_projectile_name",
-
 		"spawn_explosion",
 
 		"spawn_ceg",
@@ -947,17 +777,7 @@ return {
 
 		"path_node_costs",
 
-		"request_path",
-
 		"unit_cmd_desc_lifecycle",
-
-		"set_original_height_map",
-
-		"set_smooth_mesh",
-
-		"give_order_to_unit_synced",
-
-		"give_order_to_unit_array_synced",
 
 		"give_order_to_unit_map_synced",
 
@@ -970,8 +790,6 @@ return {
 		"give_order_array_to_unit_array_synced_broadcast",
 
 		"get_cobscript_id_non_cob",
-
-		"call_cobscript_non_cob",
 
 		"create_unit_cleanup",
 
@@ -1015,12 +833,6 @@ return {
 		},
 		["get_vector_from_heading"] = {
 			heading = -1,
-		},
-		["get_mod_option"] = {
-			key = "native_api_parity_cases",
-		},
-		["get_map_option"] = {
-			key = "blank_map_height",
 		},
 		["global_los"] = {
 			enabled = false,
@@ -1109,104 +921,6 @@ return {
 		["encoding_is_valid_base64_url"] = {
 			text = "SGVsbG8-_",
 		},
-		["vfs_file_exists"] = {
-			path = "LuaRules/Gadgets/native_api_parity.lua",
-		},
-		["vfs_missing_file_exists"] = {
-			path = "LuaRules/Gadgets/does_not_exist.lua",
-		},
-		["vfs_file_size"] = {
-			path = "LuaRules/Gadgets/native_api_parity.lua",
-		},
-		["vfs_file_info"] = {
-			path = "LuaRules/Gadgets/native_api_parity.lua",
-		},
-		["vfs_read_file"] = {
-			path = "LuaRules/Gadgets/native_api_parity.lua",
-		},
-		["vfs_read_file_as_string"] = {
-			path = "LuaRules/Gadgets/native_api_parity.lua",
-		},
-		["vfs_list_dir_count"] = {
-			path = "LuaRules/Gadgets/",
-			pattern = "*",
-		},
-		["vfs_is_directory"] = {
-			path = "LuaRules/",
-		},
-		["vfs_missing_is_directory"] = {
-			path = "does/not/exist/",
-		},
-		["vfs_pack_u8"] = {
-			values = {0, 1, 127, 255},
-		},
-		["vfs_pack_u16"] = {
-			values = {0, 1, 256, 65535},
-		},
-		["vfs_pack_u32"] = {
-			values = {0, 1, 65536, 16777215},
-		},
-		["vfs_pack_s8"] = {
-			values = {-128, -1, 0, 127},
-		},
-		["vfs_pack_s16"] = {
-			values = {-32768, -1, 0, 32767},
-		},
-		["vfs_pack_s32"] = {
-			values = {-2147483648, -1, 0, 16777215},
-		},
-		["vfs_pack_f32"] = {
-			values = {-1.25, 0, 3.5, 100.125},
-		},
-		["vfs_unpack_u8"] = {
-			source = {10, 20, 30, 40},
-			pos = 2,
-			count = 2,
-		},
-		["vfs_unpack_u16"] = {
-			source = {1000, 2000, 3000, 4000},
-			pos = 3,
-			count = 2,
-		},
-		["vfs_unpack_u32"] = {
-			source = {100000, 200000, 300000},
-			pos = 5,
-			count = 2,
-		},
-		["vfs_unpack_s8"] = {
-			source = {-40, -20, 20, 40},
-			pos = 2,
-			count = 2,
-		},
-		["vfs_unpack_s16"] = {
-			source = {-30000, -1000, 1000, 30000},
-			pos = 3,
-			count = 2,
-		},
-		["vfs_unpack_s32"] = {
-			source = {-300000, -1000, 1000, 300000},
-			pos = 5,
-			count = 2,
-		},
-		["vfs_unpack_f32"] = {
-			source = {1.5, 2.5, 3.5},
-			pos = 5,
-			count = 2,
-		},
-		["vfs_zlib_compress"] = {
-			input = "Native API parity compression payload",
-		},
-		["vfs_zlib_decompress"] = {
-			input = "Native API parity decompression payload",
-		},
-		["vfs_calculate_hash_md5"] = {
-			input = "Native API parity hash payload",
-			hashType = 0,
-		},
-		["vfs_calculate_hash_sha512"] = {
-			input = "Native API parity hash payload",
-			hashType = 1,
-		},
 		["trace_ray_ground_in_direction"] = {
 			startX = 1024,
 			startY = 256,
@@ -1225,16 +939,6 @@ return {
 			endY = -256,
 			endZ = 1024,
 			testWater = false,
-		},
-		["trace_ray_in_direction"] = {
-			posX = 0,
-			posY = 256,
-			posZ = 0,
-			dirX = 1,
-			dirY = 0,
-			dirZ = 0,
-			maxLength = 512,
-			objectType = "both",
 		},
 		["trace_ray_between_positions"] = {
 			startX = 0,
@@ -1292,43 +996,9 @@ return {
 			y = 0.0,
 			z = 0.0,
 		},
-		["get_units_in_rectangle"] = {
-			minX = 0,
-			minZ = 0,
-			maxX = 99999,
-			maxZ = 99999,
-			allegiance = -1,
-		},
-		["get_units_in_box"] = {
-			minX = 0,
-			minY = -99999,
-			minZ = 0,
-			maxX = 99999,
-			maxY = 99999,
-			maxZ = 99999,
-			allegiance = -1,
-		},
-		["get_units_in_sphere"] = {
-			x = 1024,
-			y = 96,
-			z = 1024,
-			radius = 99999,
-			allegiance = -1,
-		},
-		["get_units_in_cylinder"] = {
-			x = 1024,
-			z = 1024,
-			radius = 99999,
-			allegiance = -1,
-		},
 		["get_unit_separation"] = {
 			positional = true,
 			checkMap = false,
-		},
-		["unit_rules_param"] = {
-			scope = "unit",
-			paramName = "native_api_parity_unit_rules_param",
-			value = 455.0,
 		},
 		["unit_metal_extraction"] = {
 			depth = 1.05,
@@ -1399,9 +1069,6 @@ return {
 		},
 		["get_unit_shield_state"] = {
 			weaponNum = 1,
-		},
-		["get_unit_commands"] = {
-			maxCommands = 999,
 		},
 		["get_command_queue"] = {
 			maxCommands = 999,
@@ -1486,17 +1153,7 @@ return {
 			sphereDistTest = false,
 			checkSightDist = false,
 		},
-		["get_units_in_planes"] = {
-			planes = {{1, 0, 0, -100000}, {-1, 0, 0, 100000}, {0, 1, 0, -100000}, {0, -1, 0, 100000}, {0, 0, 1, -100000}, {0, 0, -1, 100000}},
-			allegiance = 0,
-		},
 		["get_model_root_piece"] = {
-			modelName = "fir_tree_small.s3o",
-		},
-		["get_model_piece_list"] = {
-			modelName = "fir_tree_small.s3o",
-		},
-		["get_model_piece_map"] = {
 			modelName = "fir_tree_small.s3o",
 		},
 		["get_unit_piece_position"] = {
@@ -1536,22 +1193,6 @@ return {
 			synced = true,
 			weapon = true,
 		},
-		["get_projectiles_in_rectangle"] = {
-			minX = 0,
-			minZ = 0,
-			maxX = 99999,
-			maxZ = 99999,
-			synced = true,
-			weapon = true,
-		},
-		["get_projectiles_in_sphere"] = {
-			x = 1024.0,
-			y = 128.0,
-			z = 1024.0,
-			radius = 2048,
-			synced = true,
-			weapon = true,
-		},
 		["get_position_los_state"] = {
 			x = 1024.0,
 			y = 128.0,
@@ -1564,20 +1205,6 @@ return {
 		},
 		["unit_los_state"] = {
 			rawMask = 7,
-		},
-		["unit_build_distance"] = {
-			paramName = "buildDistance",
-			value = 288.0,
-		},
-		["unit_build_range3d"] = {
-			paramName = "buildRange3D",
-			enabled = true,
-		},
-		["map_square_terrain_type"] = {
-			x = 1024.0,
-			z = 1024.0,
-			terrainTypeIndex = 1,
-			y = 128.0,
 		},
 		["get_player_controlled_unit"] = {
 			playerID = 0,
@@ -1596,9 +1223,6 @@ return {
 		},
 		["feature_smoke_time"] = {
 			smokeTime = 6.5,
-		},
-		["side_data_by_name"] = {
-			sideName = "arm",
 		},
 		["side_data_by_index"] = {
 			sideIndex = 1,
@@ -1676,12 +1300,6 @@ return {
 			maxX = 99999,
 			maxZ = 99999,
 		},
-		["get_features_in_sphere"] = {
-			x = 1024,
-			y = 96,
-			z = 1024,
-			radius = 99999,
-		},
 		["get_features_in_cylinder"] = {
 			x = 1024,
 			z = 1024,
@@ -1715,11 +1333,6 @@ return {
 		["feature_no_select"] = {
 			noSelect = false,
 		},
-		["feature_rules_param"] = {
-			scope = "feature",
-			paramName = "native_api_parity_feature_rules_param",
-			value = 455.0,
-		},
 		["feature_collision_volume_data"] = {
 			scaleX = 40.0,
 			scaleY = 40.0,
@@ -1742,13 +1355,6 @@ return {
 		["feature_add_damage"] = {
 			baseline = 800.0,
 			damage = 50.0,
-		},
-		["ground_height"] = {
-			x = 1024.0,
-			z = 1024.0,
-			height = 112,
-			terraform = 0.5,
-			y = 128.0,
 		},
 		["ground_orig_height"] = {
 			x = 1024.0,
@@ -1787,14 +1393,6 @@ return {
 			z = 1024.0,
 			y = 128.0,
 		},
-		["get_ground_info"] = {
-			x = 1024.0,
-			z = 1024.0,
-			y = 128.0,
-		},
-		["get_terrain_type_data"] = {
-			terrainTypeIndex = 0,
-		},
 		["get_metal_amount"] = {
 			x = 7,
 			z = 7,
@@ -1810,16 +1408,6 @@ return {
 		},
 		["wind"] = {
 			windStrength = 10.5,
-		},
-		["terrain_type_data"] = {
-			terrainTypeIndex = 0,
-			terrainTypeName = "native_api_parity_terrain",
-			hardness = 1.75,
-			tankSpeed = 1.25,
-			kbotSpeed = 1.25,
-			hoverSpeed = 1.25,
-			shipSpeed = 1.25,
-			receiveTracks = false,
 		},
 		["terrain_add_grass"] = {
 			x = 1024.0,
@@ -1952,25 +1540,9 @@ return {
 			playerID1 = 0,
 			playerID2 = 0,
 		},
-		["game_rules_param"] = {
-			scope = "game",
-			paramName = "native_api_parity_game_rules_param",
-			value = 455.0,
-		},
 		["team_resource"] = {
 			resource = "metal",
 			amount = 500.0,
-		},
-		["team_rules_param"] = {
-			scope = "team",
-			paramName = "native_api_parity_team_rules_param",
-			value = 455.0,
-		},
-		["player_rules_param"] = {
-			scope = "player",
-			playerID = 0,
-			paramName = "native_api_parity_player_rules_param",
-			value = 455.0,
 		},
 		["get_team_resource_stats"] = {
 			teamID = 0,
@@ -1996,10 +1568,6 @@ return {
 			resource = "metal",
 			baseline = 500.0,
 			amount = 75.0,
-		},
-		["get_team_stats_history"] = {
-			startIndex = 1,
-			endIndex = 1,
 		},
 		["unit_add_impulse"] = {
 			x = 1.0,
@@ -2303,48 +1871,6 @@ return {
 			pieceNum = 1,
 			matrix = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		},
-		["projectile_damage_armor"] = {
-			tag = "0",
-		},
-		["projectile_damage_paralyze"] = {
-			tag = "paralyzeDamageTime",
-		},
-		["projectile_damage_impulse_factor"] = {
-			tag = "impulseFactor",
-		},
-		["projectile_damage_impulse_boost"] = {
-			tag = "impulseBoost",
-		},
-		["projectile_damage_crater_mult"] = {
-			tag = "craterMult",
-		},
-		["projectile_damage_crater_boost"] = {
-			tag = "craterBoost",
-		},
-		["projectile_damage_dyn_exp"] = {
-			tag = "dynDamageExp",
-		},
-		["projectile_damage_dyn_min"] = {
-			tag = "dynDamageMin",
-		},
-		["projectile_damage_dyn_range"] = {
-			tag = "dynDamageRange",
-		},
-		["projectile_damage_dyn_inverted"] = {
-			tag = "dynDamageInverted",
-		},
-		["projectile_damage_crater_aoe"] = {
-			tag = "craterAreaOfEffect",
-		},
-		["projectile_damage_damage_aoe"] = {
-			tag = "damageAreaOfEffect",
-		},
-		["projectile_damage_edge_effectiveness"] = {
-			tag = "edgeEffectiveness",
-		},
-		["projectile_damage_explosion_speed"] = {
-			tag = "explosionSpeed",
-		},
 		["projectile_position_after_set"] = {
 			x = 1024.0,
 			y = 128.0,
@@ -2372,10 +1898,6 @@ return {
 		["projectile_ttl_after_set"] = {
 			ttl = 777,
 		},
-		["projectile_damage_after_set"] = {
-			tag = "impulseFactor",
-			damageValue = 4.25,
-		},
 		["piece_projectile_params_after_set"] = {
 			explFlags = 66,
 			spinAngle = 0.75,
@@ -2401,21 +1923,6 @@ return {
 		},
 		["projectile_set_ceg"] = {
 			cegName = "native_api_parity_missing_ceg",
-		},
-		["add_height_map"] = {
-			x = 1600,
-			z = 1600,
-			delta = 2,
-		},
-		["add_original_height_map"] = {
-			x = 1600,
-			z = 1600,
-			delta = 2,
-		},
-		["add_smooth_mesh"] = {
-			x = 1600,
-			z = 1600,
-			delta = 2,
 		},
 		["add_team_resource_excess_stats"] = {
 			resource = "metal",
@@ -2524,42 +2031,14 @@ return {
 			nodeZ = 0,
 			cost = 17.25,
 		},
-		["request_path"] = {
-			moveDefName = "KBOT1",
-			startX = 900,
-			startY = 96,
-			startZ = 900,
-			endX = 1120,
-			endY = 96,
-			endZ = 1120,
-			radius = 8,
-		},
 		["unit_cmd_desc_lifecycle"] = {
 			cmdID = 34567,
 			cmdType = 21,
 			action = "native_api_parity_cmd",
 			editedAction = "native_api_parity_cmd_edited",
 		},
-		["set_original_height_map"] = {
-			x = 1600,
-			z = 1600,
-			height = 106,
-			factor = 0.5,
-		},
-		["set_smooth_mesh"] = {
-			x = 1600,
-			z = 1600,
-			height = 106,
-			terraform = 0.5,
-		},
 		["get_cobscript_id_non_cob"] = {
 			funcName = "NativeApiParityMissingCobFunction",
-		},
-		["call_cobscript_non_cob"] = {
-			funcName = "NativeApiParityMissingCobFunction",
-			retArgs = 0,
-			name = "NativeApiParityMissingCobFunction",
-			id = 0,
 		},
 		["game_over"] = {
 			winningAllyTeams = {0},

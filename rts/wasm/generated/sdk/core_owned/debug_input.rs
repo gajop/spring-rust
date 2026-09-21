@@ -49,7 +49,7 @@
         pub struct EmulateMouseWheelResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EmulateTextEditingQuery {
             pub utf8_text: String,
             pub start: u32,
@@ -61,7 +61,7 @@
             pub consumed: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EmulateTextInputQuery {
             pub utf8_text: String,
         }

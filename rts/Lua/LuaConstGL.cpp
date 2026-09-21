@@ -732,6 +732,14 @@ bool LuaConstGL::PushEntries(lua_State* L)
 	PUSH_GL(VERTEX_ARRAY);
 	/*** @field GL.QUERY integer */
 	PUSH_GL(QUERY);
+	/*** @field GL.SAMPLES_PASSED integer */
+	PUSH_GL(SAMPLES_PASSED);
+	/*** @field GL.ANY_SAMPLES_PASSED integer */
+	PUSH_GL(ANY_SAMPLES_PASSED);
+	/*** @field GL.PRIMITIVES_GENERATED integer */
+	PUSH_GL(PRIMITIVES_GENERATED);
+	/*** @field GL.TIME_ELAPSED integer */
+	PUSH_GL(TIME_ELAPSED);
 	/*** @field GL.PROGRAM_PIPELINE integer */
 	PUSH_GL(PROGRAM_PIPELINE);
 	/*** @field GL.TRANSFORM_FEEDBACK integer */

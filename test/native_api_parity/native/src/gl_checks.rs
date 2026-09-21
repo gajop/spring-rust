@@ -933,11 +933,11 @@ impl NativeApiParity {
         );
         void!(
             "gl.UniformArray",
-            gfx.uniform_array_float(locations["u_floatArray"], &[1.5, 2.5])
+			gfx.uniform_array_float(locations["u_floatArray"], &[1.5, 2.5], 1)
         );
         side_effect!(
             "gl.UniformArray.int",
-            gfx.uniform_array_int(locations["u_intArray"], &[3, 4])
+			gfx.uniform_array_int(locations["u_intArray"], &[3, 4], 1)
         );
         void!(
             "gl.UniformMatrix",
@@ -1267,7 +1267,7 @@ impl NativeApiParity {
         void!("gl.DeleteList", gfx.delete_list(list_id));
 
         let query_id = gfx
-            .create_query()
+            .create_query(None)
             .map_err(|error| format!("CreateQuery failed: {error:?}"))?;
         let mut query_callback_error = None;
         gfx.run_query(query_id, || {

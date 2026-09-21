@@ -1,30 +1,36 @@
     pub mod rules_params {
         use super::{Result, String, Vec};
 
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum RulesParamLOS {
-            RulesparamlosAllied,
-            RulesparamlosAlliedMask,
-            RulesparamlosInlos,
-            RulesparamlosInlosMask,
-            RulesparamlosInradar,
-            RulesparamlosInradarMask,
-            RulesparamlosPrivate,
-            RulesparamlosPrivateMask,
-            RulesparamlosPublic,
-            RulesparamlosPublicMask,
-            RulesparamlosTyped,
-            RulesparamlosTypedMask,
+            RulesparamlosAllied = 2,
+            RulesparamlosAlliedMask = 62,
+            RulesparamlosInlos = 4,
+            RulesparamlosInlosMask = 60,
+            RulesparamlosInradar = 16,
+            RulesparamlosInradarMask = 48,
+            RulesparamlosPrivate = 1,
+            RulesparamlosPrivateMask = 63,
+            RulesparamlosPublic = 32,
+            RulesparamlosTyped = 8,
+            RulesparamlosTypedMask = 56,
         }
 
+        #[allow(non_upper_case_globals)]
+        impl RulesParamLOS {
+            pub const RulesparamlosPublicMask: Self = Self::RulesparamlosPublic;
+        }
+
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum RulesParamType {
-            RulesparamTypeBool,
-            RulesparamTypeFloat,
-            RulesparamTypeString,
+            RulesparamTypeBool = 0,
+            RulesparamTypeFloat = 1,
+            RulesparamTypeString = 2,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureRulesParamQuery {
             pub feature_id: i32,
             pub param_name: String,
@@ -42,12 +48,12 @@
             pub feature_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeatureRulesParamsResult {
             pub names: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGameRulesParamQuery {
             pub param_name: String,
         }
@@ -64,12 +70,12 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGameRulesParamsResult {
             pub names: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPlayerRulesParamQuery {
             pub player_id: i32,
             pub param_name: String,
@@ -87,12 +93,12 @@
             pub player_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPlayerRulesParamsResult {
             pub names: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTeamRulesParamQuery {
             pub team_id: i32,
             pub param_name: String,
@@ -110,12 +116,12 @@
             pub team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTeamRulesParamsResult {
             pub names: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitRulesParamQuery {
             pub unit_id: i32,
             pub param_name: String,
@@ -133,7 +139,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitRulesParamsResult {
             pub names: Vec<String>,
         }
@@ -440,35 +446,35 @@
         #[inline]
         pub fn set_feature_rules_param(feature_id: i32, param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
-            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             crate::generated::dynamic_input::rules_params::set_feature_rules_param(feature_id, los, &__blob0, &__blob1)
         }
 
         #[inline]
         pub fn set_game_rules_param(param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
-            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             crate::generated::dynamic_input::rules_params::set_game_rules_param(los, &__blob0, &__blob1)
         }
 
         #[inline]
         pub fn set_player_rules_param(player_id: i32, param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
-            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             crate::generated::dynamic_input::rules_params::set_player_rules_param(player_id, los, &__blob0, &__blob1)
         }
 
         #[inline]
         pub fn set_team_rules_param(team_id: i32, param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
-            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             crate::generated::dynamic_input::rules_params::set_team_rules_param(team_id, los, &__blob0, &__blob1)
         }
 
         #[inline]
         pub fn set_unit_rules_param(unit_id: i32, param_name: &str, value: &RulesParamValue, los: i32) -> Result<bool> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
-            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
+            let __blob1 = { let mut __b = Vec::new(); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.type_ as i32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if value.bool_value { 1u32 } else { 0u32 }).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&value.float_value.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(value.string_value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.string_value.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b };
             crate::generated::dynamic_input::rules_params::set_unit_rules_param(unit_id, los, &__blob0, &__blob1)
         }
 

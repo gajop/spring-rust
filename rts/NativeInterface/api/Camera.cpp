@@ -14,6 +14,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <string>
+#include <vector>
 
 namespace {
 
@@ -21,6 +24,8 @@ namespace {
 static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local std::vector<std::string> cameraNameStorage;
+static thread_local std::vector<const char*> cameraNamePointers;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
@@ -38,6 +43,9 @@ static bool IsReady()
 static void NativeGetCameraNames(const GetCameraNamesQuery* query, GetCameraNamesResult* result)
 {
 	bufferPos = 0;
+	result->error = nullptr;
+	result->names = nullptr;
+	result->count = 0;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -45,39 +53,19 @@ static void NativeGetCameraNames(const GetCameraNamesQuery* query, GetCameraName
 	}
 
 	const auto& controllers = camHandler->GetControllers();
-
-	// First, write all strings to scratch buffer
-	const char** namePointers = reinterpret_cast<const char**>(&scratchBuffer[bufferPos]);
-	size_t count = 0;
-	size_t ptrArraySize = controllers.size() * sizeof(const char*);
-
-	if (bufferPos + ptrArraySize > sizeof(scratchBuffer)) {
-		result->error = &NOT_READY_ERROR;
-		return;
+	cameraNameStorage.clear();
+	cameraNamePointers.clear();
+	cameraNameStorage.reserve(controllers.size());
+	cameraNamePointers.reserve(controllers.size());
+	for (const auto* controller : controllers) {
+		if (controller == nullptr)
+			continue;
+		cameraNameStorage.emplace_back(controller->GetName());
+		cameraNamePointers.push_back(cameraNameStorage.back().c_str());
 	}
 
-	bufferPos += ptrArraySize;
-
-	for (size_t i = 0; i < controllers.size(); ++i) {
-		if (controllers[i] != nullptr) {
-			std::string name = controllers[i]->GetName();
-			char* strBuf = &scratchBuffer[bufferPos];
-			size_t len = name.length();
-
-			if (bufferPos + len + 1 > sizeof(scratchBuffer)) {
-				result->error = &NOT_READY_ERROR;
-				return;
-			}
-
-			memcpy(strBuf, name.c_str(), len + 1);
-			namePointers[count++] = strBuf;
-			bufferPos += len + 1;
-		}
-	}
-
-	result->error = nullptr;
-	result->names = namePointers;
-	result->count = static_cast<uint32_t>(count);
+	result->names = cameraNamePointers.empty() ? nullptr : cameraNamePointers.data();
+	result->count = static_cast<uint32_t>(cameraNamePointers.size());
 }
 
 static void NativeGetCameraState(const GetCameraStateQuery* query, GetCameraStateResult* result)
@@ -345,7 +333,11 @@ static void NativeSetCameraState(const SetCameraStateQuery* query, SetCameraStat
 	// represented in the compact C struct (for example `flipped`, velocities,
 	// or the free-camera flags) are preserved instead of being zeroed.
 	CCameraController::StateMap state = camHandler->GetState();
-	state["fov"] = query->state.fov;
+	// CameraState is a compact value type, so its default fov is zero.  Treat
+	// non-positive and non-finite values as omitted instead of handing the
+	// camera a zero projection angle, which renders a black view.
+	if (std::isfinite(query->state.fov) && query->state.fov > 0.0f)
+		state["fov"] = query->state.fov;
 	state["px"] = query->state.pos.x;
 	state["py"] = query->state.pos.y;
 	state["pz"] = query->state.pos.z;
@@ -357,7 +349,8 @@ static void NativeSetCameraState(const SetCameraStateQuery* query, SetCameraStat
 	state["rz"] = query->state.rz;
 	state["height"] = query->state.height;
 	state["angle"] = query->state.angle;
-	state["dist"] = query->state.dist;
+	if (std::isfinite(query->state.dist) && query->state.dist > 0.0f)
+		state["dist"] = query->state.dist;
 	state["mode"] = static_cast<float>(query->state.mode);
 
 	camHandler->SetTransitionParams(query->transitionTimeFactor, query->transitionTimeExponent);

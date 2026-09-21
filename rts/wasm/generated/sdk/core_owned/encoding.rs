@@ -1,48 +1,48 @@
     pub mod encoding {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DecodeBase64Query {
             pub text: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DecodeBase64Result {
             pub decoded: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DecodeBase64UrlQuery {
             pub text: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DecodeBase64UrlResult {
             pub decoded: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EncodeBase64Query {
             pub text: Vec<u8>,
             pub strip_padding: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EncodeBase64Result {
             pub encoded: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EncodeBase64UrlQuery {
             pub text: Vec<u8>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct EncodeBase64UrlResult {
             pub encoded: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct IsValidBase64Query {
             pub text: String,
         }
@@ -52,7 +52,7 @@
             pub valid: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct IsValidBase64UrlQuery {
             pub text: String,
         }

@@ -28,7 +28,7 @@
             pub min_dist: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetNextWayPointResult {
             pub waypoint: Option<Float3>,
         }
@@ -49,7 +49,7 @@
             pub overlay_index: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPathNodeCostsResult {
             pub costs: Vec<f32>,
         }
@@ -59,7 +59,7 @@
             pub path_id: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPathWayPointsResult {
             pub points: Vec<Float3>,
             pub starts: Vec<i32>,
@@ -77,7 +77,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RequestPathQuery {
             pub move_def_id: u32,
             pub move_def_name: Option<String>,
@@ -124,7 +124,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPathWayPointsValue {
             pub points: Vec<Float3>,
             pub starts: Vec<i32>,

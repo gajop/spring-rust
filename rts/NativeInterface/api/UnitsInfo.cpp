@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
+#include <vector>
 
 namespace {
 
@@ -36,6 +37,8 @@ namespace {
 static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local std::vector<int32_t> nanoPieceIDs;
+static thread_local std::vector<int32_t> transportedUnitIDs;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit system not ready" };
@@ -1088,24 +1091,13 @@ static void NativeGetUnitNanoPieces(const GetUnitNanoPiecesQuery* query, GetUnit
 		return;
 	}
 
-	// Copy nano pieces to scratch buffer
-	const size_t count = nanoPieces->size();
-	const size_t bytesNeeded = count * sizeof(int32_t);
+	nanoPieceIDs.clear();
+	nanoPieceIDs.reserve(nanoPieces->size());
+	for (int piece : *nanoPieces)
+		nanoPieceIDs.push_back(piece + 1);  // Convert from 0-indexed C++ to 1-indexed Lua
 
-	if (bufferPos + bytesNeeded > sizeof(scratchBuffer)) {
-		static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	int32_t* piecesBuf = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	for (size_t i = 0; i < count; i++) {
-		piecesBuf[i] = (*nanoPieces)[i] + 1;  // Convert from 0-indexed C++ to 1-indexed Lua
-	}
-	bufferPos += bytesNeeded;
-
-	result->pieces = piecesBuf;
-	result->count = static_cast<uint32_t>(count);
+	result->pieces = nanoPieceIDs.data();
+	result->count = nanoPieceIDs.size();
 }
 
 static void NativeGetUnitTransporter(const GetUnitTransporterQuery* query, GetUnitTransporterResult* result) {
@@ -1152,22 +1144,15 @@ static void NativeGetUnitIsTransporting(const GetUnitIsTransportingQuery* query,
 	}
 
 	result->isTransporting = true;
-	result->count = unit->transportedUnits.size();
+	transportedUnitIDs.clear();
+	transportedUnitIDs.reserve(unit->transportedUnits.size());
+	for (const auto& transported : unit->transportedUnits)
+		transportedUnitIDs.push_back(transported.unit->id);
+	result->count = transportedUnitIDs.size();
 	if (result->count == 0) {
 		return;
 	}
-
-	const size_t bytesNeeded = result->count * sizeof(int32_t);
-	result->unitIDs = reinterpret_cast<int32_t*>(AllocScratch(bytesNeeded, alignof(int32_t)));
-	if (result->unitIDs == nullptr) {
-		result->error = &NOT_READY_ERROR;
-		result->count = 0;
-		return;
-	}
-
-	for (uint32_t i = 0; i < result->count; ++i) {
-		result->unitIDs[i] = unit->transportedUnits[i].unit->id;
-	}
+	result->unitIDs = transportedUnitIDs.data();
 }
 
 static void NativeGetUnitStockpile(const GetUnitStockpileQuery* query, GetUnitStockpileResult* result) {

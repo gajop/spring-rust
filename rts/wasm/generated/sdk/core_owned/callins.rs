@@ -1,7 +1,7 @@
     pub mod callins {
         use super::{String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ActivateMenuQuery {
             pub message: String,
             pub message_length: u32,
@@ -11,7 +11,7 @@
         pub struct ActivateMenuResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ActiveCommandChangedQuery {
             pub cmd_id: i32,
             pub cmd_type: i32,
@@ -24,7 +24,7 @@
         pub struct ActiveCommandChangedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AddConsoleLineQuery {
             pub message: String,
             pub section: String,
@@ -62,14 +62,14 @@
             pub position: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AllowResourceLevelQuery {
             pub team_id: i32,
             pub type_: String,
             pub level: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AllowResourceTransferQuery {
             pub old_team: i32,
             pub new_team: i32,
@@ -213,7 +213,7 @@
         pub struct CollectGarbageResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct CommandFallbackQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -221,7 +221,7 @@
             pub command: NativeCallinCommand,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct CommandNotifyQuery {
             pub command: NativeCallinCommand,
         }
@@ -275,7 +275,7 @@
         pub struct DownloadProgressResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DownloadQueuedQuery {
             pub download_id: i32,
             pub archive_name: String,
@@ -305,7 +305,7 @@
         pub struct DrawAlphaObjectsLuaResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DrawBuildSquareQuery {
             pub unit_def_id: i32,
             pub x: i32,
@@ -464,7 +464,7 @@
         pub struct GameFrameResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GameIDQuery {
             pub game_id: Vec<u8>,
         }
@@ -473,7 +473,7 @@
         pub struct GameIDResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GameOverEventQuery {
             pub winning_ally_teams: Vec<u8>,
         }
@@ -509,13 +509,13 @@
         pub struct GameProgressResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GameSetupPlayerState {
             pub player_id: i32,
             pub state: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GameSetupQuery {
             pub state: String,
             pub ready: bool,
@@ -541,7 +541,7 @@
             pub group_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct HandleLuaCallQuery {
             pub message: Vec<u8>,
         }
@@ -550,7 +550,7 @@
         pub struct HandleLuaCallResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct HandleLuaMsgQuery {
             pub player_id: i32,
             pub script: i32,
@@ -582,14 +582,14 @@
             pub value: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct KeyAction {
             pub command: String,
             pub extra: String,
             pub bound_with: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct KeyPressQuery {
             pub key_code: i32,
             pub alt: bool,
@@ -603,7 +603,7 @@
             pub action_list: Vec<KeyAction>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct KeyReleaseQuery {
             pub key_code: i32,
             pub alt: bool,
@@ -625,7 +625,7 @@
         pub struct LastMessagePositionResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LoadProgressQuery {
             pub message: String,
             pub message_length: u32,
@@ -636,7 +636,7 @@
         pub struct LoadProgressResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct MapDrawCmdQuery {
             pub player_id: i32,
             pub type_: i32,
@@ -720,7 +720,7 @@
             pub data: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct NativeCallinCommand {
             pub id: i32,
             pub time_out: i32,
@@ -793,7 +793,7 @@
         pub struct RectChangedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RecvFromSyncedQuery {
             pub message: Vec<u8>,
         }
@@ -813,13 +813,13 @@
         pub struct RenderUnitDestroyedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ResourceExcessEntry {
             pub team_id: i32,
             pub resources: Vec<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ResourceExcessQuery {
             pub entries: Vec<ResourceExcessEntry>,
         }
@@ -874,7 +874,7 @@
         pub struct StockpileChangedResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct StringCallinResult {
             pub value: String,
         }
@@ -916,14 +916,14 @@
             pub build_unit_team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TextEditingQuery {
             pub utf8: String,
             pub start: u32,
             pub length: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TextInputQuery {
             pub utf8: String,
         }
@@ -939,7 +939,7 @@
         pub struct UnitCloakEventResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitCmdDoneQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -951,7 +951,7 @@
         pub struct UnitCmdDoneResult {
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitCommandQuery {
             pub unit_id: i32,
             pub unit_def_id: i32,

@@ -61,13 +61,13 @@
             pub facing: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitBuildParamsQuery {
             pub unit_id: i32,
             pub param_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitBuildParamsResult {
             pub value: Option<NumberOrBool>,
         }
@@ -300,7 +300,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitIsTransportingResult {
             pub unit_i_ds: Vec<i32>,
             pub is_transporting: bool,
@@ -311,7 +311,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitLastAttackedPieceResult {
             pub piece: LastHitPiece,
         }
@@ -321,7 +321,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitLastAttackerResult {
             pub attacker: Option<UnitLastAttacker>,
         }
@@ -373,7 +373,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitNanoPiecesResult {
             pub pieces: Vec<i32>,
         }
@@ -477,7 +477,7 @@
             pub self_d_time: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitSensorRadiusQuery {
             pub unit_id: i32,
             pub type_: String,
@@ -494,7 +494,7 @@
             pub weapon_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitShieldStateResult {
             pub shield: Option<UnitShieldState>,
         }
@@ -515,7 +515,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitStockpileResult {
             pub stockpile: Option<UnitStockpile>,
         }
@@ -545,7 +545,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitTooltipResult {
             pub tooltip: String,
         }
@@ -590,7 +590,7 @@
             pub task: UnitWorkerTask,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LastHitPiece {
             pub name: String,
             pub piece_num: i32,
@@ -604,7 +604,7 @@
             pub armor_multiple: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitBasicInfo {
             pub unit_id: i32,
             pub unit_def_id: i32,
@@ -793,7 +793,7 @@
             pub crashing: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitIsTransportingValue {
             pub unit_i_ds: Vec<i32>,
             pub is_transporting: bool,

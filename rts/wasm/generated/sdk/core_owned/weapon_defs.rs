@@ -6,7 +6,7 @@
             pub weapon_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWeaponDefByIDResult {
             pub info: WeaponDefInfo,
             pub exists: bool,
@@ -27,18 +27,18 @@
             pub weapon_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWeaponDefCustomParamKeysResult {
             pub keys: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWeaponDefCustomParamQuery {
             pub weapon_def_id: i32,
             pub key: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWeaponDefCustomParamResult {
             pub value: String,
         }
@@ -53,7 +53,7 @@
             pub damage: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWeaponDefIDQuery {
             pub weapon_def_name: String,
         }
@@ -68,7 +68,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWeaponDefIDsResult {
             pub ids: Vec<i32>,
         }
@@ -78,7 +78,7 @@
             pub weapon_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWeaponDefNameResult {
             pub name: String,
         }
@@ -103,7 +103,7 @@
             pub valid: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct WeaponDefInfo {
             pub id: i32,
             pub name: String,
@@ -139,7 +139,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWeaponDefByIDValue {
             pub info: WeaponDefInfo,
             pub exists: bool,

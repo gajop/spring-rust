@@ -116,6 +116,7 @@ fn main() {
         systemControl: empty_api!(sys::SystemControlApi),
         profiling: empty_api!(sys::ProfilingApi),
         gfx: empty_api!(sys::GfxApi),
+        objectRendering: empty_api!(sys::ObjectRenderingApi),
         debugInput: empty_api!(sys::DebugInputApi),
         cus: std::ptr::null(),
     };

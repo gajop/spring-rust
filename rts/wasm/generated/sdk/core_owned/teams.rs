@@ -1,7 +1,7 @@
     pub mod teams {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AIInfo {
             pub skirmish_aiid: i32,
             pub name: String,
@@ -11,13 +11,13 @@
             pub options: Vec<AIOption>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AIOption {
             pub key: String,
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AllyTeamInfo {
             pub keys: Vec<String>,
             pub values: Vec<String>,
@@ -50,7 +50,7 @@
             pub team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAIInfoResult {
             pub info: AIInfo,
             pub is_ai: bool,
@@ -61,7 +61,7 @@
             pub ally_team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAllyTeamInfoResult {
             pub info: AllyTeamInfo,
         }
@@ -71,7 +71,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAllyTeamListResult {
             pub ally_teams: Vec<i32>,
         }
@@ -93,7 +93,7 @@
             pub get_player_opts: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPlayerInfoResult {
             pub info: PlayerInfo,
         }
@@ -103,7 +103,7 @@
             pub ally_team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPlayerListInAllyTeamResult {
             pub players: Vec<i32>,
         }
@@ -113,7 +113,7 @@
             pub team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPlayerListInTeamResult {
             pub players: Vec<i32>,
         }
@@ -124,7 +124,7 @@
             pub active: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetPlayerListResult {
             pub players: Vec<i32>,
         }
@@ -145,7 +145,7 @@
             pub get_team_keys: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTeamInfoResult {
             pub info: TeamInfo,
         }
@@ -155,7 +155,7 @@
             pub ally_team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTeamListResult {
             pub teams: Vec<i32>,
         }
@@ -165,7 +165,7 @@
             pub team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTeamLuaAIResult {
             pub lua_ai: String,
         }
@@ -180,7 +180,7 @@
             pub max_units: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTeamResourceStatsQuery {
             pub team_id: i32,
             pub resource: String,
@@ -191,7 +191,7 @@
             pub resources: TeamResources,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTeamResourcesQuery {
             pub team_id: i32,
             pub resource: String,
@@ -209,7 +209,7 @@
             pub end_index: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetTeamStatsHistoryResult {
             pub history: Vec<TeamStatsHistoryPoint>,
         }
@@ -224,7 +224,7 @@
             pub stats: TeamUnitStats,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PlayerInfo {
             pub player_id: i32,
             pub name: String,
@@ -242,7 +242,7 @@
             pub desynced: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct TeamInfo {
             pub team_id: i32,
             pub ally_team_id: i32,
@@ -277,6 +277,8 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct TeamStatsHistoryPoint {
+            pub time: f32,
+            pub frame: i32,
             pub metal_used: f32,
             pub metal_produced: f32,
             pub metal_excess: f32,
@@ -364,7 +366,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAIInfoValue {
             pub info: AIInfo,
             pub is_ai: bool,

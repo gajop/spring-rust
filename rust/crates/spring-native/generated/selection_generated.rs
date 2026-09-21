@@ -248,7 +248,7 @@ impl<'a> Selection<'a> {
         }
     }
 
-    pub fn get_unit_group(&self, unit_id: i32) -> Result<i32, Error> {
+    pub fn get_unit_group(&self, unit_id: i32) -> Result<(i32, bool), Error> {
         unsafe {
             let query = sys::GetUnitGroupQuery {
                 unitID: unit_id,
@@ -257,9 +257,11 @@ impl<'a> Selection<'a> {
             let func = self.api.GetUnitGroup.expect("GetUnitGroup function pointer must be initialized");
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();
-            Error::result_or(result.error, {
-                result.groupID
-            })
+            let value = (
+                result.groupID,
+                result.hasGroup,
+            );
+            Error::result_or(result.error, value)
         }
     }
 

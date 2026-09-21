@@ -5,14 +5,14 @@ use crate::{
     feature_defs::FeatureDefs, features::Features, game::Game, gfx::Gfx,
     ground_decals::GroundDecals, icons::Icons, input::Input, lights::Lights, los::Los,
     markers::Markers, math_extra::MathExtra, memory::Memory, messages::Messages,
-    metal_map::MetalMap, move_ctrl::MoveCtrl, path_finder::PathFinder, platform::Platform,
-    player::Player, profiling::Profiling, projectiles::Projectiles, rml_ui::RmlUi,
-    rules_params::RulesParams, selection::Selection, sound::Sound, synced_ctrl::SyncedCtrl, sys,
-    system_control::SystemControl, teams::Teams, terrain::Terrain, tracing::Tracing,
-    unit_defs::UnitDefs, units_commands::UnitsCommands, units_info::UnitsInfo,
-    units_pieces::UnitsPieces, units_query::UnitsQuery, units_weapons::UnitsWeapons,
-    unsynced_ctrl::UnsyncedCtrl, unsynced_read::UnsyncedRead, utils::Utils, vfs::Vfs,
-    weapon_defs::WeaponDefs,
+    metal_map::MetalMap, move_ctrl::MoveCtrl, object_rendering::ObjectRendering,
+    path_finder::PathFinder, platform::Platform, player::Player, profiling::Profiling,
+    projectiles::Projectiles, rml_ui::RmlUi, rules_params::RulesParams, selection::Selection,
+    sound::Sound, synced_ctrl::SyncedCtrl, sys, system_control::SystemControl, teams::Teams,
+    terrain::Terrain, tracing::Tracing, unit_defs::UnitDefs, units_commands::UnitsCommands,
+    units_info::UnitsInfo, units_pieces::UnitsPieces, units_query::UnitsQuery,
+    units_weapons::UnitsWeapons, unsynced_ctrl::UnsyncedCtrl, unsynced_read::UnsyncedRead,
+    utils::Utils, vfs::Vfs, weapon_defs::WeaponDefs,
 };
 
 #[derive(Clone, Copy)]
@@ -66,6 +66,7 @@ pub struct NativeInterfaceRef {
     system_control_api: Option<&'static sys::SystemControlApi>,
     profiling_api: Option<&'static sys::ProfilingApi>,
     gfx_api: Option<&'static sys::GfxApi>,
+    object_rendering_api: Option<&'static sys::ObjectRenderingApi>,
 }
 
 // Safety: The NativeInterface is managed by the Spring engine, which handles
@@ -130,6 +131,7 @@ impl NativeInterfaceRef {
                 system_control_api: iface.systemControl.as_ref(),
                 profiling_api: iface.profiling.as_ref(),
                 gfx_api: iface.gfx.as_ref(),
+                object_rendering_api: iface.objectRendering.as_ref(),
             })
         }
     }
@@ -238,6 +240,13 @@ impl NativeInterfaceRef {
 
     pub fn move_ctrl(&self) -> MoveCtrl<'_> {
         MoveCtrl::new(Self::require_api(self.move_ctrl_api, "moveCtrl"))
+    }
+
+    pub fn object_rendering(&self) -> ObjectRendering<'_> {
+        ObjectRendering::new(Self::require_api(
+            self.object_rendering_api,
+            "objectRendering",
+        ))
     }
 
     pub fn synced_ctrl(&self) -> SyncedCtrl<'_> {

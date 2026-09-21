@@ -144,22 +144,43 @@ wasm_trap_t* Core_selection_get_unit_group(void* environment, wasmtime_caller_t*
     if (state == nullptr || state->native == nullptr || state->native->selection == nullptr ||
         state->native->selection->GetUnitGroup == nullptr)
         return Trap("GetUnitGroup generated Core binding is unavailable");
-    if (1 != 0 && (slots == nullptr || slotCount != 1))
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
         return Trap("GetUnitGroup generated Core ABI signature mismatch");
-    if (1 == 0 && slotCount != 0)
+    if (2 == 0 && slotCount != 0)
         return Trap("GetUnitGroup generated Core ABI signature mismatch");
 
     std::string budgetError;
-    ImportGuard guard(state, 2u, budgetError);
+    ImportGuard guard(state, 3u, budgetError);
     if (!guard.Ok())
         return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
+    if (!state->memory.Contains(output, 8u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
 
     GetUnitGroupQuery query{};
     query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
     GetUnitGroupResult result{};
     state->native->selection->GetUnitGroup(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
-    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.groupID), errorCode));
+    if (errorCode != 0) {
+        slots[0].i32 = errorCode;
+        return nullptr;
+    }
+    std::array<std::uint8_t, 8> wire{};
+    WireWriter writer(wire);
+    if (!writer.I32(result.groupID)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.hasGroup)) return Trap("generated Core wire overflow");
+    if (!writer.Finish(4u))
+        return Trap("generated Core wire layout mismatch for GetUnitGroup");
+    if (!state->memory.Write(output, wire.data(), wire.size()))
+        return Trap("generated Core output range changed unexpectedly");
+    slots[0].i32 = 0;
     return nullptr;
 }
 
@@ -255,10 +276,10 @@ bool RegisterGeneratedImports_selection(wasmtime_linker_t* linker, HostState* st
             return false;
     }
     {
-        const wasm_valkind_t params[] = {WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I64};
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGenerated(linker, "spring:selection", "get-unit-group",
-                MakeFuncType(params, 1, results, 1), Core_selection_get_unit_group, state, error))
+                MakeFuncType(params, 2, results, 1), Core_selection_get_unit_group, state, error))
             return false;
     }
     {

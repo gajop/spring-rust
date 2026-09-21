@@ -1080,6 +1080,52 @@ wasm_trap_t* CoreOption_unsynced_ctrl_set_water_params(void* environment, wasmti
     return nullptr;
 }
 
+wasm_trap_t* CoreOption_gfx_create_query(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->CreateQuery == nullptr)
+        return Trap("CreateQuery generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("CreateQuery generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("CreateQuery generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t input = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(input, 8u, inputWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+
+    GfxCreateQueryQuery query{};
+    {
+        bool corePresent = false;
+        if (!reader.Bool(corePresent)) return Trap("generated option presence underflow");
+        query.hasTarget = corePresent;
+    }
+    { std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return Trap("generated Core wire underflow"); query.target = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.target)>>>(coreRaw); }
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    GfxUIntResult result{};
+    state->native->gfx->CreateQuery(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreOption_rml_ui_document_show(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -1229,6 +1275,13 @@ bool RegisterGeneratedOptionImports(wasmtime_linker_t* linker, HostState* state,
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedOption(linker, "spring:gfx", "create-query",
+                MakeFuncType(params, 1, results, 1), CoreOption_gfx_create_query, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I64, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedOption(linker, "spring:rml-ui", "document-show",
@@ -1239,6 +1292,6 @@ bool RegisterGeneratedOptionImports(wasmtime_linker_t* linker, HostState* state,
     return true;
 }
 
-static_assert(13 >= 0, "generated option Core callback count");
+static_assert(14 >= 0, "generated option Core callback count");
 
 } // namespace recoil::wasm::core::generated

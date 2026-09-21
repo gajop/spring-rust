@@ -83,7 +83,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMapDrawModeResult {
             pub mode: String,
         }
@@ -93,7 +93,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMiniMapDualScreenResult {
             pub position: String,
             pub dual_screen: bool,
@@ -175,7 +175,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWaterModeResult {
             pub mode: i32,
             pub name: String,
@@ -313,13 +313,13 @@
             pub radar_color2: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMiniMapDualScreenValue {
             pub position: String,
             pub dual_screen: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWaterModeValue {
             pub mode: i32,
             pub name: String,

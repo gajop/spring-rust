@@ -58,6 +58,38 @@ struct MoveCtrlResult {
 	bool success;
 };
 
+struct SetMoveCtrlTagQuery {
+	int32_t unitID;
+	int32_t tag;
+};
+
+struct GetMoveCtrlTagQuery {
+	int32_t unitID;
+};
+
+struct GetMoveCtrlTagResult {
+	const Error* error;
+	int32_t tag;
+};
+
+enum MoveCtrlProgressState {
+	MOVE_CTRL_PROGRESS_DONE = 0,
+	MOVE_CTRL_PROGRESS_ACTIVE = 1,
+	MOVE_CTRL_PROGRESS_FAILED = 2,
+};
+
+struct SetMoveCtrlProgressStateQuery {
+	int32_t unitID;
+	MoveCtrlProgressState state;
+};
+
+struct MoveCtrlMoveDefQuery {
+	int32_t unitID;
+	int32_t moveDefID;
+	const char* moveDefName;
+	bool hasMoveDefName;
+};
+
 struct IsMoveCtrlEnabledQuery {
 	int32_t unitID;
 };
@@ -89,6 +121,39 @@ struct SetNoBlockingQuery {
 struct SetNoBlockingResult {
 	const Error* error;
 	bool success;
+};
+
+struct MoveCtrlFloat3Query {
+	int32_t unitID;
+	Float3 value;
+};
+
+struct MoveCtrlPhysicsQuery {
+	int32_t unitID;
+	Float3 position;
+	Float3 velocity;
+	Float3 rotation;
+};
+
+struct MoveCtrlLimitsQuery {
+	int32_t unitID;
+	Float3 mins;
+	Float3 maxs;
+};
+
+struct MoveCtrlBoolQuery {
+	int32_t unitID;
+	bool value;
+};
+
+struct MoveCtrlFloatQuery {
+	int32_t unitID;
+	float value;
+};
+
+struct MoveCtrlHeadingQuery {
+	int32_t unitID;
+	int32_t heading;
 };
 
 // Typed equivalent of MoveCtrl.SetGroundMoveTypeData(unitID,
@@ -232,6 +297,26 @@ struct MoveCtrlApi {
 		MoveCtrlResult* result
 	);
 
+	void (*SetTag)(
+		const SetMoveCtrlTagQuery* query,
+		MoveCtrlResult* result
+	);
+
+	void (*GetTag)(
+		const GetMoveCtrlTagQuery* query,
+		GetMoveCtrlTagResult* result
+	);
+
+	void (*SetProgressState)(
+		const SetMoveCtrlProgressStateQuery* query,
+		MoveCtrlResult* result
+	);
+
+	void (*SetMoveDef)(
+		const MoveCtrlMoveDefQuery* query,
+		MoveCtrlResult* result
+	);
+
 	void (*IsMoveCtrlEnabled)(
 		const IsMoveCtrlEnabledQuery* query,
 		IsMoveCtrlEnabledResult* result
@@ -261,6 +346,25 @@ struct MoveCtrlApi {
 		const SetNoBlockingQuery* query,
 		SetNoBlockingResult* result
 	);
+
+	void (*SetExtrapolate)(const MoveCtrlBoolQuery* query, MoveCtrlResult* result);
+	void (*SetPhysics)(const MoveCtrlPhysicsQuery* query, MoveCtrlResult* result);
+	void (*SetPosition)(const MoveCtrlFloat3Query* query, MoveCtrlResult* result);
+	void (*SetVelocity)(const MoveCtrlFloat3Query* query, MoveCtrlResult* result);
+	void (*SetRelativeVelocity)(const MoveCtrlFloat3Query* query, MoveCtrlResult* result);
+	void (*SetRotation)(const MoveCtrlFloat3Query* query, MoveCtrlResult* result);
+	void (*SetRotationVelocity)(const MoveCtrlFloat3Query* query, MoveCtrlResult* result);
+	void (*SetHeading)(const MoveCtrlHeadingQuery* query, MoveCtrlResult* result);
+	void (*SetTrackSlope)(const MoveCtrlBoolQuery* query, MoveCtrlResult* result);
+	void (*SetTrackGround)(const MoveCtrlBoolQuery* query, MoveCtrlResult* result);
+	void (*SetTrackLimits)(const MoveCtrlBoolQuery* query, MoveCtrlResult* result);
+	void (*SetGroundOffset)(const MoveCtrlFloatQuery* query, MoveCtrlResult* result);
+	void (*SetGravity)(const MoveCtrlFloatQuery* query, MoveCtrlResult* result);
+	void (*SetDrag)(const MoveCtrlFloatQuery* query, MoveCtrlResult* result);
+	void (*SetWindFactor)(const MoveCtrlFloatQuery* query, MoveCtrlResult* result);
+	void (*SetLimits)(const MoveCtrlLimitsQuery* query, MoveCtrlResult* result);
+	void (*SetCollideStop)(const MoveCtrlBoolQuery* query, MoveCtrlResult* result);
+	void (*SetLimitsStop)(const MoveCtrlBoolQuery* query, MoveCtrlResult* result);
 };
 
 extern const MoveCtrlApi MOVE_CTRL_API;

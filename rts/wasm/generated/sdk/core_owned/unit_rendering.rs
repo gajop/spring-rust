@@ -69,7 +69,7 @@
             pub right: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitIconValue {
             pub icon_name: String,
             pub atlas_tex_coords: Vec<f32>,
@@ -78,7 +78,7 @@
             pub radius_adjust: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitIconDataValue {
             pub icon_name: String,
             pub atlas_tex_coords: Vec<f32>,

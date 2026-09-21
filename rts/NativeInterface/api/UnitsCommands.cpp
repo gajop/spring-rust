@@ -11,16 +11,21 @@
 #include "Game/SelectedUnitsHandler.h"
 #include "Game/GlobalUnsynced.h"
 #include "Lua/LuaConfig.h"
-#include <cstring>
 #include <algorithm>
+#include <map>
 #include <vector>
 
 namespace {
 
-// Scratch buffer
-static thread_local char scratchBuffer[64 * 1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local std::vector<CommandFFI> commandStorage;
+static thread_local std::vector<std::vector<float>> commandParameterStorage;
+static thread_local std::vector<int32_t> integerStorage;
+static thread_local std::vector<uint32_t> countStorage;
+static thread_local std::vector<BuildQueueEntry> buildQueueStorage;
+static thread_local std::vector<CommandDescription> commandDescriptionStorage;
+static thread_local std::vector<std::vector<std::string>> descriptionStringStorage;
+static thread_local std::vector<std::vector<const char*>> descriptionParameterStorage;
+static thread_local std::vector<float> parameterStorage;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
@@ -53,30 +58,6 @@ static bool CanIssueOrders()
 	return true;
 }
 
-// Helper to allocate from scratch buffer
-template<typename T>
-static T* AllocateArray(size_t count) {
-	size_t needed = count * sizeof(T);
-	if (bufferPos + needed > sizeof(scratchBuffer)) {
-		return nullptr;
-	}
-	T* ptr = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
-	bufferPos += needed;
-	return ptr;
-}
-
-// Helper to copy string to scratch buffer
-static const char* CopyString(const std::string& str) {
-	size_t len = str.length() + 1;
-	if (bufferPos + len > sizeof(scratchBuffer)) {
-		return nullptr;
-	}
-	char* ptr = &scratchBuffer[bufferPos];
-	memcpy(ptr, str.c_str(), len);
-	bufferPos += len;
-	return ptr;
-}
-
 // Helper to convert engine Command to FFI CommandFFI
 static bool ConvertCommand(const ::Command& cmd, CommandFFI& outCmd) {
 	outCmd.cmdID = cmd.GetID(false);
@@ -87,10 +68,10 @@ static bool ConvertCommand(const ::Command& cmd, CommandFFI& outCmd) {
 
 	uint32_t paramCount = cmd.GetNumParams();
 	if (paramCount > 0) {
-		outCmd.params = AllocateArray<float>(paramCount);
-		if (outCmd.params == nullptr) {
-			return false;
-		}
+		commandParameterStorage.emplace_back();
+		auto& params = commandParameterStorage.back();
+		params.resize(paramCount);
+		outCmd.params = params.data();
 		for (uint32_t i = 0; i < paramCount; ++i) {
 			outCmd.params[i] = cmd.GetParam(i);
 		}
@@ -100,6 +81,14 @@ static bool ConvertCommand(const ::Command& cmd, CommandFFI& outCmd) {
 	outCmd.paramCount = paramCount;
 
 	return true;
+}
+
+static void BeginCommandStorage(size_t count)
+{
+	commandStorage.clear();
+	commandParameterStorage.clear();
+	commandStorage.resize(count);
+	commandParameterStorage.reserve(count);
 }
 
 static bool BuildCommand(const CommandFFI& ffi, Command& outCmd)
@@ -139,7 +128,6 @@ static bool BuildCommandSimple(int32_t cmdID, uint32_t options, const float* par
 
 static void NativeGetUnitCommandCount(const GetUnitCommandCountQuery* query, GetUnitCommandCountResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->count = 0;
 
@@ -164,7 +152,6 @@ static void NativeGetUnitCommandCount(const GetUnitCommandCountQuery* query, Get
 
 static void NativeGetUnitCommands(const GetUnitCommandsQuery* query, GetUnitCommandsResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->commands = nullptr;
 	result->count = 0;
@@ -187,21 +174,16 @@ static void NativeGetUnitCommands(const GetUnitCommandsQuery* query, GetUnitComm
 
 	const CCommandQueue& queue = unit->commandAI->commandQue;
 	uint32_t count = std::min(static_cast<uint32_t>(queue.size()), query->maxCommands);
+	BeginCommandStorage(count);
 
 	if (count > 0) {
-		result->commands = AllocateArray<CommandFFI>(count);
-		if (result->commands == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
-		}
-
 		for (uint32_t i = 0; i < count; ++i) {
-			if (!ConvertCommand(queue[i], result->commands[i])) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
+			if (!ConvertCommand(queue[i], commandStorage[i])) {
 				result->count = i;
 				return;
 			}
 		}
+		result->commands = commandStorage.data();
 	}
 
 	result->count = count;
@@ -209,7 +191,6 @@ static void NativeGetUnitCommands(const GetUnitCommandsQuery* query, GetUnitComm
 
 static void NativeGetUnitCurrentCommand(const GetUnitCurrentCommandQuery* query, GetUnitCurrentCommandResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->hasCommand = false;
 
@@ -239,17 +220,17 @@ static void NativeGetUnitCurrentCommand(const GetUnitCurrentCommandQuery* query,
 	}
 
 	if (cmdIndex >= 0 && cmdIndex < static_cast<int>(queue.size())) {
-		if (!ConvertCommand(queue[cmdIndex], result->command)) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
+		BeginCommandStorage(1);
+		if (!ConvertCommand(queue[cmdIndex], commandStorage[0])) {
 			return;
 		}
+		result->command = commandStorage[0];
 		result->hasCommand = true;
 	}
 }
 
 static void NativeGetFactoryCounts(const GetFactoryCountsQuery* query, GetFactoryCountsResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->info.totalCount = 0;
 	result->info.currentCount = 0;
@@ -296,24 +277,23 @@ static void NativeGetFactoryCounts(const GetFactoryCountsQuery* query, GetFactor
 		return;
 	}
 
-	// Allocate arrays
-	result->info.unitDefIDs = AllocateArray<int32_t>(cmdCounts.size());
-	result->info.counts = AllocateArray<uint32_t>(cmdCounts.size());
-	if (result->info.unitDefIDs == nullptr || result->info.counts == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	integerStorage.clear();
+	countStorage.clear();
+	integerStorage.reserve(cmdCounts.size());
+	countStorage.reserve(cmdCounts.size());
 
 	// Fill arrays
 	uint32_t idx = 0;
 	uint32_t totalCount = 0;
 	for (const auto& pair : cmdCounts) {
-		result->info.unitDefIDs[idx] = pair.first;
-		result->info.counts[idx] = pair.second;
+		integerStorage.push_back(pair.first);
+		countStorage.push_back(pair.second);
 		totalCount += pair.second;
 		idx++;
 	}
 
+	result->info.unitDefIDs = integerStorage.data();
+	result->info.counts = countStorage.data();
 	result->info.uniqueCount = idx;
 	result->info.totalCount = totalCount;
 	result->info.currentCount = (unit->beingBuilt) ? 0 : 1; // Simplified
@@ -321,7 +301,6 @@ static void NativeGetFactoryCounts(const GetFactoryCountsQuery* query, GetFactor
 
 static void NativeGetFactoryCommandCount(const GetFactoryCommandCountQuery* query, GetFactoryCommandCountResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->count = 0;
 
@@ -346,7 +325,6 @@ static void NativeGetFactoryCommandCount(const GetFactoryCommandCountQuery* quer
 
 static void NativeGetFactoryCommands(const GetFactoryCommandsQuery* query, GetFactoryCommandsResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->commands = nullptr;
 	result->count = 0;
@@ -369,21 +347,16 @@ static void NativeGetFactoryCommands(const GetFactoryCommandsQuery* query, GetFa
 
 	const CCommandQueue& queue = factoryCAI->commandQue;
 	uint32_t count = std::min(static_cast<uint32_t>(queue.size()), query->maxCommands);
+	BeginCommandStorage(count);
 
 	if (count > 0) {
-		result->commands = AllocateArray<CommandFFI>(count);
-		if (result->commands == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
-		}
-
 		for (uint32_t i = 0; i < count; ++i) {
-			if (!ConvertCommand(queue[i], result->commands[i])) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
+			if (!ConvertCommand(queue[i], commandStorage[i])) {
 				result->count = i;
 				return;
 			}
 		}
+		result->commands = commandStorage.data();
 	}
 
 	result->count = count;
@@ -391,7 +364,6 @@ static void NativeGetFactoryCommands(const GetFactoryCommandsQuery* query, GetFa
 
 static void NativeGetFactoryBuggerOff(const GetFactoryBuggerOffQuery* query, GetFactoryBuggerOffResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->perform = false;
 	result->offset = 0.0f;
@@ -427,7 +399,6 @@ static void NativeGetFactoryBuggerOff(const GetFactoryBuggerOffQuery* query, Get
 
 static void NativeGetCommandQueue(const GetCommandQueueQuery* query, GetCommandQueueResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->commands = nullptr;
 	result->count = 0;
@@ -450,21 +421,16 @@ static void NativeGetCommandQueue(const GetCommandQueueQuery* query, GetCommandQ
 
 	const CCommandQueue& queue = unit->commandAI->commandQue;
 	uint32_t count = std::min(static_cast<uint32_t>(queue.size()), query->maxCommands);
+	BeginCommandStorage(count);
 
 	if (count > 0) {
-		result->commands = AllocateArray<CommandFFI>(count);
-		if (result->commands == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
-		}
-
 		for (uint32_t i = 0; i < count; ++i) {
-			if (!ConvertCommand(queue[i], result->commands[i])) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
+			if (!ConvertCommand(queue[i], commandStorage[i])) {
 				result->count = i;
 				return;
 			}
 		}
+		result->commands = commandStorage.data();
 	}
 
 	result->count = count;
@@ -472,7 +438,6 @@ static void NativeGetCommandQueue(const GetCommandQueueQuery* query, GetCommandQ
 
 static void NativeGetFullBuildQueue(const GetFullBuildQueueQuery* query, GetFullBuildQueueResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->entries = nullptr;
 	result->count = 0;
@@ -498,25 +463,24 @@ static void NativeGetFullBuildQueue(const GetFullBuildQueueQuery* query, GetFull
 		return;
 	}
 
-	result->entries = AllocateArray<BuildQueueEntry>(buildOptions.size());
-	if (result->entries == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	buildQueueStorage.clear();
+	buildQueueStorage.reserve(buildOptions.size());
 
 	uint32_t idx = 0;
 	for (const auto& pair : buildOptions) {
-		result->entries[idx].unitDefID = -pair.first;
-		result->entries[idx].numOrdered = pair.second;
+		buildQueueStorage.push_back({
+			.unitDefID = -pair.first,
+			.numOrdered = static_cast<uint32_t>(pair.second),
+		});
 		idx++;
 	}
 
+	result->entries = buildQueueStorage.data();
 	result->count = idx;
 }
 
 static void NativeGetRealBuildQueue(const GetRealBuildQueueQuery* query, GetRealBuildQueueResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->unitDefIDs = nullptr;
 	result->count = 0;
@@ -551,25 +515,23 @@ static void NativeGetRealBuildQueue(const GetRealBuildQueueQuery* query, GetReal
 		return;
 	}
 
-	result->unitDefIDs = AllocateArray<int32_t>(buildCount);
-	if (result->unitDefIDs == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	integerStorage.clear();
+	integerStorage.reserve(buildCount);
 
 	uint32_t idx = 0;
 	for (const auto& cmd : queue) {
 		if (cmd.GetID() < 0) {
-			result->unitDefIDs[idx++] = cmd.GetID();
+			integerStorage.push_back(cmd.GetID());
+			idx++;
 		}
 	}
 
+	result->unitDefIDs = integerStorage.data();
 	result->count = idx;
 }
 
 static void NativeGetUnitCmdDescs(const GetUnitCmdDescsQuery* query, GetUnitCmdDescsResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->cmdDescs = nullptr;
 	result->count = 0;
@@ -591,27 +553,34 @@ static void NativeGetUnitCmdDescs(const GetUnitCmdDescsQuery* query, GetUnitCmdD
 	}
 
 	const auto& possibleCmds = unit->commandAI->GetPossibleCommands();
+	commandDescriptionStorage.clear();
+	descriptionStringStorage.clear();
+	descriptionParameterStorage.clear();
 	if (possibleCmds.empty()) {
 		return;
 	}
 
-	result->cmdDescs = AllocateArray<CommandDescription>(possibleCmds.size());
-	if (result->cmdDescs == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	commandDescriptionStorage.resize(possibleCmds.size());
+	descriptionStringStorage.reserve(possibleCmds.size());
+	descriptionParameterStorage.reserve(possibleCmds.size());
 
 	for (size_t i = 0; i < possibleCmds.size(); ++i) {
 		const SCommandDescription* desc = possibleCmds[i];
-		CommandDescription& outDesc = result->cmdDescs[i];
+		CommandDescription& outDesc = commandDescriptionStorage[i];
+		auto& strings = descriptionStringStorage.emplace_back();
+		strings.reserve(5 + desc->params.size());
+		auto storeString = [&strings](const std::string& value) {
+			strings.push_back(value);
+			return strings.back().c_str();
+		};
 
 		outDesc.cmdID = desc->id;
-		outDesc.action = CopyString(desc->action);
+		outDesc.action = storeString(desc->action);
 		outDesc.type = desc->type;
-		outDesc.name = CopyString(desc->name);
-		outDesc.tooltip = CopyString(desc->tooltip);
-		outDesc.texture = CopyString(desc->iconname);
-		outDesc.cursor = CopyString(desc->mouseicon);
+		outDesc.name = storeString(desc->name);
+		outDesc.tooltip = storeString(desc->tooltip);
+		outDesc.texture = storeString(desc->iconname);
+		outDesc.cursor = storeString(desc->mouseicon);
 		outDesc.queueing = desc->queueing;
 		outDesc.hidden = desc->hidden;
 		outDesc.disabled = desc->disabled;
@@ -619,40 +588,27 @@ static void NativeGetUnitCmdDescs(const GetUnitCmdDescsQuery* query, GetUnitCmdD
 		outDesc.onlyTexture = desc->onlyTexture;
 
 		if (!desc->params.empty()) {
-			outDesc.params = AllocateArray<const char*>(desc->params.size());
-			if (outDesc.params == nullptr) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				result->count = i;
-				return;
+			auto& params = descriptionParameterStorage.emplace_back();
+			params.reserve(desc->params.size());
+			for (const auto& param : desc->params) {
+				strings.push_back(param);
+				params.push_back(strings.back().c_str());
 			}
-			for (size_t j = 0; j < desc->params.size(); ++j) {
-				outDesc.params[j] = CopyString(desc->params[j]);
-				if (outDesc.params[j] == nullptr) {
-					result->error = &BUFFER_OVERFLOW_ERROR;
-					result->count = i;
-					return;
-				}
-			}
+			outDesc.params = params.data();
 			outDesc.paramCount = desc->params.size();
 		} else {
 			outDesc.params = nullptr;
 			outDesc.paramCount = 0;
 		}
 
-		if (outDesc.action == nullptr || outDesc.name == nullptr || outDesc.tooltip == nullptr ||
-		    outDesc.texture == nullptr || outDesc.cursor == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = i;
-			return;
-		}
 	}
 
+	result->cmdDescs = commandDescriptionStorage.data();
 	result->count = possibleCmds.size();
 }
 
 static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmdDescResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->cmdIndex = -1;
 	result->found = false;
@@ -687,7 +643,6 @@ static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmd
 
 static void NativeGetCommandParams(const GetCommandParamsQuery* query, GetCommandParamsResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->params = nullptr;
 	result->count = 0;
@@ -702,19 +657,13 @@ static void NativeGetCommandParams(const GetCommandParamsQuery* query, GetComman
 		return;
 	}
 
-	result->params = AllocateArray<float>(command.paramCount);
-	if (result->params == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	std::copy(command.params, command.params + command.paramCount, result->params);
+	parameterStorage.assign(command.params, command.params + command.paramCount);
+	result->params = parameterStorage.data();
 	result->count = command.paramCount;
 }
 
 static void NativeGiveOrder(const GiveOrderQuery* query, GiveOrderResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -735,7 +684,6 @@ static void NativeGiveOrder(const GiveOrderQuery* query, GiveOrderResult* result
 
 static void NativeGiveOrderToUnitMap(const GiveOrderToUnitMapQuery* query, GiveOrderToUnitMapResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->unitsOrdered = 0;
 
@@ -768,7 +716,6 @@ static void NativeGiveOrderToUnitMap(const GiveOrderToUnitMapQuery* query, GiveO
 
 static void NativeGiveOrderArrayToUnitMap(const GiveOrderArrayToUnitMapQuery* query, GiveOrderArrayToUnitMapResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->unitsOrdered = 0;
 

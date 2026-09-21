@@ -964,6 +964,9 @@ fn render_borrowed_forward(
             SemanticType::Bytes | SemanticType::List { .. } => {
                 args.push(name);
             }
+            SemanticType::Enum { .. } => {
+                args.push(format!("{name} as i32"));
+            }
             _ => args.push(name),
         }
     }
@@ -1026,11 +1029,69 @@ fn borrowed_forward_input_supported(field: &crate::model::FieldModel) -> bool {
 }
 
 fn render_special_forward(
-    output: &mut String,
-    module: &crate::model::ApiModule,
-    function: &FunctionModel,
+	output: &mut String,
+	module: &crate::model::ApiModule,
+	function: &FunctionModel,
 ) -> bool {
-    if module.name == "units_info" && rust_ident(&function.name) == "get_unit_last_attacked_piece" {
+	if module.name == "gfx" && function.name == "ReadPixels" {
+		output.push_str(
+			r#"        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_read_pixels {
+            #[link(wasm_import_module = "spring:gfx")]
+            unsafe extern "C" {
+                #[link_name = "read-pixels"]
+                pub safe fn call(x: i32, y: i32, width: i32, height: i32, format: i32, output: i32) -> i32;
+            }
+        }
+
+        #[inline]
+        pub fn read_pixels(x: i32, y: i32, width: i32, height: i32, format: u32) -> Result<ReadPixelsValue> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut values = Vec::<f32>::new();
+                loop {
+                    let (values_pointer, values_capacity) = crate::wasm_mut_slice_parts(&mut values)?;
+                    let mut descriptor = [
+                        values_pointer as u32,
+                        values_capacity as u32,
+                        0u32,
+                        0u32,
+                    ];
+                    let descriptor_pointer = crate::wasm_output_ptr(&mut descriptor)?;
+                    let status = __core_owned_read_pixels::call(
+                        x,
+                        y,
+                        width,
+                        height,
+                        format as i32,
+                        descriptor_pointer,
+                    );
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        values.truncate(required);
+                        return Ok(ReadPixelsValue {
+                            values,
+                            components: descriptor[3],
+                        });
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    values.resize(required, 0.0);
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (x, y, width, height, format);
+                Err(unreachable!())
+            }
+        }
+
+"#,
+		);
+		return true;
+	}
+	if module.name == "units_info" && rust_ident(&function.name) == "get_unit_last_attacked_piece" {
         output.push_str(
             r#"        #[inline]
         pub fn get_unit_last_attacked_piece(unit_id: i32) -> Result<LastHitPiece> {
@@ -1212,15 +1273,56 @@ fn rust_type_simple(ty: &SemanticType) -> String {
 }
 
 fn render_enum(output: &mut String, enum_model: &EnumModel) {
+    output.push_str("        #[repr(i32)]\n");
     output.push_str("        #[derive(Debug, Clone, Copy, PartialEq, Eq)]\n");
     output.push_str(&format!("        pub enum {} {{\n", enum_model.name));
-    for variant in enum_model.variants.keys() {
-        output.push_str(&format!(
-            "            {},\n",
-            enum_variant_ident(&enum_model.name, variant)
-        ));
+    let mut canonical_variants = BTreeMap::new();
+    for (variant, value) in &enum_model.variants {
+        if !canonical_variants.contains_key(value) {
+            canonical_variants.insert(*value, enum_variant_ident(&enum_model.name, variant));
+            output.push_str(&format!(
+                "            {} = {},\n",
+                enum_variant_ident(&enum_model.name, variant),
+                value,
+            ));
+        }
     }
     output.push_str("        }\n\n");
+
+    let aliases = enum_model
+        .variants
+        .iter()
+        .filter_map(|(variant, value)| {
+            let variant_ident = enum_variant_ident(&enum_model.name, variant);
+            (canonical_variants.get(value) != Some(&variant_ident)).then(|| {
+                (
+                    variant_ident,
+                    canonical_variants
+                        .get(value)
+                        .expect("enum alias has a canonical variant"),
+                )
+            })
+        })
+        .collect::<Vec<_>>();
+    if !aliases.is_empty() {
+        output.push_str("        #[allow(non_upper_case_globals)]\n");
+        output.push_str(&format!("        impl {} {{\n", enum_model.name));
+        for (alias, canonical) in aliases {
+            output.push_str(&format!(
+                "            pub const {alias}: Self = Self::{canonical};\n"
+            ));
+        }
+        output.push_str("        }\n\n");
+    }
+}
+
+fn unique_enum_variants(enum_model: &EnumModel) -> Vec<(&str, i64)> {
+    let mut values = BTreeSet::new();
+    enum_model
+        .variants
+        .iter()
+        .filter_map(|(variant, value)| values.insert(*value).then_some((variant.as_str(), *value)))
+        .collect()
 }
 
 fn is_copy_type(
@@ -1255,6 +1357,11 @@ fn is_default_type(
     match ty {
         SemanticType::Scalar { .. } => true,
         SemanticType::Handle { .. } => true,
+        SemanticType::String
+        | SemanticType::Bytes
+        | SemanticType::List { .. }
+        | SemanticType::Option { .. } => true,
+        SemanticType::FixedArray { element, .. } => is_default_type(element, records, visited),
         SemanticType::Record { name } => {
             if !visited.insert(name.clone()) {
                 return false;
@@ -1545,11 +1652,16 @@ fn render_fixed_forward(
         "crate::generated::{module_ident}::{}",
         rust_ident(&function.name)
     );
+    let is_matrix_result = module_ident == "gfx" && rust_ident(&function.name) == "get_matrix_data";
     let body = match function.outputs.as_slice() {
         [] => format!("{core_path}({args})?;\n            Ok(())"),
         [field] => format!(
             "let value = {core_path}({args})?;\n            Ok({})",
-            convert_from_core(&field.ty, "value", records, enums),
+            if is_matrix_result {
+                "value".to_owned()
+            } else {
+                convert_from_core(&field.ty, "value", records, enums)
+            },
         ),
         fields => {
             let values = fields
@@ -1573,6 +1685,7 @@ fn render_fixed_forward(
     };
     let return_type = match function.outputs.as_slice() {
         [] => "()".to_owned(),
+        [_field] if is_matrix_result => "[f32; 16]".to_owned(),
         [field] => rust_type(&field.ty, records, enums),
         _ => format!("{}Value", function.name),
     };
@@ -1594,8 +1707,7 @@ fn convert_to_core(
     match ty {
         SemanticType::Enum { name } => {
             let enum_model = enums[name];
-            let arms = enum_model
-                .variants
+            let arms = unique_enum_variants(enum_model)
                 .iter()
                 .map(|(variant, value)| {
                     format!(
@@ -1677,8 +1789,7 @@ fn convert_from_core(
     match ty {
         SemanticType::Enum { name } => {
             let enum_model = enums[name];
-            let arms = enum_model
-                .variants
+            let arms = unique_enum_variants(enum_model)
                 .iter()
                 .map(|(variant, value)| {
                     format!(
@@ -2352,8 +2463,7 @@ fn dynamic_decode_field(
         }
         SemanticType::Enum { name } => {
             let enum_model = &enums[name];
-            let variants = enum_model
-                .variants
+            let variants = unique_enum_variants(enum_model)
                 .iter()
                 .map(|(variant, value)| {
                     format!(
@@ -2485,7 +2595,7 @@ fn di_render_blob_encode(
         SemanticType::List { element } => {
             if matches!(element.as_ref(), SemanticType::String) {
                 format!(
-                    "            let {var} = {{ let mut __b = Vec::new(); __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes()); for __item in {expr}.iter() {{ __b.extend_from_slice(&(__item.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.as_bytes()); }} __b }};\n"
+                    "            let {var} = {{ let mut __b = Vec::new(); __b.extend_from_slice(&({expr}.len() as u32).to_le_bytes()); for __item in {expr}.iter() {{ while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&(__item.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.as_bytes()); }} __b }};\n"
                 )
             } else {
                 let mut item_encode = String::new();
@@ -2503,9 +2613,10 @@ fn di_render_blob_encode(
         SemanticType::FixedArray { element, length } => {
             let mut item_encode = String::new();
             for i in 0..*length {
+                let element_expr = fixed_array_element_expr(expr, i, element);
                 di_render_field_encode(
                     element,
-                    &format!("{expr}[{i}]"),
+                    &element_expr,
                     &mut item_encode,
                     all_records,
                     records,
@@ -2527,7 +2638,7 @@ fn di_render_field_encode(
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
             "bool" => output.push_str(&format!(
-                " __b.extend_from_slice(&(if {expr} {{ 1u32 }} else {{ 0u32 }}).to_le_bytes());"
+                " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&(if {expr} {{ 1u32 }} else {{ 0u32 }}).to_le_bytes());"
             )),
             "f32" => output.push_str(&format!(
                 " while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&{expr}.to_bits().to_le_bytes());"
@@ -2597,7 +2708,7 @@ fn di_render_field_encode(
             output.push_str(&format!(" for {iter_var} in 0..{length}usize {{"));
             di_render_field_encode(
                 element,
-                &format!("{expr}[{iter_var}]"),
+                &fixed_array_element_expr(expr, &iter_var, element),
                 output,
                 all_records,
                 records,
@@ -2610,7 +2721,7 @@ fn di_render_field_encode(
             ));
             if matches!(element.as_ref(), SemanticType::String) {
                 output.push_str(&format!(
-                    " for __item in {expr}.iter() {{ __b.extend_from_slice(&(__item.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.as_bytes()); }}"
+                    " for __item in {expr}.iter() {{ while !__b.len().is_multiple_of(4) {{ __b.push(0); }} __b.extend_from_slice(&(__item.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.as_bytes()); }}"
                 ));
             } else {
                 let iter_method = if di_direct_type(element) { "iter().copied()" } else { "iter()" };
@@ -2620,6 +2731,18 @@ fn di_render_field_encode(
             }
         }
         _ => {}
+    }
+}
+
+fn fixed_array_element_expr(
+    expr: &str,
+    index: impl std::fmt::Display,
+    element: &SemanticType,
+) -> String {
+    if di_direct_type(element) {
+        format!("{expr}.get({index}).copied().unwrap_or_default()")
+    } else {
+        format!("{expr}.get({index}).cloned().unwrap_or_default()")
     }
 }
 

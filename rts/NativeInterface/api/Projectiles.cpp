@@ -15,12 +15,12 @@
 #include "Sim/Weapons/WeaponDef.h"
 #include "System/float3.h"
 
+#include <vector>
+
 namespace {
 
-// Scratch buffer
-static thread_local char scratchBuffer[1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local std::vector<int32_t> projectileIDs;
+static thread_local std::vector<float> damageValues;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Projectile system not ready" };
@@ -35,7 +35,6 @@ static bool IsReady()
 // Spatial queries
 static void NativeGetProjectilesInRectangle(const GetProjectilesInRectangleQuery* query, GetProjectilesInRectangleResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->projectiles = nullptr;
 	result->count = 0;
@@ -48,10 +47,7 @@ static void NativeGetProjectilesInRectangle(const GetProjectilesInRectangleQuery
 	const float3 mins(query->minX, 0.0f, query->minZ);
 	const float3 maxs(query->maxX, 0.0f, query->maxZ);
 
-	// Use scratch buffer for array
-	int32_t* projectiles = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxProjectiles = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	projectileIDs.clear();
 
 	QuadFieldQuery qfq;
 	quadField.GetProjectilesExact(qfq, mins, maxs);
@@ -62,21 +58,17 @@ static void NativeGetProjectilesInRectangle(const GetProjectilesInRectangleQuery
 				if (!WasmUiVisibility::IsProjectileVisible(proj)) continue;
 				if (proj->weapon && query->options.excludeWeaponProjectiles) continue;
 				if (proj->piece && query->options.excludePieceProjectiles) continue;
-				if (count < maxProjectiles) {
-					projectiles[count++] = proj->id;
-				}
+				projectileIDs.push_back(proj->id);
 			}
 		}
 	}
 
-	result->projectiles = projectiles;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->projectiles = projectileIDs.empty() ? nullptr : projectileIDs.data();
+	result->count = projectileIDs.size();
 }
 
 static void NativeGetProjectilesInSphere(const GetProjectilesInSphereQuery* query, GetProjectilesInSphereResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->projectiles = nullptr;
 	result->count = 0;
@@ -89,10 +81,7 @@ static void NativeGetProjectilesInSphere(const GetProjectilesInSphereQuery* quer
 	const float3 pos(query->center.x, query->center.y, query->center.z);
 	const float radiusSq = query->radius * query->radius;
 
-	// Use scratch buffer for array
-	int32_t* projectiles = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxProjectiles = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	projectileIDs.clear();
 
 	QuadFieldQuery qfq;
 	quadField.GetProjectilesExact(qfq, pos, query->radius);
@@ -105,22 +94,19 @@ static void NativeGetProjectilesInSphere(const GetProjectilesInSphereQuery* quer
 				if (proj->piece && query->options.excludePieceProjectiles) continue;
 
 				const float distSq = proj->pos.SqDistance(pos);
-				if (distSq <= radiusSq && count < maxProjectiles) {
-					projectiles[count++] = proj->id;
-				}
+				if (distSq <= radiusSq)
+					projectileIDs.push_back(proj->id);
 			}
 		}
 	}
 
-	result->projectiles = projectiles;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->projectiles = projectileIDs.empty() ? nullptr : projectileIDs.data();
+	result->count = projectileIDs.size();
 }
 
 // Basic info
 static void NativeGetProjectilePosition(const GetProjectilePositionQuery* query, GetProjectilePositionResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->position.x = 0.0f;
 	result->position.y = 0.0f;
@@ -144,7 +130,6 @@ static void NativeGetProjectilePosition(const GetProjectilePositionQuery* query,
 
 static void NativeGetProjectileDirection(const GetProjectileDirectionQuery* query, GetProjectileDirectionResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->direction.x = 0.0f;
 	result->direction.y = 0.0f;
@@ -169,7 +154,6 @@ static void NativeGetProjectileDirection(const GetProjectileDirectionQuery* quer
 
 static void NativeGetProjectileVelocity(const GetProjectileVelocityQuery* query, GetProjectileVelocityResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->velocity.x = 0.0f;
 	result->velocity.y = 0.0f;
@@ -194,7 +178,6 @@ static void NativeGetProjectileVelocity(const GetProjectileVelocityQuery* query,
 
 static void NativeGetProjectileGravity(const GetProjectileGravityQuery* query, GetProjectileGravityResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->gravity.x = 0.0f;
 	result->gravity.y = 0.0f;
@@ -218,7 +201,6 @@ static void NativeGetProjectileGravity(const GetProjectileGravityQuery* query, G
 // Piece projectile
 static void NativeGetPieceProjectileParams(const GetPieceProjectileParamsQuery* query, GetPieceProjectileParamsResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->isPieceProjectile = false;
 	result->params.explFlags = 0;
@@ -266,7 +248,6 @@ static void NativeGetPieceProjectileParams(const GetPieceProjectileParamsQuery* 
 // Target
 static void NativeGetProjectileTarget(const GetProjectileTargetQuery* query, GetProjectileTargetResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->target.targetType = 0; // No target
 	result->target.targetID = -1;
@@ -318,7 +299,6 @@ static void NativeGetProjectileTarget(const GetProjectileTargetQuery* query, Get
 // State
 static void NativeGetProjectileIsIntercepted(const GetProjectileIsInterceptedQuery* query, GetProjectileIsInterceptedResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->isIntercepted = false;
 
@@ -341,7 +321,6 @@ static void NativeGetProjectileIsIntercepted(const GetProjectileIsInterceptedQue
 
 static void NativeGetProjectileTimeToLive(const GetProjectileTimeToLiveQuery* query, GetProjectileTimeToLiveResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->ttl = 0.0f;
 
@@ -365,7 +344,6 @@ static void NativeGetProjectileTimeToLive(const GetProjectileTimeToLiveQuery* qu
 // Owner
 static void NativeGetProjectileOwnerID(const GetProjectileOwnerIDQuery* query, GetProjectileOwnerIDResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->ownerID = -1;
 
@@ -385,7 +363,6 @@ static void NativeGetProjectileOwnerID(const GetProjectileOwnerIDQuery* query, G
 
 static void NativeGetProjectileTeamID(const GetProjectileTeamIDQuery* query, GetProjectileTeamIDResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->teamID = -1;
 
@@ -405,7 +382,6 @@ static void NativeGetProjectileTeamID(const GetProjectileTeamIDQuery* query, Get
 
 static void NativeGetProjectileAllyTeamID(const GetProjectileAllyTeamIDQuery* query, GetProjectileAllyTeamIDResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->allyTeamID = -1;
 
@@ -426,7 +402,6 @@ static void NativeGetProjectileAllyTeamID(const GetProjectileAllyTeamIDQuery* qu
 // Type
 static void NativeGetProjectileType(const GetProjectileTypeQuery* query, GetProjectileTypeResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->weapon = false;
 	result->piece = false;
@@ -448,7 +423,6 @@ static void NativeGetProjectileType(const GetProjectileTypeQuery* query, GetProj
 
 static void NativeGetProjectileDefID(const GetProjectileDefIDQuery* query, GetProjectileDefIDResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->defID = -1;
 
@@ -472,7 +446,6 @@ static void NativeGetProjectileDefID(const GetProjectileDefIDQuery* query, GetPr
 // Damages
 static void NativeGetProjectileDamages(const GetProjectileDamagesQuery* query, GetProjectileDamagesResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->damages.damages = nullptr;
 	result->damages.damageCount = 0;
@@ -509,17 +482,13 @@ static void NativeGetProjectileDamages(const GetProjectileDamagesQuery* query, G
 
 	const DynDamageArray& damages = *wProj->damages;
 
-	// Use scratch buffer for array
-	float* damageValues = reinterpret_cast<float*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
-	const size_t maxDamages = (sizeof(scratchBuffer) - bufferPos) / sizeof(float);
+	damageValues.clear();
+	damageValues.reserve(damages.GetNumTypes());
+	for (int i = 0; i < damages.GetNumTypes(); i++)
+		damageValues.push_back(damages.Get(i));
 
-	for (int i = 0; i < damages.GetNumTypes() && count < maxDamages; i++) {
-		damageValues[count++] = damages.Get(i);
-	}
-
-	result->damages.damages = damageValues;
-	result->damages.damageCount = count;
+	result->damages.damages = damageValues.empty() ? nullptr : damageValues.data();
+	result->damages.damageCount = damageValues.size();
 	result->damages.paralyzeDamageTime = damages.paralyzeDamageTime;
 	result->damages.impulseFactor = damages.impulseFactor;
 	result->damages.impulseBoost = damages.impulseBoost;
@@ -534,12 +503,10 @@ static void NativeGetProjectileDamages(const GetProjectileDamagesQuery* query, G
 	result->damages.damageAreaOfEffect = damages.damageAreaOfEffect;
 	result->damages.edgeEffectiveness = damages.edgeEffectiveness;
 	result->damages.explosionSpeed = damages.explosionSpeed;
-	bufferPos += count * sizeof(float);
 }
 
 static void NativeGetAllProjectiles(const GetAllProjectilesQuery* query, GetAllProjectilesResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->projectiles = nullptr;
 	result->count = 0;
@@ -554,9 +521,8 @@ static void NativeGetAllProjectiles(const GetAllProjectilesQuery* query, GetAllP
 	if (projectiles.empty())
 		return;
 
-	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	uint32_t count = 0;
+	projectileIDs.clear();
+	projectileIDs.reserve(projectiles.size());
 
 	for (const CProjectile* proj : projectiles) {
 		if (proj == nullptr)
@@ -568,15 +534,11 @@ static void NativeGetAllProjectiles(const GetAllProjectilesQuery* query, GetAllP
 		if (proj->piece && query->options.excludePieceProjectiles)
 			continue;
 
-		if (count >= maxCount)
-			break;
-
-		out[count++] = proj->id;
+		projectileIDs.push_back(proj->id);
 	}
 
-	result->projectiles = out;
-	result->count = count;
-	bufferPos += count * sizeof(int32_t);
+	result->projectiles = projectileIDs.empty() ? nullptr : projectileIDs.data();
+	result->count = projectileIDs.size();
 }
 
 } // namespace

@@ -10,53 +10,30 @@
 #include "Rendering/Models/3DModel.hpp"
 #include "Rendering/Models/3DModelPiece.hpp"
 #include "System/Matrix44f.h"
-#include <vector>
 #include <string>
-#include <cstring>
+#include <vector>
 
 namespace {
 
-// Scratch buffer
-static thread_local char scratchBuffer[1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local std::vector<std::string> stringStorage;
+static thread_local std::vector<const char*> pointerStorage;
+static thread_local std::vector<PieceMapEntry> pieceMapEntries;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
 static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit or feature ID" };
 static const Error INVALID_PIECE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid piece number" };
-static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
 
 static bool IsReady() {
 	return (gs != nullptr);
 }
 
-// Helper to allocate from scratch buffer
-template<typename T>
-static T* AllocateArray(size_t count) {
-	size_t needed = count * sizeof(T);
-	if (bufferPos + needed > sizeof(scratchBuffer)) {
-		return nullptr;
-	}
-	T* ptr = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
-	bufferPos += needed;
-	return ptr;
-}
-
-// Helper to copy string to scratch buffer
 static const char* CopyString(const std::string& str) {
-	size_t len = str.length() + 1;
-	if (bufferPos + len > sizeof(scratchBuffer)) {
-		return nullptr;
-	}
-	char* ptr = &scratchBuffer[bufferPos];
-	memcpy(ptr, str.c_str(), len);
-	bufferPos += len;
-	return ptr;
+	stringStorage.push_back(str);
+	return stringStorage.back().c_str();
 }
 
 static void NativeGetModelRootPiece(const GetModelRootPieceQuery* query, GetModelRootPieceResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->rootPiece = 0;
 
@@ -66,7 +43,6 @@ static void NativeGetModelRootPiece(const GetModelRootPieceQuery* query, GetMode
 }
 
 static void NativeGetUnitRootPiece(const GetUnitRootPieceQuery* query, GetUnitRootPieceResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->rootPiece = 0;
 
@@ -86,7 +62,6 @@ static void NativeGetUnitRootPiece(const GetUnitRootPieceQuery* query, GetUnitRo
 }
 
 static void NativeGetFeatureRootPiece(const GetFeatureRootPieceQuery* query, GetFeatureRootPieceResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->rootPiece = 0;
 
@@ -106,7 +81,8 @@ static void NativeGetFeatureRootPiece(const GetFeatureRootPieceQuery* query, Get
 }
 
 static void NativeGetModelPieceList(const GetModelPieceListQuery* query, GetModelPieceListResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pointerStorage.clear();
 	result->error = nullptr;
 	result->names = nullptr;
 	result->count = 0;
@@ -119,26 +95,20 @@ static void NativeGetModelPieceList(const GetModelPieceListQuery* query, GetMode
 	if (count == 0)
 		return;
 
-	result->names = AllocateArray<const char*>(count);
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	stringStorage.reserve(count);
+	pointerStorage.resize(count);
 
 	for (uint32_t i = 0; i < count; ++i) {
-		result->names[i] = CopyString(model->pieceObjects[i]->name);
-		if (result->names[i] == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = i;
-			return;
-		}
+		pointerStorage[i] = CopyString(model->pieceObjects[i]->name);
 	}
 
+	result->names = pointerStorage.data();
 	result->count = count;
 }
 
 static void NativeGetModelPieceMap(const GetModelPieceMapQuery* query, GetModelPieceMapResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pieceMapEntries.clear();
 	result->error = nullptr;
 	result->entries = nullptr;
 	result->count = 0;
@@ -154,27 +124,21 @@ static void NativeGetModelPieceMap(const GetModelPieceMapQuery* query, GetModelP
 	if (count == 0)
 		return;
 
-	result->entries = AllocateArray<PieceMapEntry>(count);
-	if (result->entries == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	stringStorage.reserve(count);
+	pieceMapEntries.resize(count);
 
 	for (uint32_t i = 0; i < count; ++i) {
-		result->entries[i].name = CopyString(model->pieceObjects[i]->name);
-		result->entries[i].pieceNum = static_cast<int32_t>(i + 1);
-		if (result->entries[i].name == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = i;
-			return;
-		}
+		pieceMapEntries[i].name = CopyString(model->pieceObjects[i]->name);
+		pieceMapEntries[i].pieceNum = static_cast<int32_t>(i + 1);
 	}
 
+	result->entries = pieceMapEntries.data();
 	result->count = count;
 }
 
 static void NativeGetUnitPieceList(const GetUnitPieceListQuery* query, GetUnitPieceListResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pointerStorage.clear();
 	result->error = nullptr;
 	result->names = nullptr;
 	result->count = 0;
@@ -199,28 +163,22 @@ static void NativeGetUnitPieceList(const GetUnitPieceListQuery* query, GetUnitPi
 		return;
 	}
 
-	result->names = AllocateArray<const char*>(count);
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	stringStorage.reserve(count);
+	pointerStorage.resize(count);
 
 	for (uint32_t i = 0; i < count; ++i) {
 		const LocalModelPiece& piece = localModel.pieces[i];
 		const std::string name = (piece.original != nullptr) ? piece.original->name : "";
-		result->names[i] = CopyString(name);
-		if (result->names[i] == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = i;
-			return;
-		}
+		pointerStorage[i] = CopyString(name);
 	}
 
+	result->names = pointerStorage.data();
 	result->count = count;
 }
 
 static void NativeGetUnitPieceMap(const GetUnitPieceMapQuery* query, GetUnitPieceMapResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pieceMapEntries.clear();
 	result->error = nullptr;
 	result->entries = nullptr;
 	result->count = 0;
@@ -246,29 +204,23 @@ static void NativeGetUnitPieceMap(const GetUnitPieceMapQuery* query, GetUnitPiec
 		return;
 	}
 
-	result->entries = AllocateArray<PieceMapEntry>(count);
-	if (result->entries == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	stringStorage.reserve(count);
+	pieceMapEntries.resize(count);
 
 	for (uint32_t i = 0; i < count; ++i) {
 		const LocalModelPiece& piece = localModel.pieces[i];
 		const std::string name = (piece.original != nullptr) ? piece.original->name : "";
-		result->entries[i].name = CopyString(name);
-		result->entries[i].pieceNum = static_cast<int32_t>(i + 1);
-		if (result->entries[i].name == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = i;
-			return;
-		}
+		pieceMapEntries[i].name = CopyString(name);
+		pieceMapEntries[i].pieceNum = static_cast<int32_t>(i + 1);
 	}
 
+	result->entries = pieceMapEntries.data();
 	result->count = count;
 }
 
 static void NativeGetFeaturePieceList(const GetFeaturePieceListQuery* query, GetFeaturePieceListResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pointerStorage.clear();
 	result->error = nullptr;
 	result->names = nullptr;
 	result->count = 0;
@@ -294,28 +246,22 @@ static void NativeGetFeaturePieceList(const GetFeaturePieceListQuery* query, Get
 		return;
 	}
 
-	result->names = AllocateArray<const char*>(count);
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	stringStorage.reserve(count);
+	pointerStorage.resize(count);
 
 	for (uint32_t i = 0; i < count; ++i) {
 		const LocalModelPiece& piece = localModel.pieces[i];
 		const std::string name = (piece.original != nullptr) ? piece.original->name : "";
-		result->names[i] = CopyString(name);
-		if (result->names[i] == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = i;
-			return;
-		}
+		pointerStorage[i] = CopyString(name);
 	}
 
+	result->names = pointerStorage.data();
 	result->count = count;
 }
 
 static void NativeGetFeaturePieceMap(const GetFeaturePieceMapQuery* query, GetFeaturePieceMapResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pieceMapEntries.clear();
 	result->error = nullptr;
 	result->entries = nullptr;
 	result->count = 0;
@@ -341,24 +287,17 @@ static void NativeGetFeaturePieceMap(const GetFeaturePieceMapQuery* query, GetFe
 		return;
 	}
 
-	result->entries = AllocateArray<PieceMapEntry>(count);
-	if (result->entries == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	stringStorage.reserve(count);
+	pieceMapEntries.resize(count);
 
 	for (uint32_t i = 0; i < count; ++i) {
 		const LocalModelPiece& piece = localModel.pieces[i];
 		const std::string name = (piece.original != nullptr) ? piece.original->name : "";
-		result->entries[i].name = CopyString(name);
-		result->entries[i].pieceNum = static_cast<int32_t>(i + 1);
-		if (result->entries[i].name == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = i;
-			return;
-		}
+		pieceMapEntries[i].name = CopyString(name);
+		pieceMapEntries[i].pieceNum = static_cast<int32_t>(i + 1);
 	}
 
+	result->entries = pieceMapEntries.data();
 	result->count = count;
 }
 
@@ -367,19 +306,19 @@ static bool FillPieceInfo(const S3DModelPiece* piece, int32_t pieceNum, PieceInf
 	if (piece == nullptr)
 		return false;
 
+	stringStorage.reserve(2 + piece->children.size());
+	pointerStorage.clear();
+	pointerStorage.reserve(piece->children.size());
+
 	info.name = CopyString(piece->name);
 	info.parent = CopyString(piece->parent != nullptr ? piece->parent->name : "[null]");
 	info.childCount = static_cast<uint32_t>(piece->children.size());
 	info.children = nullptr;
 	if (info.childCount != 0) {
-		info.children = AllocateArray<const char*>(info.childCount);
-		if (info.children == nullptr)
-			return false;
 		for (uint32_t i = 0; i < info.childCount; ++i) {
-			info.children[i] = CopyString(piece->children[i]->name);
-			if (info.children[i] == nullptr)
-				return false;
+			pointerStorage.push_back(CopyString(piece->children[i]->name));
 		}
+		info.children = pointerStorage.data();
 	}
 
 	info.isEmpty = !piece->HasGeometryData();
@@ -401,7 +340,8 @@ static bool FillPieceInfo(const S3DModelPiece* piece, int32_t pieceNum, PieceInf
 }
 
 static void NativeGetUnitPieceInfo(const GetUnitPieceInfoQuery* query, GetUnitPieceInfoResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pointerStorage.clear();
 	result->error = nullptr;
 	result->info = {};
 	result->exists = false;
@@ -428,7 +368,6 @@ static void NativeGetUnitPieceInfo(const GetUnitPieceInfoQuery* query, GetUnitPi
 	}
 
 	if (!FillPieceInfo(piece->original, query->pieceNum, result->info)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
 		return;
 	}
 
@@ -436,7 +375,8 @@ static void NativeGetUnitPieceInfo(const GetUnitPieceInfoQuery* query, GetUnitPi
 }
 
 static void NativeGetFeaturePieceInfo(const GetFeaturePieceInfoQuery* query, GetFeaturePieceInfoResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pointerStorage.clear();
 	result->error = nullptr;
 	result->info = {};
 	result->exists = false;
@@ -463,7 +403,6 @@ static void NativeGetFeaturePieceInfo(const GetFeaturePieceInfoQuery* query, Get
 	}
 
 	if (!FillPieceInfo(piece->original, query->pieceNum, result->info)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
 		return;
 	}
 
@@ -471,7 +410,6 @@ static void NativeGetFeaturePieceInfo(const GetFeaturePieceInfoQuery* query, Get
 }
 
 static void NativeGetUnitPiecePosition(const GetUnitPiecePositionQuery* query, GetUnitPiecePositionResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -503,7 +441,6 @@ static void NativeGetUnitPiecePosition(const GetUnitPiecePositionQuery* query, G
 }
 
 static void NativeGetUnitPieceDirection(const GetUnitPieceDirectionQuery* query, GetUnitPieceDirectionResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -524,7 +461,10 @@ static void NativeGetUnitPieceDirection(const GetUnitPieceDirectionQuery* query,
 	}
 
 	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum - 1);
-	const float3 dir = unit->GetObjectSpaceVec(piece->GetDirection());
+	// Spring.GetUnitPieceDirection returns the piece's model-relative
+	// direction.  GetUnitPiecePosDir is the separate API that transforms its
+	// direction into object/world space.
+	const float3 dir = piece->GetDirection();
 
 	result->direction.x = dir.x;
 	result->direction.y = dir.y;
@@ -532,7 +472,6 @@ static void NativeGetUnitPieceDirection(const GetUnitPieceDirectionQuery* query,
 }
 
 static void NativeGetUnitPiecePosDir(const GetUnitPiecePosDirQuery* query, GetUnitPiecePosDirResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -568,7 +507,6 @@ static void NativeGetUnitPiecePosDir(const GetUnitPiecePosDirQuery* query, GetUn
 }
 
 static void NativeGetFeaturePiecePosition(const GetFeaturePiecePositionQuery* query, GetFeaturePiecePositionResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -589,7 +527,10 @@ static void NativeGetFeaturePiecePosition(const GetFeaturePiecePositionQuery* qu
 	}
 
 	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum - 1);
-	float3 pos = feature->GetObjectSpacePos(piece->GetAbsolutePos());
+	// Spring.GetFeaturePiecePosition returns the piece's model-relative
+	// coordinates.  GetFeaturePiecePosDir is the separate API that transforms
+	// its position into object/world space.
+	const float3 pos = piece->GetAbsolutePos();
 
 	result->position.x = pos.x;
 	result->position.y = pos.y;
@@ -597,7 +538,6 @@ static void NativeGetFeaturePiecePosition(const GetFeaturePiecePositionQuery* qu
 }
 
 static void NativeGetFeaturePieceDirection(const GetFeaturePieceDirectionQuery* query, GetFeaturePieceDirectionResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -626,7 +566,6 @@ static void NativeGetFeaturePieceDirection(const GetFeaturePieceDirectionQuery* 
 }
 
 static void NativeGetFeaturePiecePosDir(const GetFeaturePiecePosDirQuery* query, GetFeaturePiecePosDirResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -662,7 +601,6 @@ static void NativeGetFeaturePiecePosDir(const GetFeaturePiecePosDirQuery* query,
 }
 
 static void NativeGetUnitPieceMatrix(const GetUnitPieceMatrixQuery* query, GetUnitPieceMatrixResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -692,7 +630,6 @@ static void NativeGetUnitPieceMatrix(const GetUnitPieceMatrixQuery* query, GetUn
 }
 
 static void NativeGetFeaturePieceMatrix(const GetFeaturePieceMatrixQuery* query, GetFeaturePieceMatrixResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -722,7 +659,6 @@ static void NativeGetFeaturePieceMatrix(const GetFeaturePieceMatrixQuery* query,
 }
 
 static void NativeGetUnitScriptPiece(const GetUnitScriptPieceQuery* query, GetUnitScriptPieceResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 
 	if (!IsReady()) {
@@ -751,7 +687,8 @@ static void NativeGetUnitScriptPiece(const GetUnitScriptPieceQuery* query, GetUn
 }
 
 static void NativeGetUnitScriptNames(const GetUnitScriptNamesQuery* query, GetUnitScriptNamesResult* result) {
-	bufferPos = 0;
+	stringStorage.clear();
+	pointerStorage.clear();
 	result->error = nullptr;
 	result->names = nullptr;
 	result->count = 0;
@@ -777,26 +714,19 @@ static void NativeGetUnitScriptNames(const GetUnitScriptNamesQuery* query, GetUn
 		return;
 	}
 
-	result->names = AllocateArray<const char*>(count);
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	stringStorage.reserve(count);
+	pointerStorage.resize(count);
 
 	for (uint32_t i = 0; i < count; ++i) {
 		const LocalModelPiece* piece = pieces[i];
 		if (piece != nullptr && piece->original != nullptr) {
-			result->names[i] = CopyString(piece->original->name);
-			if (result->names[i] == nullptr) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				result->count = i;
-				return;
-			}
+			pointerStorage[i] = CopyString(piece->original->name);
 		} else {
-			result->names[i] = CopyString("");
+			pointerStorage[i] = CopyString("");
 		}
 	}
 
+	result->names = pointerStorage.data();
 	result->count = count;
 }
 

@@ -14,7 +14,7 @@ impl<'a> Game<'a> {
         }
     }
 
-    pub fn is_god_mode_enabled(&self) -> Result<bool, Error> {
+    pub fn is_god_mode_enabled(&self) -> Result<(bool, bool, bool), Error> {
         unsafe {
             let query = sys::IsGodModeEnabledQuery {
                 _unused: 0,
@@ -23,9 +23,12 @@ impl<'a> Game<'a> {
             let func = self.api.IsGodModeEnabled.expect("IsGodModeEnabled function pointer must be initialized");
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();
-            Error::result_or(result.error, {
-                result.enabled
-            })
+            let value = (
+                result.enabled,
+                result.controlAllies,
+                result.controlEnemies,
+            );
+            Error::result_or(result.error, value)
         }
     }
 

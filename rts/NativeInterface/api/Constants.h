@@ -168,6 +168,8 @@ enum GameConstant {
 // backslash-continued macro and a comment would terminate it early.)
 // ============================================================================
 #define SPRING_GL_CONSTANTS(X) \
+	X(RENDERER                       , 0x00001F01u) \
+	X(VERSION                        , 0x00001F02u) \
 	X(POINTS                         , 0x00000000u) \
 	X(LINES                          , 0x00000001u) \
 	X(LINE_LOOP                      , 0x00000002u) \
@@ -447,6 +449,10 @@ enum GameConstant {
 	X(PROGRAM                        , 0x000082E2u) \
 	X(VERTEX_ARRAY                   , 0x00008074u) \
 	X(QUERY                          , 0x000082E3u) \
+	X(SAMPLES_PASSED                 , 0x00008914u) \
+	X(ANY_SAMPLES_PASSED             , 0x00008C2Fu) \
+	X(PRIMITIVES_GENERATED           , 0x00008C87u) \
+	X(TIME_ELAPSED                   , 0x000088BFu) \
 	X(PROGRAM_PIPELINE               , 0x000082E4u) \
 	X(TRANSFORM_FEEDBACK             , 0x00008E22u) \
 	X(RENDERBUFFER                   , 0x00008D41u) \

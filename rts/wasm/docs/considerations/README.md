@@ -36,6 +36,6 @@ axis. They sit below both.
 
 ## Open work
 
-Two prototypes would settle what is still estimated: `impl/handoff.md` for a
-Rust-typed Component Model host, `impl/todo.md` for an unchecked core-wasm
-host. Both are scoped to reproduce the full benchmark table.
+The measured data is kept in `measured_costs.md`. Any future transport
+prototype should live with the code and benchmark that exercise it rather than
+as a standalone handoff document.

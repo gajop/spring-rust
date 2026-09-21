@@ -721,21 +721,21 @@ wasm_trap_t* CoreVariableIo_encoding_encode_base64(void* environment, wasmtime_c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t textInputBytes64 = static_cast<std::uint64_t>(textInputCount) * 4u;
-    if (textInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> textInputWire;
-    if (!state->memory.View(textInputPointer, static_cast<std::size_t>(textInputBytes64), textInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textInputPointer, textInputCount, textInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader textInputReader(textInputWire);
+    std::uint32_t textInputLength = 0;
+    if (!textInputReader.U32(textInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> textInputStorage;
-    textInputStorage.reserve(textInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < textInputCount; ++coreIndex) {
+    textInputStorage.reserve(textInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < textInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!textInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         textInputStorage.push_back(item);
     }
     if (!textInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.text = textInputStorage.data();
-    if (!AssignCoreCount(textInputCount, query.textLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.text = textInputLength == 0 ? nullptr : textInputStorage.data();
+    if (!AssignCoreCount(textInputLength, query.textLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.stripPadding = slots[0].i32 != 0;
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -804,21 +804,21 @@ wasm_trap_t* CoreVariableIo_encoding_encode_base64_url(void* environment, wasmti
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t textInputBytes64 = static_cast<std::uint64_t>(textInputCount) * 4u;
-    if (textInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> textInputWire;
-    if (!state->memory.View(textInputPointer, static_cast<std::size_t>(textInputBytes64), textInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(textInputPointer, textInputCount, textInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader textInputReader(textInputWire);
+    std::uint32_t textInputLength = 0;
+    if (!textInputReader.U32(textInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> textInputStorage;
-    textInputStorage.reserve(textInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < textInputCount; ++coreIndex) {
+    textInputStorage.reserve(textInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < textInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!textInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         textInputStorage.push_back(item);
     }
     if (!textInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.text = textInputStorage.data();
-    if (!AssignCoreCount(textInputCount, query.textLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.text = textInputLength == 0 ? nullptr : textInputStorage.data();
+    if (!AssignCoreCount(textInputLength, query.textLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -2312,21 +2312,21 @@ wasm_trap_t* CoreVariableIo_vfs_calculate_hash(void* environment, wasmtime_calle
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.hashType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.hashType)>>>(slots[0].i32);
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -2897,18 +2897,21 @@ wasm_trap_t* CoreVariableIo_vfs_pack_f32(void* environment, wasmtime_caller_t* c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    if (valuesInputCount == 0) {
-        query.values = nullptr;
-    } else {
-        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
-        const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-        if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max() || (valuesInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-        std::span<const std::uint8_t> valuesInputBytes;
-        if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-        static_assert(sizeof(float) == 4u, "generated Core borrowed/native element width mismatch");
-        query.values = reinterpret_cast<std::remove_reference_t<decltype(query.values)>>(valuesInputBytes.data());
+    std::span<const std::uint8_t> valuesInputWire;
+    if (!state->memory.View(valuesInputPointer, valuesInputCount, valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader valuesInputReader(valuesInputWire);
+    std::uint32_t valuesInputLength = 0;
+    if (!valuesInputReader.U32(valuesInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::vector<float> valuesInputStorage;
+    valuesInputStorage.reserve(valuesInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputLength; ++coreIndex) {
+        float item{};
+        if (!valuesInputReader.F32(item)) return Trap("generated Core wire underflow");
+        valuesInputStorage.push_back(item);
     }
-    if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.values = valuesInputLength == 0 ? nullptr : valuesInputStorage.data();
+    if (!AssignCoreCount(valuesInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -2986,21 +2989,21 @@ wasm_trap_t* CoreVariableIo_vfs_pack_s16(void* environment, wasmtime_caller_t* c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-    if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> valuesInputWire;
-    if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuesInputPointer, valuesInputCount, valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader valuesInputReader(valuesInputWire);
+    std::uint32_t valuesInputLength = 0;
+    if (!valuesInputReader.U32(valuesInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::int16_t> valuesInputStorage;
-    valuesInputStorage.reserve(valuesInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputCount; ++coreIndex) {
+    valuesInputStorage.reserve(valuesInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputLength; ++coreIndex) {
         std::int16_t item{};
         { std::int32_t coreRaw = 0; if (!valuesInputReader.I32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         valuesInputStorage.push_back(item);
     }
     if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.values = valuesInputStorage.data();
-    if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.values = valuesInputLength == 0 ? nullptr : valuesInputStorage.data();
+    if (!AssignCoreCount(valuesInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -3078,18 +3081,21 @@ wasm_trap_t* CoreVariableIo_vfs_pack_s32(void* environment, wasmtime_caller_t* c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    if (valuesInputCount == 0) {
-        query.values = nullptr;
-    } else {
-        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
-        const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-        if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max() || (valuesInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-        std::span<const std::uint8_t> valuesInputBytes;
-        if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-        static_assert(sizeof(std::int32_t) == 4u, "generated Core borrowed/native element width mismatch");
-        query.values = reinterpret_cast<std::remove_reference_t<decltype(query.values)>>(valuesInputBytes.data());
+    std::span<const std::uint8_t> valuesInputWire;
+    if (!state->memory.View(valuesInputPointer, valuesInputCount, valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader valuesInputReader(valuesInputWire);
+    std::uint32_t valuesInputLength = 0;
+    if (!valuesInputReader.U32(valuesInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::vector<std::int32_t> valuesInputStorage;
+    valuesInputStorage.reserve(valuesInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputLength; ++coreIndex) {
+        std::int32_t item{};
+        { std::int32_t coreRaw = 0; if (!valuesInputReader.I32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+        valuesInputStorage.push_back(item);
     }
-    if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.values = valuesInputLength == 0 ? nullptr : valuesInputStorage.data();
+    if (!AssignCoreCount(valuesInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -3167,21 +3173,21 @@ wasm_trap_t* CoreVariableIo_vfs_pack_s8(void* environment, wasmtime_caller_t* ca
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-    if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> valuesInputWire;
-    if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuesInputPointer, valuesInputCount, valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader valuesInputReader(valuesInputWire);
+    std::uint32_t valuesInputLength = 0;
+    if (!valuesInputReader.U32(valuesInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::int8_t> valuesInputStorage;
-    valuesInputStorage.reserve(valuesInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputCount; ++coreIndex) {
+    valuesInputStorage.reserve(valuesInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputLength; ++coreIndex) {
         std::int8_t item{};
         { std::int32_t coreRaw = 0; if (!valuesInputReader.I32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         valuesInputStorage.push_back(item);
     }
     if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.values = valuesInputStorage.data();
-    if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.values = valuesInputLength == 0 ? nullptr : valuesInputStorage.data();
+    if (!AssignCoreCount(valuesInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -3259,21 +3265,21 @@ wasm_trap_t* CoreVariableIo_vfs_pack_u16(void* environment, wasmtime_caller_t* c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-    if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> valuesInputWire;
-    if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuesInputPointer, valuesInputCount, valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader valuesInputReader(valuesInputWire);
+    std::uint32_t valuesInputLength = 0;
+    if (!valuesInputReader.U32(valuesInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint16_t> valuesInputStorage;
-    valuesInputStorage.reserve(valuesInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputCount; ++coreIndex) {
+    valuesInputStorage.reserve(valuesInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputLength; ++coreIndex) {
         std::uint16_t item{};
         { std::uint32_t coreRaw = 0; if (!valuesInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         valuesInputStorage.push_back(item);
     }
     if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.values = valuesInputStorage.data();
-    if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.values = valuesInputLength == 0 ? nullptr : valuesInputStorage.data();
+    if (!AssignCoreCount(valuesInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -3351,18 +3357,21 @@ wasm_trap_t* CoreVariableIo_vfs_pack_u32(void* environment, wasmtime_caller_t* c
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    if (valuesInputCount == 0) {
-        query.values = nullptr;
-    } else {
-        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
-        const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-        if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max() || (valuesInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-        std::span<const std::uint8_t> valuesInputBytes;
-        if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-        static_assert(sizeof(std::uint32_t) == 4u, "generated Core borrowed/native element width mismatch");
-        query.values = reinterpret_cast<std::remove_reference_t<decltype(query.values)>>(valuesInputBytes.data());
+    std::span<const std::uint8_t> valuesInputWire;
+    if (!state->memory.View(valuesInputPointer, valuesInputCount, valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader valuesInputReader(valuesInputWire);
+    std::uint32_t valuesInputLength = 0;
+    if (!valuesInputReader.U32(valuesInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::vector<std::uint32_t> valuesInputStorage;
+    valuesInputStorage.reserve(valuesInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputLength; ++coreIndex) {
+        std::uint32_t item{};
+        { std::uint32_t coreRaw = 0; if (!valuesInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+        valuesInputStorage.push_back(item);
     }
-    if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.values = valuesInputLength == 0 ? nullptr : valuesInputStorage.data();
+    if (!AssignCoreCount(valuesInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -3440,21 +3449,21 @@ wasm_trap_t* CoreVariableIo_vfs_pack_u8(void* environment, wasmtime_caller_t* ca
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t valuesInputBytes64 = static_cast<std::uint64_t>(valuesInputCount) * 4u;
-    if (valuesInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> valuesInputWire;
-    if (!state->memory.View(valuesInputPointer, static_cast<std::size_t>(valuesInputBytes64), valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(valuesInputPointer, valuesInputCount, valuesInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader valuesInputReader(valuesInputWire);
+    std::uint32_t valuesInputLength = 0;
+    if (!valuesInputReader.U32(valuesInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> valuesInputStorage;
-    valuesInputStorage.reserve(valuesInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputCount; ++coreIndex) {
+    valuesInputStorage.reserve(valuesInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < valuesInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!valuesInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         valuesInputStorage.push_back(item);
     }
     if (!valuesInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.values = valuesInputStorage.data();
-    if (!AssignCoreCount(valuesInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.values = valuesInputLength == 0 ? nullptr : valuesInputStorage.data();
+    if (!AssignCoreCount(valuesInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -3688,21 +3697,21 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_f32(void* environment, wasmtime_caller_t*
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
@@ -3787,21 +3796,21 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_s16(void* environment, wasmtime_caller_t*
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
@@ -3881,21 +3890,21 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_s32(void* environment, wasmtime_caller_t*
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
@@ -3980,21 +3989,21 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_s8(void* environment, wasmtime_caller_t* 
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
@@ -4074,21 +4083,21 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_u16(void* environment, wasmtime_caller_t*
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
@@ -4168,21 +4177,21 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_u32(void* environment, wasmtime_caller_t*
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
@@ -4267,21 +4276,21 @@ wasm_trap_t* CoreVariableIo_vfs_unpack_u8(void* environment, wasmtime_caller_t* 
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.byteOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.byteOffset)>>>(slots[0].i32);
     query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
@@ -4361,21 +4370,21 @@ wasm_trap_t* CoreVariableIo_vfs_zlib_compress(void* environment, wasmtime_caller
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -4453,21 +4462,21 @@ wasm_trap_t* CoreVariableIo_vfs_zlib_decompress(void* environment, wasmtime_call
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t dataInputBytes64 = static_cast<std::uint64_t>(dataInputCount) * 4u;
-    if (dataInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> dataInputWire;
-    if (!state->memory.View(dataInputPointer, static_cast<std::size_t>(dataInputBytes64), dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(dataInputPointer, dataInputCount, dataInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader dataInputReader(dataInputWire);
+    std::uint32_t dataInputLength = 0;
+    if (!dataInputReader.U32(dataInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<std::uint8_t> dataInputStorage;
-    dataInputStorage.reserve(dataInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < dataInputCount; ++coreIndex) {
+    dataInputStorage.reserve(dataInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < dataInputLength; ++coreIndex) {
         std::uint8_t item{};
         { std::uint32_t coreRaw = 0; if (!dataInputReader.U32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
         dataInputStorage.push_back(item);
     }
     if (!dataInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.data = dataInputStorage.data();
-    if (!AssignCoreCount(dataInputCount, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.data = dataInputLength == 0 ? nullptr : dataInputStorage.data();
+    if (!AssignCoreCount(dataInputLength, query.dataSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -4546,14 +4555,14 @@ wasm_trap_t* CoreVariableIo_unsynced_read_solve_nurbs_curve(void* environment, w
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    const std::uint64_t pointsInputBytes64 = static_cast<std::uint64_t>(pointsInputCount) * 16u;
-    if (pointsInputBytes64 > std::numeric_limits<std::size_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::span<const std::uint8_t> pointsInputWire;
-    if (!state->memory.View(pointsInputPointer, static_cast<std::size_t>(pointsInputBytes64), pointsInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (!state->memory.View(pointsInputPointer, pointsInputCount, pointsInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader pointsInputReader(pointsInputWire);
+    std::uint32_t pointsInputLength = 0;
+    if (!pointsInputReader.U32(pointsInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::vector<Float4> pointsInputStorage;
-    pointsInputStorage.reserve(pointsInputCount);
-    for (std::uint32_t coreIndex = 0; coreIndex < pointsInputCount; ++coreIndex) {
+    pointsInputStorage.reserve(pointsInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < pointsInputLength; ++coreIndex) {
         Float4 item{};
         if (!pointsInputReader.F32(item.x)) return Trap("generated Core wire underflow");
         if (!pointsInputReader.F32(item.y)) return Trap("generated Core wire underflow");
@@ -4562,26 +4571,29 @@ wasm_trap_t* CoreVariableIo_unsynced_read_solve_nurbs_curve(void* environment, w
         pointsInputStorage.push_back(item);
     }
     if (!pointsInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-    query.points = pointsInputStorage.data();
-    if (!AssignCoreCount(pointsInputCount, query.pointCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.points = pointsInputLength == 0 ? nullptr : pointsInputStorage.data();
+    if (!AssignCoreCount(pointsInputLength, query.pointCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     std::uint32_t knotsInputPointer = 0;
     std::uint32_t knotsInputCount = 0;
     if (!reader.U32(knotsInputPointer) || !reader.U32(knotsInputCount)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    if (knotsInputCount == 0) {
-        query.knots = nullptr;
-    } else {
-        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
-        const std::uint64_t knotsInputBytes64 = static_cast<std::uint64_t>(knotsInputCount) * 4u;
-        if (knotsInputBytes64 > std::numeric_limits<std::size_t>::max() || (knotsInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-        std::span<const std::uint8_t> knotsInputBytes;
-        if (!state->memory.View(knotsInputPointer, static_cast<std::size_t>(knotsInputBytes64), knotsInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-        static_assert(sizeof(float) == 4u, "generated Core borrowed/native element width mismatch");
-        query.knots = reinterpret_cast<std::remove_reference_t<decltype(query.knots)>>(knotsInputBytes.data());
+    std::span<const std::uint8_t> knotsInputWire;
+    if (!state->memory.View(knotsInputPointer, knotsInputCount, knotsInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader knotsInputReader(knotsInputWire);
+    std::uint32_t knotsInputLength = 0;
+    if (!knotsInputReader.U32(knotsInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::vector<float> knotsInputStorage;
+    knotsInputStorage.reserve(knotsInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < knotsInputLength; ++coreIndex) {
+        float item{};
+        if (!knotsInputReader.F32(item)) return Trap("generated Core wire underflow");
+        knotsInputStorage.push_back(item);
     }
-    if (!AssignCoreCount(knotsInputCount, query.knotCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!knotsInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.knots = knotsInputLength == 0 ? nullptr : knotsInputStorage.data();
+    if (!AssignCoreCount(knotsInputLength, query.knotCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.segments = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.segments)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
@@ -4679,18 +4691,21 @@ wasm_trap_t* CoreVariableIo_unit_script_call_unit_script(void* environment, wasm
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    if (argsInputCount == 0) {
-        query.args = nullptr;
-    } else {
-        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
-        const std::uint64_t argsInputBytes64 = static_cast<std::uint64_t>(argsInputCount) * 4u;
-        if (argsInputBytes64 > std::numeric_limits<std::size_t>::max() || (argsInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-        std::span<const std::uint8_t> argsInputBytes;
-        if (!state->memory.View(argsInputPointer, static_cast<std::size_t>(argsInputBytes64), argsInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-        static_assert(sizeof(float) == 4u, "generated Core borrowed/native element width mismatch");
-        query.args = reinterpret_cast<std::remove_reference_t<decltype(query.args)>>(argsInputBytes.data());
+    std::span<const std::uint8_t> argsInputWire;
+    if (!state->memory.View(argsInputPointer, argsInputCount, argsInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader argsInputReader(argsInputWire);
+    std::uint32_t argsInputLength = 0;
+    if (!argsInputReader.U32(argsInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::vector<float> argsInputStorage;
+    argsInputStorage.reserve(argsInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < argsInputLength; ++coreIndex) {
+        float item{};
+        if (!argsInputReader.F32(item)) return Trap("generated Core wire underflow");
+        argsInputStorage.push_back(item);
     }
-    if (!AssignCoreCount(argsInputCount, query.argCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!argsInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.args = argsInputLength == 0 ? nullptr : argsInputStorage.data();
+    if (!AssignCoreCount(argsInputLength, query.argCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     query.retCapacity = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.retCapacity)>>>(slots[1].i32);
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);

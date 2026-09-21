@@ -4,21 +4,18 @@
 #include "Sim/MoveTypes/MoveDefHandler.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include <vector>
-#include <cstring>
 #include <algorithm>
 
 namespace {
 
-// Scratch buffer
-static thread_local char scratchBuffer[1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local std::vector<Float3> pathPoints;
+static thread_local std::vector<int32_t> pathStarts;
+static thread_local std::vector<float> pathCosts;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
 static const Error INVALID_PATH_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid path ID" };
 static const Error INVALID_MOVEDEF_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid move definition" };
-static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
 static const Error INVALID_OVERLAY_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid overlay index" };
 static const Error OVERLAY_EXISTS_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Overlay already exists" };
 static const Error OVERLAY_EMPTY_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Overlay is empty" };
@@ -62,20 +59,7 @@ static void EnsureCostOverlaysInit() {
 	}
 }
 
-// Helper to allocate from scratch buffer
-template<typename T>
-static T* AllocateArray(size_t count) {
-	size_t needed = count * sizeof(T);
-	if (bufferPos + needed > sizeof(scratchBuffer)) {
-		return nullptr;
-	}
-	T* ptr = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
-	bufferPos += needed;
-	return ptr;
-}
-
 static void NativeRequestPath(const RequestPathQuery* query, RequestPathResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->pathID = 0;
 
@@ -107,12 +91,11 @@ static void NativeRequestPath(const RequestPathQuery* query, RequestPathResult* 
 	float3 startPos(query->startPos.x, query->startPos.y, query->startPos.z);
 	float3 endPos(query->endPos.x, query->endPos.y, query->endPos.z);
 
-	// Request path (synced=true, caller=nullptr since this is from Rust)
-	result->pathID = pathManager->RequestPath(nullptr, moveDef, startPos, endPos, query->radius, true);
+	// Match Spring.RequestPath's synchronous, immediate path result.
+	result->pathID = pathManager->RequestPath(nullptr, moveDef, startPos, endPos, query->radius, true, true);
 }
 
 static void NativeDeletePath(const DeletePathQuery* query, DeletePathResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -131,7 +114,6 @@ static void NativeDeletePath(const DeletePathQuery* query, DeletePathResult* res
 }
 
 static void NativeGetPathWayPoints(const GetPathWayPointsQuery* query, GetPathWayPointsResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->points = nullptr;
 	result->pointCount = 0;
@@ -153,38 +135,22 @@ static void NativeGetPathWayPoints(const GetPathWayPointsQuery* query, GetPathWa
 
 	pathManager->GetPathWayPoints(query->pathID, points, starts);
 
-	if (!points.empty()) {
-		result->points = AllocateArray<Float3>(points.size());
-		if (result->points == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
-		}
+	pathPoints.clear();
+	pathPoints.reserve(points.size());
+	for (const float3& point : points)
+		pathPoints.push_back({point.x, point.y, point.z});
+	result->points = pathPoints.empty() ? nullptr : pathPoints.data();
+	result->pointCount = pathPoints.size();
 
-		for (size_t i = 0; i < points.size(); ++i) {
-			result->points[i].x = points[i].x;
-			result->points[i].y = points[i].y;
-			result->points[i].z = points[i].z;
-		}
-		result->pointCount = static_cast<uint32_t>(points.size());
-	}
-
-	if (!starts.empty()) {
-		result->starts = AllocateArray<int32_t>(starts.size());
-		if (result->starts == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->pointCount = 0;
-			return;
-		}
-
-		for (size_t i = 0; i < starts.size(); ++i) {
-			result->starts[i] = starts[i];
-		}
-		result->startCount = static_cast<uint32_t>(starts.size());
-	}
+	pathStarts.clear();
+	pathStarts.reserve(starts.size());
+	for (int start : starts)
+		pathStarts.push_back(start + 1);
+	result->starts = pathStarts.empty() ? nullptr : pathStarts.data();
+	result->startCount = pathStarts.size();
 }
 
 static void NativeGetNextWayPoint(const GetNextWayPointQuery* query, GetNextWayPointResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->hasWaypoint = false;
 
@@ -201,8 +167,8 @@ static void NativeGetNextWayPoint(const GetNextWayPointQuery* query, GetNextWayP
 	float3 callerPos(query->callerPos.x, query->callerPos.y, query->callerPos.z);
 	float3 waypoint = pathManager->NextWayPoint(nullptr, query->pathID, 0, callerPos, query->minDist, true);
 
-	// Check if waypoint is valid (not -1,-1,-1)
-	if (waypoint.x >= 0.0f || waypoint.y >= 0.0f || waypoint.z >= 0.0f) {
+	// The path manager uses (-1,-1,-1) as its no-waypoint sentinel.
+	if (waypoint.x != -1.0f || waypoint.y != -1.0f || waypoint.z != -1.0f) {
 		result->waypoint.x = waypoint.x;
 		result->waypoint.y = waypoint.y;
 		result->waypoint.z = waypoint.z;
@@ -211,7 +177,6 @@ static void NativeGetNextWayPoint(const GetNextWayPointQuery* query, GetNextWayP
 }
 
 static void NativeInitPathNodeCostsArray(const InitPathNodeCostsArrayQuery* query, InitPathNodeCostsArrayResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -250,7 +215,6 @@ static void NativeInitPathNodeCostsArray(const InitPathNodeCostsArrayQuery* quer
 }
 
 static void NativeFreePathNodeCostsArray(const FreePathNodeCostsArrayQuery* query, FreePathNodeCostsArrayResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -288,7 +252,6 @@ static void NativeFreePathNodeCostsArray(const FreePathNodeCostsArrayQuery* quer
 }
 
 static void NativeSetPathNodeCosts(const SetPathNodeCostsQuery* query, SetPathNodeCostsResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -319,7 +282,6 @@ static void NativeSetPathNodeCosts(const SetPathNodeCostsQuery* query, SetPathNo
 }
 
 static void NativeGetPathNodeCosts(const GetPathNodeCostsQuery* query, GetPathNodeCostsResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->costs = nullptr;
 	result->count = 0;
@@ -346,25 +308,12 @@ static void NativeGetPathNodeCosts(const GetPathNodeCostsQuery* query, GetPathNo
 		return;
 	}
 
-	// Copy costs to scratch buffer
-	const size_t totalCosts = overlay.Size();
-	const size_t bytesNeeded = totalCosts * sizeof(float);
-
-	if (bufferPos + bytesNeeded > sizeof(scratchBuffer)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	float* costsBuf = reinterpret_cast<float*>(scratchBuffer + bufferPos);
-	memcpy(costsBuf, &overlay.costs[0], bytesNeeded);
-	bufferPos += bytesNeeded;
-
-	result->costs = costsBuf;
-	result->count = static_cast<uint32_t>(totalCosts);
+	pathCosts = overlay.costs;
+	result->costs = pathCosts.data();
+	result->count = pathCosts.size();
 }
 
 static void NativeSetPathNodeCost(const SetPathNodeCostQuery* query, SetPathNodeCostResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -401,7 +350,6 @@ static void NativeSetPathNodeCost(const SetPathNodeCostQuery* query, SetPathNode
 }
 
 static void NativeGetPathNodeCost(const GetPathNodeCostQuery* query, GetPathNodeCostResult* result) {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->cost = 0.0f;
 

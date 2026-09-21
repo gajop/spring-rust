@@ -37,7 +37,7 @@ class LuaMatTexture {
 			// Interim cross-pool bridge: a texture created by the native (Rust)
 			// plugin, resolved by handle from Lua. `data` holds the raw GL id and
 			// `texType` the GL target; the native side keeps ownership. See
-			// SBC_PORT_MISSING_BINDINGS.md -- the proper fix unifies the pools.
+			// the Gfx API -- the proper fix unifies the pools.
 			LUATEX_NATIVE,
 			LUATEX_LUATEXTURE,
 			LUATEX_LUATEXTUREATLAS,

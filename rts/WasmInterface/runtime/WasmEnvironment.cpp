@@ -7,16 +7,10 @@
 #include "wasm/generated/WasmCalloutRegistry.h"
 
 namespace {
-	// The display-layer worlds have no meaning without a renderer, and a headless
-	// build never gets one: LuaUI is not run there, so a `ui` Wasm module must not
-	// be either. Leaving it enabled meant guest UI code kept receiving Update and
-	// draw call-ins under spring-headless and had to guard every one of them with
-	// its own is_headless() check.
-#ifdef HEADLESS
-	constexpr bool UI_RUNTIME_ENABLED = false;
-#else
+	// The UI world still owns UI lifecycle, input, and data-model work in a
+	// headless build. Rendering events are sourced by the renderer and therefore
+	// are never raised there; the UI runtime must remain available for the rest.
 	constexpr bool UI_RUNTIME_ENABLED = true;
-#endif
 
 	constexpr WasmEnvironmentPolicy ENVIRONMENT_POLICIES[] = {
 		{WasmEnvironment::RulesSynced, "rules-synced", true, true, true},

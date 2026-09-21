@@ -127,7 +127,6 @@ local mapinfo = {
 
 		sunColor     = {1.0, 1.0, 1.0},
 		skyColor     = {0.1, 0.15, 0.7},
-		skyDir       = {0.0, 0.0, -1.0},
 		skyBox       = "",
 
 		cloudDensity = 0.5,

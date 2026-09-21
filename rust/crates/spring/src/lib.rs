@@ -61,6 +61,8 @@ pub mod config;
 /// importing anything here makes a synced guest desync. See `desync.rs`.
 #[cfg(target_arch = "wasm32")]
 pub mod desync;
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub mod game_options;
 #[cfg(target_arch = "wasm32")]
 pub mod gfx;
 #[cfg(target_arch = "wasm32")]
@@ -183,10 +185,14 @@ pub use generated::owned;
 pub use owned::{
     callins, camera, debug_input, display, effects_control, encoding, feature_control,
     feature_defs, features, game, game_config, ground_decals, icons, input, lights, los, markers,
-    memory, metal_map, move_ctrl, path_finder, platform, player, projectile_control, projectiles,
-    selection, sound, synced_ctrl, team_control, teams, tracing, types, unit_rendering,
-    unit_script, units_info, units_weapons, unsynced_ctrl, unsynced_read, utils, weapon_defs,
+    memory, metal_map, move_ctrl, object_rendering, path_finder, platform, player,
+    projectile_control, projectiles, selection, sound, synced_ctrl, team_control, teams, tracing,
+    types, unit_rendering, unit_script, units_info, units_weapons, unsynced_ctrl, unsynced_read,
+    utils, weapon_defs,
 };
+
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub use game_options::{get_mod_option, get_mod_options};
 
 #[inline]
 fn sqrt_f32(v: f32) -> f32 {
@@ -780,6 +786,22 @@ macro_rules! export_unit_created {
                 $crate::TeamId(unit_team).into(),
                 $crate::UnitId(builder_id).into(),
             )
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! export_unit_created_raw {
+    ($handler:path) => {
+        #[cfg(target_arch = "wasm32")]
+        #[unsafe(export_name = "spring:callin/unit-created")]
+        pub extern "C" fn __spring_unit_created_raw(
+            unit_id: i32,
+            unit_def_id: i32,
+            unit_team: i32,
+            builder_id: i32,
+        ) {
+            $handler(unit_id, unit_def_id, unit_team, builder_id)
         }
     };
 }

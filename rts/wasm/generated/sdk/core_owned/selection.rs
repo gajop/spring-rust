@@ -1,7 +1,7 @@
     pub mod selection {
         use super::{Result, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DeselectUnitArrayQuery {
             pub unit_i_ds: Vec<i32>,
         }
@@ -26,7 +26,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroupListResult {
             pub groups: Vec<i32>,
         }
@@ -46,7 +46,7 @@
             pub group_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroupUnitsCountsResult {
             pub counts: SelectionCounts,
         }
@@ -56,7 +56,7 @@
             pub group_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroupUnitsResult {
             pub units: Vec<i32>,
         }
@@ -66,7 +66,7 @@
             pub group_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGroupUnitsSortedResult {
             pub groups: Vec<TeamUnitsByDef>,
         }
@@ -96,7 +96,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetSelectedUnitsCountsResult {
             pub counts: SelectionCounts,
         }
@@ -106,7 +106,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetSelectedUnitsResult {
             pub units: Vec<i32>,
         }
@@ -116,7 +116,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetSelectedUnitsSortedResult {
             pub units: Vec<i32>,
         }
@@ -129,9 +129,10 @@
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetUnitGroupResult {
             pub group_id: i32,
+            pub has_group: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SelectUnitArrayQuery {
             pub unit_i_ds: Vec<i32>,
             pub append: bool,
@@ -153,7 +154,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SelectionCounts {
             pub unit_def_i_ds: Vec<i32>,
             pub counts: Vec<u32>,
@@ -231,6 +232,12 @@
                 #[link_name = "get-selected-units-sorted"]
                 pub safe fn call(punused: i32, output: i32) -> i32;
             }
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetUnitGroupValue {
+            pub group_id: i32,
+            pub has_group: bool,
         }
 
         #[inline]
@@ -453,9 +460,12 @@
         }
 
         #[inline]
-        pub fn get_unit_group(unit_id: i32) -> Result<i32> {
+        pub fn get_unit_group(unit_id: i32) -> Result<GetUnitGroupValue> {
             let value = crate::generated::selection::get_unit_group(unit_id)?;
-            Ok(value)
+            Ok(GetUnitGroupValue {
+                group_id: value.0,
+                has_group: value.1
+            })
         }
 
         #[inline]

@@ -2792,12 +2792,12 @@ pub safe fn texture_info(p0: i32, p1: i32) -> i32;
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "uniform-array-float"]
-pub safe fn uniform_array_float(p0: i32, p1: i32) -> i32;
+pub safe fn uniform_array_float(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
 #[link_name = "uniform-array-int"]
-pub safe fn uniform_array_int(p0: i32, p1: i32) -> i32;
+pub safe fn uniform_array_int(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
@@ -4093,7 +4093,7 @@ Err(unreachable!())
 }
 
         #[inline]
-pub fn uniform_array_float(p0: i32, blob0: &[u8]) -> crate::Result<()> {
+pub fn uniform_array_float(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
@@ -4108,17 +4108,17 @@ let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
 Ok(value) => value,
 Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
 };
-let status = raw::uniform_array_float(p0, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+let status = raw::uniform_array_float(p0, p1, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-let _ = (p0, blob0);
+let _ = (p0, p1, blob0);
 Err(unreachable!())
 }
 }
 
         #[inline]
-pub fn uniform_array_int(p0: i32, blob0: &[u8]) -> crate::Result<()> {
+pub fn uniform_array_int(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
 let mut descriptor = [0u32; 2];
@@ -4133,11 +4133,11 @@ let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
 Ok(value) => value,
 Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
 };
-let status = raw::uniform_array_int(p0, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+let status = raw::uniform_array_int(p0, p1, descriptor_ptr); if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-let _ = (p0, blob0);
+let _ = (p0, p1, blob0);
 Err(unreachable!())
 }
 }
@@ -9030,6 +9030,163 @@ Err(unreachable!())
 
     }
 
+    pub mod object_rendering {
+        #[cfg(target_arch = "wasm32")]
+        mod raw {
+            #[link(wasm_import_module = "spring:object-rendering")]
+unsafe extern "C" {
+#[link_name = "clear-deferred-material-uniform"]
+pub safe fn clear_deferred_material_uniform(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:object-rendering")]
+unsafe extern "C" {
+#[link_name = "clear-forward-material-uniform"]
+pub safe fn clear_forward_material_uniform(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:object-rendering")]
+unsafe extern "C" {
+#[link_name = "set-deferred-material-uniform"]
+pub safe fn set_deferred_material_uniform(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:object-rendering")]
+unsafe extern "C" {
+#[link_name = "set-forward-material-uniform"]
+pub safe fn set_forward_material_uniform(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:object-rendering")]
+unsafe extern "C" {
+#[link_name = "set-material"]
+pub safe fn set_material(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+}
+        }
+
+        #[inline]
+pub fn clear_deferred_material_uniform(p0: i32, p1: i32, p2: i32, p3: i32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::clear_deferred_material_uniform(p0, p1, p2, p3, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, p3, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn clear_forward_material_uniform(p0: i32, p1: i32, p2: i32, p3: i32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::clear_forward_material_uniform(p0, p1, p2, p3, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, p3, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn set_deferred_material_uniform(p0: i32, p1: i32, p2: i32, p3: i32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_deferred_material_uniform(p0, p1, p2, p3, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, p3, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn set_forward_material_uniform(p0: i32, p1: i32, p2: i32, p3: i32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_forward_material_uniform(p0, p1, p2, p3, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, p3, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn set_material(p0: i32, p1: i32, p2: i32, p3: i32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_material(p0, p1, p2, p3, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, p3, blob0);
+Err(unreachable!())
+}
+}
+
+    }
+
 #[doc(hidden)]
-pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 265;
+pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 270;
 }

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstring>
 #include <cstdlib>
+#include <vector>
 
 #include "Game/Game.h"
 #include "Game/GameSetup.h"
@@ -15,6 +16,7 @@
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Misc/SideParser.h"
 #include "Sim/Units/UnitHandler.h"
+#include "Sim/Units/UnitDefHandler.h"
 #include "Map/MapDamage.h"
 #include "Map/MetalMap.h"
 #include "Map/ReadMap.h"
@@ -26,6 +28,7 @@
 #include "System/SpringMath.h"
 #include "System/Sync/SHA512.hpp"
 #include "System/StringUtil.h"
+#include "Lua/LuaHandle.h"
 
 namespace {
 
@@ -35,6 +38,8 @@ static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 static thread_local sha512::hex_digest mapChecksumDigest;
 static thread_local sha512::hex_digest modChecksumDigest;
+static thread_local std::vector<const char*> mapOptionKeys;
+static thread_local std::vector<const char*> modOptionKeys;
 
 // Static errors
 static const Error GAME_NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game is not initialized" };
@@ -83,12 +88,19 @@ static const char* CopyScratchString(const std::string& value)
 	}
 
 IMPL_SIMPLE_QUERY(IsCheatingEnabled, GameReady(), result->enabled = gs->cheatEnabled)
-IMPL_SIMPLE_QUERY(IsGodModeEnabled, GameReady(), result->enabled = gs->godMode)
-// devLuaEnabled not available in engine
-IMPL_SIMPLE_QUERY(IsDevLuaEnabled, GameReady(), result->enabled = false)
+static void NativeIsGodModeEnabled(const IsGodModeEnabledQuery* /*query*/, IsGodModeEnabledResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->enabled = gs->godMode != 0;
+	result->controlAllies = (gs->godMode & GODMODE_ATC_BIT) != 0;
+	result->controlEnemies = (gs->godMode & GODMODE_ETC_BIT) != 0;
+}
+
+IMPL_SIMPLE_QUERY(IsDevLuaEnabled, GameReady(), result->enabled = CLuaHandle::GetDevMode())
 IMPL_SIMPLE_QUERY(IsEditDefsEnabled, GameReady(), result->enabled = gs->editDefsEnabled)
-// noCostEnabled not available in engine
-IMPL_SIMPLE_QUERY(IsNoCostEnabled, GameReady(), result->enabled = false)
+IMPL_SIMPLE_QUERY(IsNoCostEnabled, GameReady(), result->enabled = unitDefHandler->GetNoCost())
 IMPL_SIMPLE_QUERY(AreHelperAIsEnabled, GameReady(), result->enabled = !gs->noHelperAIs)
 IMPL_SIMPLE_QUERY(FixedAllies, GameReady(), result->fixed = (gameSetup != nullptr) && gameSetup->fixedAllies)
 IMPL_SIMPLE_QUERY(IsGameOver, GameReady(), result->gameOver = game->IsGameOver())
@@ -243,18 +255,14 @@ static void NativeGetMapOptions(const GetMapOptionsQuery* query, GetMapOptionsRe
 	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 	const auto& options = gameSetup->GetMapOptions();
 
-	const char** keys = reinterpret_cast<const char**>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
-
-	for (const auto& [key, value] : options) {
-		if (bufferPos + sizeof(const char*) > sizeof(scratchBuffer)) { result->error = &INTERNAL; return; }
-		keys[count++] = key.c_str();
-		bufferPos += sizeof(const char*);
-	}
+	mapOptionKeys.clear();
+	mapOptionKeys.reserve(options.size());
+	for (const auto& [key, value] : options)
+		mapOptionKeys.push_back(key.c_str());
 
 	result->error = nullptr;
-	result->keys = keys;
-	result->count = count;
+	result->keys = mapOptionKeys.empty() ? nullptr : mapOptionKeys.data();
+	result->count = mapOptionKeys.size();
 }
 
 static void NativeGetModOption(const GetModOptionQuery* query, GetModOptionResult* result) {
@@ -276,18 +284,14 @@ static void NativeGetModOptions(const GetModOptionsQuery* query, GetModOptionsRe
 	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 	const auto& options = gameSetup->GetModOptions();
 
-	const char** keys = reinterpret_cast<const char**>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
-
-	for (const auto& [key, value] : options) {
-		if (bufferPos + sizeof(const char*) > sizeof(scratchBuffer)) { result->error = &INTERNAL; return; }
-		keys[count++] = key.c_str();
-		bufferPos += sizeof(const char*);
-	}
+	modOptionKeys.clear();
+	modOptionKeys.reserve(options.size());
+	for (const auto& [key, value] : options)
+		modOptionKeys.push_back(key.c_str());
 
 	result->error = nullptr;
-	result->keys = keys;
-	result->count = count;
+	result->keys = modOptionKeys.empty() ? nullptr : modOptionKeys.data();
+	result->count = modOptionKeys.size();
 }
 
 static void NativeGetWind(const GetWindQuery* query, GetWindResult* result) {

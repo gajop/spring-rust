@@ -872,7 +872,6 @@
         "game_rules_param",
         "team_rules_param",
         "player_rules_param",
-        "get_team_stats_history",
         "projectile_damage_armor",
         "projectile_damage_paralyze",
         "projectile_damage_impulse_factor",
@@ -940,6 +939,7 @@
         "unit_remove_object_decal"
       ],
       "unsupported_output": [
+        "get_team_stats_history",
         "team_share_level",
         "share_team_resource"
       ]

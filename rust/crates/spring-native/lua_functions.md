@@ -2,10 +2,10 @@
 
 Total Namespaces: 11
 
-Total Functions: 1368
+Total Functions: 1373
 
-Callouts (Plugin → Engine): 1178
-Callins (Engine → Plugin): 190
+Callouts (Plugin → Engine): 1179
+Callins (Engine → Plugin): 194
 
 ---
 
@@ -999,7 +999,7 @@ Callins (Engine → Plugin): 190
 - `VFS.ZlibCompress` (params: uncompressed:string)
 - `VFS.ZlibDecompress` (params: compressed:string)
 
-### debug (8 functions)
+### debug (9 functions)
 
 - `debug.clearEmulatedInput` (params: )
 - `debug.emulateKeyPress` (params: keycode:integer)
@@ -1007,7 +1007,8 @@ Callins (Engine → Plugin): 190
 - `debug.emulateMouseMove` (params: x:integer, y:integer)
 - `debug.emulateMousePress` (params: button:integer)
 - `debug.emulateMouseRelease` (params: button:integer)
-- `debug.emulateNativeApiParityCallins` (params: unitID:integer, featureID:integer, projectileID:integer)
+- `debug.emulateNativeApiParityCallins` (params: unitID:integer, featureID:integer, projectileID:integer, benchmarkOnly:boolean?)
+- `debug.emulateNativeApiParityUnimplementedCallin` (params: iterations:integer)
 - `debug.emulateUnitMoveFailed` (params: unitID:integer)
 
 ### gl (185 functions)
@@ -1221,7 +1222,7 @@ Callins (Engine → Plugin): 190
 
 ## Callins (Engine → Plugin)
 
-Total: 190 functions
+Total: 194 functions
 
 - `Callins.ActiveCommandChanged`
 - `Callins.AddConsoleLine`
@@ -1230,6 +1231,7 @@ Total: 190 functions
 - `Callins.AllowDirectUnitControl`
 - `Callins.AllowFeatureBuildStep`
 - `Callins.AllowFeatureCreation`
+- `Callins.AllowQuit`
 - `Callins.AllowResourceLevel`
 - `Callins.AllowResourceTransfer`
 - `Callins.AllowStartPosition`
@@ -1237,6 +1239,7 @@ Total: 190 functions
 - `Callins.AllowUnitCaptureStep`
 - `Callins.AllowUnitCloak`
 - `Callins.AllowUnitCreation`
+- `Callins.AllowUnitDecloak`
 - `Callins.AllowUnitKamikaze`
 - `Callins.AllowUnitTransfer`
 - `Callins.AllowUnitTransport`
@@ -1305,6 +1308,7 @@ Total: 190 functions
 - `Callins.GroupChanged`
 - `Callins.Initialize`
 - `Callins.IsAbove`
+- `Callins.KeyBindingsChanged`
 - `Callins.KeyMapChanged`
 - `Callins.KeyPress`
 - `Callins.KeyRelease`
@@ -1319,6 +1323,7 @@ Total: 190 functions
 - `Callins.MouseRelease`
 - `Callins.MouseWheel`
 - `Callins.MoveCtrlNotify`
+- `Callins.NanoParticleUpdate`
 - `Callins.PlayerAdded`
 - `Callins.PlayerChanged`
 - `Callins.PlayerRemoved`

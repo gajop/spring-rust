@@ -21,7 +21,7 @@
             pub fixed: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GameMapInfo {
             pub map_name: String,
             pub map_description: String,
@@ -38,7 +38,7 @@
             pub map_damage: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GameModInfo {
             pub game_name: String,
             pub game_short_name: String,
@@ -94,7 +94,7 @@
             pub capture_cost_factor: ResourcePack,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GameSetupInfo {
             pub start_pos_type: i32,
             pub ghosted_buildings: bool,
@@ -148,7 +148,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGameMapInfoResult {
             pub info: GameMapInfo,
         }
@@ -158,7 +158,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGameModInfoResult {
             pub info: GameModInfo,
         }
@@ -198,7 +198,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGameSetupInfoResult {
             pub info: GameSetupInfo,
         }
@@ -234,12 +234,12 @@
             pub heading: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMapOptionQuery {
             pub key: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMapOptionResult {
             pub value: String,
             pub exists: bool,
@@ -250,7 +250,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMapOptionsResult {
             pub keys: Vec<String>,
         }
@@ -260,17 +260,17 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMapStartPositionsResult {
             pub positions: Vec<StartPosition>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModOptionQuery {
             pub key: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModOptionResult {
             pub value: String,
             pub exists: bool,
@@ -281,7 +281,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModOptionsResult {
             pub keys: Vec<String>,
         }
@@ -291,7 +291,7 @@
             pub side_index: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetSideDataByIndexResult {
             pub data: SideData,
         }
@@ -306,12 +306,12 @@
             pub count: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetSideDataQuery {
             pub side_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetSideDataResult {
             pub data: SideData,
         }
@@ -405,6 +405,8 @@
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct IsGodModeEnabledResult {
             pub enabled: bool,
+            pub control_allies: bool,
+            pub control_enemies: bool,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -417,7 +419,7 @@
             pub enabled: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SideData {
             pub side_name: String,
             pub case_name: String,
@@ -460,13 +462,13 @@
             pub high16: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMapOptionValue {
             pub value: String,
             pub exists: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModOptionValue {
             pub value: String,
             pub exists: bool,
@@ -476,6 +478,13 @@
         pub struct GetTeamStartPositionValue {
             pub position: Float3,
             pub valid: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct IsGodModeEnabledValue {
+            pub enabled: bool,
+            pub control_allies: bool,
+            pub control_enemies: bool,
         }
 
         #[inline]
@@ -810,9 +819,13 @@
         }
 
         #[inline]
-        pub fn is_god_mode_enabled(unused: u8) -> Result<bool> {
+        pub fn is_god_mode_enabled(unused: u8) -> Result<IsGodModeEnabledValue> {
             let value = crate::generated::game::is_god_mode_enabled(unused)?;
-            Ok(value)
+            Ok(IsGodModeEnabledValue {
+                enabled: value.0,
+                control_allies: value.1,
+                control_enemies: value.2
+            })
         }
 
         #[inline]

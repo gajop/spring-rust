@@ -54,6 +54,7 @@
 #include "NativeInterface/api/GroundDecals.h"
 #include "NativeInterface/api/SystemControl.h"
 #include "NativeInterface/api/Profiling.h"
+#include "NativeInterface/api/ObjectRendering.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -128,6 +129,7 @@ struct NativeInterface {
 	const SystemControlApi* systemControl;
 	const ProfilingApi* profiling;
 	const GfxApi* gfx;
+	const ObjectRenderingApi* objectRendering;
 	const DebugInputApi* debugInput;
 	const CusApi* cus;
 };

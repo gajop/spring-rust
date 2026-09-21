@@ -61,7 +61,9 @@ struct GetGroupUnitsQuery { int32_t groupID; };
 struct GetGroupUnitsResult { const Error* error; int32_t* units; uint32_t count; };
 
 struct GetUnitGroupQuery { int32_t unitID; };
-struct GetUnitGroupResult { const Error* error; int32_t groupID; };
+// groupID is absent in Lua when the unit is not in a group.  Keep presence
+// separate because group zero is a valid group ID.
+struct GetUnitGroupResult { const Error* error; int32_t groupID; bool hasGroup; };
 
 struct SetUnitGroupQuery { int32_t unitID; int32_t groupID; };
 struct SetUnitGroupResult { const Error* error; bool success; };

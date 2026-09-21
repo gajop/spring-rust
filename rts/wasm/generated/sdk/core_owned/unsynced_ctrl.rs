@@ -1,7 +1,7 @@
     pub mod unsynced_ctrl {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AssignMouseCursorQuery {
             pub command_name: String,
             pub cursor_file_name: String,
@@ -14,7 +14,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DeselectUnitMapQuery {
             pub unit_i_ds: Vec<i32>,
         }
@@ -24,7 +24,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DrawUnitCommandsQuery {
             pub unit_i_ds: Vec<i32>,
             pub table_or_array: bool,
@@ -57,17 +57,17 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWaterTextureQuery {
             pub tex_type: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWaterTextureResult {
             pub tex_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LoadCmdColorsConfigQuery {
             pub filename: String,
         }
@@ -77,7 +77,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LoadCtrlPanelConfigQuery {
             pub filename: String,
         }
@@ -87,7 +87,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LoadModelTexturesQuery {
             pub model_name: String,
         }
@@ -127,7 +127,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ReplaceMouseCursorQuery {
             pub old_cursor_file_name: String,
             pub new_cursor_file_name: String,
@@ -192,7 +192,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SelectUnitMapQuery {
             pub unit_i_ds: Vec<i32>,
             pub append: bool,
@@ -225,7 +225,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetAtmosphereQuery {
             pub params: AtmosphereParams,
         }
@@ -286,7 +286,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetClipboardQuery {
             pub text: String,
         }
@@ -296,7 +296,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetCustomCommandDrawDataQuery {
             pub cmd_id: i32,
             pub cmd_reference: DefRef,
@@ -322,7 +322,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetDollyCameraCurveQuery {
             pub degree: i32,
             pub control_points: Vec<Float4>,
@@ -334,7 +334,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetDollyCameraLookCurveQuery {
             pub degree: i32,
             pub control_points: Vec<Float4>,
@@ -510,6 +510,17 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureLuaDrawQuery {
+            pub feature_id: i32,
+            pub lua_draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureLuaDrawResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureNoDrawQuery {
             pub feature_id: i32,
             pub no_draw: bool,
@@ -555,7 +566,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetMapRenderingParamsQuery {
             pub params: MapRenderingParams,
         }
@@ -576,7 +587,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetMapShadingTextureQuery {
             pub tex_type: String,
             pub tex_name: String,
@@ -599,7 +610,7 @@
             pub rotation: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetMouseCursorQuery {
             pub cursor_name: String,
             pub scale: f32,
@@ -625,14 +636,25 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetProjectileLuaDrawQuery {
+            pub projectile_id: i32,
+            pub lua_draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetProjectileLuaDrawResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetShockFrontFactorsOptions {
             pub min_area: Option<f32>,
             pub min_power: Option<f32>,
             pub dist_adj: Option<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetShockFrontFactorsQuery {
             pub options: SetShockFrontFactorsOptions,
         }
@@ -642,7 +664,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetSkyBoxTextureQuery {
             pub tex_name: String,
         }
@@ -663,7 +685,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetSunLightingQuery {
             pub params: SunLightingParams,
         }
@@ -684,7 +706,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetUnitDefIconQuery {
             pub unit_def_id: i32,
             pub icon_name: String,
@@ -695,7 +717,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetUnitDefImageQuery {
             pub unit_def_id: i32,
             pub image: String,
@@ -728,7 +750,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetUnitIconQuery {
             pub unit_id: i32,
             pub icon_name: String,
@@ -836,7 +858,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetWMCaptionQuery {
             pub title: String,
             pub title_short: String,
@@ -847,7 +869,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetWMIconQuery {
             pub icon_file_name: String,
             pub force_resolution: bool,
@@ -858,7 +880,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetWaterParamsQuery {
             pub params: WaterParams,
         }
@@ -868,7 +890,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetWaterTextureQuery {
             pub tex_type: String,
             pub tex_name: String,
@@ -1289,6 +1311,12 @@
         }
 
         #[inline]
+        pub fn set_feature_lua_draw(feature_id: i32, lua_draw: bool) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_feature_lua_draw(feature_id, lua_draw)?;
+            Ok(value)
+        }
+
+        #[inline]
         pub fn set_feature_no_draw(feature_id: i32, no_draw: bool) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_feature_no_draw(feature_id, no_draw)?;
             Ok(value)
@@ -1361,6 +1389,12 @@
         #[inline]
         pub fn set_nano_projectile_params(r: f32, v: f32, a: f32, rand_r: f32, rand_v: f32, rand_a: f32) -> Result<bool> {
             let value = crate::generated::unsynced_ctrl::set_nano_projectile_params(r, v, a, rand_r, rand_v, rand_a)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn set_projectile_lua_draw(projectile_id: i32, lua_draw: bool) -> Result<bool> {
+            let value = crate::generated::unsynced_ctrl::set_projectile_lua_draw(projectile_id, lua_draw)?;
             Ok(value)
         }
 

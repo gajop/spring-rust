@@ -24,12 +24,12 @@ impl From<SetFeatureBlockingOptions> for sys::SetFeatureBlockingOptions {
 }
 
 impl<'a> FeatureControl<'a> {
-    pub fn create_feature(&self, feature_def: sys::DefRef, pos: sys::Float3, facing: i32, team_id: i32, feature_id: i32) -> Result<i32, Error> {
+    pub fn create_feature(&self, feature_def: sys::DefRef, pos: sys::Float3, heading: i32, team_id: i32, feature_id: i32) -> Result<i32, Error> {
         unsafe {
             let query = sys::CreateFeatureQuery {
                 featureDef: feature_def,
                 pos,
-                facing,
+                heading,
                 teamID: team_id,
                 featureID: feature_id,
             };

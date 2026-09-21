@@ -191,7 +191,7 @@
       "requires": [],
       "lua": {"set": ["Spring.SetGodMode"], "get": ["Spring.IsGodModeEnabled"]},
       "native": {"set": ["GameConfig.set_god_mode"], "get": ["Game.is_god_mode_enabled"]},
-      "compare": {"mode": "fields", "fields": ["enabled"]},
+      "compare": {"mode": "fields", "fields": ["enabled", "controlAllies", "controlEnemies"]},
       "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
       "params": {
         "controlAllies": {"type": "bool", "fixed": true},
@@ -201,7 +201,7 @@
         "set": {"call": "Spring.SetGodMode", "args": ["value.controlAllies", "value.controlEnemies"]},
         "call": "Spring.IsGodModeEnabled",
         "args": [],
-        "returns": ["enabled"]
+        "returns": ["enabled", "controlAllies", "controlEnemies"]
       }
     },
     {

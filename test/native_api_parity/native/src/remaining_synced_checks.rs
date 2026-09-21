@@ -53,12 +53,14 @@ impl NativeApiParity {
                 self.same_bool_if_present(label, message, "enabled", native)
             }
             "set_god_mode" => {
-                let native = self
+                let (enabled, control_allies, control_enemies) = self
                     .interface
                     .game()
                     .is_god_mode_enabled()
                     .map_err(|err| format!("is_god_mode_enabled() failed: {err:?}"))?;
-                self.same_bool_if_present(label, message, "enabled", native)
+                self.same_bool_if_present(label, message, "enabled", enabled)?;
+                self.same_bool_if_present(label, message, "controlAllies", control_allies)?;
+                self.same_bool_if_present(label, message, "controlEnemies", control_enemies)
             }
             "set_experience_grade" | "set_no_pause" | "set_square_building_mask" => {
                 self.same_i32_if_present(label, message, "returnCount", 0)

@@ -741,7 +741,12 @@ impl NativeApiParity {
                     "get_team_stats_history({team_id}, {start_index}, {end_index}) failed: {err:?}"
                 )
             })?;
-        self.same_i32_if_present(label, message, "count", native.len() as i32)
+        self.same_i32_if_present(label, message, "count", native.len() as i32)?;
+        if let Some(first) = native.first() {
+            self.same_if_present(label, message, "time", first.time)?;
+            self.same_i32_if_present(label, message, "frame", first.frame)?;
+        }
+        Ok(())
     }
     pub(crate) fn check_team_damage_stats(
         &mut self,

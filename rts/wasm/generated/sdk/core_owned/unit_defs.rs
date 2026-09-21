@@ -1,14 +1,15 @@
     pub mod unit_defs {
         use super::{Result, String, Vec};
 
+        #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum UnitDefParamType {
-            UnitDefParamBool,
-            UnitDefParamFloat,
-            UnitDefParamInt,
-            UnitDefParamMissing,
-            UnitDefParamString,
-            UnitDefParamTable,
+            UnitDefParamBool = 2,
+            UnitDefParamFloat = 3,
+            UnitDefParamInt = 1,
+            UnitDefParamMissing = 0,
+            UnitDefParamString = 4,
+            UnitDefParamTable = 5,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -16,7 +17,7 @@
             pub unit_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefByIDResult {
             pub exists: bool,
             pub basic: UnitDefBasicInfo,
@@ -64,18 +65,18 @@
             pub unit_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefCustomParamKeysResult {
             pub keys: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefCustomParamQuery {
             pub unit_def_id: i32,
             pub key: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefCustomParamResult {
             pub value: String,
         }
@@ -95,12 +96,12 @@
             pub unit_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefHumanNameResult {
             pub human_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefIDByNameQuery {
             pub unit_def_name: String,
         }
@@ -115,7 +116,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefIDsResult {
             pub ids: Vec<i32>,
         }
@@ -125,12 +126,12 @@
             pub unit_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefNameResult {
             pub name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefParamBoolQuery {
             pub unit_def_id: i32,
             pub key: String,
@@ -141,7 +142,7 @@
             pub value: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefParamFloatQuery {
             pub unit_def_id: i32,
             pub key: String,
@@ -152,7 +153,7 @@
             pub value: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefParamIntQuery {
             pub unit_def_id: i32,
             pub key: String,
@@ -168,23 +169,23 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefParamKeysResult {
             pub keys: Vec<UnitDefParamKey>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefParamStringQuery {
             pub unit_def_id: i32,
             pub key: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefParamStringResult {
             pub value: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefParamTypeQuery {
             pub key: String,
         }
@@ -204,7 +205,7 @@
             pub speed: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitDefBasicInfo {
             pub id: i32,
             pub name: String,
@@ -213,7 +214,7 @@
             pub unit_def_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitDefBuildOptions {
             pub buildable_unit_def_i_ds: Vec<i32>,
         }
@@ -251,7 +252,7 @@
             pub idle_time: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitDefParamKey {
             pub name: String,
             pub type_: i32,
@@ -288,7 +289,7 @@
             pub sonar_jammer_radius: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitDefWeapons {
             pub weapon_def_i_ds: Vec<i32>,
         }
@@ -314,7 +315,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitDefByIDValue {
             pub exists: bool,
             pub basic: UnitDefBasicInfo,

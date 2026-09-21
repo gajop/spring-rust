@@ -1545,12 +1545,18 @@ bool CGame::Draw() {
 		// (unlikely);
 		worldDrawer.GenerateIBLTextures();
 
-		// restore back to the default FBO / Viewport
-		if (FBO::IsSupported())
+		// A Core-Wasm DrawGenesis callback may bind a render target for the
+		// world pass. Keep it bound through worldDrawer.Draw(), then restore the
+		// default target before screen effects run.
+		const auto wasmWorldFBO = FBO::IsSupported() && nativeInterfaceSystem != nullptr ?
+			nativeInterfaceSystem->WasmWorldFBO() : 0;
+		if (wasmWorldFBO == 0)
 			FBO::Unbind();
 		camera->LoadViewport();
 
-		worldDrawer.Draw();
+		worldDrawer.Draw(wasmWorldFBO);
+		if (wasmWorldFBO != 0)
+			FBO::Unbind();
 		worldDrawer.ResetMVPMatrices();
 	}
 

@@ -52,8 +52,8 @@ struct UnitWeaponVectors {
 
 // Weapon targeting
 struct UnitWeaponTarget {
-	int32_t targetType;  // 0=none, 1=unit, 2=ground
-	int32_t targetID;    // Unit ID if type==1
+	int32_t targetType;  // 0=none, 1=unit, 2=ground, 3=intercept
+	int32_t targetID;    // Unit ID if type==1, projectile ID if type==3
 	Float3 targetPos;
 };
 

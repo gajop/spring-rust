@@ -474,7 +474,7 @@ static void NativeGetCurrentTooltip(const GetCurrentTooltipQuery* query, GetCurr
 static void NativeIsUserWriting(const IsUserWritingQuery* query, IsUserWritingResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->writing = (mouse != nullptr) && mouse->locked;
+	result->writing = gameTextInput.userWriting;
 }
 
 } // namespace

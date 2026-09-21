@@ -218,6 +218,49 @@ struct CoreOwned_NativeProjectileParams {
     }
 };
 
+struct CoreOwned_ObjectMaterialDescriptor {
+    ObjectMaterialDescriptor value{};
+    std::string shaderStorage;
+    std::vector<std::uint32_t> textureUnitsStorage;
+    std::vector<std::string> textureNamesStrings;
+    std::vector<const char*> textureNamesPointers;
+
+    bool Decode(HostState* state, WireReader& reader)
+    {
+        { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return false; value.shaderID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.shaderID)>>>(coreRaw); }
+        { std::uint32_t coreLength = 0; if (!reader.U32(coreLength) || !CheckResultNodes(state, coreLength)) return false; std::span<const std::uint8_t> coreBytes; if (!reader.Bytes(coreLength, coreBytes)) return false; shaderStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); value.shader = shaderStorage.data(); }
+        { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return false; value.order = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.order)>>>(coreRaw); }
+        if (!reader.Bool(value.useCamera)) return false;
+        { std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return false; value.culling = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.culling)>>>(coreRaw); }
+        { std::uint32_t coreCount = 0; if (!reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) return false; textureUnitsStorage.clear(); textureUnitsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t item{};
+            { std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+            textureUnitsStorage.push_back(item); } value.textureUnits = textureUnitsStorage.empty() ? nullptr : textureUnitsStorage.data(); if (!AssignDynamicCount(coreCount, value.textureCount)) return false; }
+        { std::uint32_t coreCount = 0; if (!reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) return false; textureNamesStrings.clear(); textureNamesPointers.clear(); textureNamesStrings.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::uint32_t coreLength = 0; if (!reader.U32(coreLength)) return false; std::span<const std::uint8_t> coreBytes; if (!reader.Bytes(coreLength, coreBytes)) return false; textureNamesStrings.emplace_back(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); } textureNamesPointers.reserve(textureNamesStrings.size()); for (const auto& item : textureNamesStrings) textureNamesPointers.push_back(item.c_str()); value.textureNames = textureNamesPointers.empty() ? nullptr : textureNamesPointers.data(); if (value.textureCount != coreCount) return false; }
+        { std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return false; value.preList = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.preList)>>>(coreRaw); }
+        { std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return false; value.postList = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.postList)>>>(coreRaw); }
+        return true;
+    }
+};
+
+struct CoreOwned_ObjectMaterialUniform {
+    ObjectMaterialUniform value{};
+    std::string nameStorage;
+
+    bool Decode(HostState* state, WireReader& reader)
+    {
+        { std::uint32_t coreLength = 0; if (!reader.U32(coreLength) || !CheckResultNodes(state, coreLength)) return false; std::span<const std::uint8_t> coreBytes; if (!reader.Bytes(coreLength, coreBytes)) return false; nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); value.name = nameStorage.data(); }
+        { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return false; value.type = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.type)>>>(coreRaw); }
+        for (std::size_t coreReadIndex2 = 0; coreReadIndex2 < 32u; ++coreReadIndex2) {
+            if (!reader.F32(value.floatValues[coreReadIndex2])) return false;
+        }
+        for (std::size_t coreReadIndex2 = 0; coreReadIndex2 < 32u; ++coreReadIndex2) {
+            { std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return false; value.intValues[coreReadIndex2] = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.intValues[coreReadIndex2])>>>(coreRaw); }
+        }
+        { std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return false; value.valueCount = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(value.valueCount)>>>(coreRaw); }
+        return true;
+    }
+};
+
 struct CoreOwned_RmlDataFieldDef {
     RmlDataFieldDef value{};
     std::string nameStorage;
@@ -451,7 +494,7 @@ wasm_trap_t* CoreDynamicInput_units_commands_get_command_params(void* environmen
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetCommandParamsResult result{};
     state->native->unitsCommands->GetCommandParams(&query, &result);
@@ -464,13 +507,15 @@ wasm_trap_t* CoreDynamicInput_units_commands_get_command_params(void* environmen
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.F32(result.params[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -742,7 +787,7 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_custom_param(void* environm
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetUnitDefCustomParamResult result{};
     state->native->unitDefs->GetUnitDefCustomParam(&query, &result);
@@ -967,7 +1012,7 @@ wasm_trap_t* CoreDynamicInput_unit_defs_get_unit_def_param_string(void* environm
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetUnitDefParamStringResult result{};
     state->native->unitDefs->GetUnitDefParamString(&query, &result);
@@ -1069,7 +1114,7 @@ wasm_trap_t* CoreDynamicInput_feature_defs_get_feature_def_custom_param(void* en
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetFeatureDefCustomParamResult result{};
     state->native->featureDefs->GetFeatureDefCustomParam(&query, &result);
@@ -1171,7 +1216,7 @@ wasm_trap_t* CoreDynamicInput_weapon_defs_get_weapon_def_custom_param(void* envi
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetWeaponDefCustomParamResult result{};
     state->native->weaponDefs->GetWeaponDefCustomParam(&query, &result);
@@ -1358,7 +1403,7 @@ wasm_trap_t* CoreDynamicInput_encoding_decode_base64(void* environment, wasmtime
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     DecodeBase64Result result{};
     state->native->encoding->DecodeBase64(&query, &result);
@@ -1371,13 +1416,15 @@ wasm_trap_t* CoreDynamicInput_encoding_decode_base64(void* environment, wasmtime
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.decoded[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -1421,7 +1468,7 @@ wasm_trap_t* CoreDynamicInput_encoding_decode_base64_url(void* environment, wasm
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     DecodeBase64UrlResult result{};
     state->native->encoding->DecodeBase64Url(&query, &result);
@@ -1434,13 +1481,15 @@ wasm_trap_t* CoreDynamicInput_encoding_decode_base64_url(void* environment, wasm
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.decoded[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -1488,7 +1537,7 @@ wasm_trap_t* CoreDynamicInput_encoding_encode_base64(void* environment, wasmtime
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     EncodeBase64Result result{};
     state->native->encoding->EncodeBase64(&query, &result);
@@ -1552,7 +1601,7 @@ wasm_trap_t* CoreDynamicInput_encoding_encode_base64_url(void* environment, wasm
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     EncodeBase64UrlResult result{};
     state->native->encoding->EncodeBase64Url(&query, &result);
@@ -2036,7 +2085,7 @@ wasm_trap_t* CoreDynamicInput_input_get_key_from_scan_symbol(void* environment, 
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetKeyFromScanSymbolResult result{};
     state->native->input->GetKeyFromScanSymbol(&query, &result);
@@ -2100,7 +2149,7 @@ wasm_trap_t* CoreDynamicInput_input_get_mouse_buttons_pressed(void* environment,
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetMouseButtonsPressedResult result{};
     state->native->input->GetMouseButtonsPressed(&query, &result);
@@ -2113,13 +2162,15 @@ wasm_trap_t* CoreDynamicInput_input_get_mouse_buttons_pressed(void* environment,
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.Bool(result.pressed[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -2772,7 +2823,7 @@ wasm_trap_t* CoreDynamicInput_tracing_trace_ray_between_positions(void* environm
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 12u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     TraceRayBetweenPositionsResult result{};
     state->native->tracing->TraceRayBetweenPositions(&query, &result);
@@ -2785,16 +2836,18 @@ wasm_trap_t* CoreDynamicInput_tracing_trace_ray_between_positions(void* environm
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 12u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.F32(result.hits[coreIndex].hitLength)) return Trap("dynamic-input Core wire overflow");
         if (!writer.I32(result.hits[coreIndex].objectID)) return Trap("dynamic-input Core wire overflow");
         if (!writer.I32(result.hits[coreIndex].objectType)) return Trap("dynamic-input Core wire overflow");
         if (!writer.Align(4u)) return Trap("dynamic-input Core record alignment overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -3017,7 +3070,7 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_get_water_texture(void* environment,
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetWaterTextureResult result{};
     state->native->unsyncedCtrl->GetWaterTexture(&query, &result);
@@ -6173,16 +6226,16 @@ wasm_trap_t* CoreDynamicInput_gfx_uniform_array_float(void* environment, wasmtim
     if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
         state->native->gfx->UniformArrayFloat == nullptr)
         return Trap("UniformArrayFloat dynamic-input Core binding is unavailable");
-    if (slots == nullptr || slotCount != 2u)
+    if (slots == nullptr || slotCount != 3u)
         return Trap("UniformArrayFloat dynamic-input Core ABI signature mismatch");
 
     std::string budgetError;
-    ImportGuard guard(state, 3u, budgetError);
+    ImportGuard guard(state, 4u, budgetError);
     if (!guard.Ok()) return Trap(budgetError);
     std::string memoryError;
     if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
 
-    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
     if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
@@ -6201,6 +6254,7 @@ wasm_trap_t* CoreDynamicInput_gfx_uniform_array_float(void* environment, wasmtim
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
     if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.components = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.components)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -6217,16 +6271,16 @@ wasm_trap_t* CoreDynamicInput_gfx_uniform_array_int(void* environment, wasmtime_
     if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
         state->native->gfx->UniformArrayInt == nullptr)
         return Trap("UniformArrayInt dynamic-input Core binding is unavailable");
-    if (slots == nullptr || slotCount != 2u)
+    if (slots == nullptr || slotCount != 3u)
         return Trap("UniformArrayInt dynamic-input Core ABI signature mismatch");
 
     std::string budgetError;
-    ImportGuard guard(state, 3u, budgetError);
+    ImportGuard guard(state, 4u, budgetError);
     if (!guard.Ok()) return Trap(budgetError);
     std::string memoryError;
     if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
 
-    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
     std::span<const std::uint8_t> inputDescriptorWire;
     if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
     WireReader inputControl(inputDescriptorWire);
@@ -6245,6 +6299,7 @@ wasm_trap_t* CoreDynamicInput_gfx_uniform_array_int(void* environment, wasmtime_
                 return true;
             }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } valuesStorage.push_back(item); } query.values = valuesStorage.empty() ? nullptr : valuesStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
     if (!valuesReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.components = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.components)>>>(slots[1].i32);
     if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
 
     GfxEmptyResult result{};
@@ -8574,7 +8629,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_elements_by_class_name(void* en
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 8u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     RmlElementHandleListResult result{};
     state->native->rmlUi->ElementGetElementsByClassName(&query, &result);
@@ -8587,13 +8642,15 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_elements_by_class_name(void* en
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 8u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U64(result.elementHandles[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -8679,7 +8736,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_elements_by_tag_name(void* envi
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 8u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     RmlElementHandleListResult result{};
     state->native->rmlUi->ElementGetElementsByTagName(&query, &result);
@@ -8692,13 +8749,15 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_get_elements_by_tag_name(void* envi
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 8u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U64(result.elementHandles[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -8998,7 +9057,7 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_query_selector_all(void* environmen
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 8u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     RmlElementHandleListResult result{};
     state->native->rmlUi->ElementQuerySelectorAll(&query, &result);
@@ -9011,13 +9070,15 @@ wasm_trap_t* CoreDynamicInput_rml_ui_element_query_selector_all(void* environmen
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 8u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U64(result.elementHandles[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -9950,7 +10011,7 @@ wasm_trap_t* CoreDynamicInput_vfs_calculate_hash(void* environment, wasmtime_cal
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     CalculateHashResult result{};
     state->native->vfs->CalculateHash(&query, &result);
@@ -10257,7 +10318,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_archive_containing_file(void* environment,
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetArchiveContainingFileResult result{};
     state->native->vfs->GetArchiveContainingFile(&query, &result);
@@ -10318,7 +10379,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_archive_path(void* environment, wasmtime_c
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetArchivePathResult result{};
     state->native->vfs->GetArchivePath(&query, &result);
@@ -10388,7 +10449,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_file_absolute_path(void* environment, wasm
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetFileAbsolutePathResult result{};
     state->native->vfs->GetFileAbsolutePath(&query, &result);
@@ -10533,7 +10594,7 @@ wasm_trap_t* CoreDynamicInput_vfs_get_name_from_rapid_tag(void* environment, was
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     GetNameFromRapidTagResult result{};
     state->native->vfs->GetNameFromRapidTag(&query, &result);
@@ -10683,7 +10744,7 @@ wasm_trap_t* CoreDynamicInput_vfs_load_file(void* environment, wasmtime_caller_t
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     LoadFileResult result{};
     state->native->vfs->LoadFile(&query, &result);
@@ -10696,13 +10757,15 @@ wasm_trap_t* CoreDynamicInput_vfs_load_file(void* environment, wasmtime_caller_t
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -10749,7 +10812,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_f32(void* environment, wasmtime_caller_t*
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     PackF32Result result{};
     state->native->vfs->PackF32(&query, &result);
@@ -10762,13 +10825,15 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_f32(void* environment, wasmtime_caller_t*
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -10815,7 +10880,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s16(void* environment, wasmtime_caller_t*
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     PackS16Result result{};
     state->native->vfs->PackS16(&query, &result);
@@ -10828,13 +10893,15 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s16(void* environment, wasmtime_caller_t*
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -10881,7 +10948,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s32(void* environment, wasmtime_caller_t*
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     PackS32Result result{};
     state->native->vfs->PackS32(&query, &result);
@@ -10894,13 +10961,15 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s32(void* environment, wasmtime_caller_t*
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -10947,7 +11016,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s8(void* environment, wasmtime_caller_t* 
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     PackS8Result result{};
     state->native->vfs->PackS8(&query, &result);
@@ -10960,13 +11029,15 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_s8(void* environment, wasmtime_caller_t* 
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11013,7 +11084,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u16(void* environment, wasmtime_caller_t*
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     PackU16Result result{};
     state->native->vfs->PackU16(&query, &result);
@@ -11026,13 +11097,15 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u16(void* environment, wasmtime_caller_t*
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11079,7 +11152,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u32(void* environment, wasmtime_caller_t*
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     PackU32Result result{};
     state->native->vfs->PackU32(&query, &result);
@@ -11092,13 +11165,15 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u32(void* environment, wasmtime_caller_t*
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11145,7 +11220,7 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u8(void* environment, wasmtime_caller_t* 
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     PackU8Result result{};
     state->native->vfs->PackU8(&query, &result);
@@ -11158,13 +11233,15 @@ wasm_trap_t* CoreDynamicInput_vfs_pack_u8(void* environment, wasmtime_caller_t* 
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11208,7 +11285,7 @@ wasm_trap_t* CoreDynamicInput_vfs_read_file(void* environment, wasmtime_caller_t
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     ReadFileResult result{};
     state->native->vfs->ReadFile(&query, &result);
@@ -11221,13 +11298,15 @@ wasm_trap_t* CoreDynamicInput_vfs_read_file(void* environment, wasmtime_caller_t
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11271,7 +11350,7 @@ wasm_trap_t* CoreDynamicInput_vfs_read_file_as_string(void* environment, wasmtim
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     ReadFileAsStringResult result{};
     state->native->vfs->ReadFileAsString(&query, &result);
@@ -11379,7 +11458,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_f32(void* environment, wasmtime_caller_
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     UnpackF32Result result{};
     state->native->vfs->UnpackF32(&query, &result);
@@ -11392,13 +11471,15 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_f32(void* environment, wasmtime_caller_
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.F32(result.values[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11447,7 +11528,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s16(void* environment, wasmtime_caller_
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     UnpackS16Result result{};
     state->native->vfs->UnpackS16(&query, &result);
@@ -11460,13 +11541,15 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s16(void* environment, wasmtime_caller_
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.I32(result.values[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11515,7 +11598,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s32(void* environment, wasmtime_caller_
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     UnpackS32Result result{};
     state->native->vfs->UnpackS32(&query, &result);
@@ -11528,13 +11611,15 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s32(void* environment, wasmtime_caller_
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.I32(result.values[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11583,7 +11668,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s8(void* environment, wasmtime_caller_t
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     UnpackS8Result result{};
     state->native->vfs->UnpackS8(&query, &result);
@@ -11596,13 +11681,15 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_s8(void* environment, wasmtime_caller_t
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.I32(result.values[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11651,7 +11738,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u16(void* environment, wasmtime_caller_
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     UnpackU16Result result{};
     state->native->vfs->UnpackU16(&query, &result);
@@ -11664,13 +11751,15 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u16(void* environment, wasmtime_caller_
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.values[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11719,7 +11808,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u32(void* environment, wasmtime_caller_
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     UnpackU32Result result{};
     state->native->vfs->UnpackU32(&query, &result);
@@ -11732,13 +11821,15 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u32(void* environment, wasmtime_caller_
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.values[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11787,7 +11878,7 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u8(void* environment, wasmtime_caller_t
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     UnpackU8Result result{};
     state->native->vfs->UnpackU8(&query, &result);
@@ -11800,13 +11891,15 @@ wasm_trap_t* CoreDynamicInput_vfs_unpack_u8(void* environment, wasmtime_caller_t
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.values[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11853,7 +11946,7 @@ wasm_trap_t* CoreDynamicInput_vfs_zlib_compress(void* environment, wasmtime_call
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     ZlibCompressResult result{};
     state->native->vfs->ZlibCompress(&query, &result);
@@ -11866,13 +11959,15 @@ wasm_trap_t* CoreDynamicInput_vfs_zlib_compress(void* environment, wasmtime_call
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -11919,7 +12014,7 @@ wasm_trap_t* CoreDynamicInput_vfs_zlib_decompress(void* environment, wasmtime_ca
     std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
     if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
-    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
 
     ZlibDecompressResult result{};
     state->native->vfs->ZlibDecompress(&query, &result);
@@ -11932,13 +12027,15 @@ wasm_trap_t* CoreDynamicInput_vfs_zlib_decompress(void* environment, wasmtime_ca
     const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
     if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
     if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
-    WireWriter writer(outputWire);
-    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
         if (!writer.U32(result.data[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     }
-    if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
     slots[0].i32 = 0;
     return nullptr;
 }
@@ -13168,7 +13265,7 @@ wasm_trap_t* CoreDynamicInput_feature_control_create_feature(void* environment, 
     }();
     if (!posOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
     if (!posReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
-    query.facing = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.facing)>>>(slots[0].i32);
+    query.heading = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.heading)>>>(slots[0].i32);
     query.teamID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.teamID)>>>(slots[1].i32);
     query.featureID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.featureID)>>>(slots[2].i32);
     if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
@@ -13518,6 +13615,229 @@ wasm_trap_t* CoreDynamicInput_cob_script_get_cob_script_id(void* environment, wa
     state->native->syncedCtrl->cobScript->GetCOBScriptID(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.funcID), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_object_rendering_clear_deferred_material_uniform(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->objectRendering == nullptr ||
+        state->native->objectRendering->ClearDeferredMaterialUniform == nullptr)
+        return Trap("ClearDeferredMaterialUniform dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5u)
+        return Trap("ClearDeferredMaterialUniform dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    ClearObjectMaterialUniformQuery query{};
+    query.objectType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectType)>>>(slots[0].i32);
+    query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[1].i32);
+    query.materialType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.materialType)>>>(slots[2].i32);
+    query.lodLevel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodLevel)>>>(slots[3].i32);
+    std::uint32_t namePointer = 0, nameBytes = 0;
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(nameBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> nameWire;
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader nameReader(nameWire);
+    std::string nameStorage;
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    ObjectRenderingResult result{};
+    state->native->objectRendering->ClearDeferredMaterialUniform(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_object_rendering_clear_forward_material_uniform(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->objectRendering == nullptr ||
+        state->native->objectRendering->ClearForwardMaterialUniform == nullptr)
+        return Trap("ClearForwardMaterialUniform dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5u)
+        return Trap("ClearForwardMaterialUniform dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    ClearObjectMaterialUniformQuery query{};
+    query.objectType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectType)>>>(slots[0].i32);
+    query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[1].i32);
+    query.materialType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.materialType)>>>(slots[2].i32);
+    query.lodLevel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodLevel)>>>(slots[3].i32);
+    std::uint32_t namePointer = 0, nameBytes = 0;
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(nameBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> nameWire;
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader nameReader(nameWire);
+    std::string nameStorage;
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    ObjectRenderingResult result{};
+    state->native->objectRendering->ClearForwardMaterialUniform(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_object_rendering_set_deferred_material_uniform(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->objectRendering == nullptr ||
+        state->native->objectRendering->SetDeferredMaterialUniform == nullptr)
+        return Trap("SetDeferredMaterialUniform dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5u)
+        return Trap("SetDeferredMaterialUniform dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    SetObjectMaterialUniformQuery query{};
+    query.objectType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectType)>>>(slots[0].i32);
+    query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[1].i32);
+    query.materialType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.materialType)>>>(slots[2].i32);
+    query.lodLevel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodLevel)>>>(slots[3].i32);
+    std::uint32_t uniformPointer = 0, uniformBytes = 0;
+    if (!inputControl.U32(uniformPointer) || !inputControl.U32(uniformBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(uniformBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> uniformWire;
+    if (!state->memory.View(uniformPointer, uniformBytes, uniformWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader uniformReader(uniformWire);
+    CoreOwned_ObjectMaterialUniform uniformOwner;
+    if (!uniformOwner.Decode(state, uniformReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    query.uniform = uniformOwner.value;
+    if (!uniformReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    ObjectRenderingResult result{};
+    state->native->objectRendering->SetDeferredMaterialUniform(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_object_rendering_set_forward_material_uniform(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->objectRendering == nullptr ||
+        state->native->objectRendering->SetForwardMaterialUniform == nullptr)
+        return Trap("SetForwardMaterialUniform dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5u)
+        return Trap("SetForwardMaterialUniform dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    SetObjectMaterialUniformQuery query{};
+    query.objectType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectType)>>>(slots[0].i32);
+    query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[1].i32);
+    query.materialType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.materialType)>>>(slots[2].i32);
+    query.lodLevel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodLevel)>>>(slots[3].i32);
+    std::uint32_t uniformPointer = 0, uniformBytes = 0;
+    if (!inputControl.U32(uniformPointer) || !inputControl.U32(uniformBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(uniformBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> uniformWire;
+    if (!state->memory.View(uniformPointer, uniformBytes, uniformWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader uniformReader(uniformWire);
+    CoreOwned_ObjectMaterialUniform uniformOwner;
+    if (!uniformOwner.Decode(state, uniformReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    query.uniform = uniformOwner.value;
+    if (!uniformReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    ObjectRenderingResult result{};
+    state->native->objectRendering->SetForwardMaterialUniform(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_object_rendering_set_material(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->objectRendering == nullptr ||
+        state->native->objectRendering->SetMaterial == nullptr)
+        return Trap("SetMaterial dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5u)
+        return Trap("SetMaterial dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    SetObjectMaterialQuery query{};
+    query.objectType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectType)>>>(slots[0].i32);
+    query.objectID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.objectID)>>>(slots[1].i32);
+    query.lodLevel = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.lodLevel)>>>(slots[2].i32);
+    query.materialType = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.materialType)>>>(slots[3].i32);
+    std::uint32_t materialPointer = 0, materialBytes = 0;
+    if (!inputControl.U32(materialPointer) || !inputControl.U32(materialBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(materialBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> materialWire;
+    if (!state->memory.View(materialPointer, materialBytes, materialWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader materialReader(materialWire);
+    CoreOwned_ObjectMaterialDescriptor materialOwner;
+    if (!materialOwner.Decode(state, materialReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    query.material = materialOwner.value;
+    if (!materialReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    ObjectRenderingResult result{};
+    state->native->objectRendering->SetMaterial(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
     return nullptr;
 }
 
@@ -14294,10 +14614,31 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
                 MakeFuncType(params, 5, results, 1), CoreDynamicInput_effects_control_spawn_ceg, state, error))
             return false;
     }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedDynamicInput(linker, "spring:object-rendering", "set-deferred-material-uniform",
+                MakeFuncType(params, 5, results, 1), CoreDynamicInput_object_rendering_set_deferred_material_uniform, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedDynamicInput(linker, "spring:object-rendering", "set-forward-material-uniform",
+                MakeFuncType(params, 5, results, 1), CoreDynamicInput_object_rendering_set_forward_material_uniform, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedDynamicInput(linker, "spring:object-rendering", "set-material",
+                MakeFuncType(params, 5, results, 1), CoreDynamicInput_object_rendering_set_material, state, error))
+            return false;
+    }
 
     return true;
 }
 
-static_assert(265u >= 0u, "generated dynamic-input Core callback count");
+static_assert(270u >= 0u, "generated dynamic-input Core callback count");
 
 } // namespace recoil::wasm::core::generated

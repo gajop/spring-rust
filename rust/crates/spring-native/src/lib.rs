@@ -196,6 +196,7 @@ mod memory;
 mod messages;
 mod metal_map;
 mod move_ctrl;
+mod object_rendering;
 mod path_finder;
 mod platform;
 mod player;
@@ -223,7 +224,9 @@ pub use camera::{SetCameraTargetOptions, TraceScreenRayOptions};
 pub use gfx::{
     GfxColorMaskOptions, GfxCreateShaderOptions, GfxDepthTestOptions, GfxFeatureDrawOptions,
     GfxFontSubmitBufferedOptions, GfxLightOptions, GfxMultiTexGenOptions, GfxObjectShapeOptions,
-    GfxSaveImageOptions, GfxTexGenOptions, GfxUnitDrawOptions,
+    GfxSaveImageOptions, GfxTexGenOptions, GfxUnitDrawOptions, MATRIX_BILLBOARD, MATRIX_PROJECTION,
+    MATRIX_PROJECTION_INVERSE, MATRIX_SHADOW, MATRIX_VIEW, MATRIX_VIEW_INVERSE,
+    MATRIX_VIEWPROJECTION, MATRIX_VIEWPROJECTION_INVERSE,
 };
 pub use ground_decals::GetGroundDecalTexturesOptions;
 pub use markers::MarkerErasePositionOptions;
@@ -275,7 +278,7 @@ pub use error::Error;
 pub use feature_defs::{FeatureDefInfo, FeatureDefs};
 pub use features::Features;
 pub use game::{Game, GameModInfo, SideData};
-pub use gfx::{ConsoleCommand, Gfx};
+pub use gfx::{ConsoleCommand, Gfx, ShaderCreateParams, ShaderUniformFloat, ShaderUniformInt};
 pub use ground_decals::GroundDecals;
 pub use icons::Icons;
 pub use input::Input;

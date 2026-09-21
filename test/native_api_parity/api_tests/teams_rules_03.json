@@ -489,7 +489,9 @@
         "mode": "fields",
         "epsilon": 0.05,
         "fields": [
-          "count"
+          "count",
+          "time",
+          "frame"
         ]
       },
       "report": {
@@ -497,7 +499,7 @@
         "native_setter": "n/a",
         "lua_getter": "`Spring.GetTeamStatsHistory`",
         "native_getter": "`Teams.get_team_stats_history`",
-        "fields": "`count`"
+        "fields": "`count`, `time`, `frame`"
       },
       "rust": {
         "check": "check_team_stats_history_count",
@@ -528,6 +530,20 @@
           {
             "field": "count",
             "transform": "table_count"
+          },
+          {
+            "field": "time",
+            "path": [
+              1,
+              "time"
+            ]
+          },
+          {
+            "field": "frame",
+            "path": [
+              1,
+              "frame"
+            ]
           }
         ]
       }

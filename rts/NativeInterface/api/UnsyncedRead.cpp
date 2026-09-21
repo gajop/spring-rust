@@ -50,6 +50,12 @@ namespace {
 // Thread-local scratch buffer for dynamic data
 thread_local uint8_t scratchBuffer[4096];
 thread_local size_t bufferPos = 0;
+thread_local std::vector<int32_t> visibleIDs;
+thread_local std::vector<Float3> messagePositions;
+thread_local std::vector<Float3> nurbsPoints;
+thread_local std::vector<ActiveCommandDescription> activeCommandStorage;
+thread_local std::vector<std::vector<std::string>> activeCommandStringStorage;
+thread_local std::vector<std::vector<const char*>> activeCommandParameterStorage;
 
 // Error messages
 static const Error NOT_READY_ERROR = {
@@ -98,26 +104,23 @@ static const char* CopyToScratch(const std::string& str) {
 	return out;
 }
 
-template<typename T>
-static T* AllocateArray(size_t count) {
-	const size_t needed = count * sizeof(T);
-	if (bufferPos + needed > sizeof(scratchBuffer))
-		return nullptr;
-
-	T* out = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
-	bufferPos += needed;
-	return out;
-}
-
-static bool FillActiveCommandDescription(const SCommandDescription& in, ActiveCommandDescription& out)
+static bool FillActiveCommandDescriptionDynamic(const SCommandDescription& in,
+	ActiveCommandDescription& out)
 {
+	auto& strings = activeCommandStringStorage.emplace_back();
+	strings.reserve(5 + in.params.size());
+	auto storeString = [&strings](const std::string& value) {
+		strings.push_back(value);
+		return strings.back().c_str();
+	};
+
 	out.id = in.id;
 	out.type = in.type;
-	out.name = CopyToScratch(in.name);
-	out.action = CopyToScratch(in.action);
-	out.tooltip = CopyToScratch(in.tooltip);
-	out.texture = CopyToScratch(in.iconname);
-	out.cursor = CopyToScratch(in.mouseicon);
+	out.name = storeString(in.name);
+	out.action = storeString(in.action);
+	out.tooltip = storeString(in.tooltip);
+	out.texture = storeString(in.iconname);
+	out.cursor = storeString(in.mouseicon);
 	out.queueing = in.queueing;
 	out.hidden = in.hidden;
 	out.disabled = in.disabled;
@@ -126,27 +129,14 @@ static bool FillActiveCommandDescription(const SCommandDescription& in, ActiveCo
 	out.params = nullptr;
 	out.paramCount = 0;
 
-	if (out.name[0] == '\0' && !in.name.empty())
-		return false;
-	if (out.action[0] == '\0' && !in.action.empty())
-		return false;
-	if (out.tooltip[0] == '\0' && !in.tooltip.empty())
-		return false;
-	if (out.texture[0] == '\0' && !in.iconname.empty())
-		return false;
-	if (out.cursor[0] == '\0' && !in.mouseicon.empty())
-		return false;
-
 	if (!in.params.empty()) {
-		out.params = AllocateArray<const char*>(in.params.size());
-		if (out.params == nullptr)
-			return false;
-
-		for (size_t i = 0; i < in.params.size(); ++i) {
-			out.params[i] = CopyToScratch(in.params[i]);
-			if (out.params[i][0] == '\0' && !in.params[i].empty())
-				return false;
+		auto& params = activeCommandParameterStorage.emplace_back();
+		params.reserve(in.params.size());
+		for (const auto& param : in.params) {
+			strings.push_back(param);
+			params.push_back(strings.back().c_str());
 		}
+		out.params = params.data();
 		out.paramCount = static_cast<uint32_t>(in.params.size());
 	}
 
@@ -774,8 +764,7 @@ static void NativeGetVisibleUnits(const GetVisibleUnitsQuery* query, GetVisibleU
 	unitQuadIter.ResetState();
 	readMap->GridVisibility(nullptr, &unitQuadIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
 
-	int32_t* ids = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;
 
 	for (auto visUnitList : unitQuadIter.GetObjectLists()) {
@@ -793,18 +782,12 @@ static void NativeGetVisibleUnits(const GetVisibleUnitsQuery* query, GetVisibleU
 			if (!camera->InView(unit->drawMidPos, testRadius + (useUnitRadius ? unit->GetDrawRadius() : 0.0f)))
 				continue;
 
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				return;
-			}
-
-			ids[count++] = unit->id;
-			bufferPos += sizeof(int32_t);
+			visibleIDs.push_back(unit->id);
 		}
 	}
 
-	result->unitIDs = ids;
-	result->count = count;
+	result->unitIDs = visibleIDs.empty() ? nullptr : visibleIDs.data();
+	result->count = visibleIDs.size();
 }
 
 static void NativeGetVisibleFeatures(const GetVisibleFeaturesQuery* query, GetVisibleFeaturesResult* result)
@@ -831,8 +814,7 @@ static void NativeGetVisibleFeatures(const GetVisibleFeaturesQuery* query, GetVi
 	featureIter.ResetState();
 	readMap->GridVisibility(nullptr, &featureIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
 
-	int32_t* ids = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;
 
 	for (auto visFeatureList : featureIter.GetObjectLists()) {
@@ -856,18 +838,12 @@ static void NativeGetVisibleFeatures(const GetVisibleFeaturesQuery* query, GetVi
 			if (!camera->InView(feature->drawMidPos, testRadius + (useFeatureRadius ? feature->GetDrawRadius() : 0.0f)))
 				continue;
 
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				return;
-			}
-
-			ids[count++] = feature->id;
-			bufferPos += sizeof(int32_t);
+			visibleIDs.push_back(feature->id);
 		}
 	}
 
-	result->featureIDs = ids;
-	result->count = count;
+	result->featureIDs = visibleIDs.empty() ? nullptr : visibleIDs.data();
+	result->count = visibleIDs.size();
 }
 
 static void NativeGetVisibleProjectiles(const GetVisibleProjectilesQuery* query, GetVisibleProjectilesResult* result)
@@ -893,8 +869,7 @@ static void NativeGetVisibleProjectiles(const GetVisibleProjectilesQuery* query,
 	projIter.ResetState();
 	readMap->GridVisibility(nullptr, &projIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
 
-	int32_t* ids = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;
 
 	for (auto visProjectileList : projIter.GetObjectLists()) {
@@ -917,18 +892,12 @@ static void NativeGetVisibleProjectiles(const GetVisibleProjectilesQuery* query,
 			if (!includePiece && p->piece)
 				continue;
 
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				return;
-			}
-
-			ids[count++] = p->id;
-			bufferPos += sizeof(int32_t);
+			visibleIDs.push_back(p->id);
 		}
 	}
 
-	result->projectileIDs = ids;
-	result->count = count;
+	result->projectileIDs = visibleIDs.empty() ? nullptr : visibleIDs.data();
+	result->count = visibleIDs.size();
 }
 
 static void NativeGetUnitsInScreenRectangle(const GetUnitsInScreenRectangleQuery* query, GetUnitsInScreenRectangleResult* result)
@@ -959,8 +928,7 @@ static void NativeGetUnitsInScreenRectangle(const GetUnitsInScreenRectangleQuery
 	unitIter.ResetState();
 	readMap->GridVisibility(nullptr, &unitIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
 
-	int32_t* ids = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;
 
 	for (auto visUnitList : unitIter.GetObjectLists()) {
@@ -981,18 +949,12 @@ static void NativeGetUnitsInScreenRectangle(const GetUnitsInScreenRectangleQuery
 			if (vpPos.z > 1.0f || vpPos.z < 0.0f)
 				continue;
 
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				return;
-			}
-
-			ids[count++] = unit->id;
-			bufferPos += sizeof(int32_t);
+			visibleIDs.push_back(unit->id);
 		}
 	}
 
-	result->unitIDs = ids;
-	result->count = count;
+	result->unitIDs = visibleIDs.empty() ? nullptr : visibleIDs.data();
+	result->count = visibleIDs.size();
 }
 
 static void NativeGetFeaturesInScreenRectangle(const GetFeaturesInScreenRectangleQuery* query, GetFeaturesInScreenRectangleResult* result)
@@ -1019,8 +981,7 @@ static void NativeGetFeaturesInScreenRectangle(const GetFeaturesInScreenRectangl
 	featureIter.ResetState();
 	readMap->GridVisibility(nullptr, &featureIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
 
-	int32_t* ids = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;
 
 	for (auto visFeatureList : featureIter.GetObjectLists()) {
@@ -1041,18 +1002,12 @@ static void NativeGetFeaturesInScreenRectangle(const GetFeaturesInScreenRectangl
 			if (vpPos.z > 1.0f || vpPos.z < 0.0f)
 				continue;
 
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				return;
-			}
-
-			ids[count++] = feature->id;
-			bufferPos += sizeof(int32_t);
+			visibleIDs.push_back(feature->id);
 		}
 	}
 
-	result->featureIDs = ids;
-	result->count = count;
+	result->featureIDs = visibleIDs.empty() ? nullptr : visibleIDs.data();
+	result->count = visibleIDs.size();
 }
 
 static void NativeIsUnitVisible(const IsUnitVisibleQuery* query, IsUnitVisibleResult* result)
@@ -1152,11 +1107,17 @@ static void NativeGetActiveCmdDesc(const GetActiveCmdDescQuery* query, GetActive
 	if (cmdIndex < 0 || cmdIndex >= static_cast<int>(cmdDescs.size()))
 		return;
 
-	if (!FillActiveCommandDescription(cmdDescs[cmdIndex], result->cmdDesc)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
+	activeCommandStorage.clear();
+	activeCommandStringStorage.clear();
+	activeCommandParameterStorage.clear();
+	activeCommandStorage.resize(1);
+	activeCommandStringStorage.reserve(1);
+	activeCommandParameterStorage.reserve(1);
+	if (!FillActiveCommandDescriptionDynamic(cmdDescs[cmdIndex], activeCommandStorage[0])) {
 		return;
 	}
 
+	result->cmdDesc = activeCommandStorage[0];
 	result->hasCommand = true;
 }
 
@@ -1175,20 +1136,21 @@ static void NativeGetActiveCmdDescs(const GetActiveCmdDescsQuery* /*query*/, Get
 	if (cmdDescs.empty())
 		return;
 
-	result->cmdDescs = AllocateArray<ActiveCommandDescription>(cmdDescs.size());
-	if (result->cmdDescs == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
+	activeCommandStorage.clear();
+	activeCommandStringStorage.clear();
+	activeCommandParameterStorage.clear();
+	activeCommandStorage.resize(cmdDescs.size());
+	activeCommandStringStorage.reserve(cmdDescs.size());
+	activeCommandParameterStorage.reserve(cmdDescs.size());
 
 	for (size_t i = 0; i < cmdDescs.size(); ++i) {
-		if (!FillActiveCommandDescription(cmdDescs[i], result->cmdDescs[i])) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
+		if (!FillActiveCommandDescriptionDynamic(cmdDescs[i], activeCommandStorage[i])) {
 			result->count = static_cast<uint32_t>(i);
 			return;
 		}
 	}
 
+	result->cmdDescs = activeCommandStorage.data();
 	result->count = static_cast<uint32_t>(cmdDescs.size());
 }
 
@@ -1314,26 +1276,16 @@ static void NativeGetLastMessagePositions(const GetLastMessagePositionsQuery* /*
 	}
 
 	const unsigned int count = infoConsole->GetMsgPosCount();
-	const size_t needed = count * sizeof(Float3);
-	if (bufferPos + needed > sizeof(scratchBuffer)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		result->positions = nullptr;
-		result->count = 0;
-		return;
-	}
-
-	Float3* positions = reinterpret_cast<Float3*>(&scratchBuffer[bufferPos]);
+	messagePositions.clear();
+	messagePositions.reserve(count);
 	for (unsigned int i = 0; i < count; ++i) {
 		const float3 msg = infoConsole->GetMsgPos();
-		positions[i].x = msg.x;
-		positions[i].y = msg.y;
-		positions[i].z = msg.z;
+		messagePositions.push_back({msg.x, msg.y, msg.z});
 	}
-	bufferPos += needed;
 
 	result->error = nullptr;
-	result->positions = positions;
-	result->count = count;
+	result->positions = messagePositions.empty() ? nullptr : messagePositions.data();
+	result->count = messagePositions.size();
 }
 
 static void NativeSolveNURBSCurve(const SolveNURBSCurveQuery* query, SolveNURBSCurveResult* result) {
@@ -1356,26 +1308,14 @@ static void NativeSolveNURBSCurve(const SolveNURBSCurveQuery* query, SolveNURBSC
 	std::vector<float> knots(query->knots, query->knots + query->knotCount);
 	const auto solved = NURBS::SolveNURBSCurve(query->degree, cpoints, knots, query->segments);
 
-	const size_t needed = solved.size() * sizeof(Float3);
-	if (bufferPos + needed > sizeof(scratchBuffer)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		result->success = false;
-		result->points = nullptr;
-		result->count = 0;
-		return;
-	}
-
-	Float3* out = reinterpret_cast<Float3*>(&scratchBuffer[bufferPos]);
-	for (size_t i = 0; i < solved.size(); ++i) {
-		out[i].x = solved[i].x;
-		out[i].y = solved[i].y;
-		out[i].z = solved[i].z;
-	}
-	bufferPos += needed;
+	nurbsPoints.clear();
+	nurbsPoints.reserve(solved.size());
+	for (const float3& point : solved)
+		nurbsPoints.push_back({point.x, point.y, point.z});
 
 	result->error = nullptr;
-	result->points = out;
-	result->count = static_cast<uint32_t>(solved.size());
+	result->points = nurbsPoints.empty() ? nullptr : nurbsPoints.data();
+	result->count = nurbsPoints.size();
 	result->success = true;
 }
 

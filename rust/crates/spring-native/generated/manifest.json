@@ -40,8 +40,8 @@
     },
     {
       "name": "feature_control_generated.rs",
-      "sha256": "0d7c9f3f518cd46d319d6d677b8aa45302c1398d6ad81d9bafb27769a2fcbcc1",
-      "bytes": 24789
+      "sha256": "2f1986198ee2ea1e174d1b9d1e7613309a879f61bee3dbc9d1baa5ea91f2c399",
+      "bytes": 24791
     },
     {
       "name": "feature_defs_generated.rs",
@@ -60,13 +60,13 @@
     },
     {
       "name": "game_generated.rs",
-      "sha256": "9c69dc52e6eba75fc9bf58bdb3a71c9e6c6209118f1b8d25d64c74c1ebfcb758",
-      "bytes": 21860
+      "sha256": "a7595045e3d2d64451c92affdb7f76547879df74c3547d0fd313c117c67a28c0",
+      "bytes": 21983
     },
     {
       "name": "gfx_generated.rs",
-      "sha256": "50360efb898b55493a7fdc36314abe59ca18a333bfd709341ed1b1d64bcc2954",
-      "bytes": 170963
+      "sha256": "67b2c7bf5ff890944d211023c366878122c42693d5d8cb541d3d06f4129d9701",
+      "bytes": 171144
     },
     {
       "name": "ground_decals_generated.rs",
@@ -120,8 +120,13 @@
     },
     {
       "name": "move_ctrl_generated.rs",
-      "sha256": "cbc39ba3c50da41576a2309e299c439eff46504d353b7b4a7c47311ddc22ccd7",
-      "bytes": 6570
+      "sha256": "c444dbb64a3b3ecc2dc796d8190f08e81d1cfcb76bdad9a03b8ad73b3ffc05eb",
+      "bytes": 20473
+    },
+    {
+      "name": "object_rendering_generated.rs",
+      "sha256": "b70f937454824d0b4cc266df57dbd0e76c084552256edcfb614cb8bfe7f51bb6",
+      "bytes": 10465
     },
     {
       "name": "path_finder_generated.rs",
@@ -165,8 +170,8 @@
     },
     {
       "name": "selection_generated.rs",
-      "sha256": "58c6e5769a5c1dc5a26ca75b9d335978e6af06cb3bdf44a4721f9dcf2866aed3",
-      "bytes": 11233
+      "sha256": "7e8e2e6274271554ed4a60ca1ff5ee2f9e3eca39435f103633b60436317d383b",
+      "bytes": 11306
     },
     {
       "name": "sound_generated.rs",
@@ -250,8 +255,8 @@
     },
     {
       "name": "unsynced_ctrl_generated.rs",
-      "sha256": "c02006d06a7440dccabe99d862b9ef64f54eeabbe3d5ac3453f52a32492b7ed7",
-      "bytes": 59634
+      "sha256": "1fd261886849fd3ac42405f0f0258668ac17bf063be371ce6bbea2d45778de44",
+      "bytes": 60976
     },
     {
       "name": "unsynced_read_generated.rs",

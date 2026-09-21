@@ -233,10 +233,12 @@ pub fn validate_names(path: &Path, native_header: &Path) -> Result<()> {
     }
 }
 
-/// The Lua engine declares Allow* callins on CSyncedLuaHandle. Keep the
-/// generated environment mask aligned with that authoritative declaration:
-/// an unsynced or UI Wasm module must never be able to influence a synced
-/// permission decision.
+/// The Lua engine declares simulation control callins on CSyncedLuaHandle.
+/// Keep the generated environment mask aligned with that authoritative
+/// declaration: an unsynced or UI Wasm module must never be able to influence
+/// a synced decision. Callins inherited from CLuaHandle, such as Explosion
+/// and collision notifications, are intentionally not included here because
+/// they also have unsynced Lua implementations.
 pub fn validate_synced_environments(
     callins: &[CallinModel],
     lua_synced_header: &Path,
@@ -257,7 +259,7 @@ pub fn validate_synced_environments(
     })?;
     let class_body = &text[class_start..class_start + class_end];
 
-    let lua_synced_allow_names = class_body
+    let lua_synced_callin_names = class_body
         .lines()
         .filter_map(|line| {
             let line = line.trim();
@@ -267,14 +269,13 @@ pub fn validate_synced_environments(
             {
                 return None;
             }
-            let name = line.split('(').next()?.split_whitespace().last()?;
-            name.starts_with("Allow").then_some(name.to_string())
+            Some(line.split('(').next()?.split_whitespace().last()?.to_string())
         })
         .collect::<BTreeSet<_>>();
 
     for callin in callins {
         let mut names = std::iter::once(&callin.name).chain(callin.aliases.iter());
-        if !names.any(|name| lua_synced_allow_names.contains(name)) {
+        if !names.any(|name| lua_synced_callin_names.contains(name)) {
             continue;
         }
         if callin.environments.iter().any(|environment| {

@@ -29,7 +29,7 @@
             pub feature_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeaturePieceListResult {
             pub names: Vec<String>,
         }
@@ -39,7 +39,7 @@
             pub feature_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeaturePieceMapResult {
             pub entries: Vec<PieceMapEntry>,
         }
@@ -50,7 +50,7 @@
             pub piece_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetFeaturePieceMatrixResult {
             pub matrix: PieceMatrix,
         }
@@ -87,27 +87,27 @@
             pub root_piece: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModelPieceListQuery {
             pub model_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModelPieceListResult {
             pub names: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModelPieceMapQuery {
             pub model_name: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModelPieceMapResult {
             pub entries: Vec<PieceMapEntry>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetModelRootPieceQuery {
             pub model_name: String,
         }
@@ -145,7 +145,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitPieceListResult {
             pub names: Vec<String>,
         }
@@ -155,7 +155,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitPieceMapResult {
             pub entries: Vec<PieceMapEntry>,
         }
@@ -166,7 +166,7 @@
             pub piece_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitPieceMatrixResult {
             pub matrix: PieceMatrix,
         }
@@ -208,7 +208,7 @@
             pub unit_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetUnitScriptNamesResult {
             pub names: Vec<String>,
         }
@@ -224,7 +224,7 @@
             pub piece_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PieceInfo {
             pub name: String,
             pub parent: String,
@@ -237,13 +237,13 @@
             pub emit_dir: Float3,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PieceMapEntry {
             pub name: String,
             pub piece_num: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PieceMatrix {
             pub m: Vec<f32>,
         }

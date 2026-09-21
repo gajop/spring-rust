@@ -273,6 +273,13 @@ impl LuaLoaderMatrix {
             return unsynced_and_ui();
         }
 
+        // UnitRendering and FeatureRendering are registered together by
+        // LuaRules and LuaUI. The typed native surface combines both tables
+        // under object_rendering and has the same client-side scope.
+        if module == "object_rendering" {
+            return unsynced_and_ui();
+        }
+
         // RmlUi is available to the in-game unsynced/UI path and to the
         // standalone menu. It is not a synced gadget capability.
         if module == "rml_ui" {

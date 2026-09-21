@@ -17,13 +17,16 @@
 #include "Lua/LuaRulesParams.h"
 #include <cstring>
 #include <variant>
+#include <vector>
 
 namespace {
 
 // Scratch buffer
-static thread_local char scratchBuffer[1024];
+static thread_local char scratchBuffer[64 * 1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local std::vector<std::string> visibleNameStorage;
+static thread_local std::vector<const char*> visibleNamePointers;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
@@ -32,18 +35,6 @@ static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .mes
 
 static bool IsReady() {
 	return (gs != nullptr);
-}
-
-// Helper to allocate from scratch buffer
-template<typename T>
-static T* AllocateArray(size_t count) {
-	size_t needed = count * sizeof(T);
-	if (bufferPos + needed > sizeof(scratchBuffer)) {
-		return nullptr;
-	}
-	T* ptr = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
-	bufferPos += needed;
-	return ptr;
 }
 
 // Helper to copy string to scratch buffer
@@ -124,26 +115,21 @@ static bool WriteVisibleParamNames(const Params& params, int allowedMask,
 	if (visibleCount == 0)
 		return true;
 
-	names = AllocateArray<const char*>(visibleCount);
-	if (names == nullptr) {
-		error = &BUFFER_OVERFLOW_ERROR;
-		return false;
-	}
-
-	uint32_t index = 0;
+	visibleNameStorage.clear();
+	visibleNamePointers.clear();
+	visibleNameStorage.reserve(visibleCount);
+	visibleNamePointers.reserve(visibleCount);
 	for (const auto& pair : params) {
 		if (!WasmUiVisibility::RulesParamVisible(pair.second.los, allowedMask))
 			continue;
-		names[index] = CopyString(pair.first);
-		if (names[index] == nullptr) {
-			error = &BUFFER_OVERFLOW_ERROR;
-			count = index;
-			return false;
-		}
-		++index;
+		visibleNameStorage.push_back(pair.first);
 	}
 
-	count = index;
+	for (const std::string& name : visibleNameStorage)
+		visibleNamePointers.push_back(name.c_str());
+
+	names = visibleNamePointers.data();
+	count = visibleNamePointers.size();
 	return true;
 }
 

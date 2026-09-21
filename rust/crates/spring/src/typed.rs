@@ -33,10 +33,12 @@ pub struct CameraState<'a> {
     pub direction: Float3,
     pub up: Float3,
     pub right: Float3,
+    /// A non-positive value leaves the engine's current field of view unchanged.
     pub fov: f32,
     pub rx: f32,
     pub ry: f32,
     pub rz: f32,
+    /// A non-positive value leaves the engine's current camera distance unchanged.
     pub dist: f32,
     pub height: f32,
     pub angle: f32,

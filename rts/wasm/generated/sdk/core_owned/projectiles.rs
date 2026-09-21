@@ -12,7 +12,7 @@
             pub options: GetAllProjectilesOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAllProjectilesResult {
             pub projectiles: Vec<i32>,
         }
@@ -38,13 +38,13 @@
             pub ally_team_id: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetProjectileDamagesQuery {
             pub projectile_id: i32,
             pub tag: String,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetProjectileDamagesResult {
             pub damages: ProjectileDamages,
         }
@@ -175,7 +175,7 @@
             pub options: GetProjectilesInRectangleOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetProjectilesInRectangleResult {
             pub projectiles: Vec<i32>,
         }
@@ -193,12 +193,12 @@
             pub options: GetProjectilesInSphereOptions,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetProjectilesInSphereResult {
             pub projectiles: Vec<i32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PieceProjectileParams {
             pub pos: Float3,
             pub speed: Float3,
@@ -213,7 +213,7 @@
             pub team: i32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ProjectileDamages {
             pub damages: Vec<f32>,
             pub paralyze_damage_time: f32,

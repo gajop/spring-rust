@@ -91,6 +91,7 @@ fn main() {
         ("rml_ui", "RmlUi.h"),
         ("vfs", "VFS.h"),
         ("unsynced_read", "UnsyncedRead.h"),
+        ("object_rendering", "ObjectRendering.h"),
     ];
 
     let mut headers = Vec::new();
@@ -157,6 +158,7 @@ fn main() {
             "rml_ui" => spring_native_codegen::generate_rml_ui,
             "vfs" => spring_native_codegen::generate_vfs,
             "unsynced_read" => spring_native_codegen::generate_unsynced_read,
+            "object_rendering" => spring_native_codegen::generate_object_rendering,
             _ => panic!("Unknown module: {}", module_name),
         };
 

@@ -40,6 +40,8 @@ pub trait Gadget<G = ()> {
         _builder: i32,
     ) {
     }
+    fn feature_created(&self, _ctx: &AddonContext<'_, G>, _feature_id: i32, _ally_team_id: i32) {}
+    fn feature_destroyed(&self, _ctx: &AddonContext<'_, G>, _feature_id: i32, _ally_team_id: i32) {}
     fn unit_destroyed(&self, _ctx: &AddonContext<'_, G>, _event: &UnitDestroyedEvent) {}
     fn unit_idle(&self, _ctx: &AddonContext<'_, G>, _unit: i32, _def: i32, _team: i32) {}
     fn projectile_created(
@@ -181,6 +183,26 @@ impl<G> GadgetHandler<G> {
             for (i, gadget) in self.gadgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     gadget.unit_created(ctx, unit, def, team, builder);
+                }
+            }
+        });
+    }
+
+    pub fn feature_created(&self, feature_id: i32, ally_team_id: i32) {
+        self.dispatch("FeatureCreated", |ctx| {
+            for (i, gadget) in self.gadgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    gadget.feature_created(ctx, feature_id, ally_team_id);
+                }
+            }
+        });
+    }
+
+    pub fn feature_destroyed(&self, feature_id: i32, ally_team_id: i32) {
+        self.dispatch("FeatureDestroyed", |ctx| {
+            for (i, gadget) in self.gadgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    gadget.feature_destroyed(ctx, feature_id, ally_team_id);
                 }
             }
         });

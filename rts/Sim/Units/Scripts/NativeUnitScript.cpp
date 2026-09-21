@@ -157,7 +157,9 @@ void CusAnimationActive(const CusAnimationQuery* query, CusAnimationResult* resu
 			result->error = &kCusInvalidArgument;
 			return;
 	}
-	result->active = script->IsInAnimation(type, query->piece, query->axis) ? 1 : 0;
+	// A CUS wait is also an engine listener. Register it here so the
+	// animation lifecycle can deliver AnimFinished to the guest scheduler.
+	result->active = script->NeedsWait(type, query->piece, query->axis) ? 1 : 0;
 }
 
 }

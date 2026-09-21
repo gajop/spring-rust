@@ -12,7 +12,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AddWorldTextQuery {
             pub text: String,
             pub pos: Float3,
@@ -49,7 +49,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct MarkerAddPointQuery {
             pub pos: Float3,
             pub text: String,

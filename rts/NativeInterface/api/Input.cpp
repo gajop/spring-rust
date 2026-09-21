@@ -37,6 +37,10 @@ static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 static thread_local std::vector<KeyBindingEntry> keyBindingStorage;
 static thread_local std::vector<std::string> keyBindingStringStorage;
+static thread_local std::vector<int32_t> pressedKeyCodes;
+static thread_local std::vector<int32_t> pressedScanCodes;
+static thread_local std::vector<const char*> actionHotkeys;
+static thread_local std::vector<uint8_t> mouseButtonStates;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
@@ -145,15 +149,8 @@ static void NativeGetMouseButtonsPressed(const GetMouseButtonsPressedQuery* quer
 		return;
 	}
 
-	const size_t needed = query->count * sizeof(bool);
-	if (bufferPos + needed > sizeof(scratchBuffer)) {
-		result->error = &INVALID_ARG_ERROR;
-		result->pressed = nullptr;
-		result->count = 0;
-		return;
-	}
-
-	bool* states = reinterpret_cast<bool*>(&scratchBuffer[bufferPos]);
+	mouseButtonStates.resize(query->count);
+	bool* states = reinterpret_cast<bool*>(mouseButtonStates.data());
 	for (uint32_t i = 0; i < query->count; ++i) {
 		const int32_t button = query->buttons[i];
 		if (button <= 0 || button > NUM_BUTTONS) {
@@ -163,7 +160,6 @@ static void NativeGetMouseButtonsPressed(const GetMouseButtonsPressedQuery* quer
 		}
 	}
 
-	bufferPos += needed;
 	result->error = nullptr;
 	result->pressed = states;
 	result->count = query->count;
@@ -215,24 +211,16 @@ static void NativeGetPressedKeys(const GetPressedKeysQuery* query, GetPressedKey
 
 	const auto& pressedKeys = KeyInput::GetPressedKeys();
 
-	// Write keys to scratch buffer
-	int32_t* keys = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	pressedKeyCodes.clear();
 
 	for (const auto& pair : pressedKeys) {
-		if (pair.second) {
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
-				result->error = &INVALID_ARG_ERROR;
-				return;
-			}
-			keys[count++] = pair.first;
-			bufferPos += sizeof(int32_t);
-		}
+		if (pair.second)
+			pressedKeyCodes.push_back(pair.first);
 	}
 
 	result->error = nullptr;
-	result->keys = keys;
-	result->count = count;
+	result->keys = pressedKeyCodes.empty() ? nullptr : pressedKeyCodes.data();
+	result->count = pressedKeyCodes.size();
 }
 
 static void NativeGetPressedScans(const GetPressedScansQuery* query, GetPressedScansResult* result)
@@ -241,24 +229,16 @@ static void NativeGetPressedScans(const GetPressedScansQuery* query, GetPressedS
 
 	const auto& pressedScans = KeyInput::GetPressedScans();
 
-	// Write scans to scratch buffer
-	int32_t* scans = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	pressedScanCodes.clear();
 
 	for (const auto& pair : pressedScans) {
-		if (pair.second) {
-			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
-				result->error = &INVALID_ARG_ERROR;
-				return;
-			}
-			scans[count++] = pair.first;
-			bufferPos += sizeof(int32_t);
-		}
+		if (pair.second)
+			pressedScanCodes.push_back(pair.first);
 	}
 
 	result->error = nullptr;
-	result->scans = scans;
-	result->count = count;
+	result->scans = pressedScanCodes.empty() ? nullptr : pressedScanCodes.data();
+	result->count = pressedScanCodes.size();
 }
 
 // Modifier keys
@@ -391,31 +371,14 @@ static void NativeGetActionHotKeys(const GetActionHotKeysQuery* query, GetAction
 		return;
 	}
 
-	if (hotkeys.size() > (sizeof(scratchBuffer) - bufferPos) / sizeof(const char*)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	const size_t pointerBytes = hotkeys.size() * sizeof(const char*);
-	const char** pointers = reinterpret_cast<const char**>(&scratchBuffer[bufferPos]);
-	bufferPos += pointerBytes;
-
-	for (size_t i = 0; i < hotkeys.size(); ++i) {
-		const std::string& hotkey = hotkeys[i];
-		if (hotkey.size() + 1 > sizeof(scratchBuffer) - bufferPos) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
-		}
-
-		char* string = &scratchBuffer[bufferPos];
-		memcpy(string, hotkey.c_str(), hotkey.size() + 1);
-		pointers[i] = string;
-		bufferPos += hotkey.size() + 1;
-	}
+	actionHotkeys.clear();
+	actionHotkeys.reserve(hotkeys.size());
+	for (const std::string& hotkey : hotkeys)
+		actionHotkeys.push_back(hotkey.c_str());
 
 	result->error = nullptr;
-	result->hotkeys = pointers;
-	result->count = static_cast<uint32_t>(hotkeys.size());
+	result->hotkeys = actionHotkeys.data();
+	result->count = actionHotkeys.size();
 }
 
 static void NativeGetKeyBindings(const GetKeyBindingsQuery* query, GetKeyBindingsResult* result)

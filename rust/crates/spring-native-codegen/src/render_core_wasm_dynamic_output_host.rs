@@ -450,7 +450,7 @@ fn render_callback(
                  slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);\n\
                  return nullptr;\n\
              }}\n\
-             if (!state->memory.Contains(outputPointer, outputCapacity)) {{\n\
+             if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {{\n\
                  slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);\n\
                  return nullptr;\n\
              }}\n\n\
@@ -483,12 +483,14 @@ fn render_callback(
                  return nullptr;\n\
              }}\n\
              if (!guard.Charge(requiredSize)) return Trap(budgetError);\n\
-             std::span<std::uint8_t> payload;\n\
-             if (!state->memory.MutableView(outputPointer, requiredSize, payload))\n\
-                 return Trap(\"dynamic Core output range changed unexpectedly\");\n\
-             WireWriter writer(payload);\n\
-             if (!encode(writer) || writer.Offset() != requiredSize)\n\
-                 return Trap(\"dynamic Core output size/write mismatch\");\n\
+             if (requiredSize != 0) {{\n\
+                 std::span<std::uint8_t> payload;\n\
+                 if (!state->memory.MutableView(outputPointer, requiredSize, payload))\n\
+                     return Trap(\"dynamic Core output range changed unexpectedly\");\n\
+                 WireWriter writer(payload);\n\
+                 if (!encode(writer) || writer.Offset() != requiredSize)\n\
+                     return Trap(\"dynamic Core output size/write mismatch\");\n\
+             }}\n\
              slots[0].i32 = 0;\n\
              return nullptr;\n\
          }}\n",

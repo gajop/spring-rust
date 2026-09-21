@@ -492,9 +492,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
@@ -1020,9 +1018,7 @@
       "aggregation": "first",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "query_strategy": "direct",
       "result_strategy": "fixed-wire",
@@ -1699,9 +1695,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "query_strategy": "direct",
       "result_strategy": "direct",
@@ -1897,9 +1891,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "query_strategy": "variable-scratch",
       "result_strategy": "direct",
@@ -1982,9 +1974,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "query_strategy": "fixed-wire",
       "result_strategy": "direct",
@@ -2145,9 +2135,7 @@
       "aggregation": "or-true",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "query_strategy": "direct",
       "result_strategy": "direct",
@@ -2617,9 +2605,7 @@
       "aggregation": "first",
       "environments": [
         "rules-synced",
-        "rules-unsynced",
-        "gaia-synced",
-        "gaia-unsynced"
+        "gaia-synced"
       ],
       "query_strategy": "direct",
       "result_strategy": "fixed-wire",

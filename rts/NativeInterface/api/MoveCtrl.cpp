@@ -3,6 +3,7 @@
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/MoveTypes/MoveType.h"
+#include "Sim/MoveTypes/MoveDefHandler.h"
 #include "Sim/MoveTypes/ScriptMoveType.h"
 #include "Sim/MoveTypes/GroundMoveType.h"
 #include "Sim/MoveTypes/AAirMoveType.h"
@@ -17,14 +18,13 @@
 
 #include <cmath>
 #include <cstring>
+#include <algorithm>
 #include <vector>
 
 namespace {
 
-// Scratch buffer for dynamic data
-static thread_local char scratchBuffer[1024];
-static thread_local size_t bufferPos = 0;
-static thread_local Error dynamicError;
+static thread_local std::vector<PathWaypoint> estimatedWaypoints;
+static thread_local std::vector<int32_t> estimatedStarts;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
@@ -47,15 +47,17 @@ static const Error INVALID_MOVE_TYPE_FIELD_ERROR = {
 	.message = "Move type field is not supported by this unit"
 };
 
-static const Error BUFFER_OVERFLOW_ERROR = {
-	.code = ERROR_BUFFER_OVERFLOW,
-	.message = "Buffer overflow"
+static const Error INVALID_PROGRESS_STATE_ERROR = {
+	.code = ERROR_INVALID_ARGUMENT,
+	.message = "Invalid move control progress state"
 };
+
+template<typename Mutator>
+static void ApplyScriptMoveType(int unitID, MoveCtrlResult* result, Mutator&& mutator);
 
 // Get move type data
 static void NativeGetUnitMoveTypeData(const GetUnitMoveTypeDataQuery* query, GetUnitMoveTypeDataResult* result)
 {
-	bufferPos = 0;
 
 	const CUnit* unit = unitHandler.GetUnit(query->unitID);
 	if (unit == nullptr || unit->moveType == nullptr) {
@@ -110,7 +112,6 @@ static void NativeGetUnitMoveTypeData(const GetUnitMoveTypeDataQuery* query, Get
 // Get estimated path
 static void NativeGetUnitEstimatedPath(const GetUnitEstimatedPathQuery* query, GetUnitEstimatedPathResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->waypoints = nullptr;
 	result->count = 0;
@@ -131,44 +132,27 @@ static void NativeGetUnitEstimatedPath(const GetUnitEstimatedPathQuery* query, G
 	std::vector<int> starts;
 	pathManager->GetPathWayPoints(gmt->GetPathID(), points, starts);
 
-	if (!points.empty()) {
-		if (bufferPos + points.size() * sizeof(PathWaypoint) > sizeof(scratchBuffer)) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			return;
-		}
-
-		result->waypoints = reinterpret_cast<PathWaypoint*>(&scratchBuffer[bufferPos]);
-		bufferPos += points.size() * sizeof(PathWaypoint);
-		result->count = static_cast<uint32_t>(points.size());
-
-		for (size_t i = 0; i < points.size(); ++i) {
-			result->waypoints[i].pos.x = points[i].x;
-			result->waypoints[i].pos.y = points[i].y;
-			result->waypoints[i].pos.z = points[i].z;
-			result->waypoints[i].eta = 0.0f;
-		}
+	estimatedWaypoints.clear();
+	estimatedWaypoints.reserve(points.size());
+	for (const float3& point : points) {
+		estimatedWaypoints.push_back({
+			.pos = {point.x, point.y, point.z},
+			.eta = 0.0f,
+		});
 	}
+	result->waypoints = estimatedWaypoints.empty() ? nullptr : estimatedWaypoints.data();
+	result->count = estimatedWaypoints.size();
 
-	if (!starts.empty()) {
-		if (bufferPos + starts.size() * sizeof(int32_t) > sizeof(scratchBuffer)) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->waypoints = nullptr;
-			result->count = 0;
-			return;
-		}
-
-		result->starts = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-		bufferPos += starts.size() * sizeof(int32_t);
-		result->startCount = static_cast<uint32_t>(starts.size());
-
-		for (size_t i = 0; i < starts.size(); ++i)
-			result->starts[i] = starts[i] + 1;
-	}
+	estimatedStarts.clear();
+	estimatedStarts.reserve(starts.size());
+	for (int start : starts)
+		estimatedStarts.push_back(start + 1);
+	result->starts = estimatedStarts.empty() ? nullptr : estimatedStarts.data();
+	result->startCount = estimatedStarts.size();
 }
 
 static void NativeMoveCtrl(const MoveCtrlQuery* query, MoveCtrlResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -192,9 +176,53 @@ static void NativeMoveCtrl(const MoveCtrlQuery* query, MoveCtrlResult* result)
 	result->success = true;
 }
 
+static void NativeSetTag(const SetMoveCtrlTagQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.tag = query->tag;
+	});
+}
+
+static void NativeGetTag(const GetMoveCtrlTagQuery* query, GetMoveCtrlTagResult* result)
+{
+	result->error = nullptr;
+	result->tag = 0;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const auto* moveType = dynamic_cast<const CScriptMoveType*>(unit->moveType);
+	if (moveType == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	result->tag = moveType->tag;
+}
+
+static void NativeSetProgressState(const SetMoveCtrlProgressStateQuery* query, MoveCtrlResult* result)
+{
+	if (query->state < MOVE_CTRL_PROGRESS_DONE || query->state > MOVE_CTRL_PROGRESS_FAILED) {
+		result->error = &INVALID_PROGRESS_STATE_ERROR;
+		result->success = false;
+		return;
+	}
+
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.progressState = static_cast<AMoveType::ProgressState>(query->state);
+	});
+}
+
 static void NativeIsMoveCtrlEnabled(const IsMoveCtrlEnabledQuery* query, IsMoveCtrlEnabledResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->enabled = false;
 
@@ -214,7 +242,6 @@ static void NativeIsMoveCtrlEnabled(const IsMoveCtrlEnabledQuery* query, IsMoveC
 
 static void NativeSetMoveCtrlGravity(const SetMoveCtrlGravityQuery* query, SetMoveCtrlGravityResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -241,7 +268,6 @@ static void NativeSetMoveCtrlGravity(const SetMoveCtrlGravityQuery* query, SetMo
 
 static void NativeSetNoBlocking(const SetNoBlockingQuery* query, SetNoBlockingResult* result)
 {
-	bufferPos = 0;
 	result->error = nullptr;
 	result->success = false;
 
@@ -437,16 +463,233 @@ static void NativeSetMoveTypeBoolean(
 	result->success = true;
 }
 
+template<typename Mutator>
+static void ApplyScriptMoveType(int unitID, MoveCtrlResult* result, Mutator&& mutator)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CScriptMoveType* moveType = dynamic_cast<CScriptMoveType*>(unit->moveType);
+	if (moveType == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	mutator(*moveType);
+	result->success = true;
+}
+
+static void NativeSetExtrapolate(const MoveCtrlBoolQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.extrapolate = query->value;
+	});
+}
+
+static void NativeSetPhysics(const MoveCtrlPhysicsQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.SetPhysics(
+			float3(query->position.x, query->position.y, query->position.z),
+			float3(query->velocity.x, query->velocity.y, query->velocity.z),
+			float3(query->rotation.x, query->rotation.y, query->rotation.z));
+	});
+}
+
+static void NativeSetPosition(const MoveCtrlFloat3Query* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.SetPosition(float3(query->value.x, query->value.y, query->value.z));
+	});
+}
+
+static void NativeSetVelocity(const MoveCtrlFloat3Query* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.SetVelocity(float3(query->value.x, query->value.y, query->value.z));
+	});
+}
+
+static void NativeSetRelativeVelocity(const MoveCtrlFloat3Query* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.SetRelativeVelocity(float3(query->value.x, query->value.y, query->value.z));
+	});
+}
+
+static void NativeSetRotation(const MoveCtrlFloat3Query* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.SetRotation(float3(query->value.x, query->value.y, query->value.z));
+	});
+}
+
+static void NativeSetRotationVelocity(const MoveCtrlFloat3Query* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.SetRotationVelocity(float3(query->value.x, query->value.y, query->value.z));
+	});
+}
+
+static void NativeSetHeading(const MoveCtrlHeadingQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.SetHeading(static_cast<short>(query->heading));
+	});
+}
+
+static void NativeSetTrackSlope(const MoveCtrlBoolQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.trackSlope = query->value;
+	});
+}
+
+static void NativeSetTrackGround(const MoveCtrlBoolQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.trackGround = query->value;
+	});
+}
+
+static void NativeSetTrackLimits(const MoveCtrlBoolQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.trackLimits = query->value;
+	});
+}
+
+static void NativeSetGroundOffset(const MoveCtrlFloatQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.groundOffset = query->value;
+	});
+}
+
+static void NativeSetGravity(const MoveCtrlFloatQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.gravityFactor = query->value;
+	});
+}
+
+static void NativeSetDrag(const MoveCtrlFloatQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.drag = query->value;
+	});
+}
+
+static void NativeSetWindFactor(const MoveCtrlFloatQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.windFactor = query->value;
+	});
+}
+
+static void NativeSetLimits(const MoveCtrlLimitsQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.mins = float3(query->mins.x, query->mins.y, query->mins.z);
+		moveType.maxs = float3(query->maxs.x, query->maxs.y, query->maxs.z);
+	});
+}
+
+static void NativeSetCollideStop(const MoveCtrlBoolQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.groundStop = query->value;
+	});
+}
+
+static void NativeSetLimitsStop(const MoveCtrlBoolQuery* query, MoveCtrlResult* result)
+{
+	ApplyScriptMoveType(query->unitID, result, [query](CScriptMoveType& moveType) {
+		moveType.limitsStop = query->value;
+	});
+}
+
+static void NativeSetMoveDef(const MoveCtrlMoveDefQuery* query, MoveCtrlResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr || unit->moveDef == nullptr || unit->moveType == nullptr)
+		return;
+
+	MoveDef* moveDef = nullptr;
+	if (query->hasMoveDefName) {
+		if (query->moveDefName != nullptr)
+			moveDef = moveDefHandler.GetMoveDefByName(query->moveDefName);
+	} else {
+		const unsigned int moveDefCount = moveDefHandler.GetNumMoveDefs();
+		if (moveDefCount != 0) {
+			const int pathType = std::clamp(query->moveDefID, 0, static_cast<int>(moveDefCount) - 1);
+			moveDef = moveDefHandler.GetMoveDefByPathType(pathType);
+		}
+	}
+
+	if (moveDef == nullptr)
+		return;
+
+	if (unit->UsingScriptMoveType())
+		unit->prevMoveType->StopMoving();
+	else
+		unit->moveType->StopMoving();
+
+	unit->moveDef = moveDef;
+	result->success = true;
+}
+
 } // namespace
 
 const MoveCtrlApi MOVE_CTRL_API = {
 	.GetUnitMoveTypeData = NativeGetUnitMoveTypeData,
 	.GetUnitEstimatedPath = NativeGetUnitEstimatedPath,
 	.MoveCtrl = NativeMoveCtrl,
+	.SetTag = NativeSetTag,
+	.GetTag = NativeGetTag,
+	.SetProgressState = NativeSetProgressState,
+	.SetMoveDef = NativeSetMoveDef,
 	.IsMoveCtrlEnabled = NativeIsMoveCtrlEnabled,
 	.SetMoveCtrlGravity = NativeSetMoveCtrlGravity,
 	.SetGroundMoveTypeMaxSpeed = NativeSetGroundMoveTypeMaxSpeed,
 	.SetMoveTypeNumeric = NativeSetMoveTypeNumeric,
 	.SetMoveTypeBoolean = NativeSetMoveTypeBoolean,
 	.SetNoBlocking = NativeSetNoBlocking,
+	.SetExtrapolate = NativeSetExtrapolate,
+	.SetPhysics = NativeSetPhysics,
+	.SetPosition = NativeSetPosition,
+	.SetVelocity = NativeSetVelocity,
+	.SetRelativeVelocity = NativeSetRelativeVelocity,
+	.SetRotation = NativeSetRotation,
+	.SetRotationVelocity = NativeSetRotationVelocity,
+	.SetHeading = NativeSetHeading,
+	.SetTrackSlope = NativeSetTrackSlope,
+	.SetTrackGround = NativeSetTrackGround,
+	.SetTrackLimits = NativeSetTrackLimits,
+	.SetGroundOffset = NativeSetGroundOffset,
+	.SetGravity = NativeSetGravity,
+	.SetDrag = NativeSetDrag,
+	.SetWindFactor = NativeSetWindFactor,
+	.SetLimits = NativeSetLimits,
+	.SetCollideStop = NativeSetCollideStop,
+	.SetLimitsStop = NativeSetLimitsStop,
 };

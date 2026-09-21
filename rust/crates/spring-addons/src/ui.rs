@@ -4,7 +4,7 @@ use alloc::rc::Rc;
 use alloc::vec::Vec;
 use core::cell::{Cell, RefCell};
 
-use crate::event::{EventResult, KeyEvent, ViewGeometry};
+use crate::event::{EventResult, KeyEvent, UnitDestroyedEvent, ViewGeometry};
 use crate::runtime::{AddonContext, AddonRuntime};
 
 pub trait Widget<G = ()> {
@@ -18,7 +18,90 @@ pub trait Widget<G = ()> {
     fn shutdown(&self, _ctx: &AddonContext<'_, G>) {}
 
     fn update(&self, _ctx: &AddonContext<'_, G>, _dt: f32) {}
+    fn unit_created(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _unit_id: i32,
+        _unit_def_id: i32,
+        _unit_team: i32,
+        _builder_id: i32,
+    ) {
+    }
+    fn feature_created(&self, _ctx: &AddonContext<'_, G>, _feature_id: i32, _ally_team_id: i32) {}
+    fn feature_destroyed(&self, _ctx: &AddonContext<'_, G>, _feature_id: i32, _ally_team_id: i32) {}
+    fn unit_destroyed(&self, _ctx: &AddonContext<'_, G>, _event: &UnitDestroyedEvent) {}
+    fn unit_given(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _unit_id: i32,
+        _unit_def_id: i32,
+        _old_team: i32,
+        _new_team: i32,
+    ) {
+    }
+    fn unit_taken(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _unit_id: i32,
+        _unit_def_id: i32,
+        _old_team: i32,
+        _new_team: i32,
+    ) {
+    }
+    fn unit_entered_los(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _unit_id: i32,
+        _unit_def_id: i32,
+        _unit_team: i32,
+        _ally_team: i32,
+    ) {
+    }
+    fn unit_left_los(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _unit_id: i32,
+        _unit_def_id: i32,
+        _unit_team: i32,
+        _ally_team: i32,
+    ) {
+    }
+    fn unit_entered_radar(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _unit_id: i32,
+        _unit_def_id: i32,
+        _unit_team: i32,
+        _ally_team: i32,
+    ) {
+    }
+    fn unit_left_radar(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _unit_id: i32,
+        _unit_def_id: i32,
+        _unit_team: i32,
+        _ally_team: i32,
+    ) {
+    }
+    fn projectile_created(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _projectile_id: i32,
+        _owner_id: i32,
+        _weapon_def_id: i32,
+    ) {
+    }
+    fn projectile_destroyed(
+        &self,
+        _ctx: &AddonContext<'_, G>,
+        _projectile_id: i32,
+        _owner_id: i32,
+        _weapon_def_id: i32,
+    ) {
+    }
     fn draw_screen(&self, _ctx: &AddonContext<'_, G>, _width: i32, _height: i32) {}
+    fn draw_genesis(&self, _ctx: &AddonContext<'_, G>) {}
     fn draw_world(&self, _ctx: &AddonContext<'_, G>) {}
 
     fn key_press(&self, _ctx: &AddonContext<'_, G>, _event: &KeyEvent<'_>) -> EventResult {
@@ -153,6 +236,132 @@ impl<G> WidgetHandler<G> {
         });
     }
 
+    pub fn unit_created(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, builder_id: i32) {
+        self.dispatch("UnitCreated", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.unit_created(ctx, unit_id, unit_def_id, unit_team, builder_id);
+                }
+            }
+        });
+    }
+
+    pub fn feature_created(&self, feature_id: i32, ally_team_id: i32) {
+        self.dispatch("FeatureCreated", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.feature_created(ctx, feature_id, ally_team_id);
+                }
+            }
+        });
+    }
+
+    pub fn feature_destroyed(&self, feature_id: i32, ally_team_id: i32) {
+        self.dispatch("FeatureDestroyed", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.feature_destroyed(ctx, feature_id, ally_team_id);
+                }
+            }
+        });
+    }
+
+    pub fn unit_destroyed(&self, event: &UnitDestroyedEvent) {
+        self.dispatch("UnitDestroyed", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.unit_destroyed(ctx, event);
+                }
+            }
+        });
+    }
+
+    pub fn unit_given(&self, unit_id: i32, unit_def_id: i32, old_team: i32, new_team: i32) {
+        self.dispatch("UnitGiven", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.unit_given(ctx, unit_id, unit_def_id, old_team, new_team);
+                }
+            }
+        });
+    }
+
+    pub fn unit_taken(&self, unit_id: i32, unit_def_id: i32, old_team: i32, new_team: i32) {
+        self.dispatch("UnitTaken", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.unit_taken(ctx, unit_id, unit_def_id, old_team, new_team);
+                }
+            }
+        });
+    }
+
+    pub fn unit_entered_los(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, ally_team: i32) {
+        self.dispatch("UnitEnteredLos", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.unit_entered_los(ctx, unit_id, unit_def_id, unit_team, ally_team);
+                }
+            }
+        });
+    }
+
+    pub fn unit_left_los(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, ally_team: i32) {
+        self.dispatch("UnitLeftLos", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.unit_left_los(ctx, unit_id, unit_def_id, unit_team, ally_team);
+                }
+            }
+        });
+    }
+
+    pub fn unit_entered_radar(
+        &self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        ally_team: i32,
+    ) {
+        self.dispatch("UnitEnteredRadar", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.unit_entered_radar(ctx, unit_id, unit_def_id, unit_team, ally_team);
+                }
+            }
+        });
+    }
+
+    pub fn unit_left_radar(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, ally_team: i32) {
+        self.dispatch("UnitLeftRadar", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.unit_left_radar(ctx, unit_id, unit_def_id, unit_team, ally_team);
+                }
+            }
+        });
+    }
+
+    pub fn projectile_created(&self, projectile_id: i32, owner_id: i32, weapon_def_id: i32) {
+        self.dispatch("ProjectileCreated", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.projectile_created(ctx, projectile_id, owner_id, weapon_def_id);
+                }
+            }
+        });
+    }
+
+    pub fn projectile_destroyed(&self, projectile_id: i32, owner_id: i32, weapon_def_id: i32) {
+        self.dispatch("ProjectileDestroyed", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.projectile_destroyed(ctx, projectile_id, owner_id, weapon_def_id);
+                }
+            }
+        });
+    }
+
     pub fn draw_screen(&self, width: i32, height: i32) {
         self.dispatch("DrawScreen", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
@@ -168,6 +377,16 @@ impl<G> WidgetHandler<G> {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.draw_world(ctx);
+                }
+            }
+        });
+    }
+
+    pub fn draw_genesis(&self) {
+        self.dispatch("DrawGenesis", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.draw_genesis(ctx);
                 }
             }
         });

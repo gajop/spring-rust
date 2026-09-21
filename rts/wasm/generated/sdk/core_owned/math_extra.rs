@@ -12,7 +12,7 @@
             pub value: u32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct BitBitsQuery {
             pub bits: Vec<u32>,
         }
@@ -66,7 +66,7 @@
             pub clamped: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct DiagQuery {
             pub values: Vec<f32>,
         }

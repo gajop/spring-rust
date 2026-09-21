@@ -5209,7 +5209,7 @@ pub mod game {
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
             #[link_name = "is-god-mode-enabled"]
-            pub safe fn core_is_god_mode_enabled(p0: i32) -> i64;
+            pub safe fn core_is_god_mode_enabled(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
@@ -5663,19 +5663,21 @@ pub mod game {
     }
 
     #[inline]
-    pub fn is_god_mode_enabled(unused: u8) -> Result<bool> {
+    pub fn is_god_mode_enabled(unused: u8) -> Result<(bool, bool, bool)> {
         #[cfg(target_arch = "wasm32")]
         {
-            let packed = raw::core_is_god_mode_enabled(unused as i32) as u64;
-            let status = (packed >> 32) as i32;
+            let mut wire = [0u8; 12];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_is_god_mode_enabled(unused as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            match packed as u32 {
-                0 => Ok(false),
-                1 => Ok(true),
-                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            let mut cursor = 0usize;
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
             }
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -6823,8 +6825,20 @@ pub mod platform {
 pub mod move_ctrl {
     use crate::{ApiError, ErrorCode, Result};
 
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct Float3 {
+        pub x: f32,
+        pub y: f32,
+        pub z: f32,
+    }
+
     #[cfg(target_arch = "wasm32")]
     pub mod raw {
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "get-tag"]
+            pub safe fn core_get_tag(p0: i32) -> i64;
+        }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
             #[link_name = "get-unit-estimated-path"]
@@ -6842,8 +6856,48 @@ pub mod move_ctrl {
         }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
+            #[link_name = "set-collide-stop"]
+            pub safe fn core_set_collide_stop(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-drag"]
+            pub safe fn core_set_drag(p0: i32, p1: f32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-extrapolate"]
+            pub safe fn core_set_extrapolate(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-gravity"]
+            pub safe fn core_set_gravity(p0: i32, p1: f32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
             #[link_name = "set-ground-move-type-max-speed"]
             pub safe fn core_set_ground_move_type_max_speed(p0: i32, p1: f32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-ground-offset"]
+            pub safe fn core_set_ground_offset(p0: i32, p1: f32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-heading"]
+            pub safe fn core_set_heading(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-limits"]
+            pub safe fn core_set_limits(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-limits-stop"]
+            pub safe fn core_set_limits_stop(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:move-ctrl")]
         unsafe extern "C" {
@@ -6864,6 +6918,84 @@ pub mod move_ctrl {
         unsafe extern "C" {
             #[link_name = "set-no-blocking"]
             pub safe fn core_set_no_blocking(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-physics"]
+            pub safe fn core_set_physics(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-position"]
+            pub safe fn core_set_position(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-progress-state"]
+            pub safe fn core_set_progress_state(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-relative-velocity"]
+            pub safe fn core_set_relative_velocity(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-rotation"]
+            pub safe fn core_set_rotation(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-rotation-velocity"]
+            pub safe fn core_set_rotation_velocity(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-tag"]
+            pub safe fn core_set_tag(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-track-ground"]
+            pub safe fn core_set_track_ground(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-track-limits"]
+            pub safe fn core_set_track_limits(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-track-slope"]
+            pub safe fn core_set_track_slope(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-velocity"]
+            pub safe fn core_set_velocity(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:move-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-wind-factor"]
+            pub safe fn core_set_wind_factor(p0: i32, p1: f32) -> i64;
+        }
+    }
+
+    #[inline]
+    pub fn get_tag(unit_id: i32) -> Result<i32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_get_tag(unit_id) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(packed as u32 as i32)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id,);
+            Err(unreachable!())
         }
     }
 
@@ -6912,6 +7044,94 @@ pub mod move_ctrl {
     }
 
     #[inline]
+    pub fn set_collide_stop(unit_id: i32, value: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_collide_stop(unit_id, if value { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_drag(unit_id: i32, value: f32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_drag(unit_id, value) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_extrapolate(unit_id: i32, value: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_extrapolate(unit_id, if value { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_gravity(unit_id: i32, value: f32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_gravity(unit_id, value) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn set_ground_move_type_max_speed(unit_id: i32, max_speed: f32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -6929,6 +7149,108 @@ pub mod move_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unit_id, max_speed);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_ground_offset(unit_id: i32, value: f32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_ground_offset(unit_id, value) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_heading(unit_id: i32, heading: i32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_heading(unit_id, heading) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, heading);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_limits(unit_id: i32, mins: Float3, maxs: Float3) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 24];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, mins.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, mins.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, mins.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, maxs.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, maxs.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, maxs.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_limits(unit_id, input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, mins, maxs);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_limits_stop(unit_id: i32, value: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_limits_stop(unit_id, if value { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
             Err(unreachable!())
         }
     }
@@ -7017,6 +7339,338 @@ pub mod move_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unit_id, no_blocking);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_physics(unit_id: i32, position: Float3, velocity: Float3, rotation: Float3) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 36];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, position.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, position.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, position.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, velocity.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, velocity.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, velocity.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, rotation.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, rotation.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, rotation.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_physics(unit_id, input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, position, velocity, rotation);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_position(unit_id: i32, value: Float3) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 12];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_position(unit_id, input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_progress_state(unit_id: i32, state: i32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_progress_state(unit_id, state) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, state);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_relative_velocity(unit_id: i32, value: Float3) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 12];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_relative_velocity(unit_id, input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_rotation(unit_id: i32, value: Float3) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 12];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_rotation(unit_id, input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_rotation_velocity(unit_id: i32, value: Float3) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 12];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_rotation_velocity(unit_id, input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_tag(unit_id: i32, tag: i32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_tag(unit_id, tag) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, tag);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_track_ground(unit_id: i32, value: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_track_ground(unit_id, if value { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_track_limits(unit_id: i32, value: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_track_limits(unit_id, if value { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_track_slope(unit_id: i32, value: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_track_slope(unit_id, if value { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_velocity(unit_id: i32, value: Float3) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut input_wire = [0u8; 12];
+            let mut input_cursor = 0usize;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.x).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.y).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_f32(&mut input_wire, &mut input_cursor, value.z).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::align(&input_wire, &mut input_cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_set_velocity(unit_id, input_pointer) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_wind_factor(unit_id: i32, value: f32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_wind_factor(unit_id, value) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, value);
             Err(unreachable!())
         }
     }
@@ -8418,7 +9072,7 @@ pub mod selection {
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
             #[link_name = "get-unit-group"]
-            pub safe fn core_get_unit_group(p0: i32) -> i64;
+            pub safe fn core_get_unit_group(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:selection")]
         unsafe extern "C" {
@@ -8509,15 +9163,21 @@ pub mod selection {
     }
 
     #[inline]
-    pub fn get_unit_group(unit_id: i32) -> Result<i32> {
+    pub fn get_unit_group(unit_id: i32) -> Result<(i32, bool)> {
         #[cfg(target_arch = "wasm32")]
         {
-            let packed = raw::core_get_unit_group(unit_id) as u64;
-            let status = (packed >> 32) as i32;
+            let mut wire = [0u8; 8];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_unit_group(unit_id, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            Ok(packed as u32 as i32)
+            let mut cursor = 0usize;
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -9600,6 +10260,11 @@ pub mod unsynced_ctrl {
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
+            #[link_name = "set-feature-lua-draw"]
+            pub safe fn core_set_feature_lua_draw(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unsynced-ctrl")]
+        unsafe extern "C" {
             #[link_name = "set-feature-no-draw"]
             pub safe fn core_set_feature_no_draw(p0: i32, p1: i32) -> i64;
         }
@@ -9637,6 +10302,11 @@ pub mod unsynced_ctrl {
         unsafe extern "C" {
             #[link_name = "set-nano-projectile-params"]
             pub safe fn core_set_nano_projectile_params(p0: f32, p1: f32, p2: f32, p3: f32, p4: f32, p5: f32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unsynced-ctrl")]
+        unsafe extern "C" {
+            #[link_name = "set-projectile-lua-draw"]
+            pub safe fn core_set_projectile_lua_draw(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
@@ -10561,6 +11231,28 @@ pub mod unsynced_ctrl {
     }
 
     #[inline]
+    pub fn set_feature_lua_draw(feature_id: i32, lua_draw: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_feature_lua_draw(feature_id, if lua_draw { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (feature_id, lua_draw);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn set_feature_no_draw(feature_id: i32, no_draw: bool) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -10798,6 +11490,28 @@ pub mod unsynced_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (r, v, a, rand_r, rand_v, rand_a);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_projectile_lua_draw(projectile_id: i32, lua_draw: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_projectile_lua_draw(projectile_id, if lua_draw { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (projectile_id, lua_draw);
             Err(unreachable!())
         }
     }
@@ -11962,7 +12676,7 @@ pub mod gfx {
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
             #[link_name = "get-query"]
-            pub safe fn core_get_query(p0: i32) -> i64;
+            pub safe fn core_get_query(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
@@ -12836,10 +13550,19 @@ pub mod gfx {
     }
 
     #[inline]
-    pub fn create_query(unused: u8) -> Result<u32> {
+    pub fn create_query(target: Option<u32>) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
-            let packed = raw::core_create_query(unused as i32) as u64;
+            let mut input_wire = [0u8; 8];
+            let mut input_cursor = 0usize;
+            let __core_option_target = target.unwrap_or_default();
+            super::__core_wire::put_boolean(&mut input_wire, &mut input_cursor, target.is_some()).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            super::__core_wire::put_u32(&mut input_wire, &mut input_cursor, __core_option_target).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&input_wire, &mut input_cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            let input_pointer = crate::wasm_output_ptr(&mut input_wire)?;
+            let packed = raw::core_create_query(input_pointer) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));
@@ -12848,7 +13571,7 @@ pub mod gfx {
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
-            let _ = (unused,);
+            let _ = (target,);
             Err(unreachable!())
         }
     }
@@ -13663,15 +14386,21 @@ pub mod gfx {
     }
 
     #[inline]
-    pub fn get_query(value: u32) -> Result<u32> {
+    pub fn get_query(value: u32) -> Result<u64> {
         #[cfg(target_arch = "wasm32")]
         {
-            let packed = raw::core_get_query(value as i32) as u64;
-            let status = (packed >> 32) as i32;
+            let mut wire = [0u8; 8];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_query(value as i32, output_pointer);
             if status != 0 {
                 return Err(ApiError::new(status));
             }
-            Ok(packed as u32)
+            let mut cursor = 0usize;
+            let value = super::__core_wire::u64(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?;
+            if !super::__core_wire::finish(&wire, &mut cursor, 8) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -25613,6 +26342,206 @@ pub mod unit_rendering {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unit_id, radius, check_icon);
+            Err(unreachable!())
+        }
+    }
+
+}
+
+pub mod object_rendering {
+    use crate::{ApiError, ErrorCode, Result};
+
+    #[cfg(target_arch = "wasm32")]
+    pub mod raw {
+        #[link(wasm_import_module = "spring:object-rendering")]
+        unsafe extern "C" {
+            #[link_name = "get-lod"]
+            pub safe fn core_get_lod(p0: i32, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:object-rendering")]
+        unsafe extern "C" {
+            #[link_name = "set-lod-count"]
+            pub safe fn core_set_lod_count(p0: i32, p1: i32, p2: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:object-rendering")]
+        unsafe extern "C" {
+            #[link_name = "set-lod-distance"]
+            pub safe fn core_set_lod_distance(p0: i32, p1: i32, p2: i32, p3: f32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:object-rendering")]
+        unsafe extern "C" {
+            #[link_name = "set-lod-length"]
+            pub safe fn core_set_lod_length(p0: i32, p1: i32, p2: i32, p3: f32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:object-rendering")]
+        unsafe extern "C" {
+            #[link_name = "set-material-display-lists"]
+            pub safe fn core_set_material_display_lists(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:object-rendering")]
+        unsafe extern "C" {
+            #[link_name = "set-material-last-lod"]
+            pub safe fn core_set_material_last_lod(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:object-rendering")]
+        unsafe extern "C" {
+            #[link_name = "set-piece-list"]
+            pub safe fn core_set_piece_list(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+        }
+    }
+
+    #[inline]
+    pub fn get_lod(object_type: i32, object_id: i32) -> Result<(u32, u32)> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 8];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_lod(object_type, object_id, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (object_type, object_id);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_lod_count(object_type: i32, object_id: i32, lod_count: u32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_lod_count(object_type, object_id, lod_count as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (object_type, object_id, lod_count);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_lod_distance(object_type: i32, object_id: i32, lod_level: u32, distance: f32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_lod_distance(object_type, object_id, lod_level as i32, distance) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (object_type, object_id, lod_level, distance);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_lod_length(object_type: i32, object_id: i32, lod_level: u32, length: f32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_lod_length(object_type, object_id, lod_level as i32, length) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (object_type, object_id, lod_level, length);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_material_display_lists(object_type: i32, object_id: i32, lod_level: u32, material_type: i32, pre_list: u32, post_list: u32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_material_display_lists(object_type, object_id, lod_level as i32, material_type, pre_list as i32, post_list as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (object_type, object_id, lod_level, material_type, pre_list, post_list);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_material_last_lod(object_type: i32, object_id: i32, material_type: i32, lod_level: u32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_material_last_lod(object_type, object_id, material_type, lod_level as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (object_type, object_id, material_type, lod_level);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_piece_list(object_type: i32, object_id: i32, lod_level: u32, piece: u32, display_list: u32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_piece_list(object_type, object_id, lod_level as i32, piece as i32, display_list as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (object_type, object_id, lod_level, piece, display_list);
             Err(unreachable!())
         }
     }

@@ -61,18 +61,18 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetProfilerRecordNamesResult {
             pub names: Vec<String>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetProfilerTimeRecordQuery {
             pub name: String,
             pub include_frame_data: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetProfilerTimeRecordResult {
             pub total_ms: f32,
             pub current_ms: f32,
@@ -137,7 +137,7 @@
             pub synced_allocs_k: f32,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetProfilerTimeRecordValue {
             pub total_ms: f32,
             pub current_ms: f32,

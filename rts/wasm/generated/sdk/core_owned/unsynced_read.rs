@@ -58,7 +58,7 @@
             }
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetActiveCmdDescValue {
             pub cmd_desc: ActiveCommandDescription,
             pub has_command: bool,
@@ -101,7 +101,7 @@
             pub using_custom_color: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SolveNURBSCurveValue {
             pub points: Vec<Float3>,
             pub success: bool,

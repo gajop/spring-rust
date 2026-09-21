@@ -144,7 +144,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -196,12 +196,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -235,7 +237,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -278,12 +280,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -317,7 +321,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -367,12 +371,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -406,7 +412,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -463,12 +469,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -502,7 +510,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -559,12 +567,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -598,7 +608,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -654,12 +664,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -693,7 +705,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -786,12 +798,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -825,7 +839,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -877,12 +891,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -916,7 +932,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -992,12 +1008,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1031,7 +1049,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1079,12 +1097,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1118,7 +1138,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1167,12 +1187,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1213,7 +1235,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1276,12 +1298,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1322,7 +1346,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1386,12 +1410,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1425,7 +1451,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1501,12 +1527,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1540,7 +1568,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1588,12 +1616,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1627,7 +1657,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1676,12 +1706,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1715,7 +1747,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1763,12 +1795,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1802,7 +1836,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1877,12 +1911,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -1916,7 +1952,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -1978,12 +2014,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2017,7 +2055,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2081,12 +2119,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2120,7 +2160,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2172,12 +2212,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2211,7 +2253,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2254,12 +2296,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2293,7 +2337,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2336,12 +2380,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2375,7 +2421,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2434,12 +2480,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2480,7 +2528,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2553,12 +2601,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2592,7 +2642,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2709,12 +2759,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2748,7 +2800,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2796,12 +2848,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2835,7 +2889,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -2884,12 +2938,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -2923,7 +2979,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3000,12 +3056,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3039,7 +3097,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3087,12 +3145,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3126,7 +3186,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3188,12 +3248,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3227,7 +3289,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3275,12 +3337,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3314,7 +3378,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3376,12 +3440,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3415,7 +3481,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3515,12 +3581,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3554,7 +3622,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3596,12 +3664,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3635,7 +3705,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3683,12 +3753,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3722,7 +3794,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3770,12 +3842,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3816,7 +3890,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3884,12 +3958,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -3923,7 +3999,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -3976,12 +4052,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4015,7 +4093,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4079,12 +4157,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4125,7 +4205,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4186,12 +4266,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4225,7 +4307,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4273,12 +4355,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4319,7 +4403,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4379,12 +4463,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4418,7 +4504,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4466,12 +4552,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4512,7 +4600,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4573,12 +4661,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4612,7 +4702,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4660,12 +4750,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4706,7 +4798,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4767,12 +4859,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4806,7 +4900,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4854,12 +4948,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -4900,7 +4996,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -4961,12 +5057,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5000,7 +5098,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5048,12 +5146,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5087,7 +5187,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5144,12 +5244,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5183,7 +5285,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5231,12 +5333,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5270,7 +5374,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5330,12 +5434,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5376,7 +5482,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5439,12 +5545,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5485,7 +5593,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5572,12 +5680,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5618,7 +5728,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5630,18 +5740,21 @@ GetMouseButtonsPressedQuery query{};
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
     }
-    if (buttonsInputCount == 0) {
-        query.buttons = nullptr;
-    } else {
-        if constexpr (std::endian::native != std::endian::little) { slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable); return nullptr; }
-        const std::uint64_t buttonsInputBytes64 = static_cast<std::uint64_t>(buttonsInputCount) * 4u;
-        if (buttonsInputBytes64 > std::numeric_limits<std::size_t>::max() || (buttonsInputPointer % 4u) != 0u) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
-        std::span<const std::uint8_t> buttonsInputBytes;
-        if (!state->memory.View(buttonsInputPointer, static_cast<std::size_t>(buttonsInputBytes64), buttonsInputBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-        static_assert(sizeof(std::int32_t) == 4u, "generated Core borrowed/native element width mismatch");
-        query.buttons = reinterpret_cast<std::remove_reference_t<decltype(query.buttons)>>(buttonsInputBytes.data());
+    std::span<const std::uint8_t> buttonsInputWire;
+    if (!state->memory.View(buttonsInputPointer, buttonsInputCount, buttonsInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader buttonsInputReader(buttonsInputWire);
+    std::uint32_t buttonsInputLength = 0;
+    if (!buttonsInputReader.U32(buttonsInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::vector<std::int32_t> buttonsInputStorage;
+    buttonsInputStorage.reserve(buttonsInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < buttonsInputLength; ++coreIndex) {
+        std::int32_t item{};
+        { std::int32_t coreRaw = 0; if (!buttonsInputReader.I32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+        buttonsInputStorage.push_back(item);
     }
-    if (!AssignCoreCount(buttonsInputCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!buttonsInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.buttons = buttonsInputLength == 0 ? nullptr : buttonsInputStorage.data();
+    if (!AssignCoreCount(buttonsInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
     if (!reader.Finish(4u)) {
         slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
         return nullptr;
@@ -5682,12 +5795,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5721,7 +5836,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5773,12 +5888,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5812,7 +5929,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5864,12 +5981,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5903,7 +6022,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -5955,12 +6074,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -5994,7 +6115,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6042,12 +6163,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6081,7 +6204,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6130,12 +6253,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6169,7 +6294,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6243,12 +6368,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6282,7 +6409,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6330,12 +6457,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6369,7 +6498,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6427,12 +6556,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6466,7 +6597,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6522,12 +6653,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6568,7 +6701,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6636,12 +6769,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6675,7 +6810,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6723,12 +6858,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6762,7 +6899,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6815,12 +6952,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6854,7 +6993,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -6908,12 +7047,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -6954,7 +7095,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7016,12 +7157,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7062,7 +7205,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7135,12 +7278,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7174,7 +7319,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7222,12 +7367,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7261,7 +7408,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7309,12 +7456,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7355,7 +7504,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7418,12 +7567,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7464,7 +7615,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7553,12 +7704,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7592,7 +7745,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7640,12 +7793,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7686,7 +7841,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7749,12 +7904,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7795,7 +7952,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7873,12 +8030,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -7919,7 +8078,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -7982,12 +8141,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8021,7 +8182,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8069,12 +8230,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8115,7 +8278,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8197,12 +8360,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8243,7 +8408,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8302,12 +8467,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8341,7 +8508,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8389,12 +8556,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8428,7 +8597,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8476,12 +8645,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8515,7 +8686,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8563,12 +8734,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8609,7 +8782,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8698,12 +8871,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8744,7 +8919,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8832,12 +9007,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8871,7 +9048,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -8957,12 +9134,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }
@@ -8996,7 +9175,7 @@ if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
 slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 return nullptr;
 }
-if (!state->memory.Contains(outputPointer, outputCapacity)) {
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
 slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 return nullptr;
 }
@@ -9089,12 +9268,14 @@ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
 return nullptr;
 }
 if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
 std::span<std::uint8_t> payload;
 if (!state->memory.MutableView(outputPointer, requiredSize, payload))
 return Trap("dynamic Core output range changed unexpectedly");
 WireWriter writer(payload);
 if (!encode(writer) || writer.Offset() != requiredSize)
 return Trap("dynamic Core output size/write mismatch");
+}
 slots[0].i32 = 0;
 return nullptr;
 }

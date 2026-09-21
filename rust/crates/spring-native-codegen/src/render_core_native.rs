@@ -155,6 +155,7 @@ pub fn native_api_path(module: &str) -> Option<(&'static str, &'static str)> {
             "nativeInterface->unsyncedRead->unitRendering",
             "UnitRenderingApi",
         ),
+        "object_rendering" => ("nativeInterface->objectRendering", "ObjectRenderingApi"),
         _ => return None,
     })
 }

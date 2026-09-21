@@ -346,6 +346,7 @@ public:
 	// Per-frame / draw callins (unsynced)
 	void Update() override;
 	void DrawGenesis() override;
+	std::uint32_t WasmWorldFBO() const { return m_wasmWorldFBO; }
 	void DrawWorld() override;
 	void DrawWorldPreUnit() override;
 	void DrawPreDecals() override;
@@ -463,6 +464,7 @@ private:
 	NativeInterface* m_nativeInterface;
 	SharedLib* m_sharedLib;
 	WasmInterfaceSystem* m_wasmSystem = nullptr;
+	std::uint32_t m_wasmWorldFBO = 0;
 	void* m_moduleData = nullptr;
 	bool m_initialized = false;
 	bool m_menuModule = false;

@@ -1,7 +1,7 @@
     pub mod icons {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct AddUnitIconQuery {
             pub icon_name: String,
             pub tex_file: String,
@@ -19,7 +19,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct FreeUnitIconQuery {
             pub icon_name: String,
         }
@@ -34,23 +34,23 @@
             pub full_data: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetAllIconDataArrayResult {
             pub entries: Vec<IconDataEntry>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetIconDataQuery {
             pub icon_name: String,
             pub full_data: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetIconDataResult {
             pub data: IconDataEntry,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct IconDataEntry {
             pub name: String,
             pub atlas_tex_coords: Vec<f32>,

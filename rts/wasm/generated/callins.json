@@ -285,9 +285,7 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "or-true"
   },
@@ -606,9 +604,7 @@
     "result": "DamageCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "first"
   },
@@ -1013,9 +1009,7 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "or-true"
   },
@@ -1132,9 +1126,7 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "or-true"
   },
@@ -1193,9 +1185,7 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "or-true"
   },
@@ -1307,9 +1297,7 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "or-true"
   },
@@ -1604,9 +1592,7 @@
     "result": "DamageCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "first"
   },

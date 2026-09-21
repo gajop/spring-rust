@@ -11,7 +11,7 @@ public:
 	void Kill();
 
 	void Update(bool newSimFrame);
-	void Draw() const;
+	void Draw(unsigned int worldFBO = 0) const;
 
 	void GenerateIBLTextures() const;
 	void ResetMVPMatrices() const;

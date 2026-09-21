@@ -63,6 +63,7 @@ public:
 	bool UnloadWasmModule(const std::string& moduleName);
 	void UnloadAllWasmModules();
 	WasmInterfaceSystem* GetWasmInterfaceSystem();
+	std::uint32_t WasmWorldFBO() const;
 
 	// Attach the active native module's CUS instance to an engine unit.  The
 	// module must register its instance before calling this entry point; the

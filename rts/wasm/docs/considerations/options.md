@@ -87,6 +87,5 @@ results.
 | Lua | 32.9 | 63.2 | |
 | Native | 6.0 | 6.9 | |
 
-Direction 1 is measured because it was prototyped. Directions 2 and 3 are not,
-and the prototypes that would settle them are in `impl/handoff.md` and
-`impl/todo.md`.
+Direction 1 is measured because it was prototyped. Directions 2 and 3 remain
+estimates until they have an accompanying implementation and benchmark.

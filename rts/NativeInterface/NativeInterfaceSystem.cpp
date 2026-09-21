@@ -183,6 +183,7 @@ public:
 		nativeInterface.systemControl = &SYSTEM_CONTROL_API;
 		nativeInterface.profiling = &PROFILING_API;
 		nativeInterface.gfx = &GFX_API;
+		nativeInterface.objectRendering = &OBJECT_RENDERING_API;
 		nativeInterface.soundApi = &SOUND_API;
 		nativeInterface.messages = &MESSAGES_API;
 		nativeInterface.config = &CONFIG_API;
@@ -549,6 +550,11 @@ void NativeInterfaceSystem::UnloadAllWasmModules() {
 
 WasmInterfaceSystem* NativeInterfaceSystem::GetWasmInterfaceSystem() {
 	return pImpl->wasmSystem.get();
+}
+
+std::uint32_t NativeInterfaceSystem::WasmWorldFBO() const
+{
+	return pImpl->eventClient != nullptr ? pImpl->eventClient->WasmWorldFBO() : 0;
 }
 
 bool NativeInterfaceSystem::AttachCusScript(int unitID, std::uint32_t instanceID,

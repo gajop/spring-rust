@@ -2,7 +2,6 @@
 
 #include "Profiling.h"
 
-#include <cstring>
 #include <string>
 #include <vector>
 
@@ -28,8 +27,9 @@ extern const spring::unsynced_set<const luaContextData*>* LUAHANDLE_CONTEXTS[2];
 
 namespace {
 
-static thread_local uint8_t scratchBuffer[4096];
-static thread_local size_t bufferPos = 0;
+static thread_local std::vector<float> frameData;
+static thread_local std::vector<std::string> profileNameStorage;
+static thread_local std::vector<const char*> profileNamePointers;
 
 static const Error INVALID_ARGUMENT_ERROR = {
 	.code = ERROR_INVALID_ARGUMENT,
@@ -40,11 +40,6 @@ static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Not available"
 };
-
-static void ResetBuffer()
-{
-	bufferPos = 0;
-}
 
 static uint64_t PackTimer(const spring_time& time, bool microseconds)
 {
@@ -103,7 +98,6 @@ static void NativeGetDrawSeconds(const GetDrawSecondsQuery*, GetDrawSecondsResul
 
 static void NativeGetProfilerTimeRecord(const GetProfilerTimeRecordQuery* query, GetProfilerTimeRecordResult* result)
 {
-	ResetBuffer();
 	result->error = nullptr;
 	result->totalMs = 0.0f;
 	result->currentMs = 0.0f;
@@ -129,26 +123,17 @@ static void NativeGetProfilerTimeRecord(const GetProfilerTimeRecordQuery* query,
 	if (!query->includeFrameData || record.frames.empty())
 		return;
 
-	const size_t bytesNeeded = record.frames.size() * sizeof(float);
-	if (bufferPos + bytesNeeded > sizeof(scratchBuffer)) {
-		result->error = &INVALID_ARGUMENT_ERROR;
-		return;
-	}
+	frameData.clear();
+	frameData.reserve(record.frames.size());
+	for (const spring_time& frame : record.frames)
+		frameData.push_back(frame.toMilliSecsf());
 
-	float* out = reinterpret_cast<float*>(scratchBuffer + bufferPos);
-	bufferPos += bytesNeeded;
-
-	for (size_t i = 0; i < record.frames.size(); ++i) {
-		out[i] = record.frames[i].toMilliSecsf();
-	}
-
-	result->frameData = out;
-	result->frameCount = record.frames.size();
+	result->frameData = frameData.data();
+	result->frameCount = frameData.size();
 }
 
 static void NativeGetProfilerRecordNames(const GetProfilerRecordNamesQuery*, GetProfilerRecordNamesResult* result)
 {
-	ResetBuffer();
 	result->error = nullptr;
 	result->names = nullptr;
 	result->count = 0;
@@ -158,28 +143,16 @@ static void NativeGetProfilerRecordNames(const GetProfilerRecordNamesQuery*, Get
 	if (count == 0)
 		return;
 
-	const size_t pointerBytes = count * sizeof(const char*);
-	if (bufferPos + pointerBytes > sizeof(scratchBuffer)) {
-		result->error = &INVALID_ARGUMENT_ERROR;
-		return;
-	}
+	profileNameStorage.clear();
+	profileNamePointers.clear();
+	profileNameStorage.reserve(count);
+	profileNamePointers.reserve(count);
+	for (const auto& profile : sortedProfiles)
+		profileNameStorage.push_back(profile.first);
+	for (const std::string& name : profileNameStorage)
+		profileNamePointers.push_back(name.c_str());
 
-	const char** names = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
-	bufferPos += pointerBytes;
-
-	for (size_t i = 0; i < count; ++i) {
-		const std::string& name = sortedProfiles[i].first;
-		if (bufferPos + name.size() + 1 > sizeof(scratchBuffer)) {
-			result->error = &INVALID_ARGUMENT_ERROR;
-			return;
-		}
-		char* dest = reinterpret_cast<char*>(scratchBuffer + bufferPos);
-		std::memcpy(dest, name.c_str(), name.size() + 1);
-		names[i] = dest;
-		bufferPos += name.size() + 1;
-	}
-
-	result->names = names;
+	result->names = profileNamePointers.data();
 	result->count = static_cast<uint32_t>(count);
 }
 

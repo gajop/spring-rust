@@ -1,7 +1,7 @@
     pub mod camera {
         use super::{Result, String, Vec};
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct CameraState {
             pub name: String,
             pub pos: Float3,
@@ -43,7 +43,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetCameraNamesResult {
             pub names: Vec<String>,
         }
@@ -92,7 +92,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetCameraTargetOptions {
             pub transition_time: Option<f32>,
             pub dir_x: Option<f32>,
@@ -100,7 +100,7 @@
             pub dir_z: Option<f32>,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetCameraTargetQuery {
             pub target: Float3,
             pub options: SetCameraTargetOptions,

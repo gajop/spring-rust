@@ -288,4 +288,9 @@ pub const API_DEFINITIONS: &[ApiDefinition] = &[
         header: "UnsyncedRead.h",
         api_struct: "UnitRenderingApi",
     },
+    ApiDefinition {
+        module: "object_rendering",
+        header: "ObjectRendering.h",
+        api_struct: "ObjectRenderingApi",
+    },
 ];

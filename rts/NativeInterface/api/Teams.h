@@ -103,6 +103,8 @@ struct AIInfo {
 
 // Team stats history point
 struct TeamStatsHistoryPoint {
+	float time;
+	int32_t frame;
 	float metalUsed;
 	float metalProduced;
 	float metalExcess;

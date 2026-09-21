@@ -13,7 +13,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ClearWatchDogTimerQuery {
             pub thread_name: String,
             pub keep_stopped: bool,
@@ -46,7 +46,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetGameNameResult {
             pub name: String,
         }
@@ -79,7 +79,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetMenuNameResult {
             pub name: String,
         }
@@ -89,7 +89,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetReplayFilePathResult {
             pub path: String,
             pub success: bool,
@@ -111,7 +111,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetReplayRecordingFilePathResult {
             pub path: String,
             pub success: bool,
@@ -132,7 +132,7 @@
             pub unused: u8,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWindowDisplayModeResult {
             pub width: i32,
             pub height: i32,
@@ -172,7 +172,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ReloadQuery {
             pub start_script: String,
         }
@@ -193,7 +193,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct RestartQuery {
             pub cmd_args: String,
             pub start_script: String,
@@ -204,7 +204,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetShareLevelQuery {
             pub resource: String,
             pub level: f32,
@@ -215,7 +215,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct ShareResourcesQuery {
             pub team_id: i32,
             pub resource: String,
@@ -227,7 +227,7 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct StartQuery {
             pub cmd_args: String,
             pub start_script: String,
@@ -276,7 +276,7 @@
             pub is_sim_lagging: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetReplayFilePathValue {
             pub path: String,
             pub success: bool,
@@ -288,13 +288,13 @@
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetReplayRecordingFilePathValue {
             pub path: String,
             pub success: bool,
         }
 
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWindowDisplayModeValue {
             pub width: i32,
             pub height: i32,

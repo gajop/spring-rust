@@ -381,6 +381,7 @@ fn render_owned_record(record: &RecordModel, records: &BTreeMap<String, RecordMo
     let mut members = String::new();
     let mut decode = String::new();
     let implicit = implicit_count_fields(&record.fields);
+    let mut assigned_counts = BTreeSet::new();
 
     for field in record
         .fields
@@ -398,27 +399,30 @@ fn render_owned_record(record: &RecordModel, records: &BTreeMap<String, RecordMo
             }
             SemanticType::Bytes => {
                 let count = count_field(field).expect("supported bytes count");
+                let count_update = dynamic_count_update(&count, &mut assigned_counts);
                 members.push_str(&format!("    std::vector<std::uint8_t> {stem}Storage;\n"));
                 decode.push_str(&format!(
-                    "        {{ std::uint32_t coreCount = 0; if (!reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) return false; std::span<const std::uint8_t> coreBytes; if (!reader.Bytes(coreCount, coreBytes)) return false; {stem}Storage.assign(coreBytes.begin(), coreBytes.end()); value.{field_name} = {stem}Storage.empty() ? nullptr : reinterpret_cast<std::remove_reference_t<decltype(value.{field_name})>>({stem}Storage.data()); if (!AssignDynamicCount(coreCount, value.{count})) return false; }}\n",
+                    "        {{ std::uint32_t coreCount = 0; if (!reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) return false; std::span<const std::uint8_t> coreBytes; if (!reader.Bytes(coreCount, coreBytes)) return false; {stem}Storage.assign(coreBytes.begin(), coreBytes.end()); value.{field_name} = {stem}Storage.empty() ? nullptr : reinterpret_cast<std::remove_reference_t<decltype(value.{field_name})>>({stem}Storage.data()); {count_update} }}\n",
                     field_name = field.name,
                 ));
             }
             SemanticType::List { element } if matches!(element.as_ref(), SemanticType::String) => {
                 let count = count_field(field).expect("supported string-list count");
+                let count_update = dynamic_count_update(&count, &mut assigned_counts);
                 members.push_str(&format!("    std::vector<std::string> {stem}Strings;\n    std::vector<const char*> {stem}Pointers;\n"));
                 decode.push_str(&format!(
-                    "        {{ std::uint32_t coreCount = 0; if (!reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) return false; {stem}Strings.clear(); {stem}Pointers.clear(); {stem}Strings.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) {{ std::uint32_t coreLength = 0; if (!reader.U32(coreLength)) return false; std::span<const std::uint8_t> coreBytes; if (!reader.Bytes(coreLength, coreBytes)) return false; {stem}Strings.emplace_back(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }} {stem}Pointers.reserve({stem}Strings.size()); for (const auto& item : {stem}Strings) {stem}Pointers.push_back(item.c_str()); value.{field_name} = {stem}Pointers.empty() ? nullptr : {stem}Pointers.data(); if (!AssignDynamicCount(coreCount, value.{count})) return false; }}\n",
+                    "        {{ std::uint32_t coreCount = 0; if (!reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) return false; {stem}Strings.clear(); {stem}Pointers.clear(); {stem}Strings.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) {{ std::uint32_t coreLength = 0; if (!reader.U32(coreLength)) return false; std::span<const std::uint8_t> coreBytes; if (!reader.Bytes(coreLength, coreBytes)) return false; {stem}Strings.emplace_back(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }} {stem}Pointers.reserve({stem}Strings.size()); for (const auto& item : {stem}Strings) {stem}Pointers.push_back(item.c_str()); value.{field_name} = {stem}Pointers.empty() ? nullptr : {stem}Pointers.data(); {count_update} }}\n",
                     field_name = field.name,
                 ));
             }
             SemanticType::List { element } => {
                 let count = count_field(field).expect("supported list count");
+                let count_update = dynamic_count_update(&count, &mut assigned_counts);
                 let cpp = native_cpp_type(element);
                 members.push_str(&format!("    std::vector<{cpp}> {stem}Storage;\n"));
                 let item_read = render_fixed_read(element, "item", records, "reader", 3);
                 decode.push_str(&format!(
-                    "        {{ std::uint32_t coreCount = 0; if (!reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) return false; {stem}Storage.clear(); {stem}Storage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) {{ {cpp} item{{}};\n{item_read}            {stem}Storage.push_back(item); }} value.{field_name} = {stem}Storage.empty() ? nullptr : {stem}Storage.data(); if (!AssignDynamicCount(coreCount, value.{count})) return false; }}\n",
+                    "        {{ std::uint32_t coreCount = 0; if (!reader.U32(coreCount) || !CheckResultNodes(state, coreCount)) return false; {stem}Storage.clear(); {stem}Storage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) {{ {cpp} item{{}};\n{item_read}            {stem}Storage.push_back(item); }} value.{field_name} = {stem}Storage.empty() ? nullptr : {stem}Storage.data(); {count_update} }}\n",
                     field_name = field.name,
                 ));
             }
@@ -437,6 +441,14 @@ fn render_owned_record(record: &RecordModel, records: &BTreeMap<String, RecordMo
     format!(
         "struct CoreOwned_{name} {{\n    {name} value{{}};\n{members}\n    bool Decode(HostState* state, WireReader& reader)\n    {{\n{decode}        return true;\n    }}\n}};\n\n"
     )
+}
+
+fn dynamic_count_update(count: &str, assigned_counts: &mut BTreeSet<String>) -> String {
+    if assigned_counts.insert(count.to_owned()) {
+        format!("if (!AssignDynamicCount(coreCount, value.{count})) return false;")
+    } else {
+        format!("if (value.{count} != coreCount) return false;")
+    }
 }
 
 fn render_callback(
@@ -648,7 +660,7 @@ fn render_output_setup(
                 _ => unreachable!(),
             };
             format!(
-                "    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[{index}].i32);\n    std::span<std::uint8_t> outputControlWire;\n    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));\n    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;\n    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * {element_bytes}u;\n    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
+                "    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[{index}].i32);\n    std::span<std::uint8_t> outputControlWire;\n    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));\n    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;\n    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * {element_bytes}u;\n    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
             )
         }
         _ => String::new(),
@@ -715,7 +727,7 @@ fn render_result(
                 2,
             );
             format!(
-                "    if (errorCode != 0) {{ slots[0].i32 = errorCode; return nullptr; }}\n    std::uint32_t required = 0;\n    if (!AssignDynamicCount(result.{count}, required) || (required != 0 && result.{field_name} == nullptr)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }}\n    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap(\"dynamic-input output descriptor changed unexpectedly\");\n    if (outputCapacity < required) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * {element_bytes}u;\n    if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!guard.Charge(requiredBytes64)) return Trap(budgetError);\n    std::span<std::uint8_t> outputWire;\n    if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap(\"dynamic-input output range changed unexpectedly\");\n    WireWriter writer(outputWire);\n    for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {{\n{item_write}    }}\n    if (!writer.Finish(1)) return Trap(\"dynamic-input variable output layout mismatch\");\n    slots[0].i32 = 0;\n    return nullptr;\n",
+                "    if (errorCode != 0) {{ slots[0].i32 = errorCode; return nullptr; }}\n    std::uint32_t required = 0;\n    if (!AssignDynamicCount(result.{count}, required) || (required != 0 && result.{field_name} == nullptr)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }}\n    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap(\"dynamic-input output descriptor changed unexpectedly\");\n    if (outputCapacity < required) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * {element_bytes}u;\n    if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!guard.Charge(requiredBytes64)) return Trap(budgetError);\n    if (required != 0) {{\n        std::span<std::uint8_t> outputWire;\n        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap(\"dynamic-input output range changed unexpectedly\");\n        WireWriter writer(outputWire);\n        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {{\n{item_write}        }}\n        if (!writer.Finish(1)) return Trap(\"dynamic-input variable output layout mismatch\");\n    }}\n    slots[0].i32 = 0;\n    return nullptr;\n",
                 field_name = field.name,
             )
         }
