@@ -115,6 +115,16 @@ pub trait UnitScript: Sized {
     fn killed(&mut self, _ctx: &UnitCtx, _recent_damage: f32, _max_health: f32) -> WreckLevel {
         WreckLevel::None
     }
+
+    /// Return true when `killed` started a suspendable death animation.
+    ///
+    /// Lua's `script.Killed` callin is allowed to sleep before returning its
+    /// wreck level.  CUS keeps the same engine-visible contract without
+    /// forcing every script to be asynchronous: scripts that spawn such an
+    /// animation opt in here and finish it with `UnitCtx::set_killed_finished`.
+    fn killed_pending(&self) -> bool {
+        false
+    }
 }
 
 /// Capability bits used by the engine adapter to skip absent entry points.

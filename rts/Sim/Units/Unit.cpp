@@ -703,6 +703,15 @@ void CUnit::UpdateWeaponVectors()
 	}
 }
 
+void CUnit::RefreshWeaponPieces()
+{
+	ZoneScoped;
+
+	for (CWeapon* w: weapons) {
+		w->RefreshWeaponPieces();
+	}
+}
+
 void CUnit::UpdateWeapons()
 {
 	ZoneScoped;

@@ -389,8 +389,7 @@ static void NativeSendToUnsynced(const SendToUnsyncedQuery* query, SendToUnsynce
 			return;
 		}
 		delivered = true;
-	}
-	if (NativeInterfaceSystem::s_instance != nullptr) {
+	} else if (NativeInterfaceSystem::s_instance != nullptr) {
 		std::string error;
 		if (!NativeInterfaceSystem::s_instance->DispatchWasmSyncedMessage(query->message, error)) {
 			result->error = &NOT_READY_ERROR;

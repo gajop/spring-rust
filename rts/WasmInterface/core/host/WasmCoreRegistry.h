@@ -110,11 +110,10 @@ inline constexpr ImportDescriptor kImports[] = {
 
 	{UnitsCommandsModule, "get-unit-command-count", "i32->i64", AllEnvironmentMask},
 	{UnitsCommandsModule, "get-unit-commands", "i32,i32,i32,i32->i64", AllEnvironmentMask},
-	// Synced order callouts borrow aligned guest i32/f32 arrays directly for the
-	// duration of the native call. Synced Core memory is fixed/non-growable, so
-	// these imports need no host vector or copy.
-	{UnitsCommandsModule, "give-order", "i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
-	{UnitsCommandsModule, "give-order-to-unit-map", "i32,i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
+	// Player order callouts follow the unsynced Lua path through
+	// selectedUnitsHandler and the network command protocol.
+	{UnitsCommandsModule, "give-order", "i32,i32,i32,i32,i32->i64", UnsyncedEnvironmentMask},
+	{UnitsCommandsModule, "give-order-to-unit-map", "i32,i32,i32,i32,i32,i32,i32->i64", UnsyncedEnvironmentMask},
 	{CobScriptModule, "call-cob-script", "i32,i32,i32,i32,i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 	{CusModule, "attach", "i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 	{CusModule, "operation", "i32,i32,i32,i32,i32,i32,i32,f32,f32,f32->i64", SyncedEnvironmentMask},

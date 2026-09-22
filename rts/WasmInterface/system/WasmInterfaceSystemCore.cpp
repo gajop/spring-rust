@@ -49,6 +49,14 @@ bool DispatchCoreModule(const recoil::wasm::core::WasmCoreDispatchPlan* plan,
 		spring::benchmark_callins::Stage::ModuleDispatch);
 	if (WasmCoreHost::Dispatch(plan, query, result, error)) {
 		spring::benchmark_callins::End(dispatchStage);
+		if (recoil::wasm::core::IsCoreInputRejectedError(error)) {
+			LOG_L(L_WARNING, "Core Wasm callin %s skipped in module %s: %s",
+				std::string(CallinName(callin)).c_str(),
+				std::string(WasmCoreHost::ModuleName(
+					recoil::wasm::core::PlanHost(plan))).c_str(),
+				error.substr(recoil::wasm::core::kCoreInputRejectedPrefix.size()).c_str());
+			error.clear();
+		}
 		return true;
 	}
 	spring::benchmark_callins::End(dispatchStage);

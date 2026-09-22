@@ -141,6 +141,7 @@ fn call_ordinals_and_engine_wreck_values_are_stable() {
     }
     assert_eq!(UnitScriptCall::from_u32(43), None);
     assert_eq!(WreckLevel::None as i32, -1);
+    assert_eq!(WreckLevel::NoWreck as i32, 0);
     assert_eq!(WreckLevel::One as i32, 1);
     assert_eq!(WreckLevel::Two as i32, 2);
     assert_eq!(WreckLevel::Three as i32, 3);

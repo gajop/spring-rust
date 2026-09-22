@@ -571,5 +571,6 @@ bool NativeInterfaceSystem::AttachCusScript(int unitID, std::uint32_t instanceID
 	if (script == nullptr)
 		return false;
 	script->Create();
+	unit->RefreshWeaponPieces();
 	return true;
 }

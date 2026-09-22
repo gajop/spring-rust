@@ -190,6 +190,9 @@ public:
 
 	void UpdateWeapons();
 	void UpdateWeaponVectors();
+	// CUS scripts can replace the unit script after PostInit, so refresh the
+	// weapon piece callbacks before the first target query.
+	void RefreshWeaponPieces();
 
 	void SlowUpdateWeapons();
 	void SlowUpdateKamikaze(bool scanForTargets);

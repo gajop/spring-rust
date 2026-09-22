@@ -152,8 +152,12 @@ struct UnitsCommandsApi {
 	void (*FindUnitCmdDesc)(const FindUnitCmdDescQuery* query, FindUnitCmdDescResult* result);
 	void (*GetCommandParams)(const GetCommandParamsQuery* query, GetCommandParamsResult* result);
 	void (*GiveOrder)(const GiveOrderQuery* query, GiveOrderResult* result);
+	void (*GiveOrderToUnit)(const GiveOrderToUnitQuery* query, GiveOrderToUnitResult* result);
 	void (*GiveOrderToUnitMap)(const GiveOrderToUnitMapQuery* query, GiveOrderToUnitMapResult* result);
+	void (*GiveOrderToUnitArray)(const GiveOrderToUnitArrayQuery* query, GiveOrderToUnitArrayResult* result);
+	void (*GiveOrderArrayToUnit)(const GiveOrderArrayToUnitQuery* query, GiveOrderArrayToUnitResult* result);
 	void (*GiveOrderArrayToUnitMap)(const GiveOrderArrayToUnitMapQuery* query, GiveOrderArrayToUnitMapResult* result);
+	void (*GiveOrderArrayToUnitArray)(const GiveOrderArrayToUnitArrayQuery* query, GiveOrderArrayToUnitArrayResult* result);
 };
 
 extern const UnitsCommandsApi UNITS_COMMANDS_API;

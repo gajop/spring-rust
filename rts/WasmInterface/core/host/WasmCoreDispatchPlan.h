@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 
 #include "NativeInterface/WasmUiVisibility.h"
 #include "System/BenchmarkCallins.h"
@@ -14,6 +15,14 @@
 class WasmCoreHost;
 
 namespace recoil::wasm::core {
+
+inline constexpr std::string_view kCoreInputRejectedPrefix =
+	"Core Wasm callin input rejected: ";
+
+inline bool IsCoreInputRejectedError(std::string_view error)
+{
+	return error.starts_with(kCoreInputRejectedPrefix);
+}
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 
@@ -104,6 +113,11 @@ inline bool DispatchPlan(const WasmCoreDispatchPlan* plan, const void* query,
 	spring::benchmark_callins::End(visibilityStage);
 
 	if (plan->invoke(*plan, query, result, error))
+		return true;
+	// A host-side serializer can reject an input before entering the guest,
+	// usually because a variable payload does not fit the guest's advertised
+	// scratch region. That is a skipped callin, not a guest fault.
+	if (IsCoreInputRejectedError(error))
 		return true;
 	return DispatchPlanFailed(plan, error);
 }

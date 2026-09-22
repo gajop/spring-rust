@@ -96,6 +96,9 @@ static bool BuildCommand(const CommandFFI& ffi, Command& outCmd)
 	if (ffi.paramCount > MAX_COMMAND_PARAMS) {
 		return false;
 	}
+	if (ffi.paramCount != 0 && ffi.params == nullptr) {
+		return false;
+	}
 
 	outCmd = Command(ffi.cmdID);
 	outCmd.SetOpts(ffi.options);
@@ -108,6 +111,27 @@ static bool BuildCommand(const CommandFFI& ffi, Command& outCmd)
 
 	for (uint32_t i = 0; i < ffi.paramCount; ++i) {
 		outCmd.PushParam(ffi.params[i]);
+	}
+
+	return true;
+}
+
+static bool BuildCommand(const NativeCommand& native, Command& outCmd)
+{
+	if (native.paramCount > MAX_COMMAND_PARAMS) {
+		return false;
+	}
+	if (native.paramCount != 0 && native.params == nullptr) {
+		return false;
+	}
+
+	outCmd = Command(native.cmdID, native.options);
+	if (native.timeout > 0) {
+		outCmd.SetTimeOut(native.timeout);
+	}
+
+	for (uint32_t i = 0; i < native.paramCount; ++i) {
+		outCmd.PushParam(native.params[i]);
 	}
 
 	return true;
@@ -682,6 +706,31 @@ static void NativeGiveOrder(const GiveOrderQuery* query, GiveOrderResult* result
 	result->success = true;
 }
 
+static void NativeGiveOrderToUnit(const GiveOrderToUnitQuery* query, GiveOrderToUnitResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (!CanIssueOrders()) {
+		result->error = &ORDERS_BLOCKED_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr || unit->noSelect)
+		return;
+
+	Command cmd;
+	if (!BuildCommandSimple(query->cmdID, query->options, query->params,
+		query->paramCount, query->timeout, cmd)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	selectedUnitsHandler.SendCommandsToUnits({unit->id}, {cmd});
+	result->success = true;
+}
+
 static void NativeGiveOrderToUnitMap(const GiveOrderToUnitMapQuery* query, GiveOrderToUnitMapResult* result)
 {
 	result->error = nullptr;
@@ -712,6 +761,66 @@ static void NativeGiveOrderToUnitMap(const GiveOrderToUnitMapQuery* query, GiveO
 		selectedUnitsHandler.SendCommandsToUnits(unitIDs, {cmd});
 		result->unitsOrdered = static_cast<int32_t>(unitIDs.size());
 	}
+}
+
+static void NativeGiveOrderToUnitArray(const GiveOrderToUnitArrayQuery* query, GiveOrderToUnitArrayResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (!CanIssueOrders()) {
+		result->error = &ORDERS_BLOCKED_ERROR;
+		return;
+	}
+
+	Command cmd;
+	if (!BuildCommandSimple(query->cmdID, query->options, query->params,
+		query->paramCount, query->timeout, cmd)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	std::vector<int> unitIDs;
+	unitIDs.reserve(query->count);
+	for (uint32_t i = 0; i < query->count; ++i) {
+		CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
+		if (unit != nullptr && !unit->noSelect)
+			unitIDs.push_back(unit->id);
+	}
+
+	if (!unitIDs.empty()) {
+		selectedUnitsHandler.SendCommandsToUnits(unitIDs, {cmd});
+		result->success = true;
+	}
+}
+
+static void NativeGiveOrderArrayToUnit(const GiveOrderArrayToUnitQuery* query, GiveOrderArrayToUnitResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (!CanIssueOrders()) {
+		result->error = &ORDERS_BLOCKED_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr || unit->noSelect || query->commandCount == 0)
+		return;
+
+	std::vector<Command> commands;
+	commands.reserve(query->commandCount);
+	for (uint32_t i = 0; i < query->commandCount; ++i) {
+		Command cmd;
+		if (!BuildCommand(query->commands[i], cmd)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+		commands.push_back(cmd);
+	}
+
+	selectedUnitsHandler.SendCommandsToUnits({unit->id}, commands);
+	result->success = true;
 }
 
 static void NativeGiveOrderArrayToUnitMap(const GiveOrderArrayToUnitMapQuery* query, GiveOrderArrayToUnitMapResult* result)
@@ -752,6 +861,41 @@ static void NativeGiveOrderArrayToUnitMap(const GiveOrderArrayToUnitMapQuery* qu
 	}
 }
 
+static void NativeGiveOrderArrayToUnitArray(const GiveOrderArrayToUnitArrayQuery* query, GiveOrderArrayToUnitArrayResult* result)
+{
+	result->error = nullptr;
+	result->unitsOrdered = 0;
+
+	if (!CanIssueOrders()) {
+		result->error = &ORDERS_BLOCKED_ERROR;
+		return;
+	}
+
+	std::vector<int> unitIDs;
+	unitIDs.reserve(query->unitCount);
+	for (uint32_t i = 0; i < query->unitCount; ++i) {
+		CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
+		if (unit != nullptr && !unit->noSelect)
+			unitIDs.push_back(unit->id);
+	}
+
+	std::vector<Command> commands;
+	commands.reserve(query->commandCount);
+	for (uint32_t i = 0; i < query->commandCount; ++i) {
+		Command cmd;
+		if (!BuildCommand(query->commands[i], cmd)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+		commands.push_back(cmd);
+	}
+
+	if (!unitIDs.empty() && !commands.empty()) {
+		selectedUnitsHandler.SendCommandsToUnits(unitIDs, commands, query->pairwise);
+		result->unitsOrdered = static_cast<int32_t>(unitIDs.size());
+	}
+}
+
 } // namespace
 
 const UnitsCommandsApi UNITS_COMMANDS_API = {
@@ -769,6 +913,10 @@ const UnitsCommandsApi UNITS_COMMANDS_API = {
 	.FindUnitCmdDesc = NativeFindUnitCmdDesc,
 	.GetCommandParams = NativeGetCommandParams,
 	.GiveOrder = NativeGiveOrder,
+	.GiveOrderToUnit = NativeGiveOrderToUnit,
 	.GiveOrderToUnitMap = NativeGiveOrderToUnitMap,
+	.GiveOrderToUnitArray = NativeGiveOrderToUnitArray,
+	.GiveOrderArrayToUnit = NativeGiveOrderArrayToUnit,
 	.GiveOrderArrayToUnitMap = NativeGiveOrderArrayToUnitMap,
+	.GiveOrderArrayToUnitArray = NativeGiveOrderArrayToUnitArray,
 };

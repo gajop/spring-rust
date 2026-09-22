@@ -299,6 +299,8 @@ impl SignalMask {
 pub enum WreckLevel {
     #[default]
     None = -1,
+    /// Lua's `Killed` return value for a unit with no wreck.
+    NoWreck = 0,
     One = 1,
     Two = 2,
     Three = 3,

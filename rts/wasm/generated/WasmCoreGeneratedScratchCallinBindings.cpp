@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <limits>
 #include <span>
+#include <string>
 #include <string_view>
 #include <type_traits>
 
@@ -48,6 +49,12 @@ bool WriteNumericList(WireWriter& writer, const T* values, std::uint32_t count)
             std::span(reinterpret_cast<const std::uint8_t*>(values), count * sizeof(T)),
             alignof(T));
     return count == 0; // no element representation crosses the boundary
+}
+
+std::string InputRejected(std::string_view reason, std::size_t capacity)
+{
+    return std::string("Core Wasm callin input rejected: ") + std::string(reason) +
+        " (scratch capacity " + std::to_string(capacity) + " bytes)";
 }
 
 } // namespace
@@ -266,8 +273,8 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 2u: {
             const auto* typedQuery = static_cast<const ActivateMenuQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core ActivateMenu query is null"; return false; }
-            if (!WriteString(writer, typedQuery->message)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!writer.U32(typedQuery->messageLength)) { error = "generated Core scratch overflow"; return false; }
+            if (!WriteString(writer, typedQuery->message)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->messageLength)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -280,11 +287,11 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 3u: {
             const auto* typedQuery = static_cast<const ActiveCommandChangedQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core ActiveCommandChanged query is null"; return false; }
-            if (!writer.I32(typedQuery->cmdID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->cmdType)) { error = "generated Core scratch overflow"; return false; }
-            if (!WriteString(writer, typedQuery->name)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!WriteString(writer, typedQuery->action)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!WriteString(writer, typedQuery->tooltip)) { error = "generated Core string exceeds scratch capacity"; return false; }
+            if (!writer.I32(typedQuery->cmdID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->cmdType)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->name)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->action)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->tooltip)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -297,19 +304,19 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 6u: {
             const auto* typedQuery = static_cast<const UnitCommandQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core AllowCommand query is null"; return false; }
-            if (!writer.I32(typedQuery->unitID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->unitDefID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->unitTeam)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->command.id)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->command.timeOut)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.pageIndex)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.tag)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.options)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->unitID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->unitDefID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->unitTeam)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->command.id)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->command.timeOut)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.pageIndex)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.tag)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.options)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             static_assert(sizeof(float) == 4u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const float*>(typedQuery->command.params), static_cast<std::uint32_t>(typedQuery->command.numParams))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
-            if (!writer.I32(typedQuery->playerNum)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->fromSynced)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->fromLua)) { error = "generated Core scratch overflow"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const float*>(typedQuery->command.params), static_cast<std::uint32_t>(typedQuery->command.numParams))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->playerNum)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->fromSynced)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->fromLua)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -327,9 +334,9 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 11u: {
             const auto* typedQuery = static_cast<const AllowResourceLevelQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core AllowResourceLevel query is null"; return false; }
-            if (!writer.I32(typedQuery->teamID)) { error = "generated Core scratch overflow"; return false; }
-            if (!WriteString(writer, typedQuery->type)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!writer.F32(typedQuery->level)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->teamID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->type)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!writer.F32(typedQuery->level)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -347,10 +354,10 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 12u: {
             const auto* typedQuery = static_cast<const AllowResourceTransferQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core AllowResourceTransfer query is null"; return false; }
-            if (!writer.I32(typedQuery->oldTeam)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->newTeam)) { error = "generated Core scratch overflow"; return false; }
-            if (!WriteString(writer, typedQuery->type)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!writer.F32(typedQuery->amount)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->oldTeam)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->newTeam)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->type)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!writer.F32(typedQuery->amount)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -368,16 +375,16 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 30u: {
             const auto* typedQuery = static_cast<const CommandFallbackQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core CommandFallback query is null"; return false; }
-            if (!writer.I32(typedQuery->unitID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->unitDefID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->unitTeam)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->command.id)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->command.timeOut)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.pageIndex)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.tag)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.options)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->unitID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->unitDefID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->unitTeam)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->command.id)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->command.timeOut)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.pageIndex)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.tag)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.options)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             static_assert(sizeof(float) == 4u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const float*>(typedQuery->command.params), static_cast<std::uint32_t>(typedQuery->command.numParams))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const float*>(typedQuery->command.params), static_cast<std::uint32_t>(typedQuery->command.numParams))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -395,9 +402,9 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 36u: {
             const auto* typedQuery = static_cast<const DownloadQueuedQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core DownloadQueued query is null"; return false; }
-            if (!writer.I32(typedQuery->downloadID)) { error = "generated Core scratch overflow"; return false; }
-            if (!WriteString(writer, typedQuery->archiveName)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!WriteString(writer, typedQuery->archiveType)) { error = "generated Core string exceeds scratch capacity"; return false; }
+            if (!writer.I32(typedQuery->downloadID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->archiveName)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->archiveType)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -410,12 +417,12 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 41u: {
             const auto* typedQuery = static_cast<const DrawBuildSquareQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core DrawBuildSquare query is null"; return false; }
-            if (!writer.I32(typedQuery->unitDefID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->x)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->z)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->facing)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->unitDefID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->x)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->z)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->facing)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->statuses), static_cast<std::uint32_t>(typedQuery->statusCount))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->statuses), static_cast<std::uint32_t>(typedQuery->statusCount))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -429,7 +436,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             const auto* typedQuery = static_cast<const GameIDQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core GameID query is null"; return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->gameID), static_cast<std::uint32_t>(typedQuery->numBytes))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->gameID), static_cast<std::uint32_t>(typedQuery->numBytes))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -443,7 +450,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             const auto* typedQuery = static_cast<const GameOverEventQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core GameOver query is null"; return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->winningAllyTeams), static_cast<std::uint32_t>(typedQuery->count))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->winningAllyTeams), static_cast<std::uint32_t>(typedQuery->count))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -456,24 +463,24 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 72u: {
             const auto* typedQuery = static_cast<const GameSetupQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core GameSetup query is null"; return false; }
-            if (!WriteString(writer, typedQuery->state)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!writer.Bool(typedQuery->ready)) { error = "generated Core scratch overflow"; return false; }
+            if (!WriteString(writer, typedQuery->state)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->ready)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             if (typedQuery->playerStateCount != 0 && typedQuery->playerStates == nullptr) { error = "generated Core record-list input is null"; return false; }
-            if (!writer.U32(static_cast<std::uint32_t>(typedQuery->playerStateCount))) { error = "generated Core record-list header exceeds scratch capacity"; return false; }
+            if (!writer.U32(static_cast<std::uint32_t>(typedQuery->playerStateCount))) { error = InputRejected("generated Core record-list header exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t coreScratchRecordTotalOffset3 = writer.Offset();
-            if (!writer.U32(0) || !writer.Align(8)) { error = "generated Core record-list header exceeds scratch capacity"; return false; }
+            if (!writer.U32(0) || !writer.Align(8)) { error = InputRejected("generated Core record-list header exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t coreScratchRecordFramesStart3 = writer.Offset();
             for (std::size_t coreScratchRecordIndex3 = 0; coreScratchRecordIndex3 < static_cast<std::size_t>(typedQuery->playerStateCount); ++coreScratchRecordIndex3) {
                 const std::size_t coreScratchRecordLengthOffset3 = writer.Offset();
-                if (!writer.U32(0) || !writer.Align(8)) { error = "generated Core record-list frame exceeds scratch capacity"; return false; }
+                if (!writer.U32(0) || !writer.Align(8)) { error = InputRejected("generated Core record-list frame exceeds scratch capacity", scratchCapacity); return false; }
                 const std::size_t coreScratchRecordPayloadStart3 = writer.Offset();
-                if (!writer.I32(typedQuery->playerStates[coreScratchRecordIndex3].playerID)) { error = "generated Core scratch overflow"; return false; }
-                if (!WriteString(writer, typedQuery->playerStates[coreScratchRecordIndex3].state)) { error = "generated Core string exceeds scratch capacity"; return false; }
+                if (!writer.I32(typedQuery->playerStates[coreScratchRecordIndex3].playerID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+                if (!WriteString(writer, typedQuery->playerStates[coreScratchRecordIndex3].state)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
                 const std::size_t coreScratchRecordPayloadBytes3 = writer.Offset() - coreScratchRecordPayloadStart3;
-                if (coreScratchRecordPayloadBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordLengthOffset3, static_cast<std::uint32_t>(coreScratchRecordPayloadBytes3))) { error = "generated Core record-list frame exceeds u32"; return false; }
+                if (coreScratchRecordPayloadBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordLengthOffset3, static_cast<std::uint32_t>(coreScratchRecordPayloadBytes3))) { error = InputRejected("generated Core record-list frame exceeds scratch capacity or u32", scratchCapacity); return false; }
             }
             const std::size_t coreScratchRecordFramesBytes3 = writer.Offset() - coreScratchRecordFramesStart3;
-            if (coreScratchRecordFramesBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordTotalOffset3, static_cast<std::uint32_t>(coreScratchRecordFramesBytes3))) { error = "generated Core record-list payload exceeds u32"; return false; }
+            if (coreScratchRecordFramesBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordTotalOffset3, static_cast<std::uint32_t>(coreScratchRecordFramesBytes3))) { error = InputRejected("generated Core record-list payload exceeds scratch capacity or u32", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -487,7 +494,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             const auto* typedQuery = static_cast<const HandleLuaCallQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core HandleLuaCall query is null"; return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->message), static_cast<std::uint32_t>(typedQuery->messageLength))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->message), static_cast<std::uint32_t>(typedQuery->messageLength))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -500,11 +507,11 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 77u: {
             const auto* typedQuery = static_cast<const HandleLuaMsgQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core HandleLuaMsg query is null"; return false; }
-            if (!writer.I32(typedQuery->playerID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->script)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->mode)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->playerID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->script)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->mode)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->data), static_cast<std::uint32_t>(typedQuery->dataLength))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->data), static_cast<std::uint32_t>(typedQuery->dataLength))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -517,32 +524,32 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 80u: {
             const auto* typedQuery = static_cast<const KeyPressQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core KeyPress query is null"; return false; }
-            if (!writer.I32(typedQuery->keyCode)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->alt)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->ctrl)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->meta)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->shift)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->isRepeat)) { error = "generated Core scratch overflow"; return false; }
-            if (!WriteString(writer, typedQuery->label)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!writer.I32(typedQuery->utf32Char)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->scanCode)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->keyCode)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->alt)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->ctrl)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->meta)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->shift)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->isRepeat)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->label)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->utf32Char)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->scanCode)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             if (typedQuery->actionCount != 0 && typedQuery->actionList == nullptr) { error = "generated Core record-list input is null"; return false; }
-            if (!writer.U32(static_cast<std::uint32_t>(typedQuery->actionCount))) { error = "generated Core record-list header exceeds scratch capacity"; return false; }
+            if (!writer.U32(static_cast<std::uint32_t>(typedQuery->actionCount))) { error = InputRejected("generated Core record-list header exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t coreScratchRecordTotalOffset3 = writer.Offset();
-            if (!writer.U32(0) || !writer.Align(8)) { error = "generated Core record-list header exceeds scratch capacity"; return false; }
+            if (!writer.U32(0) || !writer.Align(8)) { error = InputRejected("generated Core record-list header exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t coreScratchRecordFramesStart3 = writer.Offset();
             for (std::size_t coreScratchRecordIndex3 = 0; coreScratchRecordIndex3 < static_cast<std::size_t>(typedQuery->actionCount); ++coreScratchRecordIndex3) {
                 const std::size_t coreScratchRecordLengthOffset3 = writer.Offset();
-                if (!writer.U32(0) || !writer.Align(8)) { error = "generated Core record-list frame exceeds scratch capacity"; return false; }
+                if (!writer.U32(0) || !writer.Align(8)) { error = InputRejected("generated Core record-list frame exceeds scratch capacity", scratchCapacity); return false; }
                 const std::size_t coreScratchRecordPayloadStart3 = writer.Offset();
-                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].command)) { error = "generated Core string exceeds scratch capacity"; return false; }
-                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].extra)) { error = "generated Core string exceeds scratch capacity"; return false; }
-                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].boundWith)) { error = "generated Core string exceeds scratch capacity"; return false; }
+                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].command)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].extra)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].boundWith)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
                 const std::size_t coreScratchRecordPayloadBytes3 = writer.Offset() - coreScratchRecordPayloadStart3;
-                if (coreScratchRecordPayloadBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordLengthOffset3, static_cast<std::uint32_t>(coreScratchRecordPayloadBytes3))) { error = "generated Core record-list frame exceeds u32"; return false; }
+                if (coreScratchRecordPayloadBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordLengthOffset3, static_cast<std::uint32_t>(coreScratchRecordPayloadBytes3))) { error = InputRejected("generated Core record-list frame exceeds scratch capacity or u32", scratchCapacity); return false; }
             }
             const std::size_t coreScratchRecordFramesBytes3 = writer.Offset() - coreScratchRecordFramesStart3;
-            if (coreScratchRecordFramesBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordTotalOffset3, static_cast<std::uint32_t>(coreScratchRecordFramesBytes3))) { error = "generated Core record-list payload exceeds u32"; return false; }
+            if (coreScratchRecordFramesBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordTotalOffset3, static_cast<std::uint32_t>(coreScratchRecordFramesBytes3))) { error = InputRejected("generated Core record-list payload exceeds scratch capacity or u32", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -560,31 +567,31 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 81u: {
             const auto* typedQuery = static_cast<const KeyReleaseQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core KeyRelease query is null"; return false; }
-            if (!writer.I32(typedQuery->keyCode)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->alt)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->ctrl)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->meta)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->shift)) { error = "generated Core scratch overflow"; return false; }
-            if (!WriteString(writer, typedQuery->label)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!writer.I32(typedQuery->utf32Char)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->scanCode)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->keyCode)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->alt)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->ctrl)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->meta)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->shift)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->label)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->utf32Char)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->scanCode)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             if (typedQuery->actionCount != 0 && typedQuery->actionList == nullptr) { error = "generated Core record-list input is null"; return false; }
-            if (!writer.U32(static_cast<std::uint32_t>(typedQuery->actionCount))) { error = "generated Core record-list header exceeds scratch capacity"; return false; }
+            if (!writer.U32(static_cast<std::uint32_t>(typedQuery->actionCount))) { error = InputRejected("generated Core record-list header exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t coreScratchRecordTotalOffset3 = writer.Offset();
-            if (!writer.U32(0) || !writer.Align(8)) { error = "generated Core record-list header exceeds scratch capacity"; return false; }
+            if (!writer.U32(0) || !writer.Align(8)) { error = InputRejected("generated Core record-list header exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t coreScratchRecordFramesStart3 = writer.Offset();
             for (std::size_t coreScratchRecordIndex3 = 0; coreScratchRecordIndex3 < static_cast<std::size_t>(typedQuery->actionCount); ++coreScratchRecordIndex3) {
                 const std::size_t coreScratchRecordLengthOffset3 = writer.Offset();
-                if (!writer.U32(0) || !writer.Align(8)) { error = "generated Core record-list frame exceeds scratch capacity"; return false; }
+                if (!writer.U32(0) || !writer.Align(8)) { error = InputRejected("generated Core record-list frame exceeds scratch capacity", scratchCapacity); return false; }
                 const std::size_t coreScratchRecordPayloadStart3 = writer.Offset();
-                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].command)) { error = "generated Core string exceeds scratch capacity"; return false; }
-                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].extra)) { error = "generated Core string exceeds scratch capacity"; return false; }
-                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].boundWith)) { error = "generated Core string exceeds scratch capacity"; return false; }
+                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].command)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].extra)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+                if (!WriteString(writer, typedQuery->actionList[coreScratchRecordIndex3].boundWith)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
                 const std::size_t coreScratchRecordPayloadBytes3 = writer.Offset() - coreScratchRecordPayloadStart3;
-                if (coreScratchRecordPayloadBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordLengthOffset3, static_cast<std::uint32_t>(coreScratchRecordPayloadBytes3))) { error = "generated Core record-list frame exceeds u32"; return false; }
+                if (coreScratchRecordPayloadBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordLengthOffset3, static_cast<std::uint32_t>(coreScratchRecordPayloadBytes3))) { error = InputRejected("generated Core record-list frame exceeds scratch capacity or u32", scratchCapacity); return false; }
             }
             const std::size_t coreScratchRecordFramesBytes3 = writer.Offset() - coreScratchRecordFramesStart3;
-            if (coreScratchRecordFramesBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordTotalOffset3, static_cast<std::uint32_t>(coreScratchRecordFramesBytes3))) { error = "generated Core record-list payload exceeds u32"; return false; }
+            if (coreScratchRecordFramesBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordTotalOffset3, static_cast<std::uint32_t>(coreScratchRecordFramesBytes3))) { error = InputRejected("generated Core record-list payload exceeds scratch capacity or u32", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -602,9 +609,9 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 84u: {
             const auto* typedQuery = static_cast<const LoadProgressQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core LoadProgress query is null"; return false; }
-            if (!WriteString(writer, typedQuery->message)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!writer.U32(typedQuery->messageLength)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->replaceLastLine)) { error = "generated Core scratch overflow"; return false; }
+            if (!WriteString(writer, typedQuery->message)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->messageLength)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->replaceLastLine)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -617,18 +624,18 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 85u: {
             const auto* typedQuery = static_cast<const MapDrawCmdQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core MapDrawCmd query is null"; return false; }
-            if (!writer.I32(typedQuery->playerID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->type)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->hasPos0)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.F32(typedQuery->pos0.x)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.F32(typedQuery->pos0.y)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.F32(typedQuery->pos0.z)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->hasPos1)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.F32(typedQuery->pos1.x)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.F32(typedQuery->pos1.y)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.F32(typedQuery->pos1.z)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->hasLabel)) { error = "generated Core scratch overflow"; return false; }
-            if (!WriteString(writer, typedQuery->label)) { error = "generated Core string exceeds scratch capacity"; return false; }
+            if (!writer.I32(typedQuery->playerID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->type)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->hasPos0)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.F32(typedQuery->pos0.x)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.F32(typedQuery->pos0.y)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.F32(typedQuery->pos0.z)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->hasPos1)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.F32(typedQuery->pos1.x)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.F32(typedQuery->pos1.y)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.F32(typedQuery->pos1.z)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->hasLabel)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!WriteString(writer, typedQuery->label)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -647,7 +654,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             const auto* typedQuery = static_cast<const RecvFromSyncedQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core RecvFromSynced query is null"; return false; }
             static_assert(sizeof(std::uint8_t) == 1u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->message), static_cast<std::uint32_t>(typedQuery->messageLength))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const std::uint8_t*>(typedQuery->message), static_cast<std::uint32_t>(typedQuery->messageLength))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -661,23 +668,23 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
             const auto* typedQuery = static_cast<const ResourceExcessQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core ResourceExcess query is null"; return false; }
             if (typedQuery->count != 0 && typedQuery->entries == nullptr) { error = "generated Core record-list input is null"; return false; }
-            if (!writer.U32(static_cast<std::uint32_t>(typedQuery->count))) { error = "generated Core record-list header exceeds scratch capacity"; return false; }
+            if (!writer.U32(static_cast<std::uint32_t>(typedQuery->count))) { error = InputRejected("generated Core record-list header exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t coreScratchRecordTotalOffset3 = writer.Offset();
-            if (!writer.U32(0) || !writer.Align(8)) { error = "generated Core record-list header exceeds scratch capacity"; return false; }
+            if (!writer.U32(0) || !writer.Align(8)) { error = InputRejected("generated Core record-list header exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t coreScratchRecordFramesStart3 = writer.Offset();
             for (std::size_t coreScratchRecordIndex3 = 0; coreScratchRecordIndex3 < static_cast<std::size_t>(typedQuery->count); ++coreScratchRecordIndex3) {
                 const std::size_t coreScratchRecordLengthOffset3 = writer.Offset();
-                if (!writer.U32(0) || !writer.Align(8)) { error = "generated Core record-list frame exceeds scratch capacity"; return false; }
+                if (!writer.U32(0) || !writer.Align(8)) { error = InputRejected("generated Core record-list frame exceeds scratch capacity", scratchCapacity); return false; }
                 const std::size_t coreScratchRecordPayloadStart3 = writer.Offset();
-                if (!writer.I32(typedQuery->entries[coreScratchRecordIndex3].teamID)) { error = "generated Core scratch overflow"; return false; }
+                if (!writer.I32(typedQuery->entries[coreScratchRecordIndex3].teamID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
                 for (std::size_t coreScratchIndex4 = 0; coreScratchIndex4 < 2u; ++coreScratchIndex4) {
-                    if (!writer.F32(typedQuery->entries[coreScratchRecordIndex3].resources[coreScratchIndex4])) { error = "generated Core scratch overflow"; return false; }
+                    if (!writer.F32(typedQuery->entries[coreScratchRecordIndex3].resources[coreScratchIndex4])) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
                 }
                 const std::size_t coreScratchRecordPayloadBytes3 = writer.Offset() - coreScratchRecordPayloadStart3;
-                if (coreScratchRecordPayloadBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordLengthOffset3, static_cast<std::uint32_t>(coreScratchRecordPayloadBytes3))) { error = "generated Core record-list frame exceeds u32"; return false; }
+                if (coreScratchRecordPayloadBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordLengthOffset3, static_cast<std::uint32_t>(coreScratchRecordPayloadBytes3))) { error = InputRejected("generated Core record-list frame exceeds scratch capacity or u32", scratchCapacity); return false; }
             }
             const std::size_t coreScratchRecordFramesBytes3 = writer.Offset() - coreScratchRecordFramesStart3;
-            if (coreScratchRecordFramesBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordTotalOffset3, static_cast<std::uint32_t>(coreScratchRecordFramesBytes3))) { error = "generated Core record-list payload exceeds u32"; return false; }
+            if (coreScratchRecordFramesBytes3 > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32(coreScratchRecordTotalOffset3, static_cast<std::uint32_t>(coreScratchRecordFramesBytes3))) { error = InputRejected("generated Core record-list payload exceeds scratch capacity or u32", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -695,9 +702,9 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 141u: {
             const auto* typedQuery = static_cast<const TextEditingQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core TextEditing query is null"; return false; }
-            if (!WriteString(writer, typedQuery->utf8)) { error = "generated Core string exceeds scratch capacity"; return false; }
-            if (!writer.U32(typedQuery->start)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->length)) { error = "generated Core scratch overflow"; return false; }
+            if (!WriteString(writer, typedQuery->utf8)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->start)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->length)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -715,7 +722,7 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 142u: {
             const auto* typedQuery = static_cast<const TextInputQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core TextInput query is null"; return false; }
-            if (!WriteString(writer, typedQuery->utf8)) { error = "generated Core string exceeds scratch capacity"; return false; }
+            if (!WriteString(writer, typedQuery->utf8)) { error = InputRejected("generated Core string exceeds scratch capacity", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -733,16 +740,16 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 146u: {
             const auto* typedQuery = static_cast<const UnitCmdDoneQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core UnitCmdDone query is null"; return false; }
-            if (!writer.I32(typedQuery->unitID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->unitDefID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->unitTeam)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->command.id)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->command.timeOut)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.pageIndex)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.tag)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.options)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->unitID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->unitDefID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->unitTeam)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->command.id)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->command.timeOut)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.pageIndex)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.tag)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.options)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             static_assert(sizeof(float) == 4u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const float*>(typedQuery->command.params), static_cast<std::uint32_t>(typedQuery->command.numParams))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const float*>(typedQuery->command.params), static_cast<std::uint32_t>(typedQuery->command.numParams))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }
@@ -755,19 +762,19 @@ bool GeneratedScratchCallinBindings::Invoke(std::uint16_t ordinal,
         case 147u: {
             const auto* typedQuery = static_cast<const UnitCommandQuery*>(query);
             if (typedQuery == nullptr) { error = "generated Core UnitCommand query is null"; return false; }
-            if (!writer.I32(typedQuery->unitID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->unitDefID)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->unitTeam)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->command.id)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.I32(typedQuery->command.timeOut)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.pageIndex)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.tag)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.U32(typedQuery->command.options)) { error = "generated Core scratch overflow"; return false; }
+            if (!writer.I32(typedQuery->unitID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->unitDefID)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->unitTeam)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->command.id)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->command.timeOut)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.pageIndex)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.tag)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.U32(typedQuery->command.options)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             static_assert(sizeof(float) == 4u, "generated Core list element width mismatch");
-            if (!WriteNumericList(writer, reinterpret_cast<const float*>(typedQuery->command.params), static_cast<std::uint32_t>(typedQuery->command.numParams))) { error = "generated Core numeric list exceeds scratch capacity or native endian is unsupported"; return false; }
-            if (!writer.I32(typedQuery->playerNum)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->fromSynced)) { error = "generated Core scratch overflow"; return false; }
-            if (!writer.Bool(typedQuery->fromLua)) { error = "generated Core scratch overflow"; return false; }
+            if (!WriteNumericList(writer, reinterpret_cast<const float*>(typedQuery->command.params), static_cast<std::uint32_t>(typedQuery->command.numParams))) { error = InputRejected("generated Core numeric list exceeds scratch capacity or native endian is unsupported", scratchCapacity); return false; }
+            if (!writer.I32(typedQuery->playerNum)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->fromSynced)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
+            if (!writer.Bool(typedQuery->fromLua)) { error = InputRejected("generated Core scratch overflow", scratchCapacity); return false; }
             const std::size_t used = writer.Offset();
             if (used > std::numeric_limits<std::uint32_t>::max()) { error = "generated Core callin scratch payload exceeds u32"; return false; }
             if (!budget.ChargeHost(static_cast<std::uint64_t>(used))) { error = "generated Core callin scratch host-work budget exhausted"; return false; }

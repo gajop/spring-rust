@@ -106,6 +106,7 @@ public:
 	bool IsFastAutoRetargetingEnabled() const { return fastAutoRetargeting; }
 	void UpdateWeaponErrorVector();
 	void UpdateWeaponVectors();
+	void RefreshWeaponPieces() { UpdateWeaponPieces(); UpdateWeaponVectors(); }
 protected:
 	virtual void FireImpl(const bool scriptCall) {}
 	virtual void UpdateWantedDir();

@@ -320,6 +320,7 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawImpl(bool drawReflection
 	SCOPED_TIMER(zone_name.str);
 
 	if constexpr (legacy) {
+		glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_ALPHA_TEST);
 		ISky::GetSky()->SetupFog();
 	}
@@ -338,6 +339,7 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawImpl(bool drawReflection
 	if constexpr (legacy) {
 		glDisable(GL_FOG);
 		glDisable(GL_TEXTURE_2D);
+		glPopAttrib();
 	}
 }
 

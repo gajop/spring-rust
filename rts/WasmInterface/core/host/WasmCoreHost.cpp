@@ -989,8 +989,16 @@ void WasmCoreHost::FlushCusCreates()
 		creates.swap(pendingCusCreates);
 		for (const PendingCusCreate& create : creates) {
 			if (CNativeUnitScript* script = FindNativeUnitScript(create.unitId, create.instanceId);
-				script != nullptr)
+				script != nullptr) {
 				script->Create();
+
+				// Core CUS Create is deferred while the guest is active. Refresh
+				// weapon pieces only after Create has populated the callbacks.
+				if (CNativeUnitScript* liveScript = FindNativeUnitScript(create.unitId, create.instanceId);
+					liveScript != nullptr && liveScript->GetUnit() != nullptr) {
+					liveScript->GetUnit()->RefreshWeaponPieces();
+				}
+			}
 			++flushed;
 		}
 	}

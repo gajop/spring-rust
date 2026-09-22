@@ -71,6 +71,7 @@ pub(super) fn render_cpp(model: &ApiModel) -> String {
 #include <cstdint>
 #include <limits>
 #include <span>
+#include <string>
 #include <string_view>
 #include <type_traits>
 
@@ -113,6 +114,12 @@ bool WriteNumericList(WireWriter& writer, const T* values, std::uint32_t count)
             std::span(reinterpret_cast<const std::uint8_t*>(values), count * sizeof(T)),
             alignof(T));
     return count == 0; // no element representation crosses the boundary
+}}
+
+std::string InputRejected(std::string_view reason, std::size_t capacity)
+{{
+    return std::string("Core Wasm callin input rejected: ") + std::string(reason) +
+        " (scratch capacity " + std::to_string(capacity) + " bytes)";
 }}
 
 }} // namespace
@@ -307,23 +314,23 @@ fn render_cpp_type(
         SemanticType::Scalar { name } => {
             let method = writer_method(name);
             format!(
-                "{pad}if (!writer.{method}({expr})) {{ error = \"generated Core scratch overflow\"; return false; }}\n"
+                "{pad}if (!writer.{method}({expr})) {{ error = InputRejected(\"generated Core scratch overflow\", scratchCapacity); return false; }}\n"
             )
         }
         SemanticType::Enum { .. } => format!(
-            "{pad}if (!writer.I32(static_cast<std::int32_t>({expr}))) {{ error = \"generated Core scratch overflow\"; return false; }}\n"
+            "{pad}if (!writer.I32(static_cast<std::int32_t>({expr}))) {{ error = InputRejected(\"generated Core scratch overflow\", scratchCapacity); return false; }}\n"
         ),
         SemanticType::Handle { .. } => format!(
-            "{pad}if (!writer.U64(static_cast<std::uint64_t>({expr}))) {{ error = \"generated Core scratch overflow\"; return false; }}\n"
+            "{pad}if (!writer.U64(static_cast<std::uint64_t>({expr}))) {{ error = InputRejected(\"generated Core scratch overflow\", scratchCapacity); return false; }}\n"
         ),
         SemanticType::String => format!(
-            "{pad}if (!WriteString(writer, {expr})) {{ error = \"generated Core string exceeds scratch capacity\"; return false; }}\n"
+            "{pad}if (!WriteString(writer, {expr})) {{ error = InputRejected(\"generated Core string exceeds scratch capacity\", scratchCapacity); return false; }}\n"
         ),
         SemanticType::Bytes => {
             let count = count_field(field).expect("eligible bytes count");
             let count_expr = format!("{sibling_prefix}{count}");
             format!(
-                "{pad}if ({count_expr} != 0 && {expr} == nullptr) {{ error = \"generated Core byte input is null\"; return false; }}\n{pad}if (!writer.U32(static_cast<std::uint32_t>({count_expr})) || !writer.Bytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>({expr}), static_cast<std::size_t>({count_expr})))) {{ error = \"generated Core byte payload exceeds scratch capacity\"; return false; }}\n"
+                "{pad}if ({count_expr} != 0 && {expr} == nullptr) {{ error = \"generated Core byte input is null\"; return false; }}\n{pad}if (!writer.U32(static_cast<std::uint32_t>({count_expr})) || !writer.Bytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>({expr}), static_cast<std::size_t>({count_expr})))) {{ error = InputRejected(\"generated Core byte payload exceeds scratch capacity\", scratchCapacity); return false; }}\n"
             )
         }
         SemanticType::List { element } => {
@@ -344,13 +351,13 @@ fn render_cpp_type(
                     let nested =
                         render_cpp_fields(&record.fields, &item_prefix, records, indent + 1);
                     format!(
-                        "{pad}if ({count_expr} != 0 && {expr} == nullptr) {{ error = \"generated Core record-list input is null\"; return false; }}\n{pad}if (!writer.U32(static_cast<std::uint32_t>({count_expr}))) {{ error = \"generated Core record-list header exceeds scratch capacity\"; return false; }}\n{pad}const std::size_t {total_offset} = writer.Offset();\n{pad}if (!writer.U32(0) || !writer.Align(8)) {{ error = \"generated Core record-list header exceeds scratch capacity\"; return false; }}\n{pad}const std::size_t {frames_start} = writer.Offset();\n{pad}for (std::size_t {index} = 0; {index} < static_cast<std::size_t>({count_expr}); ++{index}) {{\n{pad}    const std::size_t {length_offset} = writer.Offset();\n{pad}    if (!writer.U32(0) || !writer.Align(8)) {{ error = \"generated Core record-list frame exceeds scratch capacity\"; return false; }}\n{pad}    const std::size_t {payload_start} = writer.Offset();\n{nested}{pad}    const std::size_t {payload_bytes} = writer.Offset() - {payload_start};\n{pad}    if ({payload_bytes} > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32({length_offset}, static_cast<std::uint32_t>({payload_bytes}))) {{ error = \"generated Core record-list frame exceeds u32\"; return false; }}\n{pad}}}\n{pad}const std::size_t {frames_bytes} = writer.Offset() - {frames_start};\n{pad}if ({frames_bytes} > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32({total_offset}, static_cast<std::uint32_t>({frames_bytes}))) {{ error = \"generated Core record-list payload exceeds u32\"; return false; }}\n"
+                        "{pad}if ({count_expr} != 0 && {expr} == nullptr) {{ error = \"generated Core record-list input is null\"; return false; }}\n{pad}if (!writer.U32(static_cast<std::uint32_t>({count_expr}))) {{ error = InputRejected(\"generated Core record-list header exceeds scratch capacity\", scratchCapacity); return false; }}\n{pad}const std::size_t {total_offset} = writer.Offset();\n{pad}if (!writer.U32(0) || !writer.Align(8)) {{ error = InputRejected(\"generated Core record-list header exceeds scratch capacity\", scratchCapacity); return false; }}\n{pad}const std::size_t {frames_start} = writer.Offset();\n{pad}for (std::size_t {index} = 0; {index} < static_cast<std::size_t>({count_expr}); ++{index}) {{\n{pad}    const std::size_t {length_offset} = writer.Offset();\n{pad}    if (!writer.U32(0) || !writer.Align(8)) {{ error = InputRejected(\"generated Core record-list frame exceeds scratch capacity\", scratchCapacity); return false; }}\n{pad}    const std::size_t {payload_start} = writer.Offset();\n{nested}{pad}    const std::size_t {payload_bytes} = writer.Offset() - {payload_start};\n{pad}    if ({payload_bytes} > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32({length_offset}, static_cast<std::uint32_t>({payload_bytes}))) {{ error = InputRejected(\"generated Core record-list frame exceeds scratch capacity or u32\", scratchCapacity); return false; }}\n{pad}}}\n{pad}const std::size_t {frames_bytes} = writer.Offset() - {frames_start};\n{pad}if ({frames_bytes} > std::numeric_limits<std::uint32_t>::max() || !writer.PatchU32({total_offset}, static_cast<std::uint32_t>({frames_bytes}))) {{ error = InputRejected(\"generated Core record-list payload exceeds scratch capacity or u32\", scratchCapacity); return false; }}\n"
                     )
                 }
                 _ => {
                     let cpp = cpp_list_type(element);
                     format!(
-                        "{pad}static_assert(sizeof({cpp}) == {bytes}u, \"generated Core list element width mismatch\");\n{pad}if (!WriteNumericList(writer, reinterpret_cast<const {cpp}*>({expr}), static_cast<std::uint32_t>({count_expr}))) {{ error = \"generated Core numeric list exceeds scratch capacity or native endian is unsupported\"; return false; }}\n",
+                        "{pad}static_assert(sizeof({cpp}) == {bytes}u, \"generated Core list element width mismatch\");\n{pad}if (!WriteNumericList(writer, reinterpret_cast<const {cpp}*>({expr}), static_cast<std::uint32_t>({count_expr}))) {{ error = InputRejected(\"generated Core numeric list exceeds scratch capacity or native endian is unsupported\", scratchCapacity); return false; }}\n",
                         bytes = scalar_bytes(element),
                     )
                 }

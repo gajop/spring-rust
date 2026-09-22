@@ -282,6 +282,175 @@ wasm_trap_t* CoreBorrowed_units_weapons_get_unit_weapon_state(void* environment,
     return nullptr;
 }
 
+wasm_trap_t* CoreBorrowed_units_commands_give_order_to_unit(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unitsCommands == nullptr ||
+        state->native->unitsCommands->GiveOrderToUnit == nullptr)
+        return Trap("GiveOrderToUnit borrowed Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5u)
+        return Trap("GiveOrderToUnit borrowed Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    GiveOrderToUnitQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.cmdID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.cmdID)>>>(slots[1].i32);
+    std::uint32_t paramsPointer = 0;
+    std::uint32_t paramsCount = 0;
+    if (!reader.U32(paramsPointer) || !reader.U32(paramsCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (paramsCount == 0) {
+        query.params = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::NotAvailable)));
+            return nullptr;
+        }
+        const std::uint64_t paramsBytes64 = static_cast<std::uint64_t>(paramsCount) * 4u;
+        if (paramsBytes64 > std::numeric_limits<std::size_t>::max() || (paramsPointer % 4u) != 0u) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+            return nullptr;
+        }
+        std::span<const std::uint8_t> paramsBytes;
+        if (!state->memory.View(paramsPointer, static_cast<std::size_t>(paramsBytes64), paramsBytes)) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+            return nullptr;
+        }
+        static_assert(sizeof(float) == 4u, "borrowed Core/native element width mismatch");
+        query.params = reinterpret_cast<std::remove_reference_t<decltype(query.params)>>(paramsBytes.data());
+    }
+    if (!AssignCoreBorrowedCount(paramsCount, query.paramCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.options = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options)>>>(slots[2].i32);
+    query.timeout = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.timeout)>>>(slots[3].i32);
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    GiveOrderToUnitResult result{};
+    state->native->unitsCommands->GiveOrderToUnit(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreBorrowed_units_commands_give_order_to_unit_array(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unitsCommands == nullptr ||
+        state->native->unitsCommands->GiveOrderToUnitArray == nullptr)
+        return Trap("GiveOrderToUnitArray borrowed Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4u)
+        return Trap("GiveOrderToUnitArray borrowed Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 16u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    GiveOrderToUnitArrayQuery query{};
+    std::uint32_t unitIDsPointer = 0;
+    std::uint32_t unitIDsCount = 0;
+    if (!reader.U32(unitIDsPointer) || !reader.U32(unitIDsCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (unitIDsCount == 0) {
+        query.unitIDs = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::NotAvailable)));
+            return nullptr;
+        }
+        const std::uint64_t unitIDsBytes64 = static_cast<std::uint64_t>(unitIDsCount) * 4u;
+        if (unitIDsBytes64 > std::numeric_limits<std::size_t>::max() || (unitIDsPointer % 4u) != 0u) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+            return nullptr;
+        }
+        std::span<const std::uint8_t> unitIDsBytes;
+        if (!state->memory.View(unitIDsPointer, static_cast<std::size_t>(unitIDsBytes64), unitIDsBytes)) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+            return nullptr;
+        }
+        static_assert(sizeof(std::int32_t) == 4u, "borrowed Core/native element width mismatch");
+        query.unitIDs = reinterpret_cast<std::remove_reference_t<decltype(query.unitIDs)>>(unitIDsBytes.data());
+    }
+    if (!AssignCoreBorrowedCount(unitIDsCount, query.count)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.cmdID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.cmdID)>>>(slots[0].i32);
+    std::uint32_t paramsPointer = 0;
+    std::uint32_t paramsCount = 0;
+    if (!reader.U32(paramsPointer) || !reader.U32(paramsCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (paramsCount == 0) {
+        query.params = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::NotAvailable)));
+            return nullptr;
+        }
+        const std::uint64_t paramsBytes64 = static_cast<std::uint64_t>(paramsCount) * 4u;
+        if (paramsBytes64 > std::numeric_limits<std::size_t>::max() || (paramsPointer % 4u) != 0u) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+            return nullptr;
+        }
+        std::span<const std::uint8_t> paramsBytes;
+        if (!state->memory.View(paramsPointer, static_cast<std::size_t>(paramsBytes64), paramsBytes)) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+            return nullptr;
+        }
+        static_assert(sizeof(float) == 4u, "borrowed Core/native element width mismatch");
+        query.params = reinterpret_cast<std::remove_reference_t<decltype(query.params)>>(paramsBytes.data());
+    }
+    if (!AssignCoreBorrowedCount(paramsCount, query.paramCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.options = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options)>>>(slots[1].i32);
+    query.timeout = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.timeout)>>>(slots[2].i32);
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    GiveOrderToUnitArrayResult result{};
+    state->native->unitsCommands->GiveOrderToUnitArray(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreBorrowed_units_pieces_get_model_root_piece(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -13739,6 +13908,20 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:units-commands", "give-order-to-unit",
+                MakeFuncType(params, 5, results, 1), CoreBorrowed_units_commands_give_order_to_unit, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:units-commands", "give-order-to-unit-array",
+                MakeFuncType(params, 4, results, 1), CoreBorrowed_units_commands_give_order_to_unit_array, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:units-pieces", "get-model-root-piece",
@@ -14848,6 +15031,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(210u >= 0u, "generated borrowed Core callback count");
+static_assert(212u >= 0u, "generated borrowed Core callback count");
 
 } // namespace recoil::wasm::core::generated

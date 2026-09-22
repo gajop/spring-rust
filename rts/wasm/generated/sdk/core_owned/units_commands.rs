@@ -223,7 +223,7 @@
             pub units_ordered: i32,
         }
 
-        pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
+        pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, GiveOrderArrayToUnitArrayQuery, GiveOrderArrayToUnitArrayResult, GiveOrderArrayToUnitQuery, GiveOrderArrayToUnitResult, GiveOrderToUnitArrayQuery, GiveOrderToUnitArrayResult, GiveOrderToUnitQuery, GiveOrderToUnitResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeCommand, NativeExplosionParams, NativeProjectileParams, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
         #[cfg(target_arch = "wasm32")]
         mod __core_variable_output_get_real_build_queue {
@@ -497,10 +497,33 @@
         }
 
         #[inline]
+        pub fn give_order_array_to_unit(unit_id: i32, commands: &[NativeCommand]) -> Result<bool> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(commands.len() as u32).to_le_bytes()); for __item in commands.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.cmd_id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.params.len() as u32).to_le_bytes()); for __item in __item.params.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_bits().to_le_bytes()); } while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.options.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.timeout.to_le_bytes());} __b };
+            crate::generated::dynamic_input::units_commands::give_order_array_to_unit(unit_id, &__blob0)
+        }
+
+        #[inline]
+        pub fn give_order_array_to_unit_array(unit_i_ds: &[i32], commands: &[NativeCommand], pairwise: bool) -> Result<i32> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(unit_i_ds.len() as u32).to_le_bytes()); for __item in unit_i_ds.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_le_bytes());} __b };
+            let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(commands.len() as u32).to_le_bytes()); for __item in commands.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.cmd_id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.params.len() as u32).to_le_bytes()); for __item in __item.params.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_bits().to_le_bytes()); } while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.options.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.timeout.to_le_bytes());} __b };
+            crate::generated::dynamic_input::units_commands::give_order_array_to_unit_array(pairwise as i32, &__blob0, &__blob1)
+        }
+
+        #[inline]
         pub fn give_order_array_to_unit_map(unit_i_ds: &[i32], commands: &[CommandFFI]) -> Result<i32> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(unit_i_ds.len() as u32).to_le_bytes()); for __item in unit_i_ds.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_le_bytes());} __b };
             let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(commands.len() as u32).to_le_bytes()); for __item in commands.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.cmd_id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.options as u32).to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.tag.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.ai_command_id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.time_out.to_bits().to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.params.len() as u32).to_le_bytes()); for __item in __item.params.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_bits().to_le_bytes()); }} __b };
             crate::generated::dynamic_input::units_commands::give_order_array_to_unit_map(&__blob0, &__blob1)
+        }
+
+        #[inline]
+        pub fn give_order_to_unit(unit_id: i32, cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<bool> {
+            crate::generated::borrowed::units_commands::give_order_to_unit(unit_id, cmd_id, params, options, timeout)
+        }
+
+        #[inline]
+        pub fn give_order_to_unit_array(unit_i_ds: &[i32], cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<bool> {
+            crate::generated::borrowed::units_commands::give_order_to_unit_array(unit_i_ds, cmd_id, params, options, timeout)
         }
 
         #[cfg(target_arch = "wasm32")]

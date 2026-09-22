@@ -130,7 +130,7 @@ impl<S: UnitScript> CusInstance<S> {
                 UnitScriptCall::Create => script.create(&context),
                 UnitScriptCall::Killed => {
                     result.int_value = script.killed(&context, f(0), f(1)) as i32;
-                    result.complete = true;
+                    result.complete = !script.killed_pending();
                 }
                 UnitScriptCall::WindChanged => script.wind_changed(&context, f(0), f(1)),
                 UnitScriptCall::ExtractionRateChanged => {

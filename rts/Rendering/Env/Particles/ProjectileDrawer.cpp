@@ -800,6 +800,7 @@ void CProjectileDrawer::DrawAlpha(bool drawAboveWater, bool drawBelowWater, bool
 
 		using namespace GL::State;
 		auto state = GL::SubState(
+			AlphaTest(GL_FALSE),
 			Blending(GL_TRUE),
 			BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA),
 			DepthTest(GL_TRUE),

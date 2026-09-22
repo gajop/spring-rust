@@ -264,6 +264,13 @@ impl LuaLoaderMatrix {
         module: &str,
         function: &str,
     ) -> BTreeSet<Environment> {
+        // UnitsCommands order functions use the LuaUnsyncedCtrl player/network
+        // path. They are available to UI and unsynced gadgets, while the
+        // synced command functions live under UnitControl.
+        if module == "units_commands" && function.starts_with("GiveOrder") {
+            return unsynced_and_ui();
+        }
+
         // The native surface groups LuaUnsyncedRead's rendering queries under
         // UnitRendering, while LuaUI registers the complete
         // LuaUnsyncedRead::PushEntries table too.  Keep the module's scope

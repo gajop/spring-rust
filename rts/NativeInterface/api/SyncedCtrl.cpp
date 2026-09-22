@@ -861,7 +861,7 @@ static void NativeGiveOrderToUnit(const GiveOrderToUnitQuery* query, GiveOrderTo
 		cmd.PushParam(query->params[i]);
 	}
 
-	unit->commandAI->GiveCommand(cmd);
+	unit->commandAI->GiveCommand(cmd, -1, true, false);
 	result->success = true;
 }
 
@@ -887,7 +887,7 @@ static void NativeGiveOrderToUnitArray(const GiveOrderToUnitArrayQuery* query, G
 	for (uint32_t i = 0; i < query->count; ++i) {
 		CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
 		if (unit != nullptr && unit->commandAI != nullptr) {
-			unit->commandAI->GiveCommand(cmd);
+			unit->commandAI->GiveCommand(cmd, -1, true, false);
 		}
 	}
 
@@ -927,7 +927,7 @@ static void NativeGiveOrderArrayToUnit(const GiveOrderArrayToUnitQuery* query, G
 			cmd.PushParam(nativeCmd.params[j]);
 		}
 
-		unit->commandAI->GiveCommand(cmd);
+		unit->commandAI->GiveCommand(cmd, -1, true, false);
 	}
 
 	result->success = true;
@@ -967,7 +967,7 @@ static void NativeGiveOrderArrayToUnitArray(const GiveOrderArrayToUnitArrayQuery
 					cmd.PushParam(nativeCmd.params[j]);
 				}
 
-				unit->commandAI->GiveCommand(cmd);
+				unit->commandAI->GiveCommand(cmd, -1, true, false);
 				result->unitsOrdered++;
 			}
 		}
@@ -986,7 +986,7 @@ static void NativeGiveOrderArrayToUnitArray(const GiveOrderArrayToUnitArrayQuery
 						cmd.PushParam(nativeCmd.params[j]);
 					}
 
-					unit->commandAI->GiveCommand(cmd);
+					unit->commandAI->GiveCommand(cmd, -1, true, false);
 				}
 				result->unitsOrdered++;
 			}

@@ -90,8 +90,28 @@ pub safe fn get_command_params(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:units-commands")]
 unsafe extern "C" {
+#[link_name = "give-order-array-to-unit"]
+pub safe fn give_order_array_to_unit(p0: i32, p1: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:units-commands")]
+unsafe extern "C" {
+#[link_name = "give-order-array-to-unit-array"]
+pub safe fn give_order_array_to_unit_array(p0: i32, p1: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:units-commands")]
+unsafe extern "C" {
 #[link_name = "give-order-array-to-unit-map"]
 pub safe fn give_order_array_to_unit_map(p0: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:units-commands")]
+unsafe extern "C" {
+#[link_name = "give-order-to-unit"]
+pub safe fn give_order_to_unit(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:units-commands")]
+unsafe extern "C" {
+#[link_name = "give-order-to-unit-array"]
+pub safe fn give_order_to_unit_array(p0: i32, p1: i32, p2: i32, p3: i32) -> i64;
 }
         }
 
@@ -130,6 +150,63 @@ Err(super::VariableResultError { error: unreachable!(), required: 0 })
 }
 
         #[inline]
+pub fn give_order_array_to_unit(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::give_order_array_to_unit(p0, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn give_order_array_to_unit_array(p0: i32, blob0: &[u8], blob1: &[u8]) -> crate::Result<i32> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 4];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[2] = blob1_ptr as u32;
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::give_order_array_to_unit_array(p0, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, blob0, blob1);
+Err(unreachable!())
+}
+}
+
+        #[inline]
 pub fn give_order_array_to_unit_map(blob0: &[u8], blob1: &[u8]) -> crate::Result<i32> {
 #[cfg(target_arch = "wasm32")]
 {
@@ -157,6 +234,63 @@ crate::unpack_i32(raw::give_order_array_to_unit_map(descriptor_ptr))
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (blob0, blob1);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn give_order_to_unit(p0: i32, p1: i32, p2: i32, p3: i32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::give_order_to_unit(p0, p1, p2, p3, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, p3, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn give_order_to_unit_array(p0: i32, p1: i32, p2: i32, blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 4];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[2] = blob1_ptr as u32;
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::give_order_to_unit_array(p0, p1, p2, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, blob0, blob1);
 Err(unreachable!())
 }
 }
@@ -9188,5 +9322,5 @@ Err(unreachable!())
     }
 
 #[doc(hidden)]
-pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 270;
+pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 274;
 }

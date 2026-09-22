@@ -78,6 +78,38 @@ struct ProjectileTargetRef {
 	bool isGroundTarget;
 };
 
+// Unit order arguments shared by synced control and the unsynced player-order
+// API. The API containing the function determines the command source.
+struct GiveOrderToUnitQuery { int32_t unitID; int32_t cmdID; const float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };
+struct GiveOrderToUnitResult { const Error* error; bool success; };
+
+struct GiveOrderToUnitArrayQuery { const int32_t* unitIDs; uint32_t count; int32_t cmdID; const float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };
+struct GiveOrderToUnitArrayResult { const Error* error; bool success; };
+
+struct NativeCommand {
+	int32_t cmdID;
+	float* params;
+	uint32_t paramCount;
+	uint32_t options;
+	int32_t timeout;
+};
+
+struct GiveOrderArrayToUnitQuery {
+	int32_t unitID;
+	const NativeCommand* commands;
+	uint32_t commandCount;
+};
+struct GiveOrderArrayToUnitResult { const Error* error; bool success; };
+
+struct GiveOrderArrayToUnitArrayQuery {
+	const int32_t* unitIDs;
+	uint32_t unitCount;
+	const NativeCommand* commands;
+	uint32_t commandCount;
+	bool pairwise;
+};
+struct GiveOrderArrayToUnitArrayResult { const Error* error; int32_t unitsOrdered; };
+
 struct NativeProjectileParams {
 	Float3 pos;
 	Float3 speed;

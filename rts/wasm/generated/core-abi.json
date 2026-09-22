@@ -24763,8 +24763,8 @@
       "function": "GiveOrder",
       "import_module": "spring:units-commands",
       "import_name": "give-order",
-      "environment_mask": 5,
-      "mutating": true,
+      "environment_mask": 26,
+      "mutating": false,
       "visibility_sensitive": false,
       "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
@@ -24783,11 +24783,53 @@
     },
     {
       "module": "units_commands",
+      "function": "GiveOrderArrayToUnit",
+      "import_module": "spring:units-commands",
+      "import_name": "give-order-array-to-unit",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "units_commands",
+      "function": "GiveOrderArrayToUnitArray",
+      "import_module": "spring:units-commands",
+      "import_name": "give-order-array-to-unit-array",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "units_commands",
       "function": "GiveOrderArrayToUnitMap",
       "import_module": "spring:units-commands",
       "import_name": "give-order-array-to-unit-map",
-      "environment_mask": 5,
-      "mutating": true,
+      "environment_mask": 26,
+      "mutating": false,
       "visibility_sensitive": false,
       "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
@@ -24803,11 +24845,58 @@
     },
     {
       "module": "units_commands",
+      "function": "GiveOrderToUnit",
+      "import_module": "spring:units-commands",
+      "import_name": "give-order-to-unit",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "units_commands",
+      "function": "GiveOrderToUnitArray",
+      "import_module": "spring:units-commands",
+      "import_name": "give-order-to-unit-array",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "units_commands",
       "function": "GiveOrderToUnitMap",
       "import_module": "spring:units-commands",
       "import_name": "give-order-to-unit-map",
-      "environment_mask": 5,
-      "mutating": true,
+      "environment_mask": 26,
+      "mutating": false,
       "visibility_sensitive": false,
       "source_status": "annotated",
       "input_strategy": "variable-input-buffer",
@@ -31109,6 +31198,6 @@
     }
   ],
   "automatic_count": 1186,
-  "manual_count": 194,
+  "manual_count": 198,
   "unsupported_count": 17
 }

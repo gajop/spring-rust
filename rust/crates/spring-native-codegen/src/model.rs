@@ -1008,7 +1008,10 @@ fn is_mutating(module: &str, function: &str) -> bool {
                 && !function.starts_with("Test")
         }
         "rules_params" => function.starts_with("Set"),
-        "units_commands" => function.starts_with("GiveOrder"),
+		// UnitsCommands follows the unsynced Lua player-order path. It changes
+		// simulation state only after the order has gone through the normal
+		// player/network command handling, so it is not a synced guest control.
+		"units_commands" => false,
         "metal_map" => function == "SetMetalAmount",
         "path_finder" => matches!(
             function,
@@ -1176,7 +1179,7 @@ mod tests {
     }
 
     #[test]
-    fn environment_mapping_uses_loader_and_mutation_policy() {
+	fn environment_mapping_uses_loader_and_mutation_policy() {
         let loaders = LuaLoaderMatrix::default();
         let header = Path::new("rts/NativeInterface/api/SyncedCtrl.h");
         let environments =
@@ -1193,8 +1196,10 @@ mod tests {
             true,
         );
         assert!(read_environments.contains(&Environment::RulesUnsynced));
-        assert!(read_environments.contains(&Environment::Ui));
-    }
+		assert!(read_environments.contains(&Environment::Ui));
+		assert!(!is_mutating("units_commands", "GiveOrder"));
+		assert!(!is_mutating("units_commands", "GiveOrderToUnit"));
+	}
 
     #[test]
     fn excludes_reserved_transitive_header_records_from_transport_models() {

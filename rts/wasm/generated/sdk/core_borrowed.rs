@@ -167,6 +167,71 @@ pub mod borrowed {
 
     }
 
+    pub mod units_commands {
+        use crate::{ApiError, ErrorCode, Result};
+
+        #[cfg(target_arch = "wasm32")]
+        mod raw {
+            #[link(wasm_import_module = "spring:units-commands")]
+            unsafe extern "C" {
+                #[link_name = "give-order-to-unit"]
+                pub safe fn give_order_to_unit(arg0: i32, arg1: i32, arg2: i32, arg3: i32, arg4: i32) -> i64;
+            }
+            #[link(wasm_import_module = "spring:units-commands")]
+            unsafe extern "C" {
+                #[link_name = "give-order-to-unit-array"]
+                pub safe fn give_order_to_unit_array(arg0: i32, arg1: i32, arg2: i32, arg3: i32) -> i64;
+            }
+        }
+
+        #[inline]
+        pub fn give_order_to_unit(unit_id: i32, cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(params)?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::give_order_to_unit(unit_id, cmd_id, options as i32, timeout, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unit_id, cmd_id, params, options, timeout);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn give_order_to_unit_array(unit_i_ds: &[i32], cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 16];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(unit_i_ds)?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let (core_ptr, core_len) = crate::wasm_slice_parts(params)?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::give_order_to_unit_array(cmd_id, options as i32, timeout, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unit_i_ds, cmd_id, params, options, timeout);
+                Err(unreachable!())
+            }
+        }
+
+    }
+
     pub mod units_pieces {
         use crate::{ApiError, ErrorCode, Result};
 
@@ -6102,5 +6167,5 @@ pub mod borrowed {
     }
 
 #[doc(hidden)]
-    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 210;
+    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 212;
 }

@@ -198,6 +198,188 @@ wasm_trap_t* CoreVariable_units_weapons_get_unit_weapon_state(void* environment,
     return nullptr;
 }
 
+wasm_trap_t* CoreVariable_units_commands_give_order_to_unit(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unitsCommands == nullptr ||
+        state->native->unitsCommands->GiveOrderToUnit == nullptr)
+        return Trap("GiveOrderToUnit generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 5)
+        return Trap("GiveOrderToUnit generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[4].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    GiveOrderToUnitQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.cmdID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.cmdID)>>>(slots[1].i32);
+    std::uint32_t paramsPointer = 0;
+    std::uint32_t paramsCount = 0;
+    if (!reader.U32(paramsPointer) || !reader.U32(paramsCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    const std::uint64_t paramsBytes64 = static_cast<std::uint64_t>(paramsCount) * 4u;
+    if (paramsBytes64 > std::numeric_limits<std::size_t>::max()) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> paramsWire;
+    if (!state->memory.View(paramsPointer, static_cast<std::size_t>(paramsBytes64), paramsWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader paramsReader(paramsWire);
+    std::vector<float> paramsStorage;
+    paramsStorage.reserve(paramsCount);
+    for (std::uint32_t coreIndex = 0; coreIndex < paramsCount; ++coreIndex) {
+        float item{};
+        if (!paramsReader.F32(item)) return Trap("generated Core wire underflow");
+        paramsStorage.push_back(item);
+    }
+    if (!paramsReader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.params = paramsStorage.data();
+    if (!AssignCoreCount(paramsCount, query.paramCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.options = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options)>>>(slots[2].i32);
+    query.timeout = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.timeout)>>>(slots[3].i32);
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    GiveOrderToUnitResult result{};
+    state->native->unitsCommands->GiveOrderToUnit(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreVariable_units_commands_give_order_to_unit_array(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unitsCommands == nullptr ||
+        state->native->unitsCommands->GiveOrderToUnitArray == nullptr)
+        return Trap("GiveOrderToUnitArray generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4)
+        return Trap("GiveOrderToUnitArray generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 16u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    GiveOrderToUnitArrayQuery query{};
+    std::uint32_t unitIDsPointer = 0;
+    std::uint32_t unitIDsCount = 0;
+    if (!reader.U32(unitIDsPointer) || !reader.U32(unitIDsCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    const std::uint64_t unitIDsBytes64 = static_cast<std::uint64_t>(unitIDsCount) * 4u;
+    if (unitIDsBytes64 > std::numeric_limits<std::size_t>::max()) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> unitIDsWire;
+    if (!state->memory.View(unitIDsPointer, static_cast<std::size_t>(unitIDsBytes64), unitIDsWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader unitIDsReader(unitIDsWire);
+    std::vector<std::int32_t> unitIDsStorage;
+    unitIDsStorage.reserve(unitIDsCount);
+    for (std::uint32_t coreIndex = 0; coreIndex < unitIDsCount; ++coreIndex) {
+        std::int32_t item{};
+        { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+        unitIDsStorage.push_back(item);
+    }
+    if (!unitIDsReader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.unitIDs = unitIDsStorage.data();
+    if (!AssignCoreCount(unitIDsCount, query.count)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.cmdID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.cmdID)>>>(slots[0].i32);
+    std::uint32_t paramsPointer = 0;
+    std::uint32_t paramsCount = 0;
+    if (!reader.U32(paramsPointer) || !reader.U32(paramsCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    const std::uint64_t paramsBytes64 = static_cast<std::uint64_t>(paramsCount) * 4u;
+    if (paramsBytes64 > std::numeric_limits<std::size_t>::max()) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> paramsWire;
+    if (!state->memory.View(paramsPointer, static_cast<std::size_t>(paramsBytes64), paramsWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader paramsReader(paramsWire);
+    std::vector<float> paramsStorage;
+    paramsStorage.reserve(paramsCount);
+    for (std::uint32_t coreIndex = 0; coreIndex < paramsCount; ++coreIndex) {
+        float item{};
+        if (!paramsReader.F32(item)) return Trap("generated Core wire underflow");
+        paramsStorage.push_back(item);
+    }
+    if (!paramsReader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.params = paramsStorage.data();
+    if (!AssignCoreCount(paramsCount, query.paramCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.options = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.options)>>>(slots[1].i32);
+    query.timeout = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.timeout)>>>(slots[2].i32);
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    GiveOrderToUnitArrayResult result{};
+    state->native->unitsCommands->GiveOrderToUnitArray(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariable_units_pieces_get_model_root_piece(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -12602,6 +12784,6 @@ bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(206 >= 0, "generated variable Core callback count");
+static_assert(208 >= 0, "generated variable Core callback count");
 
 } // namespace recoil::wasm::core::generated

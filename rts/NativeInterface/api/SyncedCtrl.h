@@ -165,39 +165,6 @@ struct DestroyUnitResult { const Error* error; bool success; };
 struct TransferUnitQuery { int32_t unitID; int32_t newTeamID; bool given; bool adjustUnitLimit; };
 struct TransferUnitResult { const Error* error; bool success; };
 
-struct GiveOrderToUnitQuery { int32_t unitID; int32_t cmdID; const float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };
-struct GiveOrderToUnitResult { const Error* error; bool success; };
-
-struct GiveOrderToUnitArrayQuery { const int32_t* unitIDs; uint32_t count; int32_t cmdID; const float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };
-struct GiveOrderToUnitArrayResult { const Error* error; bool success; };
-
-// Single command for order arrays
-struct NativeCommand {
-	int32_t cmdID;
-	float* params;
-	uint32_t paramCount;
-	uint32_t options;
-	int32_t timeout;
-};
-
-// Give multiple orders to a single unit
-struct GiveOrderArrayToUnitQuery {
-	int32_t unitID;
-	const NativeCommand* commands;
-	uint32_t commandCount;
-};
-struct GiveOrderArrayToUnitResult { const Error* error; bool success; };
-
-// Give multiple orders to multiple units
-struct GiveOrderArrayToUnitArrayQuery {
-	const int32_t* unitIDs;
-	uint32_t unitCount;
-	const NativeCommand* commands;
-	uint32_t commandCount;
-	bool pairwise;        // When true, assign commands by index (unit[i] gets command[i])
-};
-struct GiveOrderArrayToUnitArrayResult { const Error* error; int32_t unitsOrdered; };
-
 struct UnitFinishCommandQuery { int32_t unitID; };
 struct UnitFinishCommandResult { const Error* error; bool success; };
 
