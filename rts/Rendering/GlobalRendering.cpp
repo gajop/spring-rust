@@ -7,6 +7,7 @@
 #include <SDL.h>
 
 #include "GlobalRendering.h"
+#include "Rendering/GL/glDebugGroup.hpp"
 #include "GlobalRenderingInfo.h"
 #include "Rendering/VerticalSync.h"
 #include "Rendering/GL/StreamBuffer.h"
@@ -662,6 +663,7 @@ void CGlobalRendering::PostInit() {
 	UniformConstants::GetInstance().Init();
 	ModelUniformData::Init();
 	glGenQueries(glTimerQueries.size(), glTimerQueries.data());
+	GL::InitTracyGpuContext();
 	RenderBuffer::InitStatic();
 	GL::shapes.Init();
 
@@ -701,6 +703,7 @@ void CGlobalRendering::SwapBuffers(bool allowSwapBuffers, bool clearErrors)
 		#endif
 		
 		SDL_GL_SwapWindow(sdlWindow);
+		GL::CollectTracyGpuZones();
 
 		#ifdef _WIN32
 			if (forceDWMFlush == 2){ 

@@ -19,3 +19,21 @@ std::unique_ptr<GL::DebugGroup> GL::DebugGroup::GetScoped(uint32_t id, const cha
 	else
 		return std::make_unique<GL::DebugGroupNoop>(id, messsage);
 }
+
+void GL::InitTracyGpuContext()
+{
+#if SPRING_TRACY_GPU
+	if (tracy::GetGpuCtx().ptr == nullptr) {
+		TracyGpuContext;
+	}
+#endif
+}
+
+void GL::CollectTracyGpuZones()
+{
+#if SPRING_TRACY_GPU
+	if (tracy::GetGpuCtx().ptr != nullptr) {
+		TracyGpuCollect;
+	}
+#endif
+}

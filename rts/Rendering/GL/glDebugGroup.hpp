@@ -4,6 +4,7 @@
 #include <cstdint>
 #include "System/StringHash.h"
 #include "System/StringUtil.h"
+#include "Rendering/GL/TracyGpu.h"
 
 namespace GL {
 	class DebugGroup {
@@ -22,4 +23,4 @@ namespace GL {
 	};
 }
 
-#define SCOPED_GL_DEBUGGROUP(name) const auto _UTIL_CONCAT(__scopedGLDebugGroup, __LINE__) = GL::DebugGroup::GetScoped(0x824A/*GL_DEBUG_SOURCE_APPLICATION*/ ,name)
+#define SCOPED_GL_DEBUGGROUP(name) const auto _UTIL_CONCAT(__scopedGLDebugGroup, __LINE__) = GL::DebugGroup::GetScoped(0x824A/*GL_DEBUG_SOURCE_APPLICATION*/ ,name); SCOPED_TRACY_GPU_ZONE(name)
