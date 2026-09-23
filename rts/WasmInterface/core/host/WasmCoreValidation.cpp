@@ -182,7 +182,10 @@ bool ReadLimits(Reader& reader, std::uint64_t configuredMaximum, bool memory,
 		}
 	}
 	if (minimum > configuredMaximum || (hasMaximum && maximum > configuredMaximum)) {
-		error = memory ? "Core Wasm memory exceeds configured maximum" :
+		error = memory ?
+			"Core Wasm memory of " + std::to_string(std::max(minimum, maximum) / 16u) +
+				" MiB exceeds the " + std::to_string(configuredMaximum / 16u) +
+				" MiB limit (gamedata/modrules.lua system.WasmMemoryLimit)" :
 			"Core Wasm table exceeds configured maximum";
 		return false;
 	}

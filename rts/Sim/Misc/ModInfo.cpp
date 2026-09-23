@@ -145,6 +145,7 @@ void CModInfo::ResetState()
 		quadFieldQuadSizeInElmos = 128;
 
 		SLuaAllocLimit::MAX_ALLOC_BYTES = SLuaAllocLimit::MAX_ALLOC_BYTES_DEFAULT;
+		wasmMemoryLimitMiB = WASM_MEMORY_LIMIT_MIB_DEFAULT;
 
 		nativeExcessSharing = true;
 		allowTake = true;
@@ -211,6 +212,14 @@ void CModInfo::Init(const std::string& modFileName)
 
 		// Specify in megabytes: 1 << 20 = (1024 * 1024)
 		SLuaAllocLimit::MAX_ALLOC_BYTES = static_cast<decltype(SLuaAllocLimit::MAX_ALLOC_BYTES)>(system.GetInt("LuaAllocLimit", SLuaAllocLimit::MAX_ALLOC_BYTES >> 20u)) << 20u;
+
+		// Per Core Wasm module, in megabytes; wasm32 addresses at most 4 GiB.
+		wasmMemoryLimitMiB = system.GetInt("WasmMemoryLimit", wasmMemoryLimitMiB);
+		if (wasmMemoryLimitMiB < 1 || wasmMemoryLimitMiB > WASM_MEMORY_LIMIT_MIB_MAX) {
+			LOG_L(L_WARNING, "[ModInfo] modrules system.WasmMemoryLimit=%d is outside 1..%d MiB; using %d",
+				wasmMemoryLimitMiB, WASM_MEMORY_LIMIT_MIB_MAX, WASM_MEMORY_LIMIT_MIB_DEFAULT);
+			wasmMemoryLimitMiB = WASM_MEMORY_LIMIT_MIB_DEFAULT;
+		}
 
 		nativeExcessSharing = system.GetBool("nativeExcessSharing", nativeExcessSharing);
 		allowTake = system.GetBool("allowTake", allowTake);

@@ -16,7 +16,7 @@ fn main() {
     // the build script rather than relying on a nested .cargo/config.toml,
     // because the benchmark runner invokes Cargo from the repository root.
     // 16 MiB is intentionally roomy for Vec-heavy list/workload benchmarks
-    // while remaining far below the engine's 64 MiB default Core memory cap.
+    // while remaining far below the engine's 512 MiB default Core memory cap.
     println!("cargo:rustc-link-arg=--initial-memory=16777216");
     println!("cargo:rustc-link-arg=--no-growable-memory");
 

@@ -27,7 +27,9 @@ enum class WasmRuntimeBackend : std::uint8_t {
 
 struct WasmRuntimeConfig {
 	std::size_t maxModuleBytes = 64u * 1024u * 1024u;
-	std::uint32_t maxMemoryPages = 1024;
+	// Linear memory ceiling per module in 64 KiB pages (8192 = 512 MiB). The
+	// engine sets it from gamedata/modrules.lua's system.WasmMemoryLimit.
+	std::uint32_t maxMemoryPages = 8192;
 	std::uint32_t maxTableElements = 1u << 20;
 	std::uint32_t maxResources = 1u << 16;
 	// A complete generated Core API context can legitimately import several

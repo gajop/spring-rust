@@ -9,12 +9,29 @@ and a UI visibility filter is not a sandbox boundary.
 
 ## Memory limits
 
-`WasmRuntimeConfig` caps a module at 1024 Wasm pages (64 MiB), one linear
-memory, `1 << 20` table elements, 2048 imports, 256 exports, 128 sections, and
+`WasmRuntimeConfig` caps a module at 8192 Wasm pages (512 MiB) by default,
+one linear memory, `1 << 20` table elements, 2048 imports, 256 exports, 128 sections, and
 16 MiB of result bytes. The store limiter applies the memory and table caps
 again after validation. Synced Core modules must declare fixed memory (`max ==
 min`), so a synced module cannot grow its address space after peers have
 started executing it. The benchmark guest uses a smaller fixed 16 MiB memory.
+
+The memory cap is per module and is set by the game in `gamedata/modrules.lua`, like
+Lua's global `LuaAllocLimit`:
+
+```lua
+system = {
+	WasmMemoryLimit = 1024, -- MiB per Core Wasm module, 1..4096 (default 512)
+}
+```
+
+The engine logs the limit in force when it starts the Wasm system. The limit is
+part of the runtime configuration identity; peers agree on it because it comes
+from the checksummed game archive. It is a ceiling, not an allocation: a fixed
+synced module reserves what it declares (`--initial-memory`, with
+`--no-growable-memory`), while an unsynced module can declare a small initial
+memory and grow up to the limit. A module whose declared memory exceeds the
+limit is rejected at load with the declared and allowed sizes.
 
 The host never trusts a guest pointer merely because it is an `i32`. Generated
 bindings bind the caller memory and validate offset/length pairs before reading

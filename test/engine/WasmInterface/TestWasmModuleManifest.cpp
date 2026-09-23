@@ -75,17 +75,17 @@ void AddCoreFunctionImport(std::vector<std::uint8_t>& module,
 	AddCoreSection(module, 2, payload);
 }
 
-void AddCoreMemory(std::vector<std::uint8_t>& module, bool fixed)
+void AddCoreMemory(std::vector<std::uint8_t>& module, bool fixed, std::uint32_t pages = 1)
 {
 	std::vector<std::uint8_t> payload;
 	AppendCoreLeb(payload, 1);
 	if (fixed) {
 		AppendCoreLeb(payload, 1); // has maximum
-		AppendCoreLeb(payload, 1); // min pages
-		AppendCoreLeb(payload, 1); // max pages
+		AppendCoreLeb(payload, pages); // min pages
+		AppendCoreLeb(payload, pages); // max pages
 	} else {
 		AppendCoreLeb(payload, 0); // no maximum
-		AppendCoreLeb(payload, 1); // min pages
+		AppendCoreLeb(payload, pages); // min pages
 	}
 	AddCoreSection(module, 5, payload);
 }
@@ -103,10 +103,10 @@ void AddCoreMemoryExport(std::vector<std::uint8_t>& module)
 	AddCoreSection(module, 7, payload);
 }
 
-std::vector<std::uint8_t> MinimalCoreModule(bool fixedMemory)
+std::vector<std::uint8_t> MinimalCoreModule(bool fixedMemory, std::uint32_t memoryPages = 1)
 {
 	auto module = CoreHeader();
-	AddCoreMemory(module, fixedMemory);
+	AddCoreMemory(module, fixedMemory, memoryPages);
 	AddCoreMemoryExport(module);
 	return module;
 }
@@ -207,7 +207,7 @@ TEST_CASE("Production Core ABI rejects ambient WASI even when legacy WASI is ena
 TEST_CASE("Production Core ABI enforces import environment masks")
 {
 	auto module = CoreHeader();
-	AddCoreFunctionType(module, {}, {0x7e}); // -> i64
+	AddCoreFunctionType(module, {0x7f, 0x7f}, {0x7f}); // (name ptr, len) -> i32
 	AddCoreFunctionImport(module, "spring:profiling", "get-timer");
 	AddCoreMemory(module, true);
 	AddCoreMemoryExport(module);
@@ -277,6 +277,25 @@ TEST_CASE("Production Core ABI requires fixed synced memory but permits unsynced
 	const auto unsynced = recoil::wasm::core::ValidateModule(growable,
 		WasmEnvironment::RulesUnsynced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
 	CHECK(unsynced.valid);
+}
+
+TEST_CASE("Production Core ABI bounds module memory by the configured limit")
+{
+	const auto validate = [](std::uint32_t pages, const WasmRuntimeConfig& config) {
+		return recoil::wasm::core::ValidateModule(MinimalCoreModule(true, pages),
+			WasmEnvironment::RulesSynced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+	};
+
+	WasmRuntimeConfig config;
+	CHECK(config.maxMemoryPages == 8192); // 512 MiB
+	CHECK(validate(8192, config).valid);
+	const auto tooLarge = validate(8193, config);
+	CHECK_FALSE(tooLarge.valid);
+	CHECK(tooLarge.error.find("exceeds the 512 MiB limit") != std::string::npos);
+
+	config.maxMemoryPages = 2048; // modrules system.WasmMemoryLimit = 128
+	CHECK(validate(2048, config).valid);
+	CHECK_FALSE(validate(2049, config).valid);
 }
 
 TEST_CASE("Production Core ABI validates exact import signatures")

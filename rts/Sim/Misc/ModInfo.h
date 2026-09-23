@@ -255,6 +255,13 @@ public:
 
 	int quadFieldQuadSizeInElmos;
 
+	/// Ceiling in MiB on the linear memory of each Core Wasm module (the Lua
+	/// counterpart, LuaAllocLimit, caps all Lua states together). Set with
+	/// system.WasmMemoryLimit in gamedata/modrules.lua; default 512, allowed 1..4096.
+	int wasmMemoryLimitMiB;
+	static constexpr int WASM_MEMORY_LIMIT_MIB_DEFAULT = 512;
+	static constexpr int WASM_MEMORY_LIMIT_MIB_MAX = 4096;
+
 	bool nativeExcessSharing;
 	bool allowTake;
 	bool allowEnginePlayerlist;

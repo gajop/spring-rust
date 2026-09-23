@@ -17,6 +17,7 @@
 #include "NativeModulePath.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Game/GameSetup.h"
+#include "Sim/Misc/ModInfo.h"
 #include "Sim/Units/Scripts/UnitScriptFactory.h"
 #include "Sim/Units/Scripts/NativeUnitScript.h"
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
@@ -62,9 +63,13 @@ namespace {
 		return fallback;
 	}
 
-	WasmRuntimeConfig WasmRuntimeConfigFromModOptions()
+	WasmRuntimeConfig WasmRuntimeConfigForGame()
 	{
 		WasmRuntimeConfig config;
+		// 64 KiB pages; CModInfo keeps the limit within 1..4096 MiB.
+		config.maxMemoryPages = static_cast<std::uint32_t>(modInfo.wasmMemoryLimitMiB) * 16u;
+		LOG("[Wasm] linear memory limit per module: %d MiB (modrules system.WasmMemoryLimit)",
+			modInfo.wasmMemoryLimitMiB);
 		config.instructionFuel = ReadWasmLimitOption("wasm_instruction_fuel", config.instructionFuel);
 		config.hostWorkLimit = ReadWasmLimitOption("wasm_host_work_limit", config.hostWorkLimit);
 		return config;
@@ -192,7 +197,7 @@ public:
 		nativeInterface.utils = &UTILS_API;
 		nativeInterface.player = &PLAYER_API;
 		wasmSystem = std::make_unique<WasmInterfaceSystem>(&nativeInterface,
-			WasmRuntimeConfigFromModOptions());
+			WasmRuntimeConfigForGame());
 	}
 
 	~Impl() {
