@@ -207,6 +207,19 @@ public:
 	);
 
 private:
+	void AddTimeRaw(
+		unsigned nameHash,
+		const spring_time startTime,
+		const spring_time deltaTime,
+		const bool showGraph,
+		const bool threadTimer,
+		int threadNum,
+		const spring_time endTime
+	);
+	/// Merge the timings threads buffered since the last merge; profileMutex held
+	void FlushPendingRaw();
+
+private:
 	SortType sortingType = SortType::ST_ALPHABETICAL;
 	spring::unordered_map<unsigned, TimeRecord> profiles;
 

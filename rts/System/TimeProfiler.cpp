@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <climits>
 #include <cstring>
+#include <memory>
+#include <mutex>
+#include <vector>
 
 #include "System/TimeProfiler.h"
 #include "System/GlobalRNG.h"
@@ -23,6 +26,45 @@ static spring::unordered_map<unsigned, std::string> hashToName;
 static spring::unordered_map<unsigned, int> refCounters;
 
 static CGlobalUnsyncedRNG profileColorRNG;
+
+// Timings recorded by AddTime while enabled go to a per-thread buffer first;
+// taking the global profileMutex on every scoped timer made the profiler a
+// contention point (and skewed what it measured). Buffers are merged into the
+// shared profiles under profileMutex once per frame and before reads.
+namespace {
+	struct PendingTime {
+		unsigned nameHash;
+		spring_time startTime;
+		spring_time deltaTime;
+		spring_time endTime;
+		int threadNum;
+		bool showGraph;
+		bool threadTimer;
+	};
+
+	struct PendingTimes {
+		std::mutex mutex; // contended only while merging
+		std::vector<PendingTime> items;
+	};
+
+	constexpr size_t MAX_PENDING_TIMES = 1 << 16;
+
+	// all threads' buffers, guarded by profileMutex
+	std::vector<std::shared_ptr<PendingTimes>> pendingBuffers;
+	thread_local std::shared_ptr<PendingTimes> threadPending;
+
+	PendingTimes& GetThreadPending()
+	{
+		if (threadPending == nullptr) {
+			threadPending = std::make_shared<PendingTimes>();
+
+			std::lock_guard<ProfileMutexType> lock(profileMutex);
+			pendingBuffers.push_back(threadPending);
+		}
+
+		return *threadPending;
+	}
+}
 
 const std::array<CTimeProfiler::ProfileSortFunc, CTimeProfiler::SortType::ST_COUNT> CTimeProfiler::SortingFunctions = {
 	[](const TimeRecordPair& a, const TimeRecordPair& b) { return (a.first          < b.first         ); }, // ST_ALPHABETICAL = 0,
@@ -185,6 +227,11 @@ void CTimeProfiler::ResetState() {
 	// grab lock; ThreadPool workers might already be running SCOPED_MT_TIMER
 	std::lock_guard<ProfileMutexType> lock(profileMutex);
 
+	for (const auto& buffer: pendingBuffers) {
+		std::lock_guard<std::mutex> bufferLock(buffer->mutex);
+		buffer->items.clear();
+	}
+
 	profiles.clear();
 	profiles.reserve(128);
 	sortedProfiles.clear();
@@ -205,6 +252,7 @@ void CTimeProfiler::ToggleLock(bool lock)
 {
 	if (lock) {
 		profileMutex.lock();
+		FlushPendingRaw();
 	} else {
 		profileMutex.unlock();
 	}
@@ -220,8 +268,8 @@ void CTimeProfiler::Update()
 		return;
 	}
 
-	// FIXME: non-locking threadsafe
 	std::lock_guard<ProfileMutexType> lock(profileMutex);
+	FlushPendingRaw();
 
 	if (sortingType != ST_ALPHABETICAL)
 		++resortProfiles;
@@ -313,6 +361,7 @@ void CTimeProfiler::RefreshProfiles()
 
 	// lock so nothing modifies *unsorted* profiles during the refresh
 	std::lock_guard<ProfileMutexType> lock(profileMutex);
+	FlushPendingRaw();
 
 	RefreshProfilesRaw();
 }
@@ -356,6 +405,7 @@ const CTimeProfiler::TimeRecord& CTimeProfiler::GetTimeRecord(const char* name) 
 		return (GetTimeRecordRaw(name));
 
 	std::lock_guard<ProfileMutexType> lock(profileMutex);
+	const_cast<CTimeProfiler*>(this)->FlushPendingRaw();
 
 	return (GetTimeRecordRaw(name));
 }
@@ -381,12 +431,52 @@ void CTimeProfiler::AddTime(
 		return;
 	}
 
-	// acquire lock at the start; one inserting thread could
-	// cause a profile rehash and invalidate <pi> for another
-	std::lock_guard<ProfileMutexType> lock(profileMutex);
+	#ifdef THREADPOOL
+	const int threadNum = threadTimer ? ThreadPool::GetThreadNum() : 0;
+	#else
+	const int threadNum = 0;
+	#endif
+	const spring_time endTime = threadTimer ? spring_gettime() : spring_notime;
 
-	AddTimeRaw(nameHash, startTime, deltaTime, showGraph, threadTimer);
-	AddTimeRaw(hashString("Misc::Profiler::AddTime"), t0, spring_now() - t0, false, false);
+	PendingTimes& pending = GetThreadPending();
+	size_t numPending = 0;
+	{
+		std::lock_guard<std::mutex> lock(pending.mutex);
+
+		pending.items.push_back({nameHash, startTime, deltaTime, endTime, threadNum, showGraph, threadTimer});
+		pending.items.push_back({hashString("Misc::Profiler::AddTime"), t0, spring_now() - t0, spring_notime, 0, false, false});
+		numPending = pending.items.size();
+	}
+
+	// bound memory if nothing has merged for a long time
+	if (numPending >= MAX_PENDING_TIMES) {
+		std::lock_guard<ProfileMutexType> lock(profileMutex);
+		FlushPendingRaw();
+	}
+}
+
+void CTimeProfiler::FlushPendingRaw()
+{
+	std::vector<PendingTime> items;
+
+	for (auto it = pendingBuffers.begin(); it != pendingBuffers.end(); ) {
+		{
+			std::lock_guard<std::mutex> bufferLock((*it)->mutex);
+			items.insert(items.end(), (*it)->items.begin(), (*it)->items.end());
+			(*it)->items.clear();
+		}
+
+		// the owning thread has exited
+		if (it->use_count() == 1) {
+			it = pendingBuffers.erase(it);
+		} else {
+			++it;
+		}
+	}
+
+	for (const PendingTime& item: items) {
+		AddTimeRaw(item.nameHash, item.startTime, item.deltaTime, item.showGraph, item.threadTimer, item.threadNum, item.endTime);
+	}
 }
 
 void CTimeProfiler::AddTimeRaw(
@@ -397,8 +487,28 @@ void CTimeProfiler::AddTimeRaw(
 	const bool threadTimer
 ) {
 #ifdef THREADPOOL
+	const int threadNum = threadTimer ? ThreadPool::GetThreadNum() : 0;
+#else
+	const int threadNum = 0;
+#endif
+	AddTimeRaw(nameHash, startTime, deltaTime, showGraph, threadTimer, threadNum, threadTimer ? spring_gettime() : spring_notime);
+}
+
+void CTimeProfiler::AddTimeRaw(
+	const unsigned nameHash,
+	const spring_time startTime,
+	const spring_time deltaTime,
+	const bool showGraph,
+	const bool threadTimer,
+	const int threadNum,
+	const spring_time endTime
+) {
+#ifdef THREADPOOL
 	if (threadTimer)
-		threadProfiles[ThreadPool::GetThreadNum()].emplace_back(startTime, spring_gettime());
+		threadProfiles[threadNum].emplace_back(startTime, endTime);
+#else
+	(void)threadNum;
+	(void)endTime;
 #endif
 
 	auto pi = profiles.find(nameHash);
