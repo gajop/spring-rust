@@ -144,7 +144,7 @@ static void NativeGetGameMapInfo(const GetGameMapInfoQuery* /*query*/, GetGameMa
 	result->info.mapDamage = (mapDamage != nullptr) && !mapDamage->Disabled();
 
 	if (archiveScanner != nullptr) {
-		sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(mapInfo->map.name), mapChecksumDigest);
+		sha512::dump_digest(mapInfo->GetArchiveChecksum(), mapChecksumDigest);
 		result->info.mapChecksum = mapChecksumDigest.data();
 	}
 }

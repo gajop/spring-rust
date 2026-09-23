@@ -228,7 +228,7 @@ bool LuaConstGame::PushEntries(lua_State* L)
 		// archive checksums
 		sha512::hex_digest mapHexDigest;
 		sha512::hex_digest modHexDigest;
-		sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(mapInfo->map.name), mapHexDigest);
+		sha512::dump_digest(mapInfo->GetArchiveChecksum(), mapHexDigest);
 		sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(modInfo.filename), modHexDigest);
 
 		LuaPushNamedString(L, "mapChecksum", mapHexDigest.data());

@@ -11,6 +11,7 @@
 #include "System/Exceptions.h"
 #include "System/SpringMath.h"
 #include "System/StringUtil.h"
+#include "System/FileSystem/ArchiveScanner.h"
 #include "System/FileSystem/FileHandler.h"
 
 #if !defined(HEADLESS) && !defined(NO_SOUND)
@@ -83,6 +84,22 @@ CMapInfo::~CMapInfo()
 	delete efxprops;
 	efxprops = nullptr;
 #endif
+}
+
+sha512::raw_digest CMapInfo::GetArchiveChecksum() const
+{
+	if (archiveChecksum.has_value())
+		return *archiveChecksum;
+
+	if (archiveScanner == nullptr)
+		return {};
+
+	const sha512::raw_digest checksum = archiveScanner->GetArchiveCompleteChecksumBytes(map.name);
+
+	if (checksum != sha512::raw_digest{})
+		archiveChecksum = checksum;
+
+	return checksum;
 }
 
 

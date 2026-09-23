@@ -24,23 +24,42 @@ CVirtualArchiveFactory::~CVirtualArchiveFactory()
 }
 
 
+static uint32_t NextVirtualArchiveGeneration()
+{
+	// Process-local; virtual archives never outlive the process.
+	static uint32_t generation = 0;
+	return ++generation;
+}
+
 CVirtualArchive* CVirtualArchiveFactory::AddArchive(const std::string& fileName)
 {
-	CVirtualArchive* archive = new CVirtualArchive(fileName);
+	// Re-adding a name (e.g. regenerating a map) supersedes the older archive;
+	// lookups search newest first. Older archives stay alive for open handles.
+	CVirtualArchive* archive = new CVirtualArchive(fileName, NextVirtualArchiveGeneration());
 	archives.push_back(archive);
 	return archive;
 }
 
-IArchive* CVirtualArchiveFactory::DoCreateArchive(const std::string& fileName) const
+static CVirtualArchive* FindNewest(const std::vector<CVirtualArchive*>& archives, const std::string& baseName)
 {
-	const std::string baseName = FileSystem::GetBasename(fileName);
-
-	for (CVirtualArchive* archive: archives) {
-		if (archive->GetFileName() == baseName)
-			return archive->Open();
+	for (auto it = archives.rbegin(); it != archives.rend(); ++it) {
+		if ((*it)->GetFileName() == baseName)
+			return *it;
 	}
 
 	return nullptr;
+}
+
+uint32_t CVirtualArchiveFactory::GetGeneration(const std::string& baseName) const
+{
+	const CVirtualArchive* archive = FindNewest(archives, baseName);
+	return (archive != nullptr)? archive->GetGeneration(): 0;
+}
+
+IArchive* CVirtualArchiveFactory::DoCreateArchive(const std::string& fileName) const
+{
+	CVirtualArchive* archive = FindNewest(archives, FileSystem::GetBasename(fileName));
+	return (archive != nullptr)? archive->Open(): nullptr;
 }
 
 CVirtualArchiveOpen::CVirtualArchiveOpen(CVirtualArchive* archive, const std::string& fileName)
@@ -114,7 +133,9 @@ IArchive::SFileInfo CVirtualArchive::FileInfo(uint32_t fid) const
 		.fileName = fe.name,
 		.specialFileName = "",
 		.size = static_cast<int32_t>(fe.buffer.size()),
-		.modTime = 0
+		// no file time in memory; the (nonzero) generation lets the archive
+		// scanner treat unchanged content as cached
+		.modTime = generation
 	};
 }
 
@@ -125,6 +146,7 @@ uint32_t CVirtualArchive::AddFile(const std::string& name)
 	// archives may add paths such as LuaGaia/... after construction.
 	lcNameIndex[StringToLower(name)] = files.size();
 	files.emplace_back(files.size(), name);
+	generation = NextVirtualArchiveGeneration();
 
 	return (files.size() - 1);
 }

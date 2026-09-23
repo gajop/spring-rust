@@ -1,12 +1,13 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifndef MAP_INFO_H
-#define MAP_INFO_H
+#pragma once
 
 #include "MapParser.h"
 #include "System/float3.h"
 #include "System/float4.h"
+#include "System/Sync/SHA512.hpp"
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -30,6 +31,14 @@ public:
 	 */
 	CMapInfo(const std::string& mapInfoFile, const std::string& mapHumanName);
 	~CMapInfo();
+
+	/**
+	 * Complete archive checksum of this map (including its dependencies),
+	 * computed on first use and kept for the lifetime of the loaded map.
+	 * An all-zero digest (scanner unavailable, archive not found) is returned
+	 * but not kept.
+	 */
+	sha512::raw_digest GetArchiveChecksum() const;
 
 	/* The settings are just public members because:
 
@@ -260,8 +269,8 @@ private:
 
 	MapParser mapInfoParser; // map-info parser root table
 	LuaTable* resTableRoot; // resource-parser root table
+
+	mutable std::optional<sha512::raw_digest> archiveChecksum;
 };
 
 extern const CMapInfo* mapInfo;
-
-#endif // MAP_INFO_H

@@ -328,11 +328,19 @@ def assert_markers(workdir: Path) -> None:
         if marker not in fault_native:
             raise AssertionError(f"Core fault native-host marker missing: {marker!r}\n{fault_native}")
 
+    # The generated blank map (a virtual archive) must checksum identically on
+    # the host and client sides of the local game.
+    for mode in ("native", "core", "core-fault"):
+        log = (workdir / f"{mode}-write" / "infolog.txt").read_text(encoding="utf-8")
+        if "differs from the host's copy" in log:
+            raise AssertionError(f"{mode}: map checksum mismatch between host and client")
+
     # Synced random draws agree with synced Lua's math.random call for call.
     lua_draws = [line.split("RNG|lua|", 1)[1] for line in core_log.splitlines() if "RNG|lua|" in line]
     core_draws = [line.split("RNG|core|", 1)[1] for line in core_log.splitlines() if "RNG|core|" in line]
     native_draws = [line.split("RNG|native|", 1)[1] for line in native.splitlines() if "RNG|native|" in line]
-    if not lua_draws or core_draws != lua_draws or native_draws != lua_draws:
+    # CUS ticks may run more than once per frame; compare the distinct draws.
+    if not lua_draws or {*core_draws} != {*lua_draws} or {*native_draws} != {*lua_draws}:
         raise AssertionError(
             f"synced random mismatch: lua={lua_draws} core={core_draws} native={native_draws}"
         )

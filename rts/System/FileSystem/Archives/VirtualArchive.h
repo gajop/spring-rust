@@ -1,7 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifndef _VIRTUAL_ARCHIVE_H
-#define _VIRTUAL_ARCHIVE_H
+#pragma once
 
 #include "IArchiveFactory.h"
 #include "IArchive.h"
@@ -25,6 +24,13 @@ public:
 	 * @param filePath Path with which the archive can be found and opened
 	 */
 	CVirtualArchive* AddArchive(const std::string& fileName);
+
+	/**
+	 * Identity of the current content of the named archive (by base name), or
+	 * 0 if there is none. Changes whenever the archive is re-added or gains a
+	 * file; the archive scanner uses it in place of a modification time.
+	 */
+	uint32_t GetGeneration(const std::string& baseName) const;
 
 private:
 	IArchive* DoCreateArchive(const std::string& fileName) const;
@@ -85,8 +91,9 @@ private:
 class CVirtualArchive
 {
 public:
-	CVirtualArchive(const std::string& _fileName)
+	CVirtualArchive(const std::string& _fileName, uint32_t _generation)
 		: fileName(_fileName)
+		, generation(_generation)
 	{}
 
 	CVirtualArchiveOpen* Open();
@@ -101,6 +108,7 @@ public:
 	IArchive::SFileInfo FileInfo(uint32_t fid) const;
 
 	const std::string& GetFileName() const { return fileName; }
+	uint32_t GetGeneration() const { return generation; }
 	const spring::unordered_map<std::string, uint32_t>& GetNameIndex() const { return lcNameIndex; }
 
 	void WriteToFile();
@@ -109,8 +117,8 @@ private:
 	friend class CVirtualArchiveOpen;
 
 	std::string fileName;
+	uint32_t generation;
 	std::vector<CVirtualFile> files;
 	spring::unordered_map<std::string, uint32_t> lcNameIndex;
 };
 
-#endif // _VIRTUAL_ARCHIVE_H

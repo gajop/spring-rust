@@ -19,6 +19,7 @@
 #include "DataDirLocater.h"
 #include "Archives/IArchive.h"
 #include "Archives/DirArchive.h"
+#include "Archives/VirtualArchive.h"
 #include "FileFilter.h"
 #include "DataDirsAccess.h"
 #include "FileSystem.h"
@@ -385,6 +386,13 @@ bool CArchiveScanner::ArchiveData::GetInfoValueBool(const std::string& key) cons
 static spring::recursive_mutex scannerMutex;
 static std::atomic<uint32_t> numScannedArchives{0};
 
+// Virtual (in-memory) archives exist only for the current process: they are
+// never read from or written to the on-disk archive cache.
+static bool IsVirtualArchive(const std::string& name)
+{
+	return FileSystem::GetExtensionLowerCase(name) == "sva";
+}
+
 
 /*
  * CArchiveScanner
@@ -429,11 +437,23 @@ void CArchiveScanner::Reload()
 	// {Read,Write,Scan}* all grab this too but we need the entire reloading-sequence to appear atomic
 	std::lock_guard<decltype(scannerMutex)> lck(scannerMutex);
 
+	// virtual archives are not in the on-disk cache; carry them over in memory
+	std::vector<ArchiveInfo> virtualInfos;
+	for (const ArchiveInfo& ai: archiveInfos) {
+		if (IsVirtualArchive(ai.origName))
+			virtualInfos.push_back(ai);
+	}
+
 	// dtor
 	WriteCache();
 
 	// ctor
 	ReadCache();
+
+	for (ArchiveInfo& ai: virtualInfos) {
+		if (archiveInfosIndex.emplace(StringToLower(ai.origName), archiveInfos.size()).second)
+			archiveInfos.emplace_back(std::move(ai));
+	}
 }
 
 void CArchiveScanner::ScanAllDirs()
@@ -819,8 +839,13 @@ void CArchiveScanner::ScanArchive(const std::string& fullName, bool doChecksum)
 	ai.updated = true;
 	ai.hashed = doChecksum && GetArchiveChecksum(fullName, ai);
 
-	archiveInfosIndex.emplace(lcfn, archiveInfos.size());
-	archiveInfos.emplace_back(std::move(ai));
+	// a rescan whose cache check did not drop the old record replaces it;
+	// appending would leave the index pointing at the stale entry
+	if (const auto [it, inserted] = archiveInfosIndex.emplace(lcfn, archiveInfos.size()); inserted) {
+		archiveInfos.emplace_back(std::move(ai));
+	} else {
+		archiveInfos[it->second] = std::move(ai);
+	}
 
 	numScannedArchives += 1;
 }
@@ -828,16 +853,17 @@ void CArchiveScanner::ScanArchive(const std::string& fullName, bool doChecksum)
 
 bool CArchiveScanner::CheckCachedData(const std::string& fullName, uint32_t& modified, bool doChecksum)
 {
-	// virtual archives do not exist on disk, and thus do not have a modification time
-	// they should still be scanned as normal archives so we only skip the cache-check
-	if (FileSystem::GetExtensionLowerCase(fullName) == "sva")
-		return false;
+	// virtual archives do not exist on disk; their in-memory generation stands
+	// in for the modification time, so an unchanged archive is hashed once
+	const bool isVirtual = IsVirtualArchive(fullName);
 
-	// if stat fails, assume the archive is not broken nor cached
-	// it would also fail in the case of virtual archives and cause
-	// warning-spam which is suppressed by the extension-test above
-	if ((modified = FileSystem::GetFileModificationTime(fullName)) == 0)
+	if (isVirtual) {
+		if (virtualArchiveFactory == nullptr || (modified = virtualArchiveFactory->GetGeneration(FileSystem::GetBasename(fullName))) == 0)
+			return false;
+	} else if ((modified = FileSystem::GetFileModificationTime(fullName)) == 0) {
+		// if stat fails, assume the archive is not broken nor cached
 		return false;
+	}
 
 	const std::string& fileName      = FileSystem::GetFilename(fullName);
 	const std::string& filePath      = FileSystem::GetDirectory(fullName);
@@ -888,7 +914,8 @@ bool CArchiveScanner::CheckCachedData(const std::string& fullName, uint32_t& mod
 		return true;
 	}
 
-	if (ai.updated) {
+	// a regenerated virtual archive replaces its older generation below
+	if (ai.updated && !isVirtual) {
 		LOG_L(L_ERROR, "[AS::%s] found a \"%s\" already in \"%s\", ignoring.", __func__, fullName.c_str(), (ai.path + ai.origName).c_str());
 
 		if (baseContentArchives.find(aiIter->first) == baseContentArchives.end())
@@ -1061,7 +1088,10 @@ bool CArchiveScanner::GetArchiveChecksum(const std::string& archiveName, Archive
 		);
 	});
 
-	// combine individual hashes, initialize to hash(name)
+	// combine individual hashes, initialize to hash(name); start from zero so
+	// that a repeated computation does not XOR into the previous result
+	archiveInfo.checksum = sha512::NULL_RAW_DIGEST;
+
 	for (size_t i = 0; i < fileNames.size(); i++) {
 		auto fileName = fileNames[i];
 		const auto filesInfoIt = archiveInfo.filesInfo.find(fileName);
@@ -1172,6 +1202,10 @@ bool CArchiveScanner::ReadCacheData(const std::string& filename, bool loadOldVer
 
 		const std::string curArchiveName = curArchiveTbl.GetString("name", "");
 		const std::string curArchiveNameLC = StringToLower(curArchiveName);
+
+		// caches written before virtual archives were excluded may hold them
+		if (IsVirtualArchive(curArchiveName))
+			continue;
 		const std::string hexDigestStr = curArchiveTbl.GetString("checksum", "");
 
 		ArchiveInfo& ai = GetAddArchiveInfo(curArchiveNameLC);
@@ -1369,6 +1403,9 @@ void CArchiveScanner::WriteCacheData(const std::string& filename)
 	fprintf(out, "\tarchives = {  -- count = %u\n", uint32_t(archiveInfos.size()));
 
 	for (const ArchiveInfo& arcInfo: archiveInfos) {
+		if (IsVirtualArchive(arcInfo.origName))
+			continue;
+
 		sha512::raw_digest rawDigest;
 		sha512::hex_digest hexDigest;
 
