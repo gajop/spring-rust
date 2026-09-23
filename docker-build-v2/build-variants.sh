@@ -24,8 +24,9 @@ VARIANTS_HELP="Engine builds (point your game/launcher at the install directory)
   default  build-{arch}-linux/install        (docker-build-v2/build.sh linux)
            Optimized, no Tracy. Normal play, tests, CI-like runs.
   tracy    build-{arch}-linux-tracy/install  (this script)
-           Same optimization plus on-demand Tracy. Use when profiling; without a
-           connected Tracy client it behaves like the default build.
+           Same optimization plus on-demand Tracy and frame pointers. Use when
+           profiling (perf --call-graph fp also unwinds through Wasm guest code);
+           without a connected Tracy client it behaves like the default build.
   asan     build-{arch}-linux-asan/install   (this script)
            AddressSanitizer, no Tracy, no mimalloc. Use when debugging crashes or
            memory corruption; several times slower, never use it for timing.
@@ -35,7 +36,10 @@ VARIANTS_HELP="Engine builds (point your game/launcher at the install directory)
 Variants built by this script: tracy, asan (default: both)."
 
 declare -A VARIANT_FLAGS=(
-	[tracy]="-DTRACY_ENABLE=ON -DTRACY_ON_DEMAND=ON"
+	# Frame pointers let perf unwind with --call-graph fp through Wasm JIT
+	# frames (Cranelift keeps frame pointers; DWARF unwinding has no tables
+	# for JIT code), at a small cost that only this variant pays.
+	[tracy]="-DTRACY_ENABLE=ON -DTRACY_ON_DEMAND=ON -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O3\ -g\ -DNDEBUG\ -fno-omit-frame-pointer\ -mno-omit-leaf-frame-pointer -DCMAKE_C_FLAGS_RELWITHDEBINFO=-O3\ -g\ -DNDEBUG\ -fno-omit-frame-pointer\ -mno-omit-leaf-frame-pointer"
 	[asan]="-DUSE_ASAN=ON -DUSE_MIMALLOC=OFF -DTRACY_ENABLE=OFF"
 )
 
@@ -112,7 +116,7 @@ build_variant() {
 	# --compile forwards trailing args to `cmake --build`, so configure flags
 	# only go along when configuring
 	if (( ${#PHASE[@]} == 0 )); then
-		read -r -a flags <<< "${VARIANT_FLAGS[$variant]}"
+		read -a flags <<< "${VARIANT_FLAGS[$variant]}"
 		flags+=("${EXTRA_FLAGS[@]}")
 	fi
 

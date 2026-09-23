@@ -105,7 +105,7 @@ per run by pointing at its `install` directory:
 | Build | Directory | Built by | Configuration | Use it for |
 |-------|-----------|----------|---------------|------------|
 | default | `build-{arch}-linux/install` | `build.sh linux` | optimized, no Tracy | normal play, tests |
-| `tracy` | `build-{arch}-linux-tracy/install` | `build-variants.sh` | optimized, on-demand Tracy | profiling (behaves like default when no Tracy client is connected) |
+| `tracy` | `build-{arch}-linux-tracy/install` | `build-variants.sh` | optimized, on-demand Tracy, frame pointers | profiling; `perf --call-graph fp` also unwinds through Wasm guest code (behaves like default when no Tracy client is connected) |
 | `asan`  | `build-{arch}-linux-asan/install`  | `build-variants.sh` | AddressSanitizer, no Tracy, no mimalloc | debugging crashes and memory corruption; slow, never for timing |
 
 `docker-build-v2/build-variants.sh --help` prints the same summary.
