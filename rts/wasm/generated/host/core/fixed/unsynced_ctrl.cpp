@@ -527,6 +527,33 @@ wasm_trap_t* Core_unsynced_ctrl_set_custom_palette_color(void* environment, wasm
     return nullptr;
 }
 
+wasm_trap_t* Core_unsynced_ctrl_set_default_interface_visible(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->SetDefaultInterfaceVisible == nullptr)
+        return Trap("SetDefaultInterfaceVisible generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("SetDefaultInterfaceVisible generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("SetDefaultInterfaceVisible generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    SetDefaultInterfaceVisibleQuery query{};
+    query.parts = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.parts)>>>(slots[0].i32);
+    query.visible = slots[1].i32 != 0;
+    SetDefaultInterfaceVisibleResult result{};
+    state->native->unsyncedCtrl->SetDefaultInterfaceVisible(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.hiddenParts), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_unsynced_ctrl_set_dolly_camera_look_position(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -1946,6 +1973,13 @@ bool RegisterGeneratedImports_unsynced_ctrl(wasmtime_linker_t* linker, HostState
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:unsynced-ctrl", "set-default-interface-visible",
+                MakeFuncType(params, 2, results, 1), Core_unsynced_ctrl_set_default_interface_visible, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:unsynced-ctrl", "set-dolly-camera-look-position",
@@ -2236,6 +2270,6 @@ bool RegisterGeneratedImports_unsynced_ctrl(wasmtime_linker_t* linker, HostState
     return true;
 }
 
-static_assert(58 >= 0, "generated Core Wasm callback count");
+static_assert(59 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

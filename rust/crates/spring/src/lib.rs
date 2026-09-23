@@ -57,6 +57,7 @@ pub mod callback;
 mod cob_script;
 #[cfg(target_arch = "wasm32")]
 pub mod config;
+pub mod default_interface;
 /// Nondeterministic imports usable from synced code. Namespaced on purpose:
 /// importing anything here makes a synced guest desync. See `desync.rs`.
 #[cfg(target_arch = "wasm32")]

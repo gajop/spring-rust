@@ -34,7 +34,7 @@ pub use event::{CommandEvent, EventResult, KeyEvent, ViewGeometry};
 pub use panic::{borrow_conflict, install_panic_hook};
 pub use rules::{Gadget, GadgetHandler, UnitDestroyedEvent, UnitPreDamagedEvent};
 pub use runtime::{AddonContext, AddonRuntime, Resource, Resources, with_active_callins};
-pub use ui::{Widget, WidgetHandler};
+pub use ui::{HideDefaultInterface, Widget, WidgetHandler};
 pub use unsynced::{UnsyncedAddon, UnsyncedHandler};
 
 #[cfg(all(test, target_arch = "wasm32"))]

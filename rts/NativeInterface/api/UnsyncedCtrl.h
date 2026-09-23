@@ -190,6 +190,16 @@ struct SetDrawGroundResult { const Error* error; bool success; };
 struct SetDrawSkyQuery { bool drawSky; };
 struct SetDrawSkyResult { const Error* error; bool success; };
 
+// Hide or show parts of the engine's built-in interface, for games that draw
+// their own. `parts` is a mask of CDefaultInterface::Part bits:
+//   1 console, 2 resource bar, 4 tooltip, 8 clock, 16 FPS, 32 speed,
+//   64 player info, 128 minimap, 256 command menu, 512 end-game graph,
+//   1024 unit distance icons, 2048 map border (4095 = all).
+// Idempotent and runtime-only (not written to the user's config); showing a
+// part restores the state it had when hidden. Returns the parts now hidden.
+struct SetDefaultInterfaceVisibleQuery { uint32_t parts; bool visible; };
+struct SetDefaultInterfaceVisibleResult { const Error* error; uint32_t hiddenParts; };
+
 struct SetDrawWaterQuery { bool drawWater; };
 struct SetDrawWaterResult { const Error* error; bool success; };
 
@@ -389,6 +399,8 @@ struct UnsyncedCtrlApi {
 	void (*SetDrawSky)(const SetDrawSkyQuery* query, SetDrawSkyResult* result);
 
 	const UnsyncedRandomApi* random;
+
+	void (*SetDefaultInterfaceVisible)(const SetDefaultInterfaceVisibleQuery* query, SetDefaultInterfaceVisibleResult* result);
 	void (*SetDrawWater)(const SetDrawWaterQuery* query, SetDrawWaterResult* result);
 	void (*SetDrawGroundDeferred)(const SetDrawGroundDeferredQuery* query, SetDrawGroundDeferredResult* result);
 	void (*SetDrawModelsDeferred)(const SetDrawModelsDeferredQuery* query, SetDrawModelsDeferredResult* result);

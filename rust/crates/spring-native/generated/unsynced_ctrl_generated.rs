@@ -706,6 +706,22 @@ impl<'a> UnsyncedCtrl<'a> {
         }
     }
 
+    pub fn set_default_interface_visible(&self, parts: u32, visible: bool) -> Result<u32, Error> {
+        unsafe {
+            let query = sys::SetDefaultInterfaceVisibleQuery {
+                parts,
+                visible,
+            };
+            let mut result = MaybeUninit::<sys::SetDefaultInterfaceVisibleResult>::zeroed();
+            let func = self.api.SetDefaultInterfaceVisible.expect("SetDefaultInterfaceVisible function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.hiddenParts
+            })
+        }
+    }
+
     pub fn set_draw_water(&self, draw_water: bool) -> Result<bool, Error> {
         unsafe {
             let query = sys::SetDrawWaterQuery {

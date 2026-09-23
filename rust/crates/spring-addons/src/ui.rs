@@ -596,3 +596,42 @@ impl<G> UiCallbackRegistry<G> {
         }
     }
 }
+
+/// Widget that hides parts of the engine's built-in interface
+/// (`spring::default_interface`) for as long as it is enabled.
+///
+/// ```ignore
+/// use spring::default_interface::{ALL, MINIMAP};
+/// handler.add(HideDefaultInterface::new(ALL & !MINIMAP));
+/// ```
+pub struct HideDefaultInterface {
+    parts: u32,
+}
+
+impl HideDefaultInterface {
+    pub fn new(parts: u32) -> Self {
+        Self { parts }
+    }
+}
+
+impl<G> Widget<G> for HideDefaultInterface {
+    fn name(&self) -> &'static str {
+        "HideDefaultInterface"
+    }
+
+    fn init(&self, _ctx: &AddonContext<'_, G>) {
+        #[cfg(target_arch = "wasm32")]
+        if let Err(error) = spring::default_interface::hide(self.parts) {
+            crate::log::warning(&alloc::format!(
+                "HideDefaultInterface: hiding failed: {error:?}"
+            ));
+        }
+    }
+
+    fn shutdown(&self, _ctx: &AddonContext<'_, G>) {
+        #[cfg(target_arch = "wasm32")]
+        let _ = spring::default_interface::show(self.parts);
+        #[cfg(not(target_arch = "wasm32"))]
+        let _ = self.parts;
+    }
+}

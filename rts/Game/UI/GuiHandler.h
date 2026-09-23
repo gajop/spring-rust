@@ -102,6 +102,9 @@ public:
 	void CancelActiveCommand();
 
 	void SetDrawSelectionInfo(bool dsi) { drawSelectionInfo = dsi; }
+	/// Whether the engine's command button panel is drawn and clickable
+	void SetDefaultMenuVisible(bool visible) { defaultMenuVisible = visible; }
+	bool GetDefaultMenuVisible() const { return defaultMenuVisible; }
 	bool GetDrawSelectionInfo() const { return drawSelectionInfo; }
 
 	void SetBuildFacing(unsigned int facing) { buildFacing = facing % NUM_FACINGS; }
@@ -229,6 +232,7 @@ private:
 	bool selectThrough = false;
 	bool outlineFonts = false;
 	bool drawSelectionInfo = true;
+	bool defaultMenuVisible = true;
 
 	bool gatherMode = false;
 	bool miniMapMarker = true;

@@ -2144,6 +2144,17 @@
             pub success: bool,
         }
 
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDefaultInterfaceVisibleQuery {
+            pub parts: u32,
+            pub visible: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDefaultInterfaceVisibleResult {
+            pub hidden_parts: u32,
+        }
+
         #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetDollyCameraCurveQuery {
             pub degree: i32,

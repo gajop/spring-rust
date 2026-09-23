@@ -43,6 +43,7 @@ public:
 	virtual void SetDrawDeferredPass(bool) {}
 
 	virtual bool ToggleMapBorder() { drawMapEdges = !drawMapEdges; return drawMapEdges; }
+	bool GetDrawMapEdges() const { return drawMapEdges; }
 
 	virtual const GL::LightHandler* GetLightHandler() const { return nullptr; }
 	virtual       GL::LightHandler* GetLightHandler()       { return nullptr; }

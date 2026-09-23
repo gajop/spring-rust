@@ -11,6 +11,7 @@
 #include "GameController.h"
 #include "GameJobDispatcher.h"
 #include "GameInputReceiver.h"
+#include "Game/UI/DefaultInterface.h"
 #include "Rendering/WorldDrawer.h"
 #include "System/UnorderedMap.hpp"
 #include "System/creg/creg_cond.h"
@@ -182,6 +183,9 @@ public:
 	bool showFPS = true;
 	bool showClock = true;
 	bool showSpeed = true;
+
+	/// Parts of the built-in interface a game has hidden (not saved)
+	CDefaultInterface defaultInterface;
 
 	bool skipping = false;
 	bool playing = false;

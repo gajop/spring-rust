@@ -402,6 +402,16 @@ impl NativeModule for CusE2ENative {
             in_range as u8,
             (first == second) as u8
         ));
+
+        // Hiding the built-in interface is idempotent and reversible.
+        const ALL: u32 = (1 << 12) - 1;
+        let hidden = unsynced.set_default_interface_visible(ALL, false)?;
+        let hidden_again = unsynced.set_default_interface_visible(ALL, false)?;
+        let shown = unsynced.set_default_interface_visible(ALL, true)?;
+        let final_hidden = unsynced.set_default_interface_visible(ALL, false)?;
+        self.record(&format!(
+            "UI|default-interface|hidden={hidden}|again={hidden_again}|shown={shown}|final={final_hidden}"
+        ));
         Ok(())
     }
 

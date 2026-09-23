@@ -10185,6 +10185,11 @@ pub mod unsynced_ctrl {
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
+            #[link_name = "set-default-interface-visible"]
+            pub safe fn core_set_default_interface_visible(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unsynced-ctrl")]
+        unsafe extern "C" {
             #[link_name = "set-dolly-camera-look-position"]
             pub safe fn core_set_dolly_camera_look_position(p0: i32) -> i64;
         }
@@ -10872,6 +10877,24 @@ pub mod unsynced_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (index, r, g, b);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_default_interface_visible(parts: u32, visible: bool) -> Result<u32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_default_interface_visible(parts as i32, if visible { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(packed as u32)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (parts, visible);
             Err(unreachable!())
         }
     }

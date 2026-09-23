@@ -12,6 +12,7 @@
 #include <SDL_mouse.h>
 
 #include "Game/SelectedUnitsHandler.h"
+#include "Game/Game.h"
 #include "Game/GlobalUnsynced.h"
 #include "Game/CameraHandler.h"
 #include "Game/Camera.h"
@@ -1977,6 +1978,21 @@ static const UnsyncedRandomApi UNSYNCED_RANDOM_API = {
 	.SetSeed = NativeUnsyncedSetSeed,
 };
 
+static void NativeSetDefaultInterfaceVisible(const SetDefaultInterfaceVisibleQuery* query, SetDefaultInterfaceVisibleResult* result)
+{
+	static const Error GAME_NOT_RUNNING = { .code = ERROR_NOT_AVAILABLE, .message = "No game is running" };
+
+	result->error = nullptr;
+	result->hiddenParts = 0;
+
+	if (game == nullptr) {
+		result->error = &GAME_NOT_RUNNING;
+		return;
+	}
+
+	result->hiddenParts = game->defaultInterface.SetVisible(query->parts, query->visible);
+}
+
 } // namespace
 
 const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
@@ -2021,6 +2037,7 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetDrawGround = NativeSetDrawGround,
 	.SetDrawSky = NativeSetDrawSky,
 	.random = &UNSYNCED_RANDOM_API,
+	.SetDefaultInterfaceVisible = NativeSetDefaultInterfaceVisible,
 	.SetDrawWater = NativeSetDrawWater,
 	.SetDrawGroundDeferred = NativeSetDrawGroundDeferred,
 	.SetDrawModelsDeferred = NativeSetDrawModelsDeferred,

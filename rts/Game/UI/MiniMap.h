@@ -72,6 +72,9 @@ public:
 
 	void SetSlaveMode(bool value);
 	bool GetSlaveMode() const { return slaveDrawMode; }
+	/// Hidden: neither drawn nor handling input (see CDefaultInterface)
+	void SetHidden(bool value) { hidden = value; }
+	bool IsHidden() const { return hidden; }
 
 	bool UseUnitIcons() const { return useIcons; }
 	bool UseSimpleColors() const { return simpleColors; }
@@ -156,6 +159,7 @@ protected:
 	RotationOptions rotation = ROTATION_0;
 
 	bool slaveDrawMode = false;
+	bool hidden = false;
 	bool simpleColors = false;
 
 	bool showButtons = false;

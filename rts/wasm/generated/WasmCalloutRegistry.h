@@ -562,6 +562,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"unsynced_ctrl", "SetClipboard", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetCustomCommandDrawData", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetCustomPaletteColor", 31u, false, false, LoweringStatus::automatic},
+	{"unsynced_ctrl", "SetDefaultInterfaceVisible", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetDollyCameraCurve", 31u, false, false, LoweringStatus::annotated},
 	{"unsynced_ctrl", "SetDollyCameraLookCurve", 31u, false, false, LoweringStatus::annotated},
 	{"unsynced_ctrl", "SetDollyCameraLookPosition", 31u, false, false, LoweringStatus::automatic},

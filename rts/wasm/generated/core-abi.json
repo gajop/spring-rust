@@ -28139,6 +28139,27 @@
     },
     {
       "module": "unsynced_ctrl",
+      "function": "SetDefaultInterfaceVisible",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "set-default-interface-visible",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_ctrl",
       "function": "SetDollyCameraCurve",
       "import_module": "spring:unsynced-ctrl",
       "import_name": "set-dolly-camera-curve",
@@ -31359,7 +31380,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1194,
+  "automatic_count": 1195,
   "manual_count": 198,
   "unsupported_count": 17
 }

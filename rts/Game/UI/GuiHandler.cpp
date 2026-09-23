@@ -1466,6 +1466,9 @@ void CGuiHandler::SetActiveCommandIndex(int newIndex)
 int CGuiHandler::IconAtPos(int x, int y) // GetToolTip --> IconAtPos
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (!defaultMenuVisible)
+		return -1;
+
 	const float fx = MouseX(x);
 	const float fy = MouseY(y);
 
@@ -1614,7 +1617,7 @@ void CGuiHandler::RunCustomCommands(const std::vector<std::string>& cmds, bool r
 bool CGuiHandler::AboveGui(int x, int y)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	if (iconsCount <= 0)
+	if (iconsCount <= 0 || !defaultMenuVisible)
 		return false;
 
 	if (!selectThrough) {
@@ -2646,7 +2649,7 @@ void CGuiHandler::Draw()
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GEQUAL, 0.01f);
 
-	if (iconsCount > 0)
+	if (iconsCount > 0 && defaultMenuVisible)
 		DrawButtons();
 
 	glPopAttrib();

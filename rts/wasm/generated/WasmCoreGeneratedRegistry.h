@@ -524,6 +524,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:unsynced-ctrl", "set-clipboard", "i32->i64", 31u},
     {"spring:unsynced-ctrl", "set-custom-command-draw-data", "i32,i32,i32->i64", 31u},
     {"spring:unsynced-ctrl", "set-custom-palette-color", "i32,f32,f32,f32->i64", 31u},
+    {"spring:unsynced-ctrl", "set-default-interface-visible", "i32,i32->i64", 31u},
     {"spring:unsynced-ctrl", "set-dolly-camera-curve", "i32,i32->i64", 31u},
     {"spring:unsynced-ctrl", "set-dolly-camera-look-curve", "i32,i32->i64", 31u},
     {"spring:unsynced-ctrl", "set-dolly-camera-look-position", "i32->i64", 31u},

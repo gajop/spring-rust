@@ -260,8 +260,8 @@
     },
     {
       "name": "unsynced_ctrl_generated.rs",
-      "sha256": "1fd261886849fd3ac42405f0f0258668ac17bf063be371ce6bbea2d45778de44",
-      "bytes": 60976
+      "sha256": "04780d2d5661257be1c2bbe3311004d46b1751ad7b0a5c218d8188e7183f4142",
+      "bytes": 61651
     },
     {
       "name": "unsynced_random_generated.rs",

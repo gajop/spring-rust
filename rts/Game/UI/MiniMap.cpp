@@ -682,7 +682,7 @@ void CMiniMap::MouseWheel(bool up, float delta)
 bool CMiniMap::MousePress(int x, int y, int button)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	if (!mouseEvents)
+	if (!mouseEvents || hidden)
 		return false;
 
 	if (minimized) {
@@ -963,6 +963,9 @@ bool CMiniMap::IsInside(int x, int y)
 bool CMiniMap::IsAbove(int x, int y)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (hidden)
+		return false;
+
 	if (minimized)
 		return ((x < buttonSize) && (y < buttonSize));
 
@@ -1226,7 +1229,7 @@ void CMiniMap::UpdateTextureCache()
 void CMiniMap::Draw()
 {
 	ZoneScopedN("MiniMap::Draw");
-	if (slaveDrawMode)
+	if (slaveDrawMode || hidden)
 		return;
 
 	// Draw Border

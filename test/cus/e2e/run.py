@@ -351,6 +351,8 @@ def assert_markers(workdir: Path) -> None:
     sdk = [line for line in core_log.splitlines() if "CUS_E2E|core|sdk|" in line]
     if not sdk or "|fight=16" not in sdk[0] or "|frame=0|" in sdk[0]:
         raise AssertionError(f"SDK helper line missing or wrong: {sdk}")
+    if "UI|default-interface|hidden=4095|again=4095|shown=0|final=4095" not in native:
+        raise AssertionError(f"default interface hide/show check failed:\n{native}")
     if "RNG|native-unsynced|in_range=1|reseed_repeats=1" not in native:
         raise AssertionError(f"unsynced random check failed:\n{native}")
 
