@@ -20,6 +20,7 @@ CModInfo modInfo;
 
 void CModInfo::ResetState()
 {
+	archiveChecksum.reset();
 	filename.clear();
 	humanName.clear();
 	humanNameVersioned.clear();
@@ -160,6 +161,8 @@ void CModInfo::ResetState()
 
 void CModInfo::Init(const std::string& modFileName)
 {
+	archiveChecksum.reset();
+
 	{
 		filename = modFileName;
 		humanNameVersioned = archiveScanner->GameHumanNameFromArchive(modFileName);
@@ -421,4 +424,20 @@ void CModInfo::Init(const std::string& modFileName)
 	smoothMeshResDivider                     = std::max  (smoothMeshResDivider                    ,    1          );
 	smoothMeshSmoothRadius                   = std::max  (smoothMeshSmoothRadius                  ,    1          );
 	unitQuadPositionUpdateRate               = std::clamp(unitQuadPositionUpdateRate              ,    1    ,   15);
+}
+
+sha512::raw_digest CModInfo::GetArchiveChecksum() const
+{
+	if (archiveChecksum.has_value())
+		return *archiveChecksum;
+
+	if (archiveScanner == nullptr)
+		return {};
+
+	const sha512::raw_digest checksum = archiveScanner->GetArchiveCompleteChecksumBytes(filename);
+
+	if (checksum != sha512::raw_digest{})
+		archiveChecksum = checksum;
+
+	return checksum;
 }

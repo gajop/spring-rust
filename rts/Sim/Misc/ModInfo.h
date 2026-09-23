@@ -1,10 +1,11 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifndef MOD_INFO_H
-#define MOD_INFO_H
+#pragma once
 
+#include <optional>
 #include <string>
 #include "Sim/Misc/Resource.h"
+#include "System/Sync/SHA512.hpp"
 #include "Sim/Path/PFSTypes.h"
 
 class CModInfo
@@ -14,6 +15,13 @@ public:
 
 	void ResetState();
 	void Init(const std::string& modFileName);
+
+	/**
+	 * Complete archive checksum of the loaded game (including dependencies),
+	 * computed on first use and kept until the next Init/ResetState. An
+	 * all-zero digest (scanner unavailable, archive not found) is not kept.
+	 */
+	sha512::raw_digest GetArchiveChecksum() const;
 
 	/**
 	 * The archive file name.
@@ -256,8 +264,9 @@ public:
 
 	// If true, players can select their start position by clicking the map
 	bool useStartPositionSelecter;
+
+private:
+	mutable std::optional<sha512::raw_digest> archiveChecksum;
 };
 
 extern CModInfo modInfo;
-
-#endif // MOD_INFO_H

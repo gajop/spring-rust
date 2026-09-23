@@ -630,10 +630,15 @@
 
         #[inline]
         pub fn get_feature_last_attacked_piece(feature_id: i32) -> Result<FeatureLastHitPiece> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::features::get_feature_last_attacked_piece(feature_id, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = FeatureLastHitPiece { name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, piece_num: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, frame: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, was_hit: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? };
@@ -706,10 +711,15 @@
 
         #[inline]
         pub fn get_feature_resurrect(feature_id: i32) -> Result<GetFeatureResurrectValue> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::features::get_feature_resurrect(feature_id, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = GetFeatureResurrectValue {

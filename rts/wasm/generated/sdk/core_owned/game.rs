@@ -531,10 +531,15 @@
 
         #[inline]
         pub fn get_game_map_info(unused: u8) -> Result<GameMapInfo> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::game::get_game_map_info(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = GameMapInfo { map_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, map_description: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, map_checksum: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, map_hardness: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, extractor_radius: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, tidal: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, water_damage: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, gravity: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, map_x: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, map_y: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, map_size_x: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, map_size_z: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, map_damage: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? };
@@ -553,10 +558,15 @@
 
         #[inline]
         pub fn get_game_mod_info(unused: u8) -> Result<GameModInfo> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::game::get_game_mod_info(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = GameModInfo { game_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, game_short_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, game_version: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, game_mutator: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, game_desc: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, mod_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, mod_short_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, mod_version: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, mod_mutator: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, mod_desc: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, mod_checksum: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? };
@@ -593,10 +603,15 @@
 
         #[inline]
         pub fn get_game_setup_info(unused: u8) -> Result<GameSetupInfo> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::game::get_game_setup_info(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = GameSetupInfo { start_pos_type: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, ghosted_buildings: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, demo_play_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? };
@@ -649,10 +664,15 @@
 
         #[inline]
         pub fn get_map_options(unused: u8) -> Result<Vec<String>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::game::get_map_options(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
@@ -703,10 +723,15 @@
 
         #[inline]
         pub fn get_mod_options(unused: u8) -> Result<Vec<String>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::game::get_mod_options(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
@@ -741,10 +766,15 @@
 
         #[inline]
         pub fn get_side_data_by_index(side_index: u32) -> Result<SideData> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::game::get_side_data_by_index(side_index as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = SideData { side_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, case_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, start_unit: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, side_index: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? };

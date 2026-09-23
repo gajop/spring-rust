@@ -321,10 +321,15 @@
 
         #[inline]
         pub fn get_group_units_counts(group_id: i32) -> Result<SelectionCounts> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::selection::get_group_units_counts(group_id, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = SelectionCounts { unit_def_i_ds: { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items }, counts: { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items } };
@@ -343,10 +348,15 @@
 
         #[inline]
         pub fn get_group_units_sorted(group_id: i32) -> Result<Vec<TeamUnitsByDef>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::selection::get_group_units_sorted(group_id, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(TeamUnitsByDef { unit_def_id: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, units: { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items } }); } __items };
@@ -408,10 +418,15 @@
 
         #[inline]
         pub fn get_selected_units_counts(unused: u8) -> Result<SelectionCounts> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::selection::get_selected_units_counts(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = SelectionCounts { unit_def_i_ds: { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items }, counts: { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items } };

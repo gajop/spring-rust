@@ -169,7 +169,7 @@ static void NativeGetGameModInfo(const GetGameModInfoQuery* /*query*/, GetGameMo
 	result->info.modChecksum = nullptr;
 
 	if (archiveScanner != nullptr) {
-		sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(modInfo.filename), modChecksumDigest);
+		sha512::dump_digest(modInfo.GetArchiveChecksum(), modChecksumDigest);
 		result->info.modChecksum = modChecksumDigest.data();
 	}
 }

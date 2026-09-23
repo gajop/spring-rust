@@ -613,10 +613,15 @@
         #[inline]
         pub fn calculate_hash(data: &[u8], hash_type: i32) -> Result<String> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::calculate_hash(hash_type, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
@@ -717,10 +722,15 @@
 
         #[inline]
         pub fn get_all_archives(unused: u8) -> Result<Vec<String>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::vfs::get_all_archives(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
@@ -757,10 +767,15 @@
         pub fn get_archive_containing_file(path: &str, mode: &str) -> Result<String> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
             let __blob1 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::get_archive_containing_file(&__blob0, &__blob1, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
@@ -808,10 +823,15 @@
         #[inline]
         pub fn get_archive_path(archive_name: &str) -> Result<String> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + archive_name.len()); __b.extend_from_slice(&(archive_name.len() as u32).to_le_bytes()); __b.extend_from_slice(archive_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::get_archive_path(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
@@ -842,10 +862,15 @@
 
         #[inline]
         pub fn get_archives(unused: u8) -> Result<Vec<String>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::vfs::get_archives(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
@@ -882,10 +907,15 @@
         pub fn get_file_absolute_path(path: &str, mode: &str) -> Result<String> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
             let __blob1 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::get_file_absolute_path(&__blob0, &__blob1, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
@@ -926,10 +956,15 @@
 
         #[inline]
         pub fn get_games(unused: u8) -> Result<Vec<String>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::vfs::get_games(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
@@ -948,10 +983,15 @@
 
         #[inline]
         pub fn get_loaded_archives(unused: u8) -> Result<Vec<String>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::vfs::get_loaded_archives(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
@@ -990,10 +1030,15 @@
 
         #[inline]
         pub fn get_maps(unused: u8) -> Result<Vec<String>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::vfs::get_maps(unused as i32, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
@@ -1013,10 +1058,15 @@
         #[inline]
         pub fn get_name_from_rapid_tag(rapid_tag: &str) -> Result<String> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + rapid_tag.len()); __b.extend_from_slice(&(rapid_tag.len() as u32).to_le_bytes()); __b.extend_from_slice(rapid_tag.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::get_name_from_rapid_tag(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
@@ -1069,10 +1119,15 @@
         pub fn load_file(path: &str, mode: &str) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
             let __blob1 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::load_file(&__blob0, &__blob1, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1092,10 +1147,15 @@
         #[inline]
         pub fn pack_f32(values: &[f32]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_bits().to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::pack_f32(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1115,10 +1175,15 @@
         #[inline]
         pub fn pack_s16(values: &[i16]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::pack_s16(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1138,10 +1203,15 @@
         #[inline]
         pub fn pack_s32(values: &[i32]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::pack_s32(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1161,10 +1231,15 @@
         #[inline]
         pub fn pack_s8(values: &[i8]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::pack_s8(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1184,10 +1259,15 @@
         #[inline]
         pub fn pack_u16(values: &[u16]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::pack_u16(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1207,10 +1287,15 @@
         #[inline]
         pub fn pack_u32(values: &[u32]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::pack_u32(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1230,10 +1315,15 @@
         #[inline]
         pub fn pack_u8(values: &[u8]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(values.len() as u32).to_le_bytes()); for __item in values.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::pack_u8(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1253,10 +1343,15 @@
         #[inline]
         pub fn read_file(path: &str) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::read_file(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1276,10 +1371,15 @@
         #[inline]
         pub fn read_file_as_string(path: &str) -> Result<String> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::read_file_as_string(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
@@ -1327,10 +1427,15 @@
         #[inline]
         pub fn unpack_f32(data: &[u8], byte_offset: u32, count: u32) -> Result<Vec<f32>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::unpack_f32(byte_offset as i32, count as i32, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<f32>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1350,10 +1455,15 @@
         #[inline]
         pub fn unpack_s16(data: &[u8], byte_offset: u32, count: u32) -> Result<Vec<i16>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::unpack_s16(byte_offset as i32, count as i32, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<i16>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1373,10 +1483,15 @@
         #[inline]
         pub fn unpack_s32(data: &[u8], byte_offset: u32, count: u32) -> Result<Vec<i32>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::unpack_s32(byte_offset as i32, count as i32, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<i32>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1396,10 +1511,15 @@
         #[inline]
         pub fn unpack_s8(data: &[u8], byte_offset: u32, count: u32) -> Result<Vec<i8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::unpack_s8(byte_offset as i32, count as i32, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<i8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1419,10 +1539,15 @@
         #[inline]
         pub fn unpack_u16(data: &[u8], byte_offset: u32, count: u32) -> Result<Vec<u16>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::unpack_u16(byte_offset as i32, count as i32, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u16>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1442,10 +1567,15 @@
         #[inline]
         pub fn unpack_u32(data: &[u8], byte_offset: u32, count: u32) -> Result<Vec<u32>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::unpack_u32(byte_offset as i32, count as i32, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u32>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1465,10 +1595,15 @@
         #[inline]
         pub fn unpack_u8(data: &[u8], byte_offset: u32, count: u32) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::unpack_u8(byte_offset as i32, count as i32, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1504,10 +1639,15 @@
         #[inline]
         pub fn zlib_compress(data: &[u8]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::zlib_compress(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -1527,10 +1667,15 @@
         #[inline]
         pub fn zlib_decompress(data: &[u8]) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(data.len() as u32).to_le_bytes()); for __item in data.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::vfs::zlib_decompress(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;

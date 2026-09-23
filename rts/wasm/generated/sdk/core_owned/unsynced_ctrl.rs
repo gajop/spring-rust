@@ -73,10 +73,15 @@
         #[inline]
         pub fn get_water_texture(tex_type: &str) -> Result<String> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + tex_type.len()); __b.extend_from_slice(&(tex_type.len() as u32).to_le_bytes()); __b.extend_from_slice(tex_type.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::unsynced_ctrl::get_water_texture(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));

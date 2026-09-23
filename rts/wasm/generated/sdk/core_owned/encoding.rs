@@ -67,10 +67,15 @@
         #[inline]
         pub fn decode_base64(text: &str) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + text.len()); __b.extend_from_slice(&(text.len() as u32).to_le_bytes()); __b.extend_from_slice(text.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::encoding::decode_base64(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -90,10 +95,15 @@
         #[inline]
         pub fn decode_base64_url(text: &str) -> Result<Vec<u8>> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + text.len()); __b.extend_from_slice(&(text.len() as u32).to_le_bytes()); __b.extend_from_slice(text.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::encoding::decode_base64_url(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 4);
                         let mut __result = Vec::<u8>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -113,10 +123,15 @@
         #[inline]
         pub fn encode_base64(text: &[u8], strip_padding: bool) -> Result<String> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(text.len() as u32).to_le_bytes()); for __item in text.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::encoding::encode_base64(strip_padding as i32, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
@@ -132,10 +147,15 @@
         #[inline]
         pub fn encode_base64_url(text: &[u8]) -> Result<String> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(text.len() as u32).to_le_bytes()); for __item in text.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item as u32).to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::encoding::encode_base64_url(&__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));

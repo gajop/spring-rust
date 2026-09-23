@@ -2199,10 +2199,15 @@ fn di_render_variable_output_forward(
     output.push_str(&format!(
         r#"        #[inline]
         {arity_lint}pub fn {name}({params}) -> Result<{return_type}> {{
-{blob_setup}            let mut __output = Vec::<u8>::new();
+{blob_setup}            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {{
                 match {di_path}({all_args}, &mut __output) {{
                     Ok(required) => {{
+                        __SIZE_HINT.store(required * {element_bytes}, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * {element_bytes});
                         let mut __result = Vec::<{element_type}>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -2244,10 +2249,15 @@ fn di_render_string_output_forward(
     output.push_str(&format!(
         r#"        #[inline]
         {arity_lint}pub fn {name}({params}) -> Result<String> {{
-{blob_setup}            let mut __output = Vec::<u8>::new();
+{blob_setup}            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {{
                 match {di_path}({all_args}, &mut __output) {{
                     Ok(required) => {{
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         return String::from_utf8(__output)
                             .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
@@ -2339,10 +2349,15 @@ fn render_dynamic_output_forward(
     output.push_str(&format!(
         r#"        #[inline]
         {arity_lint}pub fn {name}({params}) -> Result<{return_type}> {{
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {{
                 match {call} {{
                     Ok(required) => {{
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
 {decode}                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {{

@@ -2457,10 +2457,15 @@
 
         #[inline]
         pub fn element_get_active_pseudo_classes(element_handle: u64) -> Result<Vec<String>> {
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_output::rml_ui::element_get_active_pseudo_classes(element_handle as i64, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
                         let mut __cursor = 0usize;
                         let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
@@ -2548,10 +2553,15 @@
         #[inline]
         pub fn element_get_elements_by_class_name(element_handle: u64, value: &str) -> Result<Vec<u64>> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::rml_ui::element_get_elements_by_class_name(element_handle as i64, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 8, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 8);
                         let mut __result = Vec::<u64>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -2581,10 +2591,15 @@
         #[inline]
         pub fn element_get_elements_by_tag_name(element_handle: u64, value: &str) -> Result<Vec<u64>> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::rml_ui::element_get_elements_by_tag_name(element_handle as i64, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 8, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 8);
                         let mut __result = Vec::<u64>::with_capacity(required);
                         let mut __cursor = 0usize;
@@ -2846,10 +2861,15 @@
         #[inline]
         pub fn element_query_selector_all(element_handle: u64, value: &str) -> Result<Vec<u64>> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = Vec::<u8>::new();
+            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
             loop {
                 match crate::generated::dynamic_input::rml_ui::element_query_selector_all(element_handle as i64, &__blob0, &mut __output) {
                     Ok(required) => {
+                        __SIZE_HINT.store(required * 8, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required * 8);
                         let mut __result = Vec::<u64>::with_capacity(required);
                         let mut __cursor = 0usize;
