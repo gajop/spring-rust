@@ -341,6 +341,21 @@ struct Float4Result {
 // Common Error Codes
 // ============================================================================
 
+// winerror.h defines several of these names as macros; hide them for the enum
+// declaration so TUs that include windows.h first still compile.
+#ifdef _WIN32
+#pragma push_macro("ERROR_INVALID_ARGUMENT")
+#pragma push_macro("ERROR_NOT_FOUND")
+#pragma push_macro("ERROR_INVALID_STATE")
+#pragma push_macro("ERROR_ALREADY_EXISTS")
+#pragma push_macro("ERROR_BUFFER_OVERFLOW")
+#undef ERROR_INVALID_ARGUMENT
+#undef ERROR_NOT_FOUND
+#undef ERROR_INVALID_STATE
+#undef ERROR_ALREADY_EXISTS
+#undef ERROR_BUFFER_OVERFLOW
+#endif
+
 enum CommonErrorCode {
 	ERROR_NONE = 0,
 	ERROR_INVALID_ARGUMENT = 1,
@@ -355,6 +370,14 @@ enum CommonErrorCode {
 	ERROR_INVALID_ID = 10,
 	ERROR_INTERNAL = 999
 };
+
+#ifdef _WIN32
+#pragma pop_macro("ERROR_BUFFER_OVERFLOW")
+#pragma pop_macro("ERROR_ALREADY_EXISTS")
+#pragma pop_macro("ERROR_INVALID_STATE")
+#pragma pop_macro("ERROR_NOT_FOUND")
+#pragma pop_macro("ERROR_INVALID_ARGUMENT")
+#endif
 
 #ifdef __cplusplus
 }
