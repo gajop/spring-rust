@@ -10,8 +10,9 @@ This fixture boots the real engine against the shared CUS implementation three t
 3. the Core-Wasm module traps in `HandleLuaMsg` while its CUS script is attached; the engine
    must deregister it and keep simulating until the native module quits.
 
-Run it from the repository root after configuring and building `build-cus`'s `engine-legacy`
-target (the debug headless stub asserts while uploading base-content textures):
+Run it from the repository root after building the engine with `docker-build-v2/build.sh linux`
+(the debug headless stub asserts while uploading base-content textures). Set
+`SPRING_CUS_E2E_ENGINE` to test another build, e.g. `build-amd64-linux-asan/install/spring`:
 
 ```bash
 python3 test/cus/e2e/run.py

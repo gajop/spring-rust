@@ -51,6 +51,13 @@ docker-build-v2/build.sh --compile linux -t tests --verbose
 # Split the phases
 docker-build-v2/build.sh --configure linux      # configure only
 docker-build-v2/build.sh --compile linux        # compile only (reuses existing config)
+
+# Build into another directory
+docker-build-v2/build.sh --build-dir build-amd64-linux-debug linux -DCMAKE_BUILD_TYPE=DEBUG
+
+# Profiling (Tracy) and AddressSanitizer builds side by side, in
+# build-amd64-linux-tracy/ and build-amd64-linux-asan/ (see docker-build-v2/README.md)
+docker-build-v2/build-variants.sh --parallel
 ```
 
 **Without Docker:**

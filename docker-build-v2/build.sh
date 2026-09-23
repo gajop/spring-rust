@@ -11,10 +11,11 @@ if [[ $(id -u) -eq 0 && -z "${SKIP_ROOT_CHECK:-}" ]]; then
   exit 2
 fi
 
-USAGE="Usage: $0 [-h|--help] [--configure|--compile] [-j|--jobs {number_of_jobs}] [--arch {arm64|amd64}] {windows|linux} [cmake_flag...]"
+USAGE="Usage: $0 [-h|--help] [--configure|--compile] [-j|--jobs {number_of_jobs}] [--arch {arm64|amd64}] [--build-dir {dir}] {windows|linux} [cmake_flag...]"
 export CONFIGURE=true
 export COMPILE=true
 export CMAKE_BUILD_PARALLEL_LEVEL=
+BUILD_DIR=
 
 case $(uname -m) in
   x86_64) ARCH=amd64 ;;
@@ -43,6 +44,8 @@ while (( $# > 0 )); do
       echo "  --compile    only compile, don't configure"
       echo "  -j, --jobs   number of concurrent processes to use when building"
       echo "  --arch       arm64 or amd64, defaults to host"
+      echo "  --build-dir  output directory relative to the repository root,"
+      echo "               defaults to build-{arch}-{os}"
       echo ""
       echo "Some behaviors can be changed by setting environment variables. Consult the script source for those more advanced use cases."
       exit 0
@@ -50,6 +53,19 @@ while (( $# > 0 )); do
     --arch)
       shift
       ARCH="$1"
+      shift
+      ;;
+    --build-dir)
+      shift
+      # A plain directory name/relative path inside the repository: it is
+      # mounted into the container, so it must not escape the checkout.
+      if ! [[ "${1-}" =~ ^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$ && "${1-}" != *..* ]]; then
+        echo "--build-dir requires a relative directory inside the repository"
+        echo ""
+        echo "$USAGE"
+        exit 1
+      fi
+      BUILD_DIR="$1"
       shift
       ;;
     -j|--jobs)
@@ -88,6 +104,8 @@ if ! [[ "$PLATFORM" =~ ^(amd64-windows|amd64-linux|arm64-linux)$ ]]; then
   echo "$USAGE"
   exit 1
 fi
+
+BUILD_DIR="${BUILD_DIR:-build-$PLATFORM}"
 
 cd "$(dirname "$(readlink -f "$0")")/.."
 
@@ -128,7 +146,7 @@ if [[ -z "${SKIP_RUST_CHECK:-}" ]]; then
   fi
 fi
 
-mkdir -p build-$PLATFORM .cache/ccache-$PLATFORM
+mkdir -p "$BUILD_DIR" .cache/ccache-$PLATFORM
 
 # Build container image selection, allow overriding.
 if [[ -n "${CONTAINER_IMAGE:-}" ]]; then
@@ -204,7 +222,7 @@ fi
 $RUNTIME run --platform=linux/$ARCH -i $TTY_FLAG --rm \
     -v "$CWD${P}":/build/src:z,ro \
     -v "$CWD${P}.cache${P}ccache-$PLATFORM":/build/cache:z,rw \
-    -v "$CWD${P}build-$PLATFORM":/build/out:z,rw \
+    -v "$CWD${P}$BUILD_DIR":/build/out:z,rw \
     $UID_FLAGS \
     $WORKTREE_MOUNTS \
     -e CONFIGURE \

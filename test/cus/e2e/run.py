@@ -12,7 +12,7 @@ import tempfile
 
 
 ROOT = Path(__file__).resolve().parents[3]
-ENGINE = Path(os.environ.get("SPRING_CUS_E2E_ENGINE", ROOT / "build-cus" / "spring"))
+ENGINE = Path(os.environ.get("SPRING_CUS_E2E_ENGINE", ROOT / "build-amd64-linux" / "install" / "spring"))
 BASE = ROOT / "cont" / "base"
 SOURCE_FIXTURE = ROOT / "test" / "native_api_parity" / "fixtures" / "game.sdd"
 NATIVE_MANIFEST = ROOT / "test" / "cus" / "e2e" / "native" / "Cargo.toml"
@@ -34,7 +34,7 @@ def run(command: list[str], *, cwd: Path = ROOT, env: dict[str, str] | None = No
 
 def build_artifacts() -> None:
     if not ENGINE.is_file():
-        raise RuntimeError(f"missing engine: {ENGINE}; build build-cus engine-legacy first")
+        raise RuntimeError(f"missing engine: {ENGINE}; build it with docker-build-v2/build.sh linux first")
     run(["cargo", "build", "--manifest-path", str(NATIVE_MANIFEST), "--release"])
     run(
         [

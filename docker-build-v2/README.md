@@ -56,13 +56,15 @@ After installing requirements, you can execute the build locally using the `buil
 
 ```console
 $ docker-build-v2/build.sh --help
-Usage: docker-build-v2/build.sh [-h|--help] [--configure|--compile] [-j|--jobs {number_of_jobs}] [--arch {arm64|amd64}] {windows|linux} [cmake_flag...]
+Usage: docker-build-v2/build.sh [-h|--help] [--configure|--compile] [-j|--jobs {number_of_jobs}] [--arch {arm64|amd64}] [--build-dir {dir}] {windows|linux} [cmake_flag...]
 Options:
   -h, --help   print this help message
   --configure  only configure, don't compile
   --compile    only compile, don't configure
   -j, --jobs   number of concurrent processes to use when building
   --arch       arm64 or amd64, defaults to host
+  --build-dir  output directory relative to the repository root,
+               defaults to build-{arch}-{os}
 
 Some behaviors can be changed by setting environment variables. Consult the script source for those more advanced use cases.
 ```
@@ -93,6 +95,28 @@ will:
 > Don't forget that symlinks exist and can be used to link compilation output `build-amd64-windows/install` to the game installation folder. It can be helpful if your Recoil game/lobby supports starting arbitrary engine versions. For example, [skylobby](https://github.com/skynet-gh/skylobby) for generic lobby software, and for BAR, there is the [Debug Launcher](https://github.com/beyond-all-reason/bar_debug_launcher).
 > - Windows: [mklink](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mklink) or third-party [Link Shell Extension (LSE)](https://schinagl.priv.at/nt/hardlinkshellext/linkshellextension.html).
 > - Linux: [`ln -s`](https://linuxize.com/post/how-to-create-symbolic-links-in-linux-using-the-ln-command/)
+
+### Build variants: profiling and AddressSanitizer
+
+`build-variants.sh` builds several Linux configurations, each in its own
+directory, so a game or tool can pick one per run:
+
+| Variant | Directory | Configuration | Use it for |
+|---------|-----------|---------------|------------|
+| `tracy` | `build-{arch}-linux-tracy/install` | optimized, on-demand Tracy | playing and profiling |
+| `asan`  | `build-{arch}-linux-asan/install`  | AddressSanitizer, no Tracy, no mimalloc | debugging memory errors (not for timing) |
+
+```shell
+docker-build-v2/build-variants.sh                 # both, one after the other
+docker-build-v2/build-variants.sh --parallel      # both at once, jobs split between them
+docker-build-v2/build-variants.sh asan            # only one
+docker-build-v2/build-variants.sh --compile tracy # incremental, keep configuration
+docker-build-v2/build-variants.sh -- -DBUILD_spring-headless=OFF  # extra cmake flags
+```
+
+With `--parallel`, each variant's output goes to `.cache/build-variants/{variant}.log`.
+The ASan build disables mimalloc because it replaces `operator new`/`delete`,
+which would hide C++ heap errors from ASan.
 
 ### Custom build config
 
