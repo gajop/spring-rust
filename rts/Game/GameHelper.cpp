@@ -395,6 +395,12 @@ static inline void QueryUnits(TFilter filter, TQuery& query)
 
 				u->tempNum = tempNum;
 
+				// cheap exact rejection before the (LOS) filter, if the query has one
+				if constexpr (requires { query.Reject(u); }) {
+					if (query.Reject(u))
+						continue;
+				}
+
 				if (!filter.Unit(u))
 					continue;
 
@@ -542,6 +548,16 @@ namespace {
 				}
 			}
 
+			/**
+			 * A unit already farther than the current best can never be added
+			 * (closeSqDist only shrinks), so QueryUnits skips the filter for
+			 * it. The result, including tie order, is unchanged. Queries that
+			 * measure from another position must override this.
+			 */
+			bool Reject(const CUnit* u) const {
+				return (pos - u->midPos).SqLength2D() > closeSqDist;
+			}
+
 			CUnit* GetClosestUnit() const { return closeUnit; }
 		};
 
@@ -555,6 +571,9 @@ namespace {
 		{
 			ClosestUnit_ErrorPos_NOT_SYNCED(const float3& pos, float searchRadius) :
 				ClosestUnit(pos, searchRadius) {}
+
+			// measures from the error position, not midPos
+			bool Reject(const CUnit*) const { return false; }
 
 			void AddUnit(CUnit* u) {
 				float3 unitPos;
