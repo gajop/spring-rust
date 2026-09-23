@@ -273,14 +273,9 @@ static void NativeSetUnitLuaDraw(const SetUnitLuaDrawQuery* query, SetUnitLuaDra
 		return;
 	}
 
+	// The GL4 drawer leaves luaDraw units out of its batches and draws them
+	// through the legacy per-unit path, where the DrawUnit callin runs.
 	unit->luaDraw = query->luaDraw;
-	if (query->luaDraw) {
-		// DrawUnit callbacks use the legacy matrix API (glScale, glTranslate,
-		// etc.).  The GL4 drawer batches units and therefore cannot observe
-		// those per-unit matrix changes.  Match the Lua SetUnitLuaDraw path by
-		// selecting the legacy drawer before the next frame.
-		CUnitDrawer::ForceLegacyPath();
-	}
 	result->success = true;
 }
 

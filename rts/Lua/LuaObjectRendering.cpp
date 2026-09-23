@@ -674,14 +674,9 @@ static int SetObjectLuaDraw(lua_State* L, ObjectType* obj)
 int LuaObjectRenderingImpl::SetUnitLuaDraw(lua_State* L)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	CUnit* unit = unitHandler.GetUnit(luaL_checkint(L, 1));
-	if (unit != nullptr && lua_isboolean(L, 2) && lua_toboolean(L, 2)) {
-		// DrawUnit uses the legacy matrix API (glScale, glTranslate, etc.).
-		// The GL4 drawer batches units and cannot observe those per-unit matrix
-		// changes. Select the legacy drawer so DrawUnit callbacks actually run.
-		CUnitDrawer::ForceLegacyPath();
-	}
-	return (SetObjectLuaDraw<CSolidObject>(L, unit));
+	// The GL4 drawer leaves luaDraw units out of its batches and draws them
+	// through the legacy per-unit path, where the DrawUnit callin runs.
+	return (SetObjectLuaDraw<CSolidObject>(L, unitHandler.GetUnit(luaL_checkint(L, 1))));
 }
 
 /*** Enable or disable custom Lua drawing for a feature.

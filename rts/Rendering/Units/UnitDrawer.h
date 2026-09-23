@@ -240,6 +240,18 @@ protected:
 
 	void DrawUnitModelBeingBuiltShadow(const CUnit* unit, bool noLuaCall) const;
 	void DrawUnitModelBeingBuiltOpaque(const CUnit* unit, bool noLuaCall) const;
+
+	void DrawLuaDrawObjectsLegacy(LuaDrawPass pass, bool deferredPass) const override;
+private:
+	// Units with Lua draw callbacks (luaDraw) cannot go through the batch: the
+	// DrawUnit callin changes per-unit legacy matrices. They are collected per
+	// pass and drawn by the legacy drawer at the end of the pass.
+	struct LuaDrawUnit {
+		const CUnit* unit;
+		int modelType;
+		unsigned int binKey;
+	};
+	mutable std::array<std::vector<LuaDrawUnit>, LUADRAW_PASS_CNT> luaDrawUnits;
 };
 
 #define unitDrawer (CUnitDrawer::modelDrawer)

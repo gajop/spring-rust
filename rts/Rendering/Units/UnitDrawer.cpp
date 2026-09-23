@@ -1636,6 +1636,11 @@ void CUnitDrawerGL4::DrawObjectsShadow(int modelType) const
 			if (!ShouldDrawUnitShadow(o))
 				continue;
 
+			if (o->luaDraw) {
+				luaDrawUnits[LUADRAW_PASS_SHADOW].push_back({o, modelType, mdlRenderer.GetObjectBinKey(i)});
+				continue;
+			}
+
 			if (o->beingBuilt && o->unitDef->showNanoFrame) {
 				beingBuilt.emplace_back(o);
 				continue;
@@ -1685,6 +1690,11 @@ void CUnitDrawerGL4::DrawOpaqueObjects(int modelType, bool drawReflection, bool 
 			if (!ShouldDrawOpaqueUnit(o, thisPassMask))
 				continue;
 
+			if (o->luaDraw) {
+				luaDrawUnits[LUADRAW_PASS_OPAQUE].push_back({o, modelType, mdlRenderer.GetObjectBinKey(i)});
+				continue;
+			}
+
 			if (o->beingBuilt && o->unitDef->showNanoFrame) {
 				beingBuilt.emplace_back(o);
 				continue;
@@ -1731,6 +1741,11 @@ void CUnitDrawerGL4::DrawAlphaObjects(int modelType, bool drawReflection, bool d
 			if (!ShouldDrawAlphaUnit(o, thisPassMask))
 				continue;
 
+			if (o->luaDraw) {
+				luaDrawUnits[LUADRAW_PASS_ALPHA].push_back({o, modelType, mdlRenderer.GetObjectBinKey(i)});
+				continue;
+			}
+
 			smv.AddToSubmission(o);
 		}
 
@@ -1742,6 +1757,88 @@ void CUnitDrawerGL4::DrawAlphaObjects(int modelType, bool drawReflection, bool d
 	// living and dead ghosted buildings
 	if (!gu->spectatingFullView)
 		DrawGhostedBuildings(modelType);
+}
+
+void CUnitDrawerGL4::DrawLuaDrawObjectsLegacy(LuaDrawPass pass, bool deferredPass) const
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	auto& units = luaDrawUnits[pass];
+	if (units.empty())
+		return;
+
+	// Runs inside the pass's ScopedModelDrawerImpl(legacy): unitDrawer and
+	// modelDrawerState are the GLSL ones, so DrawUnitTrans below takes the
+	// legacy per-unit path that invokes the DrawUnit callin.
+	Shader::IProgramObject* shadowProgram = nullptr;
+	switch (pass) {
+		case LUADRAW_PASS_OPAQUE: {
+			SetupOpaqueDrawing(deferredPass);
+		} break;
+		case LUADRAW_PASS_ALPHA: {
+			SetupAlphaDrawing(deferredPass);
+		} break;
+		case LUADRAW_PASS_SHADOW: {
+			glColor3f(1.0f, 1.0f, 1.0f);
+			glPolygonOffset(1.0f, 1.0f);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glAlphaFunc(GL_GREATER, 0.5f);
+			glEnable(GL_ALPHA_TEST);
+
+			shadowProgram = shadowHandler.GetShadowGenProg(CShadowHandler::SHADOWGEN_PROGRAM_MODEL);
+			if (shadowProgram == nullptr || !shadowProgram->IsValid()) {
+				glDisable(GL_ALPHA_TEST);
+				glDisable(GL_POLYGON_OFFSET_FILL);
+				units.clear();
+				return;
+			}
+			shadowProgram->Enable();
+		} break;
+		default: {
+			units.clear();
+			return;
+		} break;
+	}
+
+	for (const LuaDrawUnit& entry: units) {
+		CModelDrawerHelper::PushModelRenderState(entry.modelType);
+		CModelDrawerHelper::BindModelTypeTexture(entry.modelType, entry.binKey);
+
+		switch (pass) {
+			case LUADRAW_PASS_OPAQUE: {
+				SetTeamColor(entry.unit->team);
+			} break;
+			case LUADRAW_PASS_ALPHA: {
+				SetTeamColor(entry.unit->team, IModelDrawerState::alphaValues.x);
+			} break;
+			default: {
+			} break;
+		}
+
+		unitDrawer->DrawUnitTrans(entry.unit, 0, 0, false, false);
+
+		if (pass == LUADRAW_PASS_SHADOW)
+			CModelDrawerHelper::modelDrawerHelpers[entry.modelType]->UnbindShadowTex();
+
+		CModelDrawerHelper::PopModelRenderState(entry.modelType);
+	}
+
+	switch (pass) {
+		case LUADRAW_PASS_OPAQUE: {
+			ResetOpaqueDrawing(deferredPass);
+		} break;
+		case LUADRAW_PASS_ALPHA: {
+			ResetAlphaDrawing(deferredPass);
+		} break;
+		case LUADRAW_PASS_SHADOW: {
+			shadowProgram->Disable();
+			glDisable(GL_ALPHA_TEST);
+			glDisable(GL_POLYGON_OFFSET_FILL);
+		} break;
+		default: {
+		} break;
+	}
+
+	units.clear();
 }
 
 void CUnitDrawerGL4::DrawGhostedBuildings(int modelType) const
