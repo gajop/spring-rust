@@ -269,7 +269,13 @@ pub fn validate_synced_environments(
             {
                 return None;
             }
-            Some(line.split('(').next()?.split_whitespace().last()?.to_string())
+            Some(
+                line.split('(')
+                    .next()?
+                    .split_whitespace()
+                    .last()?
+                    .to_string(),
+            )
         })
         .collect::<BTreeSet<_>>();
 

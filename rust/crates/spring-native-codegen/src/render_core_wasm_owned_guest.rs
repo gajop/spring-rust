@@ -1029,12 +1029,12 @@ fn borrowed_forward_input_supported(field: &crate::model::FieldModel) -> bool {
 }
 
 fn render_special_forward(
-	output: &mut String,
-	module: &crate::model::ApiModule,
-	function: &FunctionModel,
+    output: &mut String,
+    module: &crate::model::ApiModule,
+    function: &FunctionModel,
 ) -> bool {
-	if module.name == "gfx" && function.name == "ReadPixels" {
-		output.push_str(
+    if module.name == "gfx" && function.name == "ReadPixels" {
+        output.push_str(
 			r#"        #[cfg(target_arch = "wasm32")]
         mod __core_owned_read_pixels {
             #[link(wasm_import_module = "spring:gfx")]
@@ -1089,9 +1089,9 @@ fn render_special_forward(
 
 "#,
 		);
-		return true;
-	}
-	if module.name == "units_info" && rust_ident(&function.name) == "get_unit_last_attacked_piece" {
+        return true;
+    }
+    if module.name == "units_info" && rust_ident(&function.name) == "get_unit_last_attacked_piece" {
         output.push_str(
             r#"        #[inline]
         pub fn get_unit_last_attacked_piece(unit_id: i32) -> Result<LastHitPiece> {
