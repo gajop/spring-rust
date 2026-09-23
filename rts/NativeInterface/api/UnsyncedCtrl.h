@@ -331,6 +331,21 @@ struct DeselectUnitMapResult { const Error* error; bool success; };
 struct DrawUnitCommandsQuery { const int32_t* unitIDs; uint32_t count; bool tableOrArray; int32_t queueDrawDepth; };
 struct DrawUnitCommandsResult { const Error* error; bool success; };
 
+// ============================================================================
+// Unsynced Random API
+// @see unsynced math.random
+//
+// The engine's unsynced RNG (guRNG) for local effects: particles, lights,
+// sound variation. Draws differ between clients; never use them for game state.
+// ============================================================================
+
+struct UnsyncedRandomApi {
+	void (*NextFloat)(const NextFloatQuery* query, NextFloatResult* result);
+	void (*NextIntUpTo)(const NextIntUpToQuery* query, NextIntUpToResult* result);
+	void (*NextInt)(const NextIntQuery* query, NextIntResult* result);
+	void (*SetSeed)(const SetSeedQuery* query, SetSeedResult* result);
+};
+
 struct UnsyncedCtrlApi {
 	void (*SetUnitNoDraw)(const SetUnitNoDrawQuery* query, SetUnitNoDrawResult* result);
 	void (*SetUnitEngineDrawMask)(const SetUnitEngineDrawMaskQuery* query, SetUnitEngineDrawMaskResult* result);
@@ -372,6 +387,8 @@ struct UnsyncedCtrlApi {
 	void (*SetCameraOffset)(const SetCameraOffsetQuery* query, SetCameraOffsetResult* result);
 	void (*SetDrawGround)(const SetDrawGroundQuery* query, SetDrawGroundResult* result);
 	void (*SetDrawSky)(const SetDrawSkyQuery* query, SetDrawSkyResult* result);
+
+	const UnsyncedRandomApi* random;
 	void (*SetDrawWater)(const SetDrawWaterQuery* query, SetDrawWaterResult* result);
 	void (*SetDrawGroundDeferred)(const SetDrawGroundDeferredQuery* query, SetDrawGroundDeferredResult* result);
 	void (*SetDrawModelsDeferred)(const SetDrawModelsDeferredQuery* query, SetDrawModelsDeferredResult* result);

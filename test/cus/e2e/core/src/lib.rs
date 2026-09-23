@@ -194,13 +194,13 @@ impl CoreCusModule for CusE2ECore {
 /// Mirrors the fixture gadget's `math.random` calls after the same reseed.
 fn synced_random_draws() -> String {
     const SCALE: f32 = 16_777_216.0;
-    spring::random::seed(12345);
+    spring::random::synced::seed(12345);
     let draws = [
-        (spring::random::float() * SCALE) as i64,
-        spring::random::up_to(10) as i64,
-        spring::random::int(3, 7) as i64,
-        spring::random::int(-5, 5) as i64,
-        (spring::random::float() * SCALE) as i64,
+        (spring::random::synced::float() * SCALE) as i64,
+        spring::random::synced::up_to(10) as i64,
+        spring::random::synced::int(3, 7) as i64,
+        spring::random::synced::int(-5, 5) as i64,
+        (spring::random::synced::float() * SCALE) as i64,
     ];
     draws.map(|draw| draw.to_string()).join("|")
 }

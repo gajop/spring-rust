@@ -190,7 +190,7 @@ pub use owned::{
     memory, metal_map, move_ctrl, object_rendering, path_finder, platform, player,
     projectile_control, projectiles, selection, sound, synced_ctrl, synced_random, team_control,
     teams, tracing, types, unit_rendering, unit_script, units_info, units_weapons, unsynced_ctrl,
-    unsynced_read, utils, weapon_defs,
+    unsynced_random, unsynced_read, utils, weapon_defs,
 };
 
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]

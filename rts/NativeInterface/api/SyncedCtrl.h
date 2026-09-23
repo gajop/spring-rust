@@ -1216,24 +1216,7 @@ struct GameConfigApi {
 // draws the same sequence, and the FixedRNGSeed start script key pins it.
 // ============================================================================
 
-// math.random(): a float in [0, 1)
-struct NextFloatQuery { uint8_t _unused; };
-struct NextFloatResult { const Error* error; float value; };
-
-// math.random(upper): an integer in [1, upper]
-struct NextIntUpToQuery { int32_t upper; };
-struct NextIntUpToResult { const Error* error; int32_t value; };
-
-// math.random(lower, upper): an integer in [lower, upper]
-struct NextIntQuery {
-	int32_t lower;
-	int32_t upper;
-};
-struct NextIntResult { const Error* error; int32_t value; };
-
-// math.randomseed(seed)
-struct SetSeedQuery { int32_t seed; };
-struct SetSeedResult { const Error* error; bool success; };
+// Query/result records are shared with UnsyncedRandomApi (CommonTypes.h).
 
 struct SyncedRandomApi {
 	void (*NextFloat)(const NextFloatQuery* query, NextFloatResult* result);

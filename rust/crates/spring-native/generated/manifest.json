@@ -264,6 +264,11 @@
       "bytes": 60976
     },
     {
+      "name": "unsynced_random_generated.rs",
+      "sha256": "ff253f753eb28561e308c44ecf7786d31706357b4e6c3b72325e29ebea225ccb",
+      "bytes": 2221
+    },
+    {
       "name": "unsynced_read_generated.rs",
       "sha256": "644e0aeb1389be4df869e550f024e250de76be3f9984218c613ee5b66e10e746",
       "bytes": 14994

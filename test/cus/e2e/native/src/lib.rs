@@ -77,6 +77,7 @@ struct CusE2ENative {
     ready_to_quit: bool,
     quit_requested: bool,
     fault_sent: bool,
+    unsynced_random_checked: bool,
 }
 
 impl CusE2ENative {
@@ -178,6 +179,7 @@ impl NativeModule for CusE2ENative {
             ready_to_quit: false,
             quit_requested: false,
             fault_sent: false,
+            unsynced_random_checked: false,
         }
     }
 
@@ -369,6 +371,37 @@ impl NativeModule for CusE2ENative {
                 self.record(&format!("quit-error|{error:?}"));
             }
         }
+        Ok(())
+    }
+
+    fn update(&mut self, _delta_seconds: f32) -> Result<(), Error> {
+        if self.unsynced_random_checked {
+            return Ok(());
+        }
+        self.unsynced_random_checked = true;
+
+        // Unsynced draws cannot be compared with Lua's; check the range and
+        // that reseeding reproduces the sequence.
+        let unsynced = self.interface.unsynced_ctrl();
+        let random = unsynced.random();
+        let draw = || -> Result<(f32, i32, i32), Error> {
+            random.set_seed(4242)?;
+            Ok((
+                random.next_float()?,
+                random.next_int_up_to(6)?,
+                random.next_int(-3, 3)?,
+            ))
+        };
+        let first = draw()?;
+        let second = draw()?;
+        let in_range = (0.0..1.0).contains(&first.0)
+            && (1..=6).contains(&first.1)
+            && (-3..=3).contains(&first.2);
+        self.record(&format!(
+            "RNG|native-unsynced|in_range={}|reseed_repeats={}",
+            in_range as u8,
+            (first == second) as u8
+        ));
         Ok(())
     }
 

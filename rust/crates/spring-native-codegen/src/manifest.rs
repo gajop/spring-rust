@@ -289,6 +289,11 @@ pub const API_DEFINITIONS: &[ApiDefinition] = &[
         api_struct: "SyncedRandomApi",
     },
     ApiDefinition {
+        module: "unsynced_random",
+        header: "UnsyncedCtrl.h",
+        api_struct: "UnsyncedRandomApi",
+    },
+    ApiDefinition {
         module: "unit_rendering",
         header: "UnsyncedRead.h",
         api_struct: "UnitRenderingApi",

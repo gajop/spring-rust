@@ -86,7 +86,7 @@
 //!   - [`EffectsControl`] - Spawn explosions/CEGs/SFX (3 functions)
 //!   - [`GameConfig`] - Game rule toggles and radar error settings (4 functions)
 //!   - [`CobScript`] - Call COB scripts and resolve IDs (2 functions)
-//!   - [`SyncedRandom`] - The synced RNG behind synced `math.random` (3 functions)
+//!   - [`SyncedRandom`] - The synced RNG behind synced `math.random` (4 functions)
 //!
 //! ### Utilities
 //! - [`MathExtra`] - Extended math functions
@@ -319,7 +319,7 @@ pub use units_info::UnitsInfo;
 pub use units_pieces::UnitsPieces;
 pub use units_query::{RectangleQueryExt, UnitsQuery};
 pub use units_weapons::UnitsWeapons;
-pub use unsynced_ctrl::UnsyncedCtrl;
+pub use unsynced_ctrl::{UnsyncedCtrl, UnsyncedRandom};
 pub use unsynced_read::{UnitRendering, UnsyncedRead};
 pub use utils::Utils;
 pub use vfs::{DirectoryEntry, Vfs};

@@ -246,6 +246,19 @@
             pub success: bool,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct AssignMouseCursorQuery {
+            pub command_name: String,
+            pub cursor_file_name: String,
+            pub overwrite: bool,
+            pub hot_spot_top_left: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct AssignMouseCursorResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct AssignPlayerToTeamQuery {
             pub player_id: i32,
@@ -449,6 +462,16 @@
             pub success: bool,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct DeselectUnitMapQuery {
+            pub unit_i_ds: Vec<i32>,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct DeselectUnitMapResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DestroyFeatureQuery {
             pub feature_id: i32,
@@ -475,6 +498,18 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct DestroyUnitResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct DrawUnitCommandsQuery {
+            pub unit_i_ds: Vec<i32>,
+            pub table_or_array: bool,
+            pub queue_draw_depth: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct DrawUnitCommandsResult {
             pub success: bool,
         }
 
@@ -585,6 +620,27 @@
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct FloatResult {
             pub value: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ForceLayoutUpdateQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ForceLayoutUpdateResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ForceTesselationUpdateQuery {
+            pub normal: bool,
+            pub shadow: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ForceTesselationUpdateResult {
+            pub success: bool,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -1347,6 +1403,16 @@
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GetWaterTextureQuery {
+            pub tex_type: String,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GetWaterTextureResult {
+            pub tex_name: String,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GiveOrderArrayToUnitArrayQuery {
             pub unit_i_ds: Vec<i32>,
             pub commands: Vec<NativeCommand>,
@@ -1538,6 +1604,36 @@
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct LoadCmdColorsConfigQuery {
+            pub filename: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct LoadCmdColorsConfigResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct LoadCtrlPanelConfigQuery {
+            pub filename: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct LoadCtrlPanelConfigResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct LoadModelTexturesQuery {
+            pub model_name: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct LoadModelTexturesResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct MapRenderingParams {
             pub splat_tex_scales: Option<Vec<f32>>,
             pub splat_tex_mults: Option<Vec<f32>>,
@@ -1648,10 +1744,40 @@
             pub use_boolean: bool,
         }
 
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct PauseDollyCameraQuery {
+            pub percent: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct PauseDollyCameraResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, PartialEq, Default)]
         pub struct PlanesQuery {
             pub planes: Vec<Float4>,
             pub plane_count: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct PreloadFeatureDefModelQuery {
+            pub def_id: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct PreloadFeatureDefModelResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct PreloadUnitDefModelQuery {
+            pub def_id: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct PreloadUnitDefModelResult {
+            pub success: bool,
         }
 
         #[derive(Debug, Clone, PartialEq)]
@@ -1732,10 +1858,32 @@
             pub success: bool,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct ReplaceMouseCursorQuery {
+            pub old_cursor_file_name: String,
+            pub new_cursor_file_name: String,
+            pub hot_spot_top_left: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ReplaceMouseCursorResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ResourcePack {
             pub metal: f32,
             pub energy: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ResumeDollyCameraQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ResumeDollyCameraResult {
+            pub success: bool,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -1788,6 +1936,82 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct RunDollyCameraQuery {
+            pub runtime_ms: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct RunDollyCameraResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SDLSetTextInputRectQuery {
+            pub x: i32,
+            pub y: i32,
+            pub w: i32,
+            pub h: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SDLSetTextInputRectResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SDLStartTextInputQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SDLStartTextInputResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SDLStopTextInputQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SDLStopTextInputResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SelectUnitMapQuery {
+            pub unit_i_ds: Vec<i32>,
+            pub append: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SelectUnitMapResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetActiveCommandOptions {
+            pub left_click: bool,
+            pub right_click: bool,
+            pub alt: bool,
+            pub ctrl: bool,
+            pub meta: bool,
+            pub shift: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetActiveCommandQuery {
+            pub cmd_index: i32,
+            pub button: i32,
+            pub options: SetActiveCommandOptions,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetActiveCommandResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetAllyQuery {
             pub first_ally_team_id: i32,
             pub second_ally_team_id: i32,
@@ -1813,6 +2037,67 @@
             pub success: bool,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetAtmosphereQuery {
+            pub params: AtmosphereParams,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetAtmosphereResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetAutoShowMetalQuery {
+            pub enable: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetAutoShowMetalResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetBoxSelectionByEngineQuery {
+            pub state: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetBoxSelectionByEngineResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetBuildFacingQuery {
+            pub facing: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetBuildFacingResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetBuildSpacingQuery {
+            pub spacing: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetBuildSpacingResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetCameraOffsetQuery {
+            pub pos_offset: Float3,
+            pub tilt_offset: Float3,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetCameraOffsetResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetCheatingEnabledQuery {
             pub enabled: bool,
@@ -1820,6 +2105,196 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetCheatingEnabledResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetClipboardQuery {
+            pub text: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetClipboardResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetCustomCommandDrawDataQuery {
+            pub cmd_id: i32,
+            pub cmd_reference: DefRef,
+            pub color: Float4,
+            pub show_area: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetCustomCommandDrawDataResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetCustomPaletteColorQuery {
+            pub index: i32,
+            pub r: f32,
+            pub g: f32,
+            pub b: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetCustomPaletteColorResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetDollyCameraCurveQuery {
+            pub degree: i32,
+            pub control_points: Vec<Float4>,
+            pub knots: Vec<f32>,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraCurveResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetDollyCameraLookCurveQuery {
+            pub degree: i32,
+            pub control_points: Vec<Float4>,
+            pub knots: Vec<f32>,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraLookCurveResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraLookPositionQuery {
+            pub position: Float3,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraLookPositionResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraLookUnitQuery {
+            pub unit_id: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraLookUnitResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraModeQuery {
+            pub mode: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraModeResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraPositionQuery {
+            pub position: Float3,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraPositionResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraRelativeModeQuery {
+            pub mode: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDollyCameraRelativeModeResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawGroundDeferredQuery {
+            pub draw_deferred: bool,
+            pub draw_forward: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawGroundDeferredResult {
+            pub success: bool,
+            pub deferred: bool,
+            pub forward: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawGroundQuery {
+            pub draw_ground: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawGroundResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawModelsDeferredQuery {
+            pub draw_units_deferred: bool,
+            pub draw_features_deferred: bool,
+            pub draw_units_forward: bool,
+            pub draw_features_forward: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawModelsDeferredResult {
+            pub success: bool,
+            pub units_deferred: bool,
+            pub features_deferred: bool,
+            pub units_forward: bool,
+            pub features_forward: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawSelectionInfoQuery {
+            pub draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawSelectionInfoResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawSkyQuery {
+            pub draw_sky: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawSkyResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawWaterQuery {
+            pub draw_water: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetDrawWaterResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetEngineBuildSquareRenderingQuery {
+            pub enabled: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetEngineBuildSquareRenderingResult {
             pub success: bool,
         }
 
@@ -1855,6 +2330,17 @@
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFactoryBuggerOffResult {
             pub perform: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureAlwaysUpdateMatrixQuery {
+            pub feature_id: i32,
+            pub enable: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureAlwaysUpdateMatrixResult {
+            pub success: bool,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -1918,6 +2404,28 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureEngineDrawMaskQuery {
+            pub feature_id: i32,
+            pub mask: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureEngineDrawMaskResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureFadeQuery {
+            pub feature_id: i32,
+            pub allow: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureFadeResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureFireTimeQuery {
             pub feature_id: i32,
             pub fire_time: f32,
@@ -1949,6 +2457,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureHealthResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureLuaDrawQuery {
+            pub feature_id: i32,
+            pub lua_draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureLuaDrawResult {
             pub success: bool,
         }
 
@@ -2002,6 +2521,17 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureNoDrawQuery {
+            pub feature_id: i32,
+            pub no_draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeatureNoDrawResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureNoSelectQuery {
             pub feature_id: i32,
             pub no_select: bool,
@@ -2009,6 +2539,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetFeatureNoSelectResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeaturePaletteIndexQuery {
+            pub feature_id: i32,
+            pub custom_index: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetFeaturePaletteIndexResult {
             pub success: bool,
         }
 
@@ -2241,6 +2782,63 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetLastMessagePositionQuery {
+            pub pos: Float3,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetLastMessagePositionResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetLosViewColorsQuery {
+            pub always: RgbColor,
+            pub los: RgbColor,
+            pub radar: RgbColor,
+            pub jam: RgbColor,
+            pub radar2: RgbColor,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetLosViewColorsResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetMapRenderingParamsQuery {
+            pub params: MapRenderingParams,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetMapRenderingParamsResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetMapShaderQuery {
+            pub standard_shader_id: i32,
+            pub deferred_shader_id: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetMapShaderResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetMapShadingTextureQuery {
+            pub tex_type: String,
+            pub tex_name: String,
+            pub num: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetMapShadingTextureResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMapSquareTerrainTypeQuery {
             pub x: i32,
             pub z: i32,
@@ -2249,6 +2847,43 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetMapSquareTerrainTypeResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetMiniMapRotationQuery {
+            pub radians: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetMiniMapRotationResult {
+            pub success: bool,
+            pub rotation: i32,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetMouseCursorQuery {
+            pub cursor_name: String,
+            pub scale: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetMouseCursorResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetNanoProjectileParamsQuery {
+            pub r: f32,
+            pub v: f32,
+            pub a: f32,
+            pub rand_r: f32,
+            pub rand_v: f32,
+            pub rand_a: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetNanoProjectileParamsResult {
             pub success: bool,
         }
 
@@ -2390,6 +3025,17 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetProjectileLuaDrawQuery {
+            pub projectile_id: i32,
+            pub lua_draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetProjectileLuaDrawResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetProjectileMoveControlQuery {
             pub projectile_id: i32,
             pub enable: bool,
@@ -2478,6 +3124,33 @@
             pub success: bool,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetShockFrontFactorsOptions {
+            pub min_area: Option<f32>,
+            pub min_power: Option<f32>,
+            pub dist_adj: Option<f32>,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetShockFrontFactorsQuery {
+            pub options: SetShockFrontFactorsOptions,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetShockFrontFactorsResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetSkyBoxTextureQuery {
+            pub tex_name: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetSkyBoxTextureResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, PartialEq)]
         pub struct SetSmoothMeshFuncQuery {
             pub callback: u32,
@@ -2511,6 +3184,27 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetSquareBuildingMaskResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetSunDirectionQuery {
+            pub dir: Float3,
+            pub intensity: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetSunDirectionResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetSunLightingQuery {
+            pub params: SunLightingParams,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetSunLightingResult {
             pub success: bool,
         }
 
@@ -2573,6 +3267,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetTidalResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitAlwaysUpdateMatrixQuery {
+            pub unit_id: i32,
+            pub always_update_matrix: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitAlwaysUpdateMatrixResult {
             pub success: bool,
         }
 
@@ -2709,6 +3414,28 @@
             pub state_changed: bool,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetUnitDefIconQuery {
+            pub unit_def_id: i32,
+            pub icon_name: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitDefIconResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetUnitDefImageQuery {
+            pub unit_def_id: i32,
+            pub image: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitDefImageResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitDirectionQuery {
             pub unit_id: i32,
@@ -2718,6 +3445,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitDirectionResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitEngineDrawMaskQuery {
+            pub unit_id: i32,
+            pub draw_mask: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitEngineDrawMaskResult {
             pub success: bool,
         }
 
@@ -2794,6 +3532,28 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitIconDrawQuery {
+            pub unit_id: i32,
+            pub draw_icon: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitIconDrawResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetUnitIconQuery {
+            pub unit_id: i32,
+            pub icon_name: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitIconResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitLandGoalQuery {
             pub unit_id: i32,
             pub pos: Float3,
@@ -2802,6 +3562,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitLandGoalResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitLeaveTracksQuery {
+            pub unit_id: i32,
+            pub leave_tracks: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitLeaveTracksResult {
             pub success: bool,
         }
 
@@ -2854,6 +3625,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitLosStateResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitLuaDrawQuery {
+            pub unit_id: i32,
+            pub lua_draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitLuaDrawResult {
             pub success: bool,
         }
 
@@ -2948,6 +3730,61 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitNeutralResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitNoDrawQuery {
+            pub unit_id: i32,
+            pub no_draw: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitNoDrawResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitNoGroupQuery {
+            pub unit_id: i32,
+            pub no_group: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitNoGroupResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitNoMinimapQuery {
+            pub unit_id: i32,
+            pub no_minimap: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitNoMinimapResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitNoSelectQuery {
+            pub unit_id: i32,
+            pub no_select: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitNoSelectResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitPaletteIndexQuery {
+            pub unit_id: i32,
+            pub custom_index: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitPaletteIndexResult {
             pub success: bool,
         }
 
@@ -3294,6 +4131,69 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetVideoCapturingModeQuery {
+            pub allow_capture_mode: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetVideoCapturingModeResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetVideoCapturingTimeOffsetQuery {
+            pub time_offset: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetVideoCapturingTimeOffsetResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetWMCaptionQuery {
+            pub title: String,
+            pub title_short: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWMCaptionResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetWMIconQuery {
+            pub icon_file_name: String,
+            pub force_resolution: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWMIconResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetWaterParamsQuery {
+            pub params: WaterParams,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWaterParamsResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetWaterTextureQuery {
+            pub tex_type: String,
+            pub tex_name: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWaterTextureResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindQuery {
             pub min_wind: f32,
             pub max_wind: f32,
@@ -3302,6 +4202,47 @@
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetWindResult {
             pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWindowGeometryOptions {
+            pub full_screen: bool,
+            pub borderless: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWindowGeometryQuery {
+            pub display_index: i32,
+            pub window_pos_x: i32,
+            pub window_pos_y: i32,
+            pub window_size_x: i32,
+            pub window_size_y: i32,
+            pub options: SetWindowGeometryOptions,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWindowGeometryResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWindowMaximizedQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWindowMaximizedResult {
+            pub maximized: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWindowMinimizedQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetWindowMinimizedResult {
+            pub minimized: bool,
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]
@@ -3774,6 +4715,17 @@
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct ValidUnitIDResult {
             pub valid: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct WarpMouseQuery {
+            pub x: i32,
+            pub y: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct WarpMouseResult {
+            pub success: bool,
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]

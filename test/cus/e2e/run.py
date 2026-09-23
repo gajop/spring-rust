@@ -345,6 +345,8 @@ def assert_markers(workdir: Path) -> None:
             f"synced random mismatch: lua={lua_draws} core={core_draws} native={native_draws}"
         )
     print(f"synced random draws match Lua: {lua_draws[0]}")
+    if "RNG|native-unsynced|in_range=1|reseed_repeats=1" not in native:
+        raise AssertionError(f"unsynced random check failed:\n{native}")
 
     print(native, end="")
     for line in core_log.splitlines():

@@ -219,6 +219,18 @@ fn main() {
         unit_rendering_code,
     )
     .unwrap_or_else(|e| panic!("write unit_rendering: {}", e));
+
+    // Generate UnsyncedRandom sub-API (embedded within UnsyncedCtrl)
+    let unsynced_ctrl_header = project_root.join("rts/NativeInterface/api/UnsyncedCtrl.h");
+    println!("cargo:rerun-if-changed={}", unsynced_ctrl_header.display());
+    let unsynced_random_code =
+        spring_native_codegen::generate_unsynced_random(&codegen, &unsynced_ctrl_header, &includes)
+            .unwrap_or_else(|e| panic!("unsynced_random codegen: {}", e));
+    fs::write(
+        out_dir.join("unsynced_random_generated.rs"),
+        unsynced_random_code,
+    )
+    .unwrap_or_else(|e| panic!("write unsynced_random: {}", e));
 }
 
 fn write_api_version(project_root: &std::path::Path, out_dir: &std::path::Path) {

@@ -110,6 +110,27 @@ struct GiveOrderArrayToUnitArrayQuery {
 };
 struct GiveOrderArrayToUnitArrayResult { const Error* error; int32_t unitsOrdered; };
 
+// Random draws with Lua math.random / math.randomseed semantics, shared by the
+// synced (SyncedRandomApi, gsRNG) and unsynced (UnsyncedRandomApi, guRNG) APIs.
+// math.random(): a float in [0, 1)
+struct NextFloatQuery { uint8_t _unused; };
+struct NextFloatResult { const Error* error; float value; };
+
+// math.random(upper): an integer in [1, upper]
+struct NextIntUpToQuery { int32_t upper; };
+struct NextIntUpToResult { const Error* error; int32_t value; };
+
+// math.random(lower, upper): an integer in [lower, upper]
+struct NextIntQuery {
+	int32_t lower;
+	int32_t upper;
+};
+struct NextIntResult { const Error* error; int32_t value; };
+
+// math.randomseed(seed)
+struct SetSeedQuery { int32_t seed; };
+struct SetSeedResult { const Error* error; bool success; };
+
 struct NativeProjectileParams {
 	Float3 pos;
 	Float3 speed;

@@ -29318,6 +29318,87 @@
       "notes": []
     },
     {
+      "module": "unsynced_random",
+      "function": "NextFloat",
+      "import_module": "spring:unsynced-random",
+      "import_name": "next-float",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_random",
+      "function": "NextInt",
+      "import_module": "spring:unsynced-random",
+      "import_name": "next-int",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_random",
+      "function": "NextIntUpTo",
+      "import_module": "spring:unsynced-random",
+      "import_name": "next-int-up-to",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_random",
+      "function": "SetSeed",
+      "import_module": "spring:unsynced-random",
+      "import_name": "set-seed",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
       "module": "unsynced_read",
       "function": "GetActiveCmdDesc",
       "import_module": "spring:unsynced-read",
@@ -31278,7 +31359,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1190,
+  "automatic_count": 1194,
   "manual_count": 198,
   "unsupported_count": 17
 }

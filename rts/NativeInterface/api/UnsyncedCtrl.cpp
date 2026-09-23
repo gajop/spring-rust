@@ -1919,6 +1919,64 @@ static void NativeDrawUnitCommands(const DrawUnitCommandsQuery* query, DrawUnitC
 	result->success = true;
 }
 
+// ============================================================================
+// Unsynced Random API (same arithmetic as SyncedRandomApi, on guRNG)
+// ============================================================================
+
+static void NativeUnsyncedNextFloat(const NextFloatQuery* /*query*/, NextFloatResult* result)
+{
+	result->error = nullptr;
+	result->value = guRNG.NextFloat();
+}
+
+static void NativeUnsyncedNextIntUpTo(const NextIntUpToQuery* query, NextIntUpToResult* result)
+{
+	static const Error UPPER_BELOW_ONE = { .code = ERROR_INVALID_ARGUMENT, .message = "Upper limit must be >= 1" };
+
+	result->error = nullptr;
+	result->value = 0;
+
+	if (query->upper < 1) {
+		result->error = &UPPER_BELOW_ONE;
+		return;
+	}
+
+	result->value = 1 + guRNG.NextInt(query->upper);
+}
+
+static void NativeUnsyncedNextInt(const NextIntQuery* query, NextIntResult* result)
+{
+	static const Error EMPTY_INTERVAL = { .code = ERROR_INVALID_ARGUMENT, .message = "Empty interval (lower > upper)" };
+
+	result->error = nullptr;
+	result->value = 0;
+
+	const int lower = query->lower;
+	const int upper = query->upper;
+	if (lower > upper) {
+		result->error = &EMPTY_INTERVAL;
+		return;
+	}
+
+	const float diff = (upper - lower);
+	const float r = guRNG.NextFloat();
+	result->value = std::clamp(lower + int(r * (diff + 1)), lower, upper);
+}
+
+static void NativeUnsyncedSetSeed(const SetSeedQuery* query, SetSeedResult* result)
+{
+	result->error = nullptr;
+	guRNG.SetSeed(query->seed, false);
+	result->success = true;
+}
+
+static const UnsyncedRandomApi UNSYNCED_RANDOM_API = {
+	.NextFloat = NativeUnsyncedNextFloat,
+	.NextIntUpTo = NativeUnsyncedNextIntUpTo,
+	.NextInt = NativeUnsyncedNextInt,
+	.SetSeed = NativeUnsyncedSetSeed,
+};
+
 } // namespace
 
 const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
@@ -1962,6 +2020,7 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetCameraOffset = NativeSetCameraOffset,
 	.SetDrawGround = NativeSetDrawGround,
 	.SetDrawSky = NativeSetDrawSky,
+	.random = &UNSYNCED_RANDOM_API,
 	.SetDrawWater = NativeSetDrawWater,
 	.SetDrawGroundDeferred = NativeSetDrawGroundDeferred,
 	.SetDrawModelsDeferred = NativeSetDrawModelsDeferred,

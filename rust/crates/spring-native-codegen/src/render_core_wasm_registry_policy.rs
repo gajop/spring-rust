@@ -127,7 +127,7 @@ pub(crate) fn production_environment_mask(module: &str, source_mask: u32) -> u32
     match module {
         "unsynced_read" | "unsynced_ctrl" | "camera" | "input" | "display" | "selection"
         | "sound" | "gfx" | "lights" | "icons" | "markers" | "ground_decals" | "rml_ui"
-        | "player" => source_mask & CORE_UNSYNCED_ENVIRONMENT_MASK,
+        | "player" | "unsynced_random" => source_mask & CORE_UNSYNCED_ENVIRONMENT_MASK,
         _ => source_mask,
     }
 }
