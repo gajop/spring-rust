@@ -1475,6 +1475,16 @@ bool CGame::UpdateUnsynced(const spring_time currentTime)
 bool CGame::Draw() {
 	const spring_time currentTimePreUpdate = spring_gettime();
 
+	#ifdef HEADLESS
+	// A headless client has no display swap to pace the main loop. Still run
+	// unsynced callbacks for each simulation frame (and at 30 Hz when paused),
+	// but do not update the drawing world thousands of times between frames.
+	if (gs->frameNum == lastSimFrame && (currentTimePreUpdate - lastDrawFrameTime).toMilliSecsf() < 1000.0f / GAME_SPEED) {
+		spring_sleep(spring_msecs(1));
+		return false;
+	}
+	#endif
+
 	if (UpdateUnsynced(currentTimePreUpdate))
 		return false;
 
