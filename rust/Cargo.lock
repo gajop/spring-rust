@@ -294,6 +294,7 @@ dependencies = [
 name = "spring-native"
 version = "0.1.0"
 dependencies = [
+ "libm",
  "once_cell",
  "spring",
  "spring-api-codegen",

@@ -89,6 +89,7 @@
 //!   - [`SyncedRandom`] - The synced RNG behind synced `math.random` (4 functions)
 //!
 //! ### Utilities
+//! - [`math`] - Deterministic `f32` maths (pure-Rust libm) for synced code
 //! - [`MathExtra`] - Extended math functions
 //! - [`MetalMap`] - Metal resource queries
 //! - [`PathFinder`] - Pathfinding requests
@@ -143,6 +144,7 @@ mod config;
 pub mod constants;
 pub mod cus;
 mod debug_input;
+pub mod math;
 pub mod module_entry;
 
 // Include build-time generated version constants
