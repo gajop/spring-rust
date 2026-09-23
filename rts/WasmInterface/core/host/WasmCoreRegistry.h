@@ -164,11 +164,11 @@ inline constexpr ImportDescriptor kImports[] = {
 	// Profiling reads are intentionally unsynced-only. GetTimerMicros was
 	// historically marked all-environment despite using spring_now(); allowing a
 	// synced guest to branch on that value would break deterministic simulation.
-	{ProfilingModule, "get-timer", "->i64", UnsyncedEnvironmentMask},
-	{ProfilingModule, "get-timer-micros", "->i64", UnsyncedEnvironmentMask},
+	{ProfilingModule, "get-timer", "i32,i32->i32", UnsyncedEnvironmentMask},
+	{ProfilingModule, "get-timer-micros", "i32,i32->i32", UnsyncedEnvironmentMask},
 	{ProfilingModule, "diff-timers", "i64,i64,i32,i32->i64", UnsyncedEnvironmentMask},
-	{ProfilingModule, "get-frame-timer", "i32->i64", UnsyncedEnvironmentMask},
-	{ProfilingModule, "get-draw-seconds", "->i64", UnsyncedEnvironmentMask},
+	{ProfilingModule, "get-frame-timer", "i32,i32->i32", UnsyncedEnvironmentMask},
+	{ProfilingModule, "get-draw-seconds", "i32->i64", UnsyncedEnvironmentMask},
 	{ProfilingModule, "get-lua-mem-usage", "i32,i32->i32", UnsyncedEnvironmentMask},
 	{ProfilingModule, "get-vid-mem-usage", "i32,i32->i32", UnsyncedEnvironmentMask},
 	{ProfilingModule, "get-synced-gc-info", "i32->i64", UnsyncedEnvironmentMask},

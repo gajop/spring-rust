@@ -25,29 +25,6 @@ std::int32_t ErrorCode(const Error* error)
 	return error == nullptr ? 0 : error->code;
 }
 
-wasm_trap_t* GetTimerMicros(void* environment, wasmtime_caller_t*,
-	wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-	auto* state = static_cast<HostState*>(environment);
-	if (state == nullptr || state->native == nullptr || state->native->profiling == nullptr ||
-		state->native->profiling->GetTimerMicros == nullptr)
-		return Trap("GetTimerMicros Core binding is unavailable");
-	if (slots == nullptr || slotCount != 1)
-		return Trap("GetTimerMicros Core ABI signature mismatch");
-
-	ImportGuard guard(state, 1);
-	if (!guard.Ok())
-		return Trap(guard.Error());
-
-	GetTimerMicrosQuery query{};
-	GetTimerMicrosResult result{};
-	state->native->profiling->GetTimerMicros(&query, &result);
-	if (result.error != nullptr)
-		return Trap("GetTimerMicros NativeInterface call failed");
-	slots[0].i64 = static_cast<std::int64_t>(result.timer);
-	return nullptr;
-}
-
 wasm_trap_t* SendLuaRulesMsg(void* environment, wasmtime_caller_t* caller,
 	wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -318,10 +295,6 @@ bool RegisterBenchmarkImports(wasmtime_linker_t* linker, HostState* state,
 	}
 
 	const wasm_valkind_t i64Result[] = {WASM_I64};
-	if (!Define(linker, "spring:profiling", "get-timer-micros",
-			MakeFuncType(nullptr, 0, i64Result, 1), GetTimerMicros, state, error))
-		return false;
-
 	{
 		const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
 		if (!Define(linker, "spring:messages", "send-lua-rules-msg",
