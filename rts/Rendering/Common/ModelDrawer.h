@@ -356,6 +356,8 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawOpaquePassImpl(bool defe
 	constexpr static auto zone_name = spring::Concat(spring::TypeToCharN<TDrawer>().str, "::DrawOpaquePass");
 	SCOPED_TIMER(zone_name.str);
 
+	// Object selection below queues Lua materials at the current pass's LOD.
+	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
 	SetupOpaqueDrawing(deferredPass);
 
 	for (int modelType = MODELTYPE_3DO; modelType < MODELTYPE_CNT; ++modelType) {
@@ -376,7 +378,6 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawOpaquePassImpl(bool defe
 	// objects with Lua draw callbacks that a batched drawer bypassed
 	DrawLuaDrawObjectsLegacy(LUADRAW_PASS_OPAQUE, deferredPass);
 	// draw all custom'ed units that were bypassed in the loop above
-	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
 	LuaObjectDrawer::DrawOpaqueMaterialObjects(lot, deferredPass);
 }
 
@@ -387,6 +388,7 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawAlphaPassImpl(bool drawR
 	constexpr static auto zone_name = spring::Concat(spring::TypeToCharN<TDrawer>().str, "::DrawAlphaPass");
 	SCOPED_TIMER(zone_name.str);
 
+	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
 	SetupAlphaDrawing(false);
 
 	for (int modelType = MODELTYPE_3DO; modelType < MODELTYPE_CNT; ++modelType) {
@@ -406,7 +408,6 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawAlphaPassImpl(bool drawR
 	ScopedModelDrawerImpl<CModelDrawerBase<TDrawerData, TDrawer>> smdi(true, false, false);
 	DrawLuaDrawObjectsLegacy(LUADRAW_PASS_ALPHA, /*deferredPass*/false);
 	// draw all custom'ed units that were bypassed in the loop above
-	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
 	LuaObjectDrawer::DrawAlphaMaterialObjects(lot, /*deferredPass*/false);
 }
 
@@ -418,6 +419,7 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawShadowPassImpl() const
 	SCOPED_TIMER(zone_name.str);
 
 	assert((CCameraHandler::GetActiveCamera())->GetCamType() == CCamera::CAMTYPE_SHADOW);
+	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
 
 	if constexpr (legacy) {
 		glColor3f(1.0f, 1.0f, 1.0f);
@@ -464,7 +466,6 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawShadowPassImpl() const
 	ScopedModelDrawerImpl<CModelDrawerBase<TDrawerData, TDrawer>> smdi(true, false, false);
 	DrawLuaDrawObjectsLegacy(LUADRAW_PASS_SHADOW, /*deferredPass*/false);
 	// draw all custom'ed units that were bypassed in the loop above
-	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
 	LuaObjectDrawer::DrawShadowMaterialObjects(lot, /*deferredPass*/false);
 }
 

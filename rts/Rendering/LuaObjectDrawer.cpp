@@ -6,6 +6,7 @@
 #include "Units/UnitDrawer.h"
 #include "Common/ModelDrawerState.hpp"
 #include "Game/Camera.h"
+#include "Game/CameraHandler.h"
 #include "Game/Game.h" // drawMode
 #include "Lua/LuaMaterial.h"
 #include "Rendering/Env/IWater.h"
@@ -307,7 +308,10 @@ void LuaObjectDrawer::ReadLODScales(LuaObjType objType)
 void LuaObjectDrawer::SetDrawPassGlobalLODFactor(LuaObjType objType)
 {
 	if (shadowHandler.InShadowPass()) {
-		LuaObjectMaterialData::SetGlobalLODFactor(objType, GetLODScaleShadow(objType) * camera->GetLPPScale());
+		// Shadow geometry is viewed through an orthographic sun camera, but the
+		// model LOD distances describe its projected size on the player's screen.
+		const CCamera* viewCam = CCameraHandler::GetCamera(CCamera::CAMTYPE_PLAYER);
+		LuaObjectMaterialData::SetGlobalLODFactor(objType, GetLODScaleShadow(objType) * viewCam->GetLPPScale());
 		return;
 	}
 
@@ -650,7 +654,8 @@ bool LuaObjectDrawer::AddShadowMaterialObject(CSolidObject* obj, LuaObjType objT
 	LuaObjectMaterialData* matData = obj->GetLuaMaterialData();
 
 	const LuaMatType matType = GetDrawPassShadowMat();
-	const float      lodDist = camera->ProjectedDistance(obj->pos);
+	const CCamera*    viewCam = CCameraHandler::GetCamera(CCamera::CAMTYPE_PLAYER);
+	const float      lodDist = viewCam->ProjectedDistance(obj->pos);
 
 	return (matData->AddObjectForLOD(obj, objType, matType, lodDist));
 }
@@ -728,4 +733,3 @@ void LuaObjectDrawer::DrawShadowMaterialObjects(LuaObjType objType, bool)
 	// pass for custom- or default-shader models!
 	DrawMaterialBins(objType, GetDrawPassShadowMat(), false);
 }
-
