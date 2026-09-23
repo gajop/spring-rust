@@ -30,8 +30,8 @@ VARIANTS_HELP="Engine builds (point your game/launcher at the install directory)
   asan     build-{arch}-linux-asan/install   (this script)
            AddressSanitizer, no Tracy, no mimalloc. Use when debugging crashes or
            memory corruption; several times slower, never use it for timing.
-           Leak reports at exit are on by default; ASAN_OPTIONS=detect_leaks=0
-           disables them, LSAN_OPTIONS=suppressions=<file> filters driver noise.
+           Leak reports at exit are on; the engine's known third-party leaks are
+           suppressed by the binary itself (LeakSanitizerSuppressions.h).
 
 Variants built by this script: tracy, asan (default: both)."
 

@@ -28,6 +28,7 @@
 #include "System/Log/ILog.h"
 #include "System/Log/DefaultFilter.h"
 #include "System/LogOutput.h"
+#include "System/Platform/LeakSanitizerSuppressions.h"
 #include "System/Misc/SpringTime.h"
 #include "System/Platform/ConsoleInit.hpp"
 #include "System/Platform/CrashHandler.h"

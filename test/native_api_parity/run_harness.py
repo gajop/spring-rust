@@ -36,7 +36,6 @@ DEFAULT_SPRING_HEADLESS = ENGINE_INSTALL / "spring-headless"
 GAME_FIXTURE = HARNESS / "fixtures" / "game.sdd"
 NATIVE_CRATE = HARNESS / "native" / "Cargo.toml"
 NATIVE_SO = HARNESS / "native" / "target" / "release" / "libnative_api_parity.so"
-LSAN_SUPPRESSION = HARNESS / "lsan.supp"
 WASM_PARITY_CRATE = ROOT / "test" / "wasm_api" / "guests" / "parity_guest" / "Cargo.toml"
 WASM_PARITY_CORE = (
     ROOT
@@ -656,16 +655,6 @@ def run_spring(
     env["SPRING_NATIVE_PARITY_OUTPUT_DIR"] = str(result_dir)
     if wasm_transport == "core" and run_mode in {"wasm", "wasm_guest"}:
         env["SPRING_WASM_CORE_HOST"] = "1"
-    if needs_graphics and LSAN_SUPPRESSION.is_file():
-        # Keep LeakSanitizer enabled for ASAN rendering runs while ignoring
-        # only the documented third-party/process-lifetime shutdown stacks.
-        # Preserve a caller-provided suppression file and all other options.
-        lsan_options = env.get("LSAN_OPTIONS", "")
-        if "suppressions=" not in lsan_options:
-            suppression_option = f"suppressions={LSAN_SUPPRESSION}"
-            env["LSAN_OPTIONS"] = (
-                f"{lsan_options}:{suppression_option}" if lsan_options else suppression_option
-            )
 
     if run_mode == "native" or (run_mode == "lua" and args.load_native_module_for_lua):
         env["SPRING_NATIVE_MODULE"] = str(NATIVE_SO)

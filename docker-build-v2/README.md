@@ -120,9 +120,12 @@ docker-build-v2/build-variants.sh -- -DBUILD_spring-headless=OFF  # extra cmake 
 
 With `--parallel`, each variant's output goes to `.cache/build-variants/{variant}.log`.
 The ASan build disables mimalloc because it replaces `operator new`/`delete`,
-which would hide C++ heap errors from ASan. ASan reports leaks at exit by
-default: `ASAN_OPTIONS=detect_leaks=0` turns that off, and
-`LSAN_OPTIONS=suppressions=<file>` filters known driver allocations.
+which would hide C++ heap errors from ASan. ASan reports leaks at exit. The
+engine's known third-party leaks (GPU driver, fontconfig/FreeType, SDL audio) are
+built into the binary (`rts/System/Platform/LeakSanitizerSuppressions.h`), so no
+suppression file is needed; add game-specific entries with
+`LSAN_OPTIONS=suppressions=<file>`. Add accepted engine-wide entries to that
+header instead of to per-game files.
 
 ### Custom build config
 

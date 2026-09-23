@@ -13,6 +13,7 @@
 #include "System/Platform/errorhandler.h"
 #include "System/Platform/Threading.h"
 #include "System/Platform/Misc.h"
+#include "System/Platform/LeakSanitizerSuppressions.h"
 #include "System/Log/ILog.h"
 
 #include <nowide/args.hpp>

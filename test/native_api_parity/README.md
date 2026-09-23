@@ -64,11 +64,9 @@ python3 test/native_api_parity/run_harness.py --spring build-linux/install/sprin
 Rendering-required tests are skipped, and therefore not counted as covered,
 unless `--enable-rendering-tests` is set.
 
-When the rendering run uses an ASAN-built engine, the harness automatically
-adds `lsan.supp` to `LSAN_OPTIONS`. LeakSanitizer remains enabled; the file
-contains only the known process-lifetime driver/library entries. Its
-FreeType/SDL entries are explicitly TODOs for a separate engine teardown fix,
-outside the Wasm work.
+An ASAN-built engine carries its own LeakSanitizer suppressions for known
+third-party leaks (`rts/System/Platform/LeakSanitizerSuppressions.h`), so the
+harness passes none.
 
 Use installed binaries for renderer runs. Running `build-linux/spring` directly
 without the installed data tree can fail on assets such as `fonts/FreeSansBold.otf`;
