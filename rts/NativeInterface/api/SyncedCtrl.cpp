@@ -6506,6 +6506,65 @@ static const UnitScriptApi UNIT_SCRIPT_API = {
 	.CallUnitScript = NativeCallUnitScript,
 };
 
+// ============================================================================
+// Synced Random API (same draws as CSyncedLuaHandle::SyncedRandom)
+// ============================================================================
+
+static void NativeNextFloat(const NextFloatQuery* /*query*/, NextFloatResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = gsRNG.NextFloat();
+}
+
+static void NativeNextIntUpTo(const NextIntUpToQuery* query, NextIntUpToResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = 0;
+
+	const int upper = query->upper;
+	if (upper < 1) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Upper limit must be >= 1");
+		return;
+	}
+
+	result->value = 1 + gsRNG.NextInt(upper);
+}
+
+static void NativeNextInt(const NextIntQuery* query, NextIntResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = 0;
+
+	const int lower = query->lower;
+	const int upper = query->upper;
+	if (lower > upper) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Empty interval (lower > upper)");
+		return;
+	}
+
+	const float diff = (upper - lower);
+	const float r = gsRNG.NextFloat();
+	result->value = std::clamp(lower + int(r * (diff + 1)), lower, upper);
+}
+
+static void NativeSetSeed(const SetSeedQuery* query, SetSeedResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	gsRNG.SetSeed(query->seed, false);
+	result->success = true;
+}
+
+static const SyncedRandomApi SYNCED_RANDOM_API = {
+	.NextFloat = NativeNextFloat,
+	.NextIntUpTo = NativeNextIntUpTo,
+	.NextInt = NativeNextInt,
+	.SetSeed = NativeSetSeed,
+};
+
 } // namespace
 
 // ============================================================================
@@ -6522,4 +6581,5 @@ const SyncedCtrlApi SYNCED_CTRL_API = {
 	.gameConfig = &GAME_CONFIG_API,
 	.cobScript = &COB_SCRIPT_API,
 	.unitScript = &UNIT_SCRIPT_API,
+	.random = &SYNCED_RANDOM_API,
 };

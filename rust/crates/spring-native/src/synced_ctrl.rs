@@ -19,6 +19,7 @@ pub struct SyncedCtrl<'a> {
     effects_api: &'a sys::EffectsControlApi,
     game_config_api: &'a sys::GameConfigApi,
     cob_script_api: &'a sys::COBScriptApi,
+    random_api: &'a sys::SyncedRandomApi,
 }
 
 impl<'a> SyncedCtrl<'a> {
@@ -52,6 +53,7 @@ impl<'a> SyncedCtrl<'a> {
                     .cobScript
                     .as_ref()
                     .expect("cobScript API must be initialized"),
+                random_api: api.random.as_ref().expect("random API must be initialized"),
             }
         }
     }
@@ -94,6 +96,11 @@ impl<'a> SyncedCtrl<'a> {
     /// Call COB scripts and resolve script IDs
     pub fn cob_script(&self) -> CobScript<'_> {
         CobScript::new(self.cob_script_api)
+    }
+
+    /// The synced RNG behind synced Lua's `math.random`
+    pub fn random(&self) -> SyncedRandom<'_> {
+        SyncedRandom::new(self.random_api)
     }
 }
 
@@ -193,3 +200,15 @@ impl<'a> CobScript<'a> {
 }
 
 include!(concat!(env!("OUT_DIR"), "/cob_script_generated.rs"));
+
+pub struct SyncedRandom<'a> {
+    api: &'a sys::SyncedRandomApi,
+}
+
+impl<'a> SyncedRandom<'a> {
+    pub(crate) fn new(api: &'a sys::SyncedRandomApi) -> Self {
+        Self { api }
+    }
+}
+
+include!(concat!(env!("OUT_DIR"), "/synced_random_generated.rs"));

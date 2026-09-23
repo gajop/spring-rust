@@ -195,6 +195,10 @@ fn main() {
         ),
         ("game_config", spring_native_codegen::generate_game_config),
         ("cob_script", spring_native_codegen::generate_cob_script),
+        (
+            "synced_random",
+            spring_native_codegen::generate_synced_random,
+        ),
     ];
 
     for (name, generator) in &sub_apis {

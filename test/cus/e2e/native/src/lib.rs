@@ -311,6 +311,23 @@ impl NativeModule for CusE2ENative {
     }
 
     fn game_frame(&mut self, frame: i32) -> Result<(), Error> {
+        if frame == 1 && !self.mode_is_core() {
+            // Mirrors the fixture gadget's `math.random` calls after the same
+            // reseed; draw early because the native run quits at frame 2.
+            const SCALE: f32 = 16_777_216.0;
+            let synced = self.interface.synced_ctrl();
+            let random = synced.random();
+            random.set_seed(12345)?;
+            let draws = [
+                (random.next_float()? * SCALE) as i64,
+                random.next_int_up_to(10)? as i64,
+                random.next_int(3, 7)? as i64,
+                random.next_int(-5, 5)? as i64,
+                (random.next_float()? * SCALE) as i64,
+            ];
+            let draws = draws.map(|draw| draw.to_string()).join("|");
+            self.record(&format!("RNG|native|{draws}"));
+        }
         let Some(unit) = self.unit else {
             return Ok(());
         };

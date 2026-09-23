@@ -19310,6 +19310,87 @@
       "notes": []
     },
     {
+      "module": "synced_random",
+      "function": "NextFloat",
+      "import_module": "spring:synced-random",
+      "import_name": "next-float",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "synced_random",
+      "function": "NextInt",
+      "import_module": "spring:synced-random",
+      "import_name": "next-int",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "synced_random",
+      "function": "NextIntUpTo",
+      "import_module": "spring:synced-random",
+      "import_name": "next-int-up-to",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "synced_random",
+      "function": "SetSeed",
+      "import_module": "spring:synced-random",
+      "import_name": "set-seed",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
       "module": "system_control",
       "function": "CallAsTeam",
       "import_module": "spring:system-control",
@@ -31197,7 +31278,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1186,
+  "automatic_count": 1190,
   "manual_count": 198,
   "unsupported_count": 17
 }

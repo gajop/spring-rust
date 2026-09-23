@@ -253,6 +253,10 @@ pub const MODULE_SPECS: &[ModuleSpec] = &[
         api_struct: "UnitScriptApi",
         wrapper_struct: "UnitScript",
     },
+    ModuleSpec {
+        api_struct: "SyncedRandomApi",
+        wrapper_struct: "SyncedRandom",
+    },
 ];
 
 fn generate_module(
@@ -340,6 +344,7 @@ legacy_generators! {
     (generate_unit_rendering, 53),
     (generate_object_rendering, 54),
     (generate_unit_script, 55),
+    (generate_synced_random, 56),
 }
 pub struct CodeGenerator {
     clang: Clang,

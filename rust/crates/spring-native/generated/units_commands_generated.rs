@@ -282,6 +282,26 @@ impl<'a> UnitsCommands<'a> {
         }
     }
 
+    pub fn give_order_to_unit(&self, unit_id: i32, cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::GiveOrderToUnitQuery {
+                unitID: unit_id,
+                cmdID: cmd_id,
+                params: params.as_ptr(),
+                paramCount: params.len() as u32,
+                options,
+                timeout,
+            };
+            let mut result = MaybeUninit::<sys::GiveOrderToUnitResult>::zeroed();
+            let func = self.api.GiveOrderToUnit.expect("GiveOrderToUnit function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
     pub fn give_order_to_unit_map(&self, unit_ids: &[i32], cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<i32, Error> {
         unsafe {
             let query = sys::GiveOrderToUnitMapQuery {
@@ -303,6 +323,44 @@ impl<'a> UnitsCommands<'a> {
         }
     }
 
+    pub fn give_order_to_unit_array(&self, unit_ids: &[i32], cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::GiveOrderToUnitArrayQuery {
+                unitIDs: unit_ids.as_ptr(),
+                count: unit_ids.len() as u32,
+                cmdID: cmd_id,
+                params: params.as_ptr(),
+                paramCount: params.len() as u32,
+                options,
+                timeout,
+            };
+            let mut result = MaybeUninit::<sys::GiveOrderToUnitArrayResult>::zeroed();
+            let func = self.api.GiveOrderToUnitArray.expect("GiveOrderToUnitArray function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn give_order_array_to_unit(&self, unit_id: i32, commands: &[sys::NativeCommand]) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::GiveOrderArrayToUnitQuery {
+                unitID: unit_id,
+                commands: commands.as_ptr(),
+                commandCount: commands.len() as u32,
+            };
+            let mut result = MaybeUninit::<sys::GiveOrderArrayToUnitResult>::zeroed();
+            let func = self.api.GiveOrderArrayToUnit.expect("GiveOrderArrayToUnit function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
     pub fn give_order_array_to_unit_map(&self, unit_ids: &[i32], commands: &[sys::CommandFFI]) -> Result<i32, Error> {
         unsafe {
             let query = sys::GiveOrderArrayToUnitMapQuery {
@@ -313,6 +371,25 @@ impl<'a> UnitsCommands<'a> {
             };
             let mut result = MaybeUninit::<sys::GiveOrderArrayToUnitMapResult>::zeroed();
             let func = self.api.GiveOrderArrayToUnitMap.expect("GiveOrderArrayToUnitMap function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.unitsOrdered
+            })
+        }
+    }
+
+    pub fn give_order_array_to_unit_array(&self, unit_ids: &[i32], commands: &[sys::NativeCommand], pairwise: bool) -> Result<i32, Error> {
+        unsafe {
+            let query = sys::GiveOrderArrayToUnitArrayQuery {
+                unitIDs: unit_ids.as_ptr(),
+                unitCount: unit_ids.len() as u32,
+                commands: commands.as_ptr(),
+                commandCount: commands.len() as u32,
+                pairwise,
+            };
+            let mut result = MaybeUninit::<sys::GiveOrderArrayToUnitArrayResult>::zeroed();
+            let func = self.api.GiveOrderArrayToUnitArray.expect("GiveOrderArrayToUnitArray function pointer must be initialized");
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();
             Error::result_or(result.error, {

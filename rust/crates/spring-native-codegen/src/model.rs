@@ -987,6 +987,7 @@ fn is_mutating(module: &str, function: &str) -> bool {
             | "game_config"
             | "cob_script"
             | "unit_script"
+            | "synced_random"
     );
     if synced_control_module {
         return !function.starts_with("Get")

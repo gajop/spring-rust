@@ -184,6 +184,11 @@
       "bytes": 28
     },
     {
+      "name": "synced_random_generated.rs",
+      "sha256": "0979473ac8089ef2dd21491f78c507b467bf67e0358d6a6b97b61cde16b32c61",
+      "bytes": 2219
+    },
+    {
       "name": "system_control_generated.rs",
       "sha256": "f466eacf9688e67b141ddc46c20b40303a9b553ed0536f649652622fc72c780e",
       "bytes": 16880
@@ -230,8 +235,8 @@
     },
     {
       "name": "units_commands_generated.rs",
-      "sha256": "67bde249f0bb7f968a6561df6c229f3b87192f42e472f4590a9dd38f6111ec25",
-      "bytes": 13512
+      "sha256": "2e0efe208567b7ca0a27069ac10dfd5089c1d55a3870d729c4e7f23bc553b7bf",
+      "bytes": 16862
     },
     {
       "name": "units_info_generated.rs",

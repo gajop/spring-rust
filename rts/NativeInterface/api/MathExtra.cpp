@@ -1,7 +1,13 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "MathExtra.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+
+// Exported to the synced environments: use streflop's math:: like
+// LuaMathExtra so results agree across platforms.
+#include "lib/streflop/streflop_cond.h"
 
 namespace {
 
@@ -17,7 +23,7 @@ static constexpr uint32_t EXACT_INTEGER_MASK = 0x00FFFFFF;
 static void NativeHypot(const HypotQuery* query, HypotResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->value = std::hypot(query->x, query->y);
+	result->value = math::hypot(query->x, query->y);
 }
 
 static void NativeDiag(const DiagQuery* query, DiagResult* result) {
@@ -34,7 +40,7 @@ static void NativeDiag(const DiagQuery* query, DiagResult* result) {
 	}
 
 	result->error = nullptr;
-	result->length = std::sqrt(sumSquares);
+	result->length = math::sqrt(sumSquares);
 }
 
 static void NativeClamp(const ClampQuery* query, ClampResult* result) {
@@ -70,7 +76,7 @@ static void NativeRound(const RoundQuery* query, RoundResult* result) {
 static void NativeErf(const ErfQuery* query, ErfResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->result = std::erf(query->value);
+	result->result = math::erf(query->value);
 }
 
 static void NativeSmoothStep(const SmoothStepQuery* query, SmoothStepResult* result) {
@@ -87,7 +93,7 @@ static void NativeNormalize(const NormalizeQuery* query, NormalizeResult* result
 		return;
 	}
 
-	const float length = std::sqrt(query->vec->x * query->vec->x +
+	const float length = math::sqrt(query->vec->x * query->vec->x +
 	                               query->vec->y * query->vec->y +
 	                               query->vec->z * query->vec->z);
 

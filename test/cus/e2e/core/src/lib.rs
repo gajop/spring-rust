@@ -166,6 +166,9 @@ impl CoreCusModule for CusE2ECore {
     }
 
     fn cus_tick(&mut self, frame: u32) {
+        if frame == 3 {
+            record(&format!("RNG|core|{}", synced_random_draws()));
+        }
         self.attach_pending();
         if let Some(handle) = self.handle {
             self.registry.tick(frame as u64);
@@ -186,6 +189,20 @@ impl CoreCusModule for CusE2ECore {
             let _ = self.registry.detach(handle);
         }
     }
+}
+
+/// Mirrors the fixture gadget's `math.random` calls after the same reseed.
+fn synced_random_draws() -> String {
+    const SCALE: f32 = 16_777_216.0;
+    spring::random::seed(12345);
+    let draws = [
+        (spring::random::float() * SCALE) as i64,
+        spring::random::up_to(10) as i64,
+        spring::random::int(3, 7) as i64,
+        spring::random::int(-5, 5) as i64,
+        (spring::random::float() * SCALE) as i64,
+    ];
+    draws.map(|draw| draw.to_string()).join("|")
 }
 
 fn unit_created(unit: UnitId, _def: DefId, _team: TeamId, _builder: UnitId) {

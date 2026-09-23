@@ -25834,6 +25834,111 @@ pub mod unit_script {
 
 }
 
+pub mod synced_random {
+    use crate::{ApiError, ErrorCode, Result};
+
+    #[cfg(target_arch = "wasm32")]
+    pub mod raw {
+        #[link(wasm_import_module = "spring:synced-random")]
+        unsafe extern "C" {
+            #[link_name = "next-float"]
+            pub safe fn core_next_float(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:synced-random")]
+        unsafe extern "C" {
+            #[link_name = "next-int"]
+            pub safe fn core_next_int(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:synced-random")]
+        unsafe extern "C" {
+            #[link_name = "next-int-up-to"]
+            pub safe fn core_next_int_up_to(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:synced-random")]
+        unsafe extern "C" {
+            #[link_name = "set-seed"]
+            pub safe fn core_set_seed(p0: i32) -> i64;
+        }
+    }
+
+    #[inline]
+    pub fn next_float(unused: u8) -> Result<f32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_next_float(unused as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(f32::from_bits(packed as u32))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn next_int(lower: i32, upper: i32) -> Result<i32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_next_int(lower, upper) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(packed as u32 as i32)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (lower, upper);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn next_int_up_to(upper: i32) -> Result<i32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_next_int_up_to(upper) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(packed as u32 as i32)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (upper,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_seed(seed: i32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_seed(seed) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (seed,);
+            Err(unreachable!())
+        }
+    }
+
+}
+
 pub mod unit_rendering {
     use crate::{ApiError, ErrorCode, Result};
 

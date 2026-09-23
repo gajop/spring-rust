@@ -151,6 +151,7 @@ pub fn native_api_path(module: &str) -> Option<(&'static str, &'static str)> {
         "game_config" => ("nativeInterface->syncedCtrl->gameConfig", "GameConfigApi"),
         "cob_script" => ("nativeInterface->syncedCtrl->cobScript", "COBScriptApi"),
         "unit_script" => ("nativeInterface->syncedCtrl->unitScript", "UnitScriptApi"),
+        "synced_random" => ("nativeInterface->syncedCtrl->random", "SyncedRandomApi"),
         "unit_rendering" => (
             "nativeInterface->unsyncedRead->unitRendering",
             "UnitRenderingApi",

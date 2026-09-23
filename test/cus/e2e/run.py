@@ -126,9 +126,24 @@ function gadget:GameStart()
     createFixtureUnit()
 end
 
+-- Reference draws for the synced random API: native and Core-Wasm modules
+-- seed identically and must reproduce this sequence.
+local RNG_SCALE = 16777216
+
 function gadget:GameFrame(frame)
     if frame == 1 then
         createFixtureUnit()
+    end
+    if frame == 3 then
+        math.randomseed(12345)
+        local draws = {
+            math.floor(math.random() * RNG_SCALE),
+            math.random(10),
+            math.random(3, 7),
+            math.random(-5, 5),
+            math.floor(math.random() * RNG_SCALE),
+        }
+        Spring.Echo("RNG|lua|" .. table.concat(draws, "|"))
     end
 end
 """,
@@ -312,6 +327,16 @@ def assert_markers(workdir: Path) -> None:
     ):
         if marker not in fault_native:
             raise AssertionError(f"Core fault native-host marker missing: {marker!r}\n{fault_native}")
+
+    # Synced random draws agree with synced Lua's math.random call for call.
+    lua_draws = [line.split("RNG|lua|", 1)[1] for line in core_log.splitlines() if "RNG|lua|" in line]
+    core_draws = [line.split("RNG|core|", 1)[1] for line in core_log.splitlines() if "RNG|core|" in line]
+    native_draws = [line.split("RNG|native|", 1)[1] for line in native.splitlines() if "RNG|native|" in line]
+    if not lua_draws or core_draws != lua_draws or native_draws != lua_draws:
+        raise AssertionError(
+            f"synced random mismatch: lua={lua_draws} core={core_draws} native={native_draws}"
+        )
+    print(f"synced random draws match Lua: {lua_draws[0]}")
 
     print(native, end="")
     for line in core_log.splitlines():

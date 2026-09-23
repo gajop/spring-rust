@@ -74,6 +74,8 @@ pub mod prelude;
 #[cfg(target_arch = "wasm32")]
 pub mod profiling;
 #[cfg(target_arch = "wasm32")]
+pub mod random;
+#[cfg(target_arch = "wasm32")]
 pub mod rml_ui;
 #[cfg(target_arch = "wasm32")]
 pub mod rules_params;
@@ -186,9 +188,9 @@ pub use owned::{
     callins, camera, debug_input, display, effects_control, encoding, feature_control,
     feature_defs, features, game, game_config, ground_decals, icons, input, lights, los, markers,
     memory, metal_map, move_ctrl, object_rendering, path_finder, platform, player,
-    projectile_control, projectiles, selection, sound, synced_ctrl, team_control, teams, tracing,
-    types, unit_rendering, unit_script, units_info, units_weapons, unsynced_ctrl, unsynced_read,
-    utils, weapon_defs,
+    projectile_control, projectiles, selection, sound, synced_ctrl, synced_random, team_control,
+    teams, tracing, types, unit_rendering, unit_script, units_info, units_weapons, unsynced_ctrl,
+    unsynced_read, utils, weapon_defs,
 };
 
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]

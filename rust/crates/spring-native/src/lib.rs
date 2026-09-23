@@ -77,7 +77,7 @@
 //! - [`Los`] - Line of sight and radar queries
 //!
 //! ### Control (Synced)
-//! - [`SyncedCtrl`] - Composite API with 8 sub-APIs:
+//! - [`SyncedCtrl`] - Composite API with 9 sub-APIs:
 //!   - [`TeamControl`] - Alliances, resources (11 functions)
 //!   - [`UnitControl`] - Create/destroy units, orders (19 functions)
 //!   - [`FeatureControl`] - Feature modification (8 functions)
@@ -86,6 +86,7 @@
 //!   - [`EffectsControl`] - Spawn explosions/CEGs/SFX (3 functions)
 //!   - [`GameConfig`] - Game rule toggles and radar error settings (4 functions)
 //!   - [`CobScript`] - Call COB scripts and resolve IDs (2 functions)
+//!   - [`SyncedRandom`] - The synced RNG behind synced `math.random` (3 functions)
 //!
 //! ### Utilities
 //! - [`MathExtra`] - Extended math functions
@@ -306,7 +307,7 @@ pub use selection::Selection;
 pub use sound::Sound;
 pub use synced_ctrl::{
     CobScript, EffectsControl, FeatureControl, GameConfig, ProjectileControl, SyncedCtrl,
-    TeamControl, TerrainControl, UnitControl,
+    SyncedRandom, TeamControl, TerrainControl, UnitControl,
 };
 pub use system_control::SystemControl;
 pub use teams::{PlayerInfo, TeamInfo, Teams};

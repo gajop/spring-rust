@@ -1611,6 +1611,37 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct NextFloatQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct NextFloatResult {
+            pub value: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct NextIntQuery {
+            pub lower: i32,
+            pub upper: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct NextIntResult {
+            pub value: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct NextIntUpToQuery {
+            pub upper: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct NextIntUpToResult {
+            pub value: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct NumberOrBool {
             pub number: f32,
             pub boolean: bool,
@@ -2434,6 +2465,16 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetRadarErrorParamsResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetSeedQuery {
+            pub seed: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetSeedResult {
             pub success: bool,
         }
 
@@ -3391,6 +3432,15 @@
             pub game_config: u32,
             pub cob_script: u32,
             pub unit_script: u32,
+            pub random: u32,
+        }
+
+        #[derive(Debug, Clone, PartialEq)]
+        pub struct SyncedRandomApi {
+            pub next_float: u32,
+            pub next_int_up_to: u32,
+            pub next_int: u32,
+            pub set_seed: u32,
         }
 
         #[derive(Debug, Clone, PartialEq)]
