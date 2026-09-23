@@ -13,6 +13,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[3]
 ENGINE = Path(os.environ.get("SPRING_CUS_E2E_ENGINE", ROOT / "build-amd64-linux" / "install" / "spring"))
+ENGINE_TIMEOUT = float(os.environ.get("SPRING_CUS_E2E_TIMEOUT", "90"))
 BASE = ROOT / "cont" / "base"
 SOURCE_FIXTURE = ROOT / "test" / "native_api_parity" / "fixtures" / "game.sdd"
 NATIVE_MANIFEST = ROOT / "test" / "cus" / "e2e" / "native" / "Cargo.toml"
@@ -264,7 +265,7 @@ def run_engine(workdir: Path, datadir: Path, script: Path, mode: str, core: bool
             env=env,
             stdout=stream,
             stderr=subprocess.STDOUT,
-            timeout=90,
+            timeout=ENGINE_TIMEOUT,
             check=False,
         )
     if completed.returncode != 0:
