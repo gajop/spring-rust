@@ -127,7 +127,11 @@
         "get_active_command",
         "get_default_command",
         "get_action_hot_keys",
-        "get_key_bindings_count"
+        "get_key_bindings_count",
+        "give_order_selected",
+        "give_order_to_unit_unsynced",
+        "give_order_to_unit_array_unsynced",
+        "give_order_to_unit_map_unsynced"
       ],
       "core_policy": [
         "get_gather_mode",
@@ -140,17 +144,13 @@
         "vfs_abort_download_missing",
         "vfs_scan_all_dirs"
       ],
-      "mutating_getter_or_unsupported": [
-        "give_order_selected",
-        "give_order_to_unit_unsynced",
-        "give_order_to_unit_array_unsynced",
-        "give_order_to_unit_map_unsynced",
+      "rendering_disabled": [
+        "set_shock_front_factors"
+      ],
+      "unresolved_args": [
         "give_order_array_to_unit_unsynced",
         "give_order_array_to_unit_map_unsynced",
         "give_order_array_to_unit_array_unsynced"
-      ],
-      "rendering_disabled": [
-        "set_shock_front_factors"
       ]
     }
   }

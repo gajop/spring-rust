@@ -110,6 +110,13 @@ pub mod __core_callin_scratch_wire {{
     }}
 }}
 
+/// Reserve the module's callin scratch region, in bytes.
+///
+/// The host serializes every scratch-ABI callin's arguments (strings, byte
+/// payloads such as `HandleLuaMsg` data, numeric and record lists) into this
+/// region before entering the guest. A callin whose encoded arguments do not
+/// fit is skipped with a warning naming the size and the limit; the module is
+/// not faulted. Size it for the largest message the module expects to receive.
 #[macro_export]
 macro_rules! export_callin_scratch {{
     ($bytes:expr) => {{
