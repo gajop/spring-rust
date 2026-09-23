@@ -100,6 +100,7 @@ public:
 	bool HasFinished() const;
 
 	void UpdateSpeedControl(int speedCtrl);
+	void AddPauseAtFrame(const std::string& arg);
 	static std::string SpeedControlToString(int speedCtrl);
 
 	static bool IsServerCommand(const std::string& cmd) {
@@ -269,6 +270,11 @@ private:
 	float minUserSpeed = 1.0f;
 
 	bool isPaused = false;
+
+	// Server frames at which to pause (ascending); set by the host through
+	// /pauseatframe, so e.g. a profiling harness can stop the server from
+	// queuing frames past a measurement boundary.
+	std::vector<int> pauseAtFrames;
 	/// whether the game is pausable for others than the host
 	bool gamePausable = true;
 
@@ -284,7 +290,7 @@ private:
 
 
 	/// If the server receives a command, it will forward it to clients if it is not in this set
-	static std::array<std::string, 26> commandBlacklist;
+	static std::array<std::string, 27> commandBlacklist;
 
 	std::unique_ptr<netcode::UDPListener> udpListener;
 	std::unique_ptr<CDemoReader> demoReader;

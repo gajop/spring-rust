@@ -3,7 +3,9 @@
 #include "System/Net/UDPListener.h"
 #include "System/Net/UDPConnection.h"
 
+#include <cstdlib>
 #include <functional>
+#include <limits>
 
 #if defined DEDICATED || defined DEBUG
 	#include <iostream>
@@ -120,7 +122,7 @@ decltype(CGameServer::commandBlacklist) CGameServer::commandBlacklist{
 	"nopause", "nohelp", "cheat", "desync", "godmode", "globallos",
 	"nocost", "forcestart", "nospectatorchat", "nospecdraw",
 	"skip", "reloadcob", "reloadcegs", "devlua", "editdefs",
-	"singlestep", "spec", "specbynum"
+	"singlestep", "spec", "specbynum", "pauseatframe"
 };
 
 
@@ -165,6 +167,14 @@ void CGameServer::Initialize()
 	logDebugMessages = configHandler->GetBool("ServerLogDebugMessages");
 
 	rng.Seed((myGameData->GetSetupText()).length());
+
+	// Local-only convenience for automated harnesses that must pause before
+	// they can send /pauseatframe: comma-separated server frames.
+	if (const char* frames = std::getenv("SPRING_PROFILE_PAUSE_FRAMES"); frames != nullptr && myGameSetup->onlyLocal) {
+		for (const std::string& frame: CSimpleParser::Split(frames, ",")) {
+			AddPauseAtFrame(frame);
+		}
+	}
 
 	// start network
 	if (!myGameSetup->onlyLocal)
@@ -2587,6 +2597,15 @@ void CGameServer::PushAction(const Action& action, bool fromAutoHost)
 			LOG("Server killed!");
 			quitServer = true;
 		} break;
+		case hashString("pauseatframe"): {
+			// "/pauseatframe <frame>" adds a frame, "/pauseatframe" clears all
+			if (action.extra.empty()) {
+				pauseAtFrames.clear();
+				Message("Cleared all pause-at frames");
+			} else {
+				AddPauseAtFrame(action.extra);
+			}
+		} break;
 		case hashString("pause"): {
 			// action can originate from autohost prior to start
 			// (normal clients are blocked from sending any pause
@@ -2729,8 +2748,35 @@ void CGameServer::CreateNewFrame(bool fromServerThread, bool fixedFrameTime)
 		#ifdef SYNCCHECK
 			outstandingSyncFrames.insert(serverFrameNum);
 		#endif
+
+			if (!pauseAtFrames.empty() && pauseAtFrames.front() <= serverFrameNum) {
+				// frames already passed (e.g. while fast-forwarding) are dropped
+				while (!pauseAtFrames.empty() && pauseAtFrames.front() <= serverFrameNum)
+					pauseAtFrames.erase(pauseAtFrames.begin());
+
+				if (HasLocalClient()) {
+					isPaused = true;
+					Broadcast(CBaseNetProtocol::Get().SendPause(localClientNumber, true));
+					break;
+				}
+			}
 		}
 	}
+}
+
+void CGameServer::AddPauseAtFrame(const std::string& arg)
+{
+	char* end = nullptr;
+	const long frame = std::strtol(arg.c_str(), &end, 10);
+
+	if (end == arg.c_str() || *end != '\0' || frame <= serverFrameNum || frame > std::numeric_limits<int>::max()) {
+		Message(spring::format("Invalid pause-at frame \"%s\" (must be a frame after %d)", arg.c_str(), serverFrameNum));
+		return;
+	}
+
+	const auto iter = std::lower_bound(pauseAtFrames.begin(), pauseAtFrames.end(), static_cast<int>(frame));
+	if (iter == pauseAtFrames.end() || *iter != frame)
+		pauseAtFrames.insert(iter, static_cast<int>(frame));
 }
 
 

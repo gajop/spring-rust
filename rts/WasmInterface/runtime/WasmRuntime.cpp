@@ -6,6 +6,7 @@
 #include <array>
 #include <cctype>
 #include <charconv>
+#include <cstdlib>
 #include <iomanip>
 #include <limits>
 #include <sstream>
@@ -585,6 +586,12 @@ WasmRuntime::WasmRuntime(WasmRuntimeConfig config)
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	wasm_config_t* wasmtimeConfig = wasm_config_new();
 	if (wasmtimeConfig != nullptr) {
+		// Diagnostic-only opt-in: preserve JIT names and unwind metadata for perf.
+		const char* profiling = std::getenv("SPRING_WASM_JITDUMP");
+		if (profiling != nullptr && std::string_view(profiling) == "1") {
+			wasmtime_config_profiler_set(wasmtimeConfig, WASMTIME_PROFILING_STRATEGY_JITDUMP);
+			wasmtime_config_debug_info_set(wasmtimeConfig, true);
+		}
 		wasmtime_config_consume_fuel_set(wasmtimeConfig, config.instructionFuel != 0);
 		wasmtime_config_wasm_component_model_set(wasmtimeConfig, true);
 		// Component canonical lowering can execute guest realloc while a host
