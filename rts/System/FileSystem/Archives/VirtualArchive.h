@@ -5,6 +5,7 @@
 #include "IArchiveFactory.h"
 #include "IArchive.h"
 
+#include <memory>
 #include <vector>
 #include <string>
 
@@ -35,7 +36,7 @@ public:
 private:
 	IArchive* DoCreateArchive(const std::string& fileName) const;
 
-	std::vector<CVirtualArchive*> archives;
+	std::vector<std::unique_ptr<CVirtualArchive>> archives;
 };
 
 extern CVirtualArchiveFactory* virtualArchiveFactory;

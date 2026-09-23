@@ -34,17 +34,16 @@ static uint32_t NextVirtualArchiveGeneration()
 CVirtualArchive* CVirtualArchiveFactory::AddArchive(const std::string& fileName)
 {
 	// Re-adding a name (e.g. regenerating a map) supersedes the older archive;
-	// lookups search newest first. Older archives stay alive for open handles.
-	CVirtualArchive* archive = new CVirtualArchive(fileName, NextVirtualArchiveGeneration());
-	archives.push_back(archive);
-	return archive;
+	// lookups search newest first. Older archives stay alive for open handles
+	// until the factory is destroyed.
+	return archives.emplace_back(std::make_unique<CVirtualArchive>(fileName, NextVirtualArchiveGeneration())).get();
 }
 
-static CVirtualArchive* FindNewest(const std::vector<CVirtualArchive*>& archives, const std::string& baseName)
+static CVirtualArchive* FindNewest(const std::vector<std::unique_ptr<CVirtualArchive>>& archives, const std::string& baseName)
 {
 	for (auto it = archives.rbegin(); it != archives.rend(); ++it) {
 		if ((*it)->GetFileName() == baseName)
-			return *it;
+			return it->get();
 	}
 
 	return nullptr;
