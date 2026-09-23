@@ -180,6 +180,11 @@ option(TRACY_PROFILE_MEMORY "Profile memory allocations" OFF)
 
 add_subdirectory(tracy)
 
+if (TRACY_ENABLE AND TRACY_PROFILE_MEMORY)
+	# Read by the engine's operator new/delete overrides (MemoryOverride.cpp)
+	target_compile_definitions(TracyClient PUBLIC RECOIL_TRACY_PROFILE_MEMORY)
+endif()
+
 if (TRACY_ENABLE)
 	option(RMLUI_TRACY_PROFILING "Enable RmlUi profiling with Tracy." ON)
 	# We have our own memory profiling, never enable RmlUi one.

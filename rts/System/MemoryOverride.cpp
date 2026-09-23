@@ -15,7 +15,7 @@
 #endif
 #endif
 
-#ifdef TRACY_ENABLE
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
 #include <tracy/Tracy.hpp>
 #endif
 
@@ -137,7 +137,10 @@ size_t usable_size(void* ptr)
 // Custom operator new/delete overrides using mimalloc
 // This file should be compiled only once into the engine
 // Based on mimalloc-new-delete.h from mimalloc distribution
-// When TRACY_ENABLE is defined, also tracks allocations with Tracy
+// With TRACY_PROFILE_MEMORY, also tracks allocations with Tracy. These run
+// for every C++ allocation in the process, including other libraries' static
+// destructors after Tracy's profiler is gone (e.g. libopenal at exit), so use
+// the Secure variants, which skip reporting once the profiler is destroyed.
 // ----------------------------------------------------------------------------
 
 #ifdef USE_MIMALLOC
@@ -145,16 +148,16 @@ size_t usable_size(void* ptr)
 // C++98 delete operators
 void operator delete(void* p) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free(p);
 }
 
 void operator delete[](void* p) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free(p);
 }
@@ -162,16 +165,16 @@ void operator delete[](void* p) noexcept
 // C++98 no-throw delete operators
 void operator delete(void* p, const std::nothrow_t&) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free(p);
 }
 
 void operator delete[](void* p, const std::nothrow_t&) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free(p);
 }
@@ -180,8 +183,8 @@ void operator delete[](void* p, const std::nothrow_t&) noexcept
 void* operator new(std::size_t n) noexcept(false)
 {
 	void* p = mi_new(n);
-#ifdef TRACY_ENABLE
-	TracyAlloc(p, n);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureAlloc(p, n);
 #endif
 	return p;
 }
@@ -189,8 +192,8 @@ void* operator new(std::size_t n) noexcept(false)
 void* operator new[](std::size_t n) noexcept(false)
 {
 	void* p = mi_new(n);
-#ifdef TRACY_ENABLE
-	TracyAlloc(p, n);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureAlloc(p, n);
 #endif
 	return p;
 }
@@ -200,8 +203,8 @@ void* operator new(std::size_t n, const std::nothrow_t& tag) noexcept
 {
 	(void)(tag);
 	void* p = mi_new_nothrow(n);
-#ifdef TRACY_ENABLE
-	TracyAlloc(p, n);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureAlloc(p, n);
 #endif
 	return p;
 }
@@ -210,8 +213,8 @@ void* operator new[](std::size_t n, const std::nothrow_t& tag) noexcept
 {
 	(void)(tag);
 	void* p = mi_new_nothrow(n);
-#ifdef TRACY_ENABLE
-	TracyAlloc(p, n);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureAlloc(p, n);
 #endif
 	return p;
 }
@@ -220,16 +223,16 @@ void* operator new[](std::size_t n, const std::nothrow_t& tag) noexcept
 #if (__cplusplus >= 201402L || _MSC_VER >= 1916)
 void operator delete(void* p, std::size_t n) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free_size(p, n);
 }
 
 void operator delete[](void* p, std::size_t n) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free_size(p, n);
 }
@@ -239,48 +242,48 @@ void operator delete[](void* p, std::size_t n) noexcept
 #if (__cplusplus > 201402L || defined(__cpp_aligned_new))
 void operator delete(void* p, std::align_val_t al) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free_aligned(p, static_cast<size_t>(al));
 }
 
 void operator delete[](void* p, std::align_val_t al) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free_aligned(p, static_cast<size_t>(al));
 }
 
 void operator delete(void* p, std::size_t n, std::align_val_t al) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free_size_aligned(p, n, static_cast<size_t>(al));
 }
 
 void operator delete[](void* p, std::size_t n, std::align_val_t al) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free_size_aligned(p, n, static_cast<size_t>(al));
 }
 
 void operator delete(void* p, std::align_val_t al, const std::nothrow_t&) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free_aligned(p, static_cast<size_t>(al));
 }
 
 void operator delete[](void* p, std::align_val_t al, const std::nothrow_t&) noexcept
 {
-#ifdef TRACY_ENABLE
-	TracyFree(p);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureFree(p);
 #endif
 	mi_free_aligned(p, static_cast<size_t>(al));
 }
@@ -288,8 +291,8 @@ void operator delete[](void* p, std::align_val_t al, const std::nothrow_t&) noex
 void* operator new(std::size_t n, std::align_val_t al) noexcept(false)
 {
 	void* p = mi_new_aligned(n, static_cast<size_t>(al));
-#ifdef TRACY_ENABLE
-	TracyAlloc(p, n);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureAlloc(p, n);
 #endif
 	return p;
 }
@@ -297,8 +300,8 @@ void* operator new(std::size_t n, std::align_val_t al) noexcept(false)
 void* operator new[](std::size_t n, std::align_val_t al) noexcept(false)
 {
 	void* p = mi_new_aligned(n, static_cast<size_t>(al));
-#ifdef TRACY_ENABLE
-	TracyAlloc(p, n);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureAlloc(p, n);
 #endif
 	return p;
 }
@@ -306,8 +309,8 @@ void* operator new[](std::size_t n, std::align_val_t al) noexcept(false)
 void* operator new(std::size_t n, std::align_val_t al, const std::nothrow_t&) noexcept
 {
 	void* p = mi_new_aligned_nothrow(n, static_cast<size_t>(al));
-#ifdef TRACY_ENABLE
-	TracyAlloc(p, n);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureAlloc(p, n);
 #endif
 	return p;
 }
@@ -315,8 +318,8 @@ void* operator new(std::size_t n, std::align_val_t al, const std::nothrow_t&) no
 void* operator new[](std::size_t n, std::align_val_t al, const std::nothrow_t&) noexcept
 {
 	void* p = mi_new_aligned_nothrow(n, static_cast<size_t>(al));
-#ifdef TRACY_ENABLE
-	TracyAlloc(p, n);
+#ifdef RECOIL_TRACY_PROFILE_MEMORY
+	TracySecureAlloc(p, n);
 #endif
 	return p;
 }
