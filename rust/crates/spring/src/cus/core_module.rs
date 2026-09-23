@@ -46,6 +46,29 @@ pub trait CoreCusModule: Default {
     fn cus_detach(&mut self, _instance_id: u32) {}
 }
 
+/// Marks the module's CUS state as borrowed. `export_core_cus!` holds one while
+/// an engine CUS export or `with_cus_module` runs, so the two can never alias
+/// the state: the second one sees it busy and backs off.
+pub struct CusBusy(&'static core::sync::atomic::AtomicBool);
+
+impl CusBusy {
+    #[inline]
+    pub fn enter(flag: &'static core::sync::atomic::AtomicBool) -> Option<Self> {
+        if flag.swap(true, core::sync::atomic::Ordering::Acquire) {
+            None
+        } else {
+            Some(Self(flag))
+        }
+    }
+}
+
+impl Drop for CusBusy {
+    #[inline]
+    fn drop(&mut self) {
+        self.0.store(false, core::sync::atomic::Ordering::Release);
+    }
+}
+
 #[inline]
 pub fn read_f32s(pointer: i32, count: i32, buffer_base: usize) -> Option<&'static [f32]> {
     if pointer < 0 || count < 0 || count as usize > MAX_ARGUMENTS {
@@ -102,9 +125,30 @@ pub fn buffer_range_contains(pointer: i32, bytes: usize, buffer_base: usize) -> 
 /// `T` is normally a game module containing one or more `CusRegistry`
 /// values. The host never inspects that state; it only invokes these
 /// stable exports and the engine-operation imports.
+///
+/// Also defines `with_cus_module(|module| ...)` at the invocation site, so the
+/// module's own gadget/rules code can reach the CUS state directly: attach a
+/// script from `UnitCreated`, or call a unit script, without going through the
+/// engine (which cannot re-enter a running module). It returns `None` while
+/// the state is already in use (inside a CUS export or a nested call).
 #[macro_export]
 macro_rules! export_core_cus {
     ($module_type:ty) => {
+        static __SPRING_CUS_BUSY: core::sync::atomic::AtomicBool =
+            core::sync::atomic::AtomicBool::new(false);
+
+        /// Run `f` on this module's CUS state; `None` if it is not initialized
+        /// yet or already in use further up the stack.
+        #[allow(dead_code)]
+        pub fn with_cus_module<R>(f: impl FnOnce(&mut $module_type) -> R) -> Option<R> {
+            let _busy = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY)?;
+            // SAFETY: `_busy` excludes every other access path to the state.
+            unsafe {
+                let module = &raw mut __SPRING_CUS_MODULE;
+                (*module).as_mut().map(f)
+            }
+        }
+
         static mut __SPRING_CUS_MODULE: Option<$module_type> = None;
         static mut __SPRING_CUS_BUFFER: [u8; $crate::cus::core_module::BUFFER_SIZE] =
             [0; $crate::cus::core_module::BUFFER_SIZE];
@@ -122,6 +166,9 @@ macro_rules! export_core_cus {
 
         #[unsafe(no_mangle)]
         pub extern "C" fn SPRING_CUS_INIT() -> i32 {
+            let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
+                return 1;
+            };
             unsafe {
                 let module = &raw mut __SPRING_CUS_MODULE;
                 *module = Some(<$module_type as Default>::default());
@@ -139,6 +186,10 @@ macro_rules! export_core_cus {
             integer_count: i32,
             result_pointer: i32,
         ) -> i32 {
+            // Busy: the state is in use further up this stack; "not handled".
+            let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
+                return 0;
+            };
             unsafe {
                 let buffer_base = (&raw const __SPRING_CUS_BUFFER) as *const u8 as usize;
                 let Some(float_arguments) =
@@ -217,6 +268,9 @@ macro_rules! export_core_cus {
             argument_count: i32,
             result_pointer: i32,
         ) -> i32 {
+            let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
+                return 0;
+            };
             unsafe {
                 let buffer_base = (&raw const __SPRING_CUS_BUFFER) as *const u8 as usize;
                 let Some(name) =
@@ -279,6 +333,9 @@ macro_rules! export_core_cus {
 
         #[unsafe(no_mangle)]
         pub unsafe extern "C" fn SPRING_CUS_TICK(frame: i32) {
+            let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
+                return;
+            };
             unsafe {
                 let module = &raw mut __SPRING_CUS_MODULE;
                 if let Some(module) = (*module).as_mut() {
@@ -292,6 +349,9 @@ macro_rules! export_core_cus {
 
         #[unsafe(no_mangle)]
         pub unsafe extern "C" fn SPRING_CUS_DETACH(instance_id: i32) {
+            let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
+                return;
+            };
             unsafe {
                 let module = &raw mut __SPRING_CUS_MODULE;
                 if let Some(module) = (*module).as_mut() {

@@ -295,6 +295,9 @@ def assert_markers(workdir: Path) -> None:
         "CUS_E2E|core|tick|",
         "task_resumed=1",
         "CUS_E2E|core|detach",
+        # the module calling its own unit script, via the engine and directly
+        "CUS_E2E|core|self-engine|found=1|success=1|value=4",
+        "CUS_E2E|core|self-direct|available=1|found=1|value=4",
     )
     for marker in required_core:
         if marker not in core_log:

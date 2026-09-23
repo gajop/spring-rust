@@ -43,7 +43,14 @@ pub mod variable_io {
             function_name_wire.extend_from_slice(function_name.as_bytes());
             let (function_name_pointer, function_name_length) =
                 crate::wasm_slice_parts(&function_name_wire)?;
-            let (args_pointer, args_length) = crate::wasm_slice_parts(args)?;
+            // Same wire as the host reads for every list input: a u32 element
+            // count followed by the little-endian elements.
+            let mut args_wire = Vec::with_capacity(4 + args.len() * 4);
+            args_wire.extend_from_slice(&(args.len() as u32).to_le_bytes());
+            for arg in args {
+                args_wire.extend_from_slice(&arg.to_le_bytes());
+            }
+            let (args_pointer, args_length) = crate::wasm_slice_parts(&args_wire)?;
             let mut input = [
                 function_name_pointer as u32,
                 function_name_length as u32,

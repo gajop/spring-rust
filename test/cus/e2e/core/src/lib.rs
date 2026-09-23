@@ -15,6 +15,7 @@ const INSTANCE_ID: u32 = 0xC05E_0002;
 const CAPS: ScriptCapabilities =
     ScriptCapabilities::new(ScriptCapabilities::CREATE | ScriptCapabilities::QUERY_WEAPON);
 static PENDING_UNIT: AtomicI32 = AtomicI32::new(-1);
+static ATTACHED_UNIT: AtomicI32 = AtomicI32::new(-1);
 
 fn record(message: &str) {
     let _ = spring::messages::log("cus-e2e", 1, message);
@@ -88,7 +89,10 @@ impl CusE2ECore {
         let handle = self.registry.attach(instance);
         self.handle = Some(handle);
         match WasmCus::attach(unit, INSTANCE_ID, CAPS) {
-            Ok(_) => record(&format!("CUS_E2E|core|attached|unit={unit_id}")),
+            Ok(_) => {
+                ATTACHED_UNIT.store(unit_id, Ordering::Relaxed);
+                record(&format!("CUS_E2E|core|attached|unit={unit_id}"))
+            }
             Err(_) => {
                 record("CUS_E2E|core|attach-error");
                 self.handle = None;
@@ -175,7 +179,6 @@ impl CoreCusModule for CusE2ECore {
                 spring::cmd::FIGHT
             );
         }
-        self.attach_pending();
         if let Some(handle) = self.handle {
             self.registry.tick(frame as u64);
             if !self.task_logged && self.resumed() {
@@ -211,6 +214,43 @@ fn synced_random_draws() -> String {
     draws.map(|draw| draw.to_string()).join("|")
 }
 
+/// Rules code calling its own module's unit script: through the engine and
+/// directly through `with_cus_module`.
+fn game_frame(frame: i32) {
+    // The module's own GameFrame reaches its CUS state directly to attach;
+    // no queue drained by the next CUS tick.
+    if frame == 1 && with_cus_module(|module| module.attach_pending()).is_none() {
+        record("CUS_E2E|core|attach-busy");
+    }
+    if frame != 4 {
+        return;
+    }
+    let unit = ATTACHED_UNIT.load(Ordering::Relaxed);
+    if unit < 0 {
+        return;
+    }
+    match spring::typed::call_unit_script(unit, "e2e_named", &[3.0], 1) {
+        Ok(result) => record(&format!(
+            "CUS_E2E|core|self-engine|found={}|success={}|value={}",
+            result.function_found as u8,
+            result.success as u8,
+            result.ret_values.first().copied().unwrap_or(-1.0)
+        )),
+        Err(error) => record(&format!("CUS_E2E|core|self-engine|error={error:?}")),
+    }
+    let mut values = [0.0f32; 1];
+    let mut found = false;
+    let direct = with_cus_module(|module| {
+        module.cus_call_named(INSTANCE_ID, "e2e_named", &[3.0], &mut values, &mut found)
+    });
+    record(&format!(
+        "CUS_E2E|core|self-direct|available={}|found={}|value={}",
+        direct.is_some() as u8,
+        found as u8,
+        values[0]
+    ));
+}
+
 fn unit_created(unit: UnitId, _def: DefId, _team: TeamId, _builder: UnitId) {
     let _ = PENDING_UNIT.compare_exchange(-1, unit.0, Ordering::Relaxed, Ordering::Relaxed);
 }
@@ -227,3 +267,4 @@ spring::export_callin_scratch!(4096);
 spring::export_handle_lua_msg!(handle_lua_msg);
 spring::export_environment_mask!(spring::rules_synced::ENVIRONMENT_MASK);
 spring::export_unit_created!(unit_created);
+spring::export_game_frame!(game_frame);
