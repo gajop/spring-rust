@@ -76,11 +76,18 @@ struct CusE2ENative {
     named_attempted: bool,
     ready_to_quit: bool,
     quit_requested: bool,
+    fault_sent: bool,
 }
 
 impl CusE2ENative {
     fn mode_is_core(&self) -> bool {
-        self.mode == "core"
+        self.mode == "core" || self.mode_is_core_fault()
+    }
+
+    // The Core module traps on a rules message while its CUS script is still
+    // attached; the engine must drop the module and keep simulating.
+    fn mode_is_core_fault(&self) -> bool {
+        self.mode == "core-fault"
     }
 
     fn record(&self, event: &str) {
@@ -170,6 +177,7 @@ impl NativeModule for CusE2ENative {
             named_attempted: false,
             ready_to_quit: false,
             quit_requested: false,
+            fault_sent: false,
         }
     }
 
@@ -315,12 +323,27 @@ impl NativeModule for CusE2ENative {
                         "core-named|found={}|success={}|value={value}",
                         result.found as u8, result.success as u8
                     ));
-                    if result.found && result.success && (value - 4.0).abs() < f32::EPSILON {
+                    if result.found
+                        && result.success
+                        && (value - 4.0).abs() < f32::EPSILON
+                        && !self.mode_is_core_fault()
+                    {
                         self.ready_to_quit = true;
                     }
                 }
                 Err(error) => self.record(&format!("core-named-error|{error}")),
             }
+        }
+        if self.mode_is_core_fault() && self.named_attempted && !self.fault_sent {
+            self.fault_sent = true;
+            match self.interface.messages().send_lua_rules_msg("cus-e2e-fault") {
+                Ok(_) => self.record(&format!("core-fault-sent|frame={frame}")),
+                Err(error) => self.record(&format!("core-fault-error|{error:?}")),
+            }
+        }
+        if self.mode_is_core_fault() && self.fault_sent && frame >= 90 {
+            self.record(&format!("core-fault-survived|frame={frame}"));
+            self.ready_to_quit = true;
         }
         if self.ready_to_quit && !self.quit_requested {
             self.quit_requested = true;

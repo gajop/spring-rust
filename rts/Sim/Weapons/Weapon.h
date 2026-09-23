@@ -106,7 +106,10 @@ public:
 	bool IsFastAutoRetargetingEnabled() const { return fastAutoRetargeting; }
 	void UpdateWeaponErrorVector();
 	void UpdateWeaponVectors();
-	void RefreshWeaponPieces() { UpdateWeaponPieces(); UpdateWeaponVectors(); }
+	// Called when a unit script is (re)attached. The script may resolve its
+	// pieces after Create returns, so a miss here is not reported; the
+	// weapon's own later piece queries still warn.
+	void RefreshWeaponPieces() { UpdateWeaponPieces(true, false); UpdateWeaponVectors(); }
 protected:
 	virtual void FireImpl(const bool scriptCall) {}
 	virtual void UpdateWantedDir();
@@ -116,7 +119,7 @@ protected:
 	static bool TargetUnderWater(const float3& tgtPos, const SWeaponTarget&);
 	static bool TargetInWater(const float3& tgtPos, const SWeaponTarget&);
 
-	void UpdateWeaponPieces(const bool updateAimFrom = true);
+	void UpdateWeaponPieces(const bool updateAimFrom = true, const bool warnMissing = true);
 	float3 GetLeadVec(const CUnit* unit) const;
 	float GetAccuratePredictedImpactTime(const CUnit* unit) const;
 	float GetSafeInterceptTime(const CUnit* unit, float predictMult) const;

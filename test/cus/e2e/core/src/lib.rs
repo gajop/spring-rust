@@ -48,8 +48,14 @@ impl UnitScript for E2EScript {
         ));
     }
 
+    // Pieces resolve only once the Create task has run, like a script that
+    // looks them up asynchronously; the attach-time refresh must not warn.
     fn query_weapon(&mut self, _ctx: &UnitCtx, _weapon: spring::cus::WeaponId) -> Piece {
-        Piece(7)
+        if *self.resumed.borrow() {
+            Piece(0)
+        } else {
+            Piece(-1)
+        }
     }
 }
 
@@ -186,6 +192,15 @@ fn unit_created(unit: UnitId, _def: DefId, _team: TeamId, _builder: UnitId) {
     let _ = PENDING_UNIT.compare_exchange(-1, unit.0, Ordering::Relaxed, Ordering::Relaxed);
 }
 
+fn handle_lua_msg(_player: i32, _script: i32, _mode: i32, data: &[u8]) {
+    if data == b"cus-e2e-fault" {
+        record("CUS_E2E|core|fault");
+        core::arch::wasm32::unreachable();
+    }
+}
+
 spring::export_core_cus!(CusE2ECore);
+spring::export_callin_scratch!(4096);
+spring::export_handle_lua_msg!(handle_lua_msg);
 spring::export_environment_mask!(spring::rules_synced::ENVIRONMENT_MASK);
 spring::export_unit_created!(unit_created);

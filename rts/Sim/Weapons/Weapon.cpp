@@ -232,7 +232,7 @@ float CWeapon::TargetWeight(const CUnit* targetUnit) const
 }
 
 
-void CWeapon::UpdateWeaponPieces(const bool updateAimFrom)
+void CWeapon::UpdateWeaponPieces(const bool updateAimFrom, const bool warnMissing)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	hasBlockShot = owner->script->HasBlockShot(weaponNum);
@@ -259,7 +259,7 @@ void CWeapon::UpdateWeaponPieces(const bool updateAimFrom)
 		return;
 	}
 
-	if (!alreadyWarnedAboutMissingPieces && (owner->script != &CNullUnitScript::value) && !weaponDef->isShield && (dynamic_cast<CNoWeapon*>(this) == nullptr)) {
+	if (warnMissing && !alreadyWarnedAboutMissingPieces && (owner->script != &CNullUnitScript::value) && !weaponDef->isShield && (dynamic_cast<CNoWeapon*>(this) == nullptr)) {
 		LOG_L(L_WARNING, "%s: weapon%i: Neither AimFromWeapon nor QueryWeapon defined or returned invalid pieceids", owner->unitDef->name.c_str(), weaponNum + LUA_WEAPON_BASE_INDEX);
 		alreadyWarnedAboutMissingPieces = true;
 	}

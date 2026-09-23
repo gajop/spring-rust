@@ -291,12 +291,37 @@ def assert_markers(workdir: Path) -> None:
         if marker not in core_native:
             raise AssertionError(f"Core native-host marker missing: {marker!r}\n{core_native}")
 
+    # The Core script resolves its weapon piece only after Create's task runs;
+    # the refresh at attach must not report the piece as missing.
+    if "Neither AimFromWeapon nor QueryWeapon" in core_log:
+        raise AssertionError(f"Core-Wasm weapon-piece warning at attach:\n{core_log}")
+
+    fault_log = (workdir / "core-fault-write" / "infolog.txt").read_text(encoding="utf-8")
+    fault_native = (workdir / "core-fault-events.log").read_text(encoding="utf-8")
+    for marker in (
+        "CUS_E2E|core|attached|",
+        "CUS_E2E|core|fault",
+        "Core Wasm module cus-e2e was deregistered due to fault",
+    ):
+        if marker not in fault_log:
+            raise AssertionError(f"Core-Wasm fault marker missing: {marker!r}\n{fault_log}")
+    for marker in (
+        "native|core-fault-sent|",
+        "native|core-fault-survived|",
+        "native|shutdown",
+    ):
+        if marker not in fault_native:
+            raise AssertionError(f"Core fault native-host marker missing: {marker!r}\n{fault_native}")
+
     print(native, end="")
     for line in core_log.splitlines():
         if "CUS_E2E|core|" in line:
             print(line)
     for line in core_native.splitlines():
         if line.startswith("native|core-") or line == "native|shutdown":
+            print(line)
+    for line in fault_native.splitlines():
+        if line.startswith("native|core-fault"):
             print(line)
 
 
@@ -309,6 +334,7 @@ def main() -> int:
         core_data = make_game(workdir / "core", core=True)
         run_engine(workdir, native_data, script, "native", core=False)
         run_engine(workdir, core_data, script, "core", core=True)
+        run_engine(workdir, core_data, script, "core-fault", core=True)
         assert_markers(workdir)
     except Exception:
         print(f"fixture workdir retained for diagnosis: {workdir}", file=sys.stderr)
