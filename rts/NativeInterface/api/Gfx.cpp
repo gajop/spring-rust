@@ -3096,6 +3096,32 @@ static void UploadVBO(const GfxVBOUploadQuery* query, GfxVBOUploadResult* result
 	size_t bytesWritten = 0;
 	uint8_t* destination = vbo->shadow.data() + bufferOffset;
 	const size_t destinationSize = vbo->bufferSizeInBytes - bufferOffset;
+	// The common sprite/particle layout is tightly packed float attributes.
+	// For this exact case the generic attribute converter only copies each
+	// float through a temporary; one bounded copy produces identical VBO bytes.
+	if (query->attributeIndex < 0 && vbo->target == GL_ARRAY_BUFFER && vbo->elemSizeInBytes != 0) {
+		size_t packedBytes = 0;
+		bool packedFloats = true;
+		for (const NativeVBOAttribute& attribute : vbo->attributes) {
+			if ((attribute.type != GL_FLOAT && attribute.type != GL_FLOAT_VEC4 && attribute.type != GL_FLOAT_MAT4)
+					|| attribute.pointer != packedBytes || attribute.typeSizeInBytes % sizeof(float) != 0) {
+				packedFloats = false;
+				break;
+			}
+			packedBytes += static_cast<size_t>(attribute.size) * attribute.typeSizeInBytes;
+		}
+		if (packedFloats && packedBytes == vbo->elemSizeInBytes
+				&& dataCount % (packedBytes / sizeof(float)) == 0
+				&& dataCount <= destinationSize / sizeof(float)) {
+			bytesWritten = dataCount * sizeof(float);
+			std::memcpy(destination, data, bytesWritten);
+			vbo->vbo->Bind(vbo->target);
+			vbo->vbo->SetBufferSubData(bufferOffset, bytesWritten, destination);
+			vbo->vbo->Unbind();
+			result->bytesWritten = bytesWritten;
+			return;
+		}
+	}
 	while (dataIndex < dataCount) {
 		for (const NativeVBOAttribute& attribute : vbo->attributes) {
 			if (!WriteNativeVBOAttribute(*vbo, data, dataCount, dataIndex, attribute, query->attributeIndex, destination, destinationSize, bytesWritten)) {
