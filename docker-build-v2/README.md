@@ -98,13 +98,17 @@ will:
 
 ### Build variants: profiling and AddressSanitizer
 
-`build-variants.sh` builds several Linux configurations, each in its own
-directory, so a game or tool can pick one per run:
+Besides the default build, `build-variants.sh` builds extra Linux
+configurations, each in its own directory, so a game or launcher can pick one
+per run by pointing at its `install` directory:
 
-| Variant | Directory | Configuration | Use it for |
-|---------|-----------|---------------|------------|
-| `tracy` | `build-{arch}-linux-tracy/install` | optimized, on-demand Tracy | playing and profiling |
-| `asan`  | `build-{arch}-linux-asan/install`  | AddressSanitizer, no Tracy, no mimalloc | debugging memory errors (not for timing) |
+| Build | Directory | Built by | Configuration | Use it for |
+|-------|-----------|----------|---------------|------------|
+| default | `build-{arch}-linux/install` | `build.sh linux` | optimized, no Tracy | normal play, tests |
+| `tracy` | `build-{arch}-linux-tracy/install` | `build-variants.sh` | optimized, on-demand Tracy | profiling (behaves like default when no Tracy client is connected) |
+| `asan`  | `build-{arch}-linux-asan/install`  | `build-variants.sh` | AddressSanitizer, no Tracy, no mimalloc | debugging crashes and memory corruption; slow, never for timing |
+
+`docker-build-v2/build-variants.sh --help` prints the same summary.
 
 ```shell
 docker-build-v2/build-variants.sh                 # both, one after the other
@@ -116,7 +120,9 @@ docker-build-v2/build-variants.sh -- -DBUILD_spring-headless=OFF  # extra cmake 
 
 With `--parallel`, each variant's output goes to `.cache/build-variants/{variant}.log`.
 The ASan build disables mimalloc because it replaces `operator new`/`delete`,
-which would hide C++ heap errors from ASan.
+which would hide C++ heap errors from ASan. ASan reports leaks at exit by
+default: `ASAN_OPTIONS=detect_leaks=0` turns that off, and
+`LSAN_OPTIONS=suppressions=<file>` filters known driver allocations.
 
 ### Custom build config
 

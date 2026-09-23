@@ -60,6 +60,12 @@ docker-build-v2/build.sh --build-dir build-amd64-linux-debug linux -DCMAKE_BUILD
 docker-build-v2/build-variants.sh --parallel
 ```
 
+Which build to run a game with (each has an `install/` directory):
+`build-amd64-linux` for normal play and tests, `build-amd64-linux-tracy` for
+profiling, `build-amd64-linux-asan` for debugging crashes and memory errors
+(slow; never use it for timing). `docker-build-v2/build-variants.sh --help`
+prints the same summary.
+
 **Without Docker:**
 ```bash
 # Create build directory

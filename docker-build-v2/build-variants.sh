@@ -17,9 +17,22 @@
 
 set -e -u -o pipefail
 
-USAGE="Usage: $0 [-h|--help] [--parallel] [-j|--jobs {number_of_jobs}] [--arch {arm64|amd64}] [--compile] [variant...] [-- cmake_flag...]
+USAGE="Usage: $0 [-h|--help] [--parallel] [-j|--jobs {number_of_jobs}] [--arch {arm64|amd64}] [--compile] [variant...] [-- cmake_flag...]"
 
-Variants: tracy, asan (default: both)"
+VARIANTS_HELP="Engine builds (point your game/launcher at the install directory):
+
+  default  build-{arch}-linux/install        (docker-build-v2/build.sh linux)
+           Optimized, no Tracy. Normal play, tests, CI-like runs.
+  tracy    build-{arch}-linux-tracy/install  (this script)
+           Same optimization plus on-demand Tracy. Use when profiling; without a
+           connected Tracy client it behaves like the default build.
+  asan     build-{arch}-linux-asan/install   (this script)
+           AddressSanitizer, no Tracy, no mimalloc. Use when debugging crashes or
+           memory corruption; several times slower, never use it for timing.
+           Leak reports at exit are on by default; ASAN_OPTIONS=detect_leaks=0
+           disables them, LSAN_OPTIONS=suppressions=<file> filters driver noise.
+
+Variants built by this script: tracy, asan (default: both)."
 
 declare -A VARIANT_FLAGS=(
 	[tracy]="-DTRACY_ENABLE=ON -DTRACY_ON_DEMAND=ON"
@@ -42,6 +55,8 @@ while (( $# > 0 )); do
 	case $1 in
 		-h|--help)
 			echo "$USAGE"
+			echo ""
+			echo "$VARIANTS_HELP"
 			echo ""
 			echo "Options:"
 			echo "  --parallel  build the variants at the same time, splitting the jobs"
