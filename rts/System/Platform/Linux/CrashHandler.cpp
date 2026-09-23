@@ -9,12 +9,14 @@
 #include <string>
 
 #include <array>
+#include <atomic>
 #include <deque>
 #include <vector>
 #include <new>
 
 #include <csignal>
 #include <execinfo.h>
+#include <unistd.h>
 #include <SDL_events.h>
 #include <sys/resource.h> // getrlimits
 #define UNW_LOCAL_ONLY
@@ -696,6 +698,33 @@ static sigaction_t& GetSigAction(sigact_handler_t sigact_handler)
 }
 
 
+// Set while the handler is installed. Libraries that installed their own
+// handlers after ours (wasmtime traps, Tracy) keep chaining to or restoring
+// HandleSignal after Remove(), e.g. during static destruction at exit.
+static std::atomic<bool> handlerInstalled = false;
+
+// A fatal signal after Remove(): logging and the rest of the engine may already
+// be gone, so only report a raw backtrace to stderr (async-signal-safe) and let
+// the default action terminate the process.
+static void HandleLateSignal(int signal)
+{
+	switch (signal) {
+		case SIGSEGV: case SIGILL: case SIGFPE: case SIGABRT: case SIGBUS: {
+			static constexpr char header[] = "[CrashHandler] fatal signal after shutdown; raw backtrace:\n";
+			[[maybe_unused]] const ssize_t written = write(STDERR_FILENO, header, sizeof(header) - 1);
+
+			void* frames[64];
+			backtrace_symbols_fd(frames, backtrace(frames, 64), STDERR_FILENO);
+		} break;
+		default: {
+		} break;
+	}
+
+	const sigaction_t& sa = GetSigAction(nullptr);
+	sigaction(signal, &sa, nullptr);
+	raise(signal);
+}
+
 namespace CrashHandler
 {
 	/**
@@ -937,6 +966,11 @@ namespace CrashHandler
 
 	void HandleSignal(int signal, siginfo_t* siginfo, void* pctx)
 	{
+		if (!handlerInstalled.load(std::memory_order_acquire)) {
+			HandleLateSignal(signal);
+			return;
+		}
+
 		switch (signal) {
 			case SIGINT: {
 				// ctrl+c = kill
@@ -1056,10 +1090,18 @@ namespace CrashHandler
 		sigaction(SIGCONT, &sa, nullptr);
 		sigaction(SIGBUS,  &sa, nullptr); // on macosx EXC_BAD_ACCESS (mach exception) is translated to SIGBUS
 
+		// backtrace() loads its unwinder on first use; do that here rather than
+		// inside HandleLateSignal
+		void* warmup[1];
+		backtrace(warmup, 1);
+
+		handlerInstalled.store(true, std::memory_order_release);
 		std::set_new_handler(NewHandler);
 	}
 
 	void Remove() {
+		handlerInstalled.store(false, std::memory_order_release);
+
 		//const sigaction_t& sa = GetSigAction(SIG_DFL);
 		const sigaction_t& sa = GetSigAction(nullptr);
 
