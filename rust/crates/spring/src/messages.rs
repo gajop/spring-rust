@@ -141,6 +141,19 @@ pub fn echo(message: &str, rest: &str) -> Result<bool> {
     }
 }
 
+/// Engine log levels (`System/Log/Level.h`) for [`log`] and the `log_*!` macros.
+pub mod log_level {
+    pub const DEBUG: i32 = 20;
+    pub const INFO: i32 = 30;
+    pub const NOTICE: i32 = 35;
+    pub const DEPRECATED: i32 = 37;
+    pub const WARNING: i32 = 40;
+    pub const ERROR: i32 = 50;
+    pub const FATAL: i32 = 60;
+}
+
+/// Write `message` to the engine log in `section` at `level` (see
+/// [`log_level`]); the `log_info!`-style macros format and call this.
 #[inline]
 pub fn log(section: &str, level: i32, message: &str) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
@@ -176,6 +189,30 @@ pub fn send_private_chat(message: &str, player_id: i32) -> Result<bool> {
     }
 }
 
+/// Run one console command line, e.g. `send_command("resbar 0")`.
+///
+/// Arguments belong in the line itself. Many interface commands toggle when
+/// called without an argument, so pass explicit values (`"console 0"`).
+#[inline]
+pub fn send_command(line: &str) -> Result<bool> {
+    send_commands(line, "")
+}
+
+/// Run several console command lines in order.
+#[cfg(feature = "alloc")]
+pub fn send_command_lines(lines: &[&str]) -> Result<bool> {
+    let mut iter = lines.iter();
+    let Some(first) = iter.next() else {
+        return Ok(true);
+    };
+    let rest = iter.copied().collect::<alloc::vec::Vec<_>>().join("\n");
+    send_commands(first, &rest)
+}
+
+/// Raw engine call: runs `command`, then each line of `rest` as a *further
+/// command*. `rest` is not an argument list: `send_commands("resbar", "0")`
+/// toggles the resource bar and then runs a command named `0`. Prefer
+/// [`send_command`] / [`send_command_lines`].
 #[inline]
 pub fn send_commands(command: &str, rest: &str) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]

@@ -2,6 +2,10 @@
 
 Spring callouts are synchronous. A callout made from a gadget or widget callin may cause the engine to immediately enter another callin on the same Wasm stack. `spring-addons` therefore does not assume that one addon callin finishes before another starts.
 
+## Coming from the queued model
+
+Earlier versions queued nested callins (for example `UnitCreated` raised by a `CreateUnit` callout) and ran them after the current callin returned. That is no longer the case: a nested callin is dispatched **immediately**, on the same stack, before the callout returns. Code or comments that rely on "UnitCreated is queued" are out of date. When a deferred effect is really wanted, schedule it explicitly with `ctx.delay(...)` (below).
+
 ## Classic addon model
 
 The classic model intentionally stays close to Lua semantics:

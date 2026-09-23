@@ -168,6 +168,12 @@ impl CoreCusModule for CusE2ECore {
     fn cus_tick(&mut self, frame: u32) {
         if frame == 3 {
             record(&format!("RNG|core|{}", synced_random_draws()));
+            spring::log_info!(
+                "cus-e2e",
+                "CUS_E2E|core|sdk|frame={}|fight={}",
+                spring::game::frame().unwrap_or(0),
+                spring::cmd::FIGHT
+            );
         }
         self.attach_pending();
         if let Some(handle) = self.handle {

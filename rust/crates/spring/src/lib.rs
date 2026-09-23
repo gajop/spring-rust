@@ -151,6 +151,17 @@ pub mod gl {
     include!(concat!(env!("OUT_DIR"), "/gl_generated.rs"));
 }
 
+/// Unit command ids and option bits, generated from the engine's `Command.h`.
+///
+/// Mirrors Lua's `CMD` table: `cmd::MOVE`, `cmd::FIGHT`, `cmd::IDLEMODE`, and
+/// `cmd::options::SHIFT_KEY` for the option bits.
+pub mod cmd {
+    include!(concat!(env!("OUT_DIR"), "/cmd_generated.rs"));
+
+    /// `CMD_DGUN` is Lua's historical alias of `MANUALFIRE`.
+    pub const DGUN: i32 = MANUALFIRE;
+}
+
 /// Generated production-fast Core imports and direct wrappers. This stays
 /// namespaced so specialized hand-written hot APIs remain the normal surface.
 #[cfg(target_arch = "wasm32")]
@@ -164,6 +175,56 @@ pub use generated::{gaia_synced, gaia_unsynced, intro, menu, rules_synced, rules
 
 /// Export the selected guest environment as a small Core-Wasm ABI marker.
 /// Call this once from the crate that chooses one generated environment module.
+#[cfg(feature = "alloc")]
+#[doc(hidden)]
+pub use alloc::format as __format;
+
+/// Format and write one engine log line; logging failures are ignored.
+/// Prefer [`log_debug!`], [`log_info!`], [`log_notice!`], [`log_warning!`]
+/// and [`log_error!`].
+#[cfg(feature = "alloc")]
+#[macro_export]
+macro_rules! log_at {
+    ($level:expr, $section:expr, $($arg:tt)+) => {{
+        let _ = $crate::log($section, $level, &$crate::__format!($($arg)+));
+    }};
+}
+
+/// `log_debug!("section", "format {}", args)`: an engine log line at debug level.
+#[cfg(feature = "alloc")]
+#[macro_export]
+macro_rules! log_debug {
+    ($section:expr, $($arg:tt)+) => { $crate::log_at!($crate::log_level::DEBUG, $section, $($arg)+) };
+}
+
+/// `log_info!("section", "format {}", args)`: an engine log line at info level.
+#[cfg(feature = "alloc")]
+#[macro_export]
+macro_rules! log_info {
+    ($section:expr, $($arg:tt)+) => { $crate::log_at!($crate::log_level::INFO, $section, $($arg)+) };
+}
+
+/// `log_notice!("section", "format {}", args)`: shown at the default log level.
+#[cfg(feature = "alloc")]
+#[macro_export]
+macro_rules! log_notice {
+    ($section:expr, $($arg:tt)+) => { $crate::log_at!($crate::log_level::NOTICE, $section, $($arg)+) };
+}
+
+/// `log_warning!("section", "format {}", args)`: an engine warning.
+#[cfg(feature = "alloc")]
+#[macro_export]
+macro_rules! log_warning {
+    ($section:expr, $($arg:tt)+) => { $crate::log_at!($crate::log_level::WARNING, $section, $($arg)+) };
+}
+
+/// `log_error!("section", "format {}", args)`: an engine error.
+#[cfg(feature = "alloc")]
+#[macro_export]
+macro_rules! log_error {
+    ($section:expr, $($arg:tt)+) => { $crate::log_at!($crate::log_level::ERROR, $section, $($arg)+) };
+}
+
 #[macro_export]
 macro_rules! export_environment_mask {
     ($mask:expr) => {
@@ -183,14 +244,30 @@ macro_rules! export_environment_mask {
 #[doc(hidden)]
 pub use generated::owned;
 
+/// Game state queries: the generated `game` API plus convenience helpers.
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub mod game {
+    pub use crate::owned::game::*;
+
+    /// The current simulation frame.
+    ///
+    /// `get_game_frame` returns the frame split into 16-bit halves (a Lua
+    /// float-precision convention); this reassembles it.
+    #[inline]
+    pub fn frame() -> crate::Result<u32> {
+        let value = get_game_frame(0)?;
+        Ok((value.high16 << 16) | (value.low16 & 0xFFFF))
+    }
+}
+
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]
 pub use owned::{
     callins, camera, debug_input, display, effects_control, encoding, feature_control,
-    feature_defs, features, game, game_config, ground_decals, icons, input, lights, los, markers,
-    memory, metal_map, move_ctrl, object_rendering, path_finder, platform, player,
-    projectile_control, projectiles, selection, sound, synced_ctrl, synced_random, team_control,
-    teams, tracing, types, unit_rendering, unit_script, units_info, units_weapons, unsynced_ctrl,
-    unsynced_random, unsynced_read, utils, weapon_defs,
+    feature_defs, features, game_config, ground_decals, icons, input, lights, los, markers, memory,
+    metal_map, move_ctrl, object_rendering, path_finder, platform, player, projectile_control,
+    projectiles, selection, sound, synced_ctrl, synced_random, team_control, teams, tracing, types,
+    unit_rendering, unit_script, units_info, units_weapons, unsynced_ctrl, unsynced_random,
+    unsynced_read, utils, weapon_defs,
 };
 
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]

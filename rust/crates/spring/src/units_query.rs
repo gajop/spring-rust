@@ -435,3 +435,79 @@ pub fn get_team_units(team_id: impl Into<TeamId>) -> Result<Vec<i32>> {
         Err(unreachable!())
     }
 }
+
+/// Units in an axis-aligned map rectangle; grows the buffer as needed.
+#[cfg(feature = "alloc")]
+pub fn get_units_in_rectangle(
+    xmin: f32,
+    zmin: f32,
+    xmax: f32,
+    zmax: f32,
+    allegiance: i32,
+) -> Result<Vec<i32>> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        collect_list(|pointer, capacity| {
+            units_query_raw::get_units_in_rectangle(
+                xmin, zmin, xmax, zmax, allegiance, pointer, capacity,
+            )
+        })
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (xmin, zmin, xmax, zmax, allegiance);
+        Err(unreachable!())
+    }
+}
+
+/// Units in an axis-aligned box; grows the buffer as needed.
+#[cfg(feature = "alloc")]
+pub fn get_units_in_box(min: Float3, max: Float3, allegiance: i32) -> Result<Vec<i32>> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        collect_list(|pointer, capacity| {
+            units_query_raw::get_units_in_box(
+                min.x, min.y, min.z, max.x, max.y, max.z, allegiance, pointer, capacity,
+            )
+        })
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (min, max, allegiance);
+        Err(unreachable!())
+    }
+}
+
+/// Units in a sphere; grows the buffer as needed.
+#[cfg(feature = "alloc")]
+pub fn get_units_in_sphere(center: Float3, radius: f32, allegiance: i32) -> Result<Vec<i32>> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        collect_list(|pointer, capacity| {
+            units_query_raw::get_units_in_sphere(
+                center.x, center.y, center.z, radius, allegiance, pointer, capacity,
+            )
+        })
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (center, radius, allegiance);
+        Err(unreachable!())
+    }
+}
+
+/// Units in a vertical cylinder; grows the buffer as needed.
+#[cfg(feature = "alloc")]
+pub fn get_units_in_cylinder(x: f32, z: f32, radius: f32, allegiance: i32) -> Result<Vec<i32>> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        collect_list(|pointer, capacity| {
+            units_query_raw::get_units_in_cylinder(x, z, radius, allegiance, pointer, capacity)
+        })
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (x, z, radius, allegiance);
+        Err(unreachable!())
+    }
+}

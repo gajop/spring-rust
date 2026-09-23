@@ -54,6 +54,66 @@ fn generate_gl_constants(header: &PathBuf) -> String {
     contents
 }
 
+/// Mirror the engine's command ids and option bits (`Command.h`) as Rust
+/// constants, so guests use `cmd::MOVE` instead of hand-copied numbers.
+fn generate_command_constants(header: &PathBuf) -> String {
+    println!("cargo:rerun-if-changed={}", header.display());
+    let source = fs::read_to_string(header).expect("read Sim/Units/CommandAI/Command.h");
+
+    let mut ids = String::new();
+    let mut types = String::new();
+    let mut wait_codes = String::new();
+    let mut options = String::new();
+    for line in source.lines() {
+        let Some(rest) = line.trim().strip_prefix("static constexpr ") else {
+            continue;
+        };
+        let Some((declaration, value)) = rest.split_once('=') else {
+            continue;
+        };
+        let Some(name) = declaration.split_whitespace().last() else {
+            continue;
+        };
+        let value = value.split(';').next().unwrap_or_default().trim();
+        if let Some(short) = name.strip_prefix("CMDTYPE_") {
+            types.push_str(&format!("    pub const {short}: i32 = {value};\n"));
+        } else if let Some(short) = name.strip_prefix("CMD_WAITCODE_") {
+            let value = value.trim_end_matches('f');
+            wait_codes.push_str(&format!("    pub const {short}: f32 = {value};\n"));
+        } else if let Some(short) = name.strip_prefix("CMD_") {
+            ids.push_str(&format!("pub const {short}: i32 = {value};\n"));
+        } else if matches!(
+            name,
+            "META_KEY"
+                | "INTERNAL_ORDER"
+                | "RIGHT_MOUSE_KEY"
+                | "SHIFT_KEY"
+                | "CONTROL_KEY"
+                | "ALT_KEY"
+        ) {
+            let value = value.trim_start_matches('(').trim_end_matches(')');
+            options.push_str(&format!("    pub const {name}: u32 = {value};\n"));
+        }
+    }
+    assert!(
+        ids.contains("pub const MOVE: i32 = 10;") && options.contains("SHIFT_KEY"),
+        "Command.h parse produced no usable entries"
+    );
+
+    format!(
+        "// Generated from `rts/Sim/Units/CommandAI/Command.h` by build.rs. Do not edit.\n\n\
+         {ids}\n\
+         /// `CMDTYPE_*`: how a command's parameters are gathered.\n\
+         pub mod cmd_type {{\n{types}}}\n\n\
+         /// `CMD_WAITCODE_*`: the first parameter of a `WAIT` variant.\n\
+         pub mod wait_code {{\n{wait_codes}}}\n\n\
+         /// Command option bits (`cmdOpts`). `SHIFT_KEY` queues the order,\n\
+         /// `ALT_KEY` usually inserts it at the front, `RIGHT_MOUSE_KEY` marks a\n\
+         /// right-click, `INTERNAL_ORDER` an engine-generated order.\n\
+         pub mod options {{\n{options}}}\n"
+    )
+}
+
 fn main() {
     let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let generated_dir = manifest.join("../../../rts/wasm/generated/sdk");
@@ -136,4 +196,10 @@ fn main() {
     let gl_contents =
         generate_gl_constants(&manifest.join("../../../rts/NativeInterface/api/Constants.h"));
     fs::write(&gl_output, gl_contents).expect("write generated GL constants");
+
+    let cmd_output =
+        PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("cmd_generated.rs");
+    let cmd_contents =
+        generate_command_constants(&manifest.join("../../../rts/Sim/Units/CommandAI/Command.h"));
+    fs::write(&cmd_output, cmd_contents).expect("write generated command constants");
 }
