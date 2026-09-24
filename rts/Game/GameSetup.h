@@ -46,6 +46,7 @@ public:
 		std::copy(gs.dsMapHash, gs.dsMapHash + sizeof(dsMapHash), dsMapHash);
 		std::copy(gs.dsModHash, gs.dsModHash + sizeof(dsModHash), dsModHash);
 		fixedRNGSeed = gs.fixedRNGSeed;
+		fixedUnsyncedRNGSeed = gs.fixedUnsyncedRNGSeed;
 
 		gameStartDelay = gs.gameStartDelay;
 
@@ -177,6 +178,8 @@ public:
 	};
 
 	uint32_t fixedRNGSeed;
+	/// Seed for the unsynced RNG (particles, CEGs, sounds, ...); 0 = random.
+	uint32_t fixedUnsyncedRNGSeed;
 
 	bool initBlank;
 

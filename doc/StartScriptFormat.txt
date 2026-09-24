@@ -51,6 +51,7 @@
 	NumAllyTeams=z;     // see above
 
 	FixedRNGSeed = 1; // Initialize the synced RNG with a specific seed for reproducible runs, eg. for benchmarking or cutscenes.
+	FixedUnsyncedRNGSeed = 1; // Initialize the unsynced RNG (particles, CEGs, sounds, ...) with a specific seed, eg. for comparing screenshots in tests. Only exact if the frames drawn are the same.
                           // Default value 0 will generate a random seed.
 
 	// A player (controls a team, player 0 is the host only if IsHost is not set)

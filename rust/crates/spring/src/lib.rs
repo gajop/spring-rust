@@ -74,6 +74,9 @@ pub mod messages;
 pub mod prelude;
 #[cfg(target_arch = "wasm32")]
 pub mod profiling;
+// Used by `random`, which only exists on wasm32; tested on the host.
+#[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+mod pcg;
 #[cfg(target_arch = "wasm32")]
 pub mod random;
 #[cfg(target_arch = "wasm32")]

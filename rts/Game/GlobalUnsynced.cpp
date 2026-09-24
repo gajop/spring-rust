@@ -7,6 +7,7 @@
 
 #include "GlobalUnsynced.h"
 
+#include "Game/GameSetup.h"
 #include "Game/Players/Player.h"
 #include "Game/Players/PlayerHandler.h"
 #include "Sim/Misc/TeamHandler.h"
@@ -93,6 +94,10 @@ void CGlobalUnsynced::LoadFromSetup(const CGameSetup* setup)
 	// do not call here; AddPlayer can precede LoadFromSetup
 	// playerHandler.ResetState();
 	playerHandler.LoadFromSetup(setup);
+
+	// Reproducible unsynced effects for tests; only this client is affected.
+	if (setup->fixedUnsyncedRNGSeed != 0)
+		guRNG.Seed(setup->fixedUnsyncedRNGSeed);
 }
 
 
