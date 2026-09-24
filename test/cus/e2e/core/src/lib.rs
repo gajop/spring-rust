@@ -213,6 +213,17 @@ fn game_frame(frame: i32) {
             && heights.iter().zip(&single).all(|(a, b)| b.as_ref().is_ok_and(|b| a == b)));
     record(&format!("CUS_E2E|core|ground-heights|matches={}", matches as u8));
     check_sdk_helpers();
+    check_piece_volume();
+
+    let unit_pos = spring::owned::units_info::get_unit_position(
+        ATTACHED_UNIT.load(Ordering::Relaxed),
+        Default::default(),
+    );
+    let found = unit_pos.is_ok_and(|pos| {
+        spring::get_units_in_cylinder(pos.x, pos.z, 50.0, -1)
+            .is_ok_and(|units| units.contains(&ATTACHED_UNIT.load(Ordering::Relaxed)))
+    });
+    record(&format!("CUS_E2E|core|cylinder|found={}", found as u8));
 
     let unit = ATTACHED_UNIT.load(Ordering::Relaxed);
     if unit < 0 {
@@ -280,6 +291,56 @@ fn check_sdk_helpers() {
         (param.as_deref() == Some("unit_custom_value")) as u8,
         number.is_none() as u8,
         camera_ok as u8
+    ));
+}
+
+/// Toggle a piece collision volume and trace a ray down through it.
+fn check_piece_volume() {
+    use spring::owned::tracing::{Ray, trace_ray_units};
+    use spring::owned::unit_control::set_unit_piece_collision_volume_data;
+
+    let (x, z) = (400.0, 400.0);
+    let ground = spring::get_ground_height(x, z).unwrap_or(0.0);
+    let Ok(unit) = spring::create_unit(
+        spring::UnitDefRef {
+            name: "cus_e2e_piece_unit",
+            id: -1,
+        },
+        spring::Float3::new(x, ground, z),
+        0,
+        spring::CreateUnitOptions {
+            unit_id: -1,
+            builder_id: -1,
+            ..Default::default()
+        },
+    ) else {
+        record("CUS_E2E|core|piece-volume|create-error");
+        return;
+    };
+    let set = |enable: bool| {
+        let sphere = spring::Float3::new(40.0, 40.0, 40.0);
+        // volume type 3 = sphere, primary axis 1 = y
+        set_unit_piece_collision_volume_data(unit, 0, enable, sphere, spring::Float3::ZERO, 3, 1)
+            .unwrap_or(false)
+    };
+    let hits = || {
+        let ray = Ray {
+            origin: spring::Float3::new(x, ground + 300.0, z),
+            direction: spring::Float3::new(0.0, -1.0, 0.0),
+            length: 600.0,
+            flags: 0,
+            ally_team_id: 0,
+        };
+        trace_ray_units(ray).is_ok_and(|hit| hit.hit && hit.hit_id == unit)
+    };
+    let enabled = set(true) && hits();
+    let disabled = set(false) && hits();
+    let flag = spring::owned::units_info::get_unit_piece_collision_volume_data(unit, 1) // 1-based, like Lua
+        .is_ok_and(|volume| volume.disabled);
+    let reenabled = set(true) && hits();
+    record(&format!(
+        "CUS_E2E|core|piece-volume|enabled={}|disabled={}|reenabled={}|flag={}",
+        enabled as u8, disabled as u8, reenabled as u8, flag as u8
     ));
 }
 

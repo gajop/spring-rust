@@ -309,7 +309,8 @@ pub mod game {
     }
 
     /// The current simulation frame as an `i32`, like Lua's
-    /// `Spring.GetGameFrame()`; 0 before the game starts.
+    /// `Spring.GetGameFrame()`: -1 before the first frame, and 0 when the
+    /// frame can't be read.
     #[inline]
     pub fn current_frame() -> i32 {
         frame().map_or(0, |frame| frame as i32)

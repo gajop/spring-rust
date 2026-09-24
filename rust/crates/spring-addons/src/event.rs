@@ -59,6 +59,7 @@ pub mod keys {
     pub const PAGE_UP: i32 = scancode(75);
     pub const END: i32 = scancode(77);
     pub const PAGE_DOWN: i32 = scancode(78);
+    pub const KEYPAD_ENTER: i32 = scancode(88);
 
     /// `F1` .. `F12` as `f(1)` .. `f(12)`; other numbers give -1.
     pub const fn f(number: i32) -> i32 {
@@ -97,7 +98,7 @@ impl<'a> KeyEvent<'a> {
         }
         let ascii = match symbol {
             "space" => Some(b' '),
-            "enter" => return self.key_code == 13 || self.key_code == 271,
+            "enter" => return self.key_code == keys::ENTER || self.key_code == keys::KEYPAD_ENTER,
             "escape" => return self.key_code == 27,
             value if value.len() == 1 => value.as_bytes().first().copied(),
             _ => None,
@@ -191,5 +192,8 @@ mod tests {
         assert!(key(i32::from(b'f'), b"f").matches("f"));
         assert!(key(i32::from(b'a'), b"a").matches("a"));
         assert!(key(27, b"").matches("escape"));
+        assert!(key(13, b"").matches("enter"));
+        assert!(key(0x4000_0058, b"").matches("enter"));
+        assert!(!key(271, b"").matches("enter"));
     }
 }

@@ -2,6 +2,7 @@
 
 use super::types::*;
 use crate::UnitId;
+use alloc::vec::Vec;
 
 /// Immediate operations and completion queries supplied by the engine.
 ///
@@ -89,6 +90,11 @@ pub trait PieceResolver {
     fn root(&self) -> Piece {
         Piece::INVALID
     }
+
+    /// Every piece, by name, in model order.
+    fn pieces(&self) -> Vec<(&str, Piece)> {
+        Vec::new()
+    }
 }
 
 /// Construction-only context.  It has no scheduler and therefore cannot
@@ -118,5 +124,12 @@ impl<'a> InitCtx<'a> {
     #[inline]
     pub fn root_piece(&self) -> Piece {
         self.pieces.root()
+    }
+
+    /// Every piece, by name, in model order: for scripts that find pieces by
+    /// pattern (`Build3`, `Deco1`, ...) rather than by fixed names.
+    #[inline]
+    pub fn pieces(&self) -> Vec<(&str, Piece)> {
+        self.pieces.pieces()
     }
 }

@@ -84,6 +84,16 @@ def make_game(workdir: Path, core: bool) -> Path:
     ):
         shutil.copy2(SOURCE_FIXTURE / relative, game / relative)
 
+    # The fixture unit again, hit-tested through its piece volumes.
+    piece_unit = (SOURCE_FIXTURE / "units/native_api_test_unit.lua").read_text(encoding="utf-8")
+    piece_unit = piece_unit.replace(
+        "\tnative_api_test_unit = {",
+        "\tcus_e2e_piece_unit = {\n\t\tusePieceCollisionVolumes = true,",
+        1,
+    )
+    assert "usePieceCollisionVolumes" in piece_unit
+    (game / "units/cus_e2e_piece_unit.lua").write_text(piece_unit, encoding="utf-8")
+
     (game / "modinfo.lua").write_text(
         """return {
     name = "Rust CUS E2E",
@@ -189,7 +199,7 @@ def make_script(workdir: Path) -> Path:
     {
         blank_map_x=10;
         blank_map_y=8;
-        blank_map_height=0;
+        blank_map_height=300;
         blank_map_color_r=64;
         blank_map_color_g=128;
         blank_map_color_b=64;
@@ -305,6 +315,10 @@ def assert_markers(workdir: Path) -> None:
         "CUS_E2E|core|deferred-ran|",
         "CUS_E2E|core|ground-heights|matches=1",
         "CUS_E2E|core|sdk-helpers|kinds=1|param=1|number=1|camera=1",
+        # a disabled piece volume stops ray hits; re-enabling restores them
+        "CUS_E2E|core|piece-volume|enabled=1|disabled=0|reenabled=1|flag=1",
+        # the map is raised above the query radius: a 2D cylinder, not a sphere at y=0
+        "CUS_E2E|core|cylinder|found=1",
     )
     for marker in required_core:
         if marker not in core_log:

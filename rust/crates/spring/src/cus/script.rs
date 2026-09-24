@@ -11,7 +11,15 @@ use alloc::vec::Vec;
 /// this keeps engine-consumed queries synchronous and makes the async boundary
 /// explicit.
 pub trait UnitScript: Sized {
-    fn new(_ctx: &mut InitCtx<'_>) -> Self;
+    /// Build the script. Only [`CusInstance::construct`](crate::cus::CusInstance::construct)
+    /// uses it; scripts built by `CusHost` (through `UnitDefScript::for_def`
+    /// or `attach`) needn't implement it.
+    fn new(_ctx: &mut InitCtx<'_>) -> Self {
+        panic!(
+            "{} is built through CusInstance::construct but doesn't implement UnitScript::new",
+            core::any::type_name::<Self>()
+        )
+    }
 
     fn raw_call(&mut self, _ctx: &UnitCtx, _function: i32) {}
 
