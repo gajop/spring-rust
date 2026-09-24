@@ -279,7 +279,10 @@ private:
 
 public:
 	// per-{unit,feature} custom uniforms set via LuaObjectRendering
-	spring::unsynced_map<int, std::array<LuaMatUniform, 16>> objectUniforms[2];
+	// Procedural ship materials use 26 stable surface controls plus dynamic
+	// effects (heat, subspace charge and phase). Keep room for those uniforms on
+	// each instance rather than silently dropping the last additions.
+	spring::unsynced_map<int, std::array<LuaMatUniform, 32>> objectUniforms[2];
 
 	UniformMat<CMatrix44f> viewMatrix;
 	UniformMat<CMatrix44f> projMatrix;
