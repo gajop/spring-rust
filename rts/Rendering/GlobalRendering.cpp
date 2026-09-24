@@ -604,6 +604,11 @@ bool CGlobalRendering::CreateWindowAndContext(const char* title)
 		return false;
 	}
 
+	// Blits from the window's depth buffer need a copy target of its exact
+	// depth format; see DepthBufferCopy.
+	if (SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &windowDepthBufferBitDepth) != 0)
+		windowDepthBufferBitDepth = 0;
+
 	MakeCurrentContext(false);
 	SDL_DisableScreenSaver();
 	return true;
@@ -1038,6 +1043,7 @@ void CGlobalRendering::LogVersionInfo(const char* sdlVersionStr, const char* glV
 	LOG("\ttexture query-LOD support : %i (%i)", supportTextureQueryLOD, IsExtensionSupported("GL_ARB_texture_query_lod"));
 	LOG("\tMSAA frame-buffer support : %i (%i)", supportMSAAFrameBuffer, IsExtensionSupported("GL_EXT_framebuffer_multisample"));
 	LOG("\tZ-buffer depth            : %i (-)" , supportDepthBufferBitDepth);
+	LOG("\tWindow Z-buffer depth     : %i (-)" , windowDepthBufferBitDepth);
 	LOG("\tprimitive-restart support : %i (%i)", supportRestartPrimitive, IsExtensionSupported("GL_NV_primitive_restart"));
 	LOG("\tclip-space control support: %i (%i)", supportClipSpaceControl, IsExtensionSupported("GL_ARB_clip_control"));
 	LOG("\tseamless cube-map support : %i (%i)", supportSeamlessCubeMaps, IsExtensionSupported("GL_ARB_seamless_cube_map"));

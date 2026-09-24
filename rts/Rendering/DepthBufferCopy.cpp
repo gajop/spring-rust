@@ -133,7 +133,14 @@ void DepthBufferCopy::CreateTextureAndFBO(bool ms)
 	glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, 0);
 	glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 
-	GLint depthFormat = static_cast<GLint>(CGlobalRendering::DepthBitsToFormat(globalRendering->supportDepthBufferBitDepth));
+	// The copy is blitted from the window's depth buffer, and depth blits need
+	// matching formats: use the window's depth size, not the deepest format an
+	// FBO supports (32 bits on Mesa against a 24-bit window, where every blit
+	// failed and soft particles faded out completely).
+	const int depthBits = (globalRendering->windowDepthBufferBitDepth > 0)?
+		globalRendering->windowDepthBufferBitDepth:
+		globalRendering->supportDepthBufferBitDepth;
+	GLint depthFormat = static_cast<GLint>(CGlobalRendering::DepthBitsToFormat(depthBits));
 	if (target == GL_TEXTURE_2D)
 		glTexImage2D(target, 0, depthFormat, globalRendering->viewSizeX, globalRendering->viewSizeY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	else

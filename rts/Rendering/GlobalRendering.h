@@ -324,6 +324,9 @@ public:
 	bool supportMSAAFrameBuffer;
 
 	int supportDepthBufferBitDepth;
+	/// Depth bits of the window's framebuffer, which can be fewer than
+	/// supportDepthBufferBitDepth (e.g. 24 vs 32 on Mesa); 0 if unknown.
+	int windowDepthBufferBitDepth = 0;
 
 	bool supportRestartPrimitive;
 	bool supportClipSpaceControl;
