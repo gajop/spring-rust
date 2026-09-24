@@ -1070,9 +1070,14 @@ void WasmCoreHost::FlushPendingCusCalls()
 			if (script == nullptr)
 				continue;
 
-			NativeUnitScriptCallResult result;
-			CallCusGuest(pending.instanceId, pending.call, pending.floatArgs, pending.intArgs, result);
-			busyCusCall = false;
+			// Create is queued for every attach (for the weapon-piece refresh
+			// below) but only sent to scripts that declared it. Other queued
+			// calls passed their capability check when they were posted.
+			if (pending.call != NativeUnitScriptCall::Create || script->HasCapability(CUS_CAP_CREATE)) {
+				NativeUnitScriptCallResult result;
+				CallCusGuest(pending.instanceId, pending.call, pending.floatArgs, pending.intArgs, result);
+				busyCusCall = false;
+			}
 
 			// Weapon pieces come from the script, so refresh them once Create has
 			// run. Look the script up again: Create may have replaced it.

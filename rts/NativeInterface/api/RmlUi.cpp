@@ -3416,8 +3416,15 @@ static void NativeEventListenerOnDetach(const RmlEventListenerElementQuery* quer
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	listener->OnDetach(element);
-	result->success = true;
+	// Every listener behind a handle was created by Add*EventListener and is
+	// still registered with its element. OnDetach deletes it, which would leave
+	// the element with a dangling pointer; ElementRemoveEventListener detaches it
+	// properly (RmlUi then calls OnDetach itself).
+	static const Error ATTACHED_LISTENER_ERROR = {
+		.code = ERROR_INVALID_ARGUMENT,
+		.message = "listener is attached; use ElementRemoveEventListener or ContextRemoveEventListener"
+	};
+	result->error = &ATTACHED_LISTENER_ERROR;
 }
 
 static void NativeEventListenerProcessEvent(const RmlEventListenerEventQuery* query, RmlElementBoolResult* result)

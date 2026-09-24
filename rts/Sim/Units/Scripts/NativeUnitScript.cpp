@@ -639,10 +639,11 @@ void CNativeUnitScript::AnimFinished(AnimType type, int piece, int axis)
 	// backend even when the script did not opt into an application callback;
 	// the portable dispatcher can wake waiters while the typed callback remains
 	// the default no-op.
-	if (backend != nullptr) {
-		NativeUnitScriptCallResult result;
-		backend->Invoke(instanceId, NativeUnitScriptCall::AnimFinished, {}, args, result);
-	}
+	// Posted, not invoked: a guest busy with its CUS state (for example the
+	// Turn that replaced this animation) gets it once it returns, instead of
+	// losing the wake-up.
+	if (backend != nullptr)
+		backend->Post(UnitID(unit), instanceId, NativeUnitScriptCall::AnimFinished, {}, args);
 }
 
 bool CNativeUnitScript::CallFunctionByName(const char* functionName, const float* args, uint32_t argCount,
