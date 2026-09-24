@@ -6,6 +6,7 @@
 #include "Sim/Features/FeatureDef.h"
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Features/FeatureHandler.h"
+#include "Map/Ground.h"
 #include "Sim/Misc/QuadField.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "System/float3.h"
@@ -15,6 +16,7 @@
 #include "Game/Game.h"
 #include <cstddef>
 #include <cstring>
+#include <limits>
 #include <vector>
 
 namespace {
@@ -173,14 +175,16 @@ static void NativeGetFeaturesInCylinder(const GetFeaturesInCylinderQuery* query,
 		return;
 	}
 
-	const float3 pos(query->x, 0.0f, query->z);
+	// 2D like Lua's GetFeaturesInCylinder; a positive height limits the
+	// cylinder to height/2 above and below the ground at its centre.
+	const float3 pos(query->x, CGround::GetHeightReal(query->x, query->z), query->z);
 	const float radiusSq = query->radius * query->radius;
-	const float halfHeight = query->height * 0.5f;
+	const float halfHeight = (query->height > 0.0f)? query->height * 0.5f: std::numeric_limits<float>::infinity();
 
 	featureIDs.clear();
 
 	QuadFieldQuery qfq;
-	quadField.GetFeaturesExact(qfq, pos, query->radius);
+	quadField.GetFeaturesExact(qfq, pos, query->radius, false);
 	if (qfq.features != nullptr) {
 		for (const CFeature* feature : *(qfq.features)) {
 			if (feature != nullptr && WasmUiVisibility::IsFeatureVisible(feature)) {

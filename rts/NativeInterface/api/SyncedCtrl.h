@@ -307,7 +307,8 @@ struct SetUnitSelectionVolumeDataQuery {
 };
 struct SetUnitSelectionVolumeDataResult { const Error* error; bool success; };
 
-// Unit piece collision volume queries
+// Unit piece collision volume queries. `pieceIndex` is 0-based, unlike the
+// 1-based piece numbers of GetUnitPieceCollisionVolumeData and Lua.
 struct SetUnitPieceCollisionVolumeDataQuery {
 	int32_t unitID;
 	int32_t pieceIndex;

@@ -564,7 +564,7 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 	const float radiusSq = query->radius * query->radius;
 
 	QuadFieldQuery qfq;
-	quadField.GetUnitsExact(qfq, center, query->radius);
+	quadField.GetUnitsExact(qfq, center, query->radius, false); // 2D, like Lua
 	const size_t capacity = (qfq.units == nullptr) ? 0 : qfq.units->size();
 	int32_t* units = AllocateResult<int32_t>(capacity, result->error);
 	if (result->error != nullptr)

@@ -77,6 +77,8 @@ struct GetFeaturesInRectangleResult { const Error* error; int32_t* features; uin
 struct GetFeaturesInSphereQuery { Float3 center; float radius; };
 struct GetFeaturesInSphereResult { const Error* error; int32_t* features; uint32_t count; };
 
+// Features within `radius` of (x, z) in 2D. A positive `height` also limits
+// them to height/2 above and below the ground at (x, z); 0 = unbounded.
 struct GetFeaturesInCylinderQuery { float x; float z; float radius; float height; };
 struct GetFeaturesInCylinderResult { const Error* error; int32_t* features; uint32_t count; };
 

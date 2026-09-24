@@ -1359,7 +1359,10 @@ static void NativeAddUnitDamage(const AddUnitDamageQuery* query, AddUnitDamageRe
 	}
 
 	const float3 impulse(query->impulse.x, query->impulse.y, query->impulse.z);
-	unit->DoDamage(damages, impulse, attacker, weaponDef != nullptr ? weaponDef->id : -1, -1);
+	// Like Lua, keep the negative ids for engine damage sources (-2 collision,
+	// -3 kill/self-d, -4 crush, -5 debris, -6 fall, -7 unit collision).
+	const int weaponDefID = (weaponDef != nullptr)? weaponDef->id: std::min(query->weaponDefID, -1);
+	unit->DoDamage(damages, impulse, attacker, weaponDefID, -1);
 
 	result->success = true;
 }
@@ -2018,21 +2021,15 @@ static void NativeSetUnitPieceCollisionVolumeData(const SetUnitPieceCollisionVol
 
 	LocalModelPiece* lmp = &localModel.pieces[query->pieceIndex];
 
-	if (query->enable) {
-		const float3 scales(query->scales.x, query->scales.y, query->scales.z);
-		const float3 offsets(query->offsets.x, query->offsets.y, query->offsets.z);
+	// Same as Lua's SetUnitPieceCollisionVolumeData and the feature setter:
+	// piece volumes always use continuous hit-testing, and `enable` decides
+	// whether hits register at all.
+	const float3 scales(query->scales.x, query->scales.y, query->scales.z);
+	const float3 offsets(query->offsets.x, query->offsets.y, query->offsets.z);
 
-		// Create/initialize the collision volume for this piece
-		lmp->GetCollisionVolume()->InitShape(
-			scales,
-			offsets,
-			query->volumeType,
-			CollisionVolume::COLVOL_HITTEST_CONT,
-			query->primaryAxis
-		);
-		lmp->SetScriptVisible(!lmp->GetScriptVisible());
-		lmp->SetScriptVisible(!lmp->GetScriptVisible());
-	}
+	CollisionVolume* vol = lmp->GetCollisionVolume();
+	vol->InitShape(scales, offsets, query->volumeType, CollisionVolume::COLVOL_HITTEST_CONT, query->primaryAxis);
+	vol->SetIgnoreHits(!query->enable);
 
 	result->success = true;
 }
@@ -4059,7 +4056,7 @@ static void NativeAddFeatureDamage(const AddFeatureDamageQuery* query, AddFeatur
 	}
 
 	const float3 impulse(query->impulse.x, query->impulse.y, query->impulse.z);
-	feature->DoDamage(damages, impulse, attacker, weaponDef != nullptr ? weaponDef->id : -1, -1);
+	feature->DoDamage(damages, impulse, attacker, (weaponDef != nullptr)? weaponDef->id: std::min(query->weaponDefID, -1), -1);
 
 	result->success = true;
 }
@@ -6545,9 +6542,12 @@ static void NativeNextInt(const NextIntQuery* query, NextIntResult* result)
 		return;
 	}
 
-	const float diff = (upper - lower);
+	// 64-bit span: upper - lower overflows int for wide ranges such as
+	// [INT_MIN, INT_MAX]. Ranges that fit give the same results as before.
+	const float diff = static_cast<float>(int64_t(upper) - lower);
 	const float r = gsRNG.NextFloat();
-	result->value = std::clamp(lower + int(r * (diff + 1)), lower, upper);
+	const int64_t value = int64_t(lower) + int64_t(r * (diff + 1));
+	result->value = static_cast<int>(std::clamp<int64_t>(value, lower, upper));
 }
 
 static void NativeSetSeed(const SetSeedQuery* query, SetSeedResult* result)

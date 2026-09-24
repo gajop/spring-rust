@@ -1954,9 +1954,12 @@ static void NativeUnsyncedNextInt(const NextIntQuery* query, NextIntResult* resu
 		return;
 	}
 
-	const float diff = (upper - lower);
+	// 64-bit span: upper - lower overflows int for wide ranges such as
+	// [INT_MIN, INT_MAX]. Ranges that fit give the same results as before.
+	const float diff = static_cast<float>(int64_t(upper) - lower);
 	const float r = guRNG.NextFloat();
-	result->value = std::clamp(lower + int(r * (diff + 1)), lower, upper);
+	const int64_t value = int64_t(lower) + int64_t(r * (diff + 1));
+	result->value = static_cast<int>(std::clamp<int64_t>(value, lower, upper));
 }
 
 static void NativeUnsyncedSetSeed(const SetSeedQuery* query, SetSeedResult* result)

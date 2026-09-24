@@ -282,8 +282,9 @@ float TraceRay(
 
 					bool doHitTest = false;
 
-					doHitTest |= (scanForAllies   && u->allyteam == owner->allyteam);
-					doHitTest |= (scanForEnemies  && u->allyteam != owner->allyteam);
+					// allyTeam, not owner->allyteam: the Wasm/native tracing callouts pass no owner.
+					doHitTest |= (scanForAllies   && u->allyteam == allyTeam);
+					doHitTest |= (scanForEnemies  && u->allyteam != allyTeam);
 					doHitTest |= (scanForNeutrals && u->IsNeutral());
 					doHitTest |= (scanForCloaked  && u->IsCloaked());
 
