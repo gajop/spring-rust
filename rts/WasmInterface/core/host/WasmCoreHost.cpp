@@ -16,6 +16,7 @@
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "WasmCoreAbi.h"
 #include "WasmCoreBindings.h"
+#include "WasmCoreCallinPolicy.h"
 #include "WasmCoreValidation.h"
 #include "WasmCoreVariableCallins.h"
 #include "WasmResources.h"
@@ -1485,14 +1486,14 @@ bool DispatchPlanRejected(const WasmCoreDispatchPlan* plan, std::string& error)
 bool DispatchPlanExhausted(const WasmCoreDispatchPlan* plan, std::string& error)
 {
 	error = "Core Wasm callin host-work budget exhausted";
-	WasmCoreHost::FaultHost(plan->host, error);
+	WasmCoreHost::FaultHost(plan->host, std::string(CallinName(plan->callin)) + ": " + error);
 	return false;
 }
 
 bool DispatchPlanFailed(const WasmCoreDispatchPlan* plan, std::string& error)
 {
-	WasmCoreHost::FaultHost(plan->host,
-		error.empty() ? "Core Wasm callin failed" : error);
+	WasmCoreHost::FaultHost(plan->host, std::string(CallinName(plan->callin)) + ": " +
+		(error.empty() ? std::string("Core Wasm callin failed") : error));
 	return false;
 }
 

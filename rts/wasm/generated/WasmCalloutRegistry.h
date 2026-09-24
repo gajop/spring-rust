@@ -303,6 +303,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"terrain", "GetGroundBlocked", 31u, false, false, LoweringStatus::automatic},
 	{"terrain", "GetGroundExtremes", 31u, false, false, LoweringStatus::automatic},
 	{"terrain", "GetGroundHeight", 31u, false, false, LoweringStatus::automatic},
+	{"terrain", "GetGroundHeights", 31u, false, false, LoweringStatus::annotated},
 	{"terrain", "GetGroundInfo", 31u, false, false, LoweringStatus::automatic},
 	{"terrain", "GetGroundNormal", 31u, false, false, LoweringStatus::automatic},
 	{"terrain", "GetGroundOrigHeight", 31u, false, false, LoweringStatus::automatic},

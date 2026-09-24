@@ -20708,6 +20708,27 @@
     },
     {
       "module": "terrain",
+      "function": "GetGroundHeights",
+      "import_module": "spring:terrain",
+      "import_name": "get-ground-heights",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "variable-output-buffer",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "terrain",
       "function": "GetGroundInfo",
       "import_module": "spring:terrain",
       "import_name": "get-ground-info",
@@ -31381,6 +31402,6 @@
     }
   ],
   "automatic_count": 1195,
-  "manual_count": 198,
+  "manual_count": 199,
   "unsupported_count": 17
 }

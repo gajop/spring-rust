@@ -202,6 +202,17 @@ fn game_frame(frame: i32) {
     if frame != 4 {
         return;
     }
+    let points = [[128.0, 128.0], [160.0, 96.0], [300.0, 40.0]];
+    let batched = spring::ground_heights(&points);
+    let single: Vec<_> = points
+        .iter()
+        .map(|[x, z]| spring::get_ground_height(*x, *z))
+        .collect();
+    let matches = matches!(&batched, Ok(heights)
+        if heights.len() == points.len()
+            && heights.iter().zip(&single).all(|(a, b)| b.as_ref().is_ok_and(|b| a == b)));
+    record(&format!("CUS_E2E|core|ground-heights|matches={}", matches as u8));
+
     let unit = ATTACHED_UNIT.load(Ordering::Relaxed);
     if unit < 0 {
         return;

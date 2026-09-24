@@ -303,6 +303,7 @@ def assert_markers(workdir: Path) -> None:
         # work, which runs once that use ends
         "CUS_E2E|core|unit-created|deferred=1",
         "CUS_E2E|core|deferred-ran|",
+        "CUS_E2E|core|ground-heights|matches=1",
     )
     for marker in required_core:
         if marker not in core_log:

@@ -788,6 +788,52 @@ Err(unreachable!())
 
     }
 
+    pub mod terrain {
+        #[cfg(target_arch = "wasm32")]
+        mod raw {
+            #[link(wasm_import_module = "spring:terrain")]
+unsafe extern "C" {
+#[link_name = "get-ground-heights"]
+pub safe fn get_ground_heights(p0: i32, p1: i32) -> i32;
+}
+        }
+
+        #[inline]
+pub fn get_ground_heights(blob0: &[u8], output: &mut [u8]) -> core::result::Result<usize, super::VariableResultError> {
+#[cfg(target_arch = "wasm32")]
+{
+if !output.len().is_multiple_of(4usize) || output.len() / 4usize > u32::MAX as usize {
+return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
+}
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize / 4usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::get_ground_heights(descriptor_ptr, output_descriptor_ptr);
+let required = output_descriptor[2] as usize;
+if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (blob0, output);
+Err(super::VariableResultError { error: unreachable!(), required: 0 })
+}
+}
+
+    }
+
     pub mod math_extra {
         #[cfg(target_arch = "wasm32")]
         mod raw {
@@ -9322,5 +9368,5 @@ Err(unreachable!())
     }
 
 #[doc(hidden)]
-pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 274;
+pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 275;
 }

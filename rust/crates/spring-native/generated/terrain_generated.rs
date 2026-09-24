@@ -254,4 +254,27 @@ impl<'a> Terrain<'a> {
         }
     }
 
+    pub fn get_ground_heights(&self, positions: &[f32]) -> Result<Vec<f32>, Error> {
+        unsafe {
+            let query = sys::GetGroundHeightsQuery {
+                positions: positions.as_ptr(),
+                count: positions.len() as u32,
+            };
+            let mut result = MaybeUninit::<sys::GetGroundHeightsResult>::zeroed();
+            let func = self.api.GetGroundHeights.expect("GetGroundHeights function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                {
+                    let slice = if result.count == 0 || result.heights.is_null() {
+                        &[]
+                    } else {
+                        slice::from_raw_parts(result.heights, result.count as usize)
+                    };
+                    slice.to_vec()
+                }
+            })
+        }
+    }
+
 }

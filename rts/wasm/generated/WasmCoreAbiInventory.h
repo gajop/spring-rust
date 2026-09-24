@@ -938,6 +938,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:terrain", "get-ground-blocked", "f32,f32,f32,f32->i64", 31u, Strategy::direct},
 	{"spring:terrain", "get-ground-extremes", "i32,i32->i32", 31u, Strategy::fixedOutput},
 	{"spring:terrain", "get-ground-height", "f32,f32->i64", 31u, Strategy::direct},
+	{"spring:terrain", "get-ground-heights", "i32,i32->i32", 31u, Strategy::manual},
 	{"spring:terrain", "get-ground-info", "f32,f32,i32->i32", 31u, Strategy::variableOutput},
 	{"spring:terrain", "get-ground-normal", "f32,f32,i32,i32->i32", 31u, Strategy::fixedOutput},
 	{"spring:terrain", "get-ground-orig-height", "f32,f32->i64", 31u, Strategy::direct},

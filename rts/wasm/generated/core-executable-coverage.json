@@ -1,8 +1,8 @@
 {
-  "total": 1410,
-  "executable_total": 1410,
+  "total": 1411,
+  "executable_total": 1411,
   "verified_total": 0,
-  "production_import_total": 1111,
+  "production_import_total": 1112,
   "by_class": {
     "dynamic-output-caller-owned": 89,
     "fixed": 850,
@@ -12,7 +12,7 @@
     "variable-input-borrowed": 195,
     "variable-input-borrowed-mixed-fixed": 17,
     "variable-input-nested-adapted": 27,
-    "variable-io-borrowed-input-caller-owned-output": 53,
+    "variable-io-borrowed-input-caller-owned-output": 54,
     "variable-output-caller-owned": 90
   },
   "executable": [
@@ -4068,6 +4068,20 @@
       "import_module": "spring:terrain",
       "import_name": "get-ground-height",
       "class": "fixed",
+      "verified": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 31,
+      "production_visibility_environment_mask": 31,
+      "production_environment_mask": 31,
+      "reason": null
+    },
+    {
+      "module": "terrain",
+      "function": "GetGroundHeights",
+      "import_module": "spring:terrain",
+      "import_name": "get-ground-heights",
+      "class": "variable-io-borrowed-input-caller-owned-output",
       "verified": false,
       "production_import_allowed": true,
       "production_process_safe": true,

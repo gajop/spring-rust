@@ -244,20 +244,30 @@ signature is a load/bind error.
 
 ## Host-work and fuel accounting
 
-Every implemented import enters the existing Spring import/re-entry guard and
-charges deterministic host-work units. The Core host also uses Wasmtime fuel
-when `instructionFuel != 0`.
+Every engine call a module makes (every import) costs host-work units: one per
+call, plus the size of its list and string arguments (bytes or elements), plus
+one per callin the engine delivers to the module. The budget is per module and
+per frame: synced modules start a new window at each `GameFrame`, unsynced and
+UI modules at each `Update`. The default limit is 10,000,000 units, so ordinary
+code never comes near it; a module doesn't need to spread calls over frames
+because of it.
 
-`WasmCoreHost::ResetBudget(module, error)` explicitly restores both:
+A module that goes over the limit is faulted and unloaded. The engine logs:
 
-- Spring host-work/result budgets;
-- Wasmtime fuel via `wasmtime_context_set_fuel`.
+```text
+Core Wasm module <name> was deregistered due to fault: <Callin>: ... host-work budget exhausted
+Core Wasm module <name> made more than <limit> units of engine calls in one frame ...
+```
 
-`WasmCoreHost::FuelRemaining` exposes `wasmtime_context_get_fuel` for diagnostics.
+Games set the limit with the mod option `wasm_host_work_limit` (`0`, `off`,
+`false` or `unlimited` turn it off). `wasm_instruction_fuel` does the same for
+Wasmtime fuel, which is off by default. Both are part of the synced runtime
+identity, so peers must agree on them.
 
-No implicit accounting period is chosen by the Core host. The engine must decide
-whether reset occurs per simulation frame, tick, event batch, or another fixed
-deterministic boundary. Synced peers must make the same choice.
+`WasmCoreHost::ResetBudget(module, error)` restores both the host-work/result
+budgets and the Wasmtime fuel (`wasmtime_context_set_fuel`);
+`WasmCoreHost::FuelRemaining` exposes `wasmtime_context_get_fuel` for
+diagnostics.
 
 ## Runtime safety model
 

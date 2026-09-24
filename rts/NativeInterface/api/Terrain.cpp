@@ -10,6 +10,8 @@
 #include "Rendering/Env/GrassDrawer.h"
 #include "System/float3.h"
 
+#include <vector>
+
 namespace {
 
 // Scratch buffer for dynamic data
@@ -47,6 +49,31 @@ static void NativeIsPosInMap(const IsPosInMapQuery* query, IsPosInMapResult* res
 		query->x < mapDims.mapx * SQUARE_SIZE && query->z < mapDims.mapy * SQUARE_SIZE);
 	result->inPlayArea = (query->x >= 0.0f && query->z >= 0.0f &&
 		query->x < mapDims.pwr2mapx * SQUARE_SIZE && query->z < mapDims.pwr2mapy * SQUARE_SIZE);
+}
+
+static void NativeGetGroundHeights(const GetGroundHeightsQuery* query, GetGroundHeightsResult* result)
+{
+	static thread_local std::vector<float> heights;
+	heights.clear();
+	result->heights = nullptr;
+	result->count = 0;
+
+	if (!MapReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+	if ((query->positions == nullptr && query->count > 0) || (query->count % 2) != 0) {
+		result->error = &INVALID_ARG_ERROR;
+		return;
+	}
+
+	heights.reserve(query->count / 2);
+	for (uint32_t i = 0; i < query->count; i += 2)
+		heights.push_back(CGround::GetHeightReal(query->positions[i], query->positions[i + 1]));
+
+	result->error = nullptr;
+	result->heights = heights.data();
+	result->count = static_cast<uint32_t>(heights.size());
 }
 
 static void NativeGetGroundHeight(const GetGroundHeightQuery* query, GetGroundHeightResult* result)
@@ -280,4 +307,5 @@ const TerrainApi TERRAIN_API = {
 	.GetHeightMapSize = NativeGetHeightMapSize,
 	.GetGroundBlocked = NativeGetGroundBlocked,
 	.GetGrass = NativeGetGrass,
+	.GetGroundHeights = NativeGetGroundHeights,
 };

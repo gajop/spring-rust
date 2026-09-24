@@ -210,8 +210,8 @@
     },
     {
       "name": "terrain_generated.rs",
-      "sha256": "1c95e5ec0af56e941bdeed03afca5caa9971eceb5650122ff268c7aca04e4092",
-      "bytes": 9728
+      "sha256": "ab0b2fde0b18659ae9387b5fff35fb4a5145bbde8815aed423f02b0eb3782725",
+      "bytes": 10679
     },
     {
       "name": "tracing_generated.rs",

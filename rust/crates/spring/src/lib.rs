@@ -6,6 +6,16 @@
 //! The public API is safe. `unsafe` is contained in the generated transport
 //! layer where wasm32 pointers are passed to host imports as 32-bit linear-
 //! memory offsets. The host validates every offset/length before dereferencing.
+//!
+//! # Engine-call budget
+//!
+//! Each engine call costs one host-work unit, plus the size of its list and
+//! string arguments. A module may spend 10,000,000 units per frame (synced
+//! modules per `GameFrame`, unsynced and UI modules per `Update`); a module that
+//! spends more is unloaded, with the callin named in the log. Games change the
+//! limit with the `wasm_host_work_limit` mod option. Ordinary code needn't
+//! spread calls over frames for it. For many ground heights at once, use
+//! [`ground_heights`].
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

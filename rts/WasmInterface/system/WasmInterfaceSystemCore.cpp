@@ -391,9 +391,17 @@ void WasmInterfaceSystem::RemoveFaultedModules()
 		}
 	}
 	for (const CoreModuleRecord& module : coreModules) {
-		if (WasmCoreHost::ModuleFaulted(module.descriptor.name)) {
-			LOG_L(L_WARNING, "Core Wasm module %s was deregistered due to fault",
-				module.descriptor.name.c_str());
+		if (!WasmCoreHost::ModuleFaulted(module.descriptor.name))
+			continue;
+		const std::string reason = WasmCoreHost::FaultReason(module.host);
+		LOG_L(L_WARNING, "Core Wasm module %s was deregistered due to fault: %s",
+			module.descriptor.name.c_str(), reason.c_str());
+		if (reason.find("host-work budget exhausted") != std::string::npos) {
+			LOG_L(L_WARNING, "Core Wasm module %s made more than %llu units of engine calls in one "
+				"frame (one per call, plus the size of list and string arguments). Spread the "
+				"work over frames, or raise the limit with the wasm_host_work_limit mod option.",
+				module.descriptor.name.c_str(),
+				static_cast<unsigned long long>(runtime->Config().hostWorkLimit));
 		}
 	}
 	for (const CoreModuleRecord& module : coreModules) {

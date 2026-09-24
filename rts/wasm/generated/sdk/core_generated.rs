@@ -5744,6 +5744,11 @@ pub mod terrain {
         }
         #[link(wasm_import_module = "spring:terrain")]
         unsafe extern "C" {
+            #[link_name = "get-ground-heights"]
+            pub safe fn core_get_ground_heights(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:terrain")]
+        unsafe extern "C" {
             #[link_name = "get-ground-info"]
             pub safe fn core_get_ground_info(p0: f32, p1: f32, p2: i32) -> i32;
         }

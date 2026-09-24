@@ -509,6 +509,103 @@ wasm_trap_t* CoreVariableIo_game_get_mod_option(void* environment, wasmtime_call
     return nullptr;
 }
 
+wasm_trap_t* CoreVariableIo_terrain_get_ground_heights(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->terrain == nullptr ||
+        state->native->terrain->GetGroundHeights == nullptr)
+        return Trap("GetGroundHeights generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("GetGroundHeights generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 12u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader heightsControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t heightsPointer = 0;
+    std::uint32_t heightsCapacity = 0;
+    std::uint32_t heightsIgnoredLength = 0;
+    if (!heightsControl.U32(heightsPointer) || !heightsControl.U32(heightsCapacity) ||
+        !heightsControl.U32(heightsIgnoredLength) || !heightsControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    const std::uint64_t heightsCapacityBytes = static_cast<std::uint64_t>(heightsCapacity) * 4u;
+    if (heightsCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(heightsPointer, static_cast<std::size_t>(heightsCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetGroundHeightsQuery query{};
+    std::uint32_t positionsInputPointer = 0;
+    std::uint32_t positionsInputCount = 0;
+    if (!reader.U32(positionsInputPointer) || !reader.U32(positionsInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> positionsInputWire;
+    if (!state->memory.View(positionsInputPointer, positionsInputCount, positionsInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader positionsInputReader(positionsInputWire);
+    std::uint32_t positionsInputLength = 0;
+    if (!positionsInputReader.U32(positionsInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::vector<float> positionsInputStorage;
+    positionsInputStorage.reserve(positionsInputLength);
+    for (std::uint32_t coreIndex = 0; coreIndex < positionsInputLength; ++coreIndex) {
+        float item{};
+        if (!positionsInputReader.F32(item)) return Trap("generated Core wire underflow");
+        positionsInputStorage.push_back(item);
+    }
+    if (!positionsInputReader.Finish(4u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.positions = positionsInputLength == 0 ? nullptr : positionsInputStorage.data();
+    if (!AssignCoreCount(positionsInputLength, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    GetGroundHeightsResult result{};
+    state->native->terrain->GetGroundHeights(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    if (static_cast<std::uint64_t>(result.count) > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t heightsRequired = static_cast<std::uint32_t>(result.count);
+    if (heightsRequired != 0 && result.heights == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteCoreU32(outputWire, 8u, heightsRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || heightsCapacity < heightsRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (heightsRequired != 0) {
+        const std::size_t heightsBytes = static_cast<std::size_t>(heightsRequired) * 4u;
+        if constexpr (std::endian::native == std::endian::little) {
+            static_assert(sizeof(float) == 4u, "generated Core output/native element width mismatch");
+            if (!state->memory.Write(heightsPointer, result.heights, heightsBytes)) return Trap("generated Core variable output range changed unexpectedly");
+        } else {
+            std::span<std::uint8_t> heightsWire;
+            if (!state->memory.MutableView(heightsPointer, heightsBytes, heightsWire)) return Trap("generated Core variable output range changed unexpectedly");
+            WireWriter heightsWriter(heightsWire);
+            for (std::uint32_t coreIndex = 0; coreIndex < heightsRequired; ++coreIndex) {
+            if (!heightsWriter.F32(result.heights[coreIndex])) return Trap("generated Core wire overflow");
+            }
+            if (!heightsWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
+        }
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariableIo_encoding_decode_base64(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -4802,6 +4899,13 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:terrain", "get-ground-heights",
+                MakeFuncType(params, 2, results, 1), CoreVariableIo_terrain_get_ground_heights, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedVariableIo(linker, "spring:encoding", "decode-base64",
                 MakeFuncType(params, 2, results, 1), CoreVariableIo_encoding_decode_base64, state, error))
             return false;
@@ -5132,6 +5236,6 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
     return true;
 }
 
-static_assert(53 >= 0, "generated variable-I/O Core callback count");
+static_assert(54 >= 0, "generated variable-I/O Core callback count");
 
 } // namespace recoil::wasm::core::generated

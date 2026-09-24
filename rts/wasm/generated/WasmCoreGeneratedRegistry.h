@@ -287,6 +287,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:terrain", "get-grass", "f32,f32->i64", 31u},
     {"spring:terrain", "get-ground-blocked", "f32,f32,f32,f32->i64", 31u},
     {"spring:terrain", "get-ground-height", "f32,f32->i64", 31u},
+    {"spring:terrain", "get-ground-heights", "i32,i32->i32", 31u},
     {"spring:terrain", "get-ground-info", "f32,f32,i32->i32", 31u},
     {"spring:terrain", "get-ground-normal", "f32,f32,i32,i32->i32", 31u},
     {"spring:terrain", "get-ground-orig-height", "f32,f32->i64", 31u},

@@ -1,6 +1,13 @@
 #[cfg(feature = "alloc")]
 pub use crate::owned::terrain::{get_ground_info, get_terrain_type_data};
 
+/// Ground heights at many `[x, z]` points in one engine call, like calling
+/// `Spring.GetGroundHeight` for each.
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub fn ground_heights(points: &[[f32; 2]]) -> Result<alloc::vec::Vec<f32>> {
+    crate::owned::terrain::get_ground_heights(points.as_flattened())
+}
+
 // Fixed-width Terrain reads for the Spring Core-Wasm guest SDK.
 
 use super::{ApiError, ErrorCode, Float3, Result};

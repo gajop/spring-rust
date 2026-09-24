@@ -12,7 +12,7 @@ pub use crate::owned::rules_params::{
 ///
 /// A param is readable only where its mask overlaps the reader's access, so
 /// `0` hides it from everyone — including the module that wrote it. Lua's
-/// setters default to [`PRIVATE`]; there is no such default here, so pass one
+/// setters default to [`PRIVATE`](los::PRIVATE); there is no such default here, so pass one
 /// of these explicitly.
 pub mod los {
     /// Readable by the owning ally only. Lua's default.

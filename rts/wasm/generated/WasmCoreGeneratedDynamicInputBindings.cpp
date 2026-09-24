@@ -1479,6 +1479,74 @@ wasm_trap_t* CoreDynamicInput_weapon_defs_get_weapon_def_id(void* environment, w
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_terrain_get_ground_heights(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->terrain == nullptr ||
+        state->native->terrain->GetGroundHeights == nullptr)
+        return Trap("GetGroundHeights dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("GetGroundHeights dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GetGroundHeightsQuery query{};
+    std::uint32_t positionsPointer = 0, positionsBytes = 0;
+    if (!inputControl.U32(positionsPointer) || !inputControl.U32(positionsBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(positionsBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> positionsWire;
+    if (!state->memory.View(positionsPointer, positionsBytes, positionsWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader positionsReader(positionsWire);
+    std::vector<float> positionsStorage;
+    { std::uint32_t coreCount = 0; if (!positionsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } positionsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { float item{}; bool coreItemOk = [&]() -> bool {
+                if (!positionsReader.F32(item)) return false;
+                return true;
+            }(); if (!coreItemOk) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } positionsStorage.push_back(item); } query.positions = positionsStorage.empty() ? nullptr : positionsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } }
+    if (!positionsReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 4u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetGroundHeightsResult result{};
+    state->native->terrain->GetGroundHeights(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    std::uint32_t required = 0;
+    if (!AssignDynamicCount(result.count, required) || (required != 0 && result.heights == nullptr)) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint64_t requiredBytes64 = static_cast<std::uint64_t>(required) * 4u;
+    if (requiredBytes64 > std::numeric_limits<std::size_t>::max() || !CheckResultBytes(state, static_cast<std::size_t>(requiredBytes64))) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredBytes64)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, static_cast<std::size_t>(requiredBytes64), outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        WireWriter writer(outputWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < required; ++coreIndex) {
+        if (!writer.F32(result.heights[coreIndex])) return Trap("dynamic-input Core wire overflow");
+        }
+        if (!writer.Finish(1)) return Trap("dynamic-input variable output layout mismatch");
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_math_extra_bit_bits(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -14139,6 +14207,13 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:terrain", "get-ground-heights",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_terrain_get_ground_heights, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicInput(linker, "spring:encoding", "decode-base64",
                 MakeFuncType(params, 2, results, 1), CoreDynamicInput_encoding_decode_base64, state, error))
             return false;
@@ -14854,6 +14929,6 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     return true;
 }
 
-static_assert(274u >= 0u, "generated dynamic-input Core callback count");
+static_assert(275u >= 0u, "generated dynamic-input Core callback count");
 
 } // namespace recoil::wasm::core::generated

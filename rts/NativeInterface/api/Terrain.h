@@ -167,6 +167,19 @@ struct GetGrassResult {
 	float grassLevel;
 };
 
+// NEW (no Lua equivalent): GetGroundHeight for many positions in one call.
+// `positions` holds x, z pairs (count floats); `heights` gets one per pair.
+struct GetGroundHeightsQuery {
+	const float* positions;
+	uint32_t count;
+};
+
+struct GetGroundHeightsResult {
+	const Error* error;
+	const float* heights;
+	uint32_t count;
+};
+
 // API structure
 struct TerrainApi {
 	void (*IsPosInMap)(
@@ -233,6 +246,11 @@ struct TerrainApi {
 	void (*GetGrass)(
 		const GetGrassQuery* query,
 		GetGrassResult* result
+	);
+
+	void (*GetGroundHeights)(
+		const GetGroundHeightsQuery* query,
+		GetGroundHeightsResult* result
 	);
 };
 

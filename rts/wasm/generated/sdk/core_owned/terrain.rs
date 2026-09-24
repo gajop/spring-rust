@@ -1,5 +1,5 @@
     pub mod terrain {
-        use super::{Result, String};
+        use super::{Result, String, Vec};
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetGrassQuery {
@@ -47,6 +47,16 @@
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetGroundHeightResult {
             pub height: f32,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GetGroundHeightsQuery {
+            pub positions: Vec<f32>,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GetGroundHeightsResult {
+            pub heights: Vec<f32>,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -260,6 +270,33 @@
         pub fn get_ground_height(x: f32, z: f32) -> Result<f32> {
             let value = crate::generated::terrain::get_ground_height(x, z)?;
             Ok(value)
+        }
+
+        #[inline]
+        pub fn get_ground_heights(positions: &[f32]) -> Result<Vec<f32>> {
+            let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(positions.len() as u32).to_le_bytes()); for __item in positions.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_bits().to_le_bytes());} __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_input::terrain::get_ground_heights(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required * 4, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required * 4);
+                        let mut __result = Vec::<f32>::with_capacity(required);
+                        let mut __cursor = 0usize;
+                        for _ in 0..required {
+                            __result.push(crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?);
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required * 4, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[cfg(target_arch = "wasm32")]
