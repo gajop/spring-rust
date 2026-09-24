@@ -97,7 +97,9 @@ pub struct ShaderCreateParams<'a> {
     pub geo_output_type: Option<u32>,
     /// Maximum vertices the geometry stage emits; engine default when `None`.
     pub geo_output_verts: Option<i32>,
-    /// Integer uniforms to assign after the shader is linked.
+    /// Integer uniforms to assign after the shader is linked. Bind samplers to
+    /// texture units here, e.g. `ShaderUniformInt { name: "tex", value: 0 }`,
+    /// instead of setting them after every `use_shader`.
     pub uniform_ints: &'a [ShaderUniformInt<'a>],
     /// Floating-point uniforms to assign after the shader is linked.
     pub uniform_floats: &'a [ShaderUniformFloat<'a>],
@@ -130,6 +132,11 @@ pub fn create_shader(
             geo_output_verts: params.geo_output_verts.unwrap_or(0),
         },
     )?;
+    // The engine reports a failed compile or link as shader 0; the log has
+    // the compiler's messages.
+    if shader.shader_id == 0 {
+        return Err(crate::ApiError::new(crate::ErrorCode::OperationFailed as i32));
+    }
 
     if params.uniform_ints.is_empty() && params.uniform_floats.is_empty() {
         return Ok(shader);
@@ -155,6 +162,16 @@ pub fn create_shader(
     let _ = unbound?;
 
     Ok(shader)
+}
+
+/// A uniform's location in `shader`, or `None` when the shader has no active
+/// uniform of that name (the GLSL compiler drops unused ones).
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn uniform_location(shader: u32, name: &str) -> Option<i32> {
+    crate::owned::gfx::get_uniform_location(shader, name)
+        .ok()
+        .filter(|location| *location >= 0)
 }
 
 /// Return the camera's combined view and projection matrix.

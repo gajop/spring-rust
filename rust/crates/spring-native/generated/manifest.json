@@ -175,8 +175,8 @@
     },
     {
       "name": "sound_generated.rs",
-      "sha256": "80fc39571eb31be5f517cb41dd32b6f442cbfdb3f38f5773d5fb51e403db1389",
-      "bytes": 7880
+      "sha256": "1083bf9cc5aa8302b17c94b29c31dcdb4dac64245e86a3d6067fd168e568de8a",
+      "bytes": 8486
     },
     {
       "name": "synced_ctrl_generated.rs",

@@ -865,6 +865,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:selection", "set-unit-group", "i32,i32->i64", 31u, Strategy::direct},
 	{"spring:sound", "get-sound-devices", "i32,i32->i32", 26u, Strategy::manual},
 	{"spring:sound", "get-sound-effect-params", "i32->i64", 122u, Strategy::direct},
+	{"spring:sound", "get-sound-stream-play-time", "i32->i64", 31u, Strategy::direct},
 	{"spring:sound", "get-sound-stream-time", "i32->i64", 122u, Strategy::direct},
 	{"spring:sound", "load-sound-def", "i32->i64", 31u, Strategy::variableInput},
 	{"spring:sound", "pause-sound-stream", "i32->i64", 31u, Strategy::direct},

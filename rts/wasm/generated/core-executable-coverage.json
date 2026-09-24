@@ -1,11 +1,11 @@
 {
-  "total": 1411,
-  "executable_total": 1411,
+  "total": 1412,
+  "executable_total": 1412,
   "verified_total": 0,
-  "production_import_total": 1112,
+  "production_import_total": 1113,
   "by_class": {
     "dynamic-output-caller-owned": 89,
-    "fixed": 850,
+    "fixed": 851,
     "fixed-option": 14,
     "handwritten-reviewed": 71,
     "variable-input-adapted": 4,
@@ -6565,6 +6565,20 @@
       "production_process_safe": true,
       "production_sync_environment_mask": 26,
       "production_visibility_environment_mask": 122,
+      "production_environment_mask": 26,
+      "reason": null
+    },
+    {
+      "module": "sound",
+      "function": "GetSoundStreamPlayTime",
+      "import_module": "spring:sound",
+      "import_name": "get-sound-stream-play-time",
+      "class": "fixed",
+      "verified": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 26,
+      "production_visibility_environment_mask": 31,
       "production_environment_mask": 26,
       "reason": null
     },

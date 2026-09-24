@@ -212,6 +212,7 @@ fn game_frame(frame: i32) {
         if heights.len() == points.len()
             && heights.iter().zip(&single).all(|(a, b)| b.as_ref().is_ok_and(|b| a == b)));
     record(&format!("CUS_E2E|core|ground-heights|matches={}", matches as u8));
+    check_sdk_helpers();
 
     let unit = ATTACHED_UNIT.load(Ordering::Relaxed);
     if unit < 0 {
@@ -237,6 +238,48 @@ fn game_frame(frame: i32) {
         direct.is_some() as u8,
         direct.flatten().is_some() as u8,
         values[0]
+    ));
+}
+
+spring::unit_kinds! {
+    enum Kind {
+        TestUnit = "native_api_test_unit",
+        Missing = "rust_cus_e2e_missing_def",
+    }
+}
+
+fn check_sdk_helpers() {
+    use spring::ResultExt;
+
+    let def = Kind::TestUnit.def();
+    let kinds = def.is_some()
+        && Kind::Missing.def().is_none()
+        && def.and_then(Kind::from_def) == Some(Kind::TestUnit);
+    let param = def.and_then(|def| {
+        spring::kinds::unit_def_custom_param::<String>(def, "native_api_parity_unit")
+    });
+    let number = def.and_then(|def| {
+        spring::kinds::unit_def_custom_param::<f32>(def, "native_api_parity_unit")
+    });
+    // Two failures at one call site log once.
+    for _ in 0..2 {
+        let _ = spring::get_unit_def_id(-5).log_err_once("CUS_E2E|core|log-once");
+    }
+    let camera = spring::CameraState::new(
+        "spring",
+        spring::Float3::new(0.0, 100.0, 0.0),
+        spring::Float3::new(0.0, -0.90149933, -0.4335693),
+    );
+    // MyCube's hand-written camera; its direction is only nearly unit length.
+    let camera_ok = (camera.up.y - 0.4335693).abs() < 1e-3
+        && (camera.up.z + 0.90149933).abs() < 1e-3
+        && (camera.right.x - 1.0).abs() < 1e-5;
+    record(&format!(
+        "CUS_E2E|core|sdk-helpers|kinds={}|param={}|number={}|camera={}",
+        kinds as u8,
+        (param.as_deref() == Some("unit_custom_value")) as u8,
+        number.is_none() as u8,
+        camera_ok as u8
     ));
 }
 

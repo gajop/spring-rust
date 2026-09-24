@@ -59,6 +59,32 @@ wasm_trap_t* Core_sound_get_sound_effect_params(void* environment, wasmtime_call
     return nullptr;
 }
 
+wasm_trap_t* Core_sound_get_sound_stream_play_time(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->soundApi == nullptr ||
+        state->native->soundApi->GetSoundStreamPlayTime == nullptr)
+        return Trap("GetSoundStreamPlayTime generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("GetSoundStreamPlayTime generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("GetSoundStreamPlayTime generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GetSoundStreamPlayTimeQuery query{};
+    query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
+    GetSoundStreamPlayTimeResult result{};
+    state->native->soundApi->GetSoundStreamPlayTime(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(std::bit_cast<std::uint32_t>(result.playTime), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_sound_get_sound_stream_time(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -182,6 +208,13 @@ bool RegisterGeneratedImports_sound(wasmtime_linker_t* linker, HostState* state,
     {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:sound", "get-sound-stream-play-time",
+                MakeFuncType(params, 1, results, 1), Core_sound_get_sound_stream_play_time, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:sound", "get-sound-stream-time",
                 MakeFuncType(params, 1, results, 1), Core_sound_get_sound_stream_time, state, error))
             return false;
@@ -211,6 +244,6 @@ bool RegisterGeneratedImports_sound(wasmtime_linker_t* linker, HostState* state,
     return true;
 }
 
-static_assert(5 >= 0, "generated Core Wasm callback count");
+static_assert(6 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

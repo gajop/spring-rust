@@ -9249,6 +9249,11 @@ pub mod sound {
         }
         #[link(wasm_import_module = "spring:sound")]
         unsafe extern "C" {
+            #[link_name = "get-sound-stream-play-time"]
+            pub safe fn core_get_sound_stream_play_time(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:sound")]
+        unsafe extern "C" {
             #[link_name = "get-sound-stream-time"]
             pub safe fn core_get_sound_stream_time(p0: i32) -> i64;
         }
@@ -9283,6 +9288,24 @@ pub mod sound {
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
             }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn get_sound_stream_play_time(unused: u8) -> Result<f32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_get_sound_stream_play_time(unused as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {

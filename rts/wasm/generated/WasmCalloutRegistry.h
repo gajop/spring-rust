@@ -481,6 +481,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"selection", "SetUnitGroup", 31u, false, false, LoweringStatus::automatic},
 	{"sound", "GetSoundDevices", 26u, false, false, LoweringStatus::annotated},
 	{"sound", "GetSoundEffectParams", 122u, false, false, LoweringStatus::automatic},
+	{"sound", "GetSoundStreamPlayTime", 31u, false, false, LoweringStatus::automatic},
 	{"sound", "GetSoundStreamTime", 122u, false, false, LoweringStatus::automatic},
 	{"sound", "LoadSoundDef", 31u, false, false, LoweringStatus::automatic},
 	{"sound", "PauseSoundStream", 31u, false, false, LoweringStatus::automatic},

@@ -304,12 +304,16 @@ def assert_markers(workdir: Path) -> None:
         "CUS_E2E|core|unit-created|deferred=1",
         "CUS_E2E|core|deferred-ran|",
         "CUS_E2E|core|ground-heights|matches=1",
+        "CUS_E2E|core|sdk-helpers|kinds=1|param=1|number=1|camera=1",
     )
     for marker in required_core:
         if marker not in core_log:
             raise AssertionError(f"Core-Wasm marker missing: {marker!r}\n{core_log}")
     # The engine delivers Create exactly once, although a nested callin ran
     # while the module was still attaching.
+    logged_once = core_log.count("CUS_E2E|core|log-once")
+    if logged_once != 1:
+        raise AssertionError(f"log_err_once logged {logged_once} times, expected 1\n{core_log}")
     creates = core_log.count("CUS_E2E|core|create")
     if creates != 1:
         raise AssertionError(f"Core-Wasm Create delivered {creates} times, expected 1\n{core_log}")

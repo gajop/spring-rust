@@ -19127,6 +19127,26 @@
     },
     {
       "module": "sound",
+      "function": "GetSoundStreamPlayTime",
+      "import_module": "spring:sound",
+      "import_name": "get-sound-stream-play-time",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "sound",
       "function": "GetSoundStreamTime",
       "import_module": "spring:sound",
       "import_name": "get-sound-stream-time",
@@ -31401,7 +31421,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1195,
+  "automatic_count": 1196,
   "manual_count": 199,
   "unsupported_count": 17
 }

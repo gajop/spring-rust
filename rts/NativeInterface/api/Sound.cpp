@@ -131,6 +131,14 @@ static void NativeGetSoundStreamTime(const GetSoundStreamTimeQuery* query, GetSo
 	result->time = Channels::BGMusic->StreamGetTime();
 }
 
+static void NativeGetSoundStreamPlayTime(const GetSoundStreamPlayTimeQuery* /*query*/, GetSoundStreamPlayTimeResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->playTime = Channels::BGMusic->StreamGetPlayTime();
+}
+
 static void NativeGetSoundDevices(const GetSoundDevicesQuery* /*query*/, GetSoundDevicesResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
@@ -218,4 +226,5 @@ const SoundApi SOUND_API = {
 	.GetSoundEffectParams = NativeGetSoundEffectParams,
 	.SetSoundEffectParams = NativeSetSoundEffectParams,
 	.PreloadSoundItem = NativePreloadSoundItem,
+	.GetSoundStreamPlayTime = NativeGetSoundStreamPlayTime,
 };

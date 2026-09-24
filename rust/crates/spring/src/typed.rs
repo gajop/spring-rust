@@ -45,6 +45,71 @@ pub struct CameraState<'a> {
     pub mode: i32,
 }
 
+impl<'a> CameraState<'a> {
+    /// A camera at `position` looking along `direction`, with `up` and `right`
+    /// derived from it (no roll). The other fields keep their defaults: a zero
+    /// `fov` or `dist` leaves the engine's value unchanged. Set `mode`, `height`,
+    /// `angle` and so on with struct update syntax:
+    ///
+    /// ```rust,ignore
+    /// let camera = spring::CameraState {
+    ///     fov: 45.0,
+    ///     mode: 1,
+    ///     ..spring::CameraState::new("spring", position, direction)
+    /// };
+    /// ```
+    pub fn new(name: &'a str, position: Float3, direction: Float3) -> Self {
+        let direction = direction.normalized();
+        let mut right = direction.cross(Float3::new(0.0, 1.0, 0.0)).normalized();
+        if right == Float3::ZERO {
+            // Looking straight up or down.
+            right = Float3::new(1.0, 0.0, 0.0);
+        }
+        Self {
+            name,
+            position,
+            direction,
+            up: right.cross(direction),
+            right,
+            ..Default::default()
+        }
+    }
+}
+
+/// Background music position, from Lua's `Spring.GetSoundStreamTime`.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct SoundStreamTime {
+    /// Seconds played so far.
+    pub played: f32,
+    /// Length of the stream in seconds.
+    pub length: f32,
+}
+
+impl SoundStreamTime {
+    /// Whether the stream has played to its end (or nothing is playing).
+    pub fn finished(self) -> bool {
+        self.played >= self.length
+    }
+}
+
+pub fn sound_stream_time() -> crate::Result<SoundStreamTime> {
+    Ok(SoundStreamTime {
+        played: generated::owned::sound::get_sound_stream_play_time(0)?,
+        length: generated::owned::sound::get_sound_stream_time(0)?,
+    })
+}
+
+/// Reload the game's synced and unsynced rules (`/luarules reload`), turning
+/// cheats on only for the reload if they were off, and leaving them as they
+/// were.
+pub fn reload_rules() -> crate::Result<bool> {
+    if generated::owned::game::is_cheating_enabled(0)? {
+        crate::send_command("luarules reload")
+    } else {
+        crate::send_command_lines(&["cheat 1", "luarules reload", "cheat 0"])
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ProjectileParams<'a> {
     pub position: Float3,

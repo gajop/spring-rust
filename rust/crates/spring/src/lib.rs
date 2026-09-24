@@ -89,6 +89,14 @@ pub mod profiling;
 mod pcg;
 #[cfg(target_arch = "wasm32")]
 pub mod random;
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+mod result_ext;
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub use result_ext::ResultExt;
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub mod pick;
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub mod kinds;
 #[cfg(target_arch = "wasm32")]
 pub mod rml_ui;
 #[cfg(target_arch = "wasm32")]
@@ -239,6 +247,33 @@ macro_rules! log_error {
     ($section:expr, $($arg:tt)+) => { $crate::log_at!($crate::log_level::ERROR, $section, $($arg)+) };
 }
 
+/// `log_once!(level, "section", "format {}", args)`: log only the first time
+/// this line runs, e.g. for an error that would otherwise repeat every frame.
+#[cfg(feature = "alloc")]
+#[macro_export]
+macro_rules! log_once {
+    ($level:expr, $section:expr, $($arg:tt)+) => {{
+        static LOGGED: core::sync::atomic::AtomicBool = core::sync::atomic::AtomicBool::new(false);
+        if !LOGGED.swap(true, core::sync::atomic::Ordering::Relaxed) {
+            $crate::log_at!($level, $section, $($arg)+);
+        }
+    }};
+}
+
+/// `log_every!(n, level, "section", "format {}", args)`: log the first time
+/// this line runs and then every `n`th time.
+#[cfg(feature = "alloc")]
+#[macro_export]
+macro_rules! log_every {
+    ($n:expr, $level:expr, $section:expr, $($arg:tt)+) => {{
+        static COUNT: core::sync::atomic::AtomicU32 = core::sync::atomic::AtomicU32::new(0);
+        let count = COUNT.fetch_add(1, core::sync::atomic::Ordering::Relaxed);
+        if count % ($n as u32).max(1) == 0 {
+            $crate::log_at!($level, $section, $($arg)+);
+        }
+    }};
+}
+
 #[macro_export]
 macro_rules! export_environment_mask {
     ($mask:expr) => {
@@ -271,6 +306,21 @@ pub mod game {
     pub fn frame() -> crate::Result<u32> {
         let value = get_game_frame(0)?;
         Ok((value.high16 << 16) | (value.low16 & 0xFFFF))
+    }
+
+    /// The current simulation frame as an `i32`, like Lua's
+    /// `Spring.GetGameFrame()`; 0 before the game starts.
+    #[inline]
+    pub fn current_frame() -> i32 {
+        frame().map_or(0, |frame| frame as i32)
+    }
+
+    /// The map's size in elmos (world units), like Lua's `Game.mapSizeX` and
+    /// `Game.mapSizeZ`.
+    #[inline]
+    pub fn map_size_elmos() -> crate::Result<(i32, i32)> {
+        let info = get_game_map_info(0)?;
+        Ok((info.map_size_x, info.map_size_z))
     }
 }
 
@@ -342,6 +392,39 @@ impl Float3 {
     #[inline]
     pub fn distance(self, other: Self) -> f32 {
         (self - other).length()
+    }
+
+    /// Length on the ground plane, ignoring `y`.
+    #[inline]
+    pub fn length_xz(self) -> f32 {
+        sqrt_f32(self.x * self.x + self.z * self.z)
+    }
+
+    /// Distance on the ground plane, ignoring `y`.
+    #[inline]
+    pub fn distance_xz(self, other: Self) -> f32 {
+        (self - other).length_xz()
+    }
+
+    /// `self` at `t = 0`, `other` at `t = 1`.
+    #[inline]
+    pub fn lerp(self, other: Self, t: f32) -> Self {
+        Self {
+            x: self.x + (other.x - self.x) * t,
+            y: self.y + (other.y - self.y) * t,
+            z: self.z + (other.z - self.z) * t,
+        }
+    }
+
+    /// The unit vector in the same direction; zero stays zero.
+    #[inline]
+    pub fn normalized(self) -> Self {
+        let length = self.length();
+        if length > 0.0 {
+            Self::new(self.x / length, self.y / length, self.z / length)
+        } else {
+            self
+        }
     }
 
     #[inline]

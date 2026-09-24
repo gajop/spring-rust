@@ -30,7 +30,7 @@ pub mod reexports {
     pub use std::thread_local;
 }
 
-pub use event::{CommandEvent, EventResult, KeyEvent, ViewGeometry};
+pub use event::{CommandEvent, EventResult, KeyEvent, ViewGeometry, keys};
 pub use panic::{borrow_conflict, install_panic_hook};
 pub use rules::{Gadget, GadgetHandler, UnitDestroyedEvent, UnitPreDamagedEvent};
 pub use runtime::{AddonContext, AddonRuntime, Resource, Resources, with_active_callins};

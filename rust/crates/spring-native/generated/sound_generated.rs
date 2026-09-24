@@ -187,4 +187,19 @@ impl<'a> Sound<'a> {
         }
     }
 
+    pub fn get_sound_stream_play_time(&self) -> Result<f32, Error> {
+        unsafe {
+            let query = sys::GetSoundStreamPlayTimeQuery {
+                _unused: 0,
+            };
+            let mut result = MaybeUninit::<sys::GetSoundStreamPlayTimeResult>::zeroed();
+            let func = self.api.GetSoundStreamPlayTime.expect("GetSoundStreamPlayTime function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.playTime
+            })
+        }
+    }
+
 }

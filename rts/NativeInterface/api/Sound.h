@@ -60,6 +60,10 @@ struct SetSoundStreamVolumeResult { const Error* error; bool success; };
 struct GetSoundStreamTimeQuery { uint8_t _unused; };
 struct GetSoundStreamTimeResult { const Error* error; float time; };
 
+// The first value of Lua's Spring.GetSoundStreamTime: seconds played so far.
+struct GetSoundStreamPlayTimeQuery { uint8_t _unused; };
+struct GetSoundStreamPlayTimeResult { const Error* error; float playTime; };
+
 struct GetSoundDevicesQuery { uint8_t _unused; };
 struct GetSoundDevicesResult { const Error* error; const char** devices; uint32_t count; };
 
@@ -85,6 +89,7 @@ struct SoundApi {
 	void (*GetSoundEffectParams)(const GetSoundEffectParamsQuery* query, GetSoundEffectParamsResult* result);
 	void (*SetSoundEffectParams)(const SetSoundEffectParamsQuery* query, SetSoundEffectParamsResult* result);
 	void (*PreloadSoundItem)(const PreloadSoundItemQuery* query, PreloadSoundItemResult* result);
+	void (*GetSoundStreamPlayTime)(const GetSoundStreamPlayTimeQuery* query, GetSoundStreamPlayTimeResult* result);
 };
 
 extern const SoundApi SOUND_API;

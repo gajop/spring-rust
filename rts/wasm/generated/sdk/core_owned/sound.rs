@@ -22,6 +22,16 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetSoundStreamPlayTimeQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetSoundStreamPlayTimeResult {
+            pub play_time: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetSoundStreamTimeQuery {
             pub unused: u8,
         }
@@ -148,6 +158,12 @@
         #[inline]
         pub fn get_sound_effect_params(unused: u8) -> Result<bool> {
             let value = crate::generated::sound::get_sound_effect_params(unused)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn get_sound_stream_play_time(unused: u8) -> Result<f32> {
+            let value = crate::generated::sound::get_sound_stream_play_time(unused)?;
             Ok(value)
         }
 
