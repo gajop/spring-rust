@@ -2460,8 +2460,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::rml_ui::element_get_active_pseudo_classes(element_handle as i64, &mut __output) {
                     Ok(required) => {
@@ -2556,8 +2555,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_input::rml_ui::element_get_elements_by_class_name(element_handle as i64, &__blob0, &mut __output) {
                     Ok(required) => {
@@ -2594,8 +2592,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_input::rml_ui::element_get_elements_by_tag_name(element_handle as i64, &__blob0, &mut __output) {
                     Ok(required) => {
@@ -2864,8 +2861,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_input::rml_ui::element_query_selector_all(element_handle as i64, &__blob0, &mut __output) {
                     Ok(required) => {

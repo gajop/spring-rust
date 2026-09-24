@@ -215,8 +215,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::units_weapons::get_unit_weapon_damages(unit_id, weapon_num, &mut __output) {
                     Ok(required) => {

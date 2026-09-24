@@ -265,8 +265,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_input::units_commands::get_command_params(&__blob0, &mut __output) {
                     Ok(required) => {
@@ -292,8 +291,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::units_commands::get_command_queue(unit_id, max_commands as i32, &mut __output) {
                     Ok(required) => {
@@ -338,8 +336,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::units_commands::get_factory_commands(unit_id, max_commands as i32, &mut __output) {
                     Ok(required) => {
@@ -365,8 +362,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::units_commands::get_factory_counts(unit_id, count, add_cmds as i32, &mut __output) {
                     Ok(required) => {
@@ -439,8 +435,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::units_commands::get_unit_cmd_descs(unit_id, &mut __output) {
                     Ok(required) => {
@@ -488,8 +483,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::units_commands::get_unit_current_command(unit_id, cmd_index, &mut __output) {
                     Ok(required) => {

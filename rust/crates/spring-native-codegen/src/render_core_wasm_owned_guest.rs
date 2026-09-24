@@ -2202,8 +2202,7 @@ fn di_render_variable_output_forward(
 {blob_setup}            // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {{
                 match {di_path}({all_args}, &mut __output) {{
                     Ok(required) => {{
@@ -2252,8 +2251,7 @@ fn di_render_string_output_forward(
 {blob_setup}            // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {{
                 match {di_path}({all_args}, &mut __output) {{
                     Ok(required) => {{
@@ -2352,8 +2350,7 @@ fn render_dynamic_output_forward(
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {{
                 match {call} {{
                     Ok(required) => {{

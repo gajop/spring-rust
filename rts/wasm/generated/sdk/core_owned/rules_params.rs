@@ -274,8 +274,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::rules_params::get_feature_rules_params(feature_id, &mut __output) {
                     Ok(required) => {
@@ -317,8 +316,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::rules_params::get_game_rules_params(unused as i32, &mut __output) {
                     Ok(required) => {
@@ -360,8 +358,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::rules_params::get_player_rules_params(player_id, &mut __output) {
                     Ok(required) => {
@@ -403,8 +400,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::rules_params::get_team_rules_params(team_id, &mut __output) {
                     Ok(required) => {
@@ -446,8 +442,7 @@
             // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
-            let mut __output = Vec::<u8>::new();
-            __output.resize(__SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed), 0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
             loop {
                 match crate::generated::dynamic_output::rules_params::get_unit_rules_params(unit_id, &mut __output) {
                     Ok(required) => {
