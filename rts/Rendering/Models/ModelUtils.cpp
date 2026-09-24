@@ -333,6 +333,21 @@ void ModelUtils::ApplyModelProperties(S3DModel* model, const ModelParams& modelP
 
 	// Note the content from Lua table will overwrite whatever has already been defined in modelParams
 
+	// Explicit bounds (glTF scene extras or a metafile) win over the geometry.
+	// Stale values copied from another model are easy to miss: they shrink or
+	// grow the unit's radius, culling and quad-field footprint, so say so.
+	if (modelParams.mins || modelParams.maxs || modelParams.radius) {
+		const float geometryRadius = model->CalcDrawRadius();
+		const float3 mins = modelParams.mins.value_or(model->mins);
+		const float3 maxs = modelParams.maxs.value_or(model->maxs);
+		const float explicitRadius = modelParams.radius.value_or(((maxs - mins) * 0.5f).Length());
+
+		if (explicitRadius * 2.0f < geometryRadius || explicitRadius > geometryRadius * 2.0f) {
+			LOG_L(L_WARNING, "[%s] model \"%s\": explicit bounds (radius %.2f, from glTF scene extras or a model metafile) disagree with its geometry (radius %.2f)",
+				__func__, model->name.c_str(), explicitRadius, geometryRadius);
+		}
+	}
+
 	model->mins = modelParams.mins.value_or(model->mins);
 	model->maxs = modelParams.maxs.value_or(model->maxs);
 
