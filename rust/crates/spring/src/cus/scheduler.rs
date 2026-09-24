@@ -802,7 +802,7 @@ fn spawn_task(
 }
 
 fn poll_task(context: &UnitCtx, id: TaskId, epoch: u64) {
-    let (mut future, task_waker_state) = {
+    let (mut future, task_waker_state, previous_task) = {
         let mut scheduler = context.scheduler.borrow_mut();
         let can_poll = scheduler
             .tasks
@@ -817,17 +817,21 @@ fn poll_task(context: &UnitCtx, id: TaskId, epoch: u64) {
             return;
         }
         scheduler.clear_wait_registration(id);
-        scheduler.polling_task = Some(id);
         let Some(task) = scheduler.tasks.iter_mut().find(|task| task.id == id) else {
             return;
         };
         task.queued = false;
         task.last_polled_epoch = epoch;
         task.status = TaskStatus::Running;
-        (
+        let polled = (
             task.future.take().expect("checked above"),
             Rc::clone(&task.waker),
-        )
+        );
+        // A task spawned from inside another task is polled while its parent is
+        // still being polled; the parent's id must come back afterwards so its
+        // next wait registers against the parent.
+        let previous_task = scheduler.polling_task.replace(id);
+        (polled.0, polled.1, previous_task)
     };
 
     let waker = task_waker(&task_waker_state);
@@ -835,7 +839,7 @@ fn poll_task(context: &UnitCtx, id: TaskId, epoch: u64) {
     let result = future.as_mut().poll(&mut cx);
 
     let mut scheduler = context.scheduler.borrow_mut();
-    scheduler.polling_task = None;
+    scheduler.polling_task = previous_task;
     let Some(task) = scheduler.tasks.iter_mut().find(|task| task.id == id) else {
         return;
     };

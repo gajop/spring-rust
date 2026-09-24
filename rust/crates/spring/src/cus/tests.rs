@@ -178,6 +178,27 @@ fn spawn_polls_child_before_parent_continues() {
     assert_eq!(engine.borrow().events, vec![1, 2]);
 }
 
+fn parent_then_sleeps(ctx: UnitCtx) -> TaskFuture {
+    Box::pin(async move {
+        ctx.spawn(TaskDefinition::new("child", child));
+        ctx.next_frame().await;
+        ctx.turn(Piece(2), Axis::Y, Angle::ZERO, AngularSpeed(1.0));
+    })
+}
+
+#[test]
+fn parent_keeps_running_after_spawning_a_child_and_sleeping() {
+    let engine = Rc::new(RefCell::new(TestEngine::default()));
+    let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
+    let mut scheduler = CusScheduler::new(context);
+    scheduler.spawn(TaskDefinition::new("parent", parent_then_sleeps));
+    assert_eq!(engine.borrow().events, vec![1]);
+
+    scheduler.tick(1);
+    assert_eq!(engine.borrow().events, vec![1, 2]);
+    assert_eq!(scheduler.task_count(), 0);
+}
+
 #[test]
 fn scheduler_does_not_drain_a_frame_twice() {
     let engine = Rc::new(RefCell::new(TestEngine::default()));
