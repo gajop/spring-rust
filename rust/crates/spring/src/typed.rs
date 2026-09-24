@@ -26,12 +26,18 @@ pub struct CreateUnitOptions {
     pub builder_id: i32,
 }
 
+/// A camera state for [`set_camera_state`]. `mode` picks the camera
+/// controller; `name`, `up` and `right` are ignored when setting (they are
+/// reported by `get_camera_state`, and derived by [`CameraState::new`]).
 #[derive(Clone, Copy, Debug, Default)]
 pub struct CameraState<'a> {
+    /// Ignored by `set_camera_state`; `mode` selects the controller.
     pub name: &'a str,
     pub position: Float3,
     pub direction: Float3,
+    /// Ignored by `set_camera_state`.
     pub up: Float3,
+    /// Ignored by `set_camera_state`.
     pub right: Float3,
     /// A non-positive value leaves the engine's current field of view unchanged.
     pub fov: f32,
@@ -74,6 +80,19 @@ impl<'a> CameraState<'a> {
             ..Default::default()
         }
     }
+}
+
+/// Follow `unit` with the engine's camera tracker (the `/track` action),
+/// without selecting it. `false` if the unit can't be tracked (dead, or not
+/// visible and selectable to this player). For groups and other tracking
+/// modes, see `unsynced_ctrl::track_units`.
+pub fn track_unit(unit: i32) -> crate::Result<bool> {
+    generated::owned::unsynced_ctrl::track_units(&[unit], -1)
+}
+
+/// Stop the camera tracker.
+pub fn stop_tracking() -> crate::Result<bool> {
+    generated::owned::unsynced_ctrl::stop_tracking_units(0)
 }
 
 /// Background music position, from Lua's `Spring.GetSoundStreamTime`.

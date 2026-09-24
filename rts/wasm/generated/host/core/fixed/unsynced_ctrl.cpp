@@ -1817,6 +1817,32 @@ wasm_trap_t* Core_unsynced_ctrl_set_window_minimized(void* environment, wasmtime
     return nullptr;
 }
 
+wasm_trap_t* Core_unsynced_ctrl_stop_tracking_units(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->StopTrackingUnits == nullptr)
+        return Trap("StopTrackingUnits generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("StopTrackingUnits generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("StopTrackingUnits generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    StopTrackingUnitsQuery query{};
+    query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
+    StopTrackingUnitsResult result{};
+    state->native->unsyncedCtrl->StopTrackingUnits(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_unsynced_ctrl_warp_mouse(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -2260,6 +2286,13 @@ bool RegisterGeneratedImports_unsynced_ctrl(wasmtime_linker_t* linker, HostState
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:unsynced-ctrl", "stop-tracking-units",
+                MakeFuncType(params, 1, results, 1), Core_unsynced_ctrl_stop_tracking_units, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:unsynced-ctrl", "warp-mouse",
@@ -2270,6 +2303,6 @@ bool RegisterGeneratedImports_unsynced_ctrl(wasmtime_linker_t* linker, HostState
     return true;
 }
 
-static_assert(59 >= 0, "generated Core Wasm callback count");
+static_assert(60 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

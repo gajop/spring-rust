@@ -1467,4 +1467,36 @@ impl<'a> UnsyncedCtrl<'a> {
         }
     }
 
+    pub fn track_units(&self, unit_ids: &[i32], mode: i32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::TrackUnitsQuery {
+                unitIDs: unit_ids.as_ptr(),
+                count: unit_ids.len() as u32,
+                mode,
+            };
+            let mut result = MaybeUninit::<sys::TrackUnitsResult>::zeroed();
+            let func = self.api.TrackUnits.expect("TrackUnits function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.tracking
+            })
+        }
+    }
+
+    pub fn stop_tracking_units(&self) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::StopTrackingUnitsQuery {
+                _unused: 0,
+            };
+            let mut result = MaybeUninit::<sys::StopTrackingUnitsResult>::zeroed();
+            let func = self.api.StopTrackingUnits.expect("StopTrackingUnits function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
 }

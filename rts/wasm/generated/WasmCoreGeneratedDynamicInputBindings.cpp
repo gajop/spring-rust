@@ -4187,6 +4187,50 @@ wasm_trap_t* CoreDynamicInput_unsynced_ctrl_set_water_texture(void* environment,
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_unsynced_ctrl_track_units(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->TrackUnits == nullptr)
+        return Trap("TrackUnits dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("TrackUnits dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    TrackUnitsQuery query{};
+    std::uint32_t unitIDsPointer = 0, unitIDsBytes = 0;
+    if (!inputControl.U32(unitIDsPointer) || !inputControl.U32(unitIDsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(unitIDsBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> unitIDsWire;
+    if (!state->memory.View(unitIDsPointer, unitIDsBytes, unitIDsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader unitIDsReader(unitIDsWire);
+    std::vector<std::int32_t> unitIDsStorage;
+    { std::uint32_t coreCount = 0; if (!unitIDsReader.U32(coreCount) || !CheckResultNodes(state, coreCount)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.reserve(coreCount); for (std::uint32_t coreIndex = 0; coreIndex < coreCount; ++coreIndex) { std::int32_t item{}; bool coreItemOk = [&]() -> bool {
+                { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return false; item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+                return true;
+            }(); if (!coreItemOk) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } unitIDsStorage.push_back(item); } query.unitIDs = unitIDsStorage.empty() ? nullptr : unitIDsStorage.data(); if (!AssignDynamicCount(coreCount, query.count)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } }
+    if (!unitIDsReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    query.mode = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.mode)>>>(slots[0].i32);
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    TrackUnitsResult result{};
+    state->native->unsyncedCtrl->TrackUnits(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.tracking ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_gfx_add_atlas_texture(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -14929,6 +14973,6 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     return true;
 }
 
-static_assert(275u >= 0u, "generated dynamic-input Core callback count");
+static_assert(276u >= 0u, "generated dynamic-input Core callback count");
 
 } // namespace recoil::wasm::core::generated

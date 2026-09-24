@@ -3252,6 +3252,78 @@ wasm_trap_t* CoreVariable_unsynced_ctrl_set_water_texture(void* environment, was
     return nullptr;
 }
 
+wasm_trap_t* CoreVariable_unsynced_ctrl_track_units(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->TrackUnits == nullptr)
+        return Trap("TrackUnits generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("TrackUnits generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    TrackUnitsQuery query{};
+    std::uint32_t unitIDsPointer = 0;
+    std::uint32_t unitIDsCount = 0;
+    if (!reader.U32(unitIDsPointer) || !reader.U32(unitIDsCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    const std::uint64_t unitIDsBytes64 = static_cast<std::uint64_t>(unitIDsCount) * 4u;
+    if (unitIDsBytes64 > std::numeric_limits<std::size_t>::max()) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> unitIDsWire;
+    if (!state->memory.View(unitIDsPointer, static_cast<std::size_t>(unitIDsBytes64), unitIDsWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader unitIDsReader(unitIDsWire);
+    std::vector<std::int32_t> unitIDsStorage;
+    unitIDsStorage.reserve(unitIDsCount);
+    for (std::uint32_t coreIndex = 0; coreIndex < unitIDsCount; ++coreIndex) {
+        std::int32_t item{};
+        { std::int32_t coreRaw = 0; if (!unitIDsReader.I32(coreRaw)) return Trap("generated Core wire underflow"); item = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(item)>>>(coreRaw); }
+        unitIDsStorage.push_back(item);
+    }
+    if (!unitIDsReader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.unitIDs = unitIDsStorage.data();
+    if (!AssignCoreCount(unitIDsCount, query.count)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.mode = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.mode)>>>(slots[0].i32);
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    TrackUnitsResult result{};
+    state->native->unsyncedCtrl->TrackUnits(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.tracking ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariable_gfx_add_atlas_texture(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -12784,6 +12856,6 @@ bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(208 >= 0, "generated variable Core callback count");
+static_assert(209 >= 0, "generated variable Core callback count");
 
 } // namespace recoil::wasm::core::generated

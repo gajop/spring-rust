@@ -4349,6 +4349,16 @@
             pub radius: f32,
         }
 
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct StopTrackingUnitsQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct StopTrackingUnitsResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, PartialEq)]
         pub struct StringArray {
             pub data: u32,
@@ -4447,6 +4457,17 @@
             pub set_height_map_func: u32,
             pub set_original_height_map_func: u32,
             pub set_smooth_mesh_func: u32,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct TrackUnitsQuery {
+            pub unit_i_ds: Vec<i32>,
+            pub mode: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct TrackUnitsResult {
+            pub tracking: bool,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]

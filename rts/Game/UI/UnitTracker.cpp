@@ -79,6 +79,26 @@ void CUnitTracker::SetMode(int mode)
 
 /******************************************************************************/
 
+void CUnitTracker::TrackUnits(const std::vector<int>& unitIDs)
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	trackedUnitIDs.clear();
+
+	for (const int unitID: unitIDs) {
+		if (!IsInvalidUnitForSelection(unitID))
+			trackedUnitIDs.insert(unitID);
+	}
+
+	if (trackedUnitIDs.empty()) {
+		Disable();
+		return;
+	}
+
+	smoothedRight = RgtVector;
+	trackUnit = *trackedUnitIDs.begin();
+	enabled = true;
+}
+
 void CUnitTracker::Track(std::vector<int>&& unitIDs)
 {
 	RECOIL_DETAILED_TRACY_ZONE;

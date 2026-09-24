@@ -356,6 +356,15 @@ struct UnsyncedRandomApi {
 	void (*SetSeed)(const SetSeedQuery* query, SetSeedResult* result);
 };
 
+// NEW (no Lua equivalent): the engine camera tracker (`/track`) on given units,
+// without changing the selection. `mode`: 0 single unit, 1 average position,
+// 2 extents of the group, -1 keeps the current mode. `tracking` is false when
+// none of the units can be tracked (dead, or not visible and selectable).
+struct TrackUnitsQuery { const int32_t* unitIDs; uint32_t count; int32_t mode; };
+struct TrackUnitsResult { const Error* error; bool tracking; };
+struct StopTrackingUnitsQuery { uint8_t _unused; };
+struct StopTrackingUnitsResult { const Error* error; bool success; };
+
 struct UnsyncedCtrlApi {
 	void (*SetUnitNoDraw)(const SetUnitNoDrawQuery* query, SetUnitNoDrawResult* result);
 	void (*SetUnitEngineDrawMask)(const SetUnitEngineDrawMaskQuery* query, SetUnitEngineDrawMaskResult* result);
@@ -446,6 +455,8 @@ struct UnsyncedCtrlApi {
 	void (*SetUnitLuaDraw)(const SetUnitLuaDrawQuery* query, SetUnitLuaDrawResult* result);
 	void (*SetFeatureLuaDraw)(const SetFeatureLuaDrawQuery* query, SetFeatureLuaDrawResult* result);
 	void (*SetProjectileLuaDraw)(const SetProjectileLuaDrawQuery* query, SetProjectileLuaDrawResult* result);
+	void (*TrackUnits)(const TrackUnitsQuery* query, TrackUnitsResult* result);
+	void (*StopTrackingUnits)(const StopTrackingUnitsQuery* query, StopTrackingUnitsResult* result);
 };
 
 extern const UnsyncedCtrlApi UNSYNCED_CTRL_API;

@@ -3597,6 +3597,73 @@ wasm_trap_t* CoreBorrowed_unsynced_ctrl_set_water_texture(void* environment, was
     return nullptr;
 }
 
+wasm_trap_t* CoreBorrowed_unsynced_ctrl_track_units(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->TrackUnits == nullptr)
+        return Trap("TrackUnits borrowed Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("TrackUnits borrowed Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    TrackUnitsQuery query{};
+    std::uint32_t unitIDsPointer = 0;
+    std::uint32_t unitIDsCount = 0;
+    if (!reader.U32(unitIDsPointer) || !reader.U32(unitIDsCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (unitIDsCount == 0) {
+        query.unitIDs = nullptr;
+    } else {
+        if constexpr (std::endian::native != std::endian::little) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::NotAvailable)));
+            return nullptr;
+        }
+        const std::uint64_t unitIDsBytes64 = static_cast<std::uint64_t>(unitIDsCount) * 4u;
+        if (unitIDsBytes64 > std::numeric_limits<std::size_t>::max() || (unitIDsPointer % 4u) != 0u) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+            return nullptr;
+        }
+        std::span<const std::uint8_t> unitIDsBytes;
+        if (!state->memory.View(unitIDsPointer, static_cast<std::size_t>(unitIDsBytes64), unitIDsBytes)) {
+            slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+            return nullptr;
+        }
+        static_assert(sizeof(std::int32_t) == 4u, "borrowed Core/native element width mismatch");
+        query.unitIDs = reinterpret_cast<std::remove_reference_t<decltype(query.unitIDs)>>(unitIDsBytes.data());
+    }
+    if (!AssignCoreBorrowedCount(unitIDsCount, query.count)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.mode = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.mode)>>>(slots[0].i32);
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    TrackUnitsResult result{};
+    state->native->unsyncedCtrl->TrackUnits(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.tracking ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreBorrowed_gfx_add_atlas_texture(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -14223,6 +14290,13 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:unsynced-ctrl", "track-units",
+                MakeFuncType(params, 2, results, 1), CoreBorrowed_unsynced_ctrl_track_units, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedBorrowed(linker, "spring:gfx", "add-atlas-texture",
@@ -15031,6 +15105,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(212u >= 0u, "generated borrowed Core callback count");
+static_assert(213u >= 0u, "generated borrowed Core callback count");
 
 } // namespace recoil::wasm::core::generated

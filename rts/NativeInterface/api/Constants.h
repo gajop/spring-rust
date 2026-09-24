@@ -350,6 +350,8 @@ enum GameConstant {
 	X(MAX_IMAGE_UNITS                , 0x00008F38u) \
 	X(RGBA32F                        , 0x00008814u) \
 	X(RGBA16F                        , 0x0000881Au) \
+	X(RGB32F                         , 0x00008815u) \
+	X(RGB16F                         , 0x0000881Bu) \
 	X(RG32F                          , 0x00008230u) \
 	X(RG16F                          , 0x0000822Fu) \
 	X(R11F_G11F_B10F                 , 0x00008C3Au) \
@@ -377,6 +379,7 @@ enum GameConstant {
 	X(RGBA16                         , 0x0000805Bu) \
 	X(RGB10_A2                       , 0x00008059u) \
 	X(RGBA8                          , 0x00008058u) \
+	X(RGB8                           , 0x00008051u) \
 	X(RG16                           , 0x0000822Cu) \
 	X(RG8                            , 0x0000822Bu) \
 	X(R16                            , 0x0000822Au) \

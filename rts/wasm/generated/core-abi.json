@@ -29360,6 +29360,47 @@
     },
     {
       "module": "unsynced_ctrl",
+      "function": "StopTrackingUnits",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "stop-tracking-units",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_ctrl",
+      "function": "TrackUnits",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "track-units",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_ctrl",
       "function": "WarpMouse",
       "import_module": "spring:unsynced-ctrl",
       "import_name": "warp-mouse",
@@ -31421,7 +31462,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1196,
-  "manual_count": 199,
+  "automatic_count": 1197,
+  "manual_count": 200,
   "unsupported_count": 17
 }

@@ -620,6 +620,8 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"unsynced_ctrl", "SetWindowGeometry", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetWindowMaximized", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "SetWindowMinimized", 31u, false, false, LoweringStatus::automatic},
+	{"unsynced_ctrl", "StopTrackingUnits", 31u, false, false, LoweringStatus::automatic},
+	{"unsynced_ctrl", "TrackUnits", 31u, false, false, LoweringStatus::annotated},
 	{"unsynced_ctrl", "WarpMouse", 31u, false, false, LoweringStatus::automatic},
 	{"gfx", "ActiveFBO", 122u, false, false, LoweringStatus::manual},
 	{"gfx", "ActiveShader", 122u, false, false, LoweringStatus::manual},

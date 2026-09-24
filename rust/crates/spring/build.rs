@@ -64,7 +64,21 @@ fn generate_command_constants(header: &PathBuf) -> String {
     let mut types = String::new();
     let mut wait_codes = String::new();
     let mut options = String::new();
+    let mut move_states = String::new();
+    let mut fire_states = String::new();
     for line in source.lines() {
+        // `MOVESTATE_ROAM = 2,` / `FIRESTATE_FIREATWILL = 2,` enum entries.
+        if let Some((name, value)) = line.trim().trim_end_matches(',').split_once('=') {
+            let (name, value) = (name.trim(), value.trim());
+            if let Some(short) = name.strip_prefix("MOVESTATE_") {
+                move_states.push_str(&format!("    pub const {short}: f32 = {value}.0;\n"));
+                continue;
+            }
+            if let Some(short) = name.strip_prefix("FIRESTATE_") {
+                fire_states.push_str(&format!("    pub const {short}: f32 = {value}.0;\n"));
+                continue;
+            }
+        }
         let Some(rest) = line.trim().strip_prefix("static constexpr ") else {
             continue;
         };
@@ -96,7 +110,10 @@ fn generate_command_constants(header: &PathBuf) -> String {
         }
     }
     assert!(
-        ids.contains("pub const MOVE: i32 = 10;") && options.contains("SHIFT_KEY"),
+        ids.contains("pub const MOVE: i32 = 10;")
+            && options.contains("SHIFT_KEY")
+            && move_states.contains("ROAM")
+            && fire_states.contains("HOLDFIRE"),
         "Command.h parse produced no usable entries"
     );
 
@@ -110,7 +127,11 @@ fn generate_command_constants(header: &PathBuf) -> String {
          /// Command option bits (`cmdOpts`). `SHIFT_KEY` queues the order,\n\
          /// `ALT_KEY` usually inserts it at the front, `RIGHT_MOUSE_KEY` marks a\n\
          /// right-click, `INTERNAL_ORDER` an engine-generated order.\n\
-         pub mod options {{\n{options}}}\n"
+         pub mod options {{\n{options}}}\n\n\
+         /// `MOVE_STATE` parameters: `give_order(unit, cmd::MOVE_STATE, &[cmd::move_state::HOLDPOS], 0)`.\n\
+         pub mod move_state {{\n{move_states}}}\n\n\
+         /// `FIRE_STATE` parameters: `give_order(unit, cmd::FIRE_STATE, &[cmd::fire_state::HOLDFIRE], 0)`.\n\
+         pub mod fire_state {{\n{fire_states}}}\n"
     )
 }
 

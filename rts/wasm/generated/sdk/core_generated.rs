@@ -10438,6 +10438,11 @@ pub mod unsynced_ctrl {
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
+            #[link_name = "stop-tracking-units"]
+            pub safe fn core_stop_tracking_units(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unsynced-ctrl")]
+        unsafe extern "C" {
             #[link_name = "warp-mouse"]
             pub safe fn core_warp_mouse(p0: i32, p1: i32) -> i64;
         }
@@ -12178,6 +12183,28 @@ pub mod unsynced_ctrl {
         #[cfg(target_arch = "wasm32")]
         {
             let packed = raw::core_set_window_minimized(unused as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn stop_tracking_units(unused: u8) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_stop_tracking_units(unused as i32) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));

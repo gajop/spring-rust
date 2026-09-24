@@ -21,6 +21,7 @@
 #include "Game/UI/GuiHandler.h"
 #include "Game/UI/CursorIcons.h"
 #include "Game/UI/MiniMap.h"
+#include "Game/UI/UnitTracker.h"
 #include "Game/UI/KeySet.h"
 #include "Game/UI/CommandColors.h"
 #include "Rendering/Env/IGroundDecalDrawer.h"
@@ -1993,6 +1994,27 @@ static void NativeSetDefaultInterfaceVisible(const SetDefaultInterfaceVisibleQue
 
 } // namespace
 
+static void NativeTrackUnits(const TrackUnitsQuery* query, TrackUnitsResult* result)
+{
+	result->error = nullptr;
+	result->tracking = false;
+	if (query->unitIDs == nullptr && query->count > 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (query->mode >= 0)
+		unitTracker.SetMode(query->mode);
+	unitTracker.TrackUnits({query->unitIDs, query->unitIDs + query->count});
+	result->tracking = unitTracker.Enabled();
+}
+
+static void NativeStopTrackingUnits(const StopTrackingUnitsQuery* /*query*/, StopTrackingUnitsResult* result)
+{
+	result->error = nullptr;
+	unitTracker.Disable();
+	result->success = true;
+}
+
 const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetUnitNoDraw = NativeSetUnitNoDraw,
 	.SetUnitEngineDrawMask = NativeSetUnitEngineDrawMask,
@@ -2081,4 +2103,6 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetUnitLuaDraw = NativeSetUnitLuaDraw,
 	.SetFeatureLuaDraw = NativeSetFeatureLuaDraw,
 	.SetProjectileLuaDraw = NativeSetProjectileLuaDraw,
+	.TrackUnits = NativeTrackUnits,
+	.StopTrackingUnits = NativeStopTrackingUnits,
 };

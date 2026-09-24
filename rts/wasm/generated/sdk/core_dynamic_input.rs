@@ -2117,6 +2117,11 @@ unsafe extern "C" {
 #[link_name = "set-water-texture"]
 pub safe fn set_water_texture(p0: i32) -> i64;
 }
+            #[link(wasm_import_module = "spring:unsynced-ctrl")]
+unsafe extern "C" {
+#[link_name = "track-units"]
+pub safe fn track_units(p0: i32, p1: i32) -> i64;
+}
         }
 
         #[inline]
@@ -2730,6 +2735,31 @@ crate::unpack_bool(raw::set_water_texture(descriptor_ptr))
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (blob0, blob1);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn track_units(p0: i32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::track_units(p0, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, blob0);
 Err(unreachable!())
 }
 }
@@ -9368,5 +9398,5 @@ Err(unreachable!())
     }
 
 #[doc(hidden)]
-pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 275;
+pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 276;
 }

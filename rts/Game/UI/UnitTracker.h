@@ -14,6 +14,9 @@ class CUnitTracker
 {
 public:
 	void Track(std::vector<int>&& unitIDs = {});
+	/// Follow these units with the camera without selecting them; an empty or
+	/// all-invalid list stops tracking.
+	void TrackUnits(const std::vector<int>& unitIDs);
 	void Disable();
 	bool Enabled() const { return enabled; }
 

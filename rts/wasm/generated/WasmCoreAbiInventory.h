@@ -1328,6 +1328,8 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:unsynced-ctrl", "set-window-geometry", "i32,i32,i32,i32,i32,i32->i64", 31u, Strategy::fixedInput},
 	{"spring:unsynced-ctrl", "set-window-maximized", "i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-ctrl", "set-window-minimized", "i32->i64", 31u, Strategy::direct},
+	{"spring:unsynced-ctrl", "stop-tracking-units", "i32->i64", 31u, Strategy::direct},
+	{"spring:unsynced-ctrl", "track-units", "i32,i32->i64", 31u, Strategy::manual},
 	{"spring:unsynced-ctrl", "warp-mouse", "i32,i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-random", "next-float", "i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-random", "next-int", "i32,i32->i64", 31u, Strategy::direct},

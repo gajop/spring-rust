@@ -173,6 +173,39 @@ pub mod gl {
     include!(concat!(env!("OUT_DIR"), "/gl_generated.rs"));
 }
 
+/// Engine units of size and time.
+pub mod consts {
+    /// Elmos (world units) per heightmap square, Lua's `Game.squareSize`.
+    pub const SQUARE_SIZE: i32 = 8;
+    /// [`SQUARE_SIZE`] as `f32`, for world positions.
+    pub const SQUARE_SIZE_F: f32 = 8.0;
+    /// Simulation frames per second of game time, Lua's `Game.gameSpeed`.
+    /// Not the 33 ms of a Lua bridge tick.
+    pub const GAME_SPEED: i32 = 30;
+    /// Game-time seconds per simulation frame.
+    pub const FRAME_SECONDS: f32 = 1.0 / 30.0;
+}
+
+/// Mouse button numbers of the mouse callins (`MousePress` and so on).
+pub mod mouse {
+    pub const LEFT: i32 = 1;
+    pub const MIDDLE: i32 = 2;
+    pub const RIGHT: i32 = 3;
+}
+
+/// Bits of a unit's LOS state towards an ally team (`set_unit_los_state`,
+/// `set_unit_los_mask`, `get_unit_los_state`).
+pub mod los_state {
+    /// In the ally team's line of sight now.
+    pub const IN_LOS: i32 = 1 << 0;
+    /// On the ally team's radar now.
+    pub const IN_RADAR: i32 = 1 << 1;
+    /// Has been in line of sight before (its type is known).
+    pub const PREV_LOS: i32 = 1 << 2;
+    /// Continuously on radar since it was last in line of sight.
+    pub const CONT_RADAR: i32 = 1 << 3;
+}
+
 /// Unit command ids and option bits, generated from the engine's `Command.h`.
 ///
 /// Mirrors Lua's `CMD` table: `cmd::MOVE`, `cmd::FIGHT`, `cmd::IDLEMODE`, and
@@ -417,6 +450,38 @@ impl Float3 {
         }
     }
 
+    /// The engine heading of this direction on the ground plane, as MoveCtrl
+    /// and `set_unit_heading` take it: 0 faces +z, 16384 faces +x, and
+    /// ±32768 is a half turn. The engine's own `GetHeadingFromVector`,
+    /// including its fast `atan2` approximation, so synced code gets exactly
+    /// the engine's value.
+    pub fn heading(self) -> i16 {
+        const PI: f32 = core::f32::consts::PI;
+        const HALF_PI: f32 = PI * 0.5;
+        const MAX_HEADING: i32 = 32768;
+        let (dx, dz) = (self.x, self.z);
+        let mut h = if dz != 0.0 {
+            let sz = dz * 2.0 - 1.0;
+            let d = dx / (dz + 0.000001 * sz);
+            let dd = d * d;
+            let mut h = if d.abs() > 1.0 {
+                1.0f32.copysign(d) * HALF_PI - d / (dd + 0.28)
+            } else {
+                d / (1.0 + 0.28 * dd)
+            };
+            if dz < 0.0 {
+                h += PI * if dx > 0.0 { 1.0 } else { -1.0 };
+            }
+            h
+        } else {
+            HALF_PI * if dx > 0.0 { 1.0 } else { -1.0 }
+        };
+        h *= MAX_HEADING as f32 * core::f32::consts::FRAC_1_PI;
+        let mut ih = h as i32;
+        ih += (ih == -MAX_HEADING) as i32;
+        (ih % MAX_HEADING) as i16
+    }
+
     /// The unit vector in the same direction; zero stays zero.
     #[inline]
     pub fn normalized(self) -> Self {
@@ -517,6 +582,25 @@ impl core::ops::Mul<Float3> for f32 {
             y: self * v.y,
             z: self * v.z,
         }
+    }
+}
+
+impl core::ops::Div<f32> for Float3 {
+    type Output = Self;
+    #[inline]
+    fn div(self, s: f32) -> Self {
+        Self {
+            x: self.x / s,
+            y: self.y / s,
+            z: self.z / s,
+        }
+    }
+}
+
+impl core::ops::DivAssign<f32> for Float3 {
+    #[inline]
+    fn div_assign(&mut self, s: f32) {
+        *self = *self / s;
     }
 }
 
@@ -1061,6 +1145,20 @@ extern crate std;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn heading_matches_the_engine_convention() {
+        use super::Float3;
+        assert_eq!(Float3::new(0.0, 0.0, 1.0).heading(), 0);
+        assert_eq!(Float3::new(1.0, 0.0, 0.0).heading(), 16384);
+        assert_eq!(Float3::new(-1.0, 0.0, 0.0).heading(), -16384);
+        assert_eq!(Float3::new(0.0, 0.0, -1.0).heading(), -32767);
+        // Values from the engine's C++ GetHeadingFromVector.
+        let cases = [(1.0, 1.0), (-3.0, 2.0), (0.3, -7.0), (-0.001, -5.0), (5.0, 0.0001), (-2.5, -2.5)];
+        let headings = cases.map(|(x, z)| Float3::new(x, 0.0, z).heading());
+        assert_eq!(headings, [8148, -10199, 32321, -32765, 16383, -24619]);
+        assert_eq!(Float3::new(2.0, 4.0, 6.0) / 2.0, Float3::new(1.0, 2.0, 3.0));
+    }
+
     use super::*;
 
     #[test]
