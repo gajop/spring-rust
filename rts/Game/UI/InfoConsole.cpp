@@ -195,17 +195,12 @@ void CInfoConsole::PushNewLinesToEventHandler()
 }
 
 
-size_t CInfoConsole::GetRawLines(std::vector<RawLine>& lines)
+void CInfoConsole::GetRawLines(std::vector<RawLine>& lines)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	std::lock_guard<decltype(infoConsoleMutex)> scoped_lock(infoConsoleMutex);
 
-	const size_t numNewLines = newLines;
-
-	lines.clear();
 	lines.assign(rawLines.begin(), rawLines.end());
-
-	return (newLines = 0, numNewLines);
 }
 
 

@@ -156,6 +156,8 @@ private:
 		NativeUnitScriptCall call;
 		std::vector<float> floatArgs;
 		std::vector<std::int32_t> intArgs;
+		// The engine dropped this instance; `call` is unused.
+		bool detach = false;
 	};
 
 	struct Backend;
@@ -187,6 +189,7 @@ private:
 		std::span<const float> args, std::span<float> retValues,
 		std::uint32_t& retCount, bool& found);
 	void TickGuest(std::uint32_t frame);
+	void DetachGuest(std::uint32_t instanceId);
 
 	std::string moduleName;
 	WasmEnvironment environment;

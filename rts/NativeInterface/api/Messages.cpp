@@ -17,7 +17,11 @@
 #include "Lua/LuaRules.h"
 #include "Lua/LuaUI.h"
 #include "Sim/Misc/TeamHandler.h"
+#include "Net/Protocol/BaseNetProtocol.h"
+#include "Net/Protocol/NetProtocol.h"
+#include "System/Net/PackPacket.h"
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -35,6 +39,7 @@ static thread_local std::vector<ConsoleEntry> consoleEntryBuffer;
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Message system not ready" };
 static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid player" };
 static const Error INVALID_LUA_UI_MODE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid LuaUI message mode" };
+static const Error PACKET_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Lua message packet error" };
 static const Error GUI_NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "GUI handler not ready" };
 
 static void NativeEcho(const EchoQuery* query, EchoResult* result) {
@@ -294,16 +299,33 @@ static void NativeSendSkirmishAIMessage(const SendSkirmishAIMessageQuery* query,
 	result->error = nullptr;
 }
 
+// Like Spring.SendLua*Msg, these go over the network: every client (the
+// sender included) receives the message in NETMSG_LUAMSG, where the Lua
+// handles and the synced Wasm environments get it on the same frame. Delivering
+// locally would run synced handlers on the sending client only.
+static bool SendLuaMsgPacket(std::uint16_t script, std::uint8_t mode, const char* message, const Error*& error) {
+	if (clientNet == nullptr || gu == nullptr) {
+		error = &NOT_READY_ERROR;
+		return false;
+	}
+
+	const std::vector<std::uint8_t> data(message, message + std::strlen(message));
+	try {
+		clientNet->Send(CBaseNetProtocol::Get().SendLuaMsg(gu->myPlayerNum, script, mode, data));
+	} catch (const netcode::PackPacketException& ex) {
+		LOG_L(L_WARNING, "[%s] packet error: %s", __func__, ex.what());
+		error = &PACKET_ERROR;
+		return false;
+	}
+	error = nullptr;
+	return true;
+}
+
 static void NativeSendLuaUIMsg(const SendLuaUIQuery* query, SendLuaUIResult* result) {
 	bufferPos = 0;
 
 	if (query->message == nullptr) {
 		result->error = nullptr;
-		result->success = false;
-		return;
-	}
-	if (luaUI == nullptr || gu == nullptr) {
-		result->error = &NOT_READY_ERROR;
 		result->success = false;
 		return;
 	}
@@ -315,34 +337,19 @@ static void NativeSendLuaUIMsg(const SendLuaUIQuery* query, SendLuaUIResult* res
 		return;
 	}
 
-	bool sendMsg = false;
-	switch (mode) {
-		case 0: {
-			sendMsg = true;
-		} break;
-		case 's': {
-			sendMsg = gu->spectating;
-		} break;
-		case 'a': {
-			if (gu->spectatingFullView) {
-				sendMsg = true;
-			} else {
-				sendMsg = teamHandler.Ally(gu->myAllyTeam, gu->myAllyTeam);
-			}
-		} break;
-	}
-
-	if (sendMsg)
-		luaUI->RecvLuaMsg(query->message, gu->myPlayerNum);
-
-	result->error = nullptr;
-	result->success = true;
+	result->success = SendLuaMsgPacket(LUA_HANDLE_ORDER_UI, mode, query->message, result->error);
 }
 
 static void NativeSendLuaGaiaMsg(const SendLuaGaiaQuery* query, SendLuaGaiaResult* result) {
 	bufferPos = 0;
-	result->error = nullptr;
-	result->success = (query->message != nullptr);
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+
+	result->success = SendLuaMsgPacket(LUA_HANDLE_ORDER_GAIA, 0, query->message, result->error);
 }
 
 static void NativeSendLuaRulesMsg(const SendLuaRulesQuery* query, SendLuaRulesResult* result) {
@@ -353,25 +360,8 @@ static void NativeSendLuaRulesMsg(const SendLuaRulesQuery* query, SendLuaRulesRe
 		result->success = false;
 		return;
 	}
-	if (gu == nullptr || (luaRules == nullptr && NativeInterfaceSystem::s_instance == nullptr)) {
-		result->error = &NOT_READY_ERROR;
-		result->success = false;
-		return;
-	}
 
-	if (luaRules != nullptr)
-		luaRules->RecvLuaMsg(query->message, gu->myPlayerNum);
-	// LuaRules normally owns RecvLuaMsg. When the rules implementation is a
-	// Core-WASM module there may be no Lua callin to receive the message, so
-	// route the same generic message through the native event bridge as well.
-	if (NativeInterfaceSystem::s_instance != nullptr) {
-		const auto* begin = reinterpret_cast<const std::uint8_t*>(query->message);
-		const auto* end = begin + std::strlen(query->message);
-		NativeInterfaceSystem::s_instance->HandleLuaMsg(
-			gu->myPlayerNum, LUA_HANDLE_ORDER_RULES, 0, std::vector<std::uint8_t>(begin, end));
-	}
-	result->error = nullptr;
-	result->success = true;
+	result->success = SendLuaMsgPacket(LUA_HANDLE_ORDER_RULES, 0, query->message, result->error);
 }
 
 static void NativeSendToUnsynced(const SendToUnsyncedQuery* query, SendToUnsyncedResult* result) {

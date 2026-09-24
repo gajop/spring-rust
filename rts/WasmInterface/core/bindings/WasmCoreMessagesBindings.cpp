@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string_view>
 
+#include "NativeInterface/NativeInterfaceSystem.h"
 #include "WasmCoreGeneratedSupport.h"
 #include "WasmCoreGuestInput.h"
 
@@ -272,7 +273,26 @@ MESSAGE_ID_STRING(SendSkirmishAIMessage, SendSkirmishAIMessage, SendSkirmishAIMe
 	SendSkirmishAIMessageResult, aiID, message)
 MESSAGE_TWO_STRINGS(SendLuaUIMsg, SendLuaUIMsg, SendLuaUIQuery, SendLuaUIResult, message, mode)
 MESSAGE_ONE_STRING(SendLuaGaiaMsg, SendLuaGaiaMsg, SendLuaGaiaQuery, SendLuaGaiaResult, message)
-MESSAGE_ONE_STRING(SendLuaRulesMsg, SendLuaRulesMsg, SendLuaRulesQuery, SendLuaRulesResult, message)
+
+void SendLuaRulesMsgFromSynced(const SendLuaRulesQuery* query, SendLuaRulesResult* result)
+{
+	result->error = nullptr;
+	result->success = query->message != nullptr && NativeInterfaceSystem::s_instance != nullptr;
+	if (result->success)
+		NativeInterfaceSystem::s_instance->DeliverSyncedLuaRulesMsg(query->message);
+}
+
+wasm_trap_t* SendLuaRulesMsg(void* environment, wasmtime_caller_t* caller,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || state->native == nullptr || state->native->messages == nullptr ||
+		state->native->messages->SendLuaRulesMsg == nullptr)
+		return Trap("SendLuaRulesMsg Core binding is unavailable");
+	return CallOneString<SendLuaRulesQuery, SendLuaRulesResult>(state, caller, slots, slotCount,
+		SendLuaRulesMsgFor(state),
+		[](SendLuaRulesQuery& query, const char* value) { query.message = value; }, "SendLuaRulesMsg");
+}
 MESSAGE_ONE_STRING(SendToUnsynced, SendToUnsynced, SendToUnsyncedQuery, SendToUnsyncedResult, message)
 
 #undef MESSAGE_ID_STRING
@@ -293,6 +313,13 @@ bool Define(wasmtime_linker_t* linker, const char* name, wasm_functype_t* type,
 }
 
 } // namespace
+
+SendLuaRulesMsgFunction SendLuaRulesMsgFor(const HostState* state)
+{
+	if (WasmEnvironmentMatrix::Policy(state->environment).synced)
+		return SendLuaRulesMsgFromSynced;
+	return state->native->messages->SendLuaRulesMsg;
+}
 
 bool RegisterMessagesImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error)

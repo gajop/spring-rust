@@ -11,6 +11,7 @@
 
 #include "WasmCoreGeneratedSupport.h"
 #include "WasmCoreGuestInput.h"
+#include "WasmCoreMessagesBindings.h"
 
 namespace recoil::wasm::core {
 
@@ -78,7 +79,7 @@ wasm_trap_t* SendLuaRulesMsg(void* environment, wasmtime_caller_t* caller,
 
 	SendLuaRulesQuery query{message.c_str()};
 	SendLuaRulesResult result{};
-	state->native->messages->SendLuaRulesMsg(&query, &result);
+	SendLuaRulesMsgFor(state)(&query, &result);
 	slots[0].i64 = static_cast<std::int64_t>(
 		PackU32(result.success ? 1u : 0u, ErrorCode(result.error)));
 	return nullptr;

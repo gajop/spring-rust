@@ -17,6 +17,8 @@
 #include "NativeModulePath.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Game/GameSetup.h"
+#include "Lua/LuaHandle.h"
+#include "Lua/LuaRules.h"
 #include "Sim/Misc/ModInfo.h"
 #include "Sim/Units/Scripts/UnitScriptFactory.h"
 #include "Sim/Units/Scripts/NativeUnitScript.h"
@@ -454,6 +456,14 @@ bool NativeInterfaceSystem::DispatchWasmSyncedMessage(std::string_view message,
 	std::string& error)
 {
 	return pImpl->wasmSystem->DispatchSyncedMessage(message, error);
+}
+
+void NativeInterfaceSystem::DeliverSyncedLuaRulesMsg(std::string_view message)
+{
+	constexpr int noPlayer = -1;
+	if (luaRules != nullptr)
+		luaRules->RecvLuaMsg(std::string(message), noPlayer);
+	HandleLuaMsg(noPlayer, LUA_HANDLE_ORDER_RULES, 0, std::vector<std::uint8_t>(message.begin(), message.end()));
 }
 
 bool NativeInterfaceSystem::LoadWasmModule(WasmModuleDescriptor descriptor, std::string& error) {

@@ -51,6 +51,10 @@ public:
 	// failures are reported to the caller for logging but never feed back into
 	// the simulation result.
 	bool DispatchWasmSyncedMessage(std::string_view message, std::string& error);
+	// SendLuaRulesMsg from a synced Wasm module. It runs on every client, so
+	// the message is delivered locally instead of over the network, from no
+	// player (-1) so all clients see the same arguments.
+	void DeliverSyncedLuaRulesMsg(std::string_view message);
 
 	// Wasm module lifecycle is explicit so game/map discovery can feed the same
 	// instance registry without exposing runtime internals to CGame.

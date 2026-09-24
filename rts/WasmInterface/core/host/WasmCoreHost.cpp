@@ -961,10 +961,33 @@ bool WasmCoreHost::CallNamedGuest(std::uint32_t instanceId, const char* function
 
 void WasmCoreHost::Detach(std::uint32_t instanceId)
 {
+	// A script can be dropped while this module's code is on the stack (its
+	// attach replacing the unit's previous script): the guest then still holds
+	// its CUS state, so tell it once it has returned.
+	if (GuestActive()) {
+		pendingCusCalls.push_back({.unitId = -1, .instanceId = instanceId, .call = {}, .detach = true});
+		return;
+	}
+	DetachGuest(instanceId);
+}
+
+void WasmCoreHost::DetachGuest(std::uint32_t instanceId)
+{
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	if (backend == nullptr || !backend->hasCus || !backend->cusDetach.Present() ||
 		backend->hot.faulted)
 		return;
+	WasmExecutionBudget& budget = backend->hot.budget;
+	if (!budget.ChargeHost(1)) {
+		Fault("Core Wasm CUS host-work budget exhausted");
+		return;
+	}
+	if (!budget.EnterCallback(true))
+		return;
+	struct CallbackScope {
+		WasmExecutionBudget& budget;
+		~CallbackScope() { budget.LeaveCallback(); }
+	} callbackScope{budget};
 	std::array<wasmtime_val_raw_t, 1> slots{};
 	slots[0].i32 = static_cast<std::int32_t>(instanceId);
 	std::string error;
@@ -1066,6 +1089,10 @@ void WasmCoreHost::FlushPendingCusCalls()
 		calls.swap(pendingCusCalls);
 		for (const PendingCusCall& pending: calls) {
 			++flushed;
+			if (pending.detach) {
+				DetachGuest(pending.instanceId);
+				continue;
+			}
 			CNativeUnitScript* script = FindNativeUnitScript(pending.unitId, pending.instanceId);
 			if (script == nullptr)
 				continue;
@@ -1097,7 +1124,7 @@ void WasmCoreHost::DropPendingCusCalls()
 	std::vector<PendingCusCall> calls;
 	calls.swap(pendingCusCalls);
 	for (const PendingCusCall& pending: calls) {
-		if (pending.call != NativeUnitScriptCall::Create)
+		if (pending.detach || pending.call != NativeUnitScriptCall::Create)
 			continue;
 		if (CNativeUnitScript* script = FindNativeUnitScript(pending.unitId, pending.instanceId);
 			script != nullptr)

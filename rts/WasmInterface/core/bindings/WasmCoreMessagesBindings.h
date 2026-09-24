@@ -13,6 +13,12 @@ namespace recoil::wasm::core {
 bool RegisterMessagesImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 
+// SendLuaRulesMsg as seen by the caller's environment. Unsynced modules send
+// over the network like Lua; synced modules run on every client, so theirs is
+// delivered locally.
+using SendLuaRulesMsgFunction = void (*)(const SendLuaRulesQuery*, SendLuaRulesResult*);
+SendLuaRulesMsgFunction SendLuaRulesMsgFor(const HostState* state);
+
 #endif
 
 } // namespace recoil::wasm::core

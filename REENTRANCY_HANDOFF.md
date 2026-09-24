@@ -113,7 +113,7 @@ model works, but most UI code would need `&mut Ctx`. A few callouts call back
 only under conditions (aircraft move goals, SetUnitHealth amounts); mark them
 anyway.
 
-## Bugs found by the survey (not fixed)
+## Bugs found by the survey
 
 1. **(FIXED in 453bec06b2) AnimFinished lost while busy.** It uses `Invoke`/`CallCus`, not `Post`, so
    it isn't queued when the guest is busy. A TURN/SPIN/STOP_SPIN that ends an
@@ -123,17 +123,23 @@ anyway.
 2. **(FIXED in 453bec06b2) Possible use-after-free.** `EventListenerOnDetach` (RmlUi.cpp:3419) runs
    the destroy callback and `delete this` without removing the listener from
    the element.
-3. **Synced handlers triggered directly.** `SendLuaRulesMsg`/`SendToUnsynced`
-   (Messages.cpp:363/387) deliver synchronously. Unsynced code thereby runs
-   synced LuaRules `RecvLuaMsg` and Wasm `HandleLuaMsg`; upstream this goes
-   over the network. Likely a desync risk.
-4. **Detach without a guard.** `WasmCoreHost::Detach` calls the guest's
-   `cus-detach` without the EnterCallback budget/re-entry guard. Reachable from
-   `attach` on a unit that already has a CUS script.
-5. **Stopped collector.** `GetSyncedGCInfo(collect=1)` leaves the LuaRules
-   garbage collector stopped (`LUA_GCSTOP`, Profiling.cpp:230).
-6. **Dropped console events.** `GetConsoleBuffer` resets InfoConsole
-   `newLines`, which drops pending `AddConsoleLine` events.
+3. **(FIXED) Synced handlers triggered directly.** `SendLuaRulesMsg`
+   delivered synchronously, so unsynced code ran synced LuaRules `RecvLuaMsg`
+   and Wasm `HandleLuaMsg` on the sending client only. `SendLuaUIMsg` reached
+   only the local LuaUI and `SendLuaGaiaMsg` did nothing. All three now go over
+   the network like Lua. A synced Wasm module's `SendLuaRulesMsg` (test fixtures
+   report this way) runs on every client, so it stays local, from player -1.
+   `SendToUnsynced` was fine: it is synced-only.
+4. **(FIXED) Detach without a guard.** `WasmCoreHost::Detach` called the guest's
+   `cus-detach` without the EnterCallback budget/re-entry guard; reached from
+   `attach` on a unit that already has a CUS script, the guest found its state
+   busy and dropped the detach, leaking the instance. It is now guarded and,
+   while the module's code is on the stack, queued like the other calls.
+5. **Not a bug: stopped collector.** `GetSyncedGCInfo(collect=1)` stops the
+   LuaRules collector, but every Lua state keeps it stopped outside
+   `CollectGarbage` anyway (LuaHandle.cpp), and Lua's version does the same.
+6. **(FIXED) Dropped console events.** `GetConsoleBuffer` (Lua's too) reset
+   InfoConsole `newLines`, which dropped pending `AddConsoleLine` events.
 
 Checked and false: "weapon pieces not refreshed after Core attach". `StartCreate`
 always queues, and the flush refreshes them.

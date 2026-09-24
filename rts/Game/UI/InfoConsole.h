@@ -1,7 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifndef INFO_CONSOLE_H
-#define INFO_CONSOLE_H
+#pragma once
 
 #include "InputReceiver.h"
 #include "System/float3.h"
@@ -54,7 +53,8 @@ public:
 		int id;
 	};
 
-	size_t GetRawLines(std::vector<RawLine>& copy);
+	// Copies the log; lines not yet sent as AddConsoleLine events stay pending.
+	void GetRawLines(std::vector<RawLine>& copy);
 
 private:
 	static constexpr size_t maxMsgCount = 10;
@@ -107,4 +107,3 @@ public:
 
 extern CInfoConsole* infoConsole;
 
-#endif /* INFO_CONSOLE_H */
