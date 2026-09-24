@@ -1,4 +1,4 @@
-# Open engine work: LOS sensor maintenance and a typed RmlUi layer
+# POSTPONED: Open engine work: LOS sensor maintenance and a typed RmlUi layer
 
 What is left of the 2026-09-22/23 review handoffs; everything else from them is done.
 
