@@ -177,6 +177,10 @@ public:
 		}
 
 		wasmtime_linker_allow_shadowing(linker, true);
+		// Benchmark helpers also register older versions of several standard
+		// imports. Register them first so the canonical bindings below win.
+		if (!RegisterBenchmarkImports(linker, &host, error))
+			return false;
 		// Register the legacy fast fallbacks first. Generated bindings use the
 		// canonical wire ABI and must shadow any legacy registration for the
 		// same import; otherwise a pointer-based generated call can be decoded
@@ -259,8 +263,6 @@ public:
 		if (!RegisterRulesParamsImports(linker, &host, error))
 			return false;
 		if (!RegisterConfigImports(linker, &host, error))
-			return false;
-		if (!RegisterBenchmarkImports(linker, &host, error))
 			return false;
 		return RegisterDesyncImports(linker, &host, error);
 	}
