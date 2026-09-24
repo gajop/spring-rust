@@ -1,17 +1,13 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 use spring::cus::core_module::{CoreCusCallResult, CoreCusModule};
-use spring::cus::wasm::WasmCus;
-use spring::cus::{
-    CusHandle, CusInstance, CusRegistry, Piece, ScriptCapabilities, TaskDefinition, UnitCtx,
-    UnitScript, UnitScriptCall,
-};
+use spring::cus::host::CusHost;
+use spring::cus::{Piece, ScriptCapabilities, TaskDefinition, UnitCtx, UnitScript};
 use spring::{DefId, TeamId, UnitId};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 
-const INSTANCE_ID: u32 = 0xC05E_0002;
 const CAPS: ScriptCapabilities =
     ScriptCapabilities::new(ScriptCapabilities::CREATE | ScriptCapabilities::QUERY_WEAPON);
 static PENDING_UNIT: AtomicI32 = AtomicI32::new(-1);
@@ -22,26 +18,18 @@ fn record(message: &str) {
 }
 
 struct E2EScript {
-    created: Rc<RefCell<bool>>,
     resumed: Rc<RefCell<bool>>,
-}
-
-impl Default for E2EScript {
-    fn default() -> Self {
-        Self {
-            created: Rc::new(RefCell::new(false)),
-            resumed: Rc::new(RefCell::new(false)),
-        }
-    }
 }
 
 impl UnitScript for E2EScript {
     fn new(_ctx: &mut spring::cus::InitCtx<'_>) -> Self {
-        Self::default()
+        Self {
+            resumed: Rc::new(RefCell::new(false)),
+        }
     }
 
     fn create(&mut self, ctx: &UnitCtx) {
-        *self.created.borrow_mut() = true;
+        record("CUS_E2E|core|create");
         ctx.spawn(TaskDefinition::with_state(
             "rust-cus-e2e-next-frame",
             Rc::clone(&self.resumed),
@@ -58,6 +46,23 @@ impl UnitScript for E2EScript {
             Piece(-1)
         }
     }
+
+    fn call_named(
+        &mut self,
+        _ctx: &UnitCtx,
+        name: &str,
+        arguments: &[f32],
+        returns: &mut [f32],
+    ) -> Option<usize> {
+        if name != "e2e_named" {
+            return None;
+        }
+        let (Some(argument), Some(output)) = (arguments.first(), returns.first_mut()) else {
+            return Some(0);
+        };
+        *output = *argument + 1.0;
+        Some(1)
+    }
 }
 
 async fn resume_next_frame(state: Rc<RefCell<bool>>, ctx: UnitCtx) {
@@ -66,48 +71,56 @@ async fn resume_next_frame(state: Rc<RefCell<bool>>, ctx: UnitCtx) {
     ctx.move_now(Piece(0), spring::cus::Axis::X, 1.0);
 }
 
+/// A game module that keeps its own state next to the scripts and hands the
+/// CUS exports to `CusHost`.
 #[derive(Default)]
 struct CusE2ECore {
-    registry: CusRegistry<E2EScript>,
-    handle: Option<CusHandle>,
+    host: CusHost<E2EScript>,
     task_logged: bool,
 }
 
 impl CusE2ECore {
+    // Attach, then create a unit while still holding the CUS state: the nested
+    // UnitCreated has to defer its work, and the engine must still deliver
+    // this script's Create exactly once, after GameFrame returns.
     fn attach_pending(&mut self) {
-        if self.handle.is_some() {
-            return;
-        }
         let unit_id = PENDING_UNIT.swap(-1, Ordering::Relaxed);
         if unit_id < 0 {
             return;
         }
         let unit = UnitId(unit_id);
-        let host = WasmCus::new(unit, INSTANCE_ID);
-        let engine = Rc::new(RefCell::new(host.engine()));
-        let instance = CusInstance::attach(unit, E2EScript::default(), Rc::clone(&engine));
-        let handle = self.registry.attach(instance);
-        self.handle = Some(handle);
-        match WasmCus::attach(unit, INSTANCE_ID, CAPS) {
-            Ok(_) => {
+        match self.host.attach(unit, CAPS, E2EScript::new) {
+            Ok(()) => {
                 ATTACHED_UNIT.store(unit_id, Ordering::Relaxed);
-                record(&format!("CUS_E2E|core|attached|unit={unit_id}"))
+                record(&format!("CUS_E2E|core|attached|unit={unit_id}"));
             }
-            Err(_) => {
-                record("CUS_E2E|core|attach-error");
-                self.handle = None;
-                let _ = self.registry.detach(handle);
-            }
+            Err(_) => record("CUS_E2E|core|attach-error"),
+        }
+        let second = spring::create_unit(
+            spring::UnitDefRef {
+                name: "native_api_test_unit",
+                id: -1,
+            },
+            spring::Float3 {
+                x: 160.0,
+                y: 0.0,
+                z: 160.0,
+            },
+            0,
+            spring::CreateUnitOptions {
+                unit_id: -1,
+                builder_id: -1,
+                ..Default::default()
+            },
+        );
+        if second.is_err() {
+            record("CUS_E2E|core|second-unit-error");
         }
     }
 
-    fn resumed(&mut self) -> bool {
-        self.handle
-            .and_then(|handle| {
-                self.registry.with(handle, |instance| {
-                    instance.with_state(|script| *script.resumed.borrow())
-                })
-            })
+    fn resumed(&mut self, unit: UnitId) -> bool {
+        self.host
+            .with_script(unit, |_, script| *script.resumed.borrow())
             .unwrap_or(false)
     }
 }
@@ -121,33 +134,8 @@ impl CoreCusModule for CusE2ECore {
         integer_arguments: &[i32],
         result: &mut CoreCusCallResult<'_>,
     ) -> bool {
-        if instance_id != INSTANCE_ID {
-            return false;
-        }
-        let Some(call) = UnitScriptCall::from_u32(call) else {
-            return false;
-        };
-        let Some(handle) = self.handle else {
-            return false;
-        };
-        let mut call_result = spring::cus::UnitScriptCallResult::default();
-        let handled = self
-            .registry
-            .with(handle, |instance| {
-                instance.invoke(call, float_arguments, integer_arguments, &mut call_result)
-            })
-            .unwrap_or(false);
-        if handled && call == UnitScriptCall::Create {
-            record("CUS_E2E|core|create");
-        }
-        result.int_value = call_result.int_value;
-        result.float_value = call_result.float_value;
-        result.bool_value = call_result.bool_value;
-        result.complete = call_result.complete;
-        result.int_count = call_result.int_values.len().min(result.int_values.len());
-        result.int_values[..result.int_count]
-            .copy_from_slice(&call_result.int_values[..result.int_count]);
-        handled
+        self.host
+            .cus_invoke(instance_id, call, float_arguments, integer_arguments, result)
     }
 
     fn cus_call_named(
@@ -158,15 +146,13 @@ impl CoreCusModule for CusE2ECore {
         return_values: &mut [f32],
         found: &mut bool,
     ) -> Option<usize> {
-        if instance_id != INSTANCE_ID || function_name != "e2e_named" {
-            return None;
+        let count =
+            self.host
+                .cus_call_named(instance_id, function_name, arguments, return_values, found);
+        if *found {
+            record("CUS_E2E|core|named|found=1|success=1|value=4");
         }
-        *found = true;
-        if let (Some(argument), Some(output)) = (arguments.first(), return_values.first_mut()) {
-            *output = *argument + 1.0;
-        }
-        record("CUS_E2E|core|named|found=1|success=1|value=4");
-        Some(1)
+        count
     }
 
     fn cus_tick(&mut self, frame: u32) {
@@ -179,24 +165,17 @@ impl CoreCusModule for CusE2ECore {
                 spring::cmd::FIGHT
             );
         }
-        if let Some(handle) = self.handle {
-            self.registry.tick(frame as u64);
-            if !self.task_logged && self.resumed() {
-                self.task_logged = true;
-                record(&format!("CUS_E2E|core|tick|frame={frame}|task_resumed=1"));
-            }
-            let _ = handle;
+        self.host.cus_tick(frame);
+        let unit = ATTACHED_UNIT.load(Ordering::Relaxed);
+        if unit >= 0 && !self.task_logged && self.resumed(UnitId(unit)) {
+            self.task_logged = true;
+            record(&format!("CUS_E2E|core|tick|frame={frame}|task_resumed=1"));
         }
     }
 
     fn cus_detach(&mut self, instance_id: u32) {
-        if instance_id != INSTANCE_ID {
-            return;
-        }
         record("CUS_E2E|core|detach");
-        if let Some(handle) = self.handle.take() {
-            let _ = self.registry.detach(handle);
-        }
+        self.host.cus_detach(instance_id);
     }
 }
 
@@ -217,8 +196,6 @@ fn synced_random_draws() -> String {
 /// Rules code calling its own module's unit script: through the engine and
 /// directly through `with_cus_module`.
 fn game_frame(frame: i32) {
-    // The module's own GameFrame reaches its CUS state directly to attach;
-    // no queue drained by the next CUS tick.
     if frame == 1 && with_cus_module(|module| module.attach_pending()).is_none() {
         record("CUS_E2E|core|attach-busy");
     }
@@ -239,20 +216,37 @@ fn game_frame(frame: i32) {
         Err(error) => record(&format!("CUS_E2E|core|self-engine|error={error:?}")),
     }
     let mut values = [0.0f32; 1];
-    let mut found = false;
     let direct = with_cus_module(|module| {
-        module.cus_call_named(INSTANCE_ID, "e2e_named", &[3.0], &mut values, &mut found)
+        module
+            .host
+            .call(UnitId(unit), "e2e_named", &[3.0], &mut values)
     });
     record(&format!(
         "CUS_E2E|core|self-direct|available={}|found={}|value={}",
         direct.is_some() as u8,
-        found as u8,
+        direct.flatten().is_some() as u8,
         values[0]
     ));
 }
 
 fn unit_created(unit: UnitId, _def: DefId, _team: TeamId, _builder: UnitId) {
-    let _ = PENDING_UNIT.compare_exchange(-1, unit.0, Ordering::Relaxed, Ordering::Relaxed);
+    if PENDING_UNIT
+        .compare_exchange(-1, unit.0, Ordering::Relaxed, Ordering::Relaxed)
+        .is_ok()
+        && ATTACHED_UNIT.load(Ordering::Relaxed) < 0
+    {
+        return;
+    }
+    // The second unit, created while GameFrame holds the CUS state.
+    PENDING_UNIT.store(-1, Ordering::Relaxed);
+    let ran_now = with_cus_module_or_defer(move |module| {
+        record(&format!(
+            "CUS_E2E|core|deferred-ran|unit={}|attached={}",
+            unit.0,
+            module.host.is_attached(UnitId(ATTACHED_UNIT.load(Ordering::Relaxed))) as u8
+        ));
+    });
+    record(&format!("CUS_E2E|core|unit-created|deferred={}", (!ran_now) as u8));
 }
 
 fn handle_lua_msg(_player: i32, _script: i32, _mode: i32, data: &[u8]) {

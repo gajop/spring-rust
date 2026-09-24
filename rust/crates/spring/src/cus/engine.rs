@@ -84,6 +84,11 @@ pub enum AnimationKind {
 /// Resolves a model piece name during synchronous script construction.
 pub trait PieceResolver {
     fn piece(&self, name: &str) -> Piece;
+
+    /// The model's root piece, whatever its name.
+    fn root(&self) -> Piece {
+        Piece::INVALID
+    }
 }
 
 /// Construction-only context.  It has no scheduler and therefore cannot
@@ -107,5 +112,11 @@ impl<'a> InitCtx<'a> {
     #[inline]
     pub fn piece(&self, name: &str) -> Piece {
         self.pieces.piece(name)
+    }
+
+    /// The model's root piece, whatever its name.
+    #[inline]
+    pub fn root_piece(&self) -> Piece {
+        self.pieces.root()
     }
 }

@@ -336,6 +336,32 @@ impl UnitCtx {
             .scale(self.unit, piece, destination, speed);
     }
 
+    /// Lua's `Turn(piece, axis, angle, speed)`: a speed of zero turns at once,
+    /// and an unresolved piece ([`Piece::INVALID`]) is ignored.
+    pub fn turn_to(&self, piece: Piece, axis: Axis, destination: Angle, speed: AngularSpeed) {
+        if piece == Piece::INVALID {
+            return;
+        }
+        if speed.value() == 0.0 {
+            self.turn_now(piece, axis, destination);
+        } else {
+            self.turn(piece, axis, destination, speed);
+        }
+    }
+
+    /// Lua's `Move(piece, axis, position, speed)`: a speed of zero moves at
+    /// once, and an unresolved piece ([`Piece::INVALID`]) is ignored.
+    pub fn move_to(&self, piece: Piece, axis: Axis, destination: f32, speed: f32) {
+        if piece == Piece::INVALID {
+            return;
+        }
+        if speed == 0.0 {
+            self.move_now(piece, axis, destination);
+        } else {
+            self.move_piece(piece, axis, destination, speed);
+        }
+    }
+
     #[inline]
     pub fn move_now(&self, piece: Piece, axis: Axis, destination: f32) {
         self.engine

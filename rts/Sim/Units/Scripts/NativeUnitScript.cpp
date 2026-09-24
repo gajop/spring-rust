@@ -290,10 +290,6 @@ void CNativeUnitScript::WarnMissingBackend() const
 bool CNativeUnitScript::Invoke(NativeUnitScriptCall call, std::span<const float> floatArgs,
 	std::span<const int32_t> intArgs, NativeUnitScriptCallResult* result) const
 {
-	NativeUnitScriptCallResult localResult;
-	if (result == nullptr)
-		result = &localResult;
-
 	const uint64_t capability = 1ull << static_cast<uint8_t>(call);
 	if (backend == nullptr) {
 		WarnMissingBackend();
@@ -302,6 +298,10 @@ bool CNativeUnitScript::Invoke(NativeUnitScriptCall call, std::span<const float>
 	if (!HasCapability(capability))
 		return false;
 
+	if (result == nullptr) {
+		backend->Post(UnitID(unit), instanceId, call, floatArgs, intArgs);
+		return true;
+	}
 	return backend->Invoke(instanceId, call, floatArgs, intArgs, *result);
 }
 

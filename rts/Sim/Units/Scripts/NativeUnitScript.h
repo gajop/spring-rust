@@ -147,6 +147,17 @@ public:
 		std::span<const float> floatArgs, std::span<const int32_t> intArgs,
 		NativeUnitScriptCallResult& result) = 0;
 
+	// A call whose result the engine does not read (Create, StartMoving, ...).
+	// Core-Wasm queues it while the guest holds its CUS state and delivers it,
+	// in order, once the guest has returned; other backends invoke it directly.
+	virtual void Post(int32_t unitId, uint32_t instanceId, NativeUnitScriptCall call,
+		std::span<const float> floatArgs, std::span<const int32_t> intArgs)
+	{
+		(void) unitId;
+		NativeUnitScriptCallResult result;
+		Invoke(instanceId, call, floatArgs, intArgs, result);
+	}
+
 	// Implementations must write no more than retValues.size() elements and
 	// report the number written through retCount.  The adapter validates the
 	// reported count before exposing values to CUnitScript callers.

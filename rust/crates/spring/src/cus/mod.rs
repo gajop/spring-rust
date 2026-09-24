@@ -18,6 +18,9 @@ pub mod prelude;
 #[cfg(target_arch = "wasm32")]
 pub mod core_module;
 
+#[cfg(all(target_arch = "wasm32", feature = "alloc"))]
+pub mod host;
+
 #[cfg(target_arch = "wasm32")]
 /// Core-Wasm transport for the portable CUS engine. The host validates the
 /// unit/instance pair and performs the actual CUnitScript operation.

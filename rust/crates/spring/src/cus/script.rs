@@ -14,6 +14,21 @@ pub trait UnitScript: Sized {
     fn new(_ctx: &mut InitCtx<'_>) -> Self;
 
     fn raw_call(&mut self, _ctx: &UnitCtx, _function: i32) {}
+
+    /// A function called by name, like Lua's `env.Function(...)`: from the
+    /// engine (`call_unit_script`, `Spring.CallCOBScript`) or from the rules
+    /// through [`CusHost::call`](crate::cus::host::CusHost::call). Return
+    /// `Some(n)` after writing `n` values to `returns`, or `None` when the
+    /// script has no function of that name.
+    fn call_named(
+        &mut self,
+        _ctx: &UnitCtx,
+        _name: &str,
+        _arguments: &[f32],
+        _returns: &mut [f32],
+    ) -> Option<usize> {
+        None
+    }
     fn create(&mut self, _ctx: &UnitCtx) {}
 
     fn wind_changed(&mut self, _ctx: &UnitCtx, _heading: f32, _speed: f32) {}

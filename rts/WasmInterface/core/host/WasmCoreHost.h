@@ -140,15 +140,22 @@ public:
 	void Detach(std::uint32_t instanceId) override;
 	void Tick(std::uint32_t frame) override;
 	void StartCreate(CNativeUnitScript* script) override;
+	void Post(std::int32_t unitId, std::uint32_t instanceId, NativeUnitScriptCall call,
+		std::span<const float> floatArgs, std::span<const std::int32_t> intArgs) override;
 
 	~WasmCoreHost();
 	WasmCoreHost(const WasmCoreHost&) = delete;
 	WasmCoreHost& operator=(const WasmCoreHost&) = delete;
 
 private:
-	struct PendingCusCreate {
+	// A result-less CUS call (Create included) waiting for the guest to return
+	// and release its CUS state.
+	struct PendingCusCall {
 		std::int32_t unitId;
 		std::uint32_t instanceId;
+		NativeUnitScriptCall call;
+		std::vector<float> floatArgs;
+		std::vector<std::int32_t> intArgs;
 	};
 
 	struct Backend;
@@ -165,14 +172,27 @@ private:
 	bool ResetBudgetImpl(std::string& error);
 	bool FuelRemainingImpl(std::uint64_t& fuel, std::string& error) const;
 	void Fault(std::string reason);
-	void FlushCusCreates();
-	void DropPendingCusCreates();
+	void FlushPendingCusCalls();
+	void DropPendingCusCalls();
+	bool GuestActive() const;
+	void QueueCusCall(std::int32_t unitId, std::uint32_t instanceId, NativeUnitScriptCall call,
+		std::span<const float> floatArgs, std::span<const std::int32_t> intArgs);
 	bool CallCus(std::uint32_t instanceId, NativeUnitScriptCall call,
 		std::span<const float> floatArgs, std::span<const std::int32_t> intArgs,
 		NativeUnitScriptCallResult& result);
+	bool CallCusGuest(std::uint32_t instanceId, NativeUnitScriptCall call,
+		std::span<const float> floatArgs, std::span<const std::int32_t> intArgs,
+		NativeUnitScriptCallResult& result);
+	bool CallNamedGuest(std::uint32_t instanceId, const char* functionName,
+		std::span<const float> args, std::span<float> retValues,
+		std::uint32_t& retCount, bool& found);
+	void TickGuest(std::uint32_t frame);
 
 	std::string moduleName;
 	WasmEnvironment environment;
 	std::unique_ptr<Backend> backend;
-	std::vector<PendingCusCreate> pendingCusCreates;
+	std::vector<PendingCusCall> pendingCusCalls;
+	bool flushingCusCalls = false;
+	// Set when the last guest CUS call found the guest's CUS state in use.
+	bool busyCusCall = false;
 };

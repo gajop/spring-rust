@@ -299,10 +299,19 @@ def assert_markers(workdir: Path) -> None:
         # the module calling its own unit script, via the engine and directly
         "CUS_E2E|core|self-engine|found=1|success=1|value=4",
         "CUS_E2E|core|self-direct|available=1|found=1|value=4",
+        # a UnitCreated raised while the module holds its CUS state defers its
+        # work, which runs once that use ends
+        "CUS_E2E|core|unit-created|deferred=1",
+        "CUS_E2E|core|deferred-ran|",
     )
     for marker in required_core:
         if marker not in core_log:
             raise AssertionError(f"Core-Wasm marker missing: {marker!r}\n{core_log}")
+    # The engine delivers Create exactly once, although a nested callin ran
+    # while the module was still attaching.
+    creates = core_log.count("CUS_E2E|core|create")
+    if creates != 1:
+        raise AssertionError(f"Core-Wasm Create delivered {creates} times, expected 1\n{core_log}")
     for marker in (
         "native|core-named|found=1|success=1|value=4",
         "native|shutdown",

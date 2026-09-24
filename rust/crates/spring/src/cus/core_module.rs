@@ -8,6 +8,10 @@ pub const NAME_OFFSET: usize = 2048;
 pub const RESULT_OFFSET: usize = 4096;
 pub const MAX_ARGUMENTS: usize = 256;
 pub const MAX_RESULTS: usize = 64;
+/// `SPRING_CUS_INVOKE`/`SPRING_CUS_CALL_NAMED` status for "the CUS state is in
+/// use further up the stack". The engine queues a call whose result it doesn't
+/// read (`Create`, `StartMoving`, ...) and delivers it once the module returns.
+pub const STATUS_BUSY: i32 = 2;
 
 #[derive(Debug)]
 pub struct CoreCusCallResult<'a> {
@@ -69,6 +73,52 @@ impl Drop for CusBusy {
     }
 }
 
+/// Work for the CUS state that arrived while it was in use; see
+/// `with_cus_module_or_defer` in [`export_core_cus!`](crate::export_core_cus).
+type DeferredWork<T> = alloc::vec::Vec<alloc::boxed::Box<dyn FnOnce(&mut T)>>;
+
+pub struct DeferredCus<T>(core::cell::UnsafeCell<DeferredWork<T>>);
+
+// SAFETY: Core Wasm guests are single-threaded.
+unsafe impl<T> Sync for DeferredCus<T> {}
+
+impl<T> Default for DeferredCus<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<T> DeferredCus<T> {
+    pub const fn new() -> Self {
+        Self(core::cell::UnsafeCell::new(alloc::vec::Vec::new()))
+    }
+
+    pub fn push(&self, work: alloc::boxed::Box<dyn FnOnce(&mut T)>) {
+        // SAFETY: single-threaded, and no reference into the queue outlives a
+        // call of `push` or `run`.
+        unsafe { (*self.0.get()).push(work) }
+    }
+
+    /// Run the queued work in order, including work queued meanwhile.
+    pub fn run(&self, module: &mut T) {
+        loop {
+            // SAFETY: see `push`; the queue is taken out before any work runs.
+            let work = unsafe { core::mem::take(&mut *self.0.get()) };
+            if work.is_empty() {
+                return;
+            }
+            for item in work {
+                item(module);
+            }
+        }
+    }
+}
+
+#[doc(hidden)]
+pub fn boxed<T>(work: impl FnOnce(&mut T) + 'static) -> alloc::boxed::Box<dyn FnOnce(&mut T)> {
+    alloc::boxed::Box::new(work)
+}
+
 #[inline]
 pub fn read_f32s(pointer: i32, count: i32, buffer_base: usize) -> Option<&'static [f32]> {
     if pointer < 0 || count < 0 || count as usize > MAX_ARGUMENTS {
@@ -126,16 +176,36 @@ pub fn buffer_range_contains(pointer: i32, bytes: usize, buffer_base: usize) -> 
 /// values. The host never inspects that state; it only invokes these
 /// stable exports and the engine-operation imports.
 ///
-/// Also defines `with_cus_module(|module| ...)` at the invocation site, so the
+/// Also defines `with_cus_module(|module| ...)` and
+/// `with_cus_module_or_defer(|module| ...)` at the invocation site, so the
 /// module's own gadget/rules code can reach the CUS state directly: attach a
 /// script from `UnitCreated`, or call a unit script, without going through the
 /// engine (which cannot re-enter a running module). It returns `None` while
 /// the state is already in use (inside a CUS export or a nested call).
+/// `with_cus_module_or_defer` queues the work instead and runs it, in order,
+/// as soon as that use ends: for example an attach from a `UnitCreated` raised
+/// by a unit script that creates a unit.
+///
+/// # `Create` and other engine calls
+///
+/// The engine calls `Create` exactly once for every script the module attaches,
+/// after the module has returned from the call in which it attached (the
+/// `attach` import can't re-enter the module). Don't run `Create` yourself.
+///
+/// An engine call that arrives while the CUS state is in use gets
+/// [`STATUS_BUSY`](crate::cus::core_module::STATUS_BUSY) back. The engine then queues it if it doesn't read a result
+/// (`Create`, `StartMoving`, `RawCall`, ...) and delivers it, in order, once no
+/// code of this module is on the stack. A call that returns a value
+/// (`AimWeapon`, `QueryWeapon`, `HitByWeapon`, named calls, ...) can't wait and
+/// gets the engine's neutral default instead.
 #[macro_export]
 macro_rules! export_core_cus {
     ($module_type:ty) => {
         static __SPRING_CUS_BUSY: core::sync::atomic::AtomicBool =
             core::sync::atomic::AtomicBool::new(false);
+
+        static __SPRING_CUS_DEFERRED: $crate::cus::core_module::DeferredCus<$module_type> =
+            $crate::cus::core_module::DeferredCus::new();
 
         /// Run `f` on this module's CUS state; `None` if it is not initialized
         /// yet or already in use further up the stack.
@@ -145,7 +215,36 @@ macro_rules! export_core_cus {
             // SAFETY: `_busy` excludes every other access path to the state.
             unsafe {
                 let module = &raw mut __SPRING_CUS_MODULE;
-                (*module).as_mut().map(f)
+                let module = (*module).as_mut()?;
+                __SPRING_CUS_DEFERRED.run(module);
+                let result = f(module);
+                __SPRING_CUS_DEFERRED.run(module);
+                Some(result)
+            }
+        }
+
+        /// Run `f` on this module's CUS state now, or, while the state is in
+        /// use further up the stack (or not initialized yet), as soon as that
+        /// use ends. Deferred work runs in the order it was queued. Returns
+        /// whether `f` ran now.
+        #[allow(dead_code)]
+        pub fn with_cus_module_or_defer(f: impl FnOnce(&mut $module_type) + 'static) -> bool {
+            let mut f = Some(f);
+            let ran = with_cus_module(|module| (f.take().expect("runs once"))(module)).is_some();
+            if let Some(f) = f {
+                __SPRING_CUS_DEFERRED.push($crate::cus::core_module::boxed(f));
+            }
+            ran
+        }
+
+        // Runs queued work before an export releases the state.
+        #[allow(dead_code)]
+        unsafe fn __spring_cus_run_deferred() {
+            unsafe {
+                let module = &raw mut __SPRING_CUS_MODULE;
+                if let Some(module) = (*module).as_mut() {
+                    __SPRING_CUS_DEFERRED.run(module);
+                }
             }
         }
 
@@ -172,6 +271,7 @@ macro_rules! export_core_cus {
             unsafe {
                 let module = &raw mut __SPRING_CUS_MODULE;
                 *module = Some(<$module_type as Default>::default());
+                __spring_cus_run_deferred();
             }
             0
         }
@@ -186,9 +286,9 @@ macro_rules! export_core_cus {
             integer_count: i32,
             result_pointer: i32,
         ) -> i32 {
-            // Busy: the state is in use further up this stack; "not handled".
+            // Busy: the state is in use further up this stack.
             let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
-                return 0;
+                return $crate::cus::core_module::STATUS_BUSY;
             };
             unsafe {
                 let buffer_base = (&raw const __SPRING_CUS_BUFFER) as *const u8 as usize;
@@ -243,6 +343,7 @@ macro_rules! export_core_cus {
                     integer_arguments,
                     &mut call_result,
                 );
+                __SPRING_CUS_DEFERRED.run(module);
                 if !handled {
                     return 0;
                 }
@@ -269,7 +370,7 @@ macro_rules! export_core_cus {
             result_pointer: i32,
         ) -> i32 {
             let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
-                return 0;
+                return $crate::cus::core_module::STATUS_BUSY;
             };
             unsafe {
                 let buffer_base = (&raw const __SPRING_CUS_BUFFER) as *const u8 as usize;
@@ -319,8 +420,10 @@ macro_rules! export_core_cus {
                         &mut found,
                     )
                 else {
+                    __SPRING_CUS_DEFERRED.run(module);
                     return 0;
                 };
+                __SPRING_CUS_DEFERRED.run(module);
                 if count > return_values.len() {
                     return 1;
                 }
@@ -343,6 +446,7 @@ macro_rules! export_core_cus {
                         module,
                         frame as u32,
                     );
+                    __SPRING_CUS_DEFERRED.run(module);
                 }
             }
         }
@@ -359,6 +463,7 @@ macro_rules! export_core_cus {
                         module,
                         instance_id as u32,
                     );
+                    __SPRING_CUS_DEFERRED.run(module);
                 }
             }
         }

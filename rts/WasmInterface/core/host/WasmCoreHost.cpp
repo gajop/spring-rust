@@ -102,7 +102,10 @@ constexpr std::uint32_t CUS_RESULT_BYTES = CUS_RESULT_HANDLED_OFFSET + 4;
 constexpr std::uint32_t CUS_NAMED_RESULT_HANDLED_OFFSET = 264;
 constexpr std::uint32_t CUS_NAMED_RESULT_BYTES = CUS_NAMED_RESULT_HANDLED_OFFSET + 4;
 constexpr std::uint32_t CUS_BUFFER_BYTES = 16 * 1024;
-constexpr std::size_t CUS_MAX_CREATE_FLUSHES = 1024;
+constexpr std::size_t CUS_MAX_PENDING_CALL_FLUSHES = 4096;
+// SPRING_CUS_INVOKE / SPRING_CUS_CALL_NAMED status: the guest's CUS state is in
+// use further up the stack.
+constexpr std::int32_t CUS_STATUS_BUSY = 2;
 
 struct CallinHashSlot {
 	std::uint64_t hash = 0;
@@ -225,7 +228,7 @@ WasmCoreHost::~WasmCoreHost()
 	// registry teardown paths which do not pass through WasmInterfaceSystem.
 	if (unitScriptEngine != nullptr)
 		unitScriptEngine->RemoveCusBackend(this);
-	pendingCusCreates.clear();
+	pendingCusCalls.clear();
 }
 
 WasmCoreHost* WasmCoreHost::Find(std::string_view moduleName)
@@ -507,7 +510,7 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 
 	Unload(host->moduleName);
 	host->backend = std::move(backend);
-	host->FlushCusCreates();
+	host->FlushPendingCusCalls();
 	Hosts().push_back(std::move(host));
 	// Resolve the dispatch plans once, now, so no callin ever pays for it.
 	Hosts().back()->BuildDispatchPlans();
@@ -569,7 +572,7 @@ void WasmCoreHost::Fault(std::string reason)
 		return;
 	backend->hot.faulted = true;
 	backend->faultReason = reason.empty() ? "Core Wasm module faulted" : std::move(reason);
-	DropPendingCusCreates();
+	DropPendingCusCalls();
 	if (unitScriptEngine != nullptr)
 		unitScriptEngine->CancelCusBackend(this);
 	++PendingFaultCount();
@@ -706,6 +709,16 @@ bool WasmCoreHost::CallCus(std::uint32_t instanceId, NativeUnitScriptCall call,
 	std::span<const float> floatArgs, std::span<const std::int32_t> intArgs,
 	NativeUnitScriptCallResult& result)
 {
+	const bool success = CallCusGuest(instanceId, call, floatArgs, intArgs, result);
+	busyCusCall = false;
+	FlushPendingCusCalls();
+	return success;
+}
+
+bool WasmCoreHost::CallCusGuest(std::uint32_t instanceId, NativeUnitScriptCall call,
+	std::span<const float> floatArgs, std::span<const std::int32_t> intArgs,
+	NativeUnitScriptCallResult& result)
+{
 	result = {};
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	if (backend == nullptr || !backend->hasCus || !backend->cusInvoke.Present() ||
@@ -756,6 +769,12 @@ bool WasmCoreHost::CallCus(std::uint32_t instanceId, NativeUnitScriptCall call,
 		Fault("Core Wasm CUS invoke failed: " + error);
 		return false;
 	}
+	if (slots[0].i32 == CUS_STATUS_BUSY) {
+		// The guest holds its CUS state further up this stack: the neutral
+		// result for the caller; Post queues the call instead.
+		busyCusCall = true;
+		return false;
+	}
 	if (slots[0].i32 != 0) {
 		Fault("Core Wasm CUS invoke returned status " + std::to_string(slots[0].i32));
 		return false;
@@ -771,10 +790,8 @@ bool WasmCoreHost::CallCus(std::uint32_t instanceId, NativeUnitScriptCall call,
 		(static_cast<std::uint32_t>(resultBytes[CUS_RESULT_HANDLED_OFFSET + 1]) << 8) |
 		(static_cast<std::uint32_t>(resultBytes[CUS_RESULT_HANDLED_OFFSET + 2]) << 16) |
 		(static_cast<std::uint32_t>(resultBytes[CUS_RESULT_HANDLED_OFFSET + 3]) << 24);
-	if (handled == 0) {
-		FlushCusCreates();
+	if (handled == 0)
 		return false;
-	}
 	const std::uint32_t count = ReadCusU32(
 		std::span<const std::uint8_t>(resultBytes.data(), resultBytes.size()), 16);
 	if (count > CUS_MAX_RESULTS) {
@@ -796,7 +813,6 @@ bool WasmCoreHost::CallCus(std::uint32_t instanceId, NativeUnitScriptCall call,
 		return false;
 	}
 	result.intValues.assign(values.begin(), values.begin() + count);
-	FlushCusCreates();
 	return true;
 #else
 	(void)instanceId;
@@ -815,7 +831,35 @@ bool WasmCoreHost::Invoke(std::uint32_t instanceId, NativeUnitScriptCall call,
 	return CallCus(instanceId, call, floatArgs, intArgs, result);
 }
 
+void WasmCoreHost::Post(std::int32_t unitId, std::uint32_t instanceId, NativeUnitScriptCall call,
+	std::span<const float> floatArgs, std::span<const std::int32_t> intArgs)
+{
+	// Keep the order of earlier calls that are still waiting.
+	if (!pendingCusCalls.empty()) {
+		if (GuestActive()) {
+			QueueCusCall(unitId, instanceId, call, floatArgs, intArgs);
+			return;
+		}
+		FlushPendingCusCalls();
+	}
+	NativeUnitScriptCallResult result;
+	busyCusCall = false;
+	if (!CallCusGuest(instanceId, call, floatArgs, intArgs, result) && busyCusCall)
+		QueueCusCall(unitId, instanceId, call, floatArgs, intArgs);
+	busyCusCall = false;
+	FlushPendingCusCalls();
+}
+
 bool WasmCoreHost::CallNamed(std::uint32_t instanceId, const char* functionName,
+	std::span<const float> args, std::span<float> retValues, std::uint32_t& retCount,
+	bool& found)
+{
+	const bool success = CallNamedGuest(instanceId, functionName, args, retValues, retCount, found);
+	FlushPendingCusCalls();
+	return success;
+}
+
+bool WasmCoreHost::CallNamedGuest(std::uint32_t instanceId, const char* functionName,
 	std::span<const float> args, std::span<float> retValues, std::uint32_t& retCount,
 	bool& found)
 {
@@ -871,6 +915,8 @@ bool WasmCoreHost::CallNamed(std::uint32_t instanceId, const char* functionName,
 		Fault("Core Wasm CUS named call failed: " + error);
 		return false;
 	}
+	if (slots[0].i32 == CUS_STATUS_BUSY)
+		return false;
 	if (slots[0].i32 != 0) {
 		Fault("Core Wasm CUS named call returned status " +
 			std::to_string(slots[0].i32));
@@ -883,10 +929,8 @@ bool WasmCoreHost::CallNamed(std::uint32_t instanceId, const char* functionName,
 	}
 	const auto bytes = std::span<const std::uint8_t>(resultBytes.data(), resultBytes.size());
 	const std::uint32_t handled = ReadCusU32(bytes, CUS_NAMED_RESULT_HANDLED_OFFSET);
-	if (handled == 0) {
-		FlushCusCreates();
+	if (handled == 0)
 		return false;
-	}
 	const std::uint32_t count = ReadCusU32(bytes, 0);
 	if (count > CUS_MAX_RESULTS || count > retValues.size()) {
 		Fault("Core Wasm CUS named call returned too many values");
@@ -904,7 +948,6 @@ bool WasmCoreHost::CallNamed(std::uint32_t instanceId, const char* functionName,
 	}
 	retCount = count;
 	found = foundValue != 0;
-	FlushCusCreates();
 	return true;
 #else
 	(void)instanceId;
@@ -934,6 +977,12 @@ void WasmCoreHost::Detach(std::uint32_t instanceId)
 
 void WasmCoreHost::Tick(std::uint32_t frame)
 {
+	TickGuest(frame);
+	FlushPendingCusCalls();
+}
+
+void WasmCoreHost::TickGuest(std::uint32_t frame)
+{
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	if (backend == nullptr || !backend->hasCus || !backend->cusTick.Present() ||
 		backend->hot.faulted)
@@ -959,8 +1008,6 @@ void WasmCoreHost::Tick(std::uint32_t frame)
 		slots.data(), slots.size(), error);
 	if (!success)
 		Fault("Core Wasm CUS tick failed: " + error);
-	else
-		FlushCusCreates();
 #else
 	(void)frame;
 #endif
@@ -968,48 +1015,85 @@ void WasmCoreHost::Tick(std::uint32_t frame)
 
 void WasmCoreHost::StartCreate(CNativeUnitScript* script)
 {
+	// Called from the guest's attach import: the store can't be re-entered
+	// here, so Create waits until the guest has returned.
 	if (script == nullptr || script->GetUnit() == nullptr)
 		return;
-	pendingCusCreates.push_back({
-		.unitId = script->GetUnit()->id,
-		.instanceId = script->GetInstanceId(),
+	QueueCusCall(script->GetUnit()->id, script->GetInstanceId(), NativeUnitScriptCall::Create, {}, {});
+}
+
+void WasmCoreHost::QueueCusCall(std::int32_t unitId, std::uint32_t instanceId,
+	NativeUnitScriptCall call, std::span<const float> floatArgs,
+	std::span<const std::int32_t> intArgs)
+{
+	pendingCusCalls.push_back({
+		.unitId = unitId,
+		.instanceId = instanceId,
+		.call = call,
+		.floatArgs = {floatArgs.begin(), floatArgs.end()},
+		.intArgs = {intArgs.begin(), intArgs.end()},
 	});
 }
 
-void WasmCoreHost::FlushCusCreates()
+bool WasmCoreHost::GuestActive() const
 {
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	return backend != nullptr && backend->hot.budget.CallbackDepth() > 0;
+#else
+	return false;
+#endif
+}
+
+void WasmCoreHost::FlushPendingCusCalls()
+{
+	// Deliver only once no guest code of this module is on the stack (it could
+	// still hold its CUS state), and never from inside another flush: the outer
+	// loop picks up whatever a delivered call queues.
+	if (pendingCusCalls.empty() || flushingCusCalls || GuestActive())
+		return;
+
+	flushingCusCalls = true;
 	std::size_t flushed = 0;
-	while (!pendingCusCreates.empty()) {
-		if (flushed >= CUS_MAX_CREATE_FLUSHES) {
-			Fault("Core Wasm CUS Create queue exceeded its per-dispatch limit");
+	while (!pendingCusCalls.empty()) {
+		if (flushed >= CUS_MAX_PENDING_CALL_FLUSHES) {
+			flushingCusCalls = false;
+			Fault("Core Wasm CUS call queue exceeded its per-dispatch limit");
 			return;
 		}
 
-		std::vector<PendingCusCreate> creates;
-		creates.swap(pendingCusCreates);
-		for (const PendingCusCreate& create : creates) {
-			if (CNativeUnitScript* script = FindNativeUnitScript(create.unitId, create.instanceId);
-				script != nullptr) {
-				script->Create();
+		std::vector<PendingCusCall> calls;
+		calls.swap(pendingCusCalls);
+		for (const PendingCusCall& pending: calls) {
+			++flushed;
+			CNativeUnitScript* script = FindNativeUnitScript(pending.unitId, pending.instanceId);
+			if (script == nullptr)
+				continue;
 
-				// Core CUS Create is deferred while the guest is active. Refresh
-				// weapon pieces only after Create has populated the callbacks.
-				if (CNativeUnitScript* liveScript = FindNativeUnitScript(create.unitId, create.instanceId);
+			NativeUnitScriptCallResult result;
+			CallCusGuest(pending.instanceId, pending.call, pending.floatArgs, pending.intArgs, result);
+			busyCusCall = false;
+
+			// Weapon pieces come from the script, so refresh them once Create has
+			// run. Look the script up again: Create may have replaced it.
+			if (pending.call == NativeUnitScriptCall::Create) {
+				if (CNativeUnitScript* liveScript = FindNativeUnitScript(pending.unitId, pending.instanceId);
 					liveScript != nullptr && liveScript->GetUnit() != nullptr) {
 					liveScript->GetUnit()->RefreshWeaponPieces();
 				}
 			}
-			++flushed;
 		}
 	}
+	flushingCusCalls = false;
 }
 
-void WasmCoreHost::DropPendingCusCreates()
+void WasmCoreHost::DropPendingCusCalls()
 {
-	std::vector<PendingCusCreate> creates;
-	creates.swap(pendingCusCreates);
-	for (const PendingCusCreate& create : creates) {
-		if (CNativeUnitScript* script = FindNativeUnitScript(create.unitId, create.instanceId);
+	std::vector<PendingCusCall> calls;
+	calls.swap(pendingCusCalls);
+	for (const PendingCusCall& pending: calls) {
+		if (pending.call != NativeUnitScriptCall::Create)
+			continue;
+		if (CNativeUnitScript* script = FindNativeUnitScript(pending.unitId, pending.instanceId);
 			script != nullptr)
 			script->DetachBackend(this);
 	}
@@ -1437,7 +1521,7 @@ bool WasmCoreHost::Dispatch(const recoil::wasm::core::WasmCoreDispatchPlan* plan
 	const bool success = recoil::wasm::core::DispatchPlan(plan, query, result, error);
 	RmlGui::SetCurrentContextOwner(previousOwner, previousMenuPhase);
 	if (plan != nullptr && plan->host != nullptr)
-		plan->host->FlushCusCreates();
+		plan->host->FlushPendingCusCalls();
 	return success;
 #else
 	(void)plan;
