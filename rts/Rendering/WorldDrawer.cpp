@@ -54,6 +54,7 @@
 #include "System/LoadLock.h"
 
 CONFIG(bool, PreloadModels).defaultValue(true).description("The engine will preload all models");
+CONFIG(bool, DrawSelectedCommandQueues).defaultValue(true).description("Draw selected units' command queues in the world when Shift is held or AlwaysDrawQueue is set");
 
 void CWorldDrawer::InitPre() const
 {
@@ -471,7 +472,8 @@ void CWorldDrawer::DrawMiscObjects() const
 		// note: duplicated in CMiniMap::DrawWorldStuff()
 		commandDrawer->DrawLuaQueuedUnitSetCommands();
 
-		if (cmdColors.AlwaysDrawQueue() || guihandler->GetQueueKeystate()) {
+		if (configHandler->GetBool("DrawSelectedCommandQueues") &&
+		    (cmdColors.AlwaysDrawQueue() || guihandler->GetQueueKeystate())) {
 			selectedUnitsHandler.DrawCommands();
 		}
 	}
