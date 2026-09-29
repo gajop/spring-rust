@@ -1,7 +1,24 @@
 # Wasm re-entrancy: design options
 
-Discussion notes, not decisions. Nothing below is implemented except "Today".
 Last updated 2026-09-29.
+
+**Status: option A is implemented** as `spring::commands`
+(`rust/crates/spring/src/commands.rs`, af1678c810), next to the existing
+immediate calls and `ctx.delay`. Commands are applied when the outermost
+callin of the module returns, in the same frame. All eight game ports use
+it (each on its `*-wasm-port` branch; Ship Game on `commands-api`).
+Open SDK follow-ups the ports ran into:
+- `commands::create_unit` has no facing argument (ports wrap
+  `commands::queue` around their own create).
+- No "after the queue has fully drained" helper: `run` only follows what
+  is already queued; Flove and MyCube added test helpers on `is_empty()`.
+- A `.then` can only reach shared game state through `with_global`, so
+  gadgets that keep their own state put it behind `Rc`.
+- Queued calls make their engine-side random draws later than game code
+  around them; ports keep the old synced random order by doing the draws
+  inside the queued command.
+
+The sections below are the discussion that led here.
 
 ## The problem
 
