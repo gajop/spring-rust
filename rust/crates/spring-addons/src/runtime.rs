@@ -162,6 +162,9 @@ impl<G> AddonRuntime<G> {
         global: &G,
         f: impl FnOnce(&AddonContext<'_, G>) -> R,
     ) -> R {
+        // Queued `spring::commands` run when the outermost callin of the module
+        // returns, after this callin's delayed actions.
+        let _commands = spring::commands::Scope::enter();
         let depth = {
             let _entry = callin_stack::Entry::push(name);
             self.depth.set(self.depth.get() + 1);

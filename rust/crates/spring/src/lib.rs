@@ -63,6 +63,9 @@ mod benchmark;
 /// lets crates built on top of the SDK (spring-addons) compile and run their
 /// unit tests natively.
 pub mod callback;
+/// Engine calls queued until the current callin returns.
+#[cfg(feature = "alloc")]
+pub mod commands;
 #[cfg(target_arch = "wasm32")]
 mod cob_script;
 #[cfg(target_arch = "wasm32")]

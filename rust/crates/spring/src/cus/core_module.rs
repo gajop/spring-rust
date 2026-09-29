@@ -265,6 +265,9 @@ macro_rules! export_core_cus {
 
         #[unsafe(no_mangle)]
         pub extern "C" fn SPRING_CUS_INIT() -> i32 {
+            // Declared first so it drops last: queued commands run once the
+            // CUS state is released.
+            let _commands = $crate::commands::Scope::enter();
             let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
                 return 1;
             };
@@ -287,6 +290,9 @@ macro_rules! export_core_cus {
             result_pointer: i32,
         ) -> i32 {
             // Busy: the state is in use further up this stack.
+            // Declared first so it drops last: queued commands run once the
+            // CUS state is released.
+            let _commands = $crate::commands::Scope::enter();
             let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
                 return $crate::cus::core_module::STATUS_BUSY;
             };
@@ -369,6 +375,9 @@ macro_rules! export_core_cus {
             argument_count: i32,
             result_pointer: i32,
         ) -> i32 {
+            // Declared first so it drops last: queued commands run once the
+            // CUS state is released.
+            let _commands = $crate::commands::Scope::enter();
             let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
                 return $crate::cus::core_module::STATUS_BUSY;
             };
@@ -436,6 +445,9 @@ macro_rules! export_core_cus {
 
         #[unsafe(no_mangle)]
         pub unsafe extern "C" fn SPRING_CUS_TICK(frame: i32) {
+            // Declared first so it drops last: queued commands run once the
+            // CUS state is released.
+            let _commands = $crate::commands::Scope::enter();
             let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
                 return;
             };
@@ -453,6 +465,9 @@ macro_rules! export_core_cus {
 
         #[unsafe(no_mangle)]
         pub unsafe extern "C" fn SPRING_CUS_DETACH(instance_id: i32) {
+            // Declared first so it drops last: queued commands run once the
+            // CUS state is released.
+            let _commands = $crate::commands::Scope::enter();
             let Some(_busy) = $crate::cus::core_module::CusBusy::enter(&__SPRING_CUS_BUSY) else {
                 return;
             };
