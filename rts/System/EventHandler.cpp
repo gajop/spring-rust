@@ -715,7 +715,29 @@ DRAW_CALLIN(ScreenEffects)
 DRAW_CALLIN(ScreenPost)
 DRAW_CALLIN(Screen)
 DRAW_CALLIN(InMiniMap)
-DRAW_CALLIN(InMiniMapBackground)
+
+void CEventHandler::DrawInMiniMapBackground()
+{
+	ZoneScoped;
+	if (listDrawInMiniMapBackground.empty())
+		return;
+
+	LuaOpenGL::EnableDrawInMiniMapBackground();
+	// The generic draw-callin path resets only between clients. Give the first
+	// minimap-background client the same GL state and matrices as later clients.
+	LuaOpenGL::ResetDrawInMiniMapBackground();
+	listDrawInMiniMapBackground[0]->DrawInMiniMapBackground();
+
+	for (size_t i = 1; i < listDrawInMiniMapBackground.size(); ) {
+		LuaOpenGL::ResetDrawInMiniMapBackground();
+		CEventClient* ec = listDrawInMiniMapBackground[i];
+		ec->DrawInMiniMapBackground();
+		if (i < listDrawInMiniMapBackground.size() && ec == listDrawInMiniMapBackground[i])
+			++i;
+	}
+
+	LuaOpenGL::DisableDrawInMiniMapBackground();
+}
 
 
 #define DRAW_ENTITY_CALLIN(name, args, args2)                                 \
