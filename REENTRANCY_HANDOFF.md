@@ -148,7 +148,8 @@ fn unit_pre_damaged(ctx: &mut Ctx<State>, event: &UnitPreDamagedEvent) -> Option
 }
 ```
 
-What breaks is "do something, then use the result":
+"Do something, then use the result" moves into a `.then`, which runs once
+the command has been applied, after the callins it caused:
 
 ```rust
 // Today (spawning.rs): create, then turn the new unit.
@@ -156,28 +157,36 @@ if let Some(unit) = units::create(kind, x, z, 0) {
     units::set_yaw(unit, random::float() * TAU);
 }
 
-// A: the unit doesn't exist yet. Either chain a follow-up...
+// A: the continuation gets the new id. No engine change is needed.
 commands
     .create_unit(kind.def(), position, TEAM, 0)
     .then(|unit, commands| commands.set_yaw(unit, yaw));
-
-// ...or have the engine reserve the id up front, as Bevy's `spawn` does.
-// That needs a new synced engine API.
-let unit = commands.create_unit(kind.def(), position, TEAM, 0); // reserved UnitId
-commands.set_yaw(unit, yaw);
 ```
 
-It also changes timing compared with Lua, and ports would have to account
-for it:
+(Reserving the id up front, as Bevy's `spawn` does, would only let the id be
+used inside the same callin. It's optional convenience, not a requirement.)
 
-- `UnitCreated` runs after the whole callin. Code later in the same callin
-  that counts rabbits in the roster doesn't see the new ones yet.
-- "Damage, then read health" reads the health from before the damage.
-- Callouts that take a closure and run it during the call (`Gfx RunQuery`,
-  `CallAsTeam`, height-map functions) can't be queued. They would need to be
-  given the state explicitly.
+Work that needs all of a callin's commands applied, such as a round reset
+after destroying every unit, can go in a `commands_applied` callin instead of
+one `.then` per command.
 
-## Option B: context token (recommended)
+Timing: Lua runs create → `UnitCreated` → the rest of the outer code. A runs
+the rest of the outer code → create → `UnitCreated` → the `.then`. Code that
+depends on the call moves into the `.then` and keeps Lua's order. Only code
+that reads the call's effects without being moved sees a difference: a unit
+that doesn't exist yet, health from before the damage.
+
+Lua games already defer some of this. Old Spring made `CreateUnit`,
+`DestroyUnit`, `TransferUnit`, `GiveOrder*` and `Create/DestroyFeature` an
+error when nested inside themselves. Recoil turned that into a depth limit
+of 16 (`1b61dbe8d5`). So gadgets that wanted to create units from
+`UnitCreated` queued the work to `GameFrame`.
+
+Callouts that take a closure and run it during the call (`Gfx RunQuery`,
+`CallAsTeam`, height-map functions) can't be queued. Their closure would be
+given the state explicitly.
+
+## Option B: context token
 
 Callouts that can call back become methods on `&mut Ctx`. Module state is
 only reachable through `ctx.state()`, which also borrows `ctx`. The borrow
@@ -331,6 +340,12 @@ Almost all UI code would take `&mut Ctx`.
   in place and panics with that callout's name.
 - `Gadget`, `Widget` and `UnitScript` signatures change. All eight game ports
   need updating.
+- The cost lands on the common case. Most game code is callins, and all of
+  it pays for the token and for reaching state through `ctx.state()`. That
+  protects the rarer code that calls `create_unit` and similar itself.
+- Nothing stops a game from keeping state in a `thread_local!` or
+  `static RefCell` to avoid passing `ctx` around. That brings back today's
+  runtime borrow panics, where the compiler can't see them.
 
 ## Hybrid: B plus `ctx.defer`
 
@@ -354,10 +369,96 @@ fn game_frame(&self, ctx: &mut Ctx<State>, frame: i32) {
 | Nested state conflict | Runtime panic, module unloaded | Can't happen | Compile error | Compile error |
 | Answer needed at once (`UnitPreDamaged`, `AimWeapon`, ...) | Neutral default when busy | Always correct | Always correct | Always correct |
 | Order compared with Lua | Differs where deferred | Differs for every queued callout | Same | Same, except explicit `defer` |
-| Use a result at once ("create, then configure") | Works | Needs reserved ids or `.then` | Works | Works |
+| Use a result at once ("create, then configure") | Works | In a `.then` | Works | Works |
 | Style | Borrow, release, call | Plain `&mut State`, results later | Copy out, call, write back | As B |
-| Engine changes | None | Unit-id reservation (synced API) | None | None |
-| Game changes | None | Every world-changing call | Every callin signature, scripts lose `&mut self` | As B |
+| Engine changes | None | None (id reservation optional) | None | None |
+| Game changes | None | See "A in the game ports" | Every callin signature, scripts lose `&mut self` | As B |
+
+## A in the game ports (survey 2026-09-29)
+
+Every call site of a callout that can call back, in the seven springcabal
+ports and Ship Game (5 read-only agents). Sites are sorted by what A needs:
+
+- **fire-and-forget:** the result isn't used and nothing after it depends on
+  it. Nothing changes.
+- **`.then`:** the result is used right away (new id, then configure it).
+  The change is mechanical.
+- **timing:** later code in the same callin reads the call's effects, or
+  depends on the nested callins having run. Needs rethinking.
+- **deferred today:** already inside `ctx.delay`,
+  `with_cus_module_or_defer` or a hand-made queue. A replaces it.
+
+| Game | fire-and-forget | `.then` | timing | deferred today | Verdict |
+|---|---:|---:|---:|---:|---|
+| MyCube | 4 | 2 | 1 | 9 | easy |
+| PartsNeeded | 5 | 3 | 1 | 10 | easy |
+| Flove | 12 | 7 | 2 | 12 | easy |
+| Area17 | 16 | 6 | 3 (minor) | 4 | easy to moderate |
+| Hunted | 16 | 6 | 3 | 13 | moderate |
+| Gravitas | ~35 | 6 | 3 | 8 | moderate |
+| Ship Game | ~38 | ~10 creates | 5 | several queues | moderate |
+| TTLD | 9 | 3 (+UI setup) | 4 | 7 | moderately hard |
+
+Counts are game code only. Debug and integration-test code adds more,
+mostly `.then`. Ship Game's `rules-unsynced` and all the UIs except the
+RmlUi setup chains have nothing to change.
+
+No game is blocked. About 22 timing sites fall into a few patterns:
+
+1. **Change the world, then query it in the same callin.**
+   - TTLD: `spawn_wave` then `boss_alive()` spawns a second boss.
+   - Ship Game: the motherships created on frame 1 aren't alive yet for
+     that frame's economy step, so the game ends at frame 1. New debris
+     fails `features::valid` and is dropped.
+   - Flove: three `spawn_tree` calls in one callin can pick the same spot.
+   - TTLD and Area17: villager and wanderer placement don't see units still
+     in the queue.
+   - TTLD: the drain loop gets the same nearest ally back, because its
+     transfer isn't applied yet.
+
+   Fix: `.then`, or track pending results in the game.
+2. **Reset after destroying everything.** Hunted's restart, TTLD's round
+   setup, Gravitas's wipe and Flove's round reset. Their `UnitDestroyed`
+   handlers must see the "wiping" flag, and the reset must run after them.
+   Fix: `commands_applied`, or one FIFO queue shared with `ctx.delay`.
+3. **Queued and immediate calls change order.** PartsNeeded gives STOP
+   (queued) and then sets a move goal (immediate), so STOP would clear the
+   goal. In Hunted and TTLD, synced random draws interleave differently:
+   still deterministic, but different from Lua.
+4. **"Is it dead?" before damaging.** Gravitas, Area17 and MyCube check
+   `valid`/`is_dead` because an earlier hit in the same frame may have
+   killed the unit. The check would be stale, so the command applier must
+   skip dead ids.
+5. **Order bookkeeping that relies on nested callins.** In Gravitas, a mark
+   is set after REMOVE/INSERT orders because the nested `UnitCmdDone` would
+   wipe an earlier one. PartsNeeded's ending wisp needs Roster's nested
+   `UnitCreated` to have run first.
+6. **A value handed to `UnitCreated` through a `Cell`.** Gravitas sets
+   `pending_rules` before `create_unit` so `UnitCreated` can read it. Fix:
+   let the create command carry rules params, or add a pre-apply hook.
+7. **The game's own orders reach its `AllowCommand`.** In Ship Game today,
+   `AllowCommand` finds the state busy while the game gives its own orders,
+   so `.unwrap_or(true)` lets them through, and the code relies on that.
+   Under A the callin gets the state and would filter, or change state for,
+   the game's own orders. Fix: mark internal orders (the `INTERNAL` option).
+
+What A removes: in every game, the `ctx.delay` calls,
+`with_cus_module_or_defer`, "don't hold a borrow here" comments and
+borrow-dropping code, Ship Game's `Missed` queue, and TTLD's hand-written
+`Order` command buffer. Several answers needed at once also become correct:
+Ship Game's `UnitPreDamaged` currently skips armour and applies full damage
+while `World` is busy.
+
+Requirements the survey adds to A:
+- One FIFO queue for commands and deferred closures, with continuations
+  appended to it.
+- `.then` runs after the callins its command caused.
+- Commands on dead or invalid ids are skipped, not errors.
+- Decide whether plain setters are queued too when they follow a queued
+  command ("reads immediate, writes queued"), or stay immediate and may
+  run before earlier queued commands.
+- Integration tests that check an effect in the same callin need splitting
+  across frames (Hunted, MyCube, Flove, Gravitas, Ship Game debug probes).
 
 ## Survey: callouts that can call back (2026-09-24)
 
@@ -418,15 +519,24 @@ Neither lets nested user code have full access *and* give answers at once,
 which Spring's Lua semantics need. B is our version of Bevy's compile-time
 access checks, while keeping Lua's timing.
 
-## Open decisions (for B)
+## Open decisions
 
-1. A callout marked pure that turns out to call back: panic with its name
-   (suggested), or fall back to today's runtime checks?
-2. One state per module (suggested to start), or several `ctx.state::<T>()`,
-   which brings runtime borrow checks back?
-3. UI modules: move to `&mut Ctx` now, or keep today's model for now?
-4. Which game to try it on first: TTLD (suggested: CUS and ordinary callins)
-   or Hunted (the examples above).
+1. A or B. The survey shows A is workable in every port. B's costs fall on
+   every callin.
+2. If A:
+   - Queue plain setters that follow a queued command, or keep them
+     immediate?
+   - `.then` only, or also a `commands_applied` callin?
+   - How to mark the game's own orders so they skip its `AllowCommand`?
+   - Which game to try first: MyCube or PartsNeeded (easiest), or TTLD
+     (the hardest cases).
+3. If B:
+   - A callout marked pure that turns out to call back: panic with its name,
+     or fall back to today's runtime checks?
+   - One state per module, or several `ctx.state::<T>()`?
+   - UI modules now or later?
 
-Before either: put the "can call back" list into codegen as an annotation,
-next to the environment masks, seeded from the table above.
+Either way, a callout wrongly marked pure calls back while the state is in
+use, so a runtime check stays as a safety net. First step for both: put the
+"can call back" list into codegen as an annotation, next to the environment
+masks, seeded from the survey table.
