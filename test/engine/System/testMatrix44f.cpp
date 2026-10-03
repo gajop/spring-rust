@@ -287,3 +287,21 @@ TEST_CASE("Matrix44MatrixMultiply")
 		}
 	}
 }
+
+TEST_CASE("LookAtDirectionPreservesOrientationAtLargeWorldPositions")
+{
+	const float3 direction = float3(0.24f, -0.88f, 0.41f).ANormalize();
+	const float3 up = direction.cross(UpVector).cross(direction).ANormalize();
+	const auto origin = CMatrix44f::LookAtViewDirection(ZeroVector, direction, up);
+	for (const float3 eye: {float3(16000.0f, 36746.0f, 34726.0f), float3(1e7f, 2e7f, -1e7f)}) {
+		const auto view = CMatrix44f::LookAtViewDirection(eye, direction, up);
+		// Camera translation must not alter any basis component, even where
+		// adding a one-unit target vector would be rounded away entirely.
+		for (int i = 0; i < 12; ++i)
+			CHECK(view[i] == origin[i]);
+		const auto localEye = view * eye;
+		CHECK(localEye.Length() < (eye.Length() > 1e6f ? 8.0f : 0.02f));
+	}
+	const auto target = CMatrix44f::LookAtView(ZeroVector, direction, up);
+	CHECK(target == origin);
+}

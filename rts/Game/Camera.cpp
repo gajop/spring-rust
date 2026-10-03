@@ -252,10 +252,9 @@ void CCamera::UpdateMatrices(uint32_t vsx, uint32_t vsy, float var)
 	//   but without affecting the real positions (need an intermediary)
 	const float3 fShake = ((forward * (1.0f + tiltOffset.z)) + (right * tiltOffset.x) + (up * tiltOffset.y)).ANormalize();
 	const float3 camPos = pos + posOffset;
-	const float3 center = camPos + fShake;
 
 	// recalculate the view transform
-	viewMatrix = CMatrix44f::LookAtView(camPos, center, up);
+	viewMatrix = CMatrix44f::LookAtViewDirection(camPos, fShake, up);
 
 
 	// create extra matrices (useful for shaders)

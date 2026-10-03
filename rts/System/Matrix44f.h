@@ -163,6 +163,9 @@ public:
 		return (ClipControl(cc[enabled]));
 	}
 	static CMatrix44f LookAtView(const float3& eye, const float3& center, const float3& up = UpVector);
+	// Use a direction directly when the camera already has one; constructing
+	// eye + direction loses angular precision at large world positions.
+	static CMatrix44f LookAtViewDirection(const float3& eye, const float3& direction, const float3& up = UpVector);
 	static CMatrix44f LookAtView(const float3& eye, const float3& center, const float roll = 0.0f) { return LookAtView(eye, center, float3{std::sin(roll), std::cos(roll), 0.0}); }
 	static CMatrix44f LookAtView(const float eyeX, const float eyeY, const float eyeZ, const float atX, const float atY, const float atZ, const float roll = 0.0f) {
 		return LookAtView(float3{eyeX, eyeY, eyeZ}, float3{atX, atY, atZ}, roll);

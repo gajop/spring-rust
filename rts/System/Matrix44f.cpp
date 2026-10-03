@@ -854,9 +854,14 @@ CMatrix44f CMatrix44f::ClipOrthoProj01()
 
 CMatrix44f CMatrix44f::LookAtView(const float3& eye, const float3& center, const float3& up)
 {
+	return LookAtViewDirection(eye, center - eye, up);
+}
+
+CMatrix44f CMatrix44f::LookAtViewDirection(const float3& eye, const float3& direction, const float3& up)
+{
 	CMatrix44f viewMatrix = {};
 
-	const float3 f = (center - eye).ANormalize();
+	const float3 f = float3(direction).ANormalize();
 	const float3 s = f.cross(up);
 	const float3 u = s.cross(f);
 
@@ -879,4 +884,3 @@ CMatrix44f CMatrix44f::LookAtView(const float3& eye, const float3& center, const
 
 	return viewMatrix;
 }
-
