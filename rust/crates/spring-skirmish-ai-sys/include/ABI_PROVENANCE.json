@@ -1,0 +1,14 @@
+{
+  "engine_revision": "443c9ba41c805488c5776d15142d1939609f739c",
+  "headers": {
+    "ExternalAI/Interface/AISCommands.h": "db16d2de7e7889fecd5036648f9eb94815a7458b2feea310ce462f114eaf9026",
+    "ExternalAI/Interface/AISEvents.h": "c10dc7f299d0c48a0315f4cb82185658114ba954ea2e5adcc25f2db248cfcf6c",
+    "ExternalAI/Interface/SSkirmishAICallback.h": "49bb34660e723b068ba64cc284699c9484f0a5aa2d774383ca711954e96e9a20",
+    "ExternalAI/Interface/aidefines.h": "10e43c37d274178736b395eedc124f23ea7a4c6b61ac583649d282096a6d21e6",
+    "System/ExportDefines.h": "80e97e97280e4b0268e84dc6b5242e826760b992f76951b8c56cafef63fb7aea",
+    "System/MainDefines.h": "469648d218459fbf18ea997375bf1208a8048aac59512ac81c56c78d3b5cc1c0"
+  },
+  "validated_target": "x86_64-unknown-linux-gnu",
+  "interface": "C/0.1",
+  "note": "Revision identifies provenance; header hashes identify the required callback layout."
+}

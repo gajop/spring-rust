@@ -4,6 +4,9 @@ members = [
     "crates/spring-native-codegen",
     "crates/spring-api-codegen",
     "crates/spring-native",
+    "crates/spring-skirmish-ai-sys",
+    "crates/spring-skirmish-ai",
+    "tools/skirmish-ai-bindings",
 ]
 resolver = "2"
 exclude = ["crates/spring", "crates/spring-addons"]

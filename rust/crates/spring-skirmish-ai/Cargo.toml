@@ -1,0 +1,12 @@
+[package]
+name = "spring-skirmish-ai"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "GPL-2.0-or-later"
+description = "Typed events, permitted observations and recorded orders for Rust Spring/Recoil Skirmish AIs"
+readme = "README.md"
+include = ["src/**", "examples/**", "Cargo.toml", "README.md", "LICENSE.html"]
+
+[dependencies]
+spring-skirmish-ai-sys = { version = "0.1.0", path = "../spring-skirmish-ai-sys" }

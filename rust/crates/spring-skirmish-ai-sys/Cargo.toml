@@ -1,0 +1,11 @@
+[package]
+name = "spring-skirmish-ai-sys"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "GPL-2.0-or-later"
+description = "C ABI bindings for Spring/Recoil's native Skirmish AI interface"
+readme = "README.md"
+include = ["src/**", "examples/**", "include/**", "Cargo.toml", "README.md", "LICENSE.html"]
+
+[dependencies]
