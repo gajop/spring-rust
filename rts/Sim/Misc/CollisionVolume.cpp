@@ -27,6 +27,7 @@ CR_REG_METADATA(CollisionVolume, (
 	CR_MEMBER(useContHitTest),
 	CR_MEMBER(defaultToFootPrint),
 	CR_MEMBER(defaultToPieceTree),
+	CR_IGNORED(mesh),
 
 	CR_POSTLOAD(PostLoad)
 ))
@@ -50,6 +51,8 @@ CollisionVolume& CollisionVolume::operator = (const CollisionVolume& v) {
 	useContHitTest         = v.useContHitTest;
 	defaultToFootPrint     = v.defaultToFootPrint;
 	defaultToPieceTree     = v.defaultToPieceTree;
+
+	mesh                   = v.mesh;
 
 	return *this;
 }

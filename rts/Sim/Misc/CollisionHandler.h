@@ -12,6 +12,7 @@
 class CSolidObject;
 struct LocalModelPiece;
 struct CollisionVolume;
+class CollisionMesh;
 
 enum {
 	CQ_POINT_NO_INT = 0,
@@ -159,6 +160,7 @@ class CCollisionHandler {
 		 * @param p1 end of ray (in world-coordinates)
 		 */
 		static bool Intersect(const CollisionVolume* v, const CMatrix44f& m, const float3& p0, const float3& p1, CollisionQuery* cq);
+		static bool IntersectMesh(const CollisionMesh* mesh, const CMatrix44f& m, const float3& p0, const float3& p1, CollisionQuery* cq);
 		static bool IntersectPieceTree(const CSolidObject* o, const CMatrix44f& m, const float3& p0, const float3& p1, CollisionQuery* cq);
 		static bool IntersectPiecesHelper(const CSolidObject* o, const CMatrix44f& m, const float3& p0, const float3& p1, CollisionQuery* cqp);
 

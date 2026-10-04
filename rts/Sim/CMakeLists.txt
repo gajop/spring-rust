@@ -13,6 +13,8 @@ add_library(engineSim STATIC
 		"${CMAKE_CURRENT_SOURCE_DIR}/Misc/BuildingMaskMap.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Misc/CategoryHandler.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Misc/CollisionHandler.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/Misc/CollisionMesh.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/Misc/CollisionMeshLoad.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Misc/CollisionVolume.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Misc/CommonDefHandler.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Misc/CustomColorPalette.cpp"

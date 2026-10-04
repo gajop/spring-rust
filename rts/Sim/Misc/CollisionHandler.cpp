@@ -2,6 +2,7 @@
 
 #include "CollisionHandler.h"
 #include "CollisionVolume.h"
+#include "CollisionMesh.h"
 #include "Map/ReadMap.h" // mapDims
 #include "Sim/Misc/GroundBlockingObjectMap.h"
 #include "Sim/Misc/GlobalConstants.h"
@@ -18,7 +19,7 @@ unsigned int CCollisionHandler::numContTests = 0;
 
 void CCollisionHandler::PrintStats()
 {
-	LOG("[CCollisionHandler] dis-/continuous tests: %i/%i", numDiscTests, numContTests);
+	LOG("[CCollisionHandler] dis-/continuous tests: %i/%i, mesh tests: %llu", numDiscTests, numContTests, (unsigned long long) CollisionMesh::numTests);
 }
 
 
@@ -350,7 +351,42 @@ inline bool CCollisionHandler::Intersect(
 	mr.Translate(o->relMidPos * s);
 	mr.Translate(v->GetOffsets());
 
-	return (CCollisionHandler::Intersect(v, mr, p0, p1, cq));
+	if (!CCollisionHandler::Intersect(v, mr, p0, p1, cq))
+		return false;
+
+	// the volume was only the broad phase: the hull itself decides
+	// (s is zero for a piece tree's bounding volume, which has no mesh)
+	if (v->GetMesh() == nullptr || s == 0.0f)
+		return true;
+
+	return (CCollisionHandler::IntersectMesh(v->GetMesh(), m, p0, p1, cq));
+}
+
+bool CCollisionHandler::IntersectMesh(
+	const CollisionMesh* mesh,
+	const CMatrix44f& m,
+	const float3& p0,
+	const float3& p1,
+	CollisionQuery* cq
+) {
+	RECOIL_DETAILED_TRACY_ZONE;
+	// the mesh is in model space, which <m> maps to world space
+	const CMatrix44f mInv = m.InvertAffine();
+	CollisionMesh::Hit hit;
+
+	if (cq != nullptr)
+		cq->Reset();
+
+	if (!mesh->Intersect(mInv.Mul(p0), mInv.Mul(p1), &hit))
+		return false;
+
+	if (cq != nullptr) {
+		cq->b0 = CQ_POINT_ON_RAY;
+		cq->t0 = hit.t;
+		cq->p0 = m.Mul(hit.pos);
+	}
+
+	return true;
 }
 
 bool CCollisionHandler::Intersect(const CollisionVolume* v, const CMatrix44f& m, const float3& p0, const float3& p1, CollisionQuery* q)

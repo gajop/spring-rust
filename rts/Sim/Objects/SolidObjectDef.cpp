@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "SolidObjectDef.h"
+#include "Sim/Misc/CollisionMesh.h"
 #include "Lua/LuaParser.h"
 #include "Rendering/Models/IModelParser.h"
 #include "Rendering/Models/3DModel.hpp"
@@ -120,6 +121,9 @@ void SolidObjectDef::ParseCollisionVolume(const LuaTable& odTable)
 	collisionVolume.SetDefaultToPieceTree(odTable.GetBool("usePieceCollisionVolumes", false));
 	collisionVolume.SetDefaultToFootPrint(odTable.GetBool("useFootPrintCollisionVolume", false));
 	collisionVolume.SetIgnoreHits(collisionVolume.DefaultToPieceTree());
+
+	// an exact hull in model space that refines the volume's hits
+	collisionVolume.SetMesh(CollisionMesh::Load(odTable.GetString("collisionMesh", "")));
 }
 
 void SolidObjectDef::ParseSelectionVolume(const LuaTable& odTable)

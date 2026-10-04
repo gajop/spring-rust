@@ -11,6 +11,7 @@
 constexpr float3 WORLD_TO_OBJECT_SPACE = {-1.0f, 1.0f, 1.0f};
 constexpr float COLLISION_VOLUME_EPS = 0.0000000001f;
 
+class CollisionMesh;
 struct LocalModelPiece;
 class CMatrix44f;
 class CSolidObject;
@@ -95,6 +96,9 @@ public:
 	void SetUseContHitTest(bool b) { useContHitTest = b; }
 	void SetDefaultToPieceTree(bool b) { defaultToPieceTree = b; }
 	void SetDefaultToFootPrint(bool b) { defaultToFootPrint = b; }
+	/// A triangle mesh in model space that refines this volume's hits; the volume stays the broad phase.
+	void SetMesh(const CollisionMesh* m) { mesh = m; }
+	const CollisionMesh* GetMesh() const { return mesh; }
 
 	int GetPrimaryAxis() const { return volumeAxes[0]; }
 	int GetSecondaryAxis(int idx) const { return volumeAxes[1 + idx]; }
@@ -156,6 +160,8 @@ private:
 	bool useContHitTest = true;                    /// if true, CollisionHandler does continuous instead of discrete hit-testing
 	bool defaultToFootPrint = false;               /// if true, volume becomes a box with dimensions equal to a SolidObject's {x,z}size
 	bool defaultToPieceTree = false;               /// if true, volume is owned by a unit but defaults to piece-volume tree for hit-testing
+
+	const CollisionMesh* mesh = nullptr;           /// optional exact hull in model space; shared, owned by CollisionMesh's cache
 };
 
 #endif
