@@ -71,6 +71,7 @@
 #include "Sim/Features/FeatureDef.h"
 #include "Sim/Features/FeatureDefHandler.h"
 #include "Sim/Features/FeatureHandler.h"
+#include "Sim/Features/FeatureMemPool.h"
 #include "Sim/Misc/CategoryHandler.h"
 #include "Sim/Misc/DamageArrayHandler.h"
 #include "Sim/Misc/YardmapStatusEffectsMap.h"
@@ -92,13 +93,16 @@
 #include "Sim/Projectiles/ExplosionGenerator.h"
 #include "Sim/Projectiles/Projectile.h"
 #include "Sim/Projectiles/ProjectileHandler.h"
+#include "Sim/Projectiles/ProjectileMemPool.h"
 #include "Sim/Units/CommandAI/CommandAI.h"
 #include "Sim/Units/Scripts/UnitScriptFactory.h"
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Units/UnitDefHandler.h"
+#include "Sim/Units/UnitMemPool.h"
 #include "Sim/Weapons/WeaponDefHandler.h"
 #include "Sim/Weapons/WeaponLoader.h"
+#include "Sim/Weapons/WeaponMemPool.h"
 #include "UI/CommandColors.h"
 #include "UI/EndGameBox.h"
 #include "UI/GameSetupDrawer.h"
@@ -718,6 +722,14 @@ void CGame::PostLoadSimulation(LuaParser* defsParser)
 	unitHandler.Init();
 	featureHandler.Init();
 	projectileHandler.Init();
+
+	// the pools are zero static storage, which becomes resident when written
+	if (modInfo.prefaultObjectPools) {
+		unitMemPool.prefault();
+		featureMemPool.prefault();
+		weaponMemPool.prefault();
+		projMemPool.prefault();
+	}
 	CLosHandler::InitStatic();
 
 	readMap->InitHeightMapDigestVectors(losHandler->los.size);

@@ -147,6 +147,8 @@ void CModInfo::ResetState()
 		SLuaAllocLimit::MAX_ALLOC_BYTES = SLuaAllocLimit::MAX_ALLOC_BYTES_DEFAULT;
 		wasmMemoryLimitMiB = WASM_MEMORY_LIMIT_MIB_DEFAULT;
 
+		prefaultObjectPools = true;
+
 		nativeExcessSharing = true;
 		allowTake = true;
 
@@ -220,6 +222,8 @@ void CModInfo::Init(const std::string& modFileName)
 				wasmMemoryLimitMiB, WASM_MEMORY_LIMIT_MIB_MAX, WASM_MEMORY_LIMIT_MIB_DEFAULT);
 			wasmMemoryLimitMiB = WASM_MEMORY_LIMIT_MIB_DEFAULT;
 		}
+
+		prefaultObjectPools = system.GetBool("prefaultObjectPools", prefaultObjectPools);
 
 		nativeExcessSharing = system.GetBool("nativeExcessSharing", nativeExcessSharing);
 		allowTake = system.GetBool("allowTake", allowTake);

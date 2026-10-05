@@ -262,6 +262,12 @@ public:
 	static constexpr int WASM_MEMORY_LIMIT_MIB_DEFAULT = 512;
 	static constexpr int WASM_MEMORY_LIMIT_MIB_MAX = 4096;
 
+	/// Whether the unit, feature, weapon and projectile pools are written in full when the game
+	/// loads, so that their memory is resident before objects need it (modrules
+	/// system.prefaultObjectPools, default true). False: a pool page becomes resident when an
+	/// object first uses it, so the pools cost memory in proportion to the objects a game has.
+	bool prefaultObjectPools;
+
 	bool nativeExcessSharing;
 	bool allowTake;
 	bool allowEnginePlayerlist;

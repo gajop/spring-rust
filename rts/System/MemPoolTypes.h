@@ -226,6 +226,7 @@ public:
 	}
 
 	void reserve(size_t n) { indcs.reserve(n); }
+	void prefault() {} // chunks are allocated as they are needed
 	void clear() {
 		indcs.clear();
 
@@ -289,7 +290,7 @@ private:
 template<size_t N, size_t K, class ...T>
 using FixedDynMemPoolT = FixedDynMemPool<sizeof(TypesMem<T...>), N, K, alignof(TypesMem<T...>)>;
 
-// fixed-size version.
+// fixed-size version; instances must have static storage duration (zero-initialized)
 template<size_t N, size_t S, size_t Alignment> struct StaticMemPool {
 public:
 	StaticMemPool() { clear(); }
@@ -353,8 +354,16 @@ public:
 	bool can_free() const { return (free_page_count < NUM_PAGES()); }
 
 	void reserve(size_t) {} // no-op
+	/// Writes the pages no object has used yet, which are zero already, so that the whole pool is
+	/// resident before objects need it. Without this, a page becomes resident when first used.
+	void prefault() {
+		if (used_page_count < NUM_PAGES())
+			std::memset(pages[used_page_count].data(), 0, (NUM_PAGES() - used_page_count) * PAGE_SIZE());
+	}
 	void clear() {
-		std::memset(pages.data(), 0, total_size());
+		// Pages past the high-water mark were never handed out, so they are still zero: pools
+		// live in static storage, and freeMem zeroes every page it takes back.
+		std::memset(pages.data(), 0, used_page_count * PAGE_SIZE());
 		std::memset(indcs.data(), 0, NUM_PAGES());
 
 		used_page_count = 0;
