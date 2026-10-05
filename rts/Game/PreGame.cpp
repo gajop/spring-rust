@@ -526,6 +526,13 @@ void CPreGame::StartServerForDemo(const std::string& demoName)
 	if (!demoGameSetup->Init(moddedDemoScript.str()))
 		throw content_error("Demo contains incorrect script");
 
+	// Generated maps are virtual archives, so a fresh replay process must
+	// recreate the original archive before GameDataReceived mounts it.
+	if (demoGameSetup->initBlank) {
+		CBlankMapGenerator gen(demoGameSetup.get());
+		gen.Generate();
+	}
+
 	LOG("[PreGame::%s] starting GameServer", __func__);
 	good_fpu_control_registers("before CGameServer creation");
 
