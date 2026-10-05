@@ -15,7 +15,7 @@ class BuildingMaskMap
 public:
 	void Init(unsigned int numSquares) {
 		maskMap.clear();
-		maskMap.resize(numSquares, 1); // 1st bit set to 1 indicates a normal tile
+		maskMap.resize(numSquares, DEFAULT_MASK);
 	};
 	void Kill() {
 		maskMap.clear();
@@ -29,7 +29,9 @@ private:
 	bool CheckBounds(unsigned int x, unsigned int z) const;
 
 private:
-	std::vector<std::uint16_t> maskMap;
+	static constexpr std::uint16_t DEFAULT_MASK = 1; // 1st bit set to 1 indicates a normal tile
+
+	std::vector<std::uint16_t> maskMap; // empty on a null map
 };
 
 extern BuildingMaskMap buildingMaskMap;

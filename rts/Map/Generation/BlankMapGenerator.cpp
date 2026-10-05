@@ -89,6 +89,10 @@ CBlankMapGenerator::CBlankMapGenerator(const CGameSetup* setup)
 	const std::string* blankMapXStr = mapOpts.contains("blank_map_x") ? Recoil::map_try_get(mapOpts, "blank_map_x") : Recoil::map_try_get(mapOpts, "new_map_x");
 	const std::string* blankMapYStr = mapOpts.contains("blank_map_y") ? Recoil::map_try_get(mapOpts, "blank_map_y") : Recoil::map_try_get(mapOpts, "new_map_y");
 	const std::string* blankMapHeightStr = Recoil::map_try_get(mapOpts, "blank_map_height");
+	const std::string* blankMapTerrainStr = Recoil::map_try_get(mapOpts, "blank_map_terrain");
+
+	// "null": no ground at all (CNullReadMap); otherwise an SMF of one height
+	nullMap = (blankMapTerrainStr != nullptr && *blankMapTerrainStr == "null");
 
 	if (blankMapXStr != nullptr && blankMapYStr != nullptr) {
 		try {
@@ -136,9 +140,14 @@ void CBlankMapGenerator::Generate()
 
 	// generate map and fill archive files
 	GenerateMap();
-	GenerateSMF(archive->GetFilePtr(archive->AddFile("maps/generated.smf")));
-	GenerateMapInfo(archive->GetFilePtr(archive->AddFile("mapinfo.lua")));
-	GenerateSMT(archive->GetFilePtr(archive->AddFile("maps/generated.smt")));
+	if (nullMap) {
+		// only the map info: CNullReadMap needs no map file, so nothing grows with the map's area
+		GenerateMapInfo(archive->GetFilePtr(archive->AddFile("mapinfo.lua")));
+	} else {
+		GenerateSMF(archive->GetFilePtr(archive->AddFile("maps/generated.smf")));
+		GenerateMapInfo(archive->GetFilePtr(archive->AddFile("mapinfo.lua")));
+		GenerateSMT(archive->GetFilePtr(archive->AddFile("maps/generated.smt")));
+	}
 
 	// The parity harness uses these two opt-in map options to put a Gaia
 	// manifest and Component bytes into the generated map archive.  Keeping
@@ -324,6 +333,13 @@ void CBlankMapGenerator::GenerateMapInfo(CVirtualFile* fileMapInfo)
 	luaInfo = StringReplace(luaInfo, "${SPLAT_DETAIL_NORMAL_TEX_3}", StringOrNil(GetBlankMapOpt("splatdetailnormaltex3")));
 	luaInfo = StringReplace(luaInfo, "${SPLAT_DETAIL_NORMAL_TEX_4}", StringOrNil(GetBlankMapOpt("splatdetailnormaltex4")));
 	luaInfo = StringReplace(luaInfo, "${SPLAT_DETAIL_NORMAL_DIFFUSE_ALPHA}", splatDetailNormalDiffuseAlpha ? "true" : "false");
+
+	if (nullMap) {
+		// mapSize is in units of two Spring map units (see the constructor)
+		luaInfo = StringReplace(luaInfo, "--mapfile   = \"\", --// location of smf/sm3 file (optional)", "mapfile     = \"null\",");
+		luaInfo = StringReplace(luaInfo, "notDeformable   = false,", "notDeformable   = true,");
+		luaInfo = StringReplace(luaInfo, "\tsmf = {", fmt::format("\tnullmap = {{ sizeX = {}, sizeZ = {} }},\n\n\tsmf = {{", mapSize.x * 2, mapSize.y * 2));
+	}
 
 	//Copy to filebuffer
 	fileMapInfo->buffer.assign(luaInfo.begin(), luaInfo.end());

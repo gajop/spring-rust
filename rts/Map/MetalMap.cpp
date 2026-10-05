@@ -26,17 +26,15 @@ CMetalMap metalMap;
 
 
 #ifndef NO_METALMAP
-void CMetalMap::Init(const unsigned char* map, int _sizeX, int _sizeZ, float _metalScale)
+void CMetalMap::Init(const unsigned char* map, int _sizeX, int _sizeZ, float _metalScale, bool lazy)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	metalScale = _metalScale;
 	sizeX = _sizeX;
 	sizeZ = _sizeZ;
 
-	extractionMap.clear();
-	extractionMap.resize(sizeX * sizeZ, 0.0f);
-	distributionMap.clear();
-	distributionMap.resize(sizeX * sizeZ, 0);
+	recoil::ResizeZeroed(extractionMap, size_t(sizeX) * sizeZ, lazy);
+	recoil::ResizeZeroed(distributionMap, size_t(sizeX) * sizeZ, lazy);
 
 	if (map != nullptr) {
 		memcpy(&distributionMap[0], map, sizeX * sizeZ);
@@ -137,7 +135,7 @@ int CMetalMap::GetMetalExtraction(int x, int z) const
 #else
 
 
-void CMetalMap::Init(const unsigned char* map, int _sizeX, int _sizeZ, float _metalScale) {}
+void CMetalMap::Init(const unsigned char* map, int _sizeX, int _sizeZ, float _metalScale, bool lazy) {}
 
 float CMetalMap::GetMetalAmount(int x1, int z1, int x2, int z2) const { return 0.0f; }
 float CMetalMap::GetMetalAmount(int x, int z) const { return 0.0f; }

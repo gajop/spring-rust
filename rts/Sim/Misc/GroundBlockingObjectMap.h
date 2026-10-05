@@ -166,6 +166,10 @@ public:
 
 	BlockingMapCell GetCellUnsafeConst(const float3& pos) const;
 	BlockingMapCell GetCellUnsafeConst(unsigned int mapSquare) const {
+		// no grid: every square of a null map is empty
+		if (arrCells.empty())
+			return {emptyCell, vecCells.data()};
+
 		assert(mapSquare < arrCells.size());
 		// avoid vec-cell lookup unless needed
 		return {GetArrCell(mapSquare), vecCells.data()};
@@ -183,7 +187,9 @@ private:
 	bool CellErase(unsigned int sqr, CSolidObject* o);
 
 private:
-	std::vector<ArrCell> arrCells;
+	static const ArrCell emptyCell;
+
+	std::vector<ArrCell> arrCells; // empty on a null map (see CGame::LoadMap)
 	std::vector<VecCell> vecCells;
 	std::vector<uint32_t> vecIndcs;
 };

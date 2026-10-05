@@ -40,6 +40,7 @@ private:
 
 	int2 mapSize;
 	int mapHeight;
+	bool nullMap = false;
 	std::string mapDescription;
 	std::vector<int2> startPositions;
 

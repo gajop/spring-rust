@@ -260,6 +260,9 @@ bool CSolidObject::FootPrintOnGround() const {
 		std::clamp(int(fpr.w) / SQUARE_SIZE, 0, mapDims.mapym1)
 	};
 
+	if (readMap->IsNullMap())
+		return ((pos.y - SQUARE_SIZE) <= std::max(readMap->GetNullMapHeight(), CGround::GetWaterLevel(hmFpr.x1, hmFpr.z1)));
+
 	for (int z = hmFpr.z1; z <= hmFpr.z2; ++z) {
 		const float* hPtr = CGround::GetApproximateHeightUnsafePtr(hmFpr.x1, z, true);
 		for (int x = hmFpr.x1; x <= hmFpr.x2; ++x) {

@@ -52,8 +52,8 @@ public:
 	float GetFMaxY() const { return fmaxy; }
 	float GetResolution() const { return fresolution; }
 
-	const float* GetMeshData() const { return &mesh[0]; }
-	const float* GetOriginalMeshData() const { return &origMesh[0]; }
+	const float* GetMeshData() { if (nullMap) BuildNullMapMesh(); return &mesh[0]; }
+	const float* GetOriginalMeshData() { if (nullMap) BuildNullMapMesh(); return &origMesh[0]; }
 
 	void UpdateSmoothMesh();
 
@@ -65,8 +65,12 @@ private:
 	void InitMapChangeTracking();
 	void InitDataStructures();
 	void UpdateSmoothMeshMaximas(int2 damageMin, int2 damageMax);
+	void BuildNullMapMesh();
 
 	bool enabled = true;
+	// on a null map: no mesh, every point at nullMapHeight, until a write builds one
+	bool nullMap = false;
+	float nullMapHeight = 0.0f;
 
 	int maxx = 0;
 	int maxy = 0;

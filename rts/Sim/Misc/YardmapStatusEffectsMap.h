@@ -17,6 +17,7 @@
 #include "Sim/Units/Unit.h"
 #include "Sim/Objects/SolidObject.h"
 #include "System/Log/ILog.h"
+#include "System/ZeroPageAllocator.h"
 
 class YardmapStatusEffectsMap {
 public:
@@ -46,7 +47,8 @@ public:
 
 	void ClearTile(int tileId);
 
-	void InitNewYardmapStatusEffectsMap();
+	/// lazy (a null map, where no yards close): see recoil::ResizeZeroed
+	void InitNewYardmapStatusEffectsMap(bool lazy = false);
 
 	void PostLoad();
 
@@ -69,7 +71,7 @@ private:
 
 	int tileStride = 0; // tiles per map row, set by Init / PostLoad
 
-	typedef std::vector<Tile> TileMapType;
+	typedef std::vector<Tile, recoil::ZeroPageAllocator<Tile>> TileMapType;
 	TileMapType stateMap;
 };
 

@@ -215,9 +215,6 @@ inline static bool ClampInMapHeight(float3& from, float3& to)
 float CGround::LineGroundCol(float3 from, float3 to, bool synced)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	const float* hm  = readMap->GetSharedCornerHeightMap(synced);
-	const float3* nm = readMap->GetSharedFaceNormals(synced);
-
 	const float3 pfrom = from;
 
 	// only for performance -> skip part that can impossibly collide
@@ -238,6 +235,21 @@ float CGround::LineGroundCol(float3 from, float3 to, bool synced)
 		return -1.0f;
 
 	const float skippedDist = pfrom.distance(from);
+
+	if (readMap->IsNullMap()) {
+		// the ground is one plane: the first point of the line at or below it
+		const float h = readMap->GetNullMapHeight();
+
+		if (from.y <= h)
+			return 0.0f + skippedDist;
+		if (to.y > h)
+			return -1.0f;
+
+		return (skippedDist + from.distance(to) * ((from.y - h) / (from.y - to.y)));
+	}
+
+	const float* hm  = readMap->GetSharedCornerHeightMap(synced);
+	const float3* nm = readMap->GetSharedFaceNormals(synced);
 
 	if (synced) {
 		// TODO: do this in unsynced too?
@@ -436,6 +448,9 @@ float CGround::LineGroundWaterCol(const float3 pos, const float3 dir, float len,
 float CGround::GetApproximateHeight(float x, float z, bool synced)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (readMap->IsNullMap())
+		return readMap->GetNullMapHeight();
+
 	const float* heightMap = readMap->GetSharedCenterHeightMap(synced);
 
 	const int xsquare = std::clamp(int(x) / SQUARE_SIZE, 0, mapDims.mapxm1);
@@ -447,6 +462,9 @@ float CGround::GetApproximateHeight(float x, float z, bool synced)
 float CGround::GetApproximateHeightUnsafe(int x, int z, bool synced)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (readMap->IsNullMap())
+		return readMap->GetNullMapHeight();
+
 	const float* heightMap = readMap->GetSharedCenterHeightMap(synced);
 	return heightMap[z * mapDims.mapx + x];
 }
@@ -467,12 +485,18 @@ float CGround::GetHeightAboveWater(float x, float z, bool synced)
 float CGround::GetHeightReal(float x, float z, bool synced)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (readMap->IsNullMap())
+		return readMap->GetNullMapHeight();
+
 	return InterpolateCornerHeight(x, z, readMap->GetSharedCornerHeightMap(synced));
 }
 
 float CGround::GetOrigHeight(float x, float z)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (readMap->IsNullMap())
+		return readMap->GetNullMapHeight();
+
 	return InterpolateCornerHeight(x, z, readMap->GetOriginalHeightMapSynced());
 }
 
@@ -480,6 +504,9 @@ float CGround::GetOrigHeight(float x, float z)
 const float3& CGround::GetNormal(float x, float z, bool synced)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (readMap->IsNullMap())
+		return UpVector;
+
 	const int xsquare = std::clamp(int(x) / SQUARE_SIZE, 0, mapDims.mapxm1);
 	const int zsquare = std::clamp(int(z) / SQUARE_SIZE, 0, mapDims.mapym1);
 
@@ -500,6 +527,9 @@ const float3& CGround::GetNormalAboveWater(float x, float z, bool synced)
 float CGround::GetSlope(float x, float z, bool synced)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (readMap->IsNullMap())
+		return 0.0f;
+
 	const int xhsquare = std::clamp(int(x) / (2 * SQUARE_SIZE), 0, mapDims.hmapx - 1);
 	const int zhsquare = std::clamp(int(z) / (2 * SQUARE_SIZE), 0, mapDims.hmapy - 1);
 	const float* slopeMap = readMap->GetSharedSlopeMap(synced);
@@ -511,6 +541,9 @@ float CGround::GetSlope(float x, float z, bool synced)
 float3 CGround::GetSmoothNormal(float x, float z, bool synced)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (readMap->IsNullMap())
+		return UpVector;
+
 	const int sx = std::clamp(int(math::floor(x / SQUARE_SIZE)), 1, mapDims.mapx - 2);
 	const int sz = std::clamp(int(math::floor(z / SQUARE_SIZE)), 1, mapDims.mapy - 2);
 

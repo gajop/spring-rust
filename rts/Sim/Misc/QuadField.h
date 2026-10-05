@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "System/Misc/NonCopyable.h"
+#include "System/SparseVector.h"
 #include "System/Threading/ThreadPool.h"
 #include "System/creg/creg_cond.h"
 #include "System/float3.h"
@@ -82,7 +83,9 @@ class CQuadField : spring::noncopyable
 public:
 
 
-	void Init(int2 mapDims, int quadSize);
+	/// sparse: quads are created as objects enter them, for the large, empty space of a null map
+	void Init(int2 mapDims, int quadSize, bool sparse = false);
+	void Serialize(creg::ISerializer* s);
 	void Kill();
 
 	void GetQuads(QuadFieldQuery& qfq, float3 pos, float radius);
@@ -209,12 +212,46 @@ public:
 		std::vector<CPlasmaRepulser*> repulsers;
 	};
 
+	/// The quads, one per area: an array, or on a null map one optional quad per area, created
+	/// when something enters it, as a large null map is mostly empty space. A missing quad reads
+	/// as one shared empty Quad. Reads are const; Write(i) creates the quad.
+	class QuadStore {
+	public:
+		void Init(size_t numQuads, int numAllyTeams, bool sparse);
+		void Clear();
+
+		size_t size() const { return (isSparse? sparseQuads.size(): denseQuads.size()); }
+		bool IsSparse() const { return isSparse; }
+
+		const Quad& operator [] (size_t i) const {
+			if (!isSparse)
+				return denseQuads[i];
+
+			// out of range reads empty too: GridVisibility can step one quad past the map's edges
+			const Quad* quad = sparseQuads.get(i);
+			return (quad == nullptr)? emptyQuad: *quad;
+		}
+		Quad& Write(size_t i) {
+			if (!isSparse)
+				return denseQuads[i];
+
+			return sparseQuads.write(i, [&](Quad& quad) { quad.Resize(allyTeams); });
+		}
+
+	private:
+		std::vector<Quad> denseQuads;
+		recoil::SparseVector<Quad> sparseQuads;
+		Quad emptyQuad;
+		int allyTeams = 0;
+		bool isSparse = false;
+	};
+
 	const Quad& GetQuad(unsigned i) const {
 		assert(i < baseQuads.size());
 		return baseQuads[i];
 	}
 	const Quad& GetQuadAt(unsigned x, unsigned z) const {
-		assert(unsigned(numQuadsX * z + x) < baseQuads.size());
+		assert(unsigned(numQuadsX * z + x) < baseQuads.size() || baseQuads.IsSparse());
 		return baseQuads[numQuadsX * z + x];
 	}
 
@@ -232,7 +269,7 @@ private:
 	int WorldPosToQuadFieldIdx(const float3 p) const;
 
 private:
-	std::vector<Quad> baseQuads;
+	QuadStore baseQuads;
 
 	// preallocated vectors for Get*Exact functions
 	std::array< QueryVectorCache<CUnit*>, ThreadPool::MAX_THREADS >  tempUnits;

@@ -26,6 +26,8 @@ void* realloc(void* ptr, size_t size);
 // Aligned allocation functions
 void* aligned_alloc(size_t alignment, size_t size);
 void* aligned_realloc(void* ptr, size_t oldsize, size_t newsize, size_t alignment);
+// as aligned_realloc, with the grown part zeroed; fresh pages are not written, so stay non-resident until used
+void* aligned_rezalloc(void* ptr, size_t oldsize, size_t newsize, size_t alignment);
 void aligned_free(void* ptr);
 
 // Get usable size of allocated memory

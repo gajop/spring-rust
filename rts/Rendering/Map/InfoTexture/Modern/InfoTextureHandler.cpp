@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include "Map/ReadMap.h"
 #include "InfoTextureHandler.h"
 #include "AirLos.h"
 #include "Combiner.h"
@@ -20,11 +21,16 @@ CInfoTextureHandler::CInfoTextureHandler()
 	AddInfoTexture(infoTex = new CInfoTextureCombiner());
 	AddInfoTexture(new CLosTexture());
 	AddInfoTexture(new CAirLosTexture());
-	AddInfoTexture(new CMetalTexture());
-	AddInfoTexture(new CMetalExtractionTexture());
 	AddInfoTexture(new CRadarTexture());
-	AddInfoTexture(new CHeightTexture());
-	AddInfoTexture(new CPathTexture());
+
+	// views of per-square map data, as large as the map: a null map has none to show
+	// (height, metal and paths are constant), and a missing view reads as a dummy texture
+	if (!readMap->IsNullMap()) {
+		AddInfoTexture(new CMetalTexture());
+		AddInfoTexture(new CMetalExtractionTexture());
+		AddInfoTexture(new CHeightTexture());
+		AddInfoTexture(new CPathTexture());
+	}
 	// TODO?
 	//AddInfoTexture(new CHeatTexture());
 	//AddInfoTexture(new CFlowTexture());

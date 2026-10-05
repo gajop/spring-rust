@@ -21,7 +21,10 @@ public:
 
 public:
 	void Update() override;
-	bool IsUpdateNeeded() override { return true; }
+	bool IsUpdateNeeded() override { return (!createdOnUse || RecentlyUsed()); }
+	GLuint GetTexture() override;
+private:
+	bool CreateTextures();
 private:
 	GL::Texture2D uploadTexRadar;
 	GL::Texture2D uploadTexJammer;

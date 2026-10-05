@@ -125,6 +125,15 @@ void CMapInfo::ReadGlobal()
 	map.voidWater       = topTable.GetBool("voidWater", false);
 	map.voidGround      = topTable.GetBool("voidGround", false);
 
+	if (const LuaTable& nullTable = topTable.SubTable("nullmap"); nullTable.IsValid()) {
+		// whole patches (2 map units, 128 squares), as the blank map generator also rounds
+		const auto squares = [](int units) { return std::max(1, units / 2) * 128; };
+
+		nullMap.enabled = true;
+		nullMap.sizeX = squares(nullTable.GetInt("sizeX", 8));
+		nullMap.sizeZ = squares(nullTable.GetInt("sizeZ", 8));
+	}
+
 	// clamps; global hardness can be either positive or negative but never zero
 	map.hardness        = std::max(0.001f, std::abs(map.hardness)) * std::copysign(1.0f, map.hardness);
 	map.tidalStrength   = std::max(0.000f, map.tidalStrength);

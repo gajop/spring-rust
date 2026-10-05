@@ -8,6 +8,7 @@
 
 #include "System/creg/creg_cond.h"
 #include "Sim/Misc/GlobalConstants.h"
+#include "System/ZeroPageAllocator.h"
 
 // each metalmap square covers 2x2 normal squares
 static constexpr float METAL_MAP_SQUARE_SIZE = SQUARE_SIZE * 2;
@@ -18,8 +19,11 @@ class CMetalMap
 	CR_DECLARE_STRUCT(CMetalMap)
 
 public:
-	/** Receiving a map over all metal, and creating a map over extraction. */
-	void Init(const unsigned char* map, int sizeX, int sizeZ, float metalScale);
+	/**
+	 * Receiving a map over all metal, and creating a map over extraction.
+	 * Lazy (a null map, which has no metal): see recoil::ResizeZeroed.
+	 */
+	void Init(const unsigned char* map, int sizeX, int sizeZ, float metalScale, bool lazy = false);
 	void Kill() {
 		distributionMap.clear();
 		extractionMap.clear();
@@ -59,8 +63,8 @@ public:
 private:
 	std::array<unsigned char, 256 * 3> texturePalette;
 
-	std::vector<unsigned char> distributionMap;
-	std::vector<        float> extractionMap;
+	std::vector<unsigned char, recoil::ZeroPageAllocator<unsigned char>> distributionMap;
+	std::vector<        float, recoil::ZeroPageAllocator<        float>> extractionMap;
 
 	float metalScale = 0.0f;
 

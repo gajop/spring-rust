@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "System/SparseVector.h"
 #include "System/float3.h"
 #include "System/creg/creg_cond.h"
 
@@ -120,9 +121,14 @@ public:
 private:
 	bool AllowedMsg(const CPlayer* sender) const;
 
+	DrawQuad& WriteDrawQuad(int i) { return (sparseDrawQuads.size() == 0)? drawQuads[i]: sparseDrawQuads.write(i); }
+	DrawQuad* FindDrawQuad(int i) { return (sparseDrawQuads.size() == 0)? &drawQuads[i]: sparseDrawQuads.get(i); }
+
 	int drawQuadsX;
 	int drawQuadsY;
 	std::vector<DrawQuad> drawQuads;
+	// instead of drawQuads on a null map: marks are rare, and its many quads mostly empty
+	recoil::SparseVector<DrawQuad> sparseDrawQuads;
 
 	bool drawAllMarks;
 

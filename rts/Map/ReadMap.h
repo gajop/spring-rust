@@ -71,6 +71,8 @@ class CReadMap
 protected:
 	/// called by implementations of CReadMap
 	void Initialize();
+	/// called by CNullReadMap instead of Initialize: no ground at all (see IsNullMap)
+	void InitializeNull();
 
 	virtual void UpdateHeightMapUnsynced(const SRectangle&) = 0;
 	virtual void UpdateHeightMapUnsyncedPost() = 0;
@@ -161,36 +163,49 @@ public:
 		virtual void ResetState() = 0;
 		virtual void DrawQuad(int x, int y) = 0;
 	};
-	virtual void GridVisibility(CCamera* cam, IQuadDrawer* cb, float maxDist, int quadSize, int extraSize = 0) = 0;
+	virtual void GridVisibility(CCamera* cam, IQuadDrawer* cb, float maxDist, int quadSize, int extraSize = 0);
+
+	/**
+	 * A null map (CNullReadMap) has no ground: no terrain is stored, drawn or deformed, and its
+	 * height is irrelevant. Queries see a level plane at height 0 with up normals and no slope,
+	 * terrain type or metal. CGround and the other common queries answer that directly. The raw
+	 * grid getters below still work for callers that index a grid themselves: heights, slopes and
+	 * types come from zeroed memory nothing writes, which costs no resident memory; normals are
+	 * built on first use, and that is logged once.
+	 */
+	enum NullNormalsType { NULL_FACE_NORMALS, NULL_CENTER_NORMALS, NULL_CENTER_NORMALS_2D, NULL_NORMALS_COUNT };
+
+	bool IsNullMap() const { return nullMap; }
+	static constexpr float GetNullMapHeight() { return 0.0f; }
 
 
 	/// synced only
-	const float* GetMapFileHeightMapSynced() const { return &mapFileHeightMap[0]; }
-	const float* GetOriginalHeightMapSynced() const { return &originalHeightMap[0]; }
-	const float* GetCenterHeightMapSynced() const { return &centerHeightMap[0]; }
-	const float* GetMaxHeightMapSynced() const { return &maxHeightMap[0]; }
-	const float* GetMIPHeightMapSynced(uint32_t mip) const { return mipPointerHeightMaps[mip]; }
-	const float* GetSlopeMapSynced() const { return &slopeMap[0]; }
-	const uint8_t* GetTypeMapSynced() const { return &typeMap[0]; }
-	      uint8_t* GetTypeMapSynced()       { return &typeMap[0]; }
-	const float3* GetCenterNormals2DSynced()  const { return &centerNormals2D[0]; }
+	const float* GetMapFileHeightMapSynced() const { return nullMap? NullZeros(): &mapFileHeightMap[0]; }
+	const float* GetOriginalHeightMapSynced() const { return nullMap? NullZeros(): &originalHeightMap[0]; }
+	const float* GetCenterHeightMapSynced() const { return nullMap? NullZeros(): &centerHeightMap[0]; }
+	const float* GetMaxHeightMapSynced() const { return nullMap? NullZeros(): &maxHeightMap[0]; }
+	const float* GetMIPHeightMapSynced(uint32_t mip) const { return nullMap? NullZeros(): mipPointerHeightMaps[mip]; }
+	const float* GetSlopeMapSynced() const { return nullMap? NullZeros(): &slopeMap[0]; }
+	const uint8_t* GetTypeMapSynced() const { return nullMap? NullTypeMap(): &typeMap[0]; }
+	      uint8_t* GetTypeMapSynced()       { return nullMap? NullTypeMap(): &typeMap[0]; }
+	const float3* GetCenterNormals2DSynced()  const { return nullMap? NullNormals(NULL_CENTER_NORMALS_2D): &centerNormals2D[0]; }
 
 	/// synced versions
-	const float* GetCornerHeightMapSynced() const { return sharedCornerHeightMaps[true]; }
-	const float3* GetFaceNormalsSynced()    const { return sharedFaceNormals[true]; }
-	const float3* GetCenterNormalsSynced()  const { return sharedCenterNormals[true]; }
+	const float* GetCornerHeightMapSynced() const { return GetSharedCornerHeightMap(true); }
+	const float3* GetFaceNormalsSynced()    const { return GetSharedFaceNormals(true); }
+	const float3* GetCenterNormalsSynced()  const { return GetSharedCenterNormals(true); }
 	/// unsynced versions
-	const float* GetCornerHeightMapUnsynced() const { return sharedCornerHeightMaps[false]; }
-	const float3* GetFaceNormalsUnsynced()    const { return sharedFaceNormals[false]; }
-	const float3* GetCenterNormalsUnsynced()  const { return sharedCenterNormals[false]; }
+	const float* GetCornerHeightMapUnsynced() const { return GetSharedCornerHeightMap(false); }
+	const float3* GetFaceNormalsUnsynced()    const { return GetSharedFaceNormals(false); }
+	const float3* GetCenterNormalsUnsynced()  const { return GetSharedCenterNormals(false); }
 
 
 	/// shared interface
-	const float* GetSharedCornerHeightMap(bool synced) const { return sharedCornerHeightMaps[synced]; }
-	const float* GetSharedCenterHeightMap(bool synced) const { return sharedCenterHeightMaps[synced]; }
-	const float3* GetSharedFaceNormals(bool synced) const { return sharedFaceNormals[synced]; }
-	const float3* GetSharedCenterNormals(bool synced) const { return sharedCenterNormals[synced]; }
-	const float* GetSharedSlopeMap(bool synced) const { return sharedSlopeMaps[synced]; }
+	const float* GetSharedCornerHeightMap(bool synced) const { return nullMap? NullZeros(): sharedCornerHeightMaps[synced]; }
+	const float* GetSharedCenterHeightMap(bool synced) const { return nullMap? NullZeros(): sharedCenterHeightMaps[synced]; }
+	const float3* GetSharedFaceNormals(bool synced) const { return nullMap? NullNormals(NULL_FACE_NORMALS): sharedFaceNormals[synced]; }
+	const float3* GetSharedCenterNormals(bool synced) const { return nullMap? NullNormals(NULL_CENTER_NORMALS): sharedCenterNormals[synced]; }
+	const float* GetSharedSlopeMap(bool synced) const { return nullMap? NullZeros(): sharedSlopeMaps[synced]; }
 
 	// Misc
 	void CopySyncedToUnsynced();
@@ -243,6 +258,11 @@ private:
 	inline bool HasHeightMapViewChanged(const int2 losMapPos);
 
 	float SetHeightValue(float& heightRef, const int idx, const float h, const int add = 0);
+	float RejectNullMapWrite() const;
+
+	const float* NullZeros() const;
+	const float3* NullNormals(NullNormalsType type) const;
+	uint8_t* NullTypeMap() const;
 
 public:
 	/// number of heightmap mipmaps, including full resolution
@@ -302,6 +322,8 @@ private:
 
 	uint32_t mapChecksum = 0;
 
+	bool nullMap = false;
+
 	bool processingHeightBounds = false;
 	bool hmUpdated = false;
 
@@ -318,11 +340,17 @@ extern MapDimensions mapDims;
 
 inline float CReadMap::AddHeight(const int idx, const float a) { return SetHeight(idx, a, 1); }
 inline float CReadMap::SetHeight(const int idx, const float h, const int add) {
+	if (nullMap)
+		return RejectNullMapWrite();
+
 	return SetHeightValue((*heightMapSyncedPtr)[idx], idx, h, add);
 }
 
 inline float CReadMap::AddOriginalHeight(const int idx, const float a) { return SetOriginalHeight(idx, a, 1); }
 inline float CReadMap::SetOriginalHeight(const int idx, const float h, const int add) {
+	if (nullMap)
+		return RejectNullMapWrite();
+
 	return SetHeightValue((*originalHeightMapPtr)[idx], idx, h, add);
 }
 

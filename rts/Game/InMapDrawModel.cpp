@@ -30,6 +30,11 @@ CInMapDrawModel::CInMapDrawModel()
 	, numPoints(0)
 	, numLines(0)
 {
+	if (readMap->IsNullMap()) {
+		sparseDrawQuads.resize(size_t(drawQuadsX) * drawQuadsY);
+		return;
+	}
+
 	drawQuads.resize(drawQuadsX * drawQuadsY);
 
 	for (int y = 0; y < drawQuadsY; y++) {
@@ -98,7 +103,7 @@ bool CInMapDrawModel::AddPoint(const float3& constPos, const std::string& label,
 
 	const int quad = int(pos.z * QUAD_SCALE) * drawQuadsX +
 	                 int(pos.x * QUAD_SCALE);
-	drawQuads[quad].points.push_back(point);
+	WriteDrawQuad(quad).points.push_back(point);
 
 	numPoints++;
 
@@ -131,7 +136,7 @@ bool CInMapDrawModel::AddLine(const float3& constPos1, const float3& constPos2, 
 
 	const int quad = int(pos1.z * QUAD_SCALE) * drawQuadsX +
 	                 int(pos1.x * QUAD_SCALE);
-	drawQuads[quad].lines.push_back(line);
+	WriteDrawQuad(quad).lines.push_back(line);
 
 	numLines++;
 
@@ -168,7 +173,10 @@ void CInMapDrawModel::EraseNear(const float3& constPos, int playerID, const bool
 
 	for (int y = yStart; y <= yEnd; ++y) {
 		for (int x = xStart; x <= xEnd; ++x) {
-			DrawQuad* dq = &drawQuads[(y * drawQuadsX) + x];
+			DrawQuad* dq = FindDrawQuad((y * drawQuadsX) + x);
+
+			if (dq == nullptr)
+				continue;
 
 			// use explicit indexing, MSVC chokes on iterator manipulation
 			for (size_t pii = 0; pii < dq->points.size(); /* none */) {
@@ -202,6 +210,8 @@ void CInMapDrawModel::EraseNear(const float3& constPos, int playerID, const bool
 void CInMapDrawModel::EraseAll()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	sparseDrawQuads.clear();
+
 	for (auto& drawQuad: drawQuads) {
 		drawQuad.points.clear();
 		drawQuad.lines.clear();
@@ -217,5 +227,11 @@ void CInMapDrawModel::EraseAll()
 const CInMapDrawModel::DrawQuad* CInMapDrawModel::GetDrawQuad(int x, int y) const
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (sparseDrawQuads.size() != 0) {
+		static const DrawQuad emptyQuad;
+		const DrawQuad* quad = sparseDrawQuads.get((y * drawQuadsX) + x);
+		return (quad == nullptr)? &emptyQuad: quad;
+	}
+
 	return &(drawQuads[(y * drawQuadsX) + x]);
 }

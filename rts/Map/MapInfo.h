@@ -85,6 +85,13 @@ public:
 		bool  voidGround;
 	} map;
 
+	/** "nullmap" section: a map with no map file and no ground (see CNullReadMap) */
+	struct nullmap_t {
+		bool enabled = false;
+		int  sizeX = 0; ///< in heightmap squares; the section gives Spring map units (64 squares)
+		int  sizeZ = 0;
+	} nullMap;
+
 	/** GUI settings (used by CGuiHandler) */
 	struct gui_t {
 		bool autoShowMetal;

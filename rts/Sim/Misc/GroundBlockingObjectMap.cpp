@@ -16,6 +16,7 @@
 #include "System/Misc/TracyDefs.h"
 
 CGroundBlockingObjectMap groundBlockingObjectMap;
+const CGroundBlockingObjectMap::ArrCell CGroundBlockingObjectMap::emptyCell = {};
 
 CR_BIND_TEMPLATE(CGroundBlockingObjectMap::ArrCell, )
 CR_REG_METADATA_TEMPLATE(CGroundBlockingObjectMap::ArrCell, (
@@ -46,6 +47,10 @@ void CGroundBlockingObjectMap::AddGroundBlockingObject(CSolidObject* object)
 	object->SetPhysicalStateBit(CSolidObject::PSTATE_BIT_BLOCKING);
 	object->SetMapPos(object->GetMapPos());
 
+	// no grid: a null map has no ground for objects to block
+	if (arrCells.empty())
+		return;
+
 	const int bx = object->mapPos.x, sx = object->xsize;
 	const int bz = object->mapPos.y, sz = object->zsize;
 	const int xminSqr = bx, xmaxSqr = bx + sx;
@@ -69,6 +74,10 @@ void CGroundBlockingObjectMap::AddGroundBlockingObject(CSolidObject* object, con
 	RECOIL_DETAILED_TRACY_ZONE;
 	object->SetPhysicalStateBit(CSolidObject::PSTATE_BIT_BLOCKING);
 	object->SetMapPos(object->GetMapPos());
+
+	// no grid: a null map has no ground for objects to block
+	if (arrCells.empty())
+		return;
 
 	const int bx = object->mapPos.x, sx = object->xsize;
 	const int bz = object->mapPos.y, sz = object->zsize;
@@ -123,6 +132,10 @@ void CGroundBlockingObjectMap::RemoveGroundBlockingObject(CSolidObject* object)
 	const int sz = object->zsize;
 
 	object->ClearPhysicalStateBit(CSolidObject::PSTATE_BIT_BLOCKING);
+
+	if (arrCells.empty())
+		return;
+
 	ObjectCollisionMapHelper objectCol(*object);
 
 	for (int z = bz; z < bz + sz; ++z) {

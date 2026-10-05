@@ -27,14 +27,13 @@ void YardmapStatusEffectsMap::ClearTile(int tileId) {
 	memset(&stateMap[tileId], 0, sizeof(Tile));
 }
 
-void YardmapStatusEffectsMap::InitNewYardmapStatusEffectsMap() {
+void YardmapStatusEffectsMap::InitNewYardmapStatusEffectsMap(bool lazy) {
 	const int tilesX = (mapDims.mapx + TILE_SIZE - 1) / TILE_SIZE;
 	const int tilesZ = (mapDims.mapy + TILE_SIZE - 1) / TILE_SIZE;
 
 	tileStride = tilesX;
 
-	stateMap.clear();
-	stateMap.resize(tilesX * tilesZ); // value-initialises: squares are zeroed
+	recoil::ResizeZeroed(stateMap, size_t(tilesX) * tilesZ, lazy); // squares are zeroed
 }
 
 void YardmapStatusEffectsMap::PostLoad() {

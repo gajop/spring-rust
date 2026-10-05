@@ -12,6 +12,7 @@ set(sources_engine_Map
 		"${CMAKE_CURRENT_SOURCE_DIR}/MetalMap.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/ReadMap.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Generation/BlankMapGenerator.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/Null/NullReadMap.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/SMF/SMFGroundDrawer.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/SMF/SMFGroundTextures.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/SMF/SMFMapFile.cpp"

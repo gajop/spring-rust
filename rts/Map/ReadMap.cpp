@@ -2,7 +2,9 @@
 
 
 #include <cstdlib>
+#include <atomic>
 #include <cstring> // memcpy
+#include <mutex>
 
 #include "xsimd/xsimd.hpp"
 #include "ReadMap.h"
@@ -11,6 +13,9 @@
 #include "MetalMap.h"
 #include "Rendering/Env/MapRendering.h"
 #include "SMF/SMFReadMap.h"
+#include "Null/NullReadMap.h"
+#include "Game/Camera.h"
+#include "Game/CameraHandler.h"
 #include "Game/LoadScreen.h"
 #include "System/EventHandler.h"
 #include "System/Exceptions.h"
@@ -28,6 +33,7 @@
 #include "Sim/Misc/LosHandler.h"
 
 #include "System/Misc/TracyDefs.h"
+#include "System/ZeroPageAllocator.h"
 
 static constexpr size_t MAX_UHM_RECTS_PER_FRAME = 128;
 
@@ -145,6 +151,13 @@ CReadMap* CReadMap::LoadMap(const std::string& mapName)
 	RECOIL_DETAILED_TRACY_ZONE;
 	CReadMap* rm = nullptr;
 
+	if (mapInfo->nullMap.enabled) {
+		// no map file: the map info gives the size (see CNullReadMap)
+		rm = new CNullReadMap();
+		metalMap.Init(nullptr, mapDims.hmapx, mapDims.hmapy, mapInfo->map.maxMetal, true);
+		return rm;
+	}
+
 	if (FileSystem::GetExtensionLowerCase(mapName) == "sm3") {
 		throw content_error("[CReadMap::LoadMap] SM3 maps are no longer supported as of Spring 95.0");
 	} else {
@@ -186,6 +199,14 @@ CReadMap* CReadMap::LoadMap(const std::string& mapName)
 void CReadMap::Serialize(creg::ISerializer* s)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap) {
+		// its heights never change; only the type map can, through Lua
+		s->Serialize(NullTypeMap(), size_t(mapDims.hmapx) * mapDims.hmapy);
+
+		s->SerializeObjectInstance(&metalMap, metalMap.GetClass());
+		return;
+	}
+
 	SerializeMapChangesBeforeMatch(s);
 	SerializeMapChangesDuringMatch(s);
 	SerializeTypeMap(s);
@@ -263,6 +284,11 @@ void CReadMap::SerializeTypeMap(creg::ISerializer* s)
 void CReadMap::PostLoad()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap) {
+		hmUpdated = false;
+		return;
+	}
+
 	sharedCornerHeightMaps[0] = &(*heightMapUnsyncedPtr)[0];
 	sharedCornerHeightMaps[1] = &(*heightMapSyncedPtr)[0];
 
@@ -301,6 +327,222 @@ CReadMap::~CReadMap()
 	metalMap.Kill();
 }
 
+
+namespace {
+	std::mutex nullGridMutex;
+	std::array<std::atomic<bool>, CReadMap::NULL_NORMALS_COUNT> nullNormalsBuilt;
+	std::atomic<bool> nullTypeMapBuilt = false;
+
+	// heights, slopes and maximum heights of a null map: zeroed memory that nothing writes,
+	// so reading it maps the kernel's zero page and costs no resident memory
+	std::vector<float, recoil::ZeroPageAllocator<float>> nullZeros;
+	std::vector<uint8_t, recoil::ZeroPageAllocator<uint8_t>> nullTypeMap;
+}
+
+void CReadMap::InitializeNull()
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	mapDims.Initialize();
+
+	float3::maxxpos = mapDims.mapx * SQUARE_SIZE - 1;
+	float3::maxzpos = mapDims.mapy * SQUARE_SIZE - 1;
+
+	boundingRadius = math::sqrt(Square(mapDims.mapx * SQUARE_SIZE * 1.0f) + Square(mapDims.mapy * SQUARE_SIZE * 1.0f)) * 0.5f;
+
+	nullMap = true;
+
+	// release whatever an earlier map left in the shared grids
+	for (auto& built: nullNormalsBuilt) {
+		built = false;
+	}
+	nullTypeMapBuilt = false;
+
+	const auto release = [](auto& v) { v.clear(); v.shrink_to_fit(); };
+	release(mapFileHeightMap);
+	release(originalHeightMap);
+	release(centerHeightMap);
+	release(maxHeightMap);
+	for (auto& mip: mipCenterHeightMaps) {
+		release(mip);
+	}
+	release(faceNormalsSynced);
+	release(faceNormalsUnsynced);
+	release(centerNormalsSynced);
+	release(centerNormalsUnsynced);
+	release(centerNormals2D);
+	release(slopeMap);
+	release(typeMap);
+	decltype(nullZeros)().swap(nullZeros);
+	decltype(nullTypeMap)().swap(nullTypeMap);
+
+	heightMapSyncedPtr = nullptr;
+	heightMapUnsyncedPtr = nullptr;
+	originalHeightMapPtr = nullptr;
+	mipPointerHeightMaps.fill(nullptr);
+
+	initHeightBounds = {GetNullMapHeight(), GetNullMapHeight()};
+	tempHeightBounds = initHeightBounds;
+	currHeightBounds = initHeightBounds;
+
+	uint32_t checksum = spring::LiteHash(&mapDims.mapx, sizeof(mapDims.mapx), 0);
+	checksum = spring::LiteHash(&mapDims.mapy, sizeof(mapDims.mapy), checksum);
+	mapChecksum = spring::LiteHash(mapInfo->map.name.c_str(), mapInfo->map.name.size(), checksum);
+
+	unsyncedHeightInfo.assign(1, float3{GetNullMapHeight(), GetNullMapHeight(), GetNullMapHeight()});
+
+	LOG("[CReadMap::%s] null map: %dx%d squares, no terrain", __func__, mapDims.mapx, mapDims.mapy);
+}
+
+const float* CReadMap::NullZeros() const
+{
+	assert(nullMap);
+
+	if (nullZeros.empty()) {
+		std::scoped_lock lock(nullGridMutex);
+
+		// the largest grid a raw getter can be indexed as: the corner heightmap
+		if (nullZeros.empty())
+			nullZeros.resize(size_t(mapDims.mapxp1) * mapDims.mapyp1);
+	}
+
+	return nullZeros.data();
+}
+
+const float3* CReadMap::NullNormals(NullNormalsType type) const
+{
+	assert(nullMap);
+	std::vector<float3>* grid = nullptr;
+
+	switch (type) {
+		case NULL_FACE_NORMALS     : { grid = &faceNormalsSynced; } break;
+		case NULL_CENTER_NORMALS   : { grid = &centerNormalsSynced; } break;
+		case NULL_CENTER_NORMALS_2D: { grid = &centerNormals2D; } break;
+		default: { assert(false); } break;
+	}
+
+	if (nullNormalsBuilt[type].load(std::memory_order_acquire))
+		return grid->data();
+
+	std::scoped_lock lock(nullGridMutex);
+
+	if (!nullNormalsBuilt[type].load(std::memory_order_relaxed)) {
+		// the values the grid code computes for level ground; up is not all-zero bits, so this
+		// grid is written, and logged, since nothing on a null map should need it
+		const float3 up = float3(0.0f, SQUARE_SIZE, 0.0f).Normalize();
+		const size_t size = size_t(mapDims.mapx) * mapDims.mapy * (1 + (type == NULL_FACE_NORMALS));
+		const float3 value = (type == NULL_CENTER_NORMALS_2D)? (up + up).Normalize2D(): ((type == NULL_CENTER_NORMALS)? (up + up).Normalize(): up);
+
+		LOG_L(L_WARNING, "[CReadMap::%s] null map: built a normals grid (%.1f MiB) for a caller that indexes it directly", __func__, size * sizeof(float3) / 1048576.0f);
+		grid->assign(size, value);
+		nullNormalsBuilt[type].store(true, std::memory_order_release);
+	}
+
+	return grid->data();
+}
+
+uint8_t* CReadMap::NullTypeMap() const
+{
+	assert(nullMap);
+
+	if (!nullTypeMapBuilt.load(std::memory_order_acquire)) {
+		std::scoped_lock lock(nullGridMutex);
+
+		// all type 0; Lua can change types, and only the squares it writes become resident
+		if (!nullTypeMapBuilt.load(std::memory_order_relaxed)) {
+			nullTypeMap.resize(size_t(mapDims.hmapx) * mapDims.hmapy);
+			nullTypeMapBuilt.store(true, std::memory_order_release);
+		}
+	}
+
+	return nullTypeMap.data();
+}
+
+float CReadMap::RejectNullMapWrite() const
+{
+	static bool logged = false;
+
+	if (!logged) {
+		LOG_L(L_ERROR, "[CReadMap::%s] a null map has no terrain to change; height writes are ignored", __func__);
+		logged = true;
+	}
+
+	return GetNullMapHeight();
+}
+
+void CReadMap::GridVisibility(CCamera* cam, IQuadDrawer* qd, float maxDist, int quadSize, int extraSize)
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	if (cam == nullptr) {
+		// allow passing in a custom camera for grid-visibility testing
+		// otherwise this culls using the state of whichever camera most
+		// recently had Update() called on it
+		cam = CCameraHandler::GetCamera(CCamera::CAMTYPE_VISCUL);
+		// for other cameras, KISS and just assume caller has done this
+		cam->CalcFrustumLines(GetCurrMinHeight() - 100.0f, GetCurrMaxHeight() + 100.0f, SQUARE_SIZE);
+	}
+
+	// figure out the camera's own quad
+	const int cx = cam->GetPos().x / (SQUARE_SIZE * quadSize);
+	const int cy = cam->GetPos().z / (SQUARE_SIZE * quadSize);
+
+	// and how many quads fit into the given maxDist
+	const int drawSquare = int(maxDist / (SQUARE_SIZE * quadSize)) + 1;
+
+	const int drawQuadsX = mapDims.mapx / quadSize;
+	const int drawQuadsY = mapDims.mapy / quadSize;
+
+	// clamp the area of quads around the camera to valid range
+	const int sy  = std::clamp(cy - drawSquare, 0, drawQuadsY - 1);
+	const int ey  = std::clamp(cy + drawSquare, 0, drawQuadsY - 1);
+	const int sxi = std::clamp(cx - drawSquare, 0, drawQuadsX - 1);
+	const int exi = std::clamp(cx + drawSquare, 0, drawQuadsX - 1);
+
+	const CCamera::FrustumLine* negLines = cam->GetNegFrustumLines();
+	const CCamera::FrustumLine* posLines = cam->GetPosFrustumLines();
+
+	// iterate over quads row-wise between the left and right frustum lines
+	for (int y = sy; y <= ey; y++) {
+		int sx = sxi;
+		int ex = exi;
+
+		float xtest;
+		float xtest2;
+
+		// find the starting x-coordinate
+		for (int idx = 0, cnt = negLines[4].sign; idx < cnt; idx++) {
+			const CCamera::FrustumLine& fl = negLines[idx];
+
+			xtest  = ((fl.base + fl.dir * ( y * quadSize)            ));
+			xtest2 = ((fl.base + fl.dir * ((y * quadSize) + quadSize)));
+
+			xtest = std::min(xtest, xtest2);
+			xtest = std::clamp(xtest / quadSize, -1.0f, drawQuadsX * 1.0f + 1.0f);
+
+			// increase lower bound
+			if ((xtest - extraSize) > sx)
+				sx = ((int) xtest) - extraSize;
+		}
+
+		// find the ending x-coordinate
+		for (int idx = 0, cnt = posLines[4].sign; idx < cnt; idx++) {
+			const CCamera::FrustumLine& fl = posLines[idx];
+
+			xtest  = ((fl.base + fl.dir *  (y * quadSize)            ));
+			xtest2 = ((fl.base + fl.dir * ((y * quadSize) + quadSize)));
+
+			xtest = std::max(xtest, xtest2);
+			xtest = std::clamp(xtest / quadSize, -1.0f, drawQuadsX * 1.0f + 1.0f);
+
+			// decrease upper bound
+			if ((xtest + extraSize) < ex)
+				ex = ((int) xtest) + extraSize;
+		}
+
+		for (int x = sx; x <= ex; x++) {
+			qd->DrawQuad(x, y);
+		}
+	}
+}
 
 void CReadMap::Initialize()
 {
@@ -463,6 +705,9 @@ void CReadMap::LoadOriginalHeightMapAndChecksum()
 uint32_t CReadMap::CalcHeightmapChecksum()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		return mapChecksum;
+
 	const float* heightmap = GetCornerHeightMapSynced();
 
 	uint32_t checksum = 0;
@@ -478,7 +723,9 @@ uint32_t CReadMap::CalcHeightmapChecksum()
 uint32_t CReadMap::CalcTypemapChecksum()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	uint32_t checksum = spring::LiteHash(&typeMap[0], typeMap.size() * sizeof(typeMap[0]), 0);
+	const uint8_t* types = nullMap? (nullTypeMapBuilt? nullTypeMap.data(): nullptr): typeMap.data();
+	const size_t numTypes = nullMap? (nullTypeMapBuilt? nullTypeMap.size(): 0): typeMap.size();
+	uint32_t checksum = (numTypes == 0)? 0: spring::LiteHash(types, numTypes, 0);
 
 	for (const CMapInfo::TerrainType& tt : mapInfo->terrainTypes) {
 		checksum = spring::LiteHash(tt.name.c_str(), tt.name.size(), checksum);
@@ -519,6 +766,9 @@ void CReadMap::UpdateDraw(bool firstCall)
 void CReadMap::UpdateHeightMapSynced(const SRectangle& hgtMapRect)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		return;
+
 	const bool initialize = (hgtMapRect == SRectangle{ 0, 0, mapDims.mapx, mapDims.mapy });
 
 	const int2 mins = {hgtMapRect.x1 - 1, hgtMapRect.z1 - 1};
@@ -566,6 +816,9 @@ void CReadMap::UpdateHeightMapSynced(const SRectangle& hgtMapRect)
 void CReadMap::UpdateHeightBounds(int syncFrame)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		return;
+
 	constexpr int PACING_PERIOD = GAME_SPEED; //tune if needed
 	int dataChunk = syncFrame % PACING_PERIOD;
 
@@ -604,6 +857,9 @@ void CReadMap::UpdateTempHeightBoundsSIMD(size_t idxBeg, size_t idxEnd)
 void CReadMap::UpdateHeightBounds()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		return;
+
 	tempHeightBounds.x = std::numeric_limits<float>::max();
 	tempHeightBounds.y = std::numeric_limits<float>::lowest();
 
@@ -837,6 +1093,10 @@ void CReadMap::HeightMapUpdateLOSCheck(const SRectangle& hgtMapRect)
 void CReadMap::InitHeightMapDigestVectors(const int2 losMapSize)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	// they track terrain changes per LOS square; a null map has none
+	if (nullMap)
+		return;
+
 #if defined(USE_HEIGHTMAP_DIGESTS)
 	assert(losHandler != nullptr);
 	assert(syncedHeightMapDigests.empty());
@@ -875,6 +1135,10 @@ bool CReadMap::HasHeightMapViewChanged(const int2 losMapPos)
 void CReadMap::UpdateLOS(const SRectangle& hgtMapRect)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	// unsynced terrain only lags behind changes, and a null map has none
+	if (nullMap)
+		return;
+
 	if (gu->spectatingFullView)
 		return;
 
@@ -898,6 +1162,9 @@ void CReadMap::UpdateLOS(const SRectangle& hgtMapRect)
 void CReadMap::BecomeSpectator()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		return;
+
 	HeightMapUpdateLOSCheck({0, 0, mapDims.mapx, mapDims.mapy});
 }
 
@@ -911,9 +1178,12 @@ namespace {
 void CReadMap::CopySyncedToUnsynced()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	CopySyncedToUnsyncedImpl(*heightMapSyncedPtr, *heightMapUnsyncedPtr);
-	CopySyncedToUnsyncedImpl(faceNormalsSynced, faceNormalsUnsynced);
-	CopySyncedToUnsyncedImpl(centerNormalsSynced, centerNormalsUnsynced);
+	// a null map has no terrain, synced or unsynced
+	if (!nullMap) {
+		CopySyncedToUnsyncedImpl(*heightMapSyncedPtr, *heightMapUnsyncedPtr);
+		CopySyncedToUnsyncedImpl(faceNormalsSynced, faceNormalsUnsynced);
+		CopySyncedToUnsyncedImpl(centerNormalsSynced, centerNormalsUnsynced);
+	}
 	eventHandler.UnsyncedHeightMapUpdate(SRectangle{ 0, 0, mapDims.mapx, mapDims.mapy });
 }
 

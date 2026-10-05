@@ -94,11 +94,13 @@ void ILosType::Init(const int mipLevel_, LosType type_)
 	freeIDs.reserve(4096);
 	losMaps.resize(teamHandler.ActiveAllyTeams());
 
-	const float* ctrHeightMap = readMap->GetCenterHeightMapSynced();
-	const float* mipHeightMap = readMap->GetMIPHeightMapSynced(mipLevel_);
+	// a null map has no height grids, and its LOS maps stay empty where nothing looks
+	const bool nullMap = readMap->IsNullMap();
+	const float* ctrHeightMap = nullMap? nullptr: readMap->GetCenterHeightMapSynced();
+	const float* mipHeightMap = nullMap? nullptr: readMap->GetMIPHeightMapSynced(mipLevel_);
 
 	for (CLosMap& losMap: losMaps) {
-		losMap.Init(size, int2(mapDims.mapx, mapDims.mapy), ctrHeightMap, mipHeightMap, type == LOS_TYPE_LOS);
+		losMap.Init(size, int2(mapDims.mapx, mapDims.mapy), ctrHeightMap, mipHeightMap, type == LOS_TYPE_LOS, nullMap);
 	}
 }
 

@@ -189,6 +189,14 @@ struct DeduceType<std::vector<ElemT>> {
 	}
 };
 
+// Vector type with a custom allocator (vector<ElemT, AllocT>)
+template<typename ElemT, typename AllocT>
+struct DeduceType<std::vector<ElemT, AllocT>> {
+	static std::unique_ptr<IType> Get() {
+		return std::unique_ptr<IType>(new DynamicArrayType< std::vector<ElemT, AllocT> >());
+	}
+};
+
 
 template<typename T>
 class BitArrayType : public DynamicArrayBaseType

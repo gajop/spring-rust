@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "Radar.h"
+#include "Map/ReadMap.h"
 #include "InfoTextureHandler.h"
 #include "Game/GlobalUnsynced.h"
 #include "Rendering/GlobalRendering.h"
@@ -20,18 +21,6 @@ CRadarTexture::CRadarTexture()
 : CModernInfoTexture("radar")
 {
 	texSize = losHandler->radar.size;
-
-	GL::TextureCreationParams tcp{
-		.reqNumLevels = -1,
-		.wrapMirror = false,
-		.minFilter = GL_NEAREST,
-		.magFilter = GL_LINEAR
-	};
-
-	texture = GL::Texture2D(texSize, GL_RG8, tcp, false);
-
-	CreateFBO("CRadarTexture");
-
 	const std::string fragmentCode = R"(
 		#version 130
 
@@ -74,6 +63,40 @@ CRadarTexture::CRadarTexture()
 			LOG_L(L_ERROR, fmt, shader->GetName().c_str(), shader->GetLog().c_str());
 		}
 	}
+	if (!shader->IsValid()) {
+		throw opengl_error("");
+	}
+
+	// The textures are as large as the LOS grids. On a null map, which can be far larger than
+	// any SMF map, they are created when something first binds this view, and updated only
+	// while something does (see CInfoTexture::RecentlyUsed).
+	createdOnUse = readMap->IsNullMap();
+
+	if (!createdOnUse && !CreateTextures())
+		throw opengl_error("");
+}
+
+
+CRadarTexture::~CRadarTexture()
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	shaderHandler->ReleaseProgramObject("[CRadarTexture]", "CRadarTexture");
+}
+
+
+bool CRadarTexture::CreateTextures()
+{
+	GL::TextureCreationParams tcp{
+		.reqNumLevels = -1,
+		.wrapMirror = false,
+		.minFilter = GL_NEAREST,
+		.magFilter = GL_LINEAR
+	};
+
+	texture = GL::Texture2D(texSize, GL_RG8, tcp, false);
+
+	CreateFBO("CRadarTexture");
+
 	{
 		GL::TextureCreationParams tcp{
 			.reqNumLevels = 1,
@@ -86,21 +109,29 @@ CRadarTexture::CRadarTexture()
 		uploadTexJammer = GL::Texture2D(texSize, GL_R16, tcp, false);
 	}
 
-	if (!fbo.IsValid() || !shader->IsValid() || !uploadTexRadar.IsValid() || !uploadTexJammer.IsValid()) {
-		throw opengl_error("");
+	if (!fbo.IsValid() || !uploadTexRadar.IsValid() || !uploadTexJammer.IsValid()) {
+		LOG_L(L_ERROR, "[CRadarTexture::%s] could not create its textures", __func__);
+		return false;
 	}
+
+	return true;
 }
 
-
-CRadarTexture::~CRadarTexture()
+GLuint CRadarTexture::GetTexture()
 {
-	RECOIL_DETAILED_TRACY_ZONE;
-	shaderHandler->ReleaseProgramObject("[CRadarTexture]", "CRadarTexture");
+	if (!texture.IsValid())
+		CreateTextures();
+
+	return CInfoTexture::GetTexture();
 }
 
 void CRadarTexture::Update()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	// not created yet: nothing has bound this view
+	if (!texture.IsValid())
+		return;
+
 	if (losHandler->GetGlobalLOS(gu->myAllyTeam)) {
 		fbo.Bind();
 		glViewport(0, 0, texSize.x, texSize.y);

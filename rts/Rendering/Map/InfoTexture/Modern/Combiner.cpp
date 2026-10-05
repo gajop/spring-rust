@@ -23,6 +23,10 @@ CInfoTextureCombiner::CInfoTextureCombiner()
 {
 	texSize = int2(mapDims.pwr2mapx, mapDims.pwr2mapy);
 
+	// on a null map it only shows LOS and radar, which are coarser than the map
+	if (readMap->IsNullMap())
+		texSize = int2(std::min(texSize.x, 2048), std::min(texSize.y, 2048));
+
 	GL::TextureCreationParams tcp{
 		.reqNumLevels = -1,
 		.linearMipMapFilter = false,

@@ -22,7 +22,7 @@
 
 CR_BIND(CQuadField, )
 CR_REG_METADATA(CQuadField, (
-	CR_MEMBER(baseQuads),
+	CR_IGNORED(baseQuads),
 	CR_MEMBER(numQuadsX),
 	CR_MEMBER(numQuadsZ),
 	CR_MEMBER(quadSizeX),
@@ -33,7 +33,8 @@ CR_REG_METADATA(CQuadField, (
 	CR_IGNORED(tempFeatures),
 	CR_IGNORED(tempProjectiles),
 	CR_IGNORED(tempSolids),
-	CR_IGNORED(tempQuads)
+	CR_IGNORED(tempQuads),
+	CR_SERIALIZER(Serialize)
 ))
 
 CR_BIND(CQuadField::Quad, )
@@ -63,7 +64,7 @@ void CQuadField::Quad::PostLoad()
 #endif
 }
 
-void CQuadField::Init(int2 mapDims, int quadSize)
+void CQuadField::Init(int2 mapDims, int quadSize, bool sparse)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	quadSizeX = quadSize;
@@ -78,7 +79,11 @@ void CQuadField::Init(int2 mapDims, int quadSize)
 
 	invQuadSize = {1.0f / quadSizeX, 1.0f / quadSizeZ};
 
-	baseQuads.resize(numQuadsX * numQuadsZ);
+#ifndef UNIT_TEST
+	baseQuads.Init(size_t(numQuadsX) * numQuadsZ, teamHandler.ActiveAllyTeams(), sparse);
+#else
+	baseQuads.Init(size_t(numQuadsX) * numQuadsZ, 0, sparse);
+#endif
 
 	size_t threadCount = ThreadPool::GetNumThreads();
 
@@ -86,23 +91,59 @@ void CQuadField::Init(int2 mapDims, int quadSize)
 		tempQuads[i].ReserveAll(numQuadsX * numQuadsZ);
 		tempQuads[i].ReleaseAll();
 	}
-
-
-#ifndef UNIT_TEST
-	for (Quad& quad: baseQuads) {
-		quad.Resize(teamHandler.ActiveAllyTeams());
-	}
-#endif
 }
+
+void CQuadField::QuadStore::Init(size_t numQuads, int numAllyTeams, bool sparse)
+{
+	allyTeams = numAllyTeams;
+	isSparse = sparse;
+	emptyQuad.Resize(numAllyTeams);
+
+	if (isSparse) {
+		decltype(denseQuads)().swap(denseQuads);
+		sparseQuads.resize(numQuads);
+		return;
+	}
+
+	sparseQuads.resize(0);
+	denseQuads.resize(numQuads);
+
+	for (Quad& quad: denseQuads) {
+		quad.Resize(numAllyTeams);
+	}
+}
+
+void CQuadField::QuadStore::Clear()
+{
+	if (isSparse) {
+		sparseQuads.clear();
+		return;
+	}
+
+	// reuse quads when reloading
+	for (Quad& quad: denseQuads) {
+		quad.Clear();
+	}
+}
+
+#ifdef USING_CREG
+void CQuadField::Serialize(creg::ISerializer* s)
+{
+	// every quad, empty or not, as when they were a plain array
+	int count = int(baseQuads.size());
+	s->SerializeInt(&count, sizeof(count));
+
+	for (int i = 0; i < count; i++) {
+		Quad* quad = s->IsWriting()? const_cast<Quad*>(&baseQuads[i]): &baseQuads.Write(i);
+		s->SerializeObjectInstance(quad, Quad::StaticClass());
+	}
+}
+#endif
 
 void CQuadField::Kill()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	// reuse quads when reloading
-	// baseQuads.clear();
-	for (Quad& quad: baseQuads) {
-		quad.Clear();
-	}
+	baseQuads.Clear();
 
 	for (auto cache : tempUnits)
 		cache.ReleaseAll();
@@ -391,8 +432,8 @@ bool CQuadField::InsertUnitIf(CUnit* unit, const float3& wpos)
 	if (!spring::VectorInsertUnique(unit->quads, wposQuadIdx, true))
 		return false;
 
-	spring::VectorInsertUnique(baseQuads[wposQuadIdx].units, unit, false);
-	spring::VectorInsertUnique(baseQuads[wposQuadIdx].teamUnits[unit->allyteam], unit, false);
+	spring::VectorInsertUnique(baseQuads.Write(wposQuadIdx).units, unit, false);
+	spring::VectorInsertUnique(baseQuads.Write(wposQuadIdx).teamUnits[unit->allyteam], unit, false);
 	return true;
 }
 
@@ -422,8 +463,8 @@ bool CQuadField::RemoveUnitIf(CUnit* unit, const float3& wpos)
 	if (!spring::VectorErase(unit->quads, wposQuadIdx))
 		return false;
 
-	spring::VectorErase(baseQuads[wposQuadIdx].units, unit);
-	spring::VectorErase(baseQuads[wposQuadIdx].teamUnits[unit->allyteam], unit);
+	spring::VectorErase(baseQuads.Write(wposQuadIdx).units, unit);
+	spring::VectorErase(baseQuads.Write(wposQuadIdx).teamUnits[unit->allyteam], unit);
 	return true;
 }
 #endif
@@ -444,13 +485,13 @@ void CQuadField::MovedUnit(CUnit* unit)
 	}
 
 	for (const int qi: unit->quads) {
-		spring::VectorErase(baseQuads[qi].units, unit);
-		spring::VectorErase(baseQuads[qi].teamUnits[unit->allyteam], unit);
+		spring::VectorErase(baseQuads.Write(qi).units, unit);
+		spring::VectorErase(baseQuads.Write(qi).teamUnits[unit->allyteam], unit);
 	}
 
 	for (const int qi: *qfQuery.quads) {
-		spring::VectorInsertUnique(baseQuads[qi].units, unit, false);
-		spring::VectorInsertUnique(baseQuads[qi].teamUnits[unit->allyteam], unit, false);
+		spring::VectorInsertUnique(baseQuads.Write(qi).units, unit, false);
+		spring::VectorInsertUnique(baseQuads.Write(qi).teamUnits[unit->allyteam], unit, false);
 	}
 
 	unit->quads = std::move(*qfQuery.quads);
@@ -460,8 +501,8 @@ void CQuadField::RemoveUnit(CUnit* unit)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	for (const int qi: unit->quads) {
-		spring::VectorErase(baseQuads[qi].units, unit);
-		spring::VectorErase(baseQuads[qi].teamUnits[unit->allyteam], unit);
+		spring::VectorErase(baseQuads.Write(qi).units, unit);
+		spring::VectorErase(baseQuads.Write(qi).teamUnits[unit->allyteam], unit);
 	}
 
 	unit->quads.clear();
@@ -493,11 +534,11 @@ void CQuadField::MovedRepulser(CPlasmaRepulser* repulser)
 	}
 
 	for (const int qi: repulserQuads) {
-		spring::VectorErase(baseQuads[qi].repulsers, repulser);
+		spring::VectorErase(baseQuads.Write(qi).repulsers, repulser);
 	}
 
 	for (const int qi: *qfQuery.quads) {
-		spring::VectorInsertUnique(baseQuads[qi].repulsers, repulser, false);
+		spring::VectorInsertUnique(baseQuads.Write(qi).repulsers, repulser, false);
 	}
 
 	repulser->SetQuads(std::move(*qfQuery.quads));
@@ -507,7 +548,7 @@ void CQuadField::RemoveRepulser(CPlasmaRepulser* repulser)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	for (const int qi: repulser->GetQuads()) {
-		spring::VectorErase(baseQuads[qi].repulsers, repulser);
+		spring::VectorErase(baseQuads.Write(qi).repulsers, repulser);
 	}
 
 	repulser->ClearQuads();
@@ -529,7 +570,7 @@ void CQuadField::AddFeature(CFeature* feature)
 	GetQuads(qfQuery, feature->pos, feature->radius);
 
 	for (const int qi: *qfQuery.quads) {
-		spring::VectorInsertUnique(baseQuads[qi].features, feature, false);
+		spring::VectorInsertUnique(baseQuads.Write(qi).features, feature, false);
 	}
 }
 
@@ -540,7 +581,7 @@ void CQuadField::RemoveFeature(CFeature* feature)
 	GetQuads(qfQuery, feature->pos, feature->radius);
 
 	for (const int qi: *qfQuery.quads) {
-		spring::VectorErase(baseQuads[qi].features, feature);
+		spring::VectorErase(baseQuads.Write(qi).features, feature);
 	}
 
 	#ifdef DEBUG_QUADFIELD
@@ -580,13 +621,13 @@ void CQuadField::AddProjectile(CProjectile* p)
 		GetQuadsOnRay(qfQuery, p->pos, p->dir, p->speed.w);
 
 		for (const int qi: *qfQuery.quads) {
-			spring::VectorInsertUnique(baseQuads[qi].projectiles, p, false);
+			spring::VectorInsertUnique(baseQuads.Write(qi).projectiles, p, false);
 		}
 
 		p->quads = std::move(*qfQuery.quads);
 	} else {
 		int newQuad = WorldPosToQuadFieldIdx(p->pos);
-		spring::VectorInsertUnique(baseQuads[newQuad].projectiles, p, false);
+		spring::VectorInsertUnique(baseQuads.Write(newQuad).projectiles, p, false);
 		p->quads.clear();
 		p->quads.push_back(newQuad);
 	}
@@ -598,7 +639,7 @@ void CQuadField::RemoveProjectile(CProjectile* p)
 	assert(p->synced);
 
 	for (const int qi: p->quads) {
-		spring::VectorErase(baseQuads[qi].projectiles, p);
+		spring::VectorErase(baseQuads.Write(qi).projectiles, p);
 	}
 
 	p->quads.clear();

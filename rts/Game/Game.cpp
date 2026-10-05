@@ -578,10 +578,10 @@ void CGame::LoadMap(const std::string& mapFileName)
 		/* Uses half-size grid because it *incorrectly* assumes
 		 * building positions are always snapped to the build grid. */
 		static_assert(BUILD_GRID_RESOLUTION == 2);
-		buildingMaskMap.Init(mapDims.hmapx * mapDims.hmapy);
-
-		groundBlockingObjectMap.Init(mapDims.mapSquares);
-		yardmapStatusEffectsMap.InitNewYardmapStatusEffectsMap();
+		// a null map has no ground to build on or for objects to block, and no grids for either
+		buildingMaskMap.Init(readMap->IsNullMap()? 0: mapDims.hmapx * mapDims.hmapy);
+		groundBlockingObjectMap.Init(readMap->IsNullMap()? 0: mapDims.mapSquares);
+		yardmapStatusEffectsMap.InitNewYardmapStatusEffectsMap(readMap->IsNullMap());
 	}
 
 	LEAVE_SYNCED_CODE();
@@ -682,7 +682,7 @@ void CGame::PreLoadSimulation(LuaParser* defsParser)
 
 	loadscreen->SetLoadMessage("Creating QuadField & CEGs");
 	moveDefHandler.Init(defsParser);
-	quadField.Init(int2(mapDims.mapx, mapDims.mapy), modInfo.quadFieldQuadSizeInElmos);
+	quadField.Init(int2(mapDims.mapx, mapDims.mapy), modInfo.quadFieldQuadSizeInElmos, readMap->IsNullMap());
 	damageArrayHandler.Init(defsParser);
 	explGenHandler.Init();
 }

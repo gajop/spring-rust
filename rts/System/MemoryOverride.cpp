@@ -105,6 +105,20 @@ void* aligned_realloc(void* ptr, size_t oldsize, size_t newsize, size_t alignmen
 #endif
 }
 
+void* aligned_rezalloc(void* ptr, size_t oldsize, size_t newsize, size_t alignment)
+{
+	alignment = std::max<size_t>(alignment, 1);
+#ifdef USE_MIMALLOC
+	// mimalloc knows when memory comes zeroed from the OS and then skips the clear
+	return mi_rezalloc_aligned(ptr, newsize, alignment);
+#else
+	ptr = aligned_realloc(ptr, oldsize, newsize, alignment);
+	if (newsize > oldsize)
+		std::memset(static_cast<uint8_t*>(ptr) + oldsize, 0, newsize - oldsize);
+	return ptr;
+#endif
+}
+
 void aligned_free(void* ptr)
 {
 #ifdef USE_MIMALLOC

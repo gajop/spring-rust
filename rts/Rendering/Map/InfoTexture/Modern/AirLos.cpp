@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "AirLos.h"
+#include "Map/ReadMap.h"
 #include "Game/GlobalUnsynced.h"
 #include "Rendering/GlobalRendering.h"
 #include "Rendering/Shaders/ShaderHandler.h"
@@ -17,18 +18,6 @@ CAirLosTexture::CAirLosTexture()
 : CModernInfoTexture("airlos")
 {
 	texSize = losHandler->airLos.size;
-
-	GL::TextureCreationParams tcp{
-		.reqNumLevels = -1,
-		.linearMipMapFilter = false,
-		.linearTextureFilter = true,
-		.wrapMirror = false
-	};
-
-	texture = GL::Texture2D(texSize, GL_R8, tcp, false);
-
-	CreateFBO("CAirLosTexture");
-
 	const std::string fragmentCode = R"(
 		#version 130
 
@@ -61,6 +50,40 @@ CAirLosTexture::CAirLosTexture()
 			LOG_L(L_ERROR, fmt, shader->GetName().c_str(), shader->GetLog().c_str());
 		}
 	}
+	if (!shader->IsValid()) {
+		throw opengl_error("");
+	}
+
+	// The textures are as large as the LOS grids. On a null map, which can be far larger than
+	// any SMF map, they are created when something first binds this view, and updated only
+	// while something does (see CInfoTexture::RecentlyUsed).
+	createdOnUse = readMap->IsNullMap();
+
+	if (!createdOnUse && !CreateTextures())
+		throw opengl_error("");
+}
+
+
+CAirLosTexture::~CAirLosTexture()
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	shaderHandler->ReleaseProgramObject("[CAirLosTexture]", "CAirLosTexture");
+}
+
+
+bool CAirLosTexture::CreateTextures()
+{
+	GL::TextureCreationParams tcp{
+		.reqNumLevels = -1,
+		.linearMipMapFilter = false,
+		.linearTextureFilter = true,
+		.wrapMirror = false
+	};
+
+	texture = GL::Texture2D(texSize, GL_R8, tcp, false);
+
+	CreateFBO("CAirLosTexture");
+
 	{
 		GL::TextureCreationParams tcp{
 			.reqNumLevels = 1,
@@ -72,21 +95,29 @@ CAirLosTexture::CAirLosTexture()
 		uploadTex = GL::Texture2D(texSize, GL_R16, tcp, false);
 	}
 
-	if (!fbo.IsValid() || !shader->IsValid() || !uploadTex.IsValid()) {
-		throw opengl_error("");
+	if (!fbo.IsValid() || !uploadTex.IsValid()) {
+		LOG_L(L_ERROR, "[CAirLosTexture::%s] could not create its textures", __func__);
+		return false;
 	}
+
+	return true;
 }
 
-
-CAirLosTexture::~CAirLosTexture()
+GLuint CAirLosTexture::GetTexture()
 {
-	RECOIL_DETAILED_TRACY_ZONE;
-	shaderHandler->ReleaseProgramObject("[CAirLosTexture]", "CAirLosTexture");
+	if (!texture.IsValid())
+		CreateTextures();
+
+	return CInfoTexture::GetTexture();
 }
 
 void CAirLosTexture::Update()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	// not created yet: nothing has bound this view
+	if (!texture.IsValid())
+		return;
+
 	if (losHandler->GetGlobalLOS(gu->myAllyTeam)) {
 		fbo.Bind();
 		glViewport(0, 0, texSize.x, texSize.y);

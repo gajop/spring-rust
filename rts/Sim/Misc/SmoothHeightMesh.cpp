@@ -78,10 +78,31 @@ void SmoothHeightMesh::Init(int2 max, int res, int smoothRad)
 
 	smoothRadius = std::max(1, smoothRad);
 
+	if (readMap->IsNullMap()) {
+		// level ground smooths to itself: no mesh until something writes to it
+		nullMap = true;
+		nullMapHeight = enabled? readMap->GetNullMapHeight(): 0.0f;
+		return;
+	}
+
 	InitMapChangeTracking();
 	InitDataStructures();
 
 	if (enabled) MakeSmoothMesh();
+}
+
+void SmoothHeightMesh::BuildNullMapMesh()
+{
+	// a synced write to the mesh of a null map; from here on it is an ordinary mesh
+	LOG_L(L_WARNING, "[SmoothHeightMesh::%s] null map: built the smooth mesh (%.1f MiB) for a write", __func__, 4.0f * maxx * maxy * sizeof(float) / 1048576.0f);
+
+	nullMap = false;
+	InitMapChangeTracking();
+	InitDataStructures();
+
+	std::fill(mesh.begin(), mesh.end(), nullMapHeight);
+	std::fill(origMesh.begin(), origMesh.end(), nullMapHeight);
+	std::fill(maximaMesh.begin(), maximaMesh.end(), nullMapHeight);
 }
 
 void SmoothHeightMesh::InitMapChangeTracking() {
@@ -119,11 +140,15 @@ void SmoothHeightMesh::Kill() {
 	maximaMesh.clear();
 	mesh.clear();
 	origMesh.clear();
+	nullMap = false;
 }
 
 float SmoothHeightMesh::GetHeight(float x, float y)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		return nullMapHeight;
+
 	assert(!mesh.empty());
 	return Interpolate(x, y, maxx, maxy, fresolution, &mesh[0]);
 }
@@ -131,6 +156,9 @@ float SmoothHeightMesh::GetHeight(float x, float y)
 float SmoothHeightMesh::GetHeightAboveWater(float x, float y)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		return std::max(0.0f, nullMapHeight);
+
 	assert(!mesh.empty());
 	return std::max(0.0f, Interpolate(x, y, maxx, maxy, fresolution, &mesh[0]));
 }
@@ -138,6 +166,9 @@ float SmoothHeightMesh::GetHeightAboveWater(float x, float y)
 float SmoothHeightMesh::SetHeight(int index, float h)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		BuildNullMapMesh();
+
 	assert(index < maxx*maxy);
 	return (mesh[index] = h);
 }
@@ -145,6 +176,9 @@ float SmoothHeightMesh::SetHeight(int index, float h)
 float SmoothHeightMesh::AddHeight(int index, float h)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		BuildNullMapMesh();
+
 	assert(index < maxx*maxy);
 	return (mesh[index] += h);
 }
@@ -152,6 +186,9 @@ float SmoothHeightMesh::AddHeight(int index, float h)
 float SmoothHeightMesh::SetMaxHeight(int index, float h)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (nullMap)
+		BuildNullMapMesh();
+
 	assert(index < maxx*maxy);
 	return (mesh[index] = std::max(h, mesh[index]));
 }
@@ -437,7 +474,7 @@ inline static void CheckInvariants(
 void SmoothHeightMesh::MapChanged(int x1, int y1, int x2, int y2) {
 	RECOIL_DETAILED_TRACY_ZONE;
 
-	if (!enabled) return;
+	if (!enabled || nullMap) return;
 
 	const bool queueWasEmpty = mapChangeTrack.damageQueue[mapChangeTrack.activeBuffer].empty();
 	const int res = resolution*SAMPLES_PER_QUAD;
@@ -554,7 +591,7 @@ LOG("%s: quad area in world space (%f,%f) (%f,%f)", __func__
 
 
 void SmoothHeightMesh::UpdateSmoothMesh() {
-	if (!enabled) return;
+	if (!enabled || nullMap) return;
 
 	SCOPED_TIMER("Sim::SmoothHeightMesh::UpdateSmoothMesh");
 

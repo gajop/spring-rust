@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "System/type2.h"
+#include "System/ZeroPageAllocator.h"
 #include "System/SpringMath.h"
 
 
@@ -17,13 +18,13 @@ struct SLosInstance;
 class CLosMap
 {
 public:
-	void Init(const int2 size_, const int2 mapDims, const float* ctrHeightMap_, const float* mipHeightMap_, bool sendReadmapEvents_)
+	/// no height maps: level ground at height 0 (a null map); lazy: see recoil::ResizeZeroed
+	void Init(const int2 size_, const int2 mapDims, const float* ctrHeightMap_, const float* mipHeightMap_, bool sendReadmapEvents_, bool lazy = false)
 	{
 		size = size_;
 		LOS2HEIGHT = mapDims / size;
 
-		losmap.clear();
-		losmap.resize(size.x * size.y, 0);
+		recoil::ResizeZeroed(losmap, size_t(size.x) * size.y, lazy);
 
 		ctrHeightMap = ctrHeightMap_;
 		mipHeightMap = mipHeightMap_;
@@ -55,8 +56,8 @@ public:
 	const auto& GetLosMap() const { return losmap; }
 private:
 	void LosAdd(SLosInstance* instance) const;
-	void UnsafeLosAdd(SLosInstance* instance) const;
-	void SafeLosAdd(SLosInstance* instance) const;
+	template<bool LevelGround> void UnsafeLosAdd(SLosInstance* instance) const;
+	template<bool LevelGround> void SafeLosAdd(SLosInstance* instance) const;
 
 	void AddSquaresToInstance(SLosInstance* li, const std::vector<char>& losRaySquares) const;
 
@@ -64,7 +65,7 @@ protected:
 	int2 size;
 	int2 LOS2HEIGHT;
 
-	std::vector<unsigned short> losmap;
+	std::vector<unsigned short, recoil::ZeroPageAllocator<unsigned short>> losmap;
 
 	const float* ctrHeightMap = nullptr;
 	const float* mipHeightMap = nullptr;

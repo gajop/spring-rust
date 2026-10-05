@@ -5,6 +5,7 @@
 
 #include <bit>
 #include <cassert>
+#include <cstdint>
 #include "System/creg/creg_cond.h"
 
 struct MapDimensions {
@@ -47,7 +48,7 @@ public:
 		pwr2mapx = std::bit_ceil <uint32_t> (mapx);
 		pwr2mapy = std::bit_ceil <uint32_t> (mapy);
 
-		mapSquares = mapx * mapy;
+		mapSquares = int64_t(mapx) * mapy;
 	}
 
 
@@ -108,7 +109,7 @@ public:
 	*
 	* Total number of squares on the map
 	*/
-	int mapSquares;
+	int64_t mapSquares; // 2^32 on a 1024x1024 map
 };
 
 #endif

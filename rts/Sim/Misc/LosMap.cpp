@@ -501,16 +501,19 @@ void CLosMap::LosAdd(SLosInstance* li) const
 	const SRectangle fullRect(0, 0, size.x, size.y);
 	const SRectangle safeRect(li->radius, li->radius, size.x - li->radius, size.y - li->radius);
 
-	if (fullRect.Inside(li->basePos) && li->baseHeight <= ctrHeightMap[MAP_SQUARE_FULLRES(li->basePos)])
+	// without height maps (a null map), the ground is level at height 0
+	const bool levelGround = (ctrHeightMap == nullptr);
+
+	if (fullRect.Inside(li->basePos) && li->baseHeight <= (levelGround? 0.0f: ctrHeightMap[MAP_SQUARE_FULLRES(li->basePos)]))
 		return;
 
 	// add all squares within the instance's sight radius
 	if (safeRect.Inside(li->basePos)) {
 		// we aren't touching the map borders -> we don't need to check for the map boundaries
-		UnsafeLosAdd(li);
+		if (levelGround) UnsafeLosAdd<true>(li); else UnsafeLosAdd<false>(li);
 	} else {
 		// we need to check each square if it's outside of the map boundaries
-		SafeLosAdd(li);
+		if (levelGround) SafeLosAdd<true>(li); else SafeLosAdd<false>(li);
 	}
 }
 
@@ -585,7 +588,7 @@ void CLosMap::AddSquaresToInstance(SLosInstance* li, const std::vector<char>& lo
 }
 
 
-void CLosMap::UnsafeLosAdd(SLosInstance* li) const
+template<bool LevelGround> void CLosMap::UnsafeLosAdd(SLosInstance* li) const
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	// How does it work?
@@ -649,7 +652,8 @@ void CLosMap::UnsafeLosAdd(SLosInstance* li) const
 			}
 
 			const float invR = isqrtTableLookup(off.x*off.x + off.y*off.y, threadNum);
-			const float dh = std::max(0.0f, mipHeightMap[idx++]) - losHeight;
+			const float dh = std::max(0.0f, LevelGround? 0.0f: mipHeightMap[idx]) - losHeight;
+			++idx;
 
 			*(raycastAnglesPtr++) = (dh + LOS_BONUS_HEIGHT) * invR;
 			*(losRaySquaresPtr++) = true;
@@ -682,7 +686,7 @@ void CLosMap::UnsafeLosAdd(SLosInstance* li) const
 }
 
 
-void CLosMap::SafeLosAdd(SLosInstance* li) const
+template<bool LevelGround> void CLosMap::SafeLosAdd(SLosInstance* li) const
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	// see above
@@ -738,7 +742,8 @@ void CLosMap::SafeLosAdd(SLosInstance* li) const
 				}
 
 				const float invR = isqrtTableLookup(off.x*off.x + off.y*off.y, threadNum);
-				const float dh = std::max(0.0f, mipHeightMap[idx++]) - losHeight;
+				const float dh = std::max(0.0f, LevelGround? 0.0f: mipHeightMap[idx]) - losHeight;
+				++idx;
 
 				*(raycastAnglesPtr++) = (dh + LOS_BONUS_HEIGHT) * invR;
 				*(losRaySquaresPtr++) = true;

@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include "Map/ReadMap.h"
 #include "IGroundDecalDrawer.h"
 #include "Rendering/Env/Decals/GroundDecalHandler.h"
 #include "System/Config/ConfigHandler.h"
@@ -45,7 +46,8 @@ void IGroundDecalDrawer::SetDrawDecals(bool v)
 
 	FreeInstance();
 
-	hasDecals = v;
+	// decals are drawn onto SMF ground; a null map has none
+	hasDecals = v && (readMap == nullptr || !readMap->IsNullMap());
 	assert(!groundDecals);
 	if (IGroundDecalDrawer::GetDrawDecals()) {
 		groundDecals = new CGroundDecalHandler();
