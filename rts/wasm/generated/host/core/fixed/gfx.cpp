@@ -846,6 +846,36 @@ wasm_trap_t* Core_gfx_copy_to_vbo(void* environment, wasmtime_caller_t* caller,
     return nullptr;
 }
 
+wasm_trap_t* Core_gfx_copy_vbo_to_readback(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->CopyVBOToReadback == nullptr)
+        return Trap("CopyVBOToReadback generated Core binding is unavailable");
+    if (5 != 0 && (slots == nullptr || slotCount != 5))
+        return Trap("CopyVBOToReadback generated Core ABI signature mismatch");
+    if (5 == 0 && slotCount != 0)
+        return Trap("CopyVBOToReadback generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 6u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GfxReadbackCopyQuery query{};
+    query.readbackID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.readbackID)>>>(slots[0].i32);
+    query.vboID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.vboID)>>>(slots[1].i32);
+    query.srcOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.srcOffset)>>>(slots[2].i32);
+    query.dstOffset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.dstOffset)>>>(slots[3].i32);
+    query.bytes = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.bytes)>>>(slots[4].i32);
+    GfxEmptyResult result{};
+    state->native->gfx->CopyVBOToReadback(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i32 = errorCode;
+    return nullptr;
+}
+
 wasm_trap_t* Core_gfx_create_fence(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -897,6 +927,32 @@ wasm_trap_t* Core_gfx_create_rbo(void* environment, wasmtime_caller_t* caller,
     query.samples = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.samples)>>>(slots[4].i32);
     GfxUIntResult result{};
     state->native->gfx->CreateRBO(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_gfx_create_readback(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->CreateReadback == nullptr)
+        return Trap("CreateReadback generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("CreateReadback generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("CreateReadback generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GfxUIntQuery query{};
+    query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
+    GfxUIntResult result{};
+    state->native->gfx->CreateReadback(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value), errorCode));
     return nullptr;
@@ -1105,6 +1161,32 @@ wasm_trap_t* Core_gfx_delete_rbo(void* environment, wasmtime_caller_t* caller,
     query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
     GfxEmptyResult result{};
     state->native->gfx->DeleteRBO(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i32 = errorCode;
+    return nullptr;
+}
+
+wasm_trap_t* Core_gfx_delete_readback(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->DeleteReadback == nullptr)
+        return Trap("DeleteReadback generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("DeleteReadback generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("DeleteReadback generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GfxUIntQuery query{};
+    query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
+    GfxEmptyResult result{};
+    state->native->gfx->DeleteReadback(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i32 = errorCode;
     return nullptr;
@@ -5468,6 +5550,13 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGenerated(linker, "spring:gfx", "copy-vbo-to-readback",
+                MakeFuncType(params, 5, results, 1), Core_gfx_copy_vbo_to_readback, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:gfx", "create-fence",
@@ -5479,6 +5568,13 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:gfx", "create-rbo",
                 MakeFuncType(params, 5, results, 1), Core_gfx_create_rbo, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:gfx", "create-readback",
+                MakeFuncType(params, 1, results, 1), Core_gfx_create_readback, state, error))
             return false;
     }
     {
@@ -5535,6 +5631,13 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGenerated(linker, "spring:gfx", "delete-rbo",
                 MakeFuncType(params, 1, results, 1), Core_gfx_delete_rbo, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGenerated(linker, "spring:gfx", "delete-readback",
+                MakeFuncType(params, 1, results, 1), Core_gfx_delete_readback, state, error))
             return false;
     }
     {
@@ -6416,6 +6519,6 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
     return true;
 }
 
-static_assert(162 >= 0, "generated Core Wasm callback count");
+static_assert(165 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

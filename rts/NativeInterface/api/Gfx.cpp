@@ -215,6 +215,16 @@ struct NativeFence {
 };
 static std::unordered_map<uint32_t, NativeFence> nativeFences;
 static uint32_t nativeFenceCounter = 0;
+struct NativeReadback {
+	GLuint id = 0;
+	uint32_t bytes = 0;
+	const uint8_t* mapped = nullptr;
+};
+static std::unordered_map<uint32_t, NativeReadback> nativeReadbacks;
+static uint32_t nativeReadbackCounter = 0;
+static std::vector<float> nativeReadbackResult;
+// A read-back buffer is client memory; this bounds what one call may pin.
+static constexpr uint32_t NATIVE_READBACK_MOST_BYTES = 64u << 20;
 static uint32_t nativeShaderCounter = 0;
 static uint32_t nativeRBOCounter = 0;
 static uint32_t nativeFBOCounter = 0;
@@ -4260,6 +4270,109 @@ static void DeleteFence(const GfxUIntQuery* query, GfxEmptyResult* result)
 	nativeFences.erase(it);
 }
 
+static void CreateReadback(const GfxUIntQuery* query, GfxUIntResult* result)
+{
+	result->error = nullptr;
+	result->value = 0;
+
+	const uint32_t bytes = query->value;
+	if (bytes == 0 || bytes > NATIVE_READBACK_MOST_BYTES || (bytes % 4) != 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (!GLAD_GL_ARB_buffer_storage) {
+		result->error = &OPERATION_FAILED_ERROR;
+		return;
+	}
+
+	constexpr GLbitfield mapBits = GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+	GLuint id = 0;
+	glGenBuffers(1, &id);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, id);
+	glBufferStorage(GL_COPY_WRITE_BUFFER, bytes, nullptr, mapBits | GL_CLIENT_STORAGE_BIT);
+	const auto* mapped = static_cast<const uint8_t*>(glMapBufferRange(GL_COPY_WRITE_BUFFER, 0, bytes, mapBits));
+	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+	if (mapped == nullptr) {
+		glDeleteBuffers(1, &id);
+		result->error = &OPERATION_FAILED_ERROR;
+		return;
+	}
+
+	do {
+		++nativeReadbackCounter;
+	} while (nativeReadbackCounter == 0 || nativeReadbacks.contains(nativeReadbackCounter));
+
+	nativeReadbacks[nativeReadbackCounter] = {.id = id, .bytes = bytes, .mapped = mapped};
+	result->value = nativeReadbackCounter;
+}
+
+static void CopyVBOToReadback(const GfxReadbackCopyQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+
+	const auto it = nativeReadbacks.find(query->readbackID);
+	NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (it == nativeReadbacks.end() || vbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	const GLuint source = (vbo->vbo != nullptr) ? vbo->vbo->GetIdRaw() : vbo->rawID;
+	const uint64_t sourceBytes = (vbo->vbo != nullptr) ? static_cast<uint64_t>(vbo->vbo->GetSize()) : 0;
+	const uint64_t end = static_cast<uint64_t>(query->srcOffset) + query->bytes;
+	const uint64_t dstEnd = static_cast<uint64_t>(query->dstOffset) + query->bytes;
+	if (source == 0 || query->bytes == 0 || end > sourceBytes || dstEnd > it->second.bytes) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	// Shader writes to the VBO are visible to the copy.
+	glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+	glBindBuffer(GL_COPY_READ_BUFFER, source);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, it->second.id);
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, query->srcOffset, query->dstOffset, query->bytes);
+	glBindBuffer(GL_COPY_READ_BUFFER, 0);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+}
+
+static void ReadReadback(const GfxReadbackReadQuery* query, GfxVBODownloadResult* result)
+{
+	result->error = nullptr;
+	result->values = nullptr;
+	result->count = 0;
+	nativeReadbackResult.clear();
+
+	const auto it = nativeReadbacks.find(query->readbackID);
+	if (it == nativeReadbacks.end()) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	const uint64_t end = static_cast<uint64_t>(query->offset) + static_cast<uint64_t>(query->count) * 4u;
+	if ((query->offset % 4) != 0 || end > it->second.bytes) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	nativeReadbackResult.resize(query->count);
+	std::memcpy(nativeReadbackResult.data(), it->second.mapped + query->offset, static_cast<size_t>(query->count) * 4u);
+	result->values = nativeReadbackResult.data();
+	result->count = query->count;
+}
+
+static void DeleteReadback(const GfxUIntQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+
+	const auto it = nativeReadbacks.find(query->value);
+	if (it == nativeReadbacks.end())
+		return;
+
+	glBindBuffer(GL_COPY_WRITE_BUFFER, it->second.id);
+	glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+	glDeleteBuffers(1, &it->second.id);
+	nativeReadbacks.erase(it);
+}
+
 static void GetGlobalTexNames(const GfxEmptyQuery*, GfxAtlasTexturesResult* result)
 {
 	result->error = nullptr;
@@ -5736,4 +5849,8 @@ const GfxApi GFX_API = {
 	.CreateFence = CreateFence,
 	.IsFenceSignaled = IsFenceSignaled,
 	.DeleteFence = DeleteFence,
+	.CreateReadback = CreateReadback,
+	.CopyVBOToReadback = CopyVBOToReadback,
+	.ReadReadback = ReadReadback,
+	.DeleteReadback = DeleteReadback,
 };

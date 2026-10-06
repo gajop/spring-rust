@@ -12468,6 +12468,11 @@ pub mod gfx {
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
+            #[link_name = "copy-vbo-to-readback"]
+            pub safe fn core_copy_vbo_to_readback(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
             #[link_name = "create-fence"]
             pub safe fn core_create_fence(p0: i32) -> i64;
         }
@@ -12480,6 +12485,11 @@ pub mod gfx {
         unsafe extern "C" {
             #[link_name = "create-rbo"]
             pub safe fn core_create_rbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
+            #[link_name = "create-readback"]
+            pub safe fn core_create_readback(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
@@ -12520,6 +12530,11 @@ pub mod gfx {
         unsafe extern "C" {
             #[link_name = "delete-rbo"]
             pub safe fn core_delete_rbo(p0: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
+            #[link_name = "delete-readback"]
+            pub safe fn core_delete_readback(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
@@ -12985,6 +13000,11 @@ pub mod gfx {
         unsafe extern "C" {
             #[link_name = "read-pixels"]
             pub safe fn core_read_pixels(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32, p5: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
+            #[link_name = "read-readback"]
+            pub safe fn core_read_readback(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
@@ -13648,6 +13668,20 @@ pub mod gfx {
     }
 
     #[inline]
+    pub fn copy_vbo_to_readback(readback_id: u32, vbo_id: u32, src_offset: u32, dst_offset: u32, bytes: u32) -> Result<()> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let status = raw::core_copy_vbo_to_readback(readback_id as i32, vbo_id as i32, src_offset as i32, dst_offset as i32, bytes as i32);
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (readback_id, vbo_id, src_offset, dst_offset, bytes);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn create_fence(unused: u8) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -13706,6 +13740,24 @@ pub mod gfx {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (xsize, ysize, target, format, samples);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn create_readback(value: u32) -> Result<u32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_create_readback(value as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(packed as u32)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (value,);
             Err(unreachable!())
         }
     }
@@ -13813,6 +13865,20 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let status = raw::core_delete_rbo(value as i32);
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (value,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn delete_readback(value: u32) -> Result<()> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let status = raw::core_delete_readback(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]

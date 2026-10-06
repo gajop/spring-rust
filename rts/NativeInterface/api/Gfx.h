@@ -293,6 +293,9 @@ struct GfxVBODownloadQuery {
 	bool forceGPURead;
 };
 struct GfxVBODownloadResult { const Error* error; const float* values; uint32_t count; };
+// NEW (no Lua equivalent): see CreateReadback in GfxApi.
+struct GfxReadbackCopyQuery { uint32_t readbackID; uint32_t vboID; uint32_t srcOffset; uint32_t dstOffset; uint32_t bytes; };
+struct GfxReadbackReadQuery { uint32_t readbackID; uint32_t offset; uint32_t count; };
 struct GfxVBOInstanceDataQuery {
 	uint32_t vboID;
 	const uint32_t* ids;
@@ -698,6 +701,25 @@ struct GfxApi {
 	void (*CreateFence)(const GfxEmptyQuery* query, GfxUIntResult* result);
 	void (*IsFenceSignaled)(const GfxUIntQuery* query, GfxBoolResult* result);
 	void (*DeleteFence)(const GfxUIntQuery* query, GfxEmptyResult* result);
+
+	// NEW (no Lua equivalent): reading a buffer back without waiting. Mapping a
+	// buffer for reading (DownloadVBO with forceGPURead) waits until the GPU has
+	// finished everything the driver tracked with it, about the rest of the frame
+	// that wrote it, even after a fence placed right after the writing pass has
+	// passed. A read-back buffer is client memory the GPU copies into and the
+	// engine keeps mapped (persistent, coherent), so reading it never waits.
+	//
+	// CreateReadback makes one of `value` bytes and returns its handle.
+	// CopyVBOToReadback copies `bytes` from a VBO's byte `srcOffset` to the
+	// read-back's `dstOffset`, on the GPU, after earlier shader writes to the
+	// VBO (it issues the buffer-update barrier). ReadReadback returns `count`
+	// 32-bit values from byte `offset` as floats (bit patterns kept); read only
+	// once a fence created after the copy has passed, or the values may be
+	// stale or torn. DeleteReadback frees one; an unknown handle is a no-op.
+	void (*CreateReadback)(const GfxUIntQuery* query, GfxUIntResult* result);
+	void (*CopyVBOToReadback)(const GfxReadbackCopyQuery* query, GfxEmptyResult* result);
+	void (*ReadReadback)(const GfxReadbackReadQuery* query, GfxVBODownloadResult* result);
+	void (*DeleteReadback)(const GfxUIntQuery* query, GfxEmptyResult* result);
 };
 
 extern const GfxApi GFX_API;

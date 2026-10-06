@@ -1,11 +1,11 @@
 {
-  "total": 1419,
-  "executable_total": 1419,
+  "total": 1423,
+  "executable_total": 1423,
   "verified_total": 0,
-  "production_import_total": 1119,
+  "production_import_total": 1123,
   "by_class": {
     "dynamic-output-caller-owned": 89,
-    "fixed": 856,
+    "fixed": 859,
     "fixed-option": 14,
     "handwritten-reviewed": 71,
     "variable-input-adapted": 4,
@@ -13,7 +13,7 @@
     "variable-input-borrowed-mixed-fixed": 17,
     "variable-input-nested-adapted": 27,
     "variable-io-borrowed-input-caller-owned-output": 55,
-    "variable-output-caller-owned": 90
+    "variable-output-caller-owned": 91
   },
   "executable": [
     {
@@ -9118,6 +9118,20 @@
     },
     {
       "module": "gfx",
+      "function": "CopyVBOToReadback",
+      "import_module": "spring:gfx",
+      "import_name": "copy-vbo-to-readback",
+      "class": "fixed",
+      "verified": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 26,
+      "production_visibility_environment_mask": 122,
+      "production_environment_mask": 26,
+      "reason": null
+    },
+    {
+      "module": "gfx",
       "function": "CreateFBO",
       "import_module": "spring:gfx",
       "import_name": "create-fbo",
@@ -9177,6 +9191,20 @@
       "function": "CreateRBO",
       "import_module": "spring:gfx",
       "import_name": "create-rbo",
+      "class": "fixed",
+      "verified": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 26,
+      "production_visibility_environment_mask": 122,
+      "production_environment_mask": 26,
+      "reason": null
+    },
+    {
+      "module": "gfx",
+      "function": "CreateReadback",
+      "import_module": "spring:gfx",
+      "import_name": "create-readback",
       "class": "fixed",
       "verified": false,
       "production_import_allowed": true,
@@ -9345,6 +9373,20 @@
       "function": "DeleteRBO",
       "import_module": "spring:gfx",
       "import_name": "delete-rbo",
+      "class": "fixed",
+      "verified": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 26,
+      "production_visibility_environment_mask": 122,
+      "production_environment_mask": 26,
+      "reason": null
+    },
+    {
+      "module": "gfx",
+      "function": "DeleteReadback",
+      "import_module": "spring:gfx",
+      "import_name": "delete-readback",
       "class": "fixed",
       "verified": false,
       "production_import_allowed": true,
@@ -11095,6 +11137,20 @@
       "function": "ReadPixels",
       "import_module": "spring:gfx",
       "import_name": "read-pixels",
+      "class": "variable-output-caller-owned",
+      "verified": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 26,
+      "production_visibility_environment_mask": 122,
+      "production_environment_mask": 26,
+      "reason": null
+    },
+    {
+      "module": "gfx",
+      "function": "ReadReadback",
+      "import_module": "spring:gfx",
+      "import_name": "read-readback",
       "class": "variable-output-caller-owned",
       "verified": false,
       "production_import_allowed": true,

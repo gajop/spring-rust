@@ -4875,6 +4875,30 @@
     },
     {
       "module": "gfx",
+      "function": "CopyVBOToReadback",
+      "import_module": "spring:gfx",
+      "import_name": "copy-vbo-to-readback",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "status",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32,i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "gfx",
       "function": "CreateFBO",
       "import_module": "spring:gfx",
       "import_name": "create-fbo",
@@ -4987,6 +5011,26 @@
         "i64"
       ],
       "signature": "i32,i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "gfx",
+      "function": "CreateReadback",
+      "import_module": "spring:gfx",
+      "import_name": "create-readback",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
       "notes": []
     },
     {
@@ -5237,6 +5281,26 @@
       "function": "DeleteRBO",
       "import_module": "spring:gfx",
       "import_name": "delete-rbo",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "status",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32->i32",
+      "notes": []
+    },
+    {
+      "module": "gfx",
+      "function": "DeleteReadback",
+      "import_module": "spring:gfx",
+      "import_name": "delete-readback",
       "environment_mask": 122,
       "mutating": false,
       "visibility_sensitive": false,
@@ -8050,6 +8114,29 @@
         "i32"
       ],
       "signature": "i32,i32,i32,i32,i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "gfx",
+      "function": "ReadReadback",
+      "import_module": "spring:gfx",
+      "import_name": "read-readback",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "direct",
+      "result_strategy": "variable-output-buffer",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32,i32->i32",
       "notes": []
     },
     {
@@ -31565,7 +31652,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1201,
-  "manual_count": 201,
+  "automatic_count": 1204,
+  "manual_count": 202,
   "unsupported_count": 17
 }

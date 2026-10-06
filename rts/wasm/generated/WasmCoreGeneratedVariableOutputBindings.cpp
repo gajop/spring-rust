@@ -3792,6 +3792,71 @@ wasm_trap_t* CoreVariableOutput_gfx_read_pixels(void* environment, wasmtime_call
     return nullptr;
 }
 
+wasm_trap_t* CoreVariableOutput_gfx_read_readback(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->ReadReadback == nullptr)
+        return Trap("ReadReadback generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4)
+        return Trap("ReadReadback generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader valuesControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t valuesPointer = 0;
+    std::uint32_t valuesCapacity = 0;
+    std::uint32_t valuesIgnoredLength = 0;
+    if (!valuesControl.U32(valuesPointer) || !valuesControl.U32(valuesCapacity) ||
+        !valuesControl.U32(valuesIgnoredLength) || !valuesControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    const std::uint64_t valuesCapacityBytes = static_cast<std::uint64_t>(valuesCapacity) * 4u;
+    if (valuesCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(valuesPointer, static_cast<std::size_t>(valuesCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GfxReadbackReadQuery query{};
+    query.readbackID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.readbackID)>>>(slots[0].i32);
+    query.offset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.offset)>>>(slots[1].i32);
+    query.count = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.count)>>>(slots[2].i32);
+    GfxVBODownloadResult result{};
+    state->native->gfx->ReadReadback(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    std::uint32_t valuesRequired = 0;
+    if (!NormalizeCoreCount(result.count, valuesRequired)) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (valuesRequired != 0 && result.values == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteCoreU32(outputWire, 8u, valuesRequired)) return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || valuesCapacity < valuesRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (valuesRequired != 0) {
+        const std::size_t valuesBytes = static_cast<std::size_t>(valuesRequired) * 4u;
+        std::span<std::uint8_t> valuesWire;
+        if (!state->memory.MutableView(valuesPointer, valuesBytes, valuesWire)) return Trap("generated Core variable output range changed unexpectedly");
+        WireWriter valuesWriter(valuesWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < valuesRequired; ++coreIndex) {
+        if (!valuesWriter.F32(result.values[coreIndex])) return Trap("generated Core wire overflow");
+        }
+        if (!valuesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariableOutput_ground_decals_get_all_ground_decals(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -6061,6 +6126,13 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableOutput(linker, "spring:gfx", "read-readback",
+                MakeFuncType(params, 4, results, 1), CoreVariableOutput_gfx_read_readback, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedVariableOutput(linker, "spring:ground-decals", "get-all-ground-decals",
@@ -6288,6 +6360,6 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
     return true;
 }
 
-static_assert(90 >= 0, "generated variable-output Core callback count");
+static_assert(91 >= 0, "generated variable-output Core callback count");
 
 } // namespace recoil::wasm::core::generated

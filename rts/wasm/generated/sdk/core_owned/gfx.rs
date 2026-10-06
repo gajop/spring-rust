@@ -857,6 +857,22 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GfxReadbackCopyQuery {
+            pub readback_id: u32,
+            pub vbo_id: u32,
+            pub src_offset: u32,
+            pub dst_offset: u32,
+            pub bytes: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GfxReadbackReadQuery {
+            pub readback_id: u32,
+            pub offset: u32,
+            pub count: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxRectQuery {
             pub x1: f32,
             pub y1: f32,
@@ -1491,6 +1507,15 @@
             }
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_variable_output_read_readback {
+            #[link(wasm_import_module = "spring:gfx")]
+            unsafe extern "C" {
+                #[link_name = "read-readback"]
+                pub safe fn call(preadback_id: i32, poffset: i32, pcount: i32, output: i32) -> i32;
+            }
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct CreateFBOValue {
             pub fbo_id: u32,
@@ -1990,6 +2015,12 @@
         }
 
         #[inline]
+        pub fn copy_vbo_to_readback(readback_id: u32, vbo_id: u32, src_offset: u32, dst_offset: u32, bytes: u32) -> Result<()> {
+            crate::generated::gfx::copy_vbo_to_readback(readback_id, vbo_id, src_offset, dst_offset, bytes)?;
+            Ok(())
+        }
+
+        #[inline]
         pub fn create_fbo(target: u32, attachments: &[GfxFBOAttachment], draw_buffers: &[u32], read_buffer: u32) -> Result<CreateFBOValue> {
             let __blob0 = { let mut __b = Vec::new(); __b.extend_from_slice(&(attachments.len() as u32).to_le_bytes()); for __item in attachments.iter() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.attachment.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(__item.texture_name.len() as u32).to_le_bytes()); __b.extend_from_slice(__item.texture_name.as_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.texture_target.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.mip_level.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.rbo_id.to_le_bytes()); while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&(if __item.use_rbo { 1u32 } else { 0u32 }).to_le_bytes());} __b };
             let __blob1 = { let mut __b = Vec::new(); __b.extend_from_slice(&(draw_buffers.len() as u32).to_le_bytes()); for __item in draw_buffers.iter().copied() { while !__b.len().is_multiple_of(4) { __b.push(0); } __b.extend_from_slice(&__item.to_le_bytes());} __b };
@@ -2033,6 +2064,12 @@
         #[inline]
         pub fn create_rbo(xsize: i32, ysize: i32, target: u32, format: u32, samples: i32) -> Result<u32> {
             let value = crate::generated::gfx::create_rbo(xsize, ysize, target, format, samples)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn create_readback(value: u32) -> Result<u32> {
+            let value = crate::generated::gfx::create_readback(value)?;
             Ok(value)
         }
 
@@ -2138,6 +2175,12 @@
         #[inline]
         pub fn delete_rbo(value: u32) -> Result<()> {
             crate::generated::gfx::delete_rbo(value)?;
+            Ok(())
+        }
+
+        #[inline]
+        pub fn delete_readback(value: u32) -> Result<()> {
+            crate::generated::gfx::delete_readback(value)?;
             Ok(())
         }
 
@@ -3382,6 +3425,37 @@
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (x, y, width, height, format);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn read_readback(readback_id: u32, offset: u32, count: u32) -> Result<Vec<f32>> {
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut descriptor = [0u32; 3];
+                let mut output = Vec::<f32>::new();
+                loop {
+                    let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+                    let (output_ptr, output_capacity) = crate::wasm_mut_slice_parts(&mut output)?;
+                    descriptor[0] = output_ptr as u32;
+                    descriptor[1] = output_capacity as u32;
+                    let status = __core_variable_output_read_readback::call(readback_id as i32, offset as i32, count as i32, descriptor_ptr);
+                    let required = descriptor[2] as usize;
+                    if status == 0 {
+                        output.truncate(required);
+                        return Ok(output);
+                    }
+                    if status != crate::ErrorCode::BufferOverflow as i32 {
+                        return Err(crate::ApiError::new(status));
+                    }
+                    output.resize(required, Default::default());
+                    descriptor[2] = 0;
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (readback_id as i32, offset as i32, count as i32);
                 Err(unreachable!())
             }
         }

@@ -4290,4 +4290,73 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    pub fn create_readback(&self, value: u32) -> Result<u32, Error> {
+        unsafe {
+            let query = sys::GfxUIntQuery {
+                value,
+            };
+            let mut result = MaybeUninit::<sys::GfxUIntResult>::zeroed();
+            let func = self.api.CreateReadback.expect("CreateReadback function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
+    pub fn copy_vboto_readback(&self, readback_id: u32, vbo_id: u32, src_offset: u32, dst_offset: u32, bytes: u32) -> Result<(), Error> {
+        unsafe {
+            let query = sys::GfxReadbackCopyQuery {
+                readbackID: readback_id,
+                vboID: vbo_id,
+                srcOffset: src_offset,
+                dstOffset: dst_offset,
+                bytes,
+            };
+            let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
+            let func = self.api.CopyVBOToReadback.expect("CopyVBOToReadback function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, ())
+        }
+    }
+
+    pub fn read_readback(&self, readback_id: u32, offset: u32, count: u32) -> Result<Vec<f32>, Error> {
+        unsafe {
+            let query = sys::GfxReadbackReadQuery {
+                readbackID: readback_id,
+                offset,
+                count,
+            };
+            let mut result = MaybeUninit::<sys::GfxVBODownloadResult>::zeroed();
+            let func = self.api.ReadReadback.expect("ReadReadback function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                {
+                    let slice = if result.count == 0 || result.values.is_null() {
+                        &[]
+                    } else {
+                        slice::from_raw_parts(result.values, result.count as usize)
+                    };
+                    slice.to_vec()
+                }
+            })
+        }
+    }
+
+    pub fn delete_readback(&self, value: u32) -> Result<(), Error> {
+        unsafe {
+            let query = sys::GfxUIntQuery {
+                value,
+            };
+            let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
+            let func = self.api.DeleteReadback.expect("DeleteReadback function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, ())
+        }
+    }
+
 }
