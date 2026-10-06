@@ -208,6 +208,13 @@ static uint32_t nativeTextureCounter = 0;
 static uint32_t nativeAtlasCounter = 0;
 static uint32_t nativeDisplayListCounter = 0;
 static uint32_t nativeQueryCounter = 0;
+struct NativeFence {
+	GLsync sync = nullptr;
+	bool flushed = false;
+	bool signaled = false;
+};
+static std::unordered_map<uint32_t, NativeFence> nativeFences;
+static uint32_t nativeFenceCounter = 0;
 static uint32_t nativeShaderCounter = 0;
 static uint32_t nativeRBOCounter = 0;
 static uint32_t nativeFBOCounter = 0;
@@ -4177,6 +4184,82 @@ static void GetQuery(const GfxUIntQuery* query, GfxUInt64Result* result)
 	glGetQueryObjectui64v(it->second.id, GL_QUERY_RESULT, &result->value);
 }
 
+static void IsQueryAvailable(const GfxUIntQuery* query, GfxBoolResult* result)
+{
+	result->error = nullptr;
+	result->value = false;
+
+	const auto it = nativeQueries.find(query->value);
+	if (it == nativeQueries.end()) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+
+	GLuint available = GL_FALSE;
+	glGetQueryObjectuiv(it->second.id, GL_QUERY_RESULT_AVAILABLE, &available);
+	result->value = available != GL_FALSE;
+}
+
+static void CreateFence(const GfxEmptyQuery*, GfxUIntResult* result)
+{
+	result->error = nullptr;
+	result->value = 0;
+
+	const GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+	if (sync == nullptr) {
+		result->error = &OPERATION_FAILED_ERROR;
+		return;
+	}
+
+	// Handle 0 stays invalid, also after the counter wraps.
+	do {
+		++nativeFenceCounter;
+	} while (nativeFenceCounter == 0 || nativeFences.contains(nativeFenceCounter));
+
+	nativeFences[nativeFenceCounter] = {.sync = sync};
+	result->value = nativeFenceCounter;
+}
+
+static void IsFenceSignaled(const GfxUIntQuery* query, GfxBoolResult* result)
+{
+	result->error = nullptr;
+	result->value = false;
+
+	const auto it = nativeFences.find(query->value);
+	if (it == nativeFences.end()) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+
+	NativeFence& fence = it->second;
+	if (!fence.signaled) {
+		// Flush once, so a fence still in the driver's queue reaches the GPU
+		// and later checks can see it pass; a zero timeout never waits.
+		const GLbitfield flags = fence.flushed ? 0 : GL_SYNC_FLUSH_COMMANDS_BIT;
+		const GLenum status = glClientWaitSync(fence.sync, flags, 0);
+		fence.flushed = true;
+		if (status == GL_WAIT_FAILED) {
+			result->error = &OPERATION_FAILED_ERROR;
+			return;
+		}
+		fence.signaled = (status == GL_ALREADY_SIGNALED || status == GL_CONDITION_SATISFIED);
+	}
+
+	result->value = fence.signaled;
+}
+
+static void DeleteFence(const GfxUIntQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+
+	const auto it = nativeFences.find(query->value);
+	if (it == nativeFences.end())
+		return;
+
+	glDeleteSync(it->second.sync);
+	nativeFences.erase(it);
+}
+
 static void GetGlobalTexNames(const GfxEmptyQuery*, GfxAtlasTexturesResult* result)
 {
 	result->error = nullptr;
@@ -5649,4 +5732,8 @@ const GfxApi GFX_API = {
 	.TexRect = TexRect,
 	.Shape = Shape,
 	.Billboard = Billboard,
+	.IsQueryAvailable = IsQueryAvailable,
+	.CreateFence = CreateFence,
+	.IsFenceSignaled = IsFenceSignaled,
+	.DeleteFence = DeleteFence,
 };

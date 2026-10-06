@@ -634,6 +634,9 @@ fn variable_result_supported(
             count_field(field).is_some() && fixed_wire_type(element, records)
         }
         SemanticType::String => true,
+        // Packed bytes: one wire byte (and one host-work unit) a byte, where a
+        // `list<u8>` widens each element to a 32-bit wire slot.
+        SemanticType::Bytes => count_field(field).is_some(),
         _ => false,
     }
 }
@@ -656,7 +659,7 @@ fn render_output_setup(
                         .expect("variable result element layout")
                         .0
                 }
-                SemanticType::String => 1,
+                SemanticType::String | SemanticType::Bytes => 1,
                 _ => unreachable!(),
             };
             format!(
@@ -709,6 +712,16 @@ fn render_result(
             format!(
                 "    if (errorCode != 0) {{ slots[0].i32 = errorCode; return nullptr; }}\n    const std::size_t requiredSize = result.{field_name} == nullptr ? 0u : std::char_traits<char>::length(result.{field_name});\n    if (requiredSize > std::numeric_limits<std::uint32_t>::max()) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);\n    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap(\"dynamic-input output descriptor changed unexpectedly\");\n    if (outputCapacity < required) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!CheckResultBytes(state, requiredSize)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!guard.Charge(requiredSize)) return Trap(budgetError);\n    if (required != 0) {{\n        std::span<std::uint8_t> outputWire;\n        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap(\"dynamic-input output range changed unexpectedly\");\n        std::memcpy(outputWire.data(), result.{field_name}, requiredSize);\n    }}\n    slots[0].i32 = 0;\n    return nullptr;\n",
                 field_name = field_name,
+            )
+        }
+        ResultStrategy::VariableOutputBuffer
+            if matches!(function.outputs[0].ty, SemanticType::Bytes) =>
+        {
+            let field = &function.outputs[0];
+            let count = count_field(field).expect("variable bytes output count");
+            format!(
+                "    if (errorCode != 0) {{ slots[0].i32 = errorCode; return nullptr; }}\n    std::uint32_t required = 0;\n    if (!AssignDynamicCount(result.{count}, required) || (required != 0 && result.{field_name} == nullptr)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }}\n    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap(\"dynamic-input output descriptor changed unexpectedly\");\n    if (outputCapacity < required) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    const std::size_t requiredSize = static_cast<std::size_t>(required);\n    if (!CheckResultBytes(state, requiredSize)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    if (!guard.Charge(requiredSize)) return Trap(budgetError);\n    if (required != 0) {{\n        std::span<std::uint8_t> outputWire;\n        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap(\"dynamic-input output range changed unexpectedly\");\n        std::memcpy(outputWire.data(), result.{field_name}, requiredSize);\n    }}\n    slots[0].i32 = 0;\n    return nullptr;\n",
+                field_name = field.name,
             )
         }
         ResultStrategy::VariableOutputBuffer => {

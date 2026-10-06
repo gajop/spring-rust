@@ -232,7 +232,7 @@ fn render_wrapper(
                         .expect("eligible variable result layout")
                         .0
                 }
-                SemanticType::String => 1,
+                SemanticType::String | SemanticType::Bytes => 1,
                 _ => unreachable!(),
             };
             params.push("output: &mut [u8]".to_owned());

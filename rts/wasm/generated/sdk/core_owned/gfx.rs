@@ -2002,6 +2002,12 @@
             })
         }
 
+        #[inline]
+        pub fn create_fence(unused: u8) -> Result<u32> {
+            let value = crate::generated::gfx::create_fence(unused)?;
+            Ok(value)
+        }
+
         #[cfg(target_arch = "wasm32")]
         mod __core_owned_create_list {
             #[link(wasm_import_module = "spring:gfx")]
@@ -2102,6 +2108,12 @@
         #[inline]
         pub fn delete_fbo(value: u32) -> Result<()> {
             crate::generated::gfx::delete_fbo(value)?;
+            Ok(())
+        }
+
+        #[inline]
+        pub fn delete_fence(value: u32) -> Result<()> {
+            crate::generated::gfx::delete_fence(value)?;
             Ok(())
         }
 
@@ -3077,6 +3089,18 @@
         #[inline]
         pub fn instance_data_from_units_vbo(vbo_id: u32, ids: &[u32], attribute_index: i32, team_id: i32, element_offset: i32) -> Result<u32> {
             crate::generated::borrowed::gfx::instance_data_from_units_vbo(vbo_id, ids, attribute_index, team_id, element_offset)
+        }
+
+        #[inline]
+        pub fn is_fence_signaled(value: u32) -> Result<bool> {
+            let value = crate::generated::gfx::is_fence_signaled(value)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn is_query_available(value: u32) -> Result<bool> {
+            let value = crate::generated::gfx::is_query_available(value)?;
+            Ok(value)
         }
 
         #[inline]

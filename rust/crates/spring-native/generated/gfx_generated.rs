@@ -4232,4 +4232,62 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    pub fn is_query_available(&self, value: u32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::GfxUIntQuery {
+                value,
+            };
+            let mut result = MaybeUninit::<sys::GfxBoolResult>::zeroed();
+            let func = self.api.IsQueryAvailable.expect("IsQueryAvailable function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
+    pub fn create_fence(&self) -> Result<u32, Error> {
+        unsafe {
+            let query = sys::GfxEmptyQuery {
+                _unused: 0,
+            };
+            let mut result = MaybeUninit::<sys::GfxUIntResult>::zeroed();
+            let func = self.api.CreateFence.expect("CreateFence function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
+    pub fn is_fence_signaled(&self, value: u32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::GfxUIntQuery {
+                value,
+            };
+            let mut result = MaybeUninit::<sys::GfxBoolResult>::zeroed();
+            let func = self.api.IsFenceSignaled.expect("IsFenceSignaled function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
+    pub fn delete_fence(&self, value: u32) -> Result<(), Error> {
+        unsafe {
+            let query = sys::GfxUIntQuery {
+                value,
+            };
+            let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
+            let func = self.api.DeleteFence.expect("DeleteFence function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, ())
+        }
+    }
+
 }

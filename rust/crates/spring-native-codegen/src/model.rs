@@ -532,8 +532,14 @@ fn normalize_fields(fields: &[crate::FieldDef]) -> Vec<FieldModel> {
                 // string record, not a pointer/count byte list.  Consuming
                 // the size here would silently erase the size field from the
                 // semantic record.
+                //
+                // A bytes annotation on a byte pointer followed by a count is
+                // a sized byte buffer: packed on the wire, one byte a byte,
+                // where an unannotated `uint8_t*` list widens each element.
                 let list_type = annotated_list_type(field).or_else(|| {
-                    if has_string_or_bytes_annotation(field) {
+                    if is_annotated_byte_buffer(field) {
+                        Some(SemanticType::Bytes)
+                    } else if has_string_or_bytes_annotation(field) {
                         None
                     } else {
                         list_type_for(&field.ty)
@@ -684,6 +690,18 @@ fn has_manual_annotation(field: &crate::FieldDef) -> bool {
         .annotations
         .iter()
         .any(|annotation| annotation.starts_with("spring.wasm.manual:"))
+}
+
+fn is_annotated_byte_buffer(field: &crate::FieldDef) -> bool {
+    field
+        .annotations
+        .iter()
+        .any(|annotation| annotation == "spring.wasm.bytes")
+        && matches!(
+            &field.ty,
+            CType::Pointer { pointee, .. }
+                if matches!(pointee.as_ref(), CType::Primitive(Primitive::Char | Primitive::U8))
+        )
 }
 
 fn has_string_or_bytes_annotation(field: &crate::FieldDef) -> bool {
@@ -1153,6 +1171,28 @@ mod tests {
                 .metadata
                 .contains(&"count-field:dataSize".to_string())
         );
+    }
+
+    #[test]
+    fn lowers_annotated_byte_buffers_to_packed_bytes() {
+        let fields = normalize_fields(&[
+            FieldDef {
+                name: "data".to_string(),
+                ty: CType::Pointer {
+                    pointee: Box::new(CType::Primitive(Primitive::U8)),
+                    is_const: true,
+                },
+                annotations: vec!["spring.wasm.bytes".to_string()],
+            },
+            FieldDef {
+                name: "size".to_string(),
+                ty: CType::Primitive(Primitive::U32),
+                annotations: Vec::new(),
+            },
+        ]);
+        assert_eq!(fields.len(), 1);
+        assert_eq!(fields[0].ty, SemanticType::Bytes);
+        assert!(fields[0].metadata.contains(&"count-field:size".to_string()));
     }
 
     #[test]

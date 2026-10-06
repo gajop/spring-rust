@@ -2177,7 +2177,10 @@ fn di_render_variable_output_forward(
     }
     let field = &function.outputs[0];
     if matches!(field.ty, SemanticType::String) {
-        return di_render_string_output_forward(output, function, &context);
+        return di_render_string_output_forward(output, function, &context, true);
+    }
+    if matches!(field.ty, SemanticType::Bytes) {
+        return di_render_string_output_forward(output, function, &context, false);
     }
     let SemanticType::List { element } = &field.ty else {
         return false;
@@ -2232,11 +2235,21 @@ fn di_render_variable_output_forward(
     true
 }
 
+/// A string, or with `utf8` false packed bytes: both arrive as raw wire bytes.
 fn di_render_string_output_forward(
     output: &mut String,
     function: &FunctionModel,
     context: &VariableOutputRenderContext<'_>,
+    utf8: bool,
 ) -> bool {
+    let (return_type, finish) = if utf8 {
+        (
+            "String",
+            "return String::from_utf8(__output)\n                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));",
+        )
+    } else {
+        ("Vec<u8>", "return Ok(__output);")
+    };
     let all_args = context
         .direct_args
         .iter()
@@ -2247,7 +2260,7 @@ fn di_render_string_output_forward(
     let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
     output.push_str(&format!(
         r#"        #[inline]
-        {arity_lint}pub fn {name}({params}) -> Result<String> {{
+        {arity_lint}pub fn {name}({params}) -> Result<{return_type}> {{
 {blob_setup}            // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
@@ -2257,8 +2270,7 @@ fn di_render_string_output_forward(
                     Ok(required) => {{
                         __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
                         __output.truncate(required);
-                        return String::from_utf8(__output)
-                            .map_err(|_| crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        {finish}
                     }}
                     Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {{
                         __output.resize(error.required, 0);

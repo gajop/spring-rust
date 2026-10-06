@@ -199,6 +199,16 @@ struct DownloadArchiveResult { const Error* error; };
 struct AbortDownloadQuery { int32_t id; };
 struct AbortDownloadResult { const Error* error; bool removed; };
 
+// NEW (no Lua equivalent): read part of a file, so a module can spread a
+// large read over several frames instead of copying it in one call. Reads up
+// to `length` bytes from `offset`; `size` is the count read, short of `length`
+// only at the end of the file (0 past it). A missing file is an error. Modes
+// as LoadFile. Bytes cross the Wasm boundary packed, one host-work unit a
+// byte (LoadFile's list widens each byte to four). Archive members are
+// unpacked whole on each call; plain files are read in place.
+struct LoadFileRangeQuery { const char* path; const char* mode; uint32_t offset; uint32_t length; };
+struct LoadFileRangeResult { const Error* error; RECOIL_WASM_BYTES const uint8_t* data; uint32_t size; };
+
 // API structure
 struct VFSApi {
 	void (*FileExists)(const FileExistsQuery* query, FileExistsResult* result);
@@ -254,6 +264,8 @@ struct VFSApi {
 	void (*ScanAllDirs)(const ScanAllDirsQuery* query, ScanAllDirsResult* result);
 	void (*DownloadArchive)(const DownloadArchiveQuery* query, DownloadArchiveResult* result);
 	void (*AbortDownload)(const AbortDownloadQuery* query, AbortDownloadResult* result);
+	// NEW (no Lua equivalent) — see LoadFileRangeQuery above.
+	void (*LoadFileRange)(const LoadFileRangeQuery* query, LoadFileRangeResult* result);
 };
 
 extern const VFSApi VFS_API;

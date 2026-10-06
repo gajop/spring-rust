@@ -1196,4 +1196,31 @@ impl<'a> Vfs<'a> {
         }
     }
 
+    pub fn load_file_range(&self, path: &str, mode: &str, offset: u32, length: u32) -> Result<Vec<u8>, Error> {
+        unsafe {
+            let path_cstr = std::ffi::CString::new(path).map_err(|_| Error::invalid_argument("path"))?;
+            let mode_cstr = std::ffi::CString::new(mode).map_err(|_| Error::invalid_argument("mode"))?;
+            let query = sys::LoadFileRangeQuery {
+                path: path_cstr.as_ptr(),
+                mode: mode_cstr.as_ptr(),
+                offset,
+                length,
+            };
+            let mut result = MaybeUninit::<sys::LoadFileRangeResult>::zeroed();
+            let func = self.api.LoadFileRange.expect("LoadFileRange function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                {
+                    let slice = if result.size == 0 || result.data.is_null() {
+                        &[]
+                    } else {
+                        slice::from_raw_parts(result.data, result.size as usize)
+                    };
+                    slice.to_vec()
+                }
+            })
+        }
+    }
+
 }

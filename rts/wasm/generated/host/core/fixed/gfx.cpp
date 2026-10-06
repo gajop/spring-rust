@@ -846,6 +846,32 @@ wasm_trap_t* Core_gfx_copy_to_vbo(void* environment, wasmtime_caller_t* caller,
     return nullptr;
 }
 
+wasm_trap_t* Core_gfx_create_fence(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->CreateFence == nullptr)
+        return Trap("CreateFence generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("CreateFence generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("CreateFence generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GfxEmptyQuery query{};
+    query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
+    GfxUIntResult result{};
+    state->native->gfx->CreateFence(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_gfx_create_rbo(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -949,6 +975,32 @@ wasm_trap_t* Core_gfx_delete_fbo(void* environment, wasmtime_caller_t* caller,
     query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
     GfxEmptyResult result{};
     state->native->gfx->DeleteFBO(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i32 = errorCode;
+    return nullptr;
+}
+
+wasm_trap_t* Core_gfx_delete_fence(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->DeleteFence == nullptr)
+        return Trap("DeleteFence generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("DeleteFence generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("DeleteFence generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GfxUIntQuery query{};
+    query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
+    GfxEmptyResult result{};
+    state->native->gfx->DeleteFence(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i32 = errorCode;
     return nullptr;
@@ -2816,6 +2868,58 @@ wasm_trap_t* Core_gfx_get_view_sizes(void* environment, wasmtime_caller_t* calle
     if (!state->memory.Write(output, wire.data(), wire.size()))
         return Trap("generated Core output range changed unexpectedly");
     slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* Core_gfx_is_fence_signaled(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->IsFenceSignaled == nullptr)
+        return Trap("IsFenceSignaled generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("IsFenceSignaled generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("IsFenceSignaled generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GfxUIntQuery query{};
+    query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
+    GfxBoolResult result{};
+    state->native->gfx->IsFenceSignaled(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_gfx_is_query_available(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->IsQueryAvailable == nullptr)
+        return Trap("IsQueryAvailable generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("IsQueryAvailable generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("IsQueryAvailable generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GfxUIntQuery query{};
+    query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
+    GfxBoolResult result{};
+    state->native->gfx->IsQueryAvailable(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value ? 1u : 0u), errorCode));
     return nullptr;
 }
 
@@ -5364,6 +5468,13 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:gfx", "create-fence",
+                MakeFuncType(params, 1, results, 1), Core_gfx_create_fence, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:gfx", "create-rbo",
@@ -5389,6 +5500,13 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGenerated(linker, "spring:gfx", "delete-fbo",
                 MakeFuncType(params, 1, results, 1), Core_gfx_delete_fbo, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGenerated(linker, "spring:gfx", "delete-fence",
+                MakeFuncType(params, 1, results, 1), Core_gfx_delete_fence, state, error))
             return false;
     }
     {
@@ -5767,6 +5885,20 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGenerated(linker, "spring:gfx", "get-view-sizes",
                 MakeFuncType(params, 2, results, 1), Core_gfx_get_view_sizes, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:gfx", "is-fence-signaled",
+                MakeFuncType(params, 1, results, 1), Core_gfx_is_fence_signaled, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:gfx", "is-query-available",
+                MakeFuncType(params, 1, results, 1), Core_gfx_is_query_available, state, error))
             return false;
     }
     {
@@ -6284,6 +6416,6 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
     return true;
 }
 
-static_assert(158 >= 0, "generated Core Wasm callback count");
+static_assert(162 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

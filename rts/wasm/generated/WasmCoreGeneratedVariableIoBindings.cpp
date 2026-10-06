@@ -2947,6 +2947,93 @@ wasm_trap_t* CoreVariableIo_vfs_load_file(void* environment, wasmtime_caller_t* 
     return nullptr;
 }
 
+wasm_trap_t* CoreVariableIo_vfs_load_file_range(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->LoadFileRange == nullptr)
+        return Trap("LoadFileRange generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4)
+        return Trap("LoadFileRange generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 12u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader dataControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t dataPointer = 0;
+    std::uint32_t dataCapacity = 0;
+    std::uint32_t dataIgnoredLength = 0;
+    if (!dataControl.U32(dataPointer) || !dataControl.U32(dataCapacity) ||
+        !dataControl.U32(dataIgnoredLength) || !dataControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (!state->memory.Contains(dataPointer, dataCapacity)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    LoadFileRangeQuery query{};
+    std::uint32_t pathInputPointer = 0;
+    std::uint32_t pathInputCount = 0;
+    if (!reader.U32(pathInputPointer) || !reader.U32(pathInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::string pathInputStorage;
+    { std::uint32_t coreLength = 0; if (!pathInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
+    query.path = pathInputStorage.c_str();
+    std::uint32_t modeInputPointer = 0;
+    std::uint32_t modeInputCount = 0;
+    if (!reader.U32(modeInputPointer) || !reader.U32(modeInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> modeInputWire;
+    if (!state->memory.View(modeInputPointer, modeInputCount, modeInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeInputReader(modeInputWire);
+    std::string modeInputStorage;
+    { std::uint32_t coreLength = 0; if (!modeInputReader.U32(coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeInputReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeInputStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); }
+    query.mode = modeInputStorage.c_str();
+    query.offset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.offset)>>>(slots[0].i32);
+    query.length = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.length)>>>(slots[1].i32);
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    LoadFileRangeResult result{};
+    state->native->vfs->LoadFileRange(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    if (static_cast<std::uint64_t>(result.size) > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t dataRequired = static_cast<std::uint32_t>(result.size);
+    if (dataRequired != 0 && result.data == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteCoreU32(outputWire, 8u, dataRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || dataCapacity < dataRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (dataRequired != 0 && !state->memory.Write(dataPointer, result.data, dataRequired)) return Trap("generated Core variable output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariableIo_vfs_pack_f32(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -5093,6 +5180,13 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:vfs", "load-file-range",
+                MakeFuncType(params, 4, results, 1), CoreVariableIo_vfs_load_file_range, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedVariableIo(linker, "spring:vfs", "pack-f32",
@@ -5236,6 +5330,6 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
     return true;
 }
 
-static_assert(54 >= 0, "generated variable-I/O Core callback count");
+static_assert(55 >= 0, "generated variable-I/O Core callback count");
 
 } // namespace recoil::wasm::core::generated

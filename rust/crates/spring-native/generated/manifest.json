@@ -65,8 +65,8 @@
     },
     {
       "name": "gfx_generated.rs",
-      "sha256": "67b2c7bf5ff890944d211023c366878122c42693d5d8cb541d3d06f4129d9701",
-      "bytes": 171144
+      "sha256": "cfa99f43b67a7b0351e558d1d07dc7746e1b0e383259f3793a0e651fcd27fd01",
+      "bytes": 173303
     },
     {
       "name": "ground_decals_generated.rs",
@@ -280,8 +280,8 @@
     },
     {
       "name": "vfs_generated.rs",
-      "sha256": "9c87762080eb74994387081b878eb5aec267cc9c73b345fb3365b48934f1147a",
-      "bytes": 51783
+      "sha256": "cfd97637ff171db4d1047c4f71853c8c946ae8bf25a2ed7139285f33b81d34a4",
+      "bytes": 52987
     },
     {
       "name": "weapon_defs_generated.rs",

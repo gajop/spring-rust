@@ -4903,6 +4903,26 @@
     },
     {
       "module": "gfx",
+      "function": "CreateFence",
+      "import_module": "spring:gfx",
+      "import_name": "create-fence",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "gfx",
       "function": "CreateList",
       "import_module": "spring:gfx",
       "import_name": "create-list",
@@ -5117,6 +5137,26 @@
       "function": "DeleteFBO",
       "import_module": "spring:gfx",
       "import_name": "delete-fbo",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "status",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32->i32",
+      "notes": []
+    },
+    {
+      "module": "gfx",
+      "function": "DeleteFence",
+      "import_module": "spring:gfx",
+      "import_name": "delete-fence",
       "environment_mask": 122,
       "mutating": false,
       "visibility_sensitive": false,
@@ -7202,6 +7242,46 @@
         "i64"
       ],
       "signature": "i32,i32,i32,i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "gfx",
+      "function": "IsFenceSignaled",
+      "import_module": "spring:gfx",
+      "import_name": "is-fence-signaled",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "gfx",
+      "function": "IsQueryAvailable",
+      "import_module": "spring:gfx",
+      "import_name": "is-query-available",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
       "notes": []
     },
     {
@@ -30773,6 +30853,29 @@
     },
     {
       "module": "vfs",
+      "function": "LoadFileRange",
+      "import_module": "spring:vfs",
+      "import_name": "load-file-range",
+      "environment_mask": 127,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "variable-output-buffer",
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "vfs",
       "function": "PackF32",
       "import_module": "spring:vfs",
       "import_name": "pack-f32",
@@ -31462,7 +31565,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1197,
-  "manual_count": 200,
+  "automatic_count": 1201,
+  "manual_count": 201,
   "unsupported_count": 17
 }

@@ -197,6 +197,40 @@ static void NativeLoadFile(const LoadFileQuery* query, LoadFileResult* result) {
 	result->size = static_cast<uint32_t>(content.size());
 }
 
+static void NativeLoadFileRange(const LoadFileRangeQuery* query, LoadFileRangeResult* result) {
+	bufferPos = 0;
+	result->data = nullptr;
+	result->size = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	static thread_local std::vector<uint8_t> content;
+	content.clear();
+
+	CFileHandler fh(query->path, GetModes(query->mode));
+	if (!fh.FileExists() || fh.FileSize() < 0) {
+		result->error = &FILE_NOT_FOUND_ERROR;
+		return;
+	}
+
+	const uint64_t fileSize = static_cast<uint64_t>(fh.FileSize());
+	const uint64_t begin = std::min<uint64_t>(query->offset, fileSize);
+	const uint64_t count = std::min<uint64_t>(query->length, fileSize - begin);
+	result->error = nullptr;
+	if (count == 0)
+		return;
+
+	content.resize(static_cast<size_t>(count));
+	fh.Seek(static_cast<int>(begin));
+	const int read = fh.Read(content.data(), static_cast<int>(count));
+	if (read < 0) {
+		result->error = &FILE_NOT_FOUND_ERROR;
+		return;
+	}
+	content.resize(static_cast<size_t>(read));
+	result->data = content.data();
+	result->size = static_cast<uint32_t>(content.size());
+}
+
 static void NativeListDir(const ListDirQuery* query, ListDirResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
@@ -1149,4 +1183,5 @@ const VFSApi VFS_API = {
 	.ScanAllDirs = NativeScanAllDirs,
 	.DownloadArchive = NativeDownloadArchive,
 	.AbortDownload = NativeAbortDownload,
+	.LoadFileRange = NativeLoadFileRange,
 };

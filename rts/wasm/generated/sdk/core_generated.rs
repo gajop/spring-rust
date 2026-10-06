@@ -12468,6 +12468,11 @@ pub mod gfx {
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
+            #[link_name = "create-fence"]
+            pub safe fn core_create_fence(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
             #[link_name = "create-query"]
             pub safe fn core_create_query(p0: i32) -> i64;
         }
@@ -12490,6 +12495,11 @@ pub mod gfx {
         unsafe extern "C" {
             #[link_name = "delete-fbo"]
             pub safe fn core_delete_fbo(p0: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
+            #[link_name = "delete-fence"]
+            pub safe fn core_delete_fence(p0: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
@@ -12815,6 +12825,16 @@ pub mod gfx {
         unsafe extern "C" {
             #[link_name = "get-water-rendering"]
             pub safe fn core_get_water_rendering(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
+            #[link_name = "is-fence-signaled"]
+            pub safe fn core_is_fence_signaled(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
+            #[link_name = "is-query-available"]
+            pub safe fn core_is_query_available(p0: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
@@ -13628,6 +13648,24 @@ pub mod gfx {
     }
 
     #[inline]
+    pub fn create_fence(unused: u8) -> Result<u32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_create_fence(unused as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(packed as u32)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn create_query(target: Option<u32>) -> Result<u32> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -13705,6 +13743,20 @@ pub mod gfx {
         #[cfg(target_arch = "wasm32")]
         {
             let status = raw::core_delete_fbo(value as i32);
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (value,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn delete_fence(value: u32) -> Result<()> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let status = raw::core_delete_fence(value as i32);
             if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -14675,6 +14727,50 @@ pub mod gfx {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn is_fence_signaled(value: u32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_is_fence_signaled(value as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (value,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn is_query_available(value: u32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_is_query_available(value as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (value,);
             Err(unreachable!())
         }
     }
@@ -20508,6 +20604,11 @@ pub mod vfs {
         unsafe extern "C" {
             #[link_name = "load-file"]
             pub safe fn core_load_file(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        unsafe extern "C" {
+            #[link_name = "load-file-range"]
+            pub safe fn core_load_file_range(p0: i32, p1: i32, p2: i32, p3: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {

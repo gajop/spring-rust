@@ -681,6 +681,23 @@ struct GfxApi {
 	void (*TexRect)(const GfxTexRectQuery* query, GfxEmptyResult* result);
 	void (*Shape)(const GfxShapeQuery* query, GfxEmptyResult* result);
 	void (*Billboard)(const GfxEmptyQuery* query, GfxEmptyResult* result);
+
+	// NEW (no Lua equivalent): non-blocking completion checks, appended so
+	// existing modules keep the layout of every earlier entry.
+	//
+	// IsQueryAvailable reports whether a query made by CreateQuery has a result
+	// (GL_QUERY_RESULT_AVAILABLE); GetQuery waits for the GPU, this never does.
+	void (*IsQueryAvailable)(const GfxUIntQuery* query, GfxBoolResult* result);
+	// CreateFence inserts a fence after every GPU command issued so far
+	// (glFenceSync) and returns its handle. IsFenceSignaled reports whether the
+	// GPU has passed it, without waiting (glClientWaitSync with a zero timeout;
+	// the first check flushes, so the fence reaches the GPU). A signaled fence
+	// stays signaled. DeleteFence frees it; deleting an unknown handle is a
+	// no-op. Typical use: create after the pass that writes a buffer, read the
+	// buffer the first frame the fence is signaled.
+	void (*CreateFence)(const GfxEmptyQuery* query, GfxUIntResult* result);
+	void (*IsFenceSignaled)(const GfxUIntQuery* query, GfxBoolResult* result);
+	void (*DeleteFence)(const GfxUIntQuery* query, GfxEmptyResult* result);
 };
 
 extern const GfxApi GFX_API;

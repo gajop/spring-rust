@@ -338,6 +338,19 @@
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct LoadFileRangeQuery {
+            pub path: String,
+            pub mode: String,
+            pub offset: u32,
+            pub length: u32,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct LoadFileRangeResult {
+            pub data: Vec<u8>,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct LoadFileResult {
             pub data: Vec<u8>,
         }
@@ -1127,6 +1140,29 @@
                     }
                     Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
                         __output.resize(error.required * 4, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
+        }
+
+        #[inline]
+        pub fn load_file_range(path: &str, mode: &str, offset: u32, length: u32) -> Result<Vec<u8>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_input::vfs::load_file_range(offset as i32, length as i32, &__blob0, &__blob1, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        return Ok(__output);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
                     }
                     Err(error) => return Err(error.error),
                 }

@@ -11083,6 +11083,78 @@ wasm_trap_t* CoreDynamicInput_vfs_load_file(void* environment, wasmtime_caller_t
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_vfs_load_file_range(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->LoadFileRange == nullptr)
+        return Trap("LoadFileRange dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4u)
+        return Trap("LoadFileRange dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[2].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 16u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    LoadFileRangeQuery query{};
+    std::uint32_t pathPointer = 0, pathBytes = 0;
+    if (!inputControl.U32(pathPointer) || !inputControl.U32(pathBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(pathBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> pathWire;
+    if (!state->memory.View(pathPointer, pathBytes, pathWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathReader(pathWire);
+    std::string pathStorage;
+    { std::uint32_t coreLength = 0; if (!pathReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!pathReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } pathStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.path = pathStorage.data(); }
+    if (!pathReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::uint32_t modePointer = 0, modeBytes = 0;
+    if (!inputControl.U32(modePointer) || !inputControl.U32(modeBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(modeBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> modeWire;
+    if (!state->memory.View(modePointer, modeBytes, modeWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader modeReader(modeWire);
+    std::string modeStorage;
+    { std::uint32_t coreLength = 0; if (!modeReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!modeReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } modeStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.mode = modeStorage.data(); }
+    if (!modeReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.offset = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.offset)>>>(slots[0].i32);
+    query.length = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.length)>>>(slots[1].i32);
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<std::uint8_t> outputControlWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputControlWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader outputControl(std::span<const std::uint8_t>(outputControlWire.data(), outputControlWire.size()));
+    std::uint32_t outputPointer = 0, outputCapacity = 0, outputIgnoredLength = 0;
+    if (!outputControl.U32(outputPointer) || !outputControl.U32(outputCapacity) || !outputControl.U32(outputIgnoredLength) || !outputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint64_t outputCapacityBytes = static_cast<std::uint64_t>(outputCapacity) * 1u;
+    if (outputCapacityBytes > std::numeric_limits<std::size_t>::max() || (outputCapacityBytes != 0 && !state->memory.Contains(outputPointer, static_cast<std::size_t>(outputCapacityBytes)))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    LoadFileRangeResult result{};
+    state->native->vfs->LoadFileRange(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    std::uint32_t required = 0;
+    if (!AssignDynamicCount(result.size, required) || (required != 0 && result.data == nullptr)) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteDynamicU32(outputControlWire, 8u, required)) return Trap("dynamic-input output descriptor changed unexpectedly");
+    if (outputCapacity < required) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::size_t requiredSize = static_cast<std::size_t>(required);
+    if (!CheckResultBytes(state, requiredSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (!guard.Charge(requiredSize)) return Trap(budgetError);
+    if (required != 0) {
+        std::span<std::uint8_t> outputWire;
+        if (!state->memory.MutableView(outputPointer, requiredSize, outputWire)) return Trap("dynamic-input output range changed unexpectedly");
+        std::memcpy(outputWire.data(), result.data, requiredSize);
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_vfs_pack_f32(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -14739,6 +14811,13 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "load-file-range",
+                MakeFuncType(params, 4, results, 1), CoreDynamicInput_vfs_load_file_range, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicInput(linker, "spring:vfs", "pack-f32",
@@ -14973,6 +15052,6 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     return true;
 }
 
-static_assert(276u >= 0u, "generated dynamic-input Core callback count");
+static_assert(277u >= 0u, "generated dynamic-input Core callback count");
 
 } // namespace recoil::wasm::core::generated
