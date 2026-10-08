@@ -196,6 +196,7 @@ CR_REG_METADATA(CGame, (
 	CR_MEMBER(showFPS),
 	CR_MEMBER(showClock),
 	CR_MEMBER(showSpeed),
+	CR_IGNORED(defaultInterface),
 
 	CR_IGNORED(playerTraffic),
 	CR_MEMBER(noSpectatorChat),

@@ -191,6 +191,7 @@ CR_REG_METADATA(CGlobalRendering, (
 	CR_IGNORED(supportTextureQueryLOD),
 	CR_IGNORED(supportMSAAFrameBuffer),
 	CR_IGNORED(supportDepthBufferBitDepth),
+	CR_IGNORED(windowDepthBufferBitDepth),
 	CR_IGNORED(supportRestartPrimitive),
 	CR_IGNORED(supportClipSpaceControl),
 	CR_IGNORED(supportSeamlessCubeMaps),

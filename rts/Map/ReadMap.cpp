@@ -71,6 +71,7 @@ CR_REG_METADATA(CReadMap, (
 	CR_IGNORED(unsyncedHeightInfo),
 	CR_IGNORED(boundingRadius),
 	CR_IGNORED(mapChecksum),
+	CR_IGNORED(nullMap),
 
 	CR_IGNORED(heightMapSyncedPtr),
 	CR_IGNORED(heightMapUnsyncedPtr),
