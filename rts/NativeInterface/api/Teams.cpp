@@ -119,6 +119,17 @@ static void NativeGetTeamLuaAI(const GetTeamLuaAIQuery* query, GetTeamLuaAIResul
 
 	result->error = nullptr;
 	result->luaAI = nullptr;
+
+	// Same as Spring.GetTeamLuaAI: the short name of the team's first Lua AI.
+	for (const uint8_t id: skirmishAIHandler.GetSkirmishAIsInTeam(query->teamID)) {
+		const SkirmishAIData* aiData = skirmishAIHandler.GetSkirmishAI(id);
+
+		if (aiData == nullptr || !aiData->isLuaAI)
+			continue;
+
+		result->luaAI = aiData->shortName.c_str();
+		return;
+	}
 }
 
 static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamResourcesResult* result) {
