@@ -1,0 +1,24 @@
+{
+  "spring": "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-before/spring-headless",
+  "engine_sha256": "9daa44041ab11eed356705d7e9deaf43cae06c611fd3356a856a04f3caa51400",
+  "game": "/home/gajop/.local/share/ship-game-verify/2026-10-12-jobs/game-every/game.sdd",
+  "game_overlay": "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-before-default/isolation/games/game.sdd",
+  "interval": null,
+  "threads": 4,
+  "frames": 1000,
+  "diagnostic_logging": false,
+  "duration_seconds": 49.51751300000001,
+  "demo": "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-before-default/write/demos/2026-10-12_01-46-20-225_sb_initial_null_64x64_2026.09.23-64-gc24a072 rust-wip.sdfz",
+  "command": [
+    "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-before/spring-headless",
+    "--write-dir",
+    "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-before-default/write",
+    "--isolation",
+    "--isolation-dir",
+    "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-before-default/isolation",
+    "--config",
+    "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-before-default/spring.conf",
+    "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-before-default/start.txt"
+  ],
+  "ms_per_frame": 49.51751300000001
+}

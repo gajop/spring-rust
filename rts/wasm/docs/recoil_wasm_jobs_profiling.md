@@ -86,6 +86,12 @@ so use CPU samples to distinguish computation from elapsed time. Start with
 coarse zones; enable detailed stages for a short capture when needed. There is
 no separate worker logger or shared profiling aggregation lock.
 
+State-check profiling has `Wasm::Sync::Metadata` and, only when a full scan is
+explicitly enabled, its child `Wasm::Sync::FullMemoryHash` (with the memory byte
+count). Normal play must have no FullMemoryHash zones. `WasmSyncLog` performs
+expensive diagnostic scans every frame; disable it when measuring normal game
+throughput. Full network memory checks are also disabled by default.
+
 CSV export supplies names, source locations, start times, durations, and Tracy
 thread identifiers:
 

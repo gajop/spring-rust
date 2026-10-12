@@ -156,6 +156,26 @@ TEST_CASE("Wasm jobs have the configured deterministic fuel budget on every invo
 	}
 }
 
+TEST_CASE("Wasm job checksums retain the entire copied input without rescanning payloads")
+{
+	WasmRuntime runtime;
+	auto program = Program(runtime);
+	int owner = 0;
+	WasmSyncedJobs first, identical, different;
+	first.BeginFrame(0);
+	identical.BeginFrame(0);
+	different.BeginFrame(0);
+	std::vector<std::uint8_t> input(WasmSyncedJobs::MAX_INPUT_BYTES, 0);
+	REQUIRE(first.Submit(&owner, program, "work", input) == 1);
+	REQUIRE(identical.Submit(&owner, program, "work", input) == 1);
+	const auto hash = first.StateHash(&owner);
+	CHECK(identical.StateHash(&owner) == hash);
+	input.back() = 1;
+	REQUIRE(different.Submit(&owner, program, "work", input) == 1);
+	CHECK(different.StateHash(&owner) != hash);
+	CHECK(first.StateHash(&owner) == hash); // caller mutation cannot alter the digest
+}
+
 TEST_CASE("Wasm jobs merge globally in submission order at the next frame across thread counts")
 {
 	StopThreads stop;

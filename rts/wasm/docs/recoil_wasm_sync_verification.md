@@ -37,7 +37,7 @@ A divergence in any of them is treated the same way: as an engine, runtime or ho
 
 After each simulation frame, every synced Wasm instance's linear memory is hashed (a fast non-cryptographic hash such as xxHash3) and fed to `CSyncChecker::Sync`, together with the instance's memory size and module identity.
 
-- **Interval**: configurable; every frame in test runs, every N frames in normal games (hashing many megabytes every frame is measurable cost). Dirty-page tracking can make every-frame hashing cheap later.
+- **Implemented policy**: full-memory hashing is off in normal games (`system.WasmStateHashInterval = 0` by default). `WasmSyncLog` hashes every frame for local verification without changing the network checksum; a positive game-owned interval explicitly opts into network memory scans. Normal checks cover only module metadata and cached job digests. See [the cost report and fix](recoil_wasm_state_hash_cost_2026-10-12.md). Dirty-page tracking may support cheaper full-state coverage later.
 - **Unsynced instances are excluded**: they legitimately differ per client.
 - **Consequence**: a guest divergence shows on the frame it happens, in live games, demos and tests alike, with no per-game code.
 - **Precondition**: no host call writes client-dependent data into synced guest memory. Any such write is itself a sync bug, and this hash will expose it.

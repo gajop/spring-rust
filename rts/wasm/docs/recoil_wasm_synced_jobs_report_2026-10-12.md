@@ -30,6 +30,15 @@ The implementation follows the supplied
 This report covers the requested local phases; it does not claim the plan's
 three-platform acceptance matrix is complete.
 
+## Subsequent performance correction
+
+The full-memory network checksum default described in this historical report
+was too expensive for normal play and has been replaced by opt-in memory scans.
+Normal checks now use module metadata and cached job-input digests. See the
+[cost report and correction](recoil_wasm_state_hash_cost_2026-10-12.md) and the
+[current API](recoil_wasm_synced_jobs.md); the original pinned evidence below
+remains a record of the earlier implementation.
+
 ## Implemented behavior
 
 The engine hashes complete synced Wasm linear memories after every frame, sorted

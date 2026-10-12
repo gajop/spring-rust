@@ -460,8 +460,9 @@ void WasmCoreHost::ShutdownSyncedJobs()
 	}
 }
 
-std::vector<WasmCoreHost::SyncState> WasmCoreHost::SyncedStates()
+std::vector<WasmCoreHost::SyncState> WasmCoreHost::SyncedStates(bool hashMemory)
 {
+	ZoneScopedN("Wasm::Sync::Metadata");
 	std::lock_guard registryLock(RegistryMutex());
 	std::vector<SyncState> states;
 	for (const auto& host: Hosts()) {
@@ -472,11 +473,15 @@ std::vector<WasmCoreHost::SyncState> WasmCoreHost::SyncedStates()
 		state.jobsHash = SyncedJobs().StateHash(host.get());
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 		const auto& memory = host->backend->bindings.Host().memory;
-		std::span<const std::uint8_t> bytes;
 		state.memoryBytes = memory.Size();
-		if (!memory.View(0, state.memoryBytes, bytes))
-			throw std::runtime_error("Cannot inspect synced Wasm memory: " + host->moduleName);
-		state.memoryHash = XXH3_64bits(bytes.data(), bytes.size());
+		if (hashMemory) {
+			ZoneScopedN("Wasm::Sync::FullMemoryHash");
+			ZoneValue(state.memoryBytes);
+			std::span<const std::uint8_t> bytes;
+			if (!memory.View(0, state.memoryBytes, bytes))
+				throw std::runtime_error("Cannot inspect synced Wasm memory: " + host->moduleName);
+			state.memoryHash = XXH3_64bits(bytes.data(), bytes.size());
+		}
 #endif
 		states.push_back(std::move(state));
 	}

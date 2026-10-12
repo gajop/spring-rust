@@ -1,0 +1,52 @@
+Filters: [.benchmark] [.benchmark]
+Randomness seeded to: 3569286590
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":0,"input_bytes":64,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":20,"total_ns":10945,"instantiate_ns":4133,"input_copy_ns":1131,"dispatch_ns":31,"output_copy_ns":47}
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":0,"input_bytes":4096,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":4,"total_ns":12035,"instantiate_ns":4135,"input_copy_ns":1987,"dispatch_ns":36,"output_copy_ns":48}
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":0,"input_bytes":65536,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":3,"total_ns":26774,"instantiate_ns":4319,"input_copy_ns":14809,"dispatch_ns":47,"output_copy_ns":70}
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":1000,"input_bytes":64,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":859,"total_ns":11822,"instantiate_ns":4086,"input_copy_ns":1102,"dispatch_ns":918,"output_copy_ns":35}
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":1000,"input_bytes":4096,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":862,"total_ns":12843,"instantiate_ns":4095,"input_copy_ns":1971,"dispatch_ns":922,"output_copy_ns":36}
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":1000,"input_bytes":65536,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":869,"total_ns":27286,"instantiate_ns":4244,"input_copy_ns":14787,"dispatch_ns":927,"output_copy_ns":63}
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":100000,"input_bytes":64,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":93622,"total_ns":99946,"instantiate_ns":4121,"input_copy_ns":1136,"dispatch_ns":89107,"output_copy_ns":36}
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":100000,"input_bytes":4096,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":90603,"total_ns":101678,"instantiate_ns":4262,"input_copy_ns":2035,"dispatch_ns":89116,"output_copy_ns":37}
+WASM_JOB_BENCH {"kind":"isolated","fuel":0,"iterations":100000,"input_bytes":65536,"output_bytes":12,"samples":301,"compile_ns":13052995,"inline_ns":89535,"total_ns":115668,"instantiate_ns":4217,"input_copy_ns":14854,"dispatch_ns":89111,"output_copy_ns":66}
+WASM_JOB_BENCH {"kind":"copies","fuel":0,"bytes_each_way":64,"input_copy_ns":1107,"output_copy_ns":47}
+WASM_JOB_BENCH {"kind":"copies","fuel":0,"bytes_each_way":4096,"input_copy_ns":1952,"output_copy_ns":107}
+WASM_JOB_BENCH {"kind":"copies","fuel":0,"bytes_each_way":65536,"input_copy_ns":14263,"output_copy_ns":1942}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":1,"iterations":0,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":638,"seal_ns":11979,"barrier_ns":55,"total_ns":12650}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":1,"iterations":1000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":604,"seal_ns":12816,"barrier_ns":51,"total_ns":13494}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":1,"iterations":100000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":685,"seal_ns":103205,"barrier_ns":76,"total_ns":104015}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":2,"iterations":0,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":329,"seal_ns":14,"barrier_ns":11977,"total_ns":12298}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":2,"iterations":1000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":366,"seal_ns":17,"barrier_ns":11522,"total_ns":11914}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":2,"iterations":100000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":311,"seal_ns":9,"barrier_ns":53897,"total_ns":54198}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":4,"iterations":0,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":314,"seal_ns":11,"barrier_ns":10323,"total_ns":10802}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":4,"iterations":1000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":316,"seal_ns":11,"barrier_ns":10089,"total_ns":10422}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":4,"iterations":100000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":332,"seal_ns":15,"barrier_ns":29879,"total_ns":30279}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":8,"iterations":0,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":323,"seal_ns":19,"barrier_ns":12477,"total_ns":12818}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":8,"iterations":1000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":374,"seal_ns":66,"barrier_ns":12074,"total_ns":12756}
+WASM_JOB_BENCH {"kind":"queue","fuel":0,"workers":8,"iterations":100000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":346,"seal_ns":59,"barrier_ns":20356,"total_ns":20749}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":0,"input_bytes":64,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":10,"total_ns":21416,"instantiate_ns":8396,"input_copy_ns":2791,"dispatch_ns":53,"output_copy_ns":114}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":0,"input_bytes":4096,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":5,"total_ns":10295,"instantiate_ns":3577,"input_copy_ns":1981,"dispatch_ns":41,"output_copy_ns":45}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":0,"input_bytes":65536,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":5,"total_ns":24790,"instantiate_ns":3750,"input_copy_ns":14669,"dispatch_ns":57,"output_copy_ns":66}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":1000,"input_bytes":64,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":870,"total_ns":10329,"instantiate_ns":3574,"input_copy_ns":1123,"dispatch_ns":922,"output_copy_ns":36}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":1000,"input_bytes":4096,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":1017,"total_ns":11278,"instantiate_ns":3626,"input_copy_ns":1977,"dispatch_ns":925,"output_copy_ns":38}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":1000,"input_bytes":65536,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":869,"total_ns":25511,"instantiate_ns":3646,"input_copy_ns":14554,"dispatch_ns":935,"output_copy_ns":64}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":100000,"input_bytes":64,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":92481,"total_ns":96612,"instantiate_ns":3557,"input_copy_ns":1092,"dispatch_ns":87179,"output_copy_ns":36}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":100000,"input_bytes":4096,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":87736,"total_ns":98589,"instantiate_ns":3567,"input_copy_ns":1961,"dispatch_ns":87669,"output_copy_ns":38}
+WASM_JOB_BENCH {"kind":"isolated","fuel":1000000000,"iterations":100000,"input_bytes":65536,"output_bytes":12,"samples":301,"compile_ns":1745139,"inline_ns":88290,"total_ns":111402,"instantiate_ns":3602,"input_copy_ns":14228,"dispatch_ns":87191,"output_copy_ns":58}
+WASM_JOB_BENCH {"kind":"copies","fuel":1000000000,"bytes_each_way":64,"input_copy_ns":1076,"output_copy_ns":44}
+WASM_JOB_BENCH {"kind":"copies","fuel":1000000000,"bytes_each_way":4096,"input_copy_ns":2645,"output_copy_ns":160}
+WASM_JOB_BENCH {"kind":"copies","fuel":1000000000,"bytes_each_way":65536,"input_copy_ns":14405,"output_copy_ns":1987}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":1,"iterations":0,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":286,"seal_ns":10583,"barrier_ns":40,"total_ns":10891}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":1,"iterations":1000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":256,"seal_ns":11017,"barrier_ns":38,"total_ns":11320}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":1,"iterations":100000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":283,"seal_ns":99853,"barrier_ns":45,"total_ns":100198}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":2,"iterations":0,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":298,"seal_ns":8,"barrier_ns":9533,"total_ns":9843}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":2,"iterations":1000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":291,"seal_ns":9,"barrier_ns":9816,"total_ns":10120}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":2,"iterations":100000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":311,"seal_ns":26,"barrier_ns":55705,"total_ns":56036}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":4,"iterations":0,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":322,"seal_ns":13,"barrier_ns":13878,"total_ns":14212}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":4,"iterations":1000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":318,"seal_ns":14,"barrier_ns":11035,"total_ns":11366}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":4,"iterations":100000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":326,"seal_ns":17,"barrier_ns":31433,"total_ns":31771}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":8,"iterations":0,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":320,"seal_ns":21,"barrier_ns":14168,"total_ns":14509}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":8,"iterations":1000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":317,"seal_ns":22,"barrier_ns":13682,"total_ns":14021}
+WASM_JOB_BENCH {"kind":"queue","fuel":1000000000,"workers":8,"iterations":100000,"jobs_per_batch":64,"input_bytes":4096,"admission_ns":323,"seal_ns":21,"barrier_ns":20280,"total_ns":20623}
+===============================================================================
+All tests passed (46570 assertions in 1 test case)

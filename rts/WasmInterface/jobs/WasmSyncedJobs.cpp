@@ -22,6 +22,7 @@ struct WasmSyncedJobs::State {
 		std::shared_ptr<const WasmJobProgram> program;
 		std::string exportName;
 		std::vector<std::uint8_t> input;
+		std::uint64_t inputHash;
 #if defined(TRACY_ENABLE)
 		std::string_view profileOwner;
 #endif
@@ -77,11 +78,15 @@ std::uint32_t WasmSyncedJobs::Submit(void* owner,
 	if (ZoneIsActive)
 		ZoneTextF("frame=%d job=%u export=%s input=%zu", state->frame, id, exportName.c_str(), input.size());
 	state->pending.push_back({owner, id, state->frame, std::move(program),
-		std::move(exportName), {input.begin(), input.end()}
+		std::move(exportName), {input.begin(), input.end()}, 0
 #if defined(TRACY_ENABLE)
 		, profileOwner
 #endif
 	});
+	// Hash the owned snapshot once at admission, rather than scanning payloads
+	// from the ordinary end-of-frame checksum (up to 16 MiB per batch).
+	auto& job = state->pending.back();
+	job.inputHash = XXH3_64bits(job.input.data(), job.input.size());
 	state->inputBytes += input.size();
 	return id;
 }
@@ -231,7 +236,8 @@ std::uint64_t WasmSyncedJobs::StateHash(void* owner) const
 		addWord(job.exportName.size());
 		hash = XXH3_64bits_withSeed(job.exportName.data(), job.exportName.size(), hash);
 		addWord(job.input.size());
-		hash = XXH3_64bits_withSeed(job.input.data(), job.input.size(), hash);
+		addWord(static_cast<std::uint32_t>(job.inputHash));
+		addWord(static_cast<std::uint32_t>(job.inputHash >> 32));
 	};
 	if (state->active)
 		for (const auto& job: state->active->jobs) addJob(job);

@@ -222,19 +222,29 @@ have the new frame's budget and admission context independently of `GameFrame`.
 
 ## State checksums and diagnosis
 
-After `GameFramePost` and batch sealing, the engine hashes every synced module's
-complete linear memory with XXH3-64, sorted by module name. It mixes memory size,
-module SHA-512 identity, environment, fault state, memory hash, and job submission
-hash into the existing `CSyncChecker` checksum. The job hash includes IDs, frames,
-worker identity/runtime configuration, export names, and copied input; it never
-reads background completion or worker outputs. Unsynced modules are excluded.
+After `GameFramePost` and batch sealing, normal games add only synced module
+metadata to the existing `CSyncChecker`: name, SHA-512 identity, environment,
+fault state, memory size, and job submission digest. **Normal play does not scan
+Wasm linear memory.** Reading its size is constant-time. Job input bytes are
+digested once when copied at admission; frame checks combine the cached digest
+with IDs, frames, worker identity/runtime settings, export names, and lengths.
+Checks never read background completion or worker outputs. Unsynced modules are
+excluded.
 
-Game-owned `gamedata/modrules.lua` setting `system.WasmStateHashInterval` controls network
-checksum cadence (default 1, minimum 1). **Cost:** hashing a game's whole linear memory each frame can take a
-whole frame (22 ms for a 512 MiB module); see the
-[cost report](recoil_wasm_state_hash_cost_2026-10-12.md). Client-local settings cannot change it.
-Hashing a large memory every frame costs memory bandwidth. Dirty-page tracking
-and per-game subsystem digests are future optimizations.
+Game-owned `gamedata/modrules.lua` setting `system.WasmStateHashInterval` defaults
+to **0: disabled**. A positive N explicitly enables a complete XXH3-64 memory
+scan in the network checksum every N simulation frames, including frame zero.
+Negative values clamp to zero. This is a diagnostic option: a scan of Ship Game's
+512 MiB memory cost about 22 ms, and increasing N trades that cost for periodic
+hitches; see the [cost report](recoil_wasm_state_hash_cost_2026-10-12.md).
+Client-local settings cannot change the network hashing policy. Without
+`SYNCCHECK`, an interval alone does not trigger useless scans.
+
+Setting `WasmSyncLog` explicitly enables **full-memory diagnostic hashing every
+frame**, regardless of the game's interval, and dumps can request a scan at a
+selected frame. These local diagnostics do not change the network checksum;
+one peer may log while another does not. Leave them disabled in normal play.
+Dirty-page tracking and game-owned subsystem digests remain future optimizations.
 
 Local configuration settings:
 

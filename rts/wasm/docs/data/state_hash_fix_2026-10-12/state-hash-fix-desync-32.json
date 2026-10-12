@@ -1,0 +1,72 @@
+{
+  "result": {
+    "passed": true,
+    "comparisons": [
+      {
+        "frame": 17,
+        "module": "sync-jobs-test",
+        "reason": "Wasm state or module identity",
+        "left": {
+          "name": "sync-jobs-test",
+          "identity": "189f22d23636d021d2dcfb510db991e50e4c12249fdacd81386fab5412b3af8ed74e37f2d36623766df33445c4c515f7797aa1d2366dda7fe1bcf46dfb1ac961",
+          "environment": "rules-synced",
+          "bytes": 65536,
+          "hash": "fcd7f7f83eb85c51",
+          "jobs_hash": "db02334e96d65708",
+          "faulted": false
+        },
+        "right": {
+          "name": "sync-jobs-test",
+          "identity": "189f22d23636d021d2dcfb510db991e50e4c12249fdacd81386fab5412b3af8ed74e37f2d36623766df33445c4c515f7797aa1d2366dda7fe1bcf46dfb1ac961",
+          "environment": "rules-synced",
+          "bytes": 65536,
+          "hash": "663f2cb26f1cb4e1",
+          "jobs_hash": "db02334e96d65708",
+          "faulted": false
+        }
+      }
+    ],
+    "recording_comparisons": []
+  },
+  "provenance": {
+    "command": [
+      "test/synctest/wasm_sync_replay.py",
+      "run",
+      "--spring",
+      "out/local-sync/state-hash-after/spring-headless",
+      "--game",
+      "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/game.sdd",
+      "--demo",
+      "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/replay.sdfz",
+      "--output",
+      "out/local-sync/state-hash-fix-desync-32",
+      "--threads",
+      "1",
+      "4",
+      "--frames",
+      "32",
+      "--timeout",
+      "900",
+      "--fixture",
+      "out/local-sync/integrated-jobs-fixtures/desync.wasm",
+      "--enable-synced-timers",
+      "--allow-recorded-desync",
+      "--expect-desync-frame",
+      "17",
+      "--expect-desync-module",
+      "sync-jobs-test",
+      "--dump-frame",
+      "17"
+    ],
+    "engine_sha256": "313263f7f3c19eedbc3c56b81f6e2f96e6a27b7c958440a32b72d9b1422cf9ed",
+    "demo_sha256": "ae404d83f64c87c0d5229b8b1f5e804cce82d966eaffbf7738dabe25e940d699",
+    "game": "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/game.sdd",
+    "fixture_sha256": "53d56025e678d367fbd7b0eac393f4216df53ee56b3060ce5cc769420d80417d",
+    "worker_fixture_sha256": null,
+    "threads": [
+      1,
+      4
+    ],
+    "final_frame": 32
+  }
+}

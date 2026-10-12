@@ -1,5 +1,9 @@
 # Wasm state hashing costs a whole frame, 2026-10-12
 
+**Fixed on 2026-10-12:** full-memory hashing is now disabled by default. The
+original measurements below describe the regression before the correction;
+the correction and new local checks are recorded at the end of this report.
+
 **Regression.** Since `c24a0727aa` ("Add deterministic Wasm jobs…") the engine hashes every
 synced Wasm module's complete linear memory after every simulation frame and mixes the hash into
 the sync checksum. For Ship Game that is 512 MiB a frame: about 22 ms of simulation-thread time,
@@ -89,3 +93,79 @@ uv run --quiet python tools/launch.py check skirmish --seconds 20 --speed 20 --a
 
 Evidence (outside this repository): `~/.local/share/ship-game-verify/2026-10-12-jobs/`
 (`game-*` snapshots, `run-*` speed-20 runs, `speed1-*` real-time runs, `hashlog/sync.jsonl`).
+
+## Correction and verification
+
+`system.WasmStateHashInterval` now defaults to **0**, and zero really disables
+network memory scans, including frame zero. Negative values clamp to zero.
+A positive N retains explicit full-memory hashing every N frames. Increasing N
+can still cause hitches; this remains a diagnostic option, not a normal-play
+recommendation. A build without SYNCCHECK does not scan memory merely because
+the game supplied an interval.
+
+Ordinary frames retain inexpensive module identity, environment, fault-state,
+memory-size, and job-submission checks. Reading the memory size does not inspect
+its contents. Job inputs are hashed once from the owned copy at admission;
+frame checks combine cached input digests rather than rescanning up to 16 MiB of
+payloads. Results/readiness and unsynced worlds remain outside that checksum.
+
+`WasmSyncLog` explicitly enables full-memory diagnostic hashes every frame,
+without changing the network checksum. Dumping requires that log, as documented;
+a dump setting alone does not trigger a useless scan. This preserves the local
+runner's first-frame/module diagnosis and deliberate-desync self-test. The
+checksum format/policy changes, so fresh recordings and matching engine versions
+are required for ordinary replay/network checks.
+
+The same immutable game/start script from this report was measured with a
+64 KiB marker guest, four pool threads, speed 20, and **no diagnostic log**.
+Timestamp markers delimit exactly 1,000 sim frames and exclude startup/shutdown:
+
+| Engine/policy | Milliseconds per sim frame |
+|---|---:|
+| Before correction, default full scan | 49.518 |
+| Corrected default (memory scans off) | 2.082 |
+| Corrected, explicitly zero | 1.651 |
+| Corrected, explicitly every frame | 41.266 |
+| Corrected, explicitly every 30 frames | 1.998 average; periodic scan cost remains |
+
+Only one benchmark engine ran at a time, but unrelated Rust compilation was
+active on this machine. These are throughput checks, not isolated CPU timings
+or a precise speedup estimate. Speed 20 also caps throughput at approximately
+600 frames/s. The fast default and zero runs, and the return of the cost when
+every-frame scanning is explicitly enabled, demonstrate that the default
+regression has been removed. The earlier 22 ms measurement remains the original
+report's evidence, rather than being replaced by a different workload/machine
+condition.
+
+Local native checks pass 5,230 assertions in nine cases, including full copied
+input digest coverage and immutability. The job benchmark passes 46,570
+assertions; the replay runner's ten unit tests pass. A fresh game using jobs
+matches all 121 frame logs against its recording and across 1/4 threads. The
+deliberate desync is still identified at frame 17 in `sync-jobs-test`.
+
+Recordings made **without** diagnostic logging were replayed
+**with** it enabled, across 1/4 threads: all 121 frame logs agree and recorded
+network checksums produce zero desync warnings for the default (zero), interval 1,
+and interval 30 policies. This checks the separation between diagnostic reads
+and the authoritative checksum, including frames between scheduled scans.
+
+[Evidence](data/state_hash_fix_2026-10-12/) contains binary hashes, benchmark
+commands/results, timestamp markers, native checks, and replay provenance.
+Large executables, demos, and raw logs remain under `out/local-sync`.
+`test/wasm_api/measure_state_hash_cost.py` reproduces the fixed-frame measurement
+and records an unlogged demo for the logging-invariance check:
+
+```sh
+RAYON_NUM_THREADS=2 python3 test/wasm_api/measure_state_hash_cost.py \
+  --spring /absolute/runtime/spring-headless --game /absolute/immutable/game.sdd \
+  --script /absolute/skirmish/start.txt --output /absolute/new-output --threads 4
+# Repeat with --interval 0, 1, or 30 in a fresh output directory.
+# Use result.json's demo and game_overlay with wasm_sync_replay.py run
+# --threads 1 4 --frames 120 to replay with diagnostic logging and reject
+# any recorded checksum warnings.
+```
+
+See the [current API](recoil_wasm_synced_jobs.md#state-checksums-and-diagnosis)
+and [profiling guide](recoil_wasm_jobs_profiling.md) for the updated controls and
+`Wasm::Sync::Metadata` / `Wasm::Sync::FullMemoryHash` Tracy zones. Keep
+`WasmSyncLog` empty and the game interval zero when measuring normal play.

@@ -1,0 +1,45 @@
+{
+  "result": {
+    "passed": true,
+    "comparisons": [
+      {
+        "equal": true,
+        "frames": 121
+      }
+    ],
+    "recording_comparisons": []
+  },
+  "provenance": {
+    "command": [
+      "test/synctest/wasm_sync_replay.py",
+      "run",
+      "--spring",
+      "out/local-sync/state-hash-after/spring-headless",
+      "--game",
+      "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-after-one/isolation/games/game.sdd",
+      "--demo",
+      "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-after-one/write/demos/2026-10-12_01-47-44-880_sb_initial_null_64x64_2026.09.23-65-g9c24e53 rust-wip.sdfz",
+      "--output",
+      "out/local-sync/state-hash-logging-invariant-one",
+      "--threads",
+      "1",
+      "4",
+      "--frames",
+      "120",
+      "--timeout",
+      "900"
+    ],
+    "engine_sha256": "313263f7f3c19eedbc3c56b81f6e2f96e6a27b7c958440a32b72d9b1422cf9ed",
+    "demo_sha256": "df2179495759d232cefc1a66c0cba0772c46dee891250e7e4153fb9c85111a71",
+    "game": "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/state-hash-cost-after-one/isolation/games/game.sdd",
+    "fixture_sha256": null,
+    "worker_fixture_sha256": null,
+    "threads": [
+      1,
+      4
+    ],
+    "final_frame": 120
+  },
+  "recording_had_no_diagnostic_log": true,
+  "recorded_desync_warnings": 0
+}

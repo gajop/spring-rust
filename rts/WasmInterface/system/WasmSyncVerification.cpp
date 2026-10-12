@@ -60,16 +60,24 @@ void WasmSyncVerification::EndFrame(int frame)
 				throw std::runtime_error("Cannot open WasmSyncLog: " + path);
 		}
 	}
-	// The checksum cadence is game-owned, never a client-local setting. Logs
-	// may inspect every frame without changing what enters the network checksum.
-	const bool mixState = (frame % modInfo.wasmStateHashInterval) == 0;
-	const bool dump = frame == configHandler->GetInt("WasmSyncDumpFrame");
-	if (!mixState && !log.is_open() && !dump)
+	// Basic metadata stays inexpensive in ordinary play. A game can opt into
+	// full-memory network checks; local diagnostic logging must NEVER change
+	// the bytes mixed into that checksum, even when only one peer is logging.
+#ifdef SYNCCHECK
+	const bool mixMemory = modInfo.wasmStateHashInterval > 0 &&
+		(frame % modInfo.wasmStateHashInterval) == 0;
+#else
+	const bool mixMemory = false;
+#endif
+	const bool dump = log.is_open() && frame == configHandler->GetInt("WasmSyncDumpFrame");
+#ifndef SYNCCHECK
+	if (!log.is_open() && !dump)
 		return;
-	const auto states = WasmCoreHost::SyncedStates();
+#endif
+	const auto states = WasmCoreHost::SyncedStates(mixMemory || log.is_open() || dump);
 #ifdef SYNCCHECK
 	const unsigned engineChecksum = CSyncChecker::GetChecksum();
-	if (mixState && !states.empty()) {
+	if (!states.empty()) {
 		CSyncChecker::Sync(0x5741534du);
 		CSyncChecker::Sync(static_cast<std::uint32_t>(states.size()));
 		for (const auto& state: states) {
@@ -78,7 +86,8 @@ void WasmSyncVerification::EndFrame(int frame)
 			CSyncChecker::Sync(static_cast<std::uint32_t>(state.environment));
 			CSyncChecker::Sync(static_cast<std::uint32_t>(state.faulted));
 			Sync64(state.memoryBytes);
-			Sync64(state.memoryHash);
+			if (mixMemory)
+				Sync64(state.memoryHash);
 			Sync64(state.jobsHash);
 		}
 	}
