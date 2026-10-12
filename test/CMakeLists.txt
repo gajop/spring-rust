@@ -114,6 +114,45 @@ endmacro()
 	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
 
 ################################################################################
+### Deterministic Wasm jobs: use the real engine pool, not std::thread mocks.
+	set(test_name WasmSyncedJobs)
+	set(test_src
+		"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmSyncedJobs.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/jobs/WasmJobProgram.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/jobs/WasmSyncedJobs.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmRuntime.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmEnvironment.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreValidation.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreAbi.cpp"
+		"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
+		"${ENGINE_SOURCE_DIR}/System/Threading/ThreadPool.cpp"
+		"${ENGINE_SOURCE_DIR}/System/Misc/SpringTime.cpp"
+		"${ENGINE_SOURCE_DIR}/System/Platform/CpuID.cpp"
+		"${ENGINE_SOURCE_DIR}/System/Platform/CpuTopologyCommon.cpp"
+		"${ENGINE_SOURCE_DIR}/System/Platform/Threading.cpp"
+		${sources_engine_System_Threading}
+		${test_Common_sources}
+	)
+	if(WIN32)
+		list(APPEND test_src "${ENGINE_SOURCE_DIR}/System/Platform/Win/CpuTopology.cpp")
+	else()
+		list(APPEND test_src "${ENGINE_SOURCE_DIR}/System/Platform/Linux/CpuTopology.cpp")
+	endif()
+	add_spring_test(${test_name} "${test_src}" "recoil-wasmtime;${WINMM_LIBRARY}"
+		"-DTHREADPOOL -DUNITSYNC -DNOT_USING_CREG -DNOT_USING_STREFLOP")
+	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
+	target_compile_definitions(test_${test_name} PRIVATE
+		WASM_JOB_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/wasm_api/data/synced_jobs/worker.wat")
+	if(UNIX AND NOT APPLE AND CMAKE_CXX_FLAGS MATCHES "sanitize=thread")
+		# The prebuilt Rust compiler's Rayon synchronization is uninstrumented.
+		# Also model the uninstrumented VM allocator's address reuse with a
+		# test-only lifecycle lock. Native dispatch/results remain parallel.
+		target_compile_definitions(test_${test_name} PRIVATE RECOIL_WASM_TSAN_TEST=1)
+		target_link_options(test_${test_name} PRIVATE "LINKER:--wrap=wasm_engine_new_with_config"
+			"LINKER:--wrap=wasmtime_linker_instantiate" "LINKER:--wrap=wasmtime_store_delete")
+	endif()
+
+################################################################################
 ### UDPListener
 # disabled for travis: https://springrts.com/mantis/view.php?id=5014
 if(NOT DEFINED ENV{CI})

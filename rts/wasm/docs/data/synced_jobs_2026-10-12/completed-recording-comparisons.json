@@ -1,0 +1,60 @@
+{
+  "final-player-visibility-1200": {
+    "run-0-1": {
+      "equal": true,
+      "frames": 1201
+    },
+    "run-1-2": {
+      "equal": true,
+      "frames": 1201
+    },
+    "run-2-4": {
+      "equal": true,
+      "frames": 1201
+    },
+    "run-3-8": {
+      "equal": true,
+      "frames": 1201
+    }
+  },
+  "final-player-visibility-nojobs": {
+    "run-0-1": {
+      "equal": true,
+      "frames": 1201
+    },
+    "run-1-4": {
+      "equal": true,
+      "frames": 1201
+    }
+  },
+  "final-result-chain": {
+    "run-0-1": {
+      "equal": true,
+      "frames": 601
+    },
+    "run-1-4": {
+      "equal": true,
+      "frames": 601
+    }
+  },
+  "player-visibility-combat-smoke": {
+    "run-0-1": {
+      "equal": true,
+      "frames": 61
+    },
+    "run-1-4": {
+      "equal": true,
+      "frames": 61
+    }
+  },
+  "player-regression-after-callback": {
+    "run-0-1": {
+      "equal": true,
+      "frames": 61
+    },
+    "run-1-4": {
+      "equal": true,
+      "frames": 61
+    }
+  }
+}

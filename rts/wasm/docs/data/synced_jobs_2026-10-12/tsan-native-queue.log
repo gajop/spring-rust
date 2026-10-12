@@ -1,0 +1,36 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=1)
+  Write of size 4 at 0x5555569835b8 by main thread:
+    #0 linux_signal::notify_all(int) <null> (test_WasmSyncedJobs+0x1a7098) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #1 ThreadPool::PushTaskGroup(ITaskGroup*) <null> (test_WasmSyncedJobs+0x18fd69) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #2 ThreadPool::PushTaskGroup(std::shared_ptr<ITaskGroup>&&) <null> (test_WasmSyncedJobs+0x1906b4) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #3 WasmSyncedJobs::EndFrame() <null> (test_WasmSyncedJobs+0x157d1c) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #4 CATCH2_INTERNAL_TEST_7() <null> (test_WasmSyncedJobs+0x14162d) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #5 Catch::RunContext::invokeActiveTestCase() <null> (test_WasmSyncedJobs+0x1040227) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #6 Catch::RunContext::runCurrentTest() <null> (test_WasmSyncedJobs+0x108a752) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #7 Catch::RunContext::runTest(Catch::TestCaseHandle const&) <null> (test_WasmSyncedJobs+0x108b098) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #8 Catch::Session::runInternal() <null> (test_WasmSyncedJobs+0x10ac730) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #9 Catch::Session::run() <null> (test_WasmSyncedJobs+0x10acc21) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #10 main <null> (test_WasmSyncedJobs+0x1390ac) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+
+  Previous read of size 4 at 0x5555569835b8 by thread T1:
+    #0 linux_signal::wait_for(spring_time) <null> (test_WasmSyncedJobs+0x1a6f94) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #1 ThreadPool::WorkerLoop(int, bool) <null> (test_WasmSyncedJobs+0x1962c7) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #2 std::thread::_State_impl<std::thread::_Invoker<std::tuple<std::_Bind<void (*(int, bool))(int, bool)> > > >::_M_run() <null> (test_WasmSyncedJobs+0x197395) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #3 <null> <null> (libstdc++.so.6+0xf0db1) (BuildId: 399aeff7bae833abc7d02202df7b3974a44d92cd)
+
+  Location is global 'newTasksSignal' of size 24 at 0x5555569835b0 (test_WasmSyncedJobs+0x142f5b8)
+
+  Thread T1 (tid=8, running) created by main thread at:
+    #0 pthread_create <null> (libtsan.so.2+0x58c8c) (BuildId: 73c6091c853095c26584fe8f83b71a180ae6c354)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xf0e9a) (BuildId: 399aeff7bae833abc7d02202df7b3974a44d92cd)
+    #2 CATCH2_INTERNAL_TEST_7() <null> (test_WasmSyncedJobs+0x140dbe) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #3 Catch::RunContext::invokeActiveTestCase() <null> (test_WasmSyncedJobs+0x1040227) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #4 Catch::RunContext::runCurrentTest() <null> (test_WasmSyncedJobs+0x108a752) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #5 Catch::RunContext::runTest(Catch::TestCaseHandle const&) <null> (test_WasmSyncedJobs+0x108b098) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #6 Catch::Session::runInternal() <null> (test_WasmSyncedJobs+0x10ac730) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #7 Catch::Session::run() <null> (test_WasmSyncedJobs+0x10acc21) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+    #8 main <null> (test_WasmSyncedJobs+0x1390ac) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f)
+
+SUMMARY: ThreadSanitizer: data race (/build/out/test/test_WasmSyncedJobs+0x1a7098) (BuildId: 7b981bb8ae84fdc3b586388419f2ee8978734f3f) in linux_signal::notify_all(int)
+==================

@@ -1,0 +1,47 @@
+[
+  {
+    "log": "out/local-sync/final-player-visibility-nojobs/record/sync.jsonl",
+    "sha256": "dffd93e12084978356fe4156b450340a8c2e0c889174b6fb2ce9fe2c5e94545f",
+    "frames": 1201,
+    "first": 0,
+    "last": 1200,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      }
+    ]
+  },
+  {
+    "log": "out/local-sync/final-player-visibility-nojobs/run-0-1/sync.jsonl",
+    "sha256": "dffd93e12084978356fe4156b450340a8c2e0c889174b6fb2ce9fe2c5e94545f",
+    "frames": 1201,
+    "first": 0,
+    "last": 1200,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      }
+    ]
+  },
+  {
+    "log": "out/local-sync/final-player-visibility-nojobs/run-1-4/sync.jsonl",
+    "sha256": "fe8f88ba5877fdb09d2f8362775b2c75a3259697c74e7f576666db29e978fc2f",
+    "frames": 1201,
+    "first": 0,
+    "last": 1200,
+    "workers": 4,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      }
+    ]
+  }
+]

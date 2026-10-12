@@ -1,0 +1,19 @@
+[package]
+name = "recoil-wasm-synced-jobs-guest"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[features]
+external-worker = []
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+spring = { path = "../../../../rust/crates/spring" }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"

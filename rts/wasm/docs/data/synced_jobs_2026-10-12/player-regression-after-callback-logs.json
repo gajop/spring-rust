@@ -1,0 +1,62 @@
+[
+  {
+    "log": "out/local-sync/player-regression-after-callback/record/sync.jsonl",
+    "sha256": "a89f82d3cf77bf6fcca876298612c456bb7c93998cc8671118f5d190ebfbc22f",
+    "frames": 61,
+    "first": 0,
+    "last": 60,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "88220aa7152b942f85dd5e849f7e2ee5065d7683c39fa6b6b4668dc88daa49e02844d2702d0ad95b18965a9e677c41d312d09de5c620ddc6736f117bd9797c7d",
+        "bytes": 65536
+      }
+    ]
+  },
+  {
+    "log": "out/local-sync/player-regression-after-callback/run-0-1/sync.jsonl",
+    "sha256": "a89f82d3cf77bf6fcca876298612c456bb7c93998cc8671118f5d190ebfbc22f",
+    "frames": 61,
+    "first": 0,
+    "last": 60,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "88220aa7152b942f85dd5e849f7e2ee5065d7683c39fa6b6b4668dc88daa49e02844d2702d0ad95b18965a9e677c41d312d09de5c620ddc6736f117bd9797c7d",
+        "bytes": 65536
+      }
+    ]
+  },
+  {
+    "log": "out/local-sync/player-regression-after-callback/run-1-4/sync.jsonl",
+    "sha256": "6e061795b3fd40a7edae9f82de5714d1ecd8d055824045859b1b76abe3bdd735",
+    "frames": 61,
+    "first": 0,
+    "last": 60,
+    "workers": 4,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "88220aa7152b942f85dd5e849f7e2ee5065d7683c39fa6b6b4668dc88daa49e02844d2702d0ad95b18965a9e677c41d312d09de5c620ddc6736f117bd9797c7d",
+        "bytes": 65536
+      }
+    ]
+  }
+]

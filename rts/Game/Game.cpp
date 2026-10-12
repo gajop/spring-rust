@@ -145,6 +145,8 @@
 
 #include "NativeInterface/NativeInterfaceSystem.h"
 #include "WasmInterface/standalone/WasmDefsParser.h"
+#include "WasmSyncVerification.h"
+#include "WasmCoreHost.h"
 
 #undef CreateDirectory
 
@@ -1755,6 +1757,7 @@ void CGame::SimFrame() {
 #ifdef SYNC_HISTORY
 	CSyncChecker::NewGameFrame();
 #endif
+	WasmCoreHost::BeginSyncedJobsFrame(gs->frameNum);
 	lastFrameTime = spring_gettime();
 	// This is not very ideal, as the timeoffset of each new draw frame is also calculated from this
 	// with a strange side effect: if the timeOffset was a high number, like 0.9, then this will force the next draw frame to have an offset of 0.0x
@@ -1859,6 +1862,8 @@ void CGame::SimFrame() {
 		teamHandler.GameFrame(gs->frameNum);
 		playerHandler.GameFrame(gs->frameNum);
 		eventHandler.GameFramePost(gs->frameNum);
+		WasmCoreHost::EndSyncedJobsFrame();
+		WasmSyncVerification::EndFrame(gs->frameNum);
 	}
 
 	lastSimFrameTime = spring_gettime();

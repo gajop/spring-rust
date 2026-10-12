@@ -1,0 +1,342 @@
+-- The C compiler identification is GNU 13.1.0
+-- The CXX compiler identification is GNU 13.1.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/gcc-13 - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/g++-13 - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE
+-- Prefer static-linking!
+-- gcc 13.1.0 detected
+CMake Warning at CMakeLists.txt:49 (message):
+  Using custom C_FLAGS: -fsanitize=thread -fno-omit-frame-pointer this build
+  will very likely not sync in online mode!
+
+
+CMake Warning at CMakeLists.txt:53 (message):
+  Using custom CXX_FLAGS: -fsanitize=thread -fno-omit-frame-pointer this
+  build will very likely not sync in online mode!
+
+
+-- Checking to see if CXX compiler accepts flag -fvisibility=hidden
+-- Checking to see if CXX compiler accepts flag -fvisibility=hidden - yes
+-- Checking to see if CXX compiler accepts flag -fvisibility-inlines-hidden
+-- Checking to see if CXX compiler accepts flag -fvisibility-inlines-hidden - yes
+-- Checking to see if CXX compiler accepts flag -mieee-fp
+-- Checking to see if CXX compiler accepts flag -mieee-fp - yes
+-- Checking to see if CXX compiler accepts flag -std=c++17
+-- Checking to see if CXX compiler accepts flag -std=c++17 - yes
+-- Checking to see if CXX compiler accepts flag -flto
+-- Checking to see if CXX compiler accepts flag -flto - yes
+-- Checking to see if CXX compiler accepts flag -march=i686
+-- Checking to see if CXX compiler accepts flag -march=i686 - no
+-- Checking to see if CXX compiler accepts flag -march=x86_64
+-- Checking to see if CXX compiler accepts flag -march=x86_64 - no
+-- Checking to see if CXX compiler accepts flag -mno-tls-direct-seg-refs
+-- Checking to see if CXX compiler accepts flag -mno-tls-direct-seg-refs - yes
+-- Checking to see if CXX compiler accepts flag -fuse-ld=gold
+-- Checking to see if CXX compiler accepts flag -fuse-ld=gold - yes
+-- Checking to see if CXX compiler accepts flag -fcheck-pointer-bounds
+-- Checking to see if CXX compiler accepts flag -fcheck-pointer-bounds - yes
+-- Checking to see if CXX compiler accepts flag -mmpx
+-- Checking to see if CXX compiler accepts flag -mmpx - yes
+-- Checking to see if CXX compiler accepts flag -Wchkp
+-- Checking to see if CXX compiler accepts flag -Wchkp - yes
+-- Detected x86-64 architecture: x86_64
+-- Building Spring on a 64-bit environment
+-- Found SDL2: /usr/include/SDL2
+-- Found DevIL: /build/spring-static-libs/lib/libIL.a (Required is at least version "1.8.0")
+-- Looking for strnlen
+-- Looking for strnlen - found
+-- Found ld.gold
+-- Checking to see if CXX compiler accepts flag -fdiagnostics-color=auto
+-- Checking to see if CXX compiler accepts flag -fdiagnostics-color=auto - yes
+-- Using CMAKE_CXX_FLAGS:-fsanitize=thread -fno-omit-frame-pointer -fuse-ld=gold -fdiagnostics-color=auto -march=x86-64 -mtune=generic -msse -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-sse4a -mno-avx -mno-fma -mno-fma4 -mno-xop -mno-lwp -mno-avx2  -mfpmath=sse -fsingle-precision-constant -frounding-math -mieee-fp -pipe -fno-strict-aliasing  -fvisibility=hidden  -fvisibility-inlines-hidden -pthread
+-- Using CMAKE_CXX_FLAGS_RELEASE:-O3 -DNDEBUG  -Wformat -Wformat-security -DNDEBUG
+-- Found Git: /usr/bin/git
+-- {fmt} version: 12.1.0
+-- Build type: RELEASE
+--
+-- Architecture: x64
+-- Performing Test mi_has_libpthread
+-- Performing Test mi_has_libpthread - Failed
+-- Performing Test mi_has_librt
+-- Performing Test mi_has_librt - Failed
+-- Performing Test mi_has_libatomic
+-- Performing Test mi_has_libatomic - Failed
+--
+-- Library name     : mimalloc
+-- Version          : 3.2.8
+-- Build type       : release
+-- C Compiler       : /usr/bin/gcc-13
+-- Compiler flags   : -Wall;-Wextra;-Wno-unknown-pragmas;-fvisibility=hidden;-Wstrict-prototypes;-ftls-model=initial-exec
+-- Compiler defines : MI_CMAKE_BUILD_TYPE=release;MI_BUILD_RELEASE
+-- Link libraries   : /usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/librt.so
+-- Build targets    : static;object
+--
+-- Found MiniZip: /build/spring-static-libs/lib/libminizip.a
+-- Using minizip library: /build/spring-static-libs/lib/libminizip.a
+-- Performing Test NOWIDE_HAS_LFS
+-- Performing Test NOWIDE_HAS_LFS - Success
+-- Performing Test NOWIDE_HAS_INIT_PRIORITY
+-- Performing Test NOWIDE_HAS_INIT_PRIORITY - Success
+-- Performing Test _NOWIDE_SUGGEST_OVERRIDE_SUPPORTED
+-- Performing Test _NOWIDE_SUGGEST_OVERRIDE_SUPPORTED - Success
+-- STREFLOP: Autodetected x86/x86_64 platform - enabling SSE mode
+-- Looking for C++ include unistd.h
+-- Looking for C++ include unistd.h - found
+-- Looking for C++ include stdint.h
+-- Looking for C++ include stdint.h - found
+-- Looking for C++ include inttypes.h
+-- Looking for C++ include inttypes.h - found
+-- Looking for C++ include sys/types.h
+-- Looking for C++ include sys/types.h - found
+-- Looking for C++ include sys/stat.h
+-- Looking for C++ include sys/stat.h - found
+-- Looking for C++ include fnmatch.h
+-- Looking for C++ include fnmatch.h - found
+-- Looking for C++ include stddef.h
+-- Looking for C++ include stddef.h - found
+-- Check size of uint32_t
+-- Check size of uint32_t - done
+-- Looking for strtoll
+-- Looking for strtoll - found
+-- Forcing assimp option ASSIMP_BUILD_STATIC_LIB to on
+-- Forcing assimp option ASSIMP_NO_EXPORT to on
+-- Shared libraries disabled
+-- Build an import-only version of Assimp.
+INFO RT-extension not found. glTF import/export will be built without Open3DGC-compression.
+-- Enabled formats: 3DS COLLADA LWO OBJ BLEND
+-- Disabled formats: AMF AC ASE ASSBIN ASSXML B3D BVH DXF CSM HMP IRRMESH IRR LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OGRE OPENGEX PLY MS3D COB IFC XGL FBX Q3D Q3BSP RAW SIB SMD STL TERRAGEN 3D X X3D GLTF 3MF MMD
+-- Including implementation fallback due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation westmere due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation haswell due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation icelake due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation arm64 due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation ppc64 due to SIMDJSON_IMPLEMENTATION=fallback
+-- Selected implementation fallback as builtin implementation based on fallback
+-- AVX-512 instructions are not allowed.
+-- Looking for fork
+-- Looking for fork - not found
+-- Looking for wait
+-- Looking for wait - not found
+-- Adding -Og to compile flag
+Parsing public/common/TracyVersion.hpp file
+VERSION 0.11.1
+-- TRACY_ENABLE: OFF
+-- TRACY_ON_DEMAND: ON
+-- TRACY_CALLSTACK: OFF
+-- TRACY_NO_CALLSTACK: OFF
+-- TRACY_NO_CALLSTACK_INLINES: OFF
+-- TRACY_ONLY_LOCALHOST: OFF
+-- TRACY_NO_BROADCAST: OFF
+-- TRACY_ONLY_IPV4: OFF
+-- TRACY_NO_CODE_TRANSFER: OFF
+-- TRACY_NO_CONTEXT_SWITCH: OFF
+-- TRACY_NO_EXIT: OFF
+-- TRACY_NO_SAMPLING: OFF
+-- TRACY_NO_VERIFY: OFF
+-- TRACY_NO_VSYNC_CAPTURE: OFF
+-- TRACY_NO_FRAME_IMAGE: OFF
+-- TRACY_NO_SYSTEM_TRACING: OFF
+-- TRACY_PATCHABLE_NOPSLEDS: OFF
+-- TRACY_DELAYED_INIT: OFF
+-- TRACY_MANUAL_LIFETIME: OFF
+-- TRACY_FIBERS: OFF
+-- TRACY_NO_CRASH_HANDLER: OFF
+-- TRACY_TIMER_FALLBACK: OFF
+-- TRACY_LIBUNWIND_BACKTRACE: OFF
+-- TRACY_SYMBOL_OFFLINE_RESOLVE: OFF
+-- TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT: OFF
+-- TRACY_VERBOSE: OFF
+-- TRACY_DEMANGLE: OFF
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found suitable version "2.8.1", minimum required is "2.8.1")
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found version "2.8.1")
+-- Found Freetype::Freetype - Freetype font engine enabled
+-- Found AWK: /usr/bin/awk
+-- AWK version: mawk 1.3.3 Nov 1996, Copyright (C) Michael D. Brennan
+-- Found AI Wrapper: CUtils (sources only wrapper)
+-- Found AI Interface: C-AIInterface 0.1
+-- Found AI Wrapper: Cpp-AIWrapper
+-- Found AI Wrapper: LegacyCpp-AIWrapper
+-- Found AI Wrapper: LegacyCpp-Creg-AIWrapper
+-- Found Skirmish AI: BARb stable
+-- Found Skirmish AI: CircuitAI stable
+warning: CppTestAI Skirmish AI will not be built!
+-- Found Skirmish AI: NullAI 0.1
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found suitable version "1.3.1", minimum required is "1.2.7")
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found version "1.3.1")
+-- Command "/usr/bin/git;describe;--tags;--abbrev=7;--always;--candidates;999;--match;*" in directory /build/src/tools/pr-downloader/src failed with output:
+"fatal: not a git repository: /build/src/tools/pr-downloader/../../../../../projects/spring-projects/spring-bar/.git/worktrees/spring-bar4/modules/tools/pr-downloader"
+-- PR-Downloader version: tarball
+-- Found PkgConfig: /usr/bin/pkg-config (found version "0.29.1")
+-- Checking for module 'libcurl>=7.84'
+--   Found libcurl, version 8.15.0
+-- Checking for module 'jsoncpp'
+--   No package 'jsoncpp' found
+-- Not found jsoncpp in system, using integrated version
+-- Checking for module 'minizip'
+--   Found minizip, version 4.0.10
+-- user-docs (plain/text) will be installed to {INSTALL_PREFIX}/doc
+-- Found SevenZip: /usr/bin/7z
+-- Found DevIL: /build/spring-static-libs/lib/libIL.a
+-- Found OpenAL: /usr/lib/x86_64-linux-gnu/libopenal.so (Required is at least version "1.18.2")
+-- Looking for vorbis_bitrate_addblock in vorbis
+-- Looking for vorbis_bitrate_addblock in vorbis - not found
+-- Found OggVorbis: /build/spring-static-libs/lib/libvorbis.a (Required is at least version "1.3.4")
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found suitable version "1.3.1", minimum required is "1.2.7")
+-- Using mimalloc
+-- Found Libunwind: /build/spring-static-libs/lib/libunwind.a (found suitable version "1.6.2", minimum required is "1.4.0")
+-- [download 0% complete]
+-- [download 1% complete]
+-- [download 2% complete]
+-- [download 3% complete]
+-- [download 4% complete]
+-- [download 5% complete]
+-- [download 6% complete]
+-- [download 7% complete]
+-- [download 8% complete]
+-- [download 9% complete]
+-- [download 10% complete]
+-- [download 11% complete]
+-- [download 12% complete]
+-- [download 13% complete]
+-- [download 14% complete]
+-- [download 15% complete]
+-- [download 16% complete]
+-- [download 17% complete]
+-- [download 18% complete]
+-- [download 19% complete]
+-- [download 20% complete]
+-- [download 21% complete]
+-- [download 23% complete]
+-- [download 24% complete]
+-- [download 33% complete]
+-- [download 34% complete]
+-- [download 35% complete]
+-- [download 36% complete]
+-- [download 37% complete]
+-- [download 38% complete]
+-- [download 39% complete]
+-- [download 40% complete]
+-- [download 41% complete]
+-- [download 42% complete]
+-- [download 43% complete]
+-- [download 44% complete]
+-- [download 45% complete]
+-- [download 46% complete]
+-- [download 47% complete]
+-- [download 48% complete]
+-- [download 49% complete]
+-- [download 50% complete]
+-- [download 51% complete]
+-- [download 52% complete]
+-- [download 53% complete]
+-- [download 54% complete]
+-- [download 55% complete]
+-- [download 56% complete]
+-- [download 57% complete]
+-- [download 58% complete]
+-- [download 59% complete]
+-- [download 60% complete]
+-- [download 61% complete]
+-- [download 62% complete]
+-- [download 63% complete]
+-- [download 64% complete]
+-- [download 65% complete]
+-- [download 66% complete]
+-- [download 67% complete]
+-- [download 68% complete]
+-- [download 69% complete]
+-- [download 70% complete]
+-- [download 71% complete]
+-- [download 72% complete]
+-- [download 73% complete]
+-- [download 74% complete]
+-- [download 75% complete]
+-- [download 76% complete]
+-- [download 77% complete]
+-- [download 78% complete]
+-- [download 79% complete]
+-- [download 80% complete]
+-- [download 81% complete]
+-- [download 82% complete]
+-- [download 83% complete]
+-- [download 84% complete]
+-- [download 85% complete]
+-- [download 86% complete]
+-- [download 87% complete]
+-- [download 88% complete]
+-- [download 89% complete]
+-- [download 90% complete]
+-- [download 91% complete]
+-- [download 92% complete]
+-- [download 93% complete]
+-- [download 94% complete]
+-- [download 95% complete]
+-- [download 96% complete]
+-- [download 97% complete]
+-- [download 98% complete]
+-- [download 99% complete]
+-- [download 100% complete]
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libOpenGL.so (Required is at least version "3.0")
+-- Found Fontconfig: /usr/lib/x86_64-linux-gnu/libfontconfig.a (found suitable version "2.12.6", minimum required is "2.11")
+-- Found EXPAT: /usr/lib/x86_64-linux-gnu/libexpat.a (found suitable version "2.2.5", minimum required is "2.2.5")
+CMake Warning (dev) in rts/builds/legacy/CMakeLists.txt:
+  A logical block opening on the line
+
+    /build/src/rts/builds/legacy/CMakeLists.txt:52 (if)
+
+  closes on the line
+
+    /build/src/rts/builds/legacy/CMakeLists.txt:56 (endif)
+
+  with mis-matching arguments.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found suitable version "2.8.1", minimum required is "2.8.1")
+-- Found X11: /usr/include
+-- Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so
+-- Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so - not found
+-- Looking for dnet_ntoa in dnet
+-- Looking for dnet_ntoa in dnet - not found
+-- Looking for dnet_ntoa in dnet_stub
+-- Looking for dnet_ntoa in dnet_stub - not found
+-- Looking for gethostbyname
+-- Looking for gethostbyname - not found
+-- Looking for gethostbyname in nsl
+-- Looking for gethostbyname in nsl - not found
+-- Looking for gethostbyname in bsd
+-- Looking for gethostbyname in bsd - not found
+-- Looking for connect
+-- Looking for connect - not found
+-- Looking for connect in socket
+-- Looking for connect in socket - not found
+-- Looking for remove
+-- Looking for remove - not found
+-- Looking for remove in posix
+-- Looking for remove in posix - not found
+-- Looking for shmat
+-- Looking for shmat - not found
+-- Looking for shmat in ipc
+-- Looking for shmat in ipc - not found
+-- Looking for IceConnectionNumber in ICE
+-- Looking for IceConnectionNumber in ICE - not found
+-- Using legacy as default engine
+-- No ipv6 support, disabling test
+-- Found PNG: /build/spring-static-libs/lib/libpng.a (found version "1.6.50")
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found version "1.3.1")
+-- Configuring done (4.6s)
+-- Generating done (0.2s)
+-- Build files have been written to: /build/out

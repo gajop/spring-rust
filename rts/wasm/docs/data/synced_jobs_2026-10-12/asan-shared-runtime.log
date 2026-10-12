@@ -1,0 +1,133 @@
+-- Prefer static-linking!
+-- gcc 13.1.0 detected
+CMake Warning at CMakeLists.txt:53 (message):
+  Using custom CXX_FLAGS: -fsanitize=address,undefined
+  -fno-omit-frame-pointer this build will very likely not sync in online
+  mode!
+
+
+-- Checking to see if CXX compiler accepts flag -fvisibility=hidden
+-- Checking to see if CXX compiler accepts flag -fvisibility=hidden - yes
+-- Checking to see if CXX compiler accepts flag -std=c++17
+-- Checking to see if CXX compiler accepts flag -std=c++17 - yes
+-- Detected x86-64 architecture: x86_64
+-- Building Spring on a 64-bit environment
+-- Found DevIL: /build/spring-static-libs/lib/libIL.a (Required is at least version "1.8.0")
+-- Found ld.gold
+-- Checking to see if CXX compiler accepts flag -fdiagnostics-color=auto
+-- Checking to see if CXX compiler accepts flag -fdiagnostics-color=auto - yes
+-- Using CMAKE_CXX_FLAGS:-fsanitize=address,undefined -fno-omit-frame-pointer -fuse-ld=gold -fdiagnostics-color=auto -march=x86-64 -mtune=generic -msse -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-sse4a -mno-avx -mno-fma -mno-fma4 -mno-xop -mno-lwp -mno-avx2  -mfpmath=sse -fsingle-precision-constant -frounding-math -mieee-fp -pipe -fno-strict-aliasing  -fvisibility=hidden  -fvisibility-inlines-hidden -pthread
+-- Using CMAKE_CXX_FLAGS_RELEASE:-O3 -DNDEBUG  -Wformat -Wformat-security -DNDEBUG
+-- {fmt} version: 12.1.0
+-- Build type: RELEASE
+--
+-- Architecture: x64
+--
+-- Library name     : mimalloc
+-- Version          : 3.2.8
+-- Build type       : release
+-- C Compiler       : /usr/bin/gcc-13
+-- Compiler flags   : -Wall;-Wextra;-Wno-unknown-pragmas;-fvisibility=hidden;-Wstrict-prototypes;-ftls-model=initial-exec
+-- Compiler defines : MI_CMAKE_BUILD_TYPE=release;MI_BUILD_RELEASE
+-- Link libraries   : /usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/librt.so
+-- Build targets    : static;object
+--
+-- Using minizip library: /build/spring-static-libs/lib/libminizip.a
+-- Forcing assimp option ASSIMP_BUILD_STATIC_LIB to on
+-- Forcing assimp option ASSIMP_NO_EXPORT to on
+-- Shared libraries disabled
+-- Build an import-only version of Assimp.
+-- Enabled formats: 3DS COLLADA LWO OBJ BLEND
+-- Disabled formats: AMF AC ASE ASSBIN ASSXML B3D BVH DXF CSM HMP IRRMESH IRR LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OGRE OPENGEX PLY MS3D COB IFC XGL FBX Q3D Q3BSP RAW SIB SMD STL TERRAGEN 3D X X3D GLTF 3MF MMD
+INFO RT-extension not found. glTF import/export will be built without Open3DGC-compression.
+-- Including implementation fallback due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation westmere due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation haswell due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation icelake due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation arm64 due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation ppc64 due to SIMDJSON_IMPLEMENTATION=fallback
+-- Selected implementation fallback as builtin implementation based on fallback
+-- AVX-512 instructions are not allowed.
+-- Adding -Og to compile flag
+Parsing public/common/TracyVersion.hpp file
+VERSION 0.11.1
+-- TRACY_ENABLE: OFF
+-- TRACY_ON_DEMAND: ON
+-- TRACY_CALLSTACK: OFF
+-- TRACY_NO_CALLSTACK: OFF
+-- TRACY_NO_CALLSTACK_INLINES: OFF
+-- TRACY_ONLY_LOCALHOST: OFF
+-- TRACY_NO_BROADCAST: OFF
+-- TRACY_ONLY_IPV4: OFF
+-- TRACY_NO_CODE_TRANSFER: OFF
+-- TRACY_NO_CONTEXT_SWITCH: OFF
+-- TRACY_NO_EXIT: OFF
+-- TRACY_NO_SAMPLING: OFF
+-- TRACY_NO_VERIFY: OFF
+-- TRACY_NO_VSYNC_CAPTURE: OFF
+-- TRACY_NO_FRAME_IMAGE: OFF
+-- TRACY_NO_SYSTEM_TRACING: OFF
+-- TRACY_PATCHABLE_NOPSLEDS: OFF
+-- TRACY_DELAYED_INIT: OFF
+-- TRACY_MANUAL_LIFETIME: OFF
+-- TRACY_FIBERS: OFF
+-- TRACY_NO_CRASH_HANDLER: OFF
+-- TRACY_TIMER_FALLBACK: OFF
+-- TRACY_LIBUNWIND_BACKTRACE: OFF
+-- TRACY_SYMBOL_OFFLINE_RESOLVE: OFF
+-- TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT: OFF
+-- TRACY_VERBOSE: OFF
+-- TRACY_DEMANGLE: OFF
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found version "2.8.1")
+-- Found Freetype::Freetype - Freetype font engine enabled
+-- Found AI Wrapper: CUtils (sources only wrapper)
+-- Found AI Interface: C-AIInterface 0.1
+-- Found AI Wrapper: Cpp-AIWrapper
+-- Found AI Wrapper: LegacyCpp-AIWrapper
+-- Found AI Wrapper: LegacyCpp-Creg-AIWrapper
+-- Found Skirmish AI: BARb stable
+-- Found Skirmish AI: CircuitAI stable
+warning: CppTestAI Skirmish AI will not be built!
+-- Found Skirmish AI: NullAI 0.1
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found suitable version "1.3.1", minimum required is "1.2.7")
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found version "1.3.1")
+-- Command "/usr/bin/git;describe;--tags;--abbrev=7;--always;--candidates;999;--match;*" in directory /build/src/tools/pr-downloader/src failed with output:
+"fatal: not a git repository: /build/src/tools/pr-downloader/../../../../../projects/spring-projects/spring-bar/.git/worktrees/spring-bar4/modules/tools/pr-downloader"
+-- PR-Downloader version: tarball
+-- Checking for module 'jsoncpp'
+--   No package 'jsoncpp' found
+-- Not found jsoncpp in system, using integrated version
+-- user-docs (plain/text) will be installed to {INSTALL_PREFIX}/doc
+-- /build/out/springsettings.cfg already exists!
+-- Found DevIL: /build/spring-static-libs/lib/libIL.a
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found suitable version "1.3.1", minimum required is "1.2.7")
+-- Using mimalloc
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found suitable version "2.8.1", minimum required is "2.8.1")
+CMake Warning (dev) in rts/builds/legacy/CMakeLists.txt:
+  A logical block opening on the line
+
+    /build/src/rts/builds/legacy/CMakeLists.txt:52 (if)
+
+  closes on the line
+
+    /build/src/rts/builds/legacy/CMakeLists.txt:56 (endif)
+
+  with mis-matching arguments.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Using legacy as default engine
+-- No ipv6 support, disabling test
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found version "1.3.1")
+-- Configuring done (0.6s)
+-- Generating done (0.2s)
+-- Build files have been written to: /build/out
+[0/2] Re-checking globbed directories...
+[1/1] Linking CXX executable test/test_WasmSyncedJobs
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start 2: testWasmSyncedJobs
+1/1 Test #2: testWasmSyncedJobs ...............   Passed    0.08 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.08 sec

@@ -75,7 +75,8 @@ static std::array<moodycamel::ConcurrentQueue<ITaskGroup*>, ThreadPool::MAX_THRE
 #endif
 
 static std::vector<void*> workerThreads[2];
-static std::array<bool, ThreadPool::MAX_THREADS> exitFlags;
+// The controlling thread requests exit while workers poll their own flag.
+static std::array<std::atomic<bool>, ThreadPool::MAX_THREADS> exitFlags{};
 static std::array<ThreadStats, ThreadPool::MAX_THREADS> threadStats[2];
 static spring::signal newTasksSignal[2];
 
@@ -178,6 +179,7 @@ static bool DoTask(int tid, bool async)
 			if (idx == 0)
 				NotifyWorkerThreads(true, async);
 
+			const bool queuedSlice = tg->IsSliceTask() && !tg->SelfDelete();
 			bool reschedule = !tg->IsHighPriority() && !tg->SelfDelete() && tg->ShouldReschedule();
 
 			assert(!async || tg->IsAsyncTask());
@@ -199,6 +201,8 @@ static bool DoTask(int tid, bool async)
 
 			if (reschedule)
 				while (!queue_background.enqueue(tg));
+			else if (queuedSlice)
+				tg->FinishQueueEntry();
 		}
 
 		#ifdef USE_BOOST_LOCKFREE_QUEUE
@@ -208,6 +212,7 @@ static bool DoTask(int tid, bool async)
 		#endif
 			assert(!async || tg->IsAsyncTask());
 
+			const bool queuedSlice = tg->IsSliceTask() && !tg->SelfDelete();
 			bool reschedule = !tg->IsHighPriority() && !tg->SelfDelete() && tg->ShouldReschedule();
 
 			#ifdef USE_TASK_STATS_TRACKING
@@ -227,6 +232,8 @@ static bool DoTask(int tid, bool async)
 
 			if (reschedule)
 				while (!queue_background.enqueue(tg));
+			else if (queuedSlice)
+				tg->FinishQueueEntry();
 		}
 	}
 
@@ -292,6 +299,9 @@ void WaitForFinished(std::shared_ptr<ITaskGroup>&& taskGroup)
 	//   under that condition could cause the group to be deleted
 	//   or reassigned prematurely) --> wait
 	if (taskGroup->IsFinished()) {
+		// Main-thread help may finish the callbacks before sleeping workers
+		// have drained their queue entries. Wake them before waiting for reuse.
+		NotifyWorkerThreads(true, false);
 		while (taskGroup->IsInJobQueue()) {
 			DoTask(tid, false);
 		}
@@ -332,9 +342,13 @@ void WaitForFinished(std::shared_ptr<ITaskGroup>&& taskGroup)
 void PushTaskGroup(std::shared_ptr<ITaskGroup>&& taskGroup) { PushTaskGroup(taskGroup.get()); }
 void PushTaskGroup(ITaskGroup* taskGroup)
 {
+	// A self-deleting task can finish as soon as enqueue publishes its pointer.
+	// Read everything needed for notification before handing it to workers.
+	const bool async = taskGroup->IsAsyncTask();
+	const bool queuedSlice = taskGroup->IsSliceTask() && !taskGroup->SelfDelete();
 	auto& queue = (taskGroup->IsHighPriority())
-			? taskQueues[ taskGroup->IsAsyncTask() ][ taskGroup->WantedThread() ]
-			: taskQueuesSyncBackground[ taskGroup->IsAsyncTask() ][ taskGroup->WantedThread() ];
+			? taskQueues[ async ][ taskGroup->WantedThread() ]
+			: taskQueuesSyncBackground[ async ][ taskGroup->WantedThread() ];
 
 	#if 0
 	// fake single-task group, handled by WaitForFinished to
@@ -344,6 +358,8 @@ void PushTaskGroup(ITaskGroup* taskGroup)
 	#endif
 
 	taskGroup->SetTimeStamp(spring_now());
+	if (queuedSlice)
+		taskGroup->AddQueueEntry();
 
 	#ifdef USE_BOOST_LOCKFREE_QUEUE
 	while (!queue.push(taskGroup));
@@ -353,12 +369,12 @@ void PushTaskGroup(ITaskGroup* taskGroup)
 
 	#if 1
 	// AsyncTask's do not care about wakeup-latency as much
-	if (taskGroup->IsAsyncTask())
+	if (async)
 		return;
 
 	NotifyWorkerThreads(false, false);
 	#else
-	NotifyWorkerThreads(false, taskGroup->IsAsyncTask());
+	NotifyWorkerThreads(false, async);
 	#endif
 }
 

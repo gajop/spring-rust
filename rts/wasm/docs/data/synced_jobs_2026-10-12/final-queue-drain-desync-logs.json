@@ -1,0 +1,60 @@
+[
+  {
+    "path": "out/local-sync/final-queue-drain-desync/run-0-1/sync.jsonl",
+    "sha256": "4c5a7b100ef58bce4e1b2d814a9eda19e87b18b87f6af7b06b0d32bf53641772",
+    "frames": 61,
+    "first_frame": 0,
+    "last_frame": 60,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "811b0ead4bffe379",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "189f22d23636d021d2dcfb510db991e50e4c12249fdacd81386fab5412b3af8ed74e37f2d36623766df33445c4c515f7797aa1d2366dda7fe1bcf46dfb1ac961",
+        "environment": "rules-synced",
+        "bytes": 65536,
+        "hash": "99ffae0765808e0f",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 1
+  },
+  {
+    "path": "out/local-sync/final-queue-drain-desync/run-1-4/sync.jsonl",
+    "sha256": "558a8e42ee820cd2bc2dddcedd244ba9cbf06c0c5ed0b1bc34430c158f602538",
+    "frames": 61,
+    "first_frame": 0,
+    "last_frame": 60,
+    "workers": 4,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "811b0ead4bffe379",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "189f22d23636d021d2dcfb510db991e50e4c12249fdacd81386fab5412b3af8ed74e37f2d36623766df33445c4c515f7797aa1d2366dda7fe1bcf46dfb1ac961",
+        "environment": "rules-synced",
+        "bytes": 65536,
+        "hash": "ffab223da46f79dc",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 1
+  }
+]

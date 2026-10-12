@@ -1,0 +1,89 @@
+[
+  {
+    "path": "out/local-sync/final-queue-drain-combat-45000/record/sync.jsonl",
+    "sha256": "1acfc1d3222e46f08359464ce85a225e82f9e76eae338979237959c70c6c8d6d",
+    "frames": 45001,
+    "first_frame": 0,
+    "last_frame": 45000,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "68267e3cbd5e19f0",
+        "jobs_hash": "41f67bbef00f588a",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "d236cc0ba020283cc902835542e96a0fafc3a8533f3aaeb831b29cc1192a1f6491a5181ed7b98fc074f7df06f7862dcb91828bc86b1410f126e21a4495870eca",
+        "environment": "rules-synced",
+        "bytes": 131072,
+        "hash": "7e231314d6eda741",
+        "jobs_hash": "0e7b899ce9d9b716",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  },
+  {
+    "path": "out/local-sync/final-queue-drain-combat-45000/run-0-1/sync.jsonl",
+    "sha256": "1acfc1d3222e46f08359464ce85a225e82f9e76eae338979237959c70c6c8d6d",
+    "frames": 45001,
+    "first_frame": 0,
+    "last_frame": 45000,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "68267e3cbd5e19f0",
+        "jobs_hash": "41f67bbef00f588a",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "d236cc0ba020283cc902835542e96a0fafc3a8533f3aaeb831b29cc1192a1f6491a5181ed7b98fc074f7df06f7862dcb91828bc86b1410f126e21a4495870eca",
+        "environment": "rules-synced",
+        "bytes": 131072,
+        "hash": "7e231314d6eda741",
+        "jobs_hash": "0e7b899ce9d9b716",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  },
+  {
+    "path": "out/local-sync/final-queue-drain-combat-45000/run-1-4/sync.jsonl",
+    "sha256": "4c2482b54f32243469c1a7fb17e739ec9ef487c08c4cf2489f05f990b8d75fb3",
+    "frames": 45001,
+    "first_frame": 0,
+    "last_frame": 45000,
+    "workers": 4,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "68267e3cbd5e19f0",
+        "jobs_hash": "41f67bbef00f588a",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "d236cc0ba020283cc902835542e96a0fafc3a8533f3aaeb831b29cc1192a1f6491a5181ed7b98fc074f7df06f7862dcb91828bc86b1410f126e21a4495870eca",
+        "environment": "rules-synced",
+        "bytes": 131072,
+        "hash": "7e231314d6eda741",
+        "jobs_hash": "0e7b899ce9d9b716",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  }
+]

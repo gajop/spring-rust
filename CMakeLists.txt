@@ -303,6 +303,10 @@ endif (USE_ASAN)
 
 ### Tracy related stuff
 option(RECOIL_DETAILED_TRACY_ZONING "Enable additional detailed tracy zones (only enable this for testing/debugging)" FALSE)
+option(RECOIL_WASM_JOB_DETAIL_ZONES "Trace Wasm job setup, copies, execution and teardown (requires Tracy)" FALSE)
+if(RECOIL_WASM_JOB_DETAIL_ZONES)
+	add_definitions(-DRECOIL_WASM_JOB_DETAIL_ZONES)
+endif()
 if    (RECOIL_DETAILED_TRACY_ZONING)
 	add_definitions(-DRECOIL_DETAILED_TRACY_ZONING)
 else  (RECOIL_DETAILED_TRACY_ZONING)

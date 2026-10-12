@@ -1,0 +1,77 @@
+[0/2] Re-checking globbed directories...
+[1/36] Building CXX object rts/lib/tracy/CMakeFiles/TracyClient.dir/public/TracyClient.cpp.o
+[2/36] Linking CXX static library rts/lib/tracy/libTracyClient.a
+[3/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Sync/SHA512.cpp.o
+[4/36] Building CXX object rts/lib/fmt/CMakeFiles/fmt.dir/src/os.cc.o
+[5/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Misc/SpringTime.cpp.o
+[6/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/CpuTopologyCommon.cpp.o
+[7/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/CpuID.cpp.o
+[8/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/ThreadAffinityGuard.cpp.o
+[9/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/SharedLib.cpp.o
+[10/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Threading.cpp.o
+[11/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Threading/ThreadPool.cpp.o
+[12/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/jobs/WasmJobProgram.cpp.o
+[13/36] Building CXX object rts/lib/fmt/CMakeFiles/fmt.dir/src/format.cc.o
+[14/36] Linking CXX static library rts/lib/fmt/libfmt.a
+[15/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/runtime/WasmEnvironment.cpp.o
+[16/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/engine/WasmInterface/TestWasmSyncedJobs.cpp.o
+[17/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/runtime/WasmRuntime.cpp.o
+[18/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/core/host/WasmCoreAbi.cpp.o
+[19/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[20/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Linux/Futex.cpp.o
+[21/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/core/host/WasmCoreValidation.cpp.o
+[22/36] Building C object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/SafeCStrings.c.o
+[23/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Linux/SoLib.cpp.o
+[24/36] Building C object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/LogUtil.c.o
+[25/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/Backend.cpp.o
+[26/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/DefaultFormatter.cpp.o
+[27/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Linux/CpuTopology.cpp.o
+[28/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/ConsoleSink.cpp.o
+[29/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/StreamSink.cpp.o
+[30/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/FramePrefixer.cpp.o
+[31/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Linux/ThreadSupport.cpp.o
+[32/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/DefaultFilter.cpp.o
+[33/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/lib/catch2/catch_main.cpp.o
+[34/36] Building CXX object test/lib/catch2/CMakeFiles/Catch2.dir/catch_amalgamated.cpp.o
+[35/36] Linking CXX static library test/lib/catch2/libCatch2.a
+[36/36] Linking CXX executable test/test_WasmSyncedJobs
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start 2: testWasmSyncedJobs
+1/1 Test #2: testWasmSyncedJobs ...............***Failed    0.02 sec
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==248==ERROR: AddressSanitizer: SEGV on unknown address 0x0000ffffffff (pc 0x62d3385db040 bp 0x7ffd730927a0 sp 0x7ffd73092758 T0)
+==248==The signal is caused by a WRITE memory access.
+    #0 0x62d3385db040 in std::__codecvt_utf8_utf16_base<char32_t>::do_unshift(__mbstate_t&, char*, char*, char*&) const (/build/out/test/test_WasmSyncedJobs+0x244f040) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #1 0x62d33861bc25 in std::istream::operator>>(int&) (/build/out/test/test_WasmSyncedJobs+0x248fc25) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #2 0x62d3371c6ce4 in cpu_topology::get_online_cpus() (/build/out/test/test_WasmSyncedJobs+0x103ace4) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #3 0x62d3371d85cc in cpu_topology::collect_intel_affinity_masks(std::bitset<32ul>&, std::bitset<32ul>&, std::bitset<32ul>&, std::bitset<32ul>&) (/build/out/test/test_WasmSyncedJobs+0x104c5cc) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #4 0x62d3371d9bca in cpu_topology::GetProcessorMasks() (/build/out/test/test_WasmSyncedJobs+0x104dbca) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #5 0x62d3371aeef5 in springproc::CPUID::EnumerateCores() (/build/out/test/test_WasmSyncedJobs+0x1022ef5) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #6 0x62d3371b13cd in springproc::CPUID::CPUID() (/build/out/test/test_WasmSyncedJobs+0x10253cd) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #7 0x62d3371b1619 in springproc::CPUID::GetInstance() (/build/out/test/test_WasmSyncedJobs+0x1025619) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #8 0x62d3371b62e1 in Threading::DetectCores() (/build/out/test/test_WasmSyncedJobs+0x102a2e1) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #9 0x62d336f6d823 in __static_initialization_and_destruction_0() (/build/out/test/test_WasmSyncedJobs+0xde1823) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #10 0x62d336f6e994 in _GLOBAL__sub_I_TestWasmSyncedJobs.cpp (/build/out/test/test_WasmSyncedJobs+0xde2994) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #11 0x62d33867535c in __libc_csu_init (/build/out/test/test_WasmSyncedJobs+0x24e935c) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+    #12 0x7e7938236c17 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c17) (BuildId: f7307432a8b162377e77a182b6cc2e53d771ec4b)
+    #13 0x62d336f766e9 in _start (/build/out/test/test_WasmSyncedJobs+0xdea6e9) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2)
+
+==248==Register values:
+rax = 0x000062d338bf3828  rbx = 0x00007a7935df09b0  rcx = 0x0000000000000000  rdx = 0x00000000ffffffff
+rdi = 0x000062d3399f2710  rsi = 0x00007a7935df09c0  rbp = 0x00007ffd730927a0  rsp = 0x00007ffd73092758
+ r8 = 0x00000000ffffffff   r9 = 0x00007a7935df0a28  r10 = 0x000062d338beda40  r11 = 0x0000000000000000
+r12 = 0x00007a7935df0e20  r13 = 0x000062d3399f3cc0  r14 = 0x00007a7935df0870  r15 = 0xfffff81e87242ca4
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/build/out/test/test_WasmSyncedJobs+0x244f040) (BuildId: c124956953919381019c24d1ab3e090f0750a9a2) in std::__codecvt_utf8_utf16_base<char32_t>::do_unshift(__mbstate_t&, char*, char*, char*&) const
+==248==ABORTING
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.02 sec
+
+The following tests FAILED:
+	  2 - testWasmSyncedJobs (Failed)
+Errors while running CTest

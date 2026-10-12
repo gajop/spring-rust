@@ -229,4 +229,6 @@ Out of scope for this design:
 - [Runtime & ABI](recoil_wasm_runtime_abi.md)
 - [Sandbox & Determinism](recoil_wasm_sandbox_determinism.md)
 - [Parity & Testing](recoil_wasm_parity_testing.md)
+- [Wasm Jobs & Local Sync Verification](recoil_wasm_synced_jobs.md)
+- [Profiling Wasm Jobs](recoil_wasm_jobs_profiling.md)
 - [Implementation Plan](recoil_wasm_implementation_plan.md)

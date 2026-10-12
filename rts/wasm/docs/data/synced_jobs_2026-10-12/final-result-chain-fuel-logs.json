@@ -1,0 +1,62 @@
+[
+  {
+    "log": "out/local-sync/final-result-chain-fuel/record/sync.jsonl",
+    "sha256": "c2918e715f5522b5ea7b26ea5d5f0fd81142988aca2ff44b7a38b1f67d3e87c9",
+    "frames": 601,
+    "first": 0,
+    "last": 600,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "4e247c7656e93f03aab12390c22b5a67516ffdfef1c8449f77e298e92efe765b82b84666e1a0b1c644582ba1d765468188659e03840387117371626b34f33914",
+        "bytes": 131072
+      }
+    ]
+  },
+  {
+    "log": "out/local-sync/final-result-chain-fuel/run-0-1/sync.jsonl",
+    "sha256": "c2918e715f5522b5ea7b26ea5d5f0fd81142988aca2ff44b7a38b1f67d3e87c9",
+    "frames": 601,
+    "first": 0,
+    "last": 600,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "4e247c7656e93f03aab12390c22b5a67516ffdfef1c8449f77e298e92efe765b82b84666e1a0b1c644582ba1d765468188659e03840387117371626b34f33914",
+        "bytes": 131072
+      }
+    ]
+  },
+  {
+    "log": "out/local-sync/final-result-chain-fuel/run-1-4/sync.jsonl",
+    "sha256": "57a84b5e2c485f1d2930c295a652c7c0e80e5c738551b984bad7eb8ca4aaf5f7",
+    "frames": 601,
+    "first": 0,
+    "last": 600,
+    "workers": 4,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "4e247c7656e93f03aab12390c22b5a67516ffdfef1c8449f77e298e92efe765b82b84666e1a0b1c644582ba1d765468188659e03840387117371626b34f33914",
+        "bytes": 131072
+      }
+    ]
+  }
+]

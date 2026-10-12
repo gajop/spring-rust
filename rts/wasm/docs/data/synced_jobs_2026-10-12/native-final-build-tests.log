@@ -1,0 +1,468 @@
+[0/2] Re-checking globbed directories...
+[1/2] Re-running CMake...
+-- Prefer static-linking!
+-- gcc 13.1.0 detected
+-- Checking to see if CXX compiler accepts flag -fvisibility=hidden
+-- Checking to see if CXX compiler accepts flag -fvisibility=hidden - yes
+-- Checking to see if CXX compiler accepts flag -std=c++17
+-- Checking to see if CXX compiler accepts flag -std=c++17 - yes
+-- Detected x86-64 architecture: x86_64
+-- Building Spring on a 64-bit environment
+-- Found DevIL: /build/spring-static-libs/lib/libIL.a (Required is at least version "1.8.0")
+-- Found ld.gold
+-- Checking to see if CXX compiler accepts flag -fdiagnostics-color=auto
+-- Checking to see if CXX compiler accepts flag -fdiagnostics-color=auto - yes
+-- Using CMAKE_CXX_FLAGS: -fuse-ld=gold -fdiagnostics-color=auto -march=x86-64 -mtune=generic -msse -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-sse4a -mno-avx -mno-fma -mno-fma4 -mno-xop -mno-lwp -mno-avx2  -mfpmath=sse -fsingle-precision-constant -frounding-math -mieee-fp -pipe -fno-strict-aliasing  -fvisibility=hidden  -fvisibility-inlines-hidden -pthread
+-- Using CMAKE_CXX_FLAGS_RELEASE:-O3 -DNDEBUG  -Wformat -Wformat-security -DNDEBUG
+-- {fmt} version: 12.1.0
+-- Build type: RELEASE
+--
+-- Architecture: x64
+--
+-- Library name     : mimalloc
+-- Version          : 3.2.8
+-- Build type       : release
+-- C Compiler       : /usr/bin/gcc-13
+-- Compiler flags   : -Wall;-Wextra;-Wno-unknown-pragmas;-fvisibility=hidden;-Wstrict-prototypes;-ftls-model=initial-exec
+-- Compiler defines : MI_CMAKE_BUILD_TYPE=release;MI_BUILD_RELEASE
+-- Link libraries   : pthread;rt;atomic
+-- Build targets    : static;object
+--
+-- Using minizip library: /build/spring-static-libs/lib/libminizip.a
+-- Forcing assimp option ASSIMP_BUILD_STATIC_LIB to on
+-- Forcing assimp option ASSIMP_NO_EXPORT to on
+-- Shared libraries disabled
+-- Build an import-only version of Assimp.
+INFO RT-extension not found. glTF import/export will be built without Open3DGC-compression.
+-- Enabled formats: 3DS COLLADA LWO OBJ BLEND
+-- Disabled formats: AMF AC ASE ASSBIN ASSXML B3D BVH DXF CSM HMP IRRMESH IRR LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OGRE OPENGEX PLY MS3D COB IFC XGL FBX Q3D Q3BSP RAW SIB SMD STL TERRAGEN 3D X X3D GLTF 3MF MMD
+-- Including implementation fallback due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation westmere due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation haswell due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation icelake due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation arm64 due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation ppc64 due to SIMDJSON_IMPLEMENTATION=fallback
+-- Selected implementation fallback as builtin implementation based on fallback
+-- AVX-512 instructions are not allowed.
+-- Adding -Og to compile flag
+Parsing public/common/TracyVersion.hpp file
+VERSION 0.11.1
+-- TRACY_ENABLE: OFF
+-- TRACY_ON_DEMAND: ON
+-- TRACY_CALLSTACK: OFF
+-- TRACY_NO_CALLSTACK: OFF
+-- TRACY_NO_CALLSTACK_INLINES: OFF
+-- TRACY_ONLY_LOCALHOST: OFF
+-- TRACY_NO_BROADCAST: OFF
+-- TRACY_ONLY_IPV4: OFF
+-- TRACY_NO_CODE_TRANSFER: OFF
+-- TRACY_NO_CONTEXT_SWITCH: OFF
+-- TRACY_NO_EXIT: OFF
+-- TRACY_NO_SAMPLING: OFF
+-- TRACY_NO_VERIFY: OFF
+-- TRACY_NO_VSYNC_CAPTURE: OFF
+-- TRACY_NO_FRAME_IMAGE: OFF
+-- TRACY_NO_SYSTEM_TRACING: OFF
+-- TRACY_PATCHABLE_NOPSLEDS: OFF
+-- TRACY_DELAYED_INIT: OFF
+-- TRACY_MANUAL_LIFETIME: OFF
+-- TRACY_FIBERS: OFF
+-- TRACY_NO_CRASH_HANDLER: OFF
+-- TRACY_TIMER_FALLBACK: OFF
+-- TRACY_LIBUNWIND_BACKTRACE: OFF
+-- TRACY_SYMBOL_OFFLINE_RESOLVE: OFF
+-- TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT: OFF
+-- TRACY_VERBOSE: OFF
+-- TRACY_DEMANGLE: OFF
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found version "2.8.1")
+-- Found Freetype::Freetype - Freetype font engine enabled
+-- Found AI Wrapper: CUtils (sources only wrapper)
+-- Found AI Interface: C-AIInterface 0.1
+-- Found AI Wrapper: Cpp-AIWrapper
+-- Found AI Wrapper: LegacyCpp-AIWrapper
+-- Found AI Wrapper: LegacyCpp-Creg-AIWrapper
+-- Found Skirmish AI: BARb stable
+-- Found Skirmish AI: CircuitAI stable
+warning: CppTestAI Skirmish AI will not be built!
+-- Found Skirmish AI: NullAI 0.1
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found suitable version "1.3.1", minimum required is "1.2.7")
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found version "1.3.1")
+-- Command "/usr/bin/git;describe;--tags;--abbrev=7;--always;--candidates;999;--match;*" in directory /build/src/tools/pr-downloader/src failed with output:
+"fatal: not a git repository: /build/src/tools/pr-downloader/../../../../../projects/spring-projects/spring-bar/.git/worktrees/spring-bar4/modules/tools/pr-downloader"
+-- PR-Downloader version: tarball
+-- Checking for module 'jsoncpp'
+--   No package 'jsoncpp' found
+-- Not found jsoncpp in system, using integrated version
+-- user-docs (plain/text) will be installed to {INSTALL_PREFIX}/doc
+-- /build/out/springsettings.cfg already exists!
+-- Found DevIL: /build/spring-static-libs/lib/libIL.a
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found suitable version "1.3.1", minimum required is "1.2.7")
+-- Using mimalloc
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found suitable version "2.8.1", minimum required is "2.8.1")
+CMake Warning (dev) in rts/builds/legacy/CMakeLists.txt:
+  A logical block opening on the line
+
+    /build/src/rts/builds/legacy/CMakeLists.txt:52 (if)
+
+  closes on the line
+
+    /build/src/rts/builds/legacy/CMakeLists.txt:56 (endif)
+
+  with mis-matching arguments.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Using legacy as default engine
+-- No ipv6 support, disabling test
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found version "1.3.1")
+-- Configuring done (0.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: /build/out
+[0/2] Re-checking globbed directories...
+[1/331] Building CXX object rts/System/FileSystem/Archives/CMakeFiles/archives.dir/IArchive.cpp.o
+[2/331] Building CXX object rts/System/FileSystem/Archives/CMakeFiles/archives.dir/ZipArchive.cpp.o
+[3/331] Building CXX object rts/System/FileSystem/Archives/CMakeFiles/archives.dir/SevenZipArchive.cpp.o
+[4/331] Building CXX object rts/System/FileSystem/Archives/CMakeFiles/archives.dir/DirArchive.cpp.o
+[5/331] Building CXX object rts/System/FileSystem/Archives/CMakeFiles/archives.dir/PoolArchive.cpp.o
+[6/331] Linking CXX static library rts/System/FileSystem/Archives/libarchives.a
+[7/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/BuildingMaskMap.cpp.o
+[8/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Ecs/SaveLoadUtils.cpp.o
+[9/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Features/Feature.cpp.o
+[10/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Features/FeatureHandler.cpp.o
+[11/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Features/FeatureDefHandler.cpp.o
+[12/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/CollisionHandler.cpp.o
+[13/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/CollisionVolume.cpp.o
+[14/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/GeometricObjects.cpp.o
+[15/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/GlobalSynced.cpp.o
+[16/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/GroundBlockingObjectMap.cpp.o
+[17/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/InterceptHandler.cpp.o
+[18/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/NanoPieceCache.cpp.o
+[19/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/ModInfo.cpp.o
+[20/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/LosHandler.cpp.o
+[21/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/LosMap.cpp.o
+[22/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/ResourceHandler.cpp.o
+[23/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/SimObjectIDPool.cpp.o
+[24/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/ResourceMapAnalyzer.cpp.o
+[25/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/SmoothHeightMesh.cpp.o
+[26/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/QuadField.cpp.o
+[27/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/Team.cpp.o
+[28/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/Wind.cpp.o
+[29/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/YardmapStatusEffectsMap.cpp.o
+[30/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Misc/TeamHandler.cpp.o
+[31/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/StrafeAirMoveType.cpp.o
+[32/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/AAirMoveType.cpp.o
+[33/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/MoveMath/GroundMoveMath.cpp.o
+[34/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/MoveMath/HoverMoveMath.cpp.o
+[35/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/MoveMath/ShipMoveMath.cpp.o
+[36/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/MoveDefHandler.cpp.o
+[37/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/MoveMath/MoveMath.cpp.o
+[38/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/MoveTypeFactory.cpp.o
+[39/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/MoveType.cpp.o
+[40/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/GroundMoveType.cpp.o
+[41/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/StaticMoveType.cpp.o
+[42/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/ScriptMoveType.cpp.o
+[43/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/HoverAirMoveType.cpp.o
+[44/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/Systems/GeneralMoveSystem.cpp.o
+[45/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/Utils/UnitTrapCheckUtils.cpp.o
+[46/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Objects/SolidObject.cpp.o
+[47/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/Systems/UnitTrapCheckSystem.cpp.o
+[48/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Objects/SolidObjectDef.cpp.o
+[49/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Objects/WorldObject.cpp.o
+[50/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/MoveTypes/Systems/GroundMoveSystem.cpp.o
+[51/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/Node.cpp.o
+[52/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/NodeLayer.cpp.o
+[53/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/PathCache.cpp.o
+[54/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/Systems/PathSpeedModInfoSystem.cpp.o
+[55/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/PathSearch.cpp.o
+[56/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/Systems/RemoveDeadPathsSystem.cpp.o
+[57/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/Systems/RequeuePathsSystem.cpp.o
+[58/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/Systems/SyncUpdatedPathsSystem.cpp.o
+[59/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/IPathFinder.cpp.o
+[60/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/PathCache.cpp.o
+[61/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/PathEstimator.cpp.o
+[62/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/PathFinder.cpp.o
+[63/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/PathFinderDef.cpp.o
+[64/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/PathFlowMap.cpp.o
+[65/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/PathHeatMap.cpp.o
+[66/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/QTPFS/PathManager.cpp.o
+/build/src/rts/Sim/Path/QTPFS/PathManager.cpp: In lambda function:
+/build/src/rts/Sim/Path/QTPFS/PathManager.cpp:732:38: warning: implicit capture of 'this' via '[=]' is deprecated in C++20 [-Wdeprecated]
+  732 |         const bool needTesselation = [=]() {
+      |                                      ^
+/build/src/rts/Sim/Path/QTPFS/PathManager.cpp:732:38: note: add explicit 'this' or '*this' capture
+[67/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/IPathController.cpp.o
+[68/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/ExpGenSpawner.cpp.o
+[69/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/IPathManager.cpp.o
+[70/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/PathingState.cpp.o
+[71/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/ExpGenSpawnable.cpp.o
+[72/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Path/HAPFS/PathManager.cpp.o
+[73/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/FireProjectile.cpp.o
+[74/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/FlareProjectile.cpp.o
+[75/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/PieceProjectile.cpp.o
+[76/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/ExplosionGenerator.cpp.o
+[77/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/Projectile.cpp.o
+[78/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/EmgProjectile.cpp.o
+[79/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/BeamLaserProjectile.cpp.o
+[80/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/ProjectileHandler.cpp.o
+[81/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/ExplosiveProjectile.cpp.o
+[82/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/FireBallProjectile.cpp.o
+[83/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/FlameProjectile.cpp.o
+[84/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/LargeBeamLaserProjectile.cpp.o
+[85/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/LaserProjectile.cpp.o
+[86/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/LightningProjectile.cpp.o
+[87/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/MissileProjectile.cpp.o
+[88/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/StarburstProjectile.cpp.o
+[89/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/TorpedoProjectile.cpp.o
+[90/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/WeaponProjectileFactory.cpp.o
+[91/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/BuildInfo.cpp.o
+[92/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Projectiles/WeaponProjectiles/WeaponProjectile.cpp.o
+[93/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/CommandAI/AirCAI.cpp.o
+[94/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/CommandAI/BuilderCAI.cpp.o
+[95/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/CommandAI/BuilderCaches.cpp.o
+[96/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/CommandAI/FactoryCAI.cpp.o
+[97/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/CommandAI/CommandAI.cpp.o
+[98/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/CommandAI/MobileCAI.cpp.o
+[99/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/CobDeferredCallin.cpp.o
+[100/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/CobEngine.cpp.o
+[101/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/NullUnitScript.cpp.o
+[102/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/CobThread.cpp.o
+[103/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/NativeUnitScript.cpp.o
+[104/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/CobInstance.cpp.o
+[105/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/LuaUnitScript.cpp.o
+[106/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/UnitScriptFactory.cpp.o
+[107/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/UnitScriptEngine.cpp.o
+[108/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Scripts/UnitScript.cpp.o
+[109/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/UnitDef.cpp.o
+[110/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/UnitDefHandler.cpp.o
+[111/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/UnitLoader.cpp.o
+[112/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/Unit.cpp.o
+[113/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/UnitHandler.cpp.o
+[114/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/UnitTypes/Builder.cpp.o
+[115/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/UnitTypes/Building.cpp.o
+[116/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/UnitTypes/ExtractorBuilding.cpp.o
+[117/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Units/UnitTypes/Factory.cpp.o
+[118/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/BeamLaser.cpp.o
+[119/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/BombDropper.cpp.o
+[120/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/DGunWeapon.cpp.o
+[121/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/Cannon.cpp.o
+[122/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/EmgCannon.cpp.o
+[123/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/FlameThrower.cpp.o
+[124/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/LaserCannon.cpp.o
+[125/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/MeleeWeapon.cpp.o
+[126/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/LightningCannon.cpp.o
+[127/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/MissileLauncher.cpp.o
+[128/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/PlasmaRepulser.cpp.o
+[129/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/Rifle.cpp.o
+[130/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/StarburstLauncher.cpp.o
+[131/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/TorpedoLauncher.cpp.o
+[132/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/WeaponLoader.cpp.o
+[133/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/Weapon.cpp.o
+[134/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/WeaponTarget.cpp.o
+[135/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Camera/CameraController.cpp.o
+[136/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Camera.cpp.o
+[137/331] Building CXX object rts/Sim/CMakeFiles/engineSim.dir/Weapons/WeaponDef.cpp.o
+[138/331] Linking CXX static library rts/Sim/libengineSim.a
+[139/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Camera/FPSController.cpp.o
+[140/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Camera/RotOverheadController.cpp.o
+[141/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Camera/SpringController.cpp.o
+[142/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Camera/DollyController.cpp.o
+[143/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Camera/OverheadController.cpp.o
+[144/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/FPSUnitController.cpp.o
+[145/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/CameraHandler.cpp.o
+[146/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/InMapDrawModel.cpp.o
+[147/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/InMapDraw.cpp.o
+[148/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/GameHelper.cpp.o
+[149/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Players/Player.cpp.o
+[150/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Display.cpp.o
+[151/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/PreGame.cpp.o
+[152/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Camera.cpp.o
+[153/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Features.cpp.o
+[154/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/PathFinder.cpp.o
+[155/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Game.cpp.o
+[156/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/LOS.cpp.o
+[157/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/MoveCtrl.cpp.o
+[158/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Game.cpp.o
+[159/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Projectiles.cpp.o
+[160/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Selection.cpp.o
+[161/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Teams.cpp.o
+[162/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/RulesParams.cpp.o
+[163/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Terrain.cpp.o
+[164/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Tracing.cpp.o
+[165/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/UnitDefs.cpp.o
+[166/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/SyncedCtrl.cpp.o
+[167/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/UnsyncedRead.cpp.o
+[168/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/UnsyncedCtrl.cpp.o
+[169/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/ObjectRendering.cpp.o
+[170/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Icons.cpp.o
+[171/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Lights.cpp.o
+[172/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Markers.cpp.o
+[173/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/GroundDecals.cpp.o
+[174/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/SystemControl.cpp.o
+[175/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/UnitsPieces.cpp.o
+[176/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/UnitsCommands.cpp.o
+[177/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Gfx.cpp.o
+[178/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/UnitsWeapons.cpp.o
+[179/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/UnitsInfo.cpp.o
+[180/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/Utils.cpp.o
+[181/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/UnitsQuery.cpp.o
+[182/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/WasmUiVisibility.cpp.o
+[183/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/api/VFS.cpp.o
+[184/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/SelectedUnitsAI.cpp.o
+[185/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/TraceRay.cpp.o
+[186/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/NativeInterfaceSystem.cpp.o
+[187/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/SyncedGameCommands.cpp.o
+[188/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/NativeInterface/NativeInterfaceEventClient.cpp.o
+[189/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/SelectedUnitsHandler.cpp.o
+[190/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/GameSetupDrawer.cpp.o
+[191/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/DefaultInterface.cpp.o
+[192/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/CursorIcons.cpp.o
+[193/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/Groups/Group.cpp.o
+[194/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/GameInfo.cpp.o
+[195/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/EndGameBox.cpp.o
+[196/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/Groups/GroupHandler.cpp.o
+[197/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/GuiHandler.cpp.o
+[198/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/InfoConsole.cpp.o
+[199/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/PlayerRoster.cpp.o
+[200/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/KeyBindings.cpp.o
+[201/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/PlayerRosterDrawer.cpp.o
+[202/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/SelectionKeyHandler.cpp.o
+[203/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/MouseHandler.cpp.o
+[204/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/QuitBox.cpp.o
+[205/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/MiniMap.cpp.o
+[206/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/ProfileDrawer.cpp.o
+[207/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/ShareBox.cpp.o
+[208/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/UnitTracker.cpp.o
+[209/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/StartPosSelecter.cpp.o
+[210/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UI/TooltipConsole.cpp.o
+[211/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/WaitCommandsAI.cpp.o
+[212/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaArchive.cpp.o
+[213/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Net/NetCommands.cpp.o
+[214/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaConstCMD.cpp.o
+[215/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaConstCMDTYPE.cpp.o
+[216/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaConstCOB.cpp.o
+[217/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaConstGL.cpp.o
+[218/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaConstEngine.cpp.o
+[219/331] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/UnsyncedGameCommands.cpp.o
+[220/331] Linking CXX static library rts/builds/headless/libGameHeadless.a
+[221/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaConstPlatform.cpp.o
+[222/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaConstGame.cpp.o
+[223/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaDebugExtra.cpp.o
+[224/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaVFSDownload.cpp.o
+[225/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaEncoding.cpp.o
+[226/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaFBOs.cpp.o
+[227/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaFeatureDefs.cpp.o
+[228/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaGaia.cpp.o
+[229/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaFonts.cpp.o
+[230/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaInputReceiver.cpp.o
+[231/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaIntro.cpp.o
+[232/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaHandleSynced.cpp.o
+[233/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaMathExtra.cpp.o
+[234/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaMaterial.cpp.o
+[235/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaMenu.cpp.o
+[236/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaMetalMap.cpp.o
+[237/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaObjectRendering.cpp.o
+[238/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaHandle.cpp.o
+[239/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaOpenGLUtils.cpp.o
+[240/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaPathFinder.cpp.o
+[241/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaRBOs.cpp.o
+[242/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaParser.cpp.o
+[243/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaOpenGL.cpp.o
+[244/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaRules.cpp.o
+[245/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaScream.cpp.o
+[246/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaSyncedMoveCtrl.cpp.o
+[247/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaSyncedTable.cpp.o
+[248/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaTableExtra.cpp.o
+[249/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaShaders.cpp.o
+[250/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaTracyExtra.cpp.o
+[251/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaSyncedCtrl.cpp.o
+[252/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaSyncedRead.cpp.o
+[253/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaUICommand.cpp.o
+[254/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaUnitDefs.cpp.o
+[255/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaUI.cpp.o
+[256/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaVFS.cpp.o
+[257/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaZip.cpp.o
+[258/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaWeaponDefs.cpp.o
+[259/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaUnsyncedRead.cpp.o
+[260/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaUnsyncedCtrl.cpp.o
+[261/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaUtils.cpp.o
+[262/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/Ground.cpp.o
+[263/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/BasicMapDamage.cpp.o
+[264/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaVAOImpl.cpp.o
+[265/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaVAO.cpp.o
+[266/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/MetalMap.cpp.o
+[267/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaVBO.cpp.o
+[268/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Lua/LuaVBOImpl.cpp.o
+[269/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/ReadMap.cpp.o
+[270/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/Null/NullReadMap.cpp.o
+[271/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/Generation/BlankMapGenerator.cpp.o
+[272/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/SMF/SMFGroundDrawer.cpp.o
+[273/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/SMF/SMFMapFile.cpp.o
+[274/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/SMF/SMFRenderState.cpp.o
+[275/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/SMF/SMFGroundTextures.cpp.o
+[276/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/SMF/ROAM/RoamMeshDrawer.cpp.o
+[277/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/SMF/ROAM/Patch.cpp.o
+[278/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/SMF/SMFReadMap.cpp.o
+[279/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Map/SMF/Basic/BasicMeshDrawer.cpp.o
+[280/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/DebugColVolDrawer.cpp.o
+[281/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/DepthBufferCopy.cpp.o
+[282/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/DebugDrawerQuadField.cpp.o
+[283/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/AdvWater.cpp.o
+[284/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/IGroundDecalDrawer.cpp.o
+[285/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/DebugVisibilityDrawer.cpp.o
+[286/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/HAPFSPathDrawer.cpp.o
+[287/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/QTPFSPathDrawer.cpp.o
+[288/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/IWater.cpp.o
+[289/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/CubeMapHandler.cpp.o
+[290/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/BasicWater.cpp.o
+[291/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/MapRendering.cpp.o
+[292/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/DynWater.cpp.o
+[293/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/ModernSky.cpp.o
+[294/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/RefractWater.cpp.o
+[295/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/GrassDrawer.cpp.o
+[296/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/SkyBox.cpp.o
+[297/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/BumpWater.cpp.o
+[298/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/SunLighting.cpp.o
+[299/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/WaterRendering.cpp.o
+[300/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/BubbleProjectile.cpp.o
+[301/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/BitmapMuzzleFlame.cpp.o
+[302/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/DirtProjectile.cpp.o
+[303/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/ExploSpikeProjectile.cpp.o
+[304/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/GeoThermSmokeProjectile.cpp.o
+[305/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/GeoSquareProjectile.cpp.o
+[306/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/FlyingPiece.cpp.o
+[307/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Decals/GroundDecalHandler.cpp.o
+[308/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/NanoProjectile.cpp.o
+[309/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/MuzzleFlame.cpp.o
+[310/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/HeatCloudProjectile.cpp.o
+[311/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/RepulseGfx.cpp.o
+[312/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/ProjectileDrawer.cpp.o
+[313/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/SimpleParticleSystem.cpp.o
+[314/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/ShieldSegmentProjectile.cpp.o
+[315/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/SmokeProjectile.cpp.o
+[316/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/SmokeProjectile2.cpp.o
+[317/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/SmokeTrailProjectile.cpp.o
+[318/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/SpherePartProjectile.cpp.o
+[319/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/WakeProjectile.cpp.o
+[320/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/WreckProjectile.cpp.o
+[321/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/GL/LightHandler.cpp.o
+[322/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Env/Particles/Classes/TracerProjectile.cpp.o
+[323/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/GroundFlash.cpp.o
+[324/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/HUDDrawer.cpp.o
+[325/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/GL/glExtra.cpp.o
+[326/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/CommandDrawer.cpp.o
+[327/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/IPathDrawer.cpp.o
+[328/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/GlobalRendering.cpp.o
+[329/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/LuaObjectDrawer.cpp.o
+[330/331] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/Rendering/Map/InfoTexture/Modern/AirLos.cpp.o
+[331/331] Linking CXX executable spring-headless
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start  1: testWasmModuleManifest
+1/3 Test  #1: testWasmModuleManifest ...........   Passed    0.00 sec
+    Start  2: testWasmSyncedJobs
+2/3 Test  #2: testWasmSyncedJobs ...............   Passed    0.12 sec
+    Start 23: testThreadPool
+3/3 Test #23: testThreadPool ...................   Passed    5.67 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   5.80 sec

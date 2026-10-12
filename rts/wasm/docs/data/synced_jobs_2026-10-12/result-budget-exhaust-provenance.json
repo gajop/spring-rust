@@ -1,0 +1,36 @@
+{
+  "command": [
+    "test/synctest/wasm_sync_replay.py",
+    "run",
+    "--spring",
+    "out/local-sync/runtime-queue-drain-final/spring-headless",
+    "--game",
+    "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/game.sdd",
+    "--demo",
+    "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/replay.sdfz",
+    "--output",
+    "out/local-sync/final-queue-drain-result-budget-exhaust",
+    "--threads",
+    "1",
+    "4",
+    "--frames",
+    "2",
+    "--timeout",
+    "900",
+    "--fixture",
+    "out/local-sync/fixtures/result_budget_exhaust.wasm",
+    "--record-first",
+    "--instruction-fuel",
+    "1000000000"
+  ],
+  "engine_sha256": "48038531af98d2c708111b976adb00d3a0c137dcd48d617e8bb189d4695ccf92",
+  "demo_sha256": "ae404d83f64c87c0d5229b8b1f5e804cce82d966eaffbf7738dabe25e940d699",
+  "game": "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/game.sdd",
+  "fixture_sha256": "48dac4a56b3d9ba172d6f50687a4ef64c9d2c5a2f285611945f0f9f3ee80b0fc",
+  "worker_fixture_sha256": null,
+  "threads": [
+    1,
+    4
+  ],
+  "final_frame": 2
+}

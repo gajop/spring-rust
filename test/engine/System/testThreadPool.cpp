@@ -10,6 +10,7 @@
 #include <vector>
 #include <atomic>
 #include <future>
+#include <array>
 
 #include <catch_amalgamated.hpp>
 
@@ -34,6 +35,69 @@ static spring::mutex m;
 
 static constexpr int NUM_RUNS = 5000;
 static           int NUM_THREADS = 0;
+
+TEST_CASE("background barrier drains a blocked worker queue", "[background-queue-drain]")
+{
+	if (ThreadPool::GetMaxThreads() < 2) return;
+	struct StopThreads { ~StopThreads() { ThreadPool::SetThreadCount(1); } } stopThreads;
+	ThreadPool::SetThreadCount(2);
+	std::atomic<bool> blocked{false}, release{false}, waited{false};
+	auto* blocker = new SyncTask<std::function<void()>>(std::function<void()>([&] {
+		blocked.store(true);
+		blocked.notify_all();
+		release.wait(false);
+	}));
+	blocker->wantedThread.store(1);
+	ThreadPool::PushTaskGroup(blocker);
+	blocked.wait(false);
+
+	// The waiter can finish all work itself, but the blocked worker still has
+	// this group's raw pointer queued. Reuse must wait for that entry to drain.
+	auto group = for_mt_background(0, 2, [](const int) {});
+	std::thread waiter([&] {
+		wait_for_mt_background(group);
+		waited.store(true);
+	});
+	while (group->inTaskQueue.load()) std::this_thread::yield();
+	CHECK(group->IsFinished());
+	CHECK(group->IsInJobQueue());
+	CHECK_FALSE(waited.load());
+	release.store(true);
+	release.notify_all();
+	waiter.join();
+	CHECK(waited.load());
+}
+
+TEST_CASE("background completion publishes plain results before pool reuse", "[background-publication]")
+{
+	struct StopThreads { ~StopThreads() { ThreadPool::SetThreadCount(1); } } stopThreads;
+	for (const int threads: {1, 2, 4}) {
+		if (threads > ThreadPool::GetMaxThreads()) continue;
+		ThreadPool::SetThreadCount(threads);
+		REQUIRE(ThreadPool::GetNumThreads() == threads);
+		// More than the task pool's 256 slots, with no result-side mutex or
+		// atomics that could accidentally provide the completion barrier.
+		for (int round = 0; round < 270; ++round) {
+			std::array<int, 128> results{};
+			std::array<int, 128> expected{};
+			std::atomic<int> completed{0};
+			for (int i = 0; i < int(expected.size()); ++i)
+				expected[i] = round * 1000 + i;
+			auto group = for_mt_background(0, int(results.size()), [&](const int i) {
+				results[i] = round * 1000 + i;
+				completed.fetch_add(1, std::memory_order_relaxed);
+			});
+			// Ensure workers participate; this relaxed progress flag supplies
+			// no happens-before edge for the plain result writes.
+			if (threads > 1) {
+				while (completed.load(std::memory_order_relaxed) == 0)
+					std::this_thread::yield();
+				wait_for_mt_background(group);
+			}
+			REQUIRE(results == expected);
+		}
+	}
+}
 
 
 TEST_CASE("test_for_mt")
@@ -342,4 +406,3 @@ TEST_CASE("Cleanup")
 	ThreadPool::SetThreadCount(0);
 	CHECK(ThreadPool::GetNumThreads() == 1);
 }
-

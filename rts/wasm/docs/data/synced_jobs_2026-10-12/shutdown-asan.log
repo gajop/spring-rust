@@ -1,0 +1,11 @@
+[0/2] Re-checking globbed directories...
+[1/2] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/engine/WasmInterface/TestWasmSyncedJobs.cpp.o
+[2/2] Linking CXX executable test/test_WasmSyncedJobs
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start 2: testWasmSyncedJobs
+1/1 Test #2: testWasmSyncedJobs ...............   Passed    0.35 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.35 sec

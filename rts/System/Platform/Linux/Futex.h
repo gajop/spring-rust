@@ -76,7 +76,8 @@ public:
 protected:
 	std::atomic_int sleepers;
 	std::atomic_int gen;
-	std::uint32_t mtx;
+	// The kernel needs a raw 32-bit word; C++ readers/writers use atomic_ref.
+	alignas(std::atomic_ref<std::uint32_t>::required_alignment) std::uint32_t mtx;
 };
 
 #endif // SPRINGFUTEX_H

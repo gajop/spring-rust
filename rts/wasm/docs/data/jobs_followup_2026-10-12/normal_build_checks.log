@@ -1,0 +1,36 @@
+[0/2] Re-checking globbed directories...
+[1/25] Building CXX object rts/builds/legacy/CMakeFiles/engine-legacy.dir/__/__/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[2/25] Building CXX object rts/builds/legacy/CMakeFiles/engine-legacy.dir/__/__/WasmInterface/core/bindings/WasmCoreJobsBindings.cpp.o
+[3/25] Building CXX object rts/builds/legacy/CMakeFiles/engine-legacy.dir/__/__/WasmInterface/core/bindings/WasmCoreRmlUiBindings.cpp.o
+[4/25] Building CXX object rts/builds/legacy/CMakeFiles/engine-legacy.dir/__/__/System/SpringApp.cpp.o
+[5/25] Building CXX object rts/builds/legacy/CMakeFiles/engine-legacy.dir/__/__/WasmInterface/core/host/WasmCoreHost.cpp.o
+[6/25] Building CXX object rts/builds/legacy/CMakeFiles/engine-legacy.dir/__/__/WasmInterface/system/WasmInterfaceSystemCore.cpp.o
+[7/25] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[8/25] Building CXX object rts/builds/legacy/CMakeFiles/engine-legacy.dir/__/__/WasmInterface/system/WasmInterfaceSystem.cpp.o
+[9/25] Building CXX object rts/builds/legacy/CMakeFiles/engine-legacy.dir/__/__/WasmInterface/system/WasmSyncVerification.cpp.o
+[10/25] Building CXX object rts/builds/legacy/CMakeFiles/Game.dir/__/__/Game/Game.cpp.o
+[11/25] Linking CXX static library rts/builds/legacy/libGame.a
+[12/25] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/core/bindings/WasmCoreJobsBindings.cpp.o
+[13/25] Linking CXX executable spring
+[14/25] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/core/bindings/WasmCoreRmlUiBindings.cpp.o
+[15/25] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/core/host/WasmCoreHost.cpp.o
+[16/25] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/System/SpringApp.cpp.o
+[17/25] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Game.cpp.o
+[18/25] Linking CXX static library rts/builds/headless/libGameHeadless.a
+[19/25] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/system/WasmSyncVerification.cpp.o
+[20/25] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[21/25] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/system/WasmInterfaceSystemCore.cpp.o
+[22/25] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/system/WasmInterfaceSystem.cpp.o
+[23/25] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/engine/WasmInterface/TestWasmSyncedJobs.cpp.o
+[24/25] Linking CXX executable test/test_WasmSyncedJobs
+[25/25] Linking CXX executable spring-headless
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start 1: testWasmModuleManifest
+1/2 Test #1: testWasmModuleManifest ...........   Passed    0.00 sec
+    Start 2: testWasmSyncedJobs
+2/2 Test #2: testWasmSyncedJobs ...............   Passed    0.19 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.19 sec

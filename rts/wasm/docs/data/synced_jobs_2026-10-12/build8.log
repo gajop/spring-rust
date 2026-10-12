@@ -1,0 +1,11 @@
+[0/2] Re-checking globbed directories...
+[1/2] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/core/host/WasmCoreHost.cpp.o
+[2/2] Linking CXX executable spring-headless
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start 2: testWasmSyncedJobs
+1/1 Test #2: testWasmSyncedJobs ...............   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.03 sec

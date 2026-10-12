@@ -1,0 +1,102 @@
+[0/2] Re-checking globbed directories...
+[1/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/CpuID.cpp.o
+[2/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/CpuTopologyCommon.cpp.o
+[3/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Misc/SpringTime.cpp.o
+[4/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/ThreadAffinityGuard.cpp.o
+[5/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/SharedLib.cpp.o
+[6/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Threading/ThreadPool.cpp.o
+In file included from /usr/include/c++/13/bits/shared_ptr_atomic.h:33,
+                 from /usr/include/c++/13/memory:81,
+                 from /build/src/rts/System/Platform/Linux/ThreadSupport.h:12,
+                 from /build/src/rts/System/Platform/Threading.h:9,
+                 from /build/src/rts/System/Threading/ThreadPool.h:91,
+                 from /build/src/rts/System/Threading/ThreadPool.cpp:5:
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::Block::is_empty() const [with moodycamel::ConcurrentQueue<T, Traits>::InnerQueueContext context = moodycamel::ConcurrentQueue<ITaskGroup*, moodycamel::ConcurrentQueueDefaultTraits>::explicit_context; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1483:29,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1715:76:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::Block::is_empty() const [with moodycamel::ConcurrentQueue<T, Traits>::InnerQueueContext context = moodycamel::ConcurrentQueue<ITaskGroup*, moodycamel::ConcurrentQueueDefaultTraits>::explicit_context; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1483:29,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1715:76,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1755:3:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1879:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1624:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1054:37:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ImplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:2443:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1627:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1054:37:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1879:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1624:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1058:36:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ImplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:2443:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1627:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1058:36:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+[7/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/CpuTopology.cpp.o
+[8/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Threading.cpp.o
+[9/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/Futex.cpp.o
+[10/22] Building C object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/SafeCStrings.c.o
+[11/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/SoLib.cpp.o
+[12/22] Building C object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/LogUtil.c.o
+[13/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/Backend.cpp.o
+[14/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/DefaultFormatter.cpp.o
+[15/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/engine/System/testThreadPool.cpp.o
+[16/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/ConsoleSink.cpp.o
+[17/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/StreamSink.cpp.o
+[18/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/DefaultFilter.cpp.o
+[19/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/ThreadSupport.cpp.o
+[20/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/FramePrefixer.cpp.o
+[21/22] Building CXX object test/CMakeFiles/test_ThreadPool.dir/lib/catch2/catch_main.cpp.o
+[22/22] Linking CXX executable test/test_ThreadPool
+==================
+WARNING: ThreadSanitizer: data race (pid=1)
+  Write of size 1 at 0x5555556cd543 by main thread:
+    #0 ThreadPool::SetThreadCount(int) <null> (test_ThreadPool+0x43d14) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #1 CATCH2_INTERNAL_TEST_0() <null> (test_ThreadPool+0x32bac) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #2 Catch::RunContext::invokeActiveTestCase() <null> (test_ThreadPool+0x7c4c7) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #3 Catch::RunContext::runCurrentTest() <null> (test_ThreadPool+0xc69f2) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #4 Catch::RunContext::runTest(Catch::TestCaseHandle const&) <null> (test_ThreadPool+0xc7338) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #5 Catch::Session::runInternal() <null> (test_ThreadPool+0xe89d0) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #6 Catch::Session::run() <null> (test_ThreadPool+0xe8ec1) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #7 main <null> (test_ThreadPool+0x265cc) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+
+  Previous read of size 1 at 0x5555556cd543 by thread T5:
+    #0 ThreadPool::WorkerLoop(int, bool) <null> (test_ThreadPool+0x4afe8) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #1 std::thread::_State_impl<std::thread::_Invoker<std::tuple<std::_Bind<void (*(int, bool))(int, bool)> > > >::_M_run() <null> (test_ThreadPool+0x4c4a5) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #2 <null> <null> (libstdc++.so.6+0xf0db1) (BuildId: 399aeff7bae833abc7d02202df7b3974a44d92cd)
+
+  Location is global 'exitFlags' of size 32 at 0x5555556cd540 (test_ThreadPool+0x179543)
+
+  Thread T5 (tid=168, running) created by main thread at:
+    #0 pthread_create <null> (libtsan.so.2+0x58c8c) (BuildId: 73c6091c853095c26584fe8f83b71a180ae6c354)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xf0e9a) (BuildId: 399aeff7bae833abc7d02202df7b3974a44d92cd)
+    #2 CATCH2_INTERNAL_TEST_0() <null> (test_ThreadPool+0x31f50) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #3 Catch::RunContext::invokeActiveTestCase() <null> (test_ThreadPool+0x7c4c7) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #4 Catch::RunContext::runCurrentTest() <null> (test_ThreadPool+0xc69f2) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #5 Catch::RunContext::runTest(Catch::TestCaseHandle const&) <null> (test_ThreadPool+0xc7338) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #6 Catch::Session::runInternal() <null> (test_ThreadPool+0xe89d0) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #7 Catch::Session::run() <null> (test_ThreadPool+0xe8ec1) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+    #8 main <null> (test_ThreadPool+0x265cc) (BuildId: d21435e89b873911d54b1f812107fd814987a25e)
+
+SUMMARY: ThreadSanitizer: data race (/build/out/test/test_ThreadPool+0x43d14) (BuildId: d21435e89b873911d54b1f812107fd814987a25e) in ThreadPool::SetThreadCount(int)
+==================

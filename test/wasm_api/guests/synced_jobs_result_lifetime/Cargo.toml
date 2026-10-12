@@ -1,0 +1,16 @@
+[package]
+name = "recoil-wasm-synced-jobs-result-lifetime"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# This feature is an intentional compile-fail test. A scratch result must not
+# escape its callback through a handler requiring a permanent borrowed slice.
+[features]
+retain-borrowed-result = []
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+spring = { path = "../../../../rust/crates/spring" }

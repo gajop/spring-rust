@@ -272,7 +272,7 @@ void CGame::ClientReadNet()
 	const bool haveClientDemo = (clientNet->GetDemoRecorder() != nullptr);
 
 	// now really process the messages
-	while (true) {
+	while (!gu->globalQuit) {
 		if (msgProcTimeLeft <= 0.0f)
 			break;
 		if (spring_gettime() > msgProcEndTime)

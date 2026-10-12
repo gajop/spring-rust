@@ -1,0 +1,68 @@
+test_engine_only_desync (test_wasm_sync_replay.CompareTest.test_engine_only_desync) ... ok
+test_equal (test_wasm_sync_replay.CompareTest.test_equal) ... ok
+test_faulted_empty_and_no_synccheck_fail (test_wasm_sync_replay.CompareTest.test_faulted_empty_and_no_synccheck_fail) ... ok
+test_first_guest_desync_even_when_engine_also_differs (test_wasm_sync_replay.CompareTest.test_first_guest_desync_even_when_engine_also_differs) ... ok
+test_fixture_overlay_never_writes_through_to_the_pinned_game (test_wasm_sync_replay.CompareTest.test_fixture_overlay_never_writes_through_to_the_pinned_game) ... ok
+test_memory_offsets_and_pages (test_wasm_sync_replay.CompareTest.test_memory_offsets_and_pages) ... ok
+test_truncated_or_missing_frame_fails (test_wasm_sync_replay.CompareTest.test_truncated_or_missing_frame_fails) ... ok
+test_coarse_warning_does_not_hide_first_module_difference (test_wasm_sync_replay.RunnerDiagnosticTest.test_coarse_warning_does_not_hide_first_module_difference) ... replaying with 1 workers (including sim thread)
+replaying with 4 workers (including sim thread)
+{
+  "frame": 2,
+  "module": "rules",
+  "reason": "Wasm state or module identity",
+  "left": {
+    "name": "rules",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "rules-synced",
+    "bytes": 65536,
+    "hash": "0000000000000002",
+    "faulted": false
+  },
+  "right": {
+    "name": "rules",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "rules-synced",
+    "bytes": 65536,
+    "hash": "ffffffffffffffff",
+    "faulted": false
+  }
+}
+ok
+test_equal_streams_with_recorded_warnings_still_fail (test_wasm_sync_replay.RunnerDiagnosticTest.test_equal_streams_with_recorded_warnings_still_fail) ... replaying with 1 workers (including sim thread)
+replaying with 4 workers (including sim thread)
+{
+  "equal": true,
+  "frames": 4
+}
+ok
+test_recording_comparison_reports_all_frame_state_difference (test_wasm_sync_replay.RunnerDiagnosticTest.test_recording_comparison_reports_all_frame_state_difference) ... recording a fresh demo from the pinned scenario on this engine
+replaying with 1 workers (including sim thread)
+{
+  "frame": 2,
+  "module": "rules",
+  "reason": "Wasm state or module identity",
+  "left": {
+    "name": "rules",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "rules-synced",
+    "bytes": 65536,
+    "hash": "0000000000000002",
+    "faulted": false
+  },
+  "right": {
+    "name": "rules",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "rules-synced",
+    "bytes": 65536,
+    "hash": "ffffffffffffffff",
+    "faulted": false
+  },
+  "comparison": "recording versus playback"
+}
+ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.010s
+
+OK

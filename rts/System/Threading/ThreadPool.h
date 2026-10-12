@@ -205,12 +205,26 @@ public:
 		return (dt.toNanoSecsi());
 	}
 
-	bool IsFinished() const { assert(remainingTasks.load() >= 0); return (remainingTasks.load(std::memory_order_relaxed) == 0); }
-	bool IsInJobQueue() const { return (inTaskQueue.load(std::memory_order_relaxed)); }
+	// The final task decrement releases callback writes. Waiting callers must
+	// acquire that publication before reading results or reusing the group.
+	bool IsFinished() const { assert(remainingTasks.load() >= 0); return (remainingTasks.load(std::memory_order_acquire) == 0); }
+	bool IsInJobQueue() const {
+		return inTaskQueue.load(std::memory_order_acquire) ||
+			outstandingQueueEntries.load(std::memory_order_acquire) != 0;
+	}
+	// Slice groups are published to multiple worker queues. A completed
+	// callback does not mean every queue has released its raw group pointer.
+	void AddQueueEntry() { outstandingQueueEntries.fetch_add(1, std::memory_order_relaxed); }
+	void FinishQueueEntry() {
+		assert(outstandingQueueEntries.load() > 0);
+		outstandingQueueEntries.fetch_sub(1, std::memory_order_release);
+	}
 	bool IsInTaskPool() const { return ((taskPoolMask.load(std::memory_order_relaxed) & (1 << 0)) != 0); }
 	bool IsInPoolUse() const { return ((taskPoolMask.load(std::memory_order_relaxed) & (1 << 1)) != 0); }
 
-	bool ExecLoopDone() const { return (execLoopDone.load(std::memory_order_relaxed)); }
+	// Deletion must also acquire the worker's last object access, after its
+	// callback and queue bookkeeping, rather than just task completion.
+	bool ExecLoopDone() const { return (execLoopDone.load(std::memory_order_acquire)); }
 	// pooled tasks are deleted only when their pool dies (on exit) which is always allowed
 	bool AllowDelete() const { return (IsFinished() && ((!IsInJobQueue() && ExecLoopDone()) || IsInTaskPool())); }
 
@@ -230,6 +244,7 @@ public:
 	void SetTimeStamp(const spring_time t) { ts = t.toNanoSecsi(); }
 
 	void ResetState(bool queued, bool pooled, bool inuse) {
+		assert(outstandingQueueEntries.load() == 0);
 		remainingTasks.store(0);
 		wantedThread.store(0);
 		taskPoolMask.store(((1 * pooled) << 0) + ((1 * inuse) << 1));
@@ -247,6 +262,7 @@ public:
 	std::atomic_bool execLoopDone; // whether the thread running this task is about to exit ExecLoop
 
 private:
+	std::atomic_int outstandingQueueEntries{0};
 	static std::atomic_uint lastId;
 
 	std::atomic<uint32_t> id;
@@ -1004,4 +1020,3 @@ namespace ThreadPool {
 
 #endif
 #endif
-

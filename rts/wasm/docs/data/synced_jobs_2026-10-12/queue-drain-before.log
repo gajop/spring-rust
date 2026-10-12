@@ -1,0 +1,30 @@
+[0/2] Re-checking globbed directories...
+[1/2] Building CXX object test/CMakeFiles/test_ThreadPool.dir/engine/System/testThreadPool.cpp.o
+[2/2] Linking CXX executable test/test_ThreadPool
+[do_once]
+Filters: [background-queue-drain]
+Randomness seeded to: 3252510848
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test_ThreadPool is a Catch2 v3.8.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+background barrier drains a blocked worker queue
+-------------------------------------------------------------------------------
+/build/src/test/engine/System/testThreadPool.cpp:39
+...............................................................................
+
+/build/src/test/engine/System/testThreadPool.cpp:63: FAILED:
+  CHECK( group->IsInJobQueue() )
+with expansion:
+  false
+
+/build/src/test/engine/System/testThreadPool.cpp:64: FAILED:
+  CHECK_FALSE( waited.load() )
+with expansion:
+  !true
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 4 | 2 passed | 2 failed

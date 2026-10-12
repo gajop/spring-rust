@@ -1,0 +1,38 @@
+{
+  "command": [
+    "test/synctest/wasm_sync_replay.py",
+    "run",
+    "--spring",
+    "out/local-sync/runtime-queue-drain-final/spring-headless",
+    "--game",
+    "/home/gajop/.local/share/ship-game/replay-library/20261010-125550-hammer-and-anvil-vs-peltast-skirmish/game.sdd",
+    "--demo",
+    "/home/gajop/.local/share/ship-game/replay-library/20261010-125550-hammer-and-anvil-vs-peltast-skirmish/run/write/demos/2026-10-10_03-55-51-522_sb_initial_null_64x64_2026.09.23-62-gaee7413 rust-wip.sdfz",
+    "--output",
+    "out/local-sync/final-queue-drain-combat-45000",
+    "--threads",
+    "1",
+    "4",
+    "--frames",
+    "45000",
+    "--timeout",
+    "10800",
+    "--fixture",
+    "out/local-sync/fixtures/jobs_in_game.wasm",
+    "--record-first",
+    "--instruction-fuel",
+    "100000000000"
+  ],
+  "engine_sha256": "48038531af98d2c708111b976adb00d3a0c137dcd48d617e8bb189d4695ccf92",
+  "demo_sha256": "2d89bb4e9c2f6ee4539cca37a987cedc8fd5a1666cf5e24cb4ad36784602cf13",
+  "game": "/home/gajop/.local/share/ship-game/replay-library/20261010-125550-hammer-and-anvil-vs-peltast-skirmish/game.sdd",
+  "fixture_sha256": "d2578f91b82c906f3b695b472247fe423252f41445cd6c994f561abd0e3d5d8c",
+  "worker_fixture_sha256": null,
+  "threads": [
+    1,
+    4
+  ],
+  "final_frame": 45000,
+  "recorded_demo": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/final-queue-drain-combat-45000/record/write/demos/2026-10-11_19-35-01-162_sb_initial_null_64x64_2026.09.23-63-g45c811a codex_wasm-synced-jobs.sdfz",
+  "recorded_demo_sha256": "e0651edfe2ebf1a4d1d0cd8a23c8c2a28ba1d49c4d569d5c0e4ce20666102465"
+}

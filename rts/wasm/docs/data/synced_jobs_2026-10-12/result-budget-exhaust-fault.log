@@ -1,0 +1,6 @@
+[t=00:00:06.392529][f=0000001] Warning: Core Wasm module sync-jobs-test was deregistered due to fault: core Wasm export trapped: error while executing at wasm backtrace:
+    0:    0x1b7 - <unknown>!<wasm function 10>
+    1:    0x284 - <unknown>!<wasm function 13>
+
+Caused by:
+    wasm trap: all fuel consumed by WebAssembly

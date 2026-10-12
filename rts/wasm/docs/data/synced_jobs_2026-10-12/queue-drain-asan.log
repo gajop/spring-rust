@@ -1,0 +1,18 @@
+[0/2] Re-checking globbed directories...
+[1/7] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[2/7] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Threading/ThreadPool.cpp.o
+[3/7] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/engine/WasmInterface/TestWasmSyncedJobs.cpp.o
+[4/7] Linking CXX executable test/test_WasmSyncedJobs
+[5/7] Building CXX object test/CMakeFiles/test_ThreadPool.dir/engine/System/testThreadPool.cpp.o
+[6/7] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Threading/ThreadPool.cpp.o
+[7/7] Linking CXX executable test/test_ThreadPool
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start  2: testWasmSyncedJobs
+1/2 Test  #2: testWasmSyncedJobs ...............   Passed    0.30 sec
+    Start 23: testThreadPool
+2/2 Test #23: testThreadPool ...................   Passed    7.75 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   8.06 sec

@@ -1,0 +1,49 @@
+[0/2] Re-checking globbed directories...
+[1/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/Log/ConsoleSink.cpp.o
+[2/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/Log/DefaultFormatter.cpp.o
+[3/36] Building C object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/SafeCStrings.c.o
+[4/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/Sync/SHA512.cpp.o
+[5/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/Log/StreamSink.cpp.o
+[6/36] Building C object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/Log/LogUtil.c.o
+[7/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/Log/FramePrefixer.cpp.o
+[8/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/lib/catch2/catch_main.cpp.o
+[9/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/Log/DefaultFilter.cpp.o
+[10/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/WasmInterface/runtime/WasmEnvironment.cpp.o
+[11/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/System/Log/Backend.cpp.o
+[12/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/__/rts/WasmInterface/runtime/WasmModuleManifest.cpp.o
+[13/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Misc/SpringTime.cpp.o
+[14/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Threading/ThreadPool.cpp.o
+[15/36] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/engine/WasmInterface/TestWasmModuleManifest.cpp.o
+[16/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/CpuTopologyCommon.cpp.o
+[17/36] Linking CXX executable test/test_WasmModuleManifest
+[18/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/ThreadAffinityGuard.cpp.o
+[19/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/SharedLib.cpp.o
+[20/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/CpuTopology.cpp.o
+[21/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/Futex.cpp.o
+[22/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/engine/System/testThreadPool.cpp.o
+[23/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/SoLib.cpp.o
+[24/36] Building C object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/SafeCStrings.c.o
+[25/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/Backend.cpp.o
+[26/36] Building C object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/LogUtil.c.o
+[27/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/CpuID.cpp.o
+[28/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/DefaultFormatter.cpp.o
+[29/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/DefaultFilter.cpp.o
+[30/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/ConsoleSink.cpp.o
+[31/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/FramePrefixer.cpp.o
+[32/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Log/StreamSink.cpp.o
+[33/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/lib/catch2/catch_main.cpp.o
+[34/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Threading.cpp.o
+[35/36] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/ThreadSupport.cpp.o
+[36/36] Linking CXX executable test/test_ThreadPool
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start  1: testWasmModuleManifest
+1/3 Test  #1: testWasmModuleManifest ...........   Passed    0.00 sec
+    Start  2: testWasmSyncedJobs
+2/3 Test  #2: testWasmSyncedJobs ...............   Passed    0.04 sec
+    Start 23: testThreadPool
+3/3 Test #23: testThreadPool ...................   Passed    5.81 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   5.85 sec

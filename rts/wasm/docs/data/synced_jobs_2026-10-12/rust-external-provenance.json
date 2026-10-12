@@ -1,0 +1,40 @@
+{
+  "command": [
+    "test/synctest/wasm_sync_replay.py",
+    "run",
+    "--spring",
+    "out/local-sync/runtime-queue-drain-final/spring-headless",
+    "--game",
+    "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/game.sdd",
+    "--demo",
+    "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/replay.sdfz",
+    "--output",
+    "out/local-sync/final-queue-drain-rust-worker",
+    "--threads",
+    "1",
+    "4",
+    "--frames",
+    "600",
+    "--timeout",
+    "900",
+    "--record-first",
+    "--instruction-fuel",
+    "1000000000",
+    "--fixture",
+    "out/local-sync/fixtures/rust_external_lifetime_guest.wasm",
+    "--worker-fixture",
+    "out/local-sync/fixtures/dedicated_worker.wasm"
+  ],
+  "engine_sha256": "48038531af98d2c708111b976adb00d3a0c137dcd48d617e8bb189d4695ccf92",
+  "demo_sha256": "ae404d83f64c87c0d5229b8b1f5e804cce82d966eaffbf7738dabe25e940d699",
+  "game": "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/game.sdd",
+  "fixture_sha256": "3776b0aa16a1422b5c5a7358054e630305d5c201bcf570c01e1bad29faca77dc",
+  "worker_fixture_sha256": "abe8425ab60e71969cfac075061c98b74ac40840f9175b639b6e4bc27109f3cf",
+  "threads": [
+    1,
+    4
+  ],
+  "final_frame": 600,
+  "recorded_demo": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/final-queue-drain-rust-worker/record/write/demos/2026-10-11_19-41-24-522_sb_initial_null_64x64_2026.09.23-63-g45c811a codex_wasm-synced-jobs.sdfz",
+  "recorded_demo_sha256": "606363315d94f3898c744ba8091fe86eda2fffdc1c0ad22b1488fc81f38e57aa"
+}

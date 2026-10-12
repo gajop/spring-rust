@@ -1,0 +1,116 @@
+[
+  {
+    "path": "out/local-sync/final-native-rust-worker/record/sync.jsonl",
+    "sha256": "7ee90f699584da124bbd2d90f301b5980ccd020899c58d4d895d47e98784dcf2",
+    "frames": 601,
+    "first_frame": 0,
+    "last_frame": 600,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "34db2251f792f2b8",
+        "jobs_hash": "d3871c6a3f20f013",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "817ca5be06b526c73fc4046c8940bd6b39226633b63800811049ba54f94126d1e3c434bae7686815fa8b1f0f54420bf22cb69cb39c803400c328b1d023652d10",
+        "environment": "rules-synced",
+        "bytes": 1114112,
+        "hash": "d16d675ba76502bf",
+        "jobs_hash": "58610caff40d4462",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-worker",
+        "identity": "c76c8f7a10cbf4c9db54ca0f36070f0d0339af5f0ddbbf7bae07892bcf902d59ee7db05023455a3fcf1daaa349232767d6ff02de09a9a8057127ec169e0936e0",
+        "environment": "rules-synced",
+        "bytes": 65536,
+        "hash": "33b202d302b65caa",
+        "jobs_hash": "d3871c6a3f20f013",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  },
+  {
+    "path": "out/local-sync/final-native-rust-worker/run-0-1/sync.jsonl",
+    "sha256": "7ee90f699584da124bbd2d90f301b5980ccd020899c58d4d895d47e98784dcf2",
+    "frames": 601,
+    "first_frame": 0,
+    "last_frame": 600,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "34db2251f792f2b8",
+        "jobs_hash": "d3871c6a3f20f013",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "817ca5be06b526c73fc4046c8940bd6b39226633b63800811049ba54f94126d1e3c434bae7686815fa8b1f0f54420bf22cb69cb39c803400c328b1d023652d10",
+        "environment": "rules-synced",
+        "bytes": 1114112,
+        "hash": "d16d675ba76502bf",
+        "jobs_hash": "58610caff40d4462",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-worker",
+        "identity": "c76c8f7a10cbf4c9db54ca0f36070f0d0339af5f0ddbbf7bae07892bcf902d59ee7db05023455a3fcf1daaa349232767d6ff02de09a9a8057127ec169e0936e0",
+        "environment": "rules-synced",
+        "bytes": 65536,
+        "hash": "33b202d302b65caa",
+        "jobs_hash": "d3871c6a3f20f013",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  },
+  {
+    "path": "out/local-sync/final-native-rust-worker/run-1-4/sync.jsonl",
+    "sha256": "4bd5e7fc230c3efcbcaa4e03af3891deb13c247164d94abb78acc39119ab3503",
+    "frames": 601,
+    "first_frame": 0,
+    "last_frame": 600,
+    "workers": 4,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "34db2251f792f2b8",
+        "jobs_hash": "d3871c6a3f20f013",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "817ca5be06b526c73fc4046c8940bd6b39226633b63800811049ba54f94126d1e3c434bae7686815fa8b1f0f54420bf22cb69cb39c803400c328b1d023652d10",
+        "environment": "rules-synced",
+        "bytes": 1114112,
+        "hash": "d16d675ba76502bf",
+        "jobs_hash": "58610caff40d4462",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-worker",
+        "identity": "c76c8f7a10cbf4c9db54ca0f36070f0d0339af5f0ddbbf7bae07892bcf902d59ee7db05023455a3fcf1daaa349232767d6ff02de09a9a8057127ec169e0936e0",
+        "environment": "rules-synced",
+        "bytes": 65536,
+        "hash": "33b202d302b65caa",
+        "jobs_hash": "d3871c6a3f20f013",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  }
+]

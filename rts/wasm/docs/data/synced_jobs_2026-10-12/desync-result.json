@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "comparisons": [
+    {
+      "frame": 17,
+      "module": "sync-jobs-test",
+      "reason": "Wasm state or module identity",
+      "left": {
+        "name": "sync-jobs-test",
+        "identity": "189f22d23636d021d2dcfb510db991e50e4c12249fdacd81386fab5412b3af8ed74e37f2d36623766df33445c4c515f7797aa1d2366dda7fe1bcf46dfb1ac961",
+        "environment": "rules-synced",
+        "bytes": 65536,
+        "hash": "1e543977ca3be1cc",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      },
+      "right": {
+        "name": "sync-jobs-test",
+        "identity": "189f22d23636d021d2dcfb510db991e50e4c12249fdacd81386fab5412b3af8ed74e37f2d36623766df33445c4c515f7797aa1d2366dda7fe1bcf46dfb1ac961",
+        "environment": "rules-synced",
+        "bytes": 65536,
+        "hash": "36f00240d7ebc692",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      }
+    }
+  ],
+  "recording_comparisons": []
+}

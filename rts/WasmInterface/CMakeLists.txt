@@ -3,6 +3,9 @@ recoil_wasm_configure_wasmtime(RECOIL_WASMTIME_TARGET)
 
 set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/runtime/WasmEnvironment.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/jobs/WasmJobProgram.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/jobs/WasmSyncedJobs.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreJobsBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/host/WasmCoreAbi.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitsInfoVariableBindings.cpp
@@ -35,6 +38,7 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/runtime/WasmRuntime.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/system/WasmInterfaceSystem.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/system/WasmInterfaceSystemCore.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/system/WasmSyncVerification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/standalone/WasmStandaloneEnvironment.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/standalone/WasmDefsParser.cpp
 )

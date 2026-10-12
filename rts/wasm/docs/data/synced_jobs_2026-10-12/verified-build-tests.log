@@ -1,0 +1,20 @@
+[0/2] Re-checking globbed directories...
+[1/7] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[2/7] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[3/7] Linking CXX executable spring-headless
+[4/7] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/engine/WasmInterface/TestWasmModuleManifest.cpp.o
+[5/7] Linking CXX executable test/test_WasmModuleManifest
+[6/7] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/engine/WasmInterface/TestWasmSyncedJobs.cpp.o
+[7/7] Linking CXX executable test/test_WasmSyncedJobs
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start  1: testWasmModuleManifest
+1/3 Test  #1: testWasmModuleManifest ...........   Passed    0.00 sec
+    Start  2: testWasmSyncedJobs
+2/3 Test  #2: testWasmSyncedJobs ...............   Passed    0.03 sec
+    Start 23: testThreadPool
+3/3 Test #23: testThreadPool ...................   Passed    5.81 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   5.84 sec

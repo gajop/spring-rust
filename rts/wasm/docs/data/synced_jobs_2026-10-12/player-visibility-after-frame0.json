@@ -1,0 +1,86 @@
+{
+  "record": {
+    "frame": 0,
+    "engine": 1370282190,
+    "workers": 1,
+    "checksum": 2696058844,
+    "synccheck": true,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "21a331f29b39b05b",
+        "jobs_hash": "c95404b00ba89554",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "d236cc0ba020283cc902835542e96a0fafc3a8533f3aaeb831b29cc1192a1f6491a5181ed7b98fc074f7df06f7862dcb91828bc86b1410f126e21a4495870eca",
+        "environment": "rules-synced",
+        "bytes": 131072,
+        "hash": "cdabd567bcce18ba",
+        "jobs_hash": "b0c858faa35dd83e",
+        "faulted": false
+      }
+    ],
+    "dump_sha256": "37bdc4126cfdf0f49a08c1f86e775c6522c69659c0552a86ebbe6f4baa611a3b"
+  },
+  "run-0-1": {
+    "frame": 0,
+    "engine": 1370282190,
+    "workers": 1,
+    "checksum": 2696058844,
+    "synccheck": true,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "21a331f29b39b05b",
+        "jobs_hash": "c95404b00ba89554",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "d236cc0ba020283cc902835542e96a0fafc3a8533f3aaeb831b29cc1192a1f6491a5181ed7b98fc074f7df06f7862dcb91828bc86b1410f126e21a4495870eca",
+        "environment": "rules-synced",
+        "bytes": 131072,
+        "hash": "cdabd567bcce18ba",
+        "jobs_hash": "b0c858faa35dd83e",
+        "faulted": false
+      }
+    ],
+    "dump_sha256": "37bdc4126cfdf0f49a08c1f86e775c6522c69659c0552a86ebbe6f4baa611a3b"
+  },
+  "run-1-4": {
+    "frame": 0,
+    "engine": 1370282190,
+    "workers": 4,
+    "checksum": 2696058844,
+    "synccheck": true,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "85deec5967f9f3e3d3c96d83ceda6f97becf27680dcc7368ba9e9aee03ddc03712ec6e611eb3e22f4b940d41da481be1f46a7a14d27d6f36e9b3f2396d6cac04",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "21a331f29b39b05b",
+        "jobs_hash": "c95404b00ba89554",
+        "faulted": false
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "d236cc0ba020283cc902835542e96a0fafc3a8533f3aaeb831b29cc1192a1f6491a5181ed7b98fc074f7df06f7862dcb91828bc86b1410f126e21a4495870eca",
+        "environment": "rules-synced",
+        "bytes": 131072,
+        "hash": "cdabd567bcce18ba",
+        "jobs_hash": "b0c858faa35dd83e",
+        "faulted": false
+      }
+    ],
+    "dump_sha256": "37bdc4126cfdf0f49a08c1f86e775c6522c69659c0552a86ebbe6f4baa611a3b"
+  }
+}

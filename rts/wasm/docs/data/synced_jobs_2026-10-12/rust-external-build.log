@@ -1,0 +1,3 @@
+   Compiling spring v0.1.0 (/home/gajop/worktrees/wasm-synced-jobs/spring-bar/rust/crates/spring)
+   Compiling recoil-wasm-synced-jobs-guest v0.1.0 (/home/gajop/worktrees/wasm-synced-jobs/spring-bar/test/wasm_api/guests/synced_jobs_guest)
+    Finished `release` profile [optimized] target(s) in 1.93s

@@ -1,0 +1,3 @@
+recording a fresh demo from the pinned scenario on this engine
+replaying with 1 workers (including sim thread)
+verification failed: required modules ['sync-jobs-test'] missing at frame 0

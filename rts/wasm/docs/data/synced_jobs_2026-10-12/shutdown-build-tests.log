@@ -1,0 +1,13 @@
+[0/2] Re-checking globbed directories...
+[1/4] Linking CXX static library rts/builds/headless/libGameHeadless.a
+[2/4] Linking CXX executable test/test_WasmSyncedJobs
+[3/4] Building CXX object rts/builds/headless/CMakeFiles/engine-headless.dir/__/__/System/SpringApp.cpp.o
+[4/4] Linking CXX executable spring-headless
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start 2: testWasmSyncedJobs
+1/1 Test #2: testWasmSyncedJobs ...............   Passed    0.11 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.11 sec

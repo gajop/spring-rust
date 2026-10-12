@@ -1,0 +1,110 @@
+[0/2] Re-checking globbed directories...
+[1/7] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[2/7] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Threading/ThreadPool.cpp.o
+In file included from /usr/include/c++/13/bits/shared_ptr_atomic.h:33,
+                 from /usr/include/c++/13/memory:81,
+                 from /build/src/rts/System/Platform/Linux/ThreadSupport.h:12,
+                 from /build/src/rts/System/Platform/Threading.h:9,
+                 from /build/src/rts/System/Threading/ThreadPool.h:91,
+                 from /build/src/rts/System/Threading/ThreadPool.cpp:5:
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::Block::is_empty() const [with moodycamel::ConcurrentQueue<T, Traits>::InnerQueueContext context = moodycamel::ConcurrentQueue<ITaskGroup*, moodycamel::ConcurrentQueueDefaultTraits>::explicit_context; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1483:29,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1715:76:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::Block::is_empty() const [with moodycamel::ConcurrentQueue<T, Traits>::InnerQueueContext context = moodycamel::ConcurrentQueue<ITaskGroup*, moodycamel::ConcurrentQueueDefaultTraits>::explicit_context; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1483:29,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1715:76,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1755:3:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1879:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1624:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1054:37:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ImplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:2443:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1627:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1054:37:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1879:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1624:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1058:36:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ImplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:2443:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1627:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1058:36:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+[3/7] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/engine/WasmInterface/TestWasmSyncedJobs.cpp.o
+[4/7] Linking CXX executable test/test_WasmSyncedJobs
+[5/7] Building CXX object test/CMakeFiles/test_ThreadPool.dir/engine/System/testThreadPool.cpp.o
+[6/7] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Threading/ThreadPool.cpp.o
+In file included from /usr/include/c++/13/bits/shared_ptr_atomic.h:33,
+                 from /usr/include/c++/13/memory:81,
+                 from /build/src/rts/System/Platform/Linux/ThreadSupport.h:12,
+                 from /build/src/rts/System/Platform/Threading.h:9,
+                 from /build/src/rts/System/Threading/ThreadPool.h:91,
+                 from /build/src/rts/System/Threading/ThreadPool.cpp:5:
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::Block::is_empty() const [with moodycamel::ConcurrentQueue<T, Traits>::InnerQueueContext context = moodycamel::ConcurrentQueue<ITaskGroup*, moodycamel::ConcurrentQueueDefaultTraits>::explicit_context; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1483:29,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1715:76:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::Block::is_empty() const [with moodycamel::ConcurrentQueue<T, Traits>::InnerQueueContext context = moodycamel::ConcurrentQueue<ITaskGroup*, moodycamel::ConcurrentQueueDefaultTraits>::explicit_context; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1483:29,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1715:76,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1755:3:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1879:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1624:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1054:37:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ImplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:2443:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1627:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1054:37:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1879:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1624:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1058:36:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ImplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:2443:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1627:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1058:36:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+[7/7] Linking CXX executable test/test_ThreadPool
+[do_once]
+Randomness seeded to: 3786515173
+===============================================================================
+All tests passed (2035923 assertions in 16 test cases)
+
+Randomness seeded to: 1150338917
+===============================================================================
+All tests passed (4656 assertions in 7 test cases)

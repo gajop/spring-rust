@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "WasmInterface/core/host/WasmCoreValidation.h"
+#include "NativeInterface/WasmSyncedContext.h"
 #include "WasmInterface/runtime/WasmModuleManifest.h"
 
 // The WasmInterface unit-test target predates the production fast-Core path and
@@ -251,6 +252,34 @@ TEST_CASE("Production Core ABI admits only reviewed synchronous callback imports
 	}
 }
 
+TEST_CASE("Job imports validate both signatures in all seven environments")
+{
+	WasmRuntimeConfig config;
+	for (const auto& [name, count]: std::vector<std::pair<std::string_view, int>>{{"submit", 4}, {"submit-to", 6}}) {
+		auto module = CoreHeader();
+		AddCoreFunctionType(module, std::vector<std::uint8_t>(count, 0x7f), {0x7e});
+		AddCoreFunctionImport(module, "spring:jobs", name);
+		AddCoreMemory(module, true);
+		AddCoreMemoryExport(module);
+		for (const auto environment: {WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced,
+			WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced, WasmEnvironment::UI,
+			WasmEnvironment::Menu, WasmEnvironment::Intro}) {
+			const auto result = recoil::wasm::core::ValidateModule(module, environment,
+				RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+			INFO(name << ": " << WasmEnvironmentMatrix::Name(environment));
+			CHECK(result.valid);
+			CHECK(WasmEnvironmentMatrix::HasModule(environment, "spring:jobs"));
+		}
+		module = CoreHeader();
+		AddCoreFunctionType(module, std::vector<std::uint8_t>(count - 1, 0x7f), {0x7e});
+		AddCoreFunctionImport(module, "spring:jobs", name);
+		AddCoreMemory(module, true);
+		AddCoreMemoryExport(module);
+		CHECK_FALSE(recoil::wasm::core::ValidateModule(module, WasmEnvironment::RulesSynced,
+			RECOIL_WASM_INTERFACE_VERSION_NUMBER, config).valid);
+	}
+}
+
 TEST_CASE("Production Core ABI rejects start functions")
 {
 	auto module = MinimalCoreModule(true);
@@ -334,4 +363,27 @@ TEST_CASE("Production Core ABI records validated module identity")
 	CHECK(result.identity.byteSize == module.size());
 	CHECK_FALSE(result.identity.sha512.empty());
 	CHECK(result.imports.empty());
+}
+
+TEST_CASE("Synced Wasm player visibility excludes only local demo observers and restores nested worlds")
+{
+	using namespace WasmSyncedContext;
+	CHECK_FALSE(Active());
+	CHECK(PlayerVisible(true, false));
+	{
+		ScopedContext synced(true);
+		CHECK(Active());
+		CHECK_FALSE(PlayerVisible(true, false));
+		CHECK(PlayerVisible(true, true));
+		CHECK(PlayerVisible(false, false));
+		{
+			ScopedContext unsynced(false);
+			CHECK_FALSE(Active());
+			CHECK(PlayerVisible(true, false));
+		}
+		CHECK(Active());
+		CHECK_FALSE(PlayerVisible(true, false));
+	}
+	CHECK_FALSE(Active());
+	CHECK(PlayerVisible(true, false));
 }

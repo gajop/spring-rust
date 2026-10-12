@@ -1,0 +1,14 @@
+{
+  "path": "out/local-sync/final-queue-drain-combat-45000/record/write/recordings/world-20261012-043504-0.jsonl",
+  "sha256": "74fbb790ec552aaffa36b90cd76234127ca3b75b72335c740b120c51aa55487c",
+  "last_sample": 45000.0,
+  "events": {
+    "unit-created": 192,
+    "projectile-created": 23672,
+    "damage": 19338,
+    "projectile-destroyed": 23672,
+    "unit-destroyed": 79
+  },
+  "peak_ships": 113,
+  "peak_projectiles": 139
+}

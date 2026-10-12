@@ -1,0 +1,392 @@
+{
+  "all-env-headless-v5": {
+    "result": {
+      "passed": true,
+      "comparisons": [
+        {
+          "equal": true,
+          "frames": 601
+        }
+      ],
+      "recording_comparisons": [
+        {
+          "equal": true,
+          "frames": 601
+        },
+        {
+          "equal": true,
+          "frames": 601
+        }
+      ]
+    },
+    "provenance": {
+      "command": [
+        "test/synctest/wasm_sync_replay.py",
+        "run",
+        "--spring",
+        "out/local-sync/runtime-all-env-stop-final/spring-headless",
+        "--game",
+        "out/local-sync/all-env-source-v5/game.sdd",
+        "--demo",
+        "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/replay.sdfz",
+        "--output",
+        "out/local-sync/all-env-headless-v5",
+        "--threads",
+        "1",
+        "4",
+        "--frames",
+        "600",
+        "--timeout",
+        "900",
+        "--record-first",
+        "--instruction-fuel",
+        "1000000000"
+      ],
+      "engine_sha256": "2026309d4f5a6e64c64b981426b9ce1f631c4b78fe5046858a6912e3448dc87e",
+      "demo_sha256": "ae404d83f64c87c0d5229b8b1f5e804cce82d966eaffbf7738dabe25e940d699",
+      "game": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-source-v5/game.sdd",
+      "fixture_sha256": null,
+      "worker_fixture_sha256": null,
+      "threads": [
+        1,
+        4
+      ],
+      "final_frame": 600,
+      "recorded_demo": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-headless-v5/record/write/demos/2026-10-11_23-35-20-000_sb_initial_null_64x64_2026.09.23-63-g45c811a codex_wasm-synced-jobs.sdfz",
+      "recorded_demo_sha256": "9936fa3d249a14135d9b9505f610fc2b391ede361cfde7a26c090b070ad50e54"
+    }
+  },
+  "all-env-rendered-v5": {
+    "result": {
+      "passed": true,
+      "comparisons": [
+        {
+          "equal": true,
+          "frames": 601
+        }
+      ],
+      "recording_comparisons": [
+        {
+          "equal": true,
+          "frames": 601
+        },
+        {
+          "equal": true,
+          "frames": 601
+        }
+      ]
+    },
+    "provenance": {
+      "command": [
+        "test/synctest/wasm_sync_replay.py",
+        "run",
+        "--spring",
+        "out/local-sync/runtime-all-env-stop-final/spring",
+        "--game",
+        "out/local-sync/all-env-source-v5/game.sdd",
+        "--demo",
+        "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/replay.sdfz",
+        "--output",
+        "out/local-sync/all-env-rendered-v5",
+        "--threads",
+        "1",
+        "4",
+        "--frames",
+        "600",
+        "--timeout",
+        "900",
+        "--record-first",
+        "--instruction-fuel",
+        "1000000000"
+      ],
+      "engine_sha256": "b0a50b4b181d7cfb49006e9b8e97fae772ada867bdb8b5ccf0ef9c69853b8b62",
+      "demo_sha256": "ae404d83f64c87c0d5229b8b1f5e804cce82d966eaffbf7738dabe25e940d699",
+      "game": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-source-v5/game.sdd",
+      "fixture_sha256": null,
+      "worker_fixture_sha256": null,
+      "threads": [
+        1,
+        4
+      ],
+      "final_frame": 600,
+      "recorded_demo": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-rendered-v5/record/write/demos/2026-10-11_23-35-42-860_sb_initial_null_64x64_2026.09.23-63-g45c811a codex_wasm-synced-jobs.sdfz",
+      "recorded_demo_sha256": "ac938737286ea3b215a48e5f4ec19e64d510c133735ec41916ba157dd28bc627"
+    }
+  },
+  "all-env-profile-120": {
+    "result": {
+      "passed": true,
+      "comparisons": [
+        {
+          "equal": true,
+          "frames": 121
+        }
+      ],
+      "recording_comparisons": []
+    },
+    "provenance": {
+      "command": [
+        "test/synctest/wasm_sync_replay.py",
+        "run",
+        "--spring",
+        "out/local-sync/runtime-jobs-profile-verified/spring-headless",
+        "--game",
+        "out/local-sync/all-env-source-v5/game.sdd",
+        "--demo",
+        "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-headless-v5/record/write/demos/2026-10-11_23-35-20-000_sb_initial_null_64x64_2026.09.23-63-g45c811a codex_wasm-synced-jobs.sdfz",
+        "--output",
+        "out/local-sync/all-env-profile-120",
+        "--frames",
+        "120",
+        "--threads",
+        "1",
+        "4",
+        "--timeout",
+        "900"
+      ],
+      "engine_sha256": "048ac973b6f8fce77f57b2dce61820d750e956a91b383c4d79cdea09eef8b01a",
+      "demo_sha256": "9936fa3d249a14135d9b9505f610fc2b391ede361cfde7a26c090b070ad50e54",
+      "game": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-source-v5/game.sdd",
+      "fixture_sha256": null,
+      "worker_fixture_sha256": null,
+      "threads": [
+        1,
+        4
+      ],
+      "final_frame": 120
+    }
+  },
+  "all-env-loading-120": {
+    "result": {
+      "passed": true,
+      "comparisons": [
+        {
+          "equal": true,
+          "frames": 121
+        }
+      ],
+      "recording_comparisons": [
+        {
+          "equal": true,
+          "frames": 121
+        },
+        {
+          "equal": true,
+          "frames": 121
+        }
+      ]
+    },
+    "provenance": {
+      "command": [
+        "test/synctest/wasm_sync_replay.py",
+        "run",
+        "--spring",
+        "out/local-sync/runtime-all-env-verified/spring",
+        "--game",
+        "out/local-sync/all-env-loading/game.sdd",
+        "--demo",
+        "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/replay.sdfz",
+        "--output",
+        "out/local-sync/all-env-loading-120",
+        "--threads",
+        "1",
+        "4",
+        "--frames",
+        "120",
+        "--timeout",
+        "900",
+        "--record-first",
+        "--instruction-fuel",
+        "1000000000"
+      ],
+      "engine_sha256": "b0a50b4b181d7cfb49006e9b8e97fae772ada867bdb8b5ccf0ef9c69853b8b62",
+      "demo_sha256": "ae404d83f64c87c0d5229b8b1f5e804cce82d966eaffbf7738dabe25e940d699",
+      "game": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-loading/game.sdd",
+      "fixture_sha256": null,
+      "worker_fixture_sha256": null,
+      "threads": [
+        1,
+        4
+      ],
+      "final_frame": 120,
+      "recorded_demo": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-loading-120/record/write/demos/2026-10-11_23-50-25-809_sb_initial_null_64x64_2026.09.23-63-g45c811a codex_wasm-synced-jobs.sdfz",
+      "recorded_demo_sha256": "4d105409c21169c2c28ec9f2900119500dd0f4e72ba16859c19725c72359a6e3"
+    }
+  },
+  "normal_vs_profile": {
+    "equal": true,
+    "frames": 121
+  },
+  "game_trace_zone_counts": {
+    "Wasm::Jobs::Worker": 37948,
+    "Wasm::Jobs::ResultCallback": 37936,
+    "Wasm::Jobs::Setup": 37948,
+    "Wasm::Jobs::Teardown": 37948,
+    "Wasm::Jobs::OutputCopy": 37948,
+    "Wasm::Jobs::Barrier": 18848,
+    "Wasm::Jobs::Execute": 37948,
+    "Wasm::Jobs::SubmitImport": 37948,
+    "Wasm::Jobs::Seal": 18853,
+    "Wasm::Jobs::Collect": 18848,
+    "Wasm::Jobs::InputCopy": 37948,
+    "Wasm::Jobs::Admission": 37948
+  },
+  "perf": {
+    "prior_paranoid": 4,
+    "current_paranoid": 2,
+    "persisted": "/etc/sysctl.d/60-recoil-profiling.conf",
+    "record": "-k 1 -e cycles:u -F 499 --call-graph fp",
+    "samples": 1165,
+    "lost_samples": 0,
+    "jit_symbols_verified": [
+      "work",
+      "pure",
+      "wasm trampolines",
+      "Wasmtime",
+      "WasmJobProgram::Run",
+      "malloc",
+      "memmove"
+    ]
+  },
+  "artifacts": {
+    "out/local-sync/runtime-all-env-verified/spring-headless": {
+      "bytes": 114565560,
+      "sha256": "2026309d4f5a6e64c64b981426b9ce1f631c4b78fe5046858a6912e3448dc87e"
+    },
+    "out/local-sync/runtime-all-env-verified/spring": {
+      "bytes": 116715744,
+      "sha256": "b0a50b4b181d7cfb49006e9b8e97fae772ada867bdb8b5ccf0ef9c69853b8b62"
+    },
+    "out/local-sync/runtime-jobs-profile-verified/spring-headless": {
+      "bytes": 976171816,
+      "sha256": "048ac973b6f8fce77f57b2dce61820d750e956a91b383c4d79cdea09eef8b01a"
+    },
+    "out/local-sync/jobs-benchmark-idle.tracy": {
+      "bytes": 667826,
+      "sha256": "cb05a7c4fbd8740010f25d7beb4a55f9ab3ad248ebca6c7e68c99eb983e6b0ff"
+    },
+    "out/local-sync/jobs-game-final.tracy": {
+      "bytes": 203200173,
+      "sha256": "96685f92fd68ba6fedff7177d65d17b979b28e94a3009d909ff9665fee99bf99"
+    },
+    "out/local-sync/jobs-perf/jobs-final.perf.jit.data": {
+      "bytes": 193532,
+      "sha256": "458d83a44db55df2a1bc4e8328eaa9f71278319e59cc4730130740345015c760"
+    }
+  },
+  "source_commit": "5b3d7b8ce27e501e0148ca3b4139df28ca0642fa",
+  "all-env-loading-mt-60": {
+    "result": {
+      "passed": true,
+      "comparisons": [
+        {
+          "equal": true,
+          "frames": 61
+        }
+      ],
+      "recording_comparisons": [
+        {
+          "equal": true,
+          "frames": 61
+        },
+        {
+          "equal": true,
+          "frames": 61
+        }
+      ]
+    },
+    "provenance": {
+      "command": [
+        "wasm_sync_replay.py",
+        "run",
+        "--spring",
+        "out/local-sync/runtime-all-env-verified/spring",
+        "--game",
+        "out/local-sync/all-env-loading/game.sdd",
+        "--demo",
+        "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/replay.sdfz",
+        "--output",
+        "out/local-sync/all-env-loading-mt-60",
+        "--threads",
+        "1",
+        "4",
+        "--frames",
+        "60",
+        "--timeout",
+        "900",
+        "--record-first",
+        "--instruction-fuel",
+        "1000000000"
+      ],
+      "engine_sha256": "b0a50b4b181d7cfb49006e9b8e97fae772ada867bdb8b5ccf0ef9c69853b8b62",
+      "demo_sha256": "ae404d83f64c87c0d5229b8b1f5e804cce82d966eaffbf7738dabe25e940d699",
+      "game": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-loading/game.sdd",
+      "fixture_sha256": null,
+      "worker_fixture_sha256": null,
+      "threads": [
+        1,
+        4
+      ],
+      "final_frame": 60,
+      "recorded_demo": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/all-env-loading-mt-60/record/write/demos/2026-10-11_23-53-12-754_sb_initial_null_64x64_2026.09.23-63-g45c811a codex_wasm-synced-jobs.sdfz",
+      "recorded_demo_sha256": "9f992e71a47bb78f5ef2266b504e782a43884246bdb151c3a60dc6a7fe69f93a"
+    },
+    "configuration_override": "LoadingMT = 1 appended to every runner-generated spring.conf before launch; see retained files",
+    "intro_pre_sim_results": 400
+  },
+  "normal_benchmark": {
+    "rows": 48,
+    "assertions": 46570,
+    "long_work_rows": [
+      {
+        "kind": "queue",
+        "fuel": 1000000000,
+        "workers": 1,
+        "iterations": 100000,
+        "jobs_per_batch": 64,
+        "input_bytes": 4096,
+        "admission_ns": 200,
+        "seal_ns": 100419,
+        "barrier_ns": 53,
+        "total_ns": 100690
+      },
+      {
+        "kind": "queue",
+        "fuel": 1000000000,
+        "workers": 2,
+        "iterations": 100000,
+        "jobs_per_batch": 64,
+        "input_bytes": 4096,
+        "admission_ns": 186,
+        "seal_ns": 11,
+        "barrier_ns": 52813,
+        "total_ns": 53004
+      },
+      {
+        "kind": "queue",
+        "fuel": 1000000000,
+        "workers": 4,
+        "iterations": 100000,
+        "jobs_per_batch": 64,
+        "input_bytes": 4096,
+        "admission_ns": 198,
+        "seal_ns": 15,
+        "barrier_ns": 31457,
+        "total_ns": 31648
+      },
+      {
+        "kind": "queue",
+        "fuel": 1000000000,
+        "workers": 8,
+        "iterations": 100000,
+        "jobs_per_batch": 64,
+        "input_bytes": 4096,
+        "admission_ns": 197,
+        "seal_ns": 21,
+        "barrier_ns": 19527,
+        "total_ns": 19801
+      }
+    ],
+    "note": "New normal build; separately measured from original headline and connected detailed trace."
+  }
+}

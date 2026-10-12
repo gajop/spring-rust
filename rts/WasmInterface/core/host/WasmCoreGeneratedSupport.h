@@ -8,6 +8,7 @@
 #include <string_view>
 
 #include "NativeInterface/WasmUiVisibility.h"
+#include "NativeInterface/WasmSyncedContext.h"
 #include "WasmCoreBindings.h"
 
 namespace recoil::wasm::core::generated {
@@ -26,6 +27,7 @@ class ImportGuard {
 public:
 	ImportGuard(HostState* state, std::uint64_t work)
 		: uiContext(state != nullptr && state->environment == WasmEnvironment::UI)
+		, syncedContext(state != nullptr && WasmEnvironmentMatrix::Policy(state->environment).synced)
 		, errorStorage(&ownedError)
 	{
 		Initialize(state, work);
@@ -33,6 +35,7 @@ public:
 
 	ImportGuard(HostState* state, std::uint64_t work, std::string& error)
 		: uiContext(state != nullptr && state->environment == WasmEnvironment::UI)
+		, syncedContext(state != nullptr && WasmEnvironmentMatrix::Policy(state->environment).synced)
 		, errorStorage(&error)
 	{
 		Initialize(state, work);
@@ -108,6 +111,7 @@ private:
 	// non-UI modules this is a literal no-op, preserving any outer restricted
 	// context and avoiding a thread-local save/restore on the hot path.
 	WasmUiVisibility::ConditionalScopedContext uiContext;
+	WasmSyncedContext::ScopedContext syncedContext;
 	WasmExecutionBudget* budget = nullptr;
 	bool entered = false;
 	bool failed = false;

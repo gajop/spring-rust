@@ -22,7 +22,7 @@ namespace {
 
 WasmInterfaceSystem*& ActiveCoreSystem()
 {
-	static WasmInterfaceSystem* system = nullptr;
+	static thread_local WasmInterfaceSystem* system = nullptr;
 	return system;
 }
 
@@ -185,17 +185,33 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 		return true;
 
 	// Budgets are frame-scoped rather than call-scoped. Reset every synced
-	// instance immediately before the simulation GameFrame boundary and every
+	// instance at BeginSyncedJobsFrame (before result delivery) and every
 	// unsynced/UI instance immediately before the Update boundary. GameFrame is
 	// also broadcast to unsynced worlds below, so their budget must be reset at
 	// the same boundary before that broadcast runs.
 	if (synced && callin == WasmCoreCallin::GameFrame) {
-		if (!system->ResetBudgetWindow(true, error) ||
-			!system->ResetBudgetWindow(false, error))
+		if (!system->ResetBudgetWindow(false, error))
 			return false;
-	} else if (!synced && callin == WasmCoreCallin::Update &&
-		!system->ResetBudgetWindow(false, error)) {
-		return false;
+	}
+	// Each system pumps only its own modules, even when several UI/menu/gadget
+	// systems coexist. Keep the window open through Update, then seal on every
+	// return path; input/draw callbacks submit into the next window.
+	struct UpdateJobsScope {
+		std::span<CoreModuleRecord> modules;
+		std::size_t begun = 0;
+		~UpdateJobsScope() {
+			for (std::size_t i = 0; i < begun; ++i)
+				WasmCoreHost::EndUnsyncedJobsUpdate(modules[i].host);
+		}
+	} updateJobs{system->coreModules};
+	if (!synced && (callin == WasmCoreCallin::Update || callin == CoreCallinOf("DrawLoadScreen"))) {
+		for (CoreModuleRecord& module: system->coreModules) {
+			if (module.host == nullptr)
+				module.host = WasmCoreHost::ModuleHandle(module.descriptor.name);
+			if (!WasmCoreHost::BeginUnsyncedJobsUpdate(module.host, error))
+				return false;
+			++updateJobs.begun;
+		}
 	}
 
 	const auto selectionStage = spring::benchmark_callins::BeginStage(
@@ -408,7 +424,16 @@ void WasmInterfaceSystem::RemoveFaultedModules()
 		if (WasmCoreHost::ModuleFaulted(module.descriptor.name) && module.host != nullptr)
 			deferredRmlOwners.push_back(module.host);
 	}
-	if (WasmCoreHost::RemoveFaulted() == 0)
+	bool removed = false;
+	for (const CoreModuleRecord& module: coreModules) {
+		if (!WasmCoreHost::ModuleFaulted(module.descriptor.name))
+			continue;
+		// Another system (notably Intro during threaded game loading) must not
+		// delete this system's cached handles while it is using them.
+		WasmCoreHost::Unload(module.descriptor.name);
+		removed = true;
+	}
+	if (!removed)
 		return;
 	coreModules.erase(std::remove_if(coreModules.begin(), coreModules.end(),
 		[](const CoreModuleRecord& module) {

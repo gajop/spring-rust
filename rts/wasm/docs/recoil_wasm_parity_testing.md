@@ -147,6 +147,8 @@ Differential fuzzing can compare native semantic conversion and Wasm conversion 
 
 Reuse the existing cross-platform sync test infrastructure.
 
+The plan for verifying real games, not only fixtures, is [Sync Verification](recoil_wasm_sync_verification.md).
+
 Add a Wasm synced scenario to the platform matrix.
 
 Verify:

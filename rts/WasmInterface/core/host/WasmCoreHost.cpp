@@ -4,9 +4,13 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
+#include <mutex>
 #include <bit>
 #include <cstring>
+#include <fstream>
 #include <memory>
+#include <stdexcept>
 #include <limits>
 #include <utility>
 
@@ -20,6 +24,10 @@
 #include "WasmCoreValidation.h"
 #include "WasmCoreVariableCallins.h"
 #include "WasmResources.h"
+#include "WasmInterface/jobs/WasmSyncedJobs.h"
+#include "System/Misc/TracyDefs.h"
+#include "WasmInterface/jobs/WasmJobProgram.h"
+#include "System/SpringHash.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Rml/Backends/RmlUi_Backend.h"
 
@@ -37,14 +45,30 @@ namespace {
 
 // Bumped when a guest faults and cleared by the sweep that removes
 // it. Dispatch reads this instead of scanning the registry every call.
-std::size_t& PendingFaultCount()
+std::atomic<std::size_t>& PendingFaultCount()
 {
-	static std::size_t pending = 0;
+	static std::atomic<std::size_t> pending = 0;
 	return pending;
+}
+
+// Intro runs on the frontend while game modules can load on the loading thread.
+// Registry locks never enter private worker execution or cached callin dispatch.
+std::recursive_mutex& RegistryMutex()
+{
+	static std::recursive_mutex mutex;
+	return mutex;
+}
+
+WasmSyncedJobs& SyncedJobs()
+{
+	static WasmSyncedJobs jobs;
+	return jobs;
 }
 
 std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 {
+	// Construct jobs first so they outlive the host registry during static teardown.
+	(void)SyncedJobs();
 	static std::vector<std::unique_ptr<WasmCoreHost>> hosts;
 	return hosts;
 }
@@ -179,6 +203,9 @@ struct WasmCoreHost::Backend {
 	}
 
 	const WasmRuntime* runtime = nullptr;
+	std::string moduleIdentity;
+	std::shared_ptr<const WasmJobProgram> jobProgram;
+	std::unique_ptr<WasmSyncedJobs> localJobs;
 	recoil::wasm::core::HotGuestState hot;
 	// Resolved once at load: one entry per callin the guest exports. Handed to
 	// the dispatcher as stable pointers, so this vector is never grown again.
@@ -198,6 +225,9 @@ struct WasmCoreHost::Backend {
 	wasmtime_linker_t* linker = nullptr;
 	wasmtime_module_t* module = nullptr;
 	wasmtime_instance_t instance{};
+	recoil::wasm::core::RawExport jobResult;
+	recoil::wasm::core::RawExport jobResultBuffer;
+	recoil::wasm::core::RawExport jobResultCapacity;
 #endif
 	std::string faultReason;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -224,6 +254,10 @@ WasmCoreHost::WasmCoreHost(std::string moduleName, WasmEnvironment environment,
 
 WasmCoreHost::~WasmCoreHost()
 {
+	if (WasmEnvironmentMatrix::Policy(environment).synced)
+		SyncedJobs().CancelOwner(this);
+	else if (backend && backend->localJobs)
+		backend->localJobs->Reset();
 	// The host owns the backend object, so every script must stop referring to
 	// it before the backend member is destroyed. This also covers direct host
 	// registry teardown paths which do not pass through WasmInterfaceSystem.
@@ -234,6 +268,7 @@ WasmCoreHost::~WasmCoreHost()
 
 WasmCoreHost* WasmCoreHost::Find(std::string_view moduleName)
 {
+	std::lock_guard registryLock(RegistryMutex());
 	const auto& hosts = Hosts();
 	const auto iter = std::find_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
 		return host != nullptr && host->moduleName == moduleName;
@@ -252,6 +287,221 @@ bool WasmCoreHost::Enabled()
 WasmCoreCallin WasmCoreHost::ResolveCallin(std::string_view name)
 {
 	return static_cast<WasmCoreCallin>(ResolveCallinOrdinal(name));
+}
+
+std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const std::uint8_t> input, std::string_view workerModule)
+{
+	using recoil::wasm::core::PackU32;
+	using recoil::wasm::core::Status;
+	if (!backend || backend->hot.faulted)
+		return PackU32(0, static_cast<std::int32_t>(Status::InvalidState));
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const bool synced = WasmEnvironmentMatrix::Policy(environment).synced;
+	auto* jobs = synced ? &SyncedJobs() : backend->localJobs.get();
+	if (!jobs)
+		return PackU32(0, static_cast<std::int32_t>(Status::NotAvailable));
+	if (!jobs->Accepting())
+		return PackU32(0, static_cast<std::int32_t>(Status::InvalidState));
+	std::lock_guard registryLock(RegistryMutex());
+	const auto* worker = (workerModule.empty() || workerModule == moduleName) ? this : Find(workerModule);
+	// A synced owner may target either synced world. A local owner targets its
+	// own world only: job execution never widens host visibility/capabilities.
+	if (!worker || (synced ? !WasmEnvironmentMatrix::Policy(worker->environment).synced
+		: (worker->environment != environment || worker->backend->bindings.Host().native != backend->bindings.Host().native)) ||
+		worker->backend->hot.faulted || !worker->backend->jobProgram)
+		return PackU32(0, static_cast<std::int32_t>(Status::NotFound));
+	if (!backend->jobResult.Present())
+		return PackU32(0, static_cast<std::int32_t>(Status::NotAvailable));
+	ZoneScopedN("Wasm::Jobs::SubmitImport");
+	if (ZoneIsActive)
+		ZoneTextF("owner=%s worker=%s environment=%s", moduleName.c_str(), worker->moduleName.c_str(), WasmEnvironmentMatrix::Name(environment));
+	const auto id = jobs->Submit(this, worker->backend->jobProgram, std::move(exportName), input
+#if defined(TRACY_ENABLE)
+		, moduleName
+#endif
+	);
+	ZoneValue(id);
+	return PackU32(id, static_cast<std::int32_t>(id ? Status::Ok : Status::BufferOverflow));
+#else
+	return PackU32(0, static_cast<std::int32_t>(Status::NotAvailable));
+#endif
+}
+
+void WasmCoreHost::BeginSyncedJobsFrame(int frame)
+{
+	std::lock_guard registryLock(RegistryMutex());
+	// A new game may reuse the process after each interface unloaded its own
+	// modules. Start its global ID sequence here, without resetting it during
+	// an individual module reload in a running game.
+	if (frame == 0)
+		SyncedJobs().Reset();
+	// Drain old workers before any guest callback. Set the new submission frame
+	// before result callbacks, which may themselves enqueue next-frame work.
+	auto deliveries = SyncedJobs().BeginFrame(frame);
+	for (const auto& host: Hosts()) {
+		if (!WasmEnvironmentMatrix::Policy(host->environment).synced || host->backend->hot.faulted)
+			continue;
+		std::string error;
+		if (!host->ResetBudgetImpl(error))
+			throw std::runtime_error("Cannot reset synced Wasm frame budget: " + error);
+	}
+	DeliverJobResults(deliveries, frame);
+}
+
+bool WasmCoreHost::BeginUnsyncedJobsUpdate(WasmCoreHost* host, std::string& error)
+{
+	if (!host || WasmEnvironmentMatrix::Policy(host->environment).synced || host->backend->hot.faulted)
+		return true;
+	if (!host->ResetBudgetImpl(error))
+		return false;
+	if (!host->backend->localJobs)
+		return true;
+	try {
+		auto deliveries = host->backend->localJobs->BeginUpdate();
+		const int tick = deliveries.empty() ? 0 : deliveries.front().submittedFrame + 1;
+		DeliverJobResults(deliveries, tick);
+	} catch (const std::exception& failure) {
+		error = failure.what();
+		host->Fault("Unsynced Wasm job failure: " + error);
+		return false;
+	}
+	return true;
+}
+
+void WasmCoreHost::EndUnsyncedJobsUpdate(WasmCoreHost* host)
+{
+	if (!host || !host->backend->localJobs)
+		return;
+	if (host->backend->hot.faulted) {
+		host->backend->localJobs->CancelOwner(host);
+		return;
+	}
+	try {
+		host->backend->localJobs->EndUpdate();
+	} catch (const std::exception& failure) {
+		host->Fault("Unsynced Wasm job dispatch failed: " + std::string(failure.what()));
+		host->backend->localJobs->CancelOwner(host);
+	}
+}
+
+void WasmCoreHost::DeliverJobResults(std::span<const WasmSyncedJobs::Delivery> deliveries, int frame)
+{
+	std::lock_guard registryLock(RegistryMutex());
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	for (const auto& delivery: deliveries) {
+		auto* host = static_cast<WasmCoreHost*>(delivery.owner);
+		if (std::none_of(Hosts().begin(), Hosts().end(), [host](const auto& h) { return h.get() == host; }))
+			continue;
+		auto& b = *host->backend;
+		if (b.hot.faulted) continue;
+		ZoneScopedN("Wasm::Jobs::ResultCallback");
+		ZoneValue(delivery.id);
+		if (ZoneIsActive)
+			ZoneTextF("frame=%d submitted=%d job=%u owner=%s status=%u output=%zu", frame,
+			delivery.submittedFrame, delivery.id, host->moduleName.c_str(),
+			static_cast<unsigned>(delivery.result.status), delivery.result.bytes.size());
+		std::string error;
+		auto& budget = b.hot.budget;
+		if (!budget.ChargeHost(1 + delivery.result.bytes.size()) || !budget.EnterCallback(true)) {
+			host->Fault("Wasm job result delivery budget exhausted");
+			continue;
+		}
+		struct Scope {
+			WasmExecutionBudget& budget;
+			void* previousOwner;
+			bool previousMenuPhase;
+			bool active = true;
+			void Finish() { if (active) { budget.LeaveCallback(); active = false; } }
+			~Scope() { Finish(); RmlGui::SetCurrentContextOwner(previousOwner, previousMenuPhase); }
+		} scope{budget, RmlGui::GetCurrentContextOwner(), RmlGui::IsCurrentContextMenuPhase()};
+		RmlGui::SetCurrentContextOwner(host, host->IsMenuEnvironment());
+		WasmUiVisibility::ConditionalScopedContext uiContext(host->environment == WasmEnvironment::UI);
+		std::array<wasmtime_val_raw_t, 4> slots{};
+		auto* context = wasmtime_store_context(b.store);
+		if (!b.jobResultBuffer.Call(context, slots.data(), 1, error)) {
+			host->Fault(error);
+			continue;
+		}
+		const auto pointer = static_cast<std::uint32_t>(slots[0].i32);
+		if (!b.jobResultCapacity.Call(context, slots.data(), 1, error)) {
+			host->Fault(error);
+			continue;
+		}
+		const auto capacity = static_cast<std::uint32_t>(slots[0].i32);
+		if (delivery.result.bytes.size() > capacity ||
+			!b.bindings.Host().memory.Write(pointer, delivery.result.bytes.data(), delivery.result.bytes.size())) {
+			host->Fault("Wasm job result scratch buffer is out of bounds or too small");
+			continue;
+		}
+		slots[0].i32 = delivery.id;
+		slots[1].i32 = static_cast<std::uint32_t>(delivery.result.status);
+		slots[2].i32 = pointer;
+		slots[3].i32 = delivery.result.bytes.size();
+		if (!b.jobResult.Call(context, slots.data(), slots.size(), error))
+			host->Fault(error);
+		scope.Finish();
+		host->FlushPendingCusCalls();
+	}
+#endif
+}
+
+void WasmCoreHost::EndSyncedJobsFrame()
+{
+	SyncedJobs().EndFrame();
+}
+
+void WasmCoreHost::ShutdownSyncedJobs()
+{
+	std::lock_guard registryLock(RegistryMutex());
+	SyncedJobs().Reset();
+	for (const auto& host: Hosts()) {
+		if (host->backend->localJobs)
+			host->backend->localJobs->Reset();
+	}
+}
+
+std::vector<WasmCoreHost::SyncState> WasmCoreHost::SyncedStates()
+{
+	std::lock_guard registryLock(RegistryMutex());
+	std::vector<SyncState> states;
+	for (const auto& host: Hosts()) {
+		if (!WasmEnvironmentMatrix::Policy(host->environment).synced)
+			continue;
+		SyncState state{host->moduleName, host->backend->moduleIdentity, host->environment};
+		state.faulted = host->backend->hot.faulted;
+		state.jobsHash = SyncedJobs().StateHash(host.get());
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+		const auto& memory = host->backend->bindings.Host().memory;
+		std::span<const std::uint8_t> bytes;
+		state.memoryBytes = memory.Size();
+		if (!memory.View(0, state.memoryBytes, bytes))
+			throw std::runtime_error("Cannot inspect synced Wasm memory: " + host->moduleName);
+		state.memoryHash = XXH3_64bits(bytes.data(), bytes.size());
+#endif
+		states.push_back(std::move(state));
+	}
+	std::sort(states.begin(), states.end(), [](const auto& a, const auto& b) {
+		return a.name < b.name;
+	});
+	return states;
+}
+
+bool WasmCoreHost::DumpSyncedMemory(std::string_view moduleName, const std::string& path)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* host = Find(moduleName);
+	if (host == nullptr || !WasmEnvironmentMatrix::Policy(host->environment).synced)
+		return false;
+	const auto& memory = host->backend->bindings.Host().memory;
+	std::span<const std::uint8_t> bytes;
+	if (!memory.View(0, memory.Size(), bytes))
+		return false;
+	std::ofstream out(path, std::ios::binary | std::ios::trunc);
+	out.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+	return out.good();
+#else
+	return false;
+#endif
 }
 
 bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
@@ -284,6 +534,7 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 	auto host = std::unique_ptr<WasmCoreHost>(
 		new WasmCoreHost(std::move(moduleName), environment, nullptr));
 	auto backend = std::make_unique<Backend>(nativeInterface, runtime, environment, host.get());
+	backend->moduleIdentity = identity.sha512;
 	backend->bindings.Host().host = host.get();
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -313,6 +564,7 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 			recoil::wasm::core::ErrorMessage(compileError);
 		return false;
 	}
+	backend->jobProgram = WasmJobProgram::FromCompiled(runtime, backend->module, identity.sha512);
 	backend->linker = wasmtime_linker_new(engine);
 	if (backend->linker == nullptr) {
 		error = "Core Wasm host could not create a linker";
@@ -364,6 +616,25 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 			std::string(WasmEnvironmentMatrix::Name(environment)) +
 			" guest-mask=" + std::to_string(static_cast<std::uint32_t>(markerSlot.i32));
 		return false;
+	}
+	{
+		const wasm_valkind_t i32[] = {WASM_I32};
+		const wasm_valkind_t fourI32[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+		if (!backend->jobResult.Resolve(context, backend->instance,
+				"spring:jobs/result", 18, fourI32, {}, true, error) ||
+			!backend->jobResultBuffer.Resolve(context, backend->instance,
+				"SPRING_JOB_RESULT_BUFFER", 24, {}, i32, true, error) ||
+			!backend->jobResultCapacity.Resolve(context, backend->instance,
+				"SPRING_JOB_RESULT_CAPACITY", 26, {}, i32, true, error))
+			return false;
+		if (backend->jobResult.Present() != backend->jobResultBuffer.Present() ||
+			backend->jobResult.Present() != backend->jobResultCapacity.Present()) {
+			error = "Core Wasm job result exports must include result, buffer and capacity";
+			return false;
+		}
+		if (backend->jobResult.Present() && !WasmEnvironmentMatrix::Policy(environment).synced) {
+			backend->localJobs = std::make_unique<WasmSyncedJobs>(WasmSyncedJobs::Mode::Update);
+		}
 	}
 	if (!backend->bindings.Bind(context, backend->instance, error)) {
 		error = "Core Wasm binding failed: " + error;
@@ -509,6 +780,7 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 	return false;
 #endif
 
+	std::lock_guard registryLock(RegistryMutex());
 	Unload(host->moduleName);
 	host->backend = std::move(backend);
 	host->FlushPendingCusCalls();
@@ -520,6 +792,7 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 
 void WasmCoreHost::Unload(std::string_view moduleName)
 {
+	std::lock_guard registryLock(RegistryMutex());
 	auto& hosts = Hosts();
 	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
 		if (host != nullptr && host->moduleName == moduleName)
@@ -533,6 +806,8 @@ void WasmCoreHost::Unload(std::string_view moduleName)
 
 void WasmCoreHost::UnloadAll()
 {
+	std::lock_guard registryLock(RegistryMutex());
+	ShutdownSyncedJobs();
 	for (const auto& host : Hosts())
 		ClearHostRmlContexts(host.get());
 	Hosts().clear();
@@ -546,11 +821,13 @@ std::string_view WasmCoreHost::ModuleName(const WasmCoreHost* host)
 
 bool WasmCoreHost::AnyActive()
 {
+	std::lock_guard registryLock(RegistryMutex());
 	return !Hosts().empty();
 }
 
 bool WasmCoreHost::AnyActive(WasmEnvironment environment)
 {
+	std::lock_guard registryLock(RegistryMutex());
 	return std::any_of(Hosts().begin(), Hosts().end(), [environment](const auto& host) {
 		return host != nullptr && host->environment == environment;
 	});
@@ -569,6 +846,7 @@ bool WasmCoreHost::ModuleFaulted(std::string_view moduleName)
 
 void WasmCoreHost::Fault(std::string reason)
 {
+	std::lock_guard registryLock(RegistryMutex());
 	if (backend == nullptr || backend->hot.faulted)
 		return;
 	backend->hot.faulted = true;
@@ -590,6 +868,7 @@ bool WasmCoreHost::FaultModule(std::string_view moduleName, std::string reason)
 
 void WasmCoreHost::RecountPendingFaults()
 {
+	std::lock_guard registryLock(RegistryMutex());
 	std::size_t pending = 0;
 	for (const auto& host : Hosts()) {
 		if (host != nullptr && host->backend != nullptr && host->backend->hot.faulted)
@@ -605,6 +884,7 @@ std::size_t WasmCoreHost::PendingFaults()
 
 std::size_t WasmCoreHost::RemoveFaulted()
 {
+	std::lock_guard registryLock(RegistryMutex());
 	// Callers poll this on the dispatch path, so a run with no faults must not
 	// touch the registry at all.
 	if (PendingFaultCount() == 0)
@@ -1609,6 +1889,7 @@ bool WasmCoreHost::DispatchModule(std::string_view moduleName, std::string_view 
 bool WasmCoreHost::DispatchEnvironment(WasmEnvironment environment, std::string_view name,
 	const void* query, void* result, std::string& error)
 {
+	std::lock_guard registryLock(RegistryMutex());
 	const WasmCoreCallin callin = ResolveCallin(name);
 	if (callin == WasmCoreCallin::Invalid) {
 		error = "unsupported Core Wasm callin: " + std::string(name);
@@ -1629,6 +1910,7 @@ bool WasmCoreHost::DispatchEnvironment(WasmEnvironment environment, std::string_
 bool WasmCoreHost::DispatchCallin(std::string_view name, const void* query, void* result,
 	std::string& error)
 {
+	std::lock_guard registryLock(RegistryMutex());
 	const WasmCoreCallin callin = ResolveCallin(name);
 	if (callin == WasmCoreCallin::Invalid)
 		return false;

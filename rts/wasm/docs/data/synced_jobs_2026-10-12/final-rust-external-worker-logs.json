@@ -1,0 +1,77 @@
+[
+  {
+    "log": "out/local-sync/final-rust-external-worker/record/sync.jsonl",
+    "sha256": "f824854035d5686135d332d389a05fe94daffed3d2e4d7972aa40dd081d75f47",
+    "frames": 601,
+    "first": 0,
+    "last": 600,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "817ca5be06b526c73fc4046c8940bd6b39226633b63800811049ba54f94126d1e3c434bae7686815fa8b1f0f54420bf22cb69cb39c803400c328b1d023652d10",
+        "bytes": 1114112
+      },
+      {
+        "name": "sync-jobs-worker",
+        "identity": "c76c8f7a10cbf4c9db54ca0f36070f0d0339af5f0ddbbf7bae07892bcf902d59ee7db05023455a3fcf1daaa349232767d6ff02de09a9a8057127ec169e0936e0",
+        "bytes": 65536
+      }
+    ]
+  },
+  {
+    "log": "out/local-sync/final-rust-external-worker/run-0-1/sync.jsonl",
+    "sha256": "f824854035d5686135d332d389a05fe94daffed3d2e4d7972aa40dd081d75f47",
+    "frames": 601,
+    "first": 0,
+    "last": 600,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "817ca5be06b526c73fc4046c8940bd6b39226633b63800811049ba54f94126d1e3c434bae7686815fa8b1f0f54420bf22cb69cb39c803400c328b1d023652d10",
+        "bytes": 1114112
+      },
+      {
+        "name": "sync-jobs-worker",
+        "identity": "c76c8f7a10cbf4c9db54ca0f36070f0d0339af5f0ddbbf7bae07892bcf902d59ee7db05023455a3fcf1daaa349232767d6ff02de09a9a8057127ec169e0936e0",
+        "bytes": 65536
+      }
+    ]
+  },
+  {
+    "log": "out/local-sync/final-rust-external-worker/run-1-4/sync.jsonl",
+    "sha256": "165ba1378235059bbe0eec9badc09e4e3437064b663b8ff38df3a2b8c6f17214",
+    "frames": 601,
+    "first": 0,
+    "last": 600,
+    "workers": 4,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "bytes": 536870912
+      },
+      {
+        "name": "sync-jobs-test",
+        "identity": "817ca5be06b526c73fc4046c8940bd6b39226633b63800811049ba54f94126d1e3c434bae7686815fa8b1f0f54420bf22cb69cb39c803400c328b1d023652d10",
+        "bytes": 1114112
+      },
+      {
+        "name": "sync-jobs-worker",
+        "identity": "c76c8f7a10cbf4c9db54ca0f36070f0d0339af5f0ddbbf7bae07892bcf902d59ee7db05023455a3fcf1daaa349232767d6ff02de09a9a8057127ec169e0936e0",
+        "bytes": 65536
+      }
+    ]
+  }
+]

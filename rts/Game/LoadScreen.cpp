@@ -389,7 +389,7 @@ void CLoadScreen::DispatchWasmDrawLoadScreen()
 	SimpleCallinQuery query = {};
 	bool handled = false;
 	std::string error;
-	if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
+	if (!m_wasmEnv->GetWasmSystem()->DispatchOwnCoreCallin(
 			CoreCallinOf("DrawLoadScreen"), &query, false, nullptr, handled, error)) {
 		if (!error.empty())
 			LOG_L(L_ERROR, "WasmIntro DrawLoadScreen failed: %s", error.c_str());
@@ -407,7 +407,7 @@ void CLoadScreen::DispatchWasmLoadProgress(const std::string& msg, bool replaceL
 	};
 	bool handled = false;
 	std::string error;
-	if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
+	if (!m_wasmEnv->GetWasmSystem()->DispatchOwnCoreCallin(
 			CoreCallinOf("LoadProgress"), &query, false, nullptr, handled, error)) {
 		if (!error.empty())
 			LOG_L(L_ERROR, "WasmIntro LoadProgress failed: %s", error.c_str());

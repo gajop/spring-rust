@@ -1,0 +1,12 @@
+{
+  "left_bytes": 65536,
+  "right_bytes": 65536,
+  "differing_bytes": 2,
+  "pages": [
+    0
+  ],
+  "first_offsets": [
+    16,
+    17
+  ]
+}

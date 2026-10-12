@@ -75,6 +75,8 @@ pub mod default_interface;
 /// importing anything here makes a synced guest desync. See `desync.rs`.
 #[cfg(target_arch = "wasm32")]
 pub mod desync;
+#[cfg(target_arch = "wasm32")]
+pub mod jobs;
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]
 pub mod game_options;
 #[cfg(target_arch = "wasm32")]
@@ -1192,4 +1194,10 @@ mod tests {
             3
         );
     }
+}
+
+#[cfg(all(test, target_arch = "wasm32"))]
+mod job_result_export_compile_test {
+    fn handle(_id: crate::jobs::JobId, _result: core::result::Result<&[u8], crate::jobs::JobError>) {}
+    crate::export_job_results!(handle, 4096);
 }

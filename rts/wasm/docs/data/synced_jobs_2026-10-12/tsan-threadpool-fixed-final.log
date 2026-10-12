@@ -1,0 +1,36 @@
+[0/2] Re-checking globbed directories...
+[1/2] Building CXX object test/CMakeFiles/test_ThreadPool.dir/__/rts/System/Platform/Linux/Futex.cpp.o
+[2/2] Linking CXX executable test/test_ThreadPool
+==================
+WARNING: ThreadSanitizer: data race (pid=1)
+  Write of size 8 at 0x721800012070 by main thread:
+    #0 operator delete(void*, unsigned long) <null> (libtsan.so.2+0xa6a52) (BuildId: 73c6091c853095c26584fe8f83b71a180ae6c354)
+    #1 std::_Sp_counted_ptr_inplace<TTaskGroup<CATCH2_INTERNAL_TEST_6()::{lambda()#1}, void>, std::allocator<void>, (__gnu_cxx::_Lock_policy)2>::_M_destroy() <null> (test_ThreadPool+0x28a11) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #2 Parallel2TaskGroup<CATCH2_INTERNAL_TEST_6()::{lambda()#1}>::ExecuteStep(int) <null> (test_ThreadPool+0x2ea58) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #3 ThreadPool::WaitForFinished(std::shared_ptr<ITaskGroup>&&) <null> (test_ThreadPool+0x49e4a) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #4 CATCH2_INTERNAL_TEST_6() <null> (test_ThreadPool+0x3e5ed) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #5 Catch::RunContext::invokeActiveTestCase() <null> (test_ThreadPool+0x7c4c7) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #6 Catch::RunContext::runCurrentTest() <null> (test_ThreadPool+0xc69f2) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #7 Catch::RunContext::runTest(Catch::TestCaseHandle const&) <null> (test_ThreadPool+0xc7338) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #8 Catch::Session::runInternal() <null> (test_ThreadPool+0xe89d0) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #9 Catch::Session::run() <null> (test_ThreadPool+0xe8ec1) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #10 main <null> (test_ThreadPool+0x265cc) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+
+  Previous read of size 8 at 0x721800012070 by thread T9:
+    #0 ThreadPool::WorkerLoop(int, bool) <null> (test_ThreadPool+0x4a616) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #1 std::thread::_State_impl<std::thread::_Invoker<std::tuple<std::_Bind<void (*(int, bool))(int, bool)> > > >::_M_run() <null> (test_ThreadPool+0x4c4a5) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #2 <null> <null> (libstdc++.so.6+0xf0db1) (BuildId: 399aeff7bae833abc7d02202df7b3974a44d92cd)
+
+  Thread T9 (tid=32, running) created by main thread at:
+    #0 pthread_create <null> (libtsan.so.2+0x58c8c) (BuildId: 73c6091c853095c26584fe8f83b71a180ae6c354)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xf0e9a) (BuildId: 399aeff7bae833abc7d02202df7b3974a44d92cd)
+    #2 CATCH2_INTERNAL_TEST_2() <null> (test_ThreadPool+0x379c3) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #3 Catch::RunContext::invokeActiveTestCase() <null> (test_ThreadPool+0x7c4c7) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #4 Catch::RunContext::runCurrentTest() <null> (test_ThreadPool+0xc69f2) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #5 Catch::RunContext::runTest(Catch::TestCaseHandle const&) <null> (test_ThreadPool+0xc7338) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #6 Catch::Session::runInternal() <null> (test_ThreadPool+0xe89d0) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #7 Catch::Session::run() <null> (test_ThreadPool+0xe8ec1) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+    #8 main <null> (test_ThreadPool+0x265cc) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7)
+
+SUMMARY: ThreadSanitizer: data race (/build/out/test/test_ThreadPool+0x28a11) (BuildId: 19760ba228efb70e8127d3d880e241799712d0c7) in std::_Sp_counted_ptr_inplace<TTaskGroup<CATCH2_INTERNAL_TEST_6()::{lambda()#1}, void>, std::allocator<void>, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+==================

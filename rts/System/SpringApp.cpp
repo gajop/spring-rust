@@ -21,6 +21,7 @@
 #undef KeyPress
 #undef KeyRelease
 #undef GrayScale
+#undef Status // Xlib macro conflicts with the Core Wasm status enum.
 #endif
 
 
@@ -105,6 +106,7 @@
 #include "System/Sync/FPUCheck.h"
 #include "System/Threading/ThreadPool.h"
 #include "System/LoadSave/DemoFileExtension.h"
+#include "WasmCoreHost.h"
 
 #include "Game/UnsyncedGameCommands.h"
 #include "Game/SyncedGameCommands.h"
@@ -770,6 +772,7 @@ void SpringApp::Reload(const std::string script)
 	LOG("[SpringApp::%s][1]", __func__);
 
 	// get rid of any running worker threads
+	WasmCoreHost::ShutdownSyncedJobs();
 	ThreadPool::SetThreadCount(0);
 	ThreadPool::SetDefaultThreadCount();
 
@@ -1014,6 +1017,7 @@ void SpringApp::Kill(bool fromRun)
 	killedCount += 1;
 
 	LOG("[SpringApp::%s][1] fromRun=%d", __func__, fromRun);
+	WasmCoreHost::ShutdownSyncedJobs();
 	ThreadPool::SetThreadCount(0);
 	LOG("[SpringApp::%s][2]", __func__);
 	LuaVFSDownload::Free(true);

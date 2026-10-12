@@ -1,0 +1,40 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=1)
+  Atomic write of size 4 at 0x5555556cc6f0 by main thread:
+    #0 spring_futex::lock() <null> (test_ThreadPool+0x5b8bb) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #1 CATCH2_INTERNAL_TEST_2()::{lambda(int)#1}::operator()(int) const <null> (test_ThreadPool+0x30e2e) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #2 std::_Function_handler<void (int), CATCH2_INTERNAL_TEST_2()::{lambda(int)#1}>::_M_invoke(std::_Any_data const&, int&&) <null> (test_ThreadPool+0x31453) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #3 ForTaskGroup<CATCH2_INTERNAL_TEST_2()::{lambda(int)#1}>::ExecuteStep(int) <null> (test_ThreadPool+0x2b955) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #4 ThreadPool::WaitForFinished(std::shared_ptr<ITaskGroup>&&) <null> (test_ThreadPool+0x49e4a) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #5 CATCH2_INTERNAL_TEST_2() <null> (test_ThreadPool+0x388cc) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #6 Catch::RunContext::invokeActiveTestCase() <null> (test_ThreadPool+0x7c4c7) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #7 Catch::RunContext::runCurrentTest() <null> (test_ThreadPool+0xc69f2) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #8 Catch::RunContext::runTest(Catch::TestCaseHandle const&) <null> (test_ThreadPool+0xc7338) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #9 Catch::Session::runInternal() <null> (test_ThreadPool+0xe89d0) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #10 Catch::Session::run() <null> (test_ThreadPool+0xe8ec1) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #11 main <null> (test_ThreadPool+0x265cc) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+
+  Previous write of size 4 at 0x5555556cc6f0 by thread T9:
+    #0 spring_futex::unlock() <null> (test_ThreadPool+0x5b9b7) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #1 CATCH2_INTERNAL_TEST_2()::{lambda(int)#1}::operator()(int) const <null> (test_ThreadPool+0x30f8d) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #2 std::_Function_handler<void (int), CATCH2_INTERNAL_TEST_2()::{lambda(int)#1}>::_M_invoke(std::_Any_data const&, int&&) <null> (test_ThreadPool+0x31453) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #3 ForTaskGroup<CATCH2_INTERNAL_TEST_2()::{lambda(int)#1}>::ExecuteStep(int) <null> (test_ThreadPool+0x2b955) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #4 ThreadPool::WorkerLoop(int, bool) <null> (test_ThreadPool+0x4b1ca) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #5 std::thread::_State_impl<std::thread::_Invoker<std::tuple<std::_Bind<void (*(int, bool))(int, bool)> > > >::_M_run() <null> (test_ThreadPool+0x4c4a5) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #6 <null> <null> (libstdc++.so.6+0xf0db1) (BuildId: 399aeff7bae833abc7d02202df7b3974a44d92cd)
+
+  Location is global 'm' of size 4 at 0x5555556cc6f0 (test_ThreadPool+0x1786f0)
+
+  Thread T9 (tid=16, running) created by main thread at:
+    #0 pthread_create <null> (libtsan.so.2+0x58c8c) (BuildId: 73c6091c853095c26584fe8f83b71a180ae6c354)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xf0e9a) (BuildId: 399aeff7bae833abc7d02202df7b3974a44d92cd)
+    #2 CATCH2_INTERNAL_TEST_2() <null> (test_ThreadPool+0x379c3) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #3 Catch::RunContext::invokeActiveTestCase() <null> (test_ThreadPool+0x7c4c7) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #4 Catch::RunContext::runCurrentTest() <null> (test_ThreadPool+0xc69f2) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #5 Catch::RunContext::runTest(Catch::TestCaseHandle const&) <null> (test_ThreadPool+0xc7338) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #6 Catch::Session::runInternal() <null> (test_ThreadPool+0xe89d0) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #7 Catch::Session::run() <null> (test_ThreadPool+0xe8ec1) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+    #8 main <null> (test_ThreadPool+0x265cc) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064)
+
+SUMMARY: ThreadSanitizer: data race (/build/out/test/test_ThreadPool+0x5b8bb) (BuildId: 5ba966cec74b3cba207aec53471dc9c526cd3064) in spring_futex::lock()
+==================

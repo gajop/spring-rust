@@ -1,0 +1,62 @@
+[
+  {
+    "path": "out/local-sync/final-native-nojobs/record/sync.jsonl",
+    "sha256": "f5532cccc47fd5ddf2e94e3aec32012aa7aad63db8a550bbfb0709213d9ff6eb",
+    "frames": 1201,
+    "first_frame": 0,
+    "last_frame": 1200,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "d391cd69df5486ef",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  },
+  {
+    "path": "out/local-sync/final-native-nojobs/run-0-1/sync.jsonl",
+    "sha256": "f5532cccc47fd5ddf2e94e3aec32012aa7aad63db8a550bbfb0709213d9ff6eb",
+    "frames": 1201,
+    "first_frame": 0,
+    "last_frame": 1200,
+    "workers": 1,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "d391cd69df5486ef",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  },
+  {
+    "path": "out/local-sync/final-native-nojobs/run-1-4/sync.jsonl",
+    "sha256": "f92a5df5031da549344a32d37c4c6e7dd7d771e86b6d6e3c756c0b0775ca84f6",
+    "frames": 1201,
+    "first_frame": 0,
+    "last_frame": 1200,
+    "workers": 4,
+    "modules": [
+      {
+        "name": "shipgame-rules",
+        "identity": "0b2bf570b68aa8c4322042b27c909a1318a9d83a7b245461e3abc26739c82944ad16c00adba2c8c776a6c6c09ff88763857a43ae7b8f6c97a7d7d73fc186a6cf",
+        "environment": "rules-synced",
+        "bytes": 536870912,
+        "hash": "d391cd69df5486ef",
+        "jobs_hash": "db02334e96d65708",
+        "faulted": false
+      }
+    ],
+    "recorded_desync_warnings": 0
+  }
+]

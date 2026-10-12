@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "comparisons": [
+    {
+      "equal": true,
+      "frames": 61
+    }
+  ]
+}

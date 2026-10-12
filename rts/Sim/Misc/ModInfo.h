@@ -259,6 +259,8 @@ public:
 	/// counterpart, LuaAllocLimit, caps all Lua states together). Set with
 	/// system.WasmMemoryLimit in gamedata/modrules.lua; default 512, allowed 1..4096.
 	int wasmMemoryLimitMiB;
+	/// Game-owned checksum cadence; diagnostics still log every frame.
+	int wasmStateHashInterval;
 	static constexpr int WASM_MEMORY_LIMIT_MIB_DEFAULT = 512;
 	static constexpr int WASM_MEMORY_LIMIT_MIB_MAX = 4096;
 

@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "comparisons": [
+    {
+      "equal": true,
+      "frames": 1201
+    }
+  ],
+  "recording_comparisons": [
+    {
+      "equal": true,
+      "frames": 1201
+    },
+    {
+      "equal": true,
+      "frames": 1201
+    }
+  ]
+}

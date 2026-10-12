@@ -1,6 +1,8 @@
 #include "Teams.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
+#include "NativeInterface/WasmSyncedContext.h"
+#include "Game/GameSetup.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -34,6 +36,12 @@ static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .mes
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Team system not ready" };
 
 static bool IsReady() { return (gs != nullptr); }
+
+static bool IsPlayerVisible(const CPlayer* player)
+{
+	return player != nullptr && WasmSyncedContext::PlayerVisible(
+		gameSetup != nullptr && gameSetup->hostDemo, player->isFromDemo);
+}
 
 static const char* StoreAIString(const std::string& value)
 {
@@ -317,7 +325,7 @@ static void NativeArePlayersAllied(const ArePlayersAlliedQuery* query, ArePlayer
 	const CPlayer* player1 = playerHandler.Player(query->playerID1);
 	const CPlayer* player2 = playerHandler.Player(query->playerID2);
 
-	if (player1 == nullptr || player2 == nullptr) {
+	if (!IsPlayerVisible(player1) || !IsPlayerVisible(player2)) {
 		result->error = &INVALID_PLAYER_ERROR;
 		return;
 	}
@@ -334,7 +342,7 @@ static void NativeGetPlayerList(const GetPlayerListQuery* query, GetPlayerListRe
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
-		if (player == nullptr) continue;
+		if (!IsPlayerVisible(player)) continue;
 		if (query->active && !player->active) continue;
 		if (query->teamID >= 0 && (player->spectator || player->team != query->teamID)) continue;
 
@@ -353,7 +361,7 @@ static void NativeGetPlayerListInTeam(const GetPlayerListInTeamQuery* query, Get
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active && player->team == query->teamID) {
+		if (IsPlayerVisible(player) && player->active && player->team == query->teamID) {
 			playerIDs.push_back(p);
 		}
 	}
@@ -370,7 +378,7 @@ static void NativeGetPlayerListInAllyTeam(const GetPlayerListInAllyTeamQuery* qu
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active &&
+		if (IsPlayerVisible(player) && player->active &&
 			(query->allyTeamID < 0 || teamHandler.AllyTeam(player->team) == query->allyTeamID)) {
 			playerIDs.push_back(p);
 		}
@@ -386,7 +394,7 @@ static void NativeGetPlayerInfo(const GetPlayerInfoQuery* query, GetPlayerInfoRe
 	if (!playerHandler.IsValidPlayer(query->playerID)) { result->error = &INVALID_PLAYER_ERROR; return; }
 
 	const CPlayer* player = playerHandler.Player(query->playerID);
-	if (player == nullptr) { result->error = &INVALID_PLAYER_ERROR; return; }
+	if (!IsPlayerVisible(player)) { result->error = &INVALID_PLAYER_ERROR; return; }
 
 	result->error = nullptr;
 	result->info.playerID = query->playerID;
@@ -410,7 +418,7 @@ static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* qu
 	if (!playerHandler.IsValidPlayer(query->playerID)) { result->error = &INVALID_PLAYER_ERROR; return; }
 
 	const CPlayer* player = playerHandler.Player(query->playerID);
-	if (player == nullptr) { result->error = &INVALID_PLAYER_ERROR; return; }
+	if (!IsPlayerVisible(player)) { result->error = &INVALID_PLAYER_ERROR; return; }
 
 	const CUnit* controllee = player->fpsController.GetControllee();
 	if (controllee != nullptr && !WasmUiVisibility::IsUnitAlly(controllee))

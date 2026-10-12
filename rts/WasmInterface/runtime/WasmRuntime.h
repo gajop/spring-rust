@@ -101,6 +101,9 @@ public:
 
 private:
 	friend class WasmCoreHost;
+	// Local C++ microbenchmark uses this same engine/config for its inline baseline.
+	friend class WasmJobBenchmark;
+	friend class WasmJobProgram;
 
 	struct BackendState;
 	void* BackendEngine() const;

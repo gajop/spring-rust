@@ -1,0 +1,24 @@
+{
+  "worktree": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar",
+  "branch": "codex/wasm-synced-jobs",
+  "base_commit": "45c811a942",
+  "implementation_commit": "4a2e544d274902e55323978a5833f9c438d639b4",
+  "engine_sha256": "48038531af98d2c708111b976adb00d3a0c137dcd48d617e8bb189d4695ccf92",
+  "compiler": "GCC 13.1.0",
+  "configuration": "RELEASE",
+  "runtime": "Wasmtime 42.0.1",
+  "cpu": "Intel Core i7-12700",
+  "linux_build_image": "ghcr.io/beyond-all-reason/recoil-build-amd64-linux@sha256:31b3667ba0d37620b4ad9b45d1840c8d3e95317f2b233044d2e17697ce8fe61d",
+  "implementation_commits": [
+    "18667ed2c8",
+    "fb0af0c8ef",
+    "bdf066118f",
+    "20b1ef0a8e",
+    "d9e5f46861",
+    "3812017ff2",
+    "0d2040f31d",
+    "9ae5fbe155",
+    "4a2e544d27"
+  ],
+  "engine_path": "/home/gajop/worktrees/wasm-synced-jobs/spring-bar/out/local-sync/runtime-queue-drain-final/spring-headless"
+}

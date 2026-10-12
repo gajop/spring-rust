@@ -17,6 +17,7 @@
 #include "WasmCoreDispatchPlan.h"
 #include "WasmEnvironment.h"
 #include "WasmRuntime.h"
+#include "WasmInterface/jobs/WasmSyncedJobs.h"
 #include "wasm/generated/WasmCallinRegistry.h"
 
 struct NativeInterface;
@@ -128,6 +129,30 @@ public:
 	static bool FuelRemaining(std::string_view moduleName, std::uint64_t& fuel,
 		std::string& error);
 
+	// End-of-frame verification runs on the simulation thread only. Guest
+	// memories are never inspected by a worker or an unsynced callback.
+	struct SyncState {
+		std::string name;
+		std::string identity;
+		WasmEnvironment environment;
+		std::uint64_t memoryBytes = 0;
+		std::uint64_t memoryHash = 0;
+		std::uint64_t jobsHash = 0;
+		bool faulted = false;
+	};
+	static std::vector<SyncState> SyncedStates();
+	static bool DumpSyncedMemory(std::string_view moduleName, const std::string& path);
+	// Explicit simulation boundaries, independent of whether a guest exports
+	// GameFrame. Results precede all frame callbacks and share their budget.
+	static void BeginSyncedJobsFrame(int frame);
+	static void EndSyncedJobsFrame();
+	static bool BeginUnsyncedJobsUpdate(WasmCoreHost* host, std::string& error);
+	static void EndUnsyncedJobsUpdate(WasmCoreHost* host);
+	// Drain and cancel before the engine stops/recreates its worker pool.
+	static void ShutdownSyncedJobs();
+	std::uint64_t SubmitJob(std::string exportName, std::span<const std::uint8_t> input,
+		std::string_view workerModule = {});
+
 	// NativeUnitScriptBackend implementation for CUS instances owned by this
 	// Core guest. The module-level scheduler is ticked after engine animation
 	// interpolation, through CUnitScriptEngine.
@@ -148,6 +173,7 @@ public:
 	WasmCoreHost& operator=(const WasmCoreHost&) = delete;
 
 private:
+	static void DeliverJobResults(std::span<const WasmSyncedJobs::Delivery> deliveries, int frame);
 	// A result-less CUS call (Create included) waiting for the guest to return
 	// and release its CUS state.
 	struct PendingCusCall {

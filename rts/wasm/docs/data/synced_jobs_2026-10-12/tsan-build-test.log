@@ -1,0 +1,99 @@
+[0/2] Re-checking globbed directories...
+[1/36] Building CXX object rts/lib/tracy/CMakeFiles/TracyClient.dir/public/TracyClient.cpp.o
+[2/36] Linking CXX static library rts/lib/tracy/libTracyClient.a
+[3/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Sync/SHA512.cpp.o
+[4/36] Building CXX object rts/lib/fmt/CMakeFiles/fmt.dir/src/os.cc.o
+[5/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/CpuTopologyCommon.cpp.o
+[6/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/ThreadAffinityGuard.cpp.o
+[7/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/SharedLib.cpp.o
+[8/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Misc/SpringTime.cpp.o
+[9/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/CpuID.cpp.o
+[10/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Threading.cpp.o
+[11/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Threading/ThreadPool.cpp.o
+In file included from /usr/include/c++/13/bits/shared_ptr_atomic.h:33,
+                 from /usr/include/c++/13/memory:81,
+                 from /build/src/rts/System/Platform/Linux/ThreadSupport.h:12,
+                 from /build/src/rts/System/Platform/Threading.h:9,
+                 from /build/src/rts/System/Threading/ThreadPool.h:91,
+                 from /build/src/rts/System/Threading/ThreadPool.cpp:5:
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::Block::is_empty() const [with moodycamel::ConcurrentQueue<T, Traits>::InnerQueueContext context = moodycamel::ConcurrentQueue<ITaskGroup*, moodycamel::ConcurrentQueueDefaultTraits>::explicit_context; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1483:29,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1715:76:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::Block::is_empty() const [with moodycamel::ConcurrentQueue<T, Traits>::InnerQueueContext context = moodycamel::ConcurrentQueue<ITaskGroup*, moodycamel::ConcurrentQueueDefaultTraits>::explicit_context; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1483:29,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1715:76,
+    inlined from 'moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::~ExplicitProducer() [with T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1755:3:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1879:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1624:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1054:37:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ImplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:2443:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1627:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1054:37:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ExplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1879:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1624:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1058:36:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In function 'void std::atomic_thread_fence(memory_order)',
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ImplicitProducer::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:2443:29,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::ProducerBase::dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1627:57,
+    inlined from 'bool moodycamel::ConcurrentQueue<T, Traits>::try_dequeue(U&) [with U = ITaskGroup*; T = ITaskGroup*; Traits = moodycamel::ConcurrentQueueDefaultTraits]' at /build/src/rts/System/ConcurrentQueue.h:1058:36:
+/usr/include/c++/13/bits/atomic_base.h:144:26: warning: 'atomic_thread_fence' is not supported with '-fsanitize=thread' [-Wtsan]
+  144 |   { __atomic_thread_fence(int(__m)); }
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+[12/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/jobs/WasmJobProgram.cpp.o
+[13/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/runtime/WasmEnvironment.cpp.o
+[14/36] Building CXX object rts/lib/fmt/CMakeFiles/fmt.dir/src/format.cc.o
+[15/36] Linking CXX static library rts/lib/fmt/libfmt.a
+[16/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/core/host/WasmCoreAbi.cpp.o
+[17/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Linux/CpuTopology.cpp.o
+[18/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/jobs/WasmSyncedJobs.cpp.o
+[19/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/runtime/WasmRuntime.cpp.o
+[20/36] Building C object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/SafeCStrings.c.o
+[21/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Linux/SoLib.cpp.o
+[22/36] Building C object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/LogUtil.c.o
+[23/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/WasmInterface/core/host/WasmCoreValidation.cpp.o
+[24/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/Backend.cpp.o
+[25/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Linux/Futex.cpp.o
+[26/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/DefaultFormatter.cpp.o
+[27/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/ConsoleSink.cpp.o
+[28/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/engine/WasmInterface/TestWasmSyncedJobs.cpp.o
+[29/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/StreamSink.cpp.o
+[30/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/FramePrefixer.cpp.o
+[31/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Log/DefaultFilter.cpp.o
+[32/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/__/rts/System/Platform/Linux/ThreadSupport.cpp.o
+[33/36] Building CXX object test/CMakeFiles/test_WasmSyncedJobs.dir/lib/catch2/catch_main.cpp.o
+[34/36] Building CXX object test/lib/catch2/CMakeFiles/Catch2.dir/catch_amalgamated.cpp.o
+[35/36] Linking CXX static library test/lib/catch2/libCatch2.a
+[36/36] Linking CXX executable test/test_WasmSyncedJobs
+Internal ctest changing into directory: /build/out
+Test project /build/out
+    Start 2: testWasmSyncedJobs
+1/1 Test #2: testWasmSyncedJobs ...............***Failed    0.01 sec
+FATAL: ThreadSanitizer: encountered an incompatible memory layout but was unable to disable ASLR (perhaps sandboxing is enabled?).
+FATAL: Please rerun with lower ASLR entropy, ASLR disabled, and/or sandboxing disabled.
+
+Errors while running CTest
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.01 sec
+
+The following tests FAILED:
+	  2 - testWasmSyncedJobs (Failed)
