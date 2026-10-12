@@ -219,6 +219,8 @@ inline constexpr ImportDescriptor kImports[] = {
 	// timers stay unsynced-only under spring:profiling.
 	{DesyncModule, "get-timer", "->i64", AllEnvironmentMask},
 	{DesyncModule, "get-timer-micros", "->i64", AllEnvironmentMask},
+	{DesyncModule, "try-get-timer", "i32->i32", AllEnvironmentMask},
+	{DesyncModule, "try-get-timer-micros", "i32->i32", AllEnvironmentMask},
 	{DesyncModule, "diff-timers", "i64,i64,i32,i32->i64", AllEnvironmentMask},
 	{BenchmarkModule, "consume-string", "i32,i32->i64", AllEnvironmentMask},
 	{BenchmarkModule, "consume-f32-list", "i32,i32->i64", AllEnvironmentMask},

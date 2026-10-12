@@ -1,0 +1,6 @@
+[0/2] Re-checking globbed directories...
+[1/2] Building CXX object test/CMakeFiles/test_WasmModuleManifest.dir/engine/WasmInterface/TestWasmModuleManifest.cpp.o
+[2/2] Linking CXX executable test/test_WasmModuleManifest
+Randomness seeded to: 14748513
+===============================================================================
+All tests passed (127 assertions in 16 test cases)

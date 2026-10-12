@@ -6,6 +6,21 @@ Reports with measurements live beside this file (for example the
 
 ## 2026-10-12 · Creating feature 32001 crashes the engine; the cap limits large maps
 
+**Resolved overflow:** the loader checks available memory pages before allocation,
+and automatic-ID admission checks the ID pool. Full-pool creation now returns
+no ID (`-1` through the Core/Rust API) without crashing. Pool reuse remains
+subject to the existing 32-frame ID-recycling tick. Wasm stress verification
+fills the pool, rejects further calls, destroys a feature, then successfully
+allocates after recycling; recording and 1/4-thread replays agree for all 37
+frames. See [local fix report](ship_game_engine_fixes_2026-10-12.md).
+
+**Cap reviewed:** 32,000 units plus 32,000 features occupy a shared 16-bit ID
+range, enforced in `GlobalConstants.h`. Supporting 48,000 features while keeping
+the unit cap requires a wider combined ID representation and an audit of the
+network, save, and object-reference paths. A modrule or a larger constant alone
+cannot safely bypass this constraint. This patch retains both caps; a wider-ID
+change is separate work, not part of the overflow fix.
+
 Creating features past `MAX_FEATURES` (32000, `rts/Sim/Misc/GlobalConstants.h`) from Wasm
 segfaults the engine instead of failing the call:
 
@@ -35,6 +50,12 @@ each a feature). 200 fields (12,000 asteroids) run fine.
 
 ## 2026-10-12 · Disabled synced timers trap and unload the rules module
 
+**Resolved:** new checked Core timer imports return `NotAvailable` when disabled;
+the Rust SDK's existing `Result<u64>` API now uses them. Legacy scalar imports
+return deterministic zero for already-built guests instead of trapping. Actual
+clock reads still require `SPRING_ENABLE_SYNCED_TIMERS=1` in synced worlds.
+Disabled and enabled probes pass; disabled profiling leaves the rules alive.
+
 `spring:desync` timers (`get-timer`, `get-timer-micros`) trap when synced timers are disabled.
 The trap faults the calling callin, and the engine deregisters the whole synced rules module:
 the game carries on with no rules at all.
@@ -54,6 +75,12 @@ Seen with Ship Game's profiling option (`--modoption sb_profile_game=1`) without
 strict-determinism setting.
 
 ## 2026-10-12 · groundFX atlas error on every load
+
+**Resolved headless message:** groundFX reporting now matches the existing
+projectile-atlas path: headless allocation failure does not emit a graphics
+error. Rendered failures remain errors. Local headless and Xvfb rendered checks
+have no groundFX error, and the rendered recording/replays agree for all seven
+frames. This does not increase texture limits or hide rendered failures.
 
 Every Ship Game load, headless included, logs:
 

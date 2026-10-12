@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "environment": {
+    "SPRING_ENABLE_SYNCED_TIMERS": "1"
+  },
+  "engine_sha256": "8bc60bf3cde553513e6245fa787fb9b06a0aa655e5636d78ba0d0bd0890d5a2c",
+  "checks": [
+    "positive full-width milliseconds",
+    "positive full-width microseconds",
+    "microsecond unit conversion",
+    "out-of-bounds status for both calls"
+  ],
+  "log": "out/local-sync/engine-notes-timers-enabled-v2/write/infolog.txt"
+}

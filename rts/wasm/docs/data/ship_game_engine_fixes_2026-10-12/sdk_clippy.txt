@@ -1,0 +1,2 @@
+   Compiling spring v0.1.0 (/home/gajop/projects/spring-projects/spring-bar/rust/crates/spring)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.60s

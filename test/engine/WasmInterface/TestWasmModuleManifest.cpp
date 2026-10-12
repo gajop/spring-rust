@@ -280,6 +280,31 @@ TEST_CASE("Job imports validate both signatures in all seven environments")
 	}
 }
 
+TEST_CASE("Checked desync timers validate full-width output-pointer signatures")
+{
+	WasmRuntimeConfig config;
+	for (const auto name: {"try-get-timer", "try-get-timer-micros"}) {
+		auto module = CoreHeader();
+		AddCoreFunctionType(module, {0x7f}, {0x7f});
+		AddCoreFunctionImport(module, "spring:desync", name);
+		AddCoreMemory(module, true);
+		AddCoreMemoryExport(module);
+		for (const auto environment: {WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced,
+			WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced,
+			WasmEnvironment::UI, WasmEnvironment::Menu, WasmEnvironment::Intro}) {
+			CHECK(recoil::wasm::core::ValidateModule(module, environment,
+				RECOIL_WASM_INTERFACE_VERSION_NUMBER, config).valid);
+		}
+		module = CoreHeader();
+		AddCoreFunctionType(module, {}, {0x7e});
+		AddCoreFunctionImport(module, "spring:desync", name);
+		AddCoreMemory(module, true);
+		AddCoreMemoryExport(module);
+		CHECK_FALSE(recoil::wasm::core::ValidateModule(module, WasmEnvironment::RulesSynced,
+			RECOIL_WASM_INTERFACE_VERSION_NUMBER, config).valid);
+	}
+}
+
 TEST_CASE("Production Core ABI rejects start functions")
 {
 	auto module = MinimalCoreModule(true);

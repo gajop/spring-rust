@@ -107,7 +107,7 @@ void CFeatureHandler::LoadFeaturesFromMap()
 CFeature* CFeatureHandler::LoadFeature(const FeatureLoadParams& params) {
 	RECOIL_DETAILED_TRACY_ZONE;
 	// need to check this BEFORE creating the instance
-	if (!CanAddFeature(params.featureID))
+	if (!featureMemPool.can_alloc() || !CanAddFeature(params.featureID))
 		return nullptr;
 
 	CFeature* feature = featureMemPool.alloc<CFeature>();

@@ -15,10 +15,10 @@ use super::{ApiError, Result};
 mod raw {
     #[link(wasm_import_module = "spring:desync")]
     unsafe extern "C" {
-        #[link_name = "get-timer"]
-        pub safe fn get_timer() -> i64;
-        #[link_name = "get-timer-micros"]
-        pub safe fn get_timer_micros() -> i64;
+        #[link_name = "try-get-timer"]
+        pub safe fn get_timer(output: i32) -> i32;
+        #[link_name = "try-get-timer-micros"]
+        pub safe fn get_timer_micros(output: i32) -> i32;
         #[link_name = "diff-timers"]
         pub safe fn diff_timers(
             end_timer: i64,
@@ -29,12 +29,18 @@ mod raw {
     }
 }
 
-/// Host timer ticks. Desyncs synced guests.
+/// Host timer ticks. Desyncs synced guests when explicitly enabled.
+/// Returns `NotAvailable` when synced timing is disabled; no clock is read.
 #[inline]
 pub fn get_timer() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        Ok(raw::get_timer() as u64)
+        let mut timer = 0u64;
+        let status = raw::get_timer((&raw mut timer) as usize as i32);
+        if status != 0 {
+            return Err(ApiError::new(status));
+        }
+        Ok(timer)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -42,12 +48,18 @@ pub fn get_timer() -> Result<u64> {
     }
 }
 
-/// Host timer in microseconds. Desyncs synced guests.
+/// Host timer in microseconds. Desyncs synced guests when explicitly enabled.
+/// Returns `NotAvailable` when synced timing is disabled; no clock is read.
 #[inline]
 pub fn get_timer_micros() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        Ok(raw::get_timer_micros() as u64)
+        let mut timer = 0u64;
+        let status = raw::get_timer_micros((&raw mut timer) as usize as i32);
+        if status != 0 {
+            return Err(ApiError::new(status));
+        }
+        Ok(timer)
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

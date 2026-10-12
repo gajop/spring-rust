@@ -17,6 +17,7 @@
 #include "WasmCoreDesyncBindings.h"
 
 #include <bit>
+#include <array>
 #include <cstdint>
 #include <string>
 
@@ -48,11 +49,15 @@ wasm_trap_t* GetTimer(void* environment, wasmtime_caller_t*,
 		return Trap("desync get-timer Core binding is unavailable");
 	if (slots == nullptr || slotCount != 1)
 		return Trap("desync get-timer Core ABI signature mismatch");
-	if (!TimerAllowed(state))
-		return Trap("synced Wasm timers are disabled; set SPRING_ENABLE_SYNCED_TIMERS=1 for diagnostic benchmarking");
 	ImportGuard guard(state, 1);
 	if (!guard.Ok())
 		return Trap(guard.Error());
+	if (!TimerAllowed(state)) {
+		// Legacy scalar ABI has no status slot. Return deterministic zero so
+		// already-built profiling guests can degrade without losing their rules.
+		slots[0].i64 = 0;
+		return nullptr;
+	}
 	GetTimerQuery query{};
 	GetTimerResult result{};
 	state->native->profiling->GetTimer(&query, &result);
@@ -71,17 +76,61 @@ wasm_trap_t* GetTimerMicros(void* environment, wasmtime_caller_t*,
 		return Trap("desync get-timer-micros Core binding is unavailable");
 	if (slots == nullptr || slotCount != 1)
 		return Trap("desync get-timer-micros Core ABI signature mismatch");
-	if (!TimerAllowed(state))
-		return Trap("synced Wasm timers are disabled; set SPRING_ENABLE_SYNCED_TIMERS=1 for diagnostic benchmarking");
 	ImportGuard guard(state, 1);
 	if (!guard.Ok())
 		return Trap(guard.Error());
+	if (!TimerAllowed(state)) {
+		slots[0].i64 = 0;
+		return nullptr;
+	}
 	GetTimerMicrosQuery query{};
 	GetTimerMicrosResult result{};
 	state->native->profiling->GetTimerMicros(&query, &result);
 	if (result.error != nullptr)
 		return Trap("desync get-timer-micros unexpectedly returned a native error");
 	slots[0].i64 = static_cast<std::int64_t>(result.timer);
+	return nullptr;
+}
+
+template<bool Micros>
+wasm_trap_t* TryGetTimer(void* environment, wasmtime_caller_t*,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || slots == nullptr || slotCount != 1)
+		return Trap("desync checked timer Core ABI signature mismatch");
+	ImportGuard guard(state, 9);
+	if (!guard.Ok())
+		return Trap(guard.Error());
+	const auto pointer = static_cast<std::uint32_t>(slots[0].i32);
+	const auto status = [&]() -> std::int32_t {
+		if (!TimerAllowed(state) || state->native == nullptr || state->native->profiling == nullptr)
+			return static_cast<std::int32_t>(Status::NotAvailable);
+		if (!state->memory.Contains(pointer, sizeof(std::uint64_t)))
+			return static_cast<std::int32_t>(Status::OutOfBounds);
+		std::uint64_t timer = 0;
+		if constexpr (Micros) {
+			if (state->native->profiling->GetTimerMicros == nullptr)
+				return static_cast<std::int32_t>(Status::NotAvailable);
+			GetTimerMicrosQuery query{};
+			GetTimerMicrosResult result{};
+			state->native->profiling->GetTimerMicros(&query, &result);
+			if (result.error != nullptr) return result.error->code;
+			timer = result.timer;
+		} else {
+			if (state->native->profiling->GetTimer == nullptr)
+				return static_cast<std::int32_t>(Status::NotAvailable);
+			GetTimerQuery query{};
+			GetTimerResult result{};
+			state->native->profiling->GetTimer(&query, &result);
+			if (result.error != nullptr) return result.error->code;
+			timer = result.timer;
+		}
+		std::array<std::uint8_t, 8> bytes{};
+		for (std::size_t i = 0; i < bytes.size(); ++i) bytes[i] = static_cast<std::uint8_t>(timer >> (8 * i));
+		return static_cast<std::int32_t>(state->memory.Write(pointer, bytes.data(), bytes.size()) ? Status::Ok : Status::OutOfBounds);
+	}();
+	slots[0].i32 = status;
 	return nullptr;
 }
 
@@ -133,11 +182,16 @@ bool RegisterDesyncImports(wasmtime_linker_t* linker, HostState* state, std::str
 		return false;
 	}
 	const wasm_valkind_t i64[] = {WASM_I64};
+	const wasm_valkind_t i32[] = {WASM_I32};
 	const wasm_valkind_t twoI64TwoI32[] = {WASM_I64, WASM_I64, WASM_I32, WASM_I32};
 	if (!Define(linker, "get-timer", MakeFuncType(nullptr, 0, i64, 1),
 			GetTimer, state, error) ||
 		!Define(linker, "get-timer-micros", MakeFuncType(nullptr, 0, i64, 1),
-			GetTimerMicros, state, error))
+			GetTimerMicros, state, error) ||
+		!Define(linker, "try-get-timer", MakeFuncType(i32, 1, i32, 1),
+			TryGetTimer<false>, state, error) ||
+		!Define(linker, "try-get-timer-micros", MakeFuncType(i32, 1, i32, 1),
+			TryGetTimer<true>, state, error))
 		return false;
 	return Define(linker, "diff-timers", MakeFuncType(twoI64TwoI32, 4, i64, 1),
 		DiffTimers, state, error);

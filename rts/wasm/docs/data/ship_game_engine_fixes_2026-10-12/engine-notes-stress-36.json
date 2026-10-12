@@ -1,0 +1,61 @@
+{
+  "result": {
+    "passed": true,
+    "comparisons": [
+      {
+        "equal": true,
+        "frames": 37
+      }
+    ],
+    "recording_comparisons": [
+      {
+        "equal": true,
+        "frames": 37
+      },
+      {
+        "equal": true,
+        "frames": 37
+      }
+    ]
+  },
+  "provenance": {
+    "command": [
+      "test/synctest/wasm_sync_replay.py",
+      "run",
+      "--spring",
+      "out/local-sync/engine-notes-runtime/spring-headless",
+      "--game",
+      "/home/gajop/.local/share/ship-game-verify/2026-10-12-jobs/game-every/game.sdd",
+      "--demo",
+      "/home/gajop/.local/share/ship-game/replay-library/20261010-124455-saved-check-run/replay.sdfz",
+      "--output",
+      "out/local-sync/engine-notes-stress-36",
+      "--threads",
+      "1",
+      "4",
+      "--frames",
+      "36",
+      "--timeout",
+      "900",
+      "--record-first",
+      "--instruction-fuel",
+      "1000000000",
+      "--fixture",
+      "out/local-sync/engine-notes-fixtures/stress-36.wasm"
+    ],
+    "engine_sha256": "8bc60bf3cde553513e6245fa787fb9b06a0aa655e5636d78ba0d0bd0890d5a2c",
+    "demo_sha256": "ae404d83f64c87c0d5229b8b1f5e804cce82d966eaffbf7738dabe25e940d699",
+    "game": "/home/gajop/.local/share/ship-game-verify/2026-10-12-jobs/game-every/game.sdd",
+    "fixture_sha256": "93b15814307f551725dea309420b22f2ba5d562e04d5a6e24a940952f682defc",
+    "worker_fixture_sha256": null,
+    "threads": [
+      1,
+      4
+    ],
+    "final_frame": 36,
+    "recorded_demo": "/home/gajop/projects/spring-projects/spring-bar/out/local-sync/engine-notes-stress-36/record/write/demos/2026-10-12_06-12-19-406_sb_initial_null_64x64_2026.09.23-68-g859f29d rust-wip.sdfz",
+    "recorded_demo_sha256": "6c9d9bed25b16ca3cfe194c04f3de4aa9bd9e2e15c0cf14acf60626a5c034350"
+  },
+  "recorded_desync_warnings": 0,
+  "groundfx_errors": 0
+}

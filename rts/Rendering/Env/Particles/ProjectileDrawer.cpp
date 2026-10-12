@@ -246,8 +246,11 @@ void CProjectileDrawer::Init() {
 	plasmatex          = &textureAtlas->GetTextureWithBackup("plasmatexture",          "circularthingy");
 
 
-	if (!groundFXAtlas->Finalize())
+	if (!groundFXAtlas->Finalize()) {
+#ifndef HEADLESS
 		LOG_L(L_ERROR, "Could not finalize groundFX texture atlas. Use fewer/smaller textures.");
+#endif
+	}
 
 	groundflashtex = &groundFXAtlas->GetTexture("groundflash");
 	groundringtex = &groundFXAtlas->GetTexture("groundring");
@@ -1253,4 +1256,3 @@ void CProjectileDrawer::RenderProjectileDestroyed(const CProjectile* p)
 	if (p->model != nullptr)
 		modelRenderers[MDL_TYPE(p)].DelObject(p);
 }
-
