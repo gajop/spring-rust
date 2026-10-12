@@ -230,7 +230,9 @@ worker identity/runtime configuration, export names, and copied input; it never
 reads background completion or worker outputs. Unsynced modules are excluded.
 
 Game-owned `gamedata/modrules.lua` setting `system.WasmStateHashInterval` controls network
-checksum cadence (default 1, minimum 1). Client-local settings cannot change it.
+checksum cadence (default 1, minimum 1). **Cost:** hashing a game's whole linear memory each frame can take a
+whole frame (22 ms for a 512 MiB module); see the
+[cost report](recoil_wasm_state_hash_cost_2026-10-12.md). Client-local settings cannot change it.
 Hashing a large memory every frame costs memory bandwidth. Dirty-page tracking
 and per-game subsystem digests are future optimizations.
 
